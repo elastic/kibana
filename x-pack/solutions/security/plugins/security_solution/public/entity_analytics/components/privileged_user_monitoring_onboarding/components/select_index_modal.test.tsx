@@ -15,23 +15,23 @@ import { TestProviders } from '../../../../common/mock';
 const mockUpdatePrivMonMonitoredIndices = vi.fn().mockImplementation(() => Promise.resolve({}));
 const mockRegisterPrivMonMonitoredIndices = vi.fn().mockImplementation(() => Promise.resolve({}));
 vi.mock('../../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        updatePrivMonMonitoredIndices: () => mockUpdatePrivMonMonitoredIndices(),
-        registerPrivMonMonitoredIndices: () => mockRegisterPrivMonMonitoredIndices(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      updatePrivMonMonitoredIndices: () => mockUpdatePrivMonMonitoredIndices(),
+      registerPrivMonMonitoredIndices: () => mockRegisterPrivMonMonitoredIndices(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchPrivilegedUserIndices = vi.fn().mockReturnValue({
   data: ['index1', 'index2'],
@@ -40,11 +40,11 @@ const mockUseFetchPrivilegedUserIndices = vi.fn().mockReturnValue({
 });
 
 vi.mock('../hooks/use_fetch_privileged_user_indices', () => {
-      const mocked = {
-      useFetchPrivilegedUserIndices: () => mockUseFetchPrivilegedUserIndices(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchPrivilegedUserIndices: () => mockUseFetchPrivilegedUserIndices(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IndexSelectorModal', () => {
   const onCloseMock = vi.fn();

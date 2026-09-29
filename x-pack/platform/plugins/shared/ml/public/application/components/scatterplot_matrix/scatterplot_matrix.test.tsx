@@ -23,41 +23,41 @@ const mockEsSearch = vi.fn((body) => ({
 }));
 
 vi.mock('../../contexts/kibana', () => {
-      const mocked = {
-      useMlApi: () => ({
-        esSearch: mockEsSearch,
-      }),
-      useMlKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: vi.fn(),
-          },
-          data: {
-            query: {
-              filterManager: mockFilterManager,
+  const mocked = {
+    useMlApi: () => ({
+      esSearch: mockEsSearch,
+    }),
+    useMlKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: vi.fn(),
+        },
+        data: {
+          query: {
+            filterManager: mockFilterManager,
+            timefilter: {
               timefilter: {
-                timefilter: {
-                  getTime: vi.fn(() => {
-                    return { from: '', to: '' };
-                  }),
-                  getRefreshInterval: vi.fn(),
-                },
+                getTime: vi.fn(() => {
+                  return { from: '', to: '' };
+                }),
+                getRefreshInterval: vi.fn(),
               },
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mocking VegaChart to avoid a jest/canvas related error
 vi.mock('../vega_chart', () => {
-      const mocked = {
-      VegaChart: () => <div data-test-subj="mlVegaChart" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VegaChart: () => <div data-test-subj="mlVegaChart" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Data Frame Analytics: <ScatterplotMatrix />', () => {
   it('renders the scatterplot matrix wrapper with options but not the chart itself', async () => {

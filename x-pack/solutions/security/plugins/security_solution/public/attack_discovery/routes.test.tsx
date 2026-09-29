@@ -25,78 +25,78 @@ import { useIdsFromUrl } from './pages/results/history/use_ids_from_url';
 import { buildAttackDetailPath } from '../../common/utils/attack_detail_path';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      Redirect: vi.fn(() => <div data-test-subj="mock-redirect" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Redirect: vi.fn(() => <div data-test-subj="mock-redirect" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-router', () => {
-      const mocked = {
-      useSearchParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => {
-      const mocked = {
-      useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./pages/results/history/use_ids_from_url', () => {
-      const mocked = {
-      useIdsFromUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIdsFromUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/utils/attack_detail_path', () => {
-      const mocked = {
-      buildAttackDetailPath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAttackDetailPath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./pages', () => {
-      const mocked = {
-      AttackDiscoveryPage: () => <div data-test-subj="mock-attack-discovery-page" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryPage: () => <div data-test-subj="mock-attack-discovery-page" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./pages/attack_discovery_moved', () => {
-      const mocked = {
-      AttackDiscoveryMovedPage: () => <div data-test-subj="mock-attack-discovery-moved-page" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryMovedPage: () => <div data-test-subj="mock-attack-discovery-moved-page" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/components/plugin_template_wrapper', () => {
-      const mocked = {
-      PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="mock-plugin-template-wrapper">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="mock-plugin-template-wrapper">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/components/security_route_page_wrapper', () => {
-      const mocked = {
-      SecurityRoutePageWrapper: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="mock-security-route-page-wrapper">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecurityRoutePageWrapper: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="mock-security-route-page-wrapper">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttackDiscoveryRoutes', () => {
   const mockSearchParams = new URLSearchParams();

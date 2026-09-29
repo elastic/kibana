@@ -11,16 +11,16 @@ import { vi } from 'vitest';
 
 export const insertDataIntoIndexMock = vi.fn();
 vi.doMock('./lib/insert_data_into_index', () => {
-      const mocked = {
-      insertDataIntoIndex: insertDataIntoIndexMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    insertDataIntoIndex: insertDataIntoIndexMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const findSampleObjectsMock = vi.fn();
 vi.doMock('./lib/find_sample_objects', () => {
-      const mocked = {
-      findSampleObjects: findSampleObjectsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findSampleObjects: findSampleObjectsMock,
+  };
+  return { ...mocked, default: mocked };
+});

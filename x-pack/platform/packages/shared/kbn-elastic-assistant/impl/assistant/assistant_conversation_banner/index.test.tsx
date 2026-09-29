@@ -17,18 +17,18 @@ import { customConvo } from '../../mock/conversation';
 vi.mock('../../..');
 
 vi.mock('../../connectorland/connector_missing_callout', () => {
-      const mocked = {
-      ConnectorMissingCallout: () => <div data-test-subj="connector-missing-callout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorMissingCallout: () => <div data-test-subj="connector-missing-callout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./elastic_llm_callout', () => {
-      const mocked = {
-      ElasticLlmCallout: () => <div data-test-subj="elastic-llm-callout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ElasticLlmCallout: () => <div data-test-subj="elastic-llm-callout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssistantConversationBanner', () => {
   const setIsSettingsModalVisible = vi.fn();

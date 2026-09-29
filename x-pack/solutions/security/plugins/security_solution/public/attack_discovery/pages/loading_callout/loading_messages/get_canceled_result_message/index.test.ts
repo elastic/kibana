@@ -13,18 +13,18 @@ import { getFormattedDate } from '../get_formatted_time';
 import * as i18n from '../../translations';
 
 vi.mock('../get_formatted_time', () => {
-      const mocked = {
-      getFormattedDate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormattedDate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../translations', () => {
-      const mocked = {
-      CANCELED_VIA: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CANCELED_VIA: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getCanceledResultMessage', () => {
   const mockConnectorName = 'Test Connector';

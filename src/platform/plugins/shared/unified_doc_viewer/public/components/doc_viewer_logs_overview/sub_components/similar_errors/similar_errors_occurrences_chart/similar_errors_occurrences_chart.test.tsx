@@ -27,28 +27,28 @@ const mockUseDataSourcesContext = vi.fn(() => ({
 }));
 
 vi.mock('../../../../../hooks/use_data_sources', () => {
-      const mocked = {
-      useDataSourcesContext: () => mockUseDataSourcesContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataSourcesContext: () => mockUseDataSourcesContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../content_framework/chart', () => {
-      const mocked = {
-      ContentFrameworkChart: ({ children, title, ...rest }: any) => (
-        <div data-test-subj="ContentFrameworkChart" {...rest}>
-          <h3>{title}</h3>
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkChart: ({ children, title, ...rest }: any) => (
+      <div data-test-subj="ContentFrameworkChart" {...rest}>
+        <h3>{title}</h3>
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedGetParentApi: (() => any) | undefined;
 
 vi.mock('@kbn/embeddable-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/embeddable-plugin/public'));
+  const original = await vi.importActual('@kbn/embeddable-plugin/public');
   return {
     ...original,
     EmbeddableRenderer: ({ type, getParentApi }: any) => {

@@ -7,106 +7,105 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { z } from '@kbn/zod/v4';
 import type { StepExecuteModalProps } from './step_execute_modal';
 import { StepExecuteModal } from './step_execute_modal';
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsMonacoTheme: vi.fn(),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsMonacoTheme: vi.fn(),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./step_execute_manual_form', () => {
-      const mocked = {
-      StepExecuteManualForm: ({ value, setValue, errors, warnings }: any) => (
-        <div data-test-subj="mockManualForm">
-          <span data-test-subj="manualFormValue">{value}</span>
-          {errors && <span data-test-subj="manualFormErrors">{errors}</span>}
-          {warnings && <span data-test-subj="manualFormWarnings">{warnings}</span>}
-          <button
-            data-test-subj="manualFormChange"
-            onClick={() => setValue('{"updated":"value"}')}
-            type="button"
-          >
-            {'change'}
-          </button>
-          <button
-            data-test-subj="manualFormInvalidChange"
-            onClick={() => setValue('invalid-json')}
-            type="button"
-          >
-            {'invalid change'}
-          </button>
-          <button
-            data-test-subj="manualFormValidMatchingSchema"
-            onClick={() => setValue('{"requiredField":"ok"}')}
-            type="button"
-          >
-            {'valid matching schema'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepExecuteManualForm: ({ value, setValue, errors, warnings }: any) => (
+      <div data-test-subj="mockManualForm">
+        <span data-test-subj="manualFormValue">{value}</span>
+        {errors && <span data-test-subj="manualFormErrors">{errors}</span>}
+        {warnings && <span data-test-subj="manualFormWarnings">{warnings}</span>}
+        <button
+          data-test-subj="manualFormChange"
+          onClick={() => setValue('{"updated":"value"}')}
+          type="button"
+        >
+          {'change'}
+        </button>
+        <button
+          data-test-subj="manualFormInvalidChange"
+          onClick={() => setValue('invalid-json')}
+          type="button"
+        >
+          {'invalid change'}
+        </button>
+        <button
+          data-test-subj="manualFormValidMatchingSchema"
+          onClick={() => setValue('{"requiredField":"ok"}')}
+          type="button"
+        >
+          {'valid matching schema'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./step_execute_historical_form', () => {
-      const mocked = {
-      NOT_READY_SENTINEL: '__step_historical_not_ready__',
-      StepExecuteHistoricalForm: ({
-        value,
-        setValue,
-        setErrors,
-        setExecutionContext,
-        stepId,
-        warnings,
-      }: any) => (
-        <div data-test-subj="mockHistoricalForm">
-          <span data-test-subj="historicalFormValue">{value}</span>
-          <span data-test-subj="historicalFormStepId">{stepId}</span>
-          {warnings && <span data-test-subj="historicalFormWarnings">{warnings}</span>}
-          <button
-            data-test-subj="historicalFormChange"
-            onClick={() => setValue('{"historical":"input"}')}
-            type="button"
-          >
-            {'load execution'}
-          </button>
-          <button
-            data-test-subj="historicalFormSetNotReady"
-            onClick={() => setErrors('__step_historical_not_ready__')}
-            type="button"
-          >
-            {'set not ready'}
-          </button>
-          <button
-            data-test-subj="historicalFormSetError"
-            onClick={() => setErrors('Some error')}
-            type="button"
-          >
-            {'set error'}
-          </button>
-          <button
-            data-test-subj="historicalFormSetExecutionContext"
-            onClick={() => setExecutionContext({ key: 'value' })}
-            type="button"
-          >
-            {'set execution context'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NOT_READY_SENTINEL: '__step_historical_not_ready__',
+    StepExecuteHistoricalForm: ({
+      value,
+      setValue,
+      setErrors,
+      setExecutionContext,
+      stepId,
+      warnings,
+    }: any) => (
+      <div data-test-subj="mockHistoricalForm">
+        <span data-test-subj="historicalFormValue">{value}</span>
+        <span data-test-subj="historicalFormStepId">{stepId}</span>
+        {warnings && <span data-test-subj="historicalFormWarnings">{warnings}</span>}
+        <button
+          data-test-subj="historicalFormChange"
+          onClick={() => setValue('{"historical":"input"}')}
+          type="button"
+        >
+          {'load execution'}
+        </button>
+        <button
+          data-test-subj="historicalFormSetNotReady"
+          onClick={() => setErrors('__step_historical_not_ready__')}
+          type="button"
+        >
+          {'set not ready'}
+        </button>
+        <button
+          data-test-subj="historicalFormSetError"
+          onClick={() => setErrors('Some error')}
+          type="button"
+        >
+          {'set error'}
+        </button>
+        <button
+          data-test-subj="historicalFormSetExecutionContext"
+          onClick={() => setExecutionContext({ key: 'value' })}
+          type="button"
+        >
+          {'set execution context'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (props: StepExecuteModalProps) => {
   return render(<StepExecuteModal {...props} />, { wrapper: I18nProvider });

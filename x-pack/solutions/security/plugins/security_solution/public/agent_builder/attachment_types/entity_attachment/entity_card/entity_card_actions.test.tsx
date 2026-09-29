@@ -23,7 +23,7 @@ import { EntityAnalyticsAgentNavigationProvider } from '../../entity_analytics_a
 import { EntityCardActions } from './entity_card_actions';
 
 vi.mock('../../entity_explore_navigation', async () => {
-  const actual = (await vi.importActual('../../entity_explore_navigation'));
+  const actual = await vi.importActual('../../entity_explore_navigation');
   return {
     ...actual,
     navigateToEntityAnalyticsHomePageInApp: vi.fn(),

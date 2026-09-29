@@ -20,13 +20,13 @@ import type { PluginConfig } from '../../../config';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
 vi.mock('@kbn/task-manager-plugin/server', () => {
-      const mocked = {
-      runInvalidate: vi.fn().mockResolvedValue({ totalInvalidated: 3, missingApiKeyRetries: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runInvalidate: vi.fn().mockResolvedValue({ totalInvalidated: 3, missingApiKeyRetries: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { runInvalidate } = (await vi.importMock('@kbn/task-manager-plugin/server'));
+const { runInvalidate } = await vi.importMock('@kbn/task-manager-plugin/server');
 
 const config = {
   get: vi.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),

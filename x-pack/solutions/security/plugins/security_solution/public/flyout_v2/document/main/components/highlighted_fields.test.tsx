@@ -32,13 +32,13 @@ vi.mock('../hooks/use_highlighted_fields_privilege');
 vi.mock('../../../rule/main/hooks/use_rule_details');
 const mockAddSuccess = vi.fn();
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addSuccess: mockAddSuccess,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addSuccess: mockAddSuccess,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderHighlightedFields = (hideEditButton = false) =>
   render(

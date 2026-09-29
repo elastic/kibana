@@ -24,8 +24,7 @@ describe('encryption key generation interactive', () => {
   });
 
   it('should prompt the user to write keys if the interactive flag is set', async () => {
-    vi
-      .spyOn(prompt, 'confirm')
+    vi.spyOn(prompt, 'confirm')
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(true)
@@ -43,8 +42,7 @@ describe('encryption key generation interactive', () => {
   });
 
   it('should write to disk partial keys', async () => {
-    vi
-      .spyOn(prompt, 'confirm')
+    vi.spyOn(prompt, 'confirm')
       .mockResolvedValueOnce(true)
       .mockResolvedValueOnce(false)
       .mockResolvedValueOnce(false)

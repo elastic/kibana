@@ -23,12 +23,12 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
-      const mocked = {
-      useUiSetting: vi.fn(() => false),
-      useUiSetting$: vi.fn((value: string) => ['0,0']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn(() => false),
+    useUiSetting$: vi.fn((value: string) => ['0,0']),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors');
 vi.mock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
@@ -36,26 +36,30 @@ vi.mock(
 vi.mock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/execute',
   () => {
-      const mocked = {
-        executeAction: async () => ({
-          status: 'ok',
-          data: {
-            ok: true,
-            channels: [
-              {
-                id: 'channel-id',
-                name: 'channel-name',
-              },
-            ],
-          },
-          connector_id: '.slack_api',
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      executeAction: async () => ({
+        status: 'ok',
+        data: {
+          ok: true,
+          channels: [
+            {
+              id: 'channel-id',
+              name: 'channel-name',
+            },
+          ],
+        },
+        connector_id: '.slack_api',
+      }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
-const { loadAllActions } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors'));
-const { loadActionTypes } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'));
+const { loadAllActions } = await vi.importMock(
+  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connectors'
+);
+const { loadActionTypes } = await vi.importMock(
+  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api/connector_types'
+);
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -129,7 +133,7 @@ const mockToasts = {
 };
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
+  const original = await vi.importActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     useKibana: () => ({

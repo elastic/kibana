@@ -9,7 +9,7 @@ import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
 vi.mock('./send_email', async () => {
-  const actual = (await vi.importActual('./send_email'));
+  const actual = await vi.importActual('./send_email');
   return {
     ...actual,
     sendEmail: vi.fn(),

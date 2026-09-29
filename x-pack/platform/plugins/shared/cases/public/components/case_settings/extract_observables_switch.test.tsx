@@ -51,9 +51,7 @@ describe('ExtractObservablesSwitch', () => {
   });
 
   it('it disables the switch', async () => {
-    render(
-      <ExtractObservablesSwitch disabled={true} isEnabled={false} onSwitchChange={vi.fn()} />
-    );
+    render(<ExtractObservablesSwitch disabled={true} isEnabled={false} onSwitchChange={vi.fn()} />);
 
     expect(await screen.findByTestId('extract-observables-switch')).toHaveProperty(
       'disabled',

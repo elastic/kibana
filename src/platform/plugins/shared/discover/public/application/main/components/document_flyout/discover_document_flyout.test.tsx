@@ -38,7 +38,7 @@ import {
 } from '../../utils/expanded_doc';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const react = require('react');
   const OriginalFlyout = actual.EuiFlyout;
 
@@ -59,12 +59,12 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/react-kibana-mount', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-kibana-mount')),
-      toMountPoint: vi.fn((node) => node),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-kibana-mount')),
+    toMountPoint: vi.fn((node) => node),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const [inResultsHit, outOfResultsHit] = esHitsMock;
 const expandedDocRef: ExpandedDocRef = {
@@ -98,11 +98,9 @@ const setup = async ({
   setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
   if (searchResult) {
-    vi
-      .mocked(services.data.search.search)
-      .mockImplementation(() =>
-        searchResult instanceof Error ? throwError(() => searchResult) : from(searchResult)
-      );
+    vi.mocked(services.data.search.search).mockImplementation(() =>
+      searchResult instanceof Error ? throwError(() => searchResult) : from(searchResult)
+    );
   }
 
   const toolkit = getDiscoverInternalStateMock({ services });
@@ -397,11 +395,9 @@ describe('DiscoverDocumentFlyout', () => {
     const services = createDiscoverServicesMock();
     let resolveSearch: (response: IKibanaSearchResponse) => void = () => {};
 
-    vi
-      .mocked(services.data.search.search)
-      .mockImplementation(() =>
-        from(new Promise<IKibanaSearchResponse>((resolve) => (resolveSearch = resolve)))
-      );
+    vi.mocked(services.data.search.search).mockImplementation(() =>
+      from(new Promise<IKibanaSearchResponse>((resolve) => (resolveSearch = resolve)))
+    );
 
     setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 
@@ -589,8 +585,7 @@ describe('DiscoverDocumentFlyout', () => {
 
   it('clears the current document when the reference changes to a missing document', async () => {
     const services = createDiscoverServicesMock();
-    vi
-      .mocked(services.data.search.search)
+    vi.mocked(services.data.search.search)
       .mockImplementationOnce(() => from(searchResponseFor(outOfResultsHit)))
       .mockImplementationOnce(() => from(Promise.resolve({ rawResponse: { hits: { hits: [] } } })));
     const { toolkit } = await setup({ services });

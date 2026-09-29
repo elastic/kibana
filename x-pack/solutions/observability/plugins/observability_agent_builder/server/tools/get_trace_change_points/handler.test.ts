@@ -12,25 +12,25 @@ import { getToolHandler } from './handler';
 const mockSearch = vi.fn().mockResolvedValue({ aggregations: { groups: { buckets: [] } } });
 
 vi.mock('../../utils/build_apm_resources', () => {
-      const mocked = {
-      buildApmResources: vi.fn().mockResolvedValue({
-        apmEventClient: { search: (...args: unknown[]) => mockSearch(...args) },
-        apmDataAccessServices: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildApmResources: vi.fn().mockResolvedValue({
+      apmEventClient: { search: (...args: unknown[]) => mockSearch(...args) },
+      apmDataAccessServices: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/get_preferred_document_source', () => {
-      const mocked = {
-      getPreferredDocumentSource: vi.fn().mockResolvedValue({
-        rollupInterval: '1m',
-        hasDurationSummaryField: false,
-        documentType: 'transactionMetric',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPreferredDocumentSource: vi.fn().mockResolvedValue({
+      rollupInterval: '1m',
+      hasDurationSummaryField: false,
+      documentType: 'transactionMetric',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const BASE_ARGS = {
   core: {} as any,

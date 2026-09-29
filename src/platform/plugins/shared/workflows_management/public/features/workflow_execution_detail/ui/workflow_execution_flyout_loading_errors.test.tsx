@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionFlyout } from './workflow_execution_flyout';
@@ -21,25 +20,25 @@ import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 vi.mock('../../../entities/workflows/model/use_workflow_execution_polling');
 vi.mock('../model/use_child_workflow_executions', () => {
-      const mocked = {
-      useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChildWorkflowExecutions: () => ({ childExecutions: new Map(), isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./execution_take_action_split_button', () => {
-      const mocked = {
-      ExecutionTakeActionSplitButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExecutionTakeActionSplitButton: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/ui/execution_data_viewer/json_editor_common', () => {
-      const mocked = {
-      JSONCodeEditorCommonMemoized: ({ jsonValue }: { jsonValue: string }) => (
-        <pre data-test-subj="execution-json">{jsonValue}</pre>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JSONCodeEditorCommonMemoized: ({ jsonValue }: { jsonValue: string }) => (
+      <pre data-test-subj="execution-json">{jsonValue}</pre>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const execution: WorkflowExecutionDto = {
   id: 'exec-1',

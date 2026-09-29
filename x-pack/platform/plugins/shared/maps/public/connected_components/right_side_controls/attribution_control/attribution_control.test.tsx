@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('../../../kibana_services', () => {
-      const mocked = {
-      isScreenshotMode: () => {
-        return false;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isScreenshotMode: () => {
+      return false;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

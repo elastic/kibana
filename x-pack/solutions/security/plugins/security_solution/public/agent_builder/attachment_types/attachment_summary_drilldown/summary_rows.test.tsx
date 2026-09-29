@@ -19,44 +19,44 @@ import { renderAlertSection, renderAlertsSection } from './summary_rows';
 // Stub the lazy flyout opener so it records calls synchronously (no Suspense/lazy boundary).
 const mockFlyoutOpener = vi.fn((_props: unknown) => null);
 vi.mock('./open_flyout_on_mount', () => {
-      const mocked = {
-      AttachmentSummaryFlyoutOpener: (props: unknown) => mockFlyoutOpener(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentSummaryFlyoutOpener: (props: unknown) => mockFlyoutOpener(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agentic-investigations-common', () => {
-      const mocked = {
-      AttachmentSummaryGroup: ({ title, rows }: { title: string; rows: React.ReactNode[] }) =>
-        rows.length === 0 ? null : (
-          <div data-test-subj="group" data-title={title}>
-            <ul>{rows}</ul>
-          </div>
-        ),
-      AttachmentSummaryRow: ({
-        label,
-        onClick,
-        children,
-      }: {
-        label: string;
-        onClick?: () => void;
-        children?: React.ReactNode;
-      }) => (
-        <li data-test-subj="row" data-label={label}>
-          {onClick ? (
-            <button type="button" onClick={onClick} data-test-subj="row-button">
-              {label}
-            </button>
-          ) : (
-            <span data-test-subj="row-readonly">{label}</span>
-          )}
-          {children}
-        </li>
+  const mocked = {
+    AttachmentSummaryGroup: ({ title, rows }: { title: string; rows: React.ReactNode[] }) =>
+      rows.length === 0 ? null : (
+        <div data-test-subj="group" data-title={title}>
+          <ul>{rows}</ul>
+        </div>
       ),
-      DEFAULT_COLLAPSED_COUNT: 4,
-    };
-      return { ...mocked, default: mocked };
-    });
+    AttachmentSummaryRow: ({
+      label,
+      onClick,
+      children,
+    }: {
+      label: string;
+      onClick?: () => void;
+      children?: React.ReactNode;
+    }) => (
+      <li data-test-subj="row" data-label={label}>
+        {onClick ? (
+          <button type="button" onClick={onClick} data-test-subj="row-button">
+            {label}
+          </button>
+        ) : (
+          <span data-test-subj="row-readonly">{label}</span>
+        )}
+        {children}
+      </li>
+    ),
+    DEFAULT_COLLAPSED_COUNT: 4,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeSearch = (
   alertHits: Array<{ _id: string; _index?: string; _source: Record<string, unknown> }>

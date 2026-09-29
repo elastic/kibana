@@ -25,16 +25,16 @@ import { isAgentlessSetupDefault, useAgentless, useSetupTechnology } from './set
 
 vi.mock('../../../../../services');
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      sendGetOneAgentPolicy: vi.fn(),
-      sendGetOneFleetServerHost: vi.fn().mockResolvedValue({}),
-      sendGetOneOutput: vi.fn().mockResolvedValue({}),
-      useStartServices: vi.fn(),
-      useConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    sendGetOneAgentPolicy: vi.fn(),
+    sendGetOneFleetServerHost: vi.fn().mockResolvedValue({}),
+    sendGetOneOutput: vi.fn().mockResolvedValue({}),
+    useStartServices: vi.fn(),
+    useConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../../../common/services/generate_new_agent_policy');
 
 type MockFn = MockedFunction<any>;

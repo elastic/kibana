@@ -17,14 +17,14 @@ import type { ArchiveMetadata } from './types';
 import { AbstractFileSystem } from './abstract_file_system';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      cleanTypeCheckArtifacts: vi.fn(),
-      calculateFileHashes: vi.fn().mockResolvedValue({
-        'pnpm-lock.yaml': 'hash1',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cleanTypeCheckArtifacts: vi.fn(),
+    calculateFileHashes: vi.fn().mockResolvedValue({
+      'pnpm-lock.yaml': 'hash1',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { cleanTypeCheckArtifacts } = (await vi.importMock('../utils')) as {
   cleanTypeCheckArtifacts: MockedFunction<(log: SomeDevLog) => Promise<void>>;

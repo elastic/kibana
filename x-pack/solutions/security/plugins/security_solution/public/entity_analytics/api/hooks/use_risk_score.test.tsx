@@ -22,33 +22,33 @@ import { EntityRiskQueries } from '../../../../common/api/search_strategy';
 vi.mock('../../../common/hooks/use_license');
 
 vi.mock('../../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/containers/use_search_strategy', () => {
-      const mocked = {
-      useSearchStrategy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchStrategy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_app_toasts');
 vi.mock('./use_risk_engine_status', () => {
-      const mocked = {
-      useRiskEngineStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskEngineStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLicense = useLicense as Mock;
 const mockUseSearchStrategy = useSearchStrategy as Mock;

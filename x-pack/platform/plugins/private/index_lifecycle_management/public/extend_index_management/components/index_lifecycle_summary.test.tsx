@@ -18,34 +18,34 @@ import { sendGet } from '../../application/services/http';
 import { IndexLifecycleSummary } from './index_lifecycle_summary';
 
 vi.mock('../../application/services/http', () => {
-      const mocked = {
-      sendGet: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGet: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useEuiTheme so the badge colors hook has a stable theme.
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({
-        euiTheme: {
-          colors: {
-            vis: {
-              euiColorVis3: '#BFDBFF',
-            },
-            severity: {
-              risk: '#FF995E',
-              warning: '#FCD883',
-              neutral: '#B5E5F2',
-            },
-            backgroundBaseSubdued: '#CAD3E2',
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: {
+          vis: {
+            euiColorVis3: '#BFDBFF',
           },
+          severity: {
+            risk: '#FF995E',
+            warning: '#FCD883',
+            neutral: '#B5E5F2',
+          },
+          backgroundBaseSubdued: '#CAD3E2',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const flushMicrotasks = async () => {
   await Promise.resolve();

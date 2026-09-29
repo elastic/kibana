@@ -210,9 +210,9 @@ describe('Download Service', () => {
   beforeEach(() => {
     mockedLogger = loggerMock.create();
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
-    vi
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: true } as any);
+    vi.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+      useSpaceAwareness: true,
+    } as any);
     mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
       canEncrypt: true,
     } as any);

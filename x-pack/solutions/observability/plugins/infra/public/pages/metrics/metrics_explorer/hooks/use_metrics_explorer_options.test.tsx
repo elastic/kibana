@@ -29,25 +29,25 @@ const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as MockedFunctio
 
 let PREFILL: Record<string, any> = {};
 vi.mock('../../../../alerting/use_alert_prefill', () => {
-      const mocked = {
-      useAlertPrefillContext: () => ({
-        metricThresholdPrefill: {
-          setPrefillOptions(opts: Record<string, any>) {
-            PREFILL = opts;
-          },
+  const mocked = {
+    useAlertPrefillContext: () => ({
+      metricThresholdPrefill: {
+        setPrefillOptions(opts: Record<string, any>) {
+          PREFILL = opts;
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_kibana_timefilter_time', () => {
-      const mocked = {
-      useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
-      useSyncKibanaTimeFilterTime: () => [() => {}],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+    useSyncKibanaTimeFilterTime: () => [() => {}],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseMetricsExplorerOptionsHook = () => renderHook(() => useMetricsExplorerOptions());
 

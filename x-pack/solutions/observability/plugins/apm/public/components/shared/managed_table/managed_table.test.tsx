@@ -13,36 +13,36 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { shouldfetchServer, ManagedTable, type TableActions, type ITableColumn } from '.';
 
 vi.mock('../../../context/url_params_context/use_url_params', () => {
-      const mocked = {
-      useLegacyUrlParams: () => ({
-        urlParams: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLegacyUrlParams: () => ({
+      urlParams: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({
-        push: vi.fn(),
-        location: { search: '' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({
+      push: vi.fn(),
+      location: { search: '' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          uiSettings: {
-            get: vi.fn().mockReturnValue('off'),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: vi.fn().mockReturnValue('off'),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface TestItem {
   id: string;

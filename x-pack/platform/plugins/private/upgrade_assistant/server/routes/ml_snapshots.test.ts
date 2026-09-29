@@ -23,14 +23,14 @@ import { createRequestMock } from './__mocks__/request.mock';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
-      const mocked = {
-      versionCheckHandlerWrapper:
-        () =>
-        <P, Q, B>(handler: RequestHandler<P, Q, B>) =>
-          handler,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    versionCheckHandlerWrapper:
+      () =>
+      <P, Q, B>(handler: RequestHandler<P, Q, B>) =>
+        handler,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const JOB_ID = 'job_id';
 const SNAPSHOT_ID = 'snapshot_id';
@@ -236,8 +236,7 @@ describe('ML snapshots APIs', () => {
   describe('GET /api/upgrade_assistant/ml_snapshots/:jobId/:snapshotId', () => {
     it('returns "idle" status if saved object does not exist', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-          .getModelSnapshots as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.getModelSnapshots as Mock
       ).mockResolvedValue({
         count: 1,
         model_snapshots: [
@@ -281,8 +280,7 @@ describe('ML snapshots APIs', () => {
 
     it('returns "in_progress" status if snapshot upgrade is in progress', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-          .getModelSnapshots as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.getModelSnapshots as Mock
       ).mockResolvedValue({
         count: 1,
         model_snapshots: [
@@ -315,8 +313,7 @@ describe('ML snapshots APIs', () => {
       });
 
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockResolvedValue({
         body: {
           model_snapshot_upgrades: [
@@ -352,8 +349,7 @@ describe('ML snapshots APIs', () => {
 
     it('fails when snapshot upgrade status returns has status="failed"', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-          .getModelSnapshots as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.getModelSnapshots as Mock
       ).mockResolvedValue({
         count: 1,
         model_snapshots: [
@@ -386,8 +382,7 @@ describe('ML snapshots APIs', () => {
       });
 
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockResolvedValue({
         body: {
           model_snapshot_upgrades: [
@@ -417,8 +412,7 @@ describe('ML snapshots APIs', () => {
 
     it('returns "complete" status if snapshot upgrade has completed', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml
-          .getModelSnapshots as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.ml.getModelSnapshots as Mock
       ).mockResolvedValue({
         count: 1,
         model_snapshots: [
@@ -451,8 +445,7 @@ describe('ML snapshots APIs', () => {
       });
 
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockRejectedValue(new esErrors.ResponseError({ statusCode: 404 } as any));
 
       (

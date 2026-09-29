@@ -20,11 +20,11 @@ import { cloneDeep } from 'lodash/fp';
 import { InputsModelId } from '../../store/inputs/constants';
 
 vi.mock('./modal', () => {
-      const mocked = {
-      ModalInspectQuery: vi.fn(() => <div data-test-subj="mocker-modal" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ModalInspectQuery: vi.fn(() => <div data-test-subj="mocker-modal" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Inspect Button', () => {
   const refetch = vi.fn();

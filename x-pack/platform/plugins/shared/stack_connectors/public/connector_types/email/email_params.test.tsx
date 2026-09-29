@@ -23,11 +23,11 @@ import { getFormattedEmailOptions, getEmailSender } from './email_params';
 import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/get_experimental_features');
 
 const useKibanaMock = useKibana as Mock;

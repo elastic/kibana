@@ -21,40 +21,40 @@ import { buildAttacksOnlyFilter } from '../../table/filtering_configs';
 import { ALERTS_QUERY_NAMES } from '../../../../containers/detection_engine/alerts/constants';
 
 vi.mock('../common/use_alerts_aggregation', () => {
-      const mocked = {
-      useAlertsAggregation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsAggregation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_attack_timestamps', () => {
-      const mocked = {
-      useAttackTimestamps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackTimestamps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      parseAttacksVolumeData: vi.fn(),
-      getInterval: vi.fn(() => 3600000), // Mock returning 1 hour by default
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseAttacksVolumeData: vi.fn(),
+    getInterval: vi.fn(() => 3600000), // Mock returning 1 hour by default
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./aggregations', () => {
-      const mocked = {
-      getAttacksVolumeAggregations: vi.fn(() => ({ some: 'agg' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAttacksVolumeAggregations: vi.fn(() => ({ some: 'agg' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAttacksVolumeData', () => {
   const mockRefetchAgg = vi.fn();

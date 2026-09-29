@@ -32,22 +32,22 @@ const capturedProps: {
 } = {};
 
 vi.mock('@kbn/control-group-renderer', () => {
-      const mocked = {
-      ControlGroupRenderer: vi.fn().mockImplementation((props) => {
-        capturedProps.getCreationOptions = props.getCreationOptions;
-        capturedProps.projectRouting = props.projectRouting;
-        return <div data-testid="control-group-renderer" />;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ControlGroupRenderer: vi.fn().mockImplementation((props) => {
+      capturedProps.getCreationOptions = props.getCreationOptions;
+      capturedProps.projectRouting = props.projectRouting;
+      return <div data-testid="control-group-renderer" />;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({ services: {} })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(() => ({ services: {} })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 

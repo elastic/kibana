@@ -18,11 +18,11 @@ import {
 import { generateWorkflowTool } from './generate_workflow';
 
 vi.mock('@kbn/agent-builder-workflow-gen', () => {
-      const mocked = {
-      generateWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const generateWorkflowMock = generateWorkflow as MockedFunction<typeof generateWorkflow>;
 

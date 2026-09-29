@@ -32,11 +32,11 @@ import {
 // Mock the saved search since it relies on the embeddable registry to be
 // populated correctly otherwise
 vi.mock('@kbn/saved-search-component', () => {
-      const mocked = {
-      LazySavedSearchComponent: vi.fn((props) => <div data-test-subj="embeddedSavedSearchMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazySavedSearchComponent: vi.fn((props) => <div data-test-subj="embeddedSavedSearchMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 const LazySavedSearchComponentMock = vi.mocked(LazySavedSearchComponent);
 
 const commonDependencies = {
@@ -83,9 +83,10 @@ describe('LogsOverview', () => {
   });
 
   beforeAll(() => {
-    vi
-      .spyOn(mockDependencies.logsDataAccess.services.logSourcesService, 'getFlattenedLogSources')
-      .mockResolvedValue('logs');
+    vi.spyOn(
+      mockDependencies.logsDataAccess.services.logSourcesService,
+      'getFlattenedLogSources'
+    ).mockResolvedValue('logs');
     vi.spyOn(mockDependencies.dataViews, 'create').mockResolvedValue(mockDataView);
     vi.spyOn(mockMlApi, 'checkMlCapabilities').mockResolvedValue({
       isPlatinumOrTrialLicense: true,

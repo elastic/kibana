@@ -19,11 +19,11 @@ import { DatasetStatsAccordion } from '.';
 
 vi.mock('../../hooks/use_evals_api');
 vi.mock('../../components/example_scores_table', () => {
-      const mocked = {
-      ExampleScoresTable: vi.fn(() => <div>Example scores table</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExampleScoresTable: vi.fn(() => <div>Example scores table</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseExperimentDatasetExamples = vi.mocked(useExperimentDatasetExamples);
 const mockExampleScoresTable = vi.mocked(ExampleScoresTable);

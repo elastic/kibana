@@ -153,9 +153,9 @@ describe('useDeleteFileAttachment', () => {
       queryClient.setQueryData(statsKey, { total: 0 });
 
       let resolveDelete: () => void;
-      vi
-        .spyOn(api, 'deleteFileAttachments')
-        .mockImplementationOnce(() => new Promise<void>((resolve) => (resolveDelete = resolve)));
+      vi.spyOn(api, 'deleteFileAttachments').mockImplementationOnce(
+        () => new Promise<void>((resolve) => (resolveDelete = resolve))
+      );
 
       const { result } = renderHook(() => useDeleteFileAttachment(), {
         wrapper: getWrapper(queryClient),

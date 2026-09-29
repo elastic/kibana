@@ -15,9 +15,7 @@ import { useGetPackagesQuery } from './use_request/epm';
 
 vi.mock('./use_request/epm');
 
-const mockedUseGetPackagesQuery = useGetPackagesQuery as MockedFunction<
-  typeof useGetPackagesQuery
->;
+const mockedUseGetPackagesQuery = useGetPackagesQuery as MockedFunction<typeof useGetPackagesQuery>;
 
 describe('useIsPackagePolicyUpgradable', () => {
   beforeEach(() => {

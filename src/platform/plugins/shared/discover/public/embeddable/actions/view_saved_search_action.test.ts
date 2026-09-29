@@ -33,9 +33,9 @@ const compatibleEmbeddableApi: SearchEmbeddableApi = {
   },
 } as unknown as SearchEmbeddableApi;
 
-vi
-  .spyOn(services.core.chrome, 'getActiveSolutionNavId$')
-  .mockReturnValue(new BehaviorSubject(SolutionType.Search));
+vi.spyOn(services.core.chrome, 'getActiveSolutionNavId$').mockReturnValue(
+  new BehaviorSubject(SolutionType.Search)
+);
 
 describe('view saved search action', () => {
   it('is compatible when embeddable is of type saved search, in view mode && appropriate permissions are set', async () => {

@@ -60,7 +60,8 @@ describe('initMetrics', () => {
   ];
 
   beforeEach(async () => {
-    MeterProviderMock = (await vi.importMock('@elastic/opentelemetry-node/sdk')).metrics.MeterProvider;
+    MeterProviderMock = (await vi.importMock('@elastic/opentelemetry-node/sdk')).metrics
+      .MeterProvider;
     PeriodicExportingMetricReader = (await vi.importMock('@elastic/opentelemetry-node/sdk')).metrics
       .PeriodicExportingMetricReader;
   });

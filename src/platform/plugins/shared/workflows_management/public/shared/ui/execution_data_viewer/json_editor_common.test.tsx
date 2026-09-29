@@ -7,50 +7,49 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { JsonCodeEditorCommon, JSONCodeEditorCommonMemoized } from './json_editor_common';
 
 // Mock CodeEditor
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: (props: any) => (
-        <div
-          data-test-subj="mocked-code-editor"
-          data-value={props.value}
-          data-readonly={String(props.options?.readOnly ?? false)}
-          data-language={props.languageId}
-          aria-label={props['aria-label']}
-        >
-          {props.value}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: (props: any) => (
+      <div
+        data-test-subj="mocked-code-editor"
+        data-value={props.value}
+        data-readonly={String(props.options?.readOnly ?? false)}
+        data-language={props.languageId}
+        aria-label={props['aria-label']}
+      >
+        {props.value}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useMemoCss
 vi.mock('@kbn/css-utils/public/use_memo_css', () => {
-      const mocked = {
-      useMemoCss: () => ({
-        codeEditor: undefined,
-        copyButtonContainer: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMemoCss: () => ({
+      codeEditor: undefined,
+      copyButtonContainer: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock theme constant + registration hook
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-      useWorkflowsMonacoTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+    useWorkflowsMonacoTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('JsonCodeEditorCommon', () => {
   const defaultProps = {

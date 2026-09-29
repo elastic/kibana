@@ -17,16 +17,16 @@ import { WithAppDependencies } from './helpers/setup_environment';
 vi.mock('@kbn/code-editor');
 
 vi.mock('../../../component_templates/component_templates_context', () => {
-      const mocked = {
-      useComponentTemplatesContext: vi.fn().mockReturnValue({
-        toasts: {
-          addError: vi.fn(),
-          addSuccess: vi.fn(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useComponentTemplatesContext: vi.fn().mockReturnValue({
+      toasts: {
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onChangeHandler = vi.fn();
 describe('Mappings editor: runtime fields', () => {

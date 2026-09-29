@@ -17,7 +17,7 @@ import { RiskSeverity, EMPTY_SEVERITY_COUNT } from '../../../../common/search_st
 import type { SeverityCount } from '../severity/types';
 
 vi.mock('@kbn/cell-actions', async () => {
-  const actual = (await vi.importActual('@kbn/cell-actions'));
+  const actual = await vi.importActual('@kbn/cell-actions');
   return {
     ...actual,
     CellActions: ({ data, metadata }: CellActionsProps) => {

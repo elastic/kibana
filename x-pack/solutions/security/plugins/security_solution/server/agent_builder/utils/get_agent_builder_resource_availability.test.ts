@@ -33,11 +33,7 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: undefined,
     });
-    (mockCore.getStartServices as Mock).mockResolvedValue([
-      {},
-      { spaces: mockSpacesStart },
-      {},
-    ]);
+    (mockCore.getStartServices as Mock).mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -53,11 +49,7 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: 'classic',
     });
-    (mockCore.getStartServices as Mock).mockResolvedValue([
-      {},
-      { spaces: mockSpacesStart },
-      {},
-    ]);
+    (mockCore.getStartServices as Mock).mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -73,11 +65,7 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: 'security',
     });
-    (mockCore.getStartServices as Mock).mockResolvedValue([
-      {},
-      { spaces: mockSpacesStart },
-      {},
-    ]);
+    (mockCore.getStartServices as Mock).mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -93,11 +81,7 @@ describe('getAgentBuilderResourceAvailability', () => {
       id: 'default',
       solution: 'oblt',
     });
-    (mockCore.getStartServices as Mock).mockResolvedValue([
-      {},
-      { spaces: mockSpacesStart },
-      {},
-    ]);
+    (mockCore.getStartServices as Mock).mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,
@@ -128,11 +112,7 @@ describe('getAgentBuilderResourceAvailability', () => {
     (mockSpacesStart.spacesService.getActiveSpace as Mock).mockRejectedValue(
       new Error('Spaces unavailable')
     );
-    (mockCore.getStartServices as Mock).mockResolvedValue([
-      {},
-      { spaces: mockSpacesStart },
-      {},
-    ]);
+    (mockCore.getStartServices as Mock).mockResolvedValue([{}, { spaces: mockSpacesStart }, {}]);
 
     const result = await getAgentBuilderResourceAvailability({
       core: mockCore,

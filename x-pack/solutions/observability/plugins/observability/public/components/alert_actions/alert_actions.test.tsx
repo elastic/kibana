@@ -48,12 +48,12 @@ const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToCreateAnyRules: false,
 }));
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
-      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+    useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const refresh = vi.fn();
 const caseForCallback = { id: 'case-id' } as CaseUI;

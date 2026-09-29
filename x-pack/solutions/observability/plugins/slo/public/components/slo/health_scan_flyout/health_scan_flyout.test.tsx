@@ -16,23 +16,23 @@ import { render } from '../../../utils/test_helper';
 let mockOnSelectScanId: (scanId: string) => void;
 
 vi.mock('./scan_history_list', () => {
-      const mocked = {
-      ScanHistoryList: ({ onSelectScanId }: { onSelectScanId: (scanId: string) => void }) => {
-        mockOnSelectScanId = onSelectScanId;
-        return <div data-test-subj="scanHistoryList">ScanHistoryList</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScanHistoryList: ({ onSelectScanId }: { onSelectScanId: (scanId: string) => void }) => {
+      mockOnSelectScanId = onSelectScanId;
+      return <div data-test-subj="scanHistoryList">ScanHistoryList</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./scan_results_panel', () => {
-      const mocked = {
-      ScanResultsPanel: ({ scanId }: { scanId: string }) => (
-        <div data-test-subj="scanResultsPanel">ScanResultsPanel: {scanId}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScanResultsPanel: ({ scanId }: { scanId: string }) => (
+      <div data-test-subj="scanResultsPanel">ScanResultsPanel: {scanId}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('HealthScanFlyout', () => {
   const mockOnClose = vi.fn();

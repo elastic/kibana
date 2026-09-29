@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import {
   setMockValues,
   setMockActions,
@@ -16,6 +14,7 @@ import {
 import React from 'react';
 
 import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
@@ -26,27 +25,27 @@ import { AnalyticsCollectionChartWithLens } from './analytics_collection_chart';
 import { AnalyticsCollectionOverview } from './analytics_collection_overview';
 
 vi.mock('./analytics_collection_chart', () => {
-      const mocked = {
-      AnalyticsCollectionChartWithLens: vi.fn(() => (
-        <div data-test-subj="analyticsCollectionChart" />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnalyticsCollectionChartWithLens: vi.fn(() => (
+      <div data-test-subj="analyticsCollectionChart" />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../utils/find_or_create_data_view', () => {
-      const mocked = {
-      findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./analytics_collection_overview_table', () => {
-      const mocked = {
-      AnalyticsCollectionOverviewTable: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnalyticsCollectionOverviewTable: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockedChart = vi.mocked(AnalyticsCollectionChartWithLens);
 

@@ -14,11 +14,11 @@ import { getContinuity } from './get_continuity';
 import { fetchPipelines } from '../fetchers';
 
 vi.mock('../fetchers', () => {
-      const mocked = {
-      fetchPipelines: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchPipelines: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchPipelines = fetchPipelines as Mock;
 

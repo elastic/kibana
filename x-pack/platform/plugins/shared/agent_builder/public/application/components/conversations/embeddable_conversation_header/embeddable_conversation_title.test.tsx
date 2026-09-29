@@ -20,28 +20,28 @@ import {
 import { EmbeddableConversationTitle } from './embeddable_conversation_title';
 
 vi.mock('../../../hooks/use_conversation', () => {
-      const mocked = {
-      useConversationTitle: vi.fn(),
-      useHasPersistedConversation: vi.fn(),
-      useConversationPermissions: vi.fn(),
-      useConversationReadOnly: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationTitle: vi.fn(),
+    useHasPersistedConversation: vi.fn(),
+    useConversationPermissions: vi.fn(),
+    useConversationReadOnly: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rename_conversation_modal', () => {
-      const mocked = {
-      RenameConversationModal: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RenameConversationModal: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../delete_conversation_modal', () => {
-      const mocked = {
-      DeleteConversationModal: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeleteConversationModal: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationTitle = vi.mocked(useConversationTitle);
 const mockUseHasPersistedConversation = vi.mocked(useHasPersistedConversation);

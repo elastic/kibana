@@ -7,28 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowVisualEditorFlyoutTarget } from './workflow_visual_editor_flyout';
 import { WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 
 vi.mock('../../hooks/use_workflows_monaco_theme', () => {
-      const mocked = {
-      useWorkflowsMonacoTheme: vi.fn(),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsMonacoTheme: vi.fn(),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({ value }: any) => <div data-test-subj="editorValue">{value}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({ value }: any) => <div data-test-subj="editorValue">{value}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderFlyout = (target: WorkflowVisualEditorFlyoutTarget) =>
   render(

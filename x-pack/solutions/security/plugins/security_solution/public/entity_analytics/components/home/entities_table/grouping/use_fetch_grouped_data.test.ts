@@ -28,9 +28,9 @@ import { DataViewContext, type DataViewContextValue } from '..';
 import { ENTITY_FIELDS, ENTITY_GROUPING_OPTIONS } from '../constants';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = { getESQLResults: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getESQLResults: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana');
 

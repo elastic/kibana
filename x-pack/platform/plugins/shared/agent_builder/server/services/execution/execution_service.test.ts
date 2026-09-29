@@ -48,11 +48,11 @@ const mockExecutionClient: Mocked<AgentExecutionClient> = {
 };
 
 vi.mock('./persistence', () => {
-      const mocked = {
-      createAgentExecutionClient: () => mockExecutionClient,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createAgentExecutionClient: () => mockExecutionClient,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const conflictError = () =>
   Object.assign(new Error('version conflict'), {
@@ -64,35 +64,35 @@ const mockHandleAgentExecution = vi.fn();
 const mockCollectAndWriteEvents = vi.fn();
 
 vi.mock('./execution_runner', () => {
-      const mocked = {
-      handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
-      collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handleAgentExecution: (...args: any[]) => mockHandleAgentExecution(...args),
+    collectAndWriteEvents: (...args: any[]) => mockCollectAndWriteEvents(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock abort monitor
 vi.mock('./task/abort_monitor', () => {
-      const mocked = {
-      AbortMonitor: vi.fn().mockImplementation(() => ({
-        start: vi.fn(),
-        stop: vi.fn(),
-        getSignal: vi.fn().mockReturnValue(new AbortController().signal),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AbortMonitor: vi.fn().mockImplementation(() => ({
+      start: vi.fn(),
+      stop: vi.fn(),
+      getSignal: vi.fn().mockReturnValue(new AbortController().signal),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock heartbeat reporter
 vi.mock('./task/heartbeat_reporter', () => {
-      const mocked = {
-      HeartbeatReporter: vi.fn().mockImplementation(() => ({
-        start: vi.fn(),
-        stop: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HeartbeatReporter: vi.fn().mockImplementation(() => ({
+      start: vi.fn(),
+      stop: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTaskManagerSchedule = vi.fn();
 const mockTaskManagerEnsureScheduled = vi.fn();
@@ -157,13 +157,12 @@ describe('AgentExecutionService', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    (attachmentsService.validateAttachmentInputs as Mock).mockImplementation(
-      async (attachments) =>
-        attachments?.map((attachment: { type: string; data: unknown }) => ({
-          id: 'attachment-1',
-          type: attachment.type,
-          data: attachment.data,
-        }))
+    (attachmentsService.validateAttachmentInputs as Mock).mockImplementation(async (attachments) =>
+      attachments?.map((attachment: { type: string; data: unknown }) => ({
+        id: 'attachment-1',
+        type: attachment.type,
+        data: attachment.data,
+      }))
     );
     mockExecutionClient.create.mockResolvedValue({
       executionId: 'test-id',
@@ -784,35 +783,39 @@ describe('AgentExecutionService', () => {
     // Detailed behavior is tested in execution_follower.test.ts.
     // This smoke test verifies that service.followExecution delegates correctly.
     it('should delegate to followExecution$ and return an observable', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const fakeEvent = { type: 'message_chunk', data: { message_id: 'm1', text_chunk: 'hello' } };
+        const fakeEvent = {
+          type: 'message_chunk',
+          data: { message_id: 'm1', text_chunk: 'hello' },
+        };
 
-              // peek: failed with 1 event
-              mockExecutionClient.peek.mockResolvedValueOnce({
-                status: ExecutionStatus.failed,
-                eventCount: 1,
-              });
-              mockExecutionClient.readEvents.mockResolvedValueOnce({
-                events: [fakeEvent],
-                status: ExecutionStatus.failed,
-              } as any);
+        // peek: failed with 1 event
+        mockExecutionClient.peek.mockResolvedValueOnce({
+          status: ExecutionStatus.failed,
+          eventCount: 1,
+        });
+        mockExecutionClient.readEvents.mockResolvedValueOnce({
+          events: [fakeEvent],
+          status: ExecutionStatus.failed,
+        } as any);
 
-              const receivedEvents: any[] = [];
+        const receivedEvents: any[] = [];
 
-              service.followExecution('exec-1').subscribe({
-                next: (event) => receivedEvents.push(event),
-                error: () => {
-                  // We expect an error (failed status) — just verify events were emitted before it
-                  expect(receivedEvents).toHaveLength(1);
-                  expect(receivedEvents[0]).toEqual(fakeEvent);
-                  done();
-                },
-                complete: () => done.fail('Expected an error, not completion'),
-              });
-            
-        }));
+        service.followExecution('exec-1').subscribe({
+          next: (event) => receivedEvents.push(event),
+          error: () => {
+            // We expect an error (failed status) — just verify events were emitted before it
+            expect(receivedEvents).toHaveLength(1);
+            expect(receivedEvents[0]).toEqual(fakeEvent);
+            done();
+          },
+          complete: () => done.fail('Expected an error, not completion'),
+        });
+      }));
   });
 
   describe('executeAgent with metadata', () => {

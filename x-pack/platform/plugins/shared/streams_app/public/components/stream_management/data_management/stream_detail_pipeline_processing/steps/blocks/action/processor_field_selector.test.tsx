@@ -15,96 +15,96 @@ import { ProcessorFieldSelector } from './processor_field_selector';
 import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
 
 vi.mock('../../../hooks/use_field_suggestions', () => {
-      const mocked = {
-      useEnrichmentFieldSuggestions: vi.fn(() => [
-        { name: '@timestamp', type: 'date' },
-        { name: 'log.level', type: 'keyword' },
-        { name: 'service.name', type: 'keyword' },
-        { name: 'error.message', type: 'text' },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnrichmentFieldSuggestions: vi.fn(() => [
+      { name: '@timestamp', type: 'date' },
+      { name: 'log.level', type: 'keyword' },
+      { name: 'service.name', type: 'keyword' },
+      { name: 'error.message', type: 'text' },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/use_stream_data_view_field_types', () => {
-      const mocked = {
-      useStreamDataViewFieldTypes: vi.fn(() => ({
-        fieldTypes: [
-          { name: '@timestamp', type: 'date', esType: 'date' },
-          { name: 'log.level', type: 'string', esType: 'keyword' },
-          { name: 'service.name', type: 'string', esType: 'keyword' },
-          { name: 'error.message', type: 'string', esType: 'text' },
-        ],
-        fieldTypeMap: new Map([
-          ['@timestamp', 'date'],
-          ['log.level', 'keyword'],
-          ['service.name', 'keyword'],
-          ['error.message', 'text'],
-        ]),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        dataView: {} as any,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamDataViewFieldTypes: vi.fn(() => ({
+      fieldTypes: [
+        { name: '@timestamp', type: 'date', esType: 'date' },
+        { name: 'log.level', type: 'string', esType: 'keyword' },
+        { name: 'service.name', type: 'string', esType: 'keyword' },
+        { name: 'error.message', type: 'string', esType: 'text' },
+      ],
+      fieldTypeMap: new Map([
+        ['@timestamp', 'date'],
+        ['log.level', 'keyword'],
+        ['service.name', 'keyword'],
+        ['error.message', 'text'],
+      ]),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      dataView: {} as any,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the simulator selector hook
 vi.mock('../../../state_management/stream_enrichment_state_machine', () => {
-      const mocked = {
-      useSimulatorSelector: vi.fn((selector) => selector({ context: { streamName: 'test-stream' } })),
-      useStreamEnrichmentSelector: vi.fn((selector) =>
-        selector({
-          context: {
-            fieldTypesByProcessor: new Map(),
-          },
-        })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSimulatorSelector: vi.fn((selector) => selector({ context: { streamName: 'test-stream' } })),
+    useStreamEnrichmentSelector: vi.fn((selector) =>
+      selector({
+        context: {
+          fieldTypesByProcessor: new Map(),
+        },
+      })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the AutocompleteSelector component to focus on ProcessorFieldSelector-specific logic
 vi.mock('../../../../shared/autocomplete_selector', () => {
-      const mocked = {
-      AutocompleteSelector: vi.fn(
-        ({
-          value,
-          onChange,
-          label,
-          helpText,
-          isInvalid,
-          error,
-          dataTestSubj,
-          placeholder,
-          disabled,
-          compressed,
-          fullWidth,
-          suggestions,
-          labelAppend,
-          autoFocus,
-        }) => (
-          <div>
-            <label htmlFor="mock-field-selector">
-              {label}
-              {labelAppend && <span>{labelAppend}</span>}
-            </label>
-            {helpText && <div>{helpText}</div>}
-            <input
-              id="mock-field-selector"
-              data-test-subj={dataTestSubj || 'mock-field-selector'}
-              value={value || ''}
-              onChange={(e) => onChange?.(e.target.value)}
-              placeholder={placeholder}
-              disabled={disabled}
-              autoFocus={autoFocus}
-            />
-            {isInvalid && error && <div role="alert">{error}</div>}
-          </div>
-        )
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AutocompleteSelector: vi.fn(
+      ({
+        value,
+        onChange,
+        label,
+        helpText,
+        isInvalid,
+        error,
+        dataTestSubj,
+        placeholder,
+        disabled,
+        compressed,
+        fullWidth,
+        suggestions,
+        labelAppend,
+        autoFocus,
+      }) => (
+        <div>
+          <label htmlFor="mock-field-selector">
+            {label}
+            {labelAppend && <span>{labelAppend}</span>}
+          </label>
+          {helpText && <div>{helpText}</div>}
+          <input
+            id="mock-field-selector"
+            data-test-subj={dataTestSubj || 'mock-field-selector'}
+            value={value || ''}
+            onChange={(e) => onChange?.(e.target.value)}
+            placeholder={placeholder}
+            disabled={disabled}
+            autoFocus={autoFocus}
+          />
+          {isInvalid && error && <div role="alert">{error}</div>}
+        </div>
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TestWrapper = ({
   children,

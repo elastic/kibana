@@ -15,18 +15,18 @@ import { useIsExperimentalFeatureEnabled } from './use_experimental_features';
 import { ENABLE_NEW_FLYOUT_SETTING } from '../../../common/constants';
 
 vi.mock('../lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useIsNewFlyoutEnabled', () => {
   let mockUiSettingsGet: Mock;

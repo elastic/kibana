@@ -20,17 +20,17 @@ import { assigneeSignal } from './assignee_overrides';
 import { useAssigneePickers } from './use_assignee_pickers';
 
 vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
-      useUserProfiles: vi.fn(),
-      useSuggestUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+    useUserProfiles: vi.fn(),
+    useSuggestUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Replace AssignToUsers with a minimal stub so we can drive onChange directly.
 vi.mock('@kbn/agentic-investigations-common', async () => {
-  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
+  const actual = await vi.importActual('@kbn/agentic-investigations-common');
   return {
     ...actual,
     // eslint-disable-next-line react/display-name

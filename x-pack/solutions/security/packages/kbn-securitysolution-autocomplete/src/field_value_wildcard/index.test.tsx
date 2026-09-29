@@ -22,11 +22,11 @@ import { WILDCARD_WARNING, FILEPATH_WARNING } from '@kbn/securitysolution-utils'
 
 vi.mock('../hooks/use_field_value_autocomplete');
 vi.mock('../translations', () => {
-      const mocked = {
-      FIELD_SPACE_WARNING: 'Warning: there is a space',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FIELD_SPACE_WARNING: 'Warning: there is a space',
+  };
+  return { ...mocked, default: mocked };
+});
 describe('AutocompleteFieldWildcardComponent', () => {
   let wrapper: ReactWrapper;
 

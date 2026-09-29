@@ -15,18 +15,18 @@ import { createFleetTestRendererMock } from '../../../../../../../mock';
 import { HeaderRightContent } from './right_content';
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useAuthz: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useAuthz: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../../hooks/use_can_enable_auto_upgrades', () => {
-      const mocked = {
-      useCanEnableAutomaticAgentUpgrades: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanEnableAutomaticAgentUpgrades: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const agentPolicy = {
   id: 'policy-1',

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import Boom from '@hapi/boom';
 import { act } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';

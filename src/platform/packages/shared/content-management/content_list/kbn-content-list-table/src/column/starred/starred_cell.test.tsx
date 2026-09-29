@@ -20,7 +20,7 @@ import {
 import { StarredCell } from './starred_cell';
 
 vi.mock('@kbn/content-management-favorites-public', async () => {
-  const actual = (await vi.importActual('@kbn/content-management-favorites-public'));
+  const actual = await vi.importActual('@kbn/content-management-favorites-public');
 
   return {
     ...actual,

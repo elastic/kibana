@@ -14,30 +14,30 @@ import { OverviewPageFooter } from './overview_page_footer';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 vi.mock('@kbn/shared-ux-link-redirect-app', () => {
-      const mocked = {
-      RedirectAppLinks: vi.fn((element: JSX.Element) => element),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectAppLinks: vi.fn((element: JSX.Element) => element),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../context', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          application: { capabilities: { advancedSettings: { show: true, save: true } } },
-          notifications: { toast: { addSuccess: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        application: { capabilities: { advancedSettings: { show: true, save: true } } },
+        notifications: { toast: { addSuccess: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../ui_settings', () => {
-      const mocked = {
-      useUiSetting$: vi.fn().mockReturnValue(['path-to-default-route', vi.fn()]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting$: vi.fn().mockReturnValue(['path-to-default-route', vi.fn()]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 afterEach(() => vi.clearAllMocks());
 

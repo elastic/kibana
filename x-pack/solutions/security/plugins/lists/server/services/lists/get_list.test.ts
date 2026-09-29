@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { getListResponseMock } from '../../../common/schemas/response/list_schema.mock';

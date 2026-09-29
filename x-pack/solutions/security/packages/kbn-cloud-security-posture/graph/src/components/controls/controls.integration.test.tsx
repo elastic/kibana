@@ -21,13 +21,13 @@ import {
 } from '../test_ids';
 
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      ...require('@xyflow/react'),
-      useReactFlow: vi.fn(),
-      useStore: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('@xyflow/react'),
+    useReactFlow: vi.fn(),
+    useStore: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useReactFlowMock = useReactFlow as Mock;
 const useStoreMock = useStore as Mock;

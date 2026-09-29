@@ -26,48 +26,48 @@ const mockStreamsRepositoryClient = {
 };
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        dependencies: {
-          start: {
-            streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
-          },
+  const mocked = {
+    useKibana: () => ({
+      dependencies: {
+        start: {
+          streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the abort controller hook
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useAbortController: () => ({
-        signal: new AbortController().signal,
-        abort: vi.fn(),
-        refresh: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAbortController: () => ({
+      signal: new AbortController().signal,
+      abort: vi.fn(),
+      refresh: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the error toast function
 const mockShowFetchErrorToast = vi.fn();
 vi.mock('../../../../../hooks/use_fetch_error_toast', () => {
-      const mocked = {
-      useFetchErrorToast: () => mockShowFetchErrorToast,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchErrorToast: () => mockShowFetchErrorToast,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the actor ref hook; capture sent events for assertions
 const mockSend = vi.fn();
 vi.mock('../state_management/stream_routing_state_machine', () => {
-      const mocked = {
-      useStreamsRoutingActorRef: () => ({ send: mockSend }),
-      useStreamsRoutingSelector: () => 'test-stream',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsRoutingActorRef: () => ({ send: mockSend }),
+    useStreamsRoutingSelector: () => 'test-stream',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const condition: Condition = { field: 'service.name', eq: 'api' };
 

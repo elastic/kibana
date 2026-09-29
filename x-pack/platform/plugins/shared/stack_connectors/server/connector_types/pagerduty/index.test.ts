@@ -24,11 +24,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 
 vi.mock('./post_pagerduty', () => {
-      const mocked = {
-      postPagerduty: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    postPagerduty: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const postPagerdutyMock = postPagerduty as Mock;
 const services: Services = actionsMock.createServices();

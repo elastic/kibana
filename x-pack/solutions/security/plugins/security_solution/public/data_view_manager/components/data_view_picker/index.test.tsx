@@ -20,20 +20,20 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { PageScope } from '../../constants';
 
 vi.mock('../../../common/utils/global_query_string', () => {
-      const mocked = {
-      useUpdateUrlParam: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateUrlParam: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_data_view');
 
 vi.mock('../../hooks/use_select_data_view', () => {
-      const mocked = {
-      useSelectDataView: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectDataView: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
   return {
@@ -45,41 +45,45 @@ vi.mock('react-redux-v7', () => {
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('@kbn/unified-search-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/unified-search-plugin/public')),
-      DataViewPicker: vi.fn((props) => (
-        <div data-test-subj="dataViewManager">
+  const mocked = {
+    ...(await vi.importActual('@kbn/unified-search-plugin/public')),
+    DataViewPicker: vi.fn((props) => (
+      <div data-test-subj="dataViewManager">
+        <button
+          type="button"
+          onClick={() => props.onChangeDataView('new-data-view-id')}
+          data-test-subj="changeDataView"
+        >
+          {'Change Data View'}
+        </button>
+        <button
+          type="button"
+          onClick={() => props.onDataViewCreated()}
+          data-test-subj="createDataView"
+        >
+          {'Create Data View'}
+        </button>
+        {props.onAddField && (
+          <button type="button" onClick={() => props.onAddField()} data-test-subj="addField">
+            {'Add Field'}
+          </button>
+        )}
+        {props.onEditDataView && (
           <button
             type="button"
-            onClick={() => props.onChangeDataView('new-data-view-id')}
-            data-test-subj="changeDataView"
+            onClick={() => props.onEditDataView()}
+            data-test-subj="editDataView"
           >
-            {'Change Data View'}
+            {'Edit Data View'}
           </button>
-          <button
-            type="button"
-            onClick={() => props.onDataViewCreated()}
-            data-test-subj="createDataView"
-          >
-            {'Create Data View'}
-          </button>
-          {props.onAddField && (
-            <button type="button" onClick={() => props.onAddField()} data-test-subj="addField">
-              {'Add Field'}
-            </button>
-          )}
-          {props.onEditDataView && (
-            <button type="button" onClick={() => props.onEditDataView()} data-test-subj="editDataView">
-              {'Edit Data View'}
-            </button>
-          )}
-          <div data-test-subj="currentDataViewId">{props.currentDataViewId}</div>
-          <div data-test-subj="trigger">{props.trigger.label}</div>
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+        )}
+        <div data-test-subj="currentDataViewId">{props.currentDataViewId}</div>
+        <div data-test-subj="trigger">{props.trigger.label}</div>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DataViewPicker', () => {
   let mockDispatch = vi.fn();
@@ -174,9 +178,9 @@ describe('DataViewPicker', () => {
 
   it('opens field editor when adding a field', async () => {
     const mockFieldEditorClose = vi.fn();
-    vi
-      .mocked(useKibana().services.dataViewFieldEditor.openEditor)
-      .mockResolvedValue(mockFieldEditorClose);
+    vi.mocked(useKibana().services.dataViewFieldEditor.openEditor).mockResolvedValue(
+      mockFieldEditorClose
+    );
 
     render(
       <TestProviders>
@@ -195,9 +199,9 @@ describe('DataViewPicker', () => {
   });
 
   it('shows a danger toast when adding field fails to load data view', async () => {
-    vi
-      .mocked(useKibana().services.data.dataViews.get)
-      .mockRejectedValue(new Error('conflict loading data view'));
+    vi.mocked(useKibana().services.data.dataViews.get).mockRejectedValue(
+      new Error('conflict loading data view')
+    );
 
     render(
       <TestProviders>
@@ -217,9 +221,9 @@ describe('DataViewPicker', () => {
 
   describe('when user does not have editDataView permission', () => {
     it('does not render edit data view button', () => {
-      vi
-        .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
-        .mockReturnValue(false);
+      vi.mocked(useKibana().services.dataViewEditor.userPermissions.editDataView).mockReturnValue(
+        false
+      );
 
       render(
         <TestProviders>
@@ -231,9 +235,9 @@ describe('DataViewPicker', () => {
     });
 
     it('does not render add field button', () => {
-      vi
-        .mocked(useKibana().services.dataViewEditor.userPermissions.editDataView)
-        .mockReturnValue(false);
+      vi.mocked(useKibana().services.dataViewEditor.userPermissions.editDataView).mockReturnValue(
+        false
+      );
 
       render(
         <TestProviders>

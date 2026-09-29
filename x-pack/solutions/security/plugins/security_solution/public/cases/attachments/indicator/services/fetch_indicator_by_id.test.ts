@@ -22,9 +22,9 @@ describe('FetchIndicatorByIdService', () => {
   describe('fetchIndicatorById()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        vi
-          .mocked(mockedSearchService.search)
-          .mockReturnValue(new BehaviorSubject(indicatorsResponse));
+        vi.mocked(mockedSearchService.search).mockReturnValue(
+          new BehaviorSubject(indicatorsResponse)
+        );
       });
 
       it('should pass the query down to searchService', async () => {
@@ -59,9 +59,9 @@ describe('FetchIndicatorByIdService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        vi
-          .mocked(mockedSearchService.search)
-          .mockReturnValue(throwError(() => new Error('some random exception')));
+        vi.mocked(mockedSearchService.search).mockReturnValue(
+          throwError(() => new Error('some random exception'))
+        );
       });
 
       it('should throw an error', async () => {

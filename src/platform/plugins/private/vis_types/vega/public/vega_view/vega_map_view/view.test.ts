@@ -75,12 +75,12 @@ vi.mock('@kbn/mapbox-gl', () => {
 });
 
 vi.mock('./layers', () => {
-      const mocked = {
-      initVegaLayer: vi.fn(),
-      initTmsRasterLayer: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initVegaLayer: vi.fn(),
+    initTmsRasterLayer: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('vega_map_view/view', () => {
   describe('VegaMapView', () => {

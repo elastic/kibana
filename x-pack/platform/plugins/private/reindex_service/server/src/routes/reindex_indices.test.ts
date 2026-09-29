@@ -38,11 +38,11 @@ const mockReindexService = {
 };
 
 vi.mock('../lib/reindex_service', () => {
-      const mocked = {
-      reindexServiceFactory: () => mockReindexService,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reindexServiceFactory: () => mockReindexService,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
 import type { ReindexSavedObject } from '../lib/types';

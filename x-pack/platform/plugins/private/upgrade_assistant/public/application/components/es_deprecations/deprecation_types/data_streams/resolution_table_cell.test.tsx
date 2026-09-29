@@ -21,11 +21,11 @@ import { LoadingState } from '../../../types';
 const mockUseDataStreamMigrationContext = vi.fn<MigrationStateContext, []>();
 
 vi.mock('./context', () => {
-      const mocked = {
-      useDataStreamMigrationContext: () => mockUseDataStreamMigrationContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataStreamMigrationContext: () => mockUseDataStreamMigrationContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseCorrectiveAction: DataStreamsAction = {
   type: 'dataStream',

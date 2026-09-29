@@ -18,26 +18,26 @@ import { ImportDashboardJsonFlyout } from './import_dashboard_json_flyout';
 
 const mockSanitizeDashboard = vi.fn();
 vi.mock('../../dashboard_app/top_nav/share/export_json/sanitize_dashboard', () => {
-      const mocked = {
-      sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sanitizeDashboard: (...args: unknown[]) => mockSanitizeDashboard(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddDanger = vi.fn();
 const mockHttpPost = vi.fn();
 vi.mock('../../services/kibana_services', () => {
-      const mocked = {
-      coreServices: {
-        http: { post: (...args: unknown[]) => mockHttpPost(...args) },
-        notifications: { toasts: { addDanger: (...args: unknown[]) => mockAddDanger(...args) } },
-        application: {
-          getUrlForApp: () => '/app/management/kibana/objects',
-        },
+  const mocked = {
+    coreServices: {
+      http: { post: (...args: unknown[]) => mockHttpPost(...args) },
+      notifications: { toasts: { addDanger: (...args: unknown[]) => mockAddDanger(...args) } },
+      application: {
+        getUrlForApp: () => '/app/management/kibana/objects',
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SANITIZED_STATE = { title: 'My Dashboard', panels: [], description: '' };
 const UNSANITIZED_STATE = { ...SANITIZED_STATE, property_removed_by_sanitizer: 'remove me' };

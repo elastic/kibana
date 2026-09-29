@@ -29,25 +29,25 @@ const mockPrepend = (path: string) => `/base${path}`;
 let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
 vi.mock('../../services/action_policies_api', () => {
-      const mocked = {
-      ActionPoliciesApi: 'ActionPoliciesApi',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPoliciesApi: 'ActionPoliciesApi',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/rules_api', () => {
-      const mocked = {
-      RulesApi: 'RulesApi',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesApi: 'RulesApi',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: 'WorkflowApi',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: 'WorkflowApi',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockApplicationService = { navigateToUrl: (...a: unknown[]) => mockNavigateToUrl(...a) };
 const mockHttpService = { basePath: { prepend: mockPrepend } };
@@ -64,35 +64,35 @@ const mockActionPoliciesApiService = {
 };
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: (token: unknown) => {
-        const services: Record<string, unknown> = {
-          application: mockApplicationService,
-          http: mockHttpService,
-          notifications: mockNotificationsService,
-          uiSettings: {
-            get: (id: string) =>
-              id === 'alerting:v2:experimentalFeatures' && mockAlertingV2ExperimentalFeaturesEnabled,
-          },
-          WorkflowApi: mockWorkflowApiService,
-          RulesApi: mockRulesApiService,
-          ActionPoliciesApi: mockActionPoliciesApiService,
-        };
-        return services[token as string] ?? {};
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: (token: unknown) => {
+      const services: Record<string, unknown> = {
+        application: mockApplicationService,
+        http: mockHttpService,
+        notifications: mockNotificationsService,
+        uiSettings: {
+          get: (id: string) =>
+            id === 'alerting:v2:experimentalFeatures' && mockAlertingV2ExperimentalFeaturesEnabled,
+        },
+        WorkflowApi: mockWorkflowApiService,
+        RulesApi: mockRulesApiService,
+        ActionPoliciesApi: mockActionPoliciesApiService,
+      };
+      return services[token as string] ?? {};
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/action_policy/details_flyout/action_policy_definition_list', () => {
-      const mocked = {
-      ActionPolicyDefinitionList: (props: Record<string, unknown>) => (
-        <div data-test-subj="mockDefinitionList">{JSON.stringify(Object.keys(props))}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyDefinitionList: (props: Record<string, unknown>) => (
+      <div data-test-subj="mockDefinitionList">{JSON.stringify(Object.keys(props))}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultData = {
   name: 'My Policy',

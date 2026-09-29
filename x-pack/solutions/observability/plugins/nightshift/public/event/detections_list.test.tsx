@@ -16,38 +16,38 @@ import { DetectionsList, MAX_VISIBLE_DETECTIONS } from './detections_list';
 import { useFetchEventLifecycle } from '../hooks/use_fetch_event_lifecycle';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_event_lifecycle');
 vi.mock('../detection/change_point_visualization', () => {
-      const mocked = {
-      ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
-        <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangePointSparkline: ({ data }: { data: Array<{ x: number; y: number }> }) => (
+      <div data-test-subj="mockDetectionSparkline" data-point-count={data.length} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { basePath: { prepend: (path: string) => `/base${path}` } },
-          charts: {
-            theme: {
-              useChartsBaseTheme: () => ({}),
-              useSparklineOverrides: () => ({}),
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { basePath: { prepend: (path: string) => `/base${path}` } },
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => ({}),
+            useSparklineOverrides: () => ({}),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchEventLifecycle = useFetchEventLifecycle as Mock;
 

@@ -13,9 +13,9 @@ export const getDocLinksMock = vi.fn();
 export const getDocLinksMetaMock = vi.fn();
 
 vi.doMock('@kbn/doc-links', () => {
-      const mocked = {
-      getDocLinks: getDocLinksMock,
-      getDocLinksMeta: getDocLinksMetaMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDocLinks: getDocLinksMock,
+    getDocLinksMeta: getDocLinksMetaMock,
+  };
+  return { ...mocked, default: mocked };
+});

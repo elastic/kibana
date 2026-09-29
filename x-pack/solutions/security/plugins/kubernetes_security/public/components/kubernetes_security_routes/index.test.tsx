@@ -16,32 +16,32 @@ import { KubernetesSecurityRoutes } from '.';
 import { createAppRootMockRenderer } from '../../test';
 
 vi.mock('../percent_widget', () => {
-      const mocked = {
-      PercentWidget: () => <div>{'Mock percent widget'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PercentWidget: () => <div>{'Mock percent widget'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_last_updated', () => {
-      const mocked = {
-      useLastUpdated: () => <div>{'Mock updated now'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLastUpdated: () => <div>{'Mock updated now'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../count_widget', () => {
-      const mocked = {
-      CountWidget: () => <div>{'Mock count widget'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CountWidget: () => <div>{'Mock count widget'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../container_name_widget', () => {
-      const mocked = {
-      ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContainerNameWidget: () => <div>{'Mock Container Name widget'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataViewId = 'dataViewId';
 

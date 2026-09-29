@@ -15,15 +15,15 @@ import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { useAssetDetailsRedirect } from './use_asset_details_redirect';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(() => ({
-        pathname: '',
-        search: '',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(() => ({
+      pathname: '',
+      search: '',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MOCK_HREF = '/app/r?l=ASSET_DETAILS_LOCATOR&v=8.15.0&lz=MoCkLoCaToRvAlUe';
 const coreStartMock = coreMock.createStart();

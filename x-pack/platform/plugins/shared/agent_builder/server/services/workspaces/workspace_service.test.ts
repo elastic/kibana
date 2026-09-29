@@ -20,9 +20,9 @@ import { createWorkspaceService } from './workspace_service';
 // Keep the real path validation; stub the ES-backed workspace client + storage.
 vi.mock('./client/workspace_client');
 vi.mock('./client/storage', () => {
-      const mocked = { createStorage: vi.fn(() => ({})) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { createStorage: vi.fn(() => ({})) };
+  return { ...mocked, default: mocked };
+});
 
 const b64 = (s: string) => Buffer.from(s).toString('base64');
 

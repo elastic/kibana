@@ -20,11 +20,11 @@ import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import { getFieldFormatsRegistry } from '@kbn/data-plugin/public/test_utils';
 
 vi.mock('@kbn/data-plugin/public/services', () => {
-      const mocked = {
-      getUiSettings: () => ({ get: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUiSettings: () => ({ get: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TimeseriesVisualization', () => {
   describe('TimeSeries Y-Axis formatted value', () => {

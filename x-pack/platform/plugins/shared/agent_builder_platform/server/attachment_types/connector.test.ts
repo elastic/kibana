@@ -21,19 +21,19 @@ import { z } from '@kbn/zod/v4';
 import { createConnectorAttachmentType } from './connector';
 
 vi.mock('@kbn/connector-specs', () => {
-      const mocked = {
-      getConnectorSpec: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorSpec: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-server')),
-      formatSchemaForLlm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-server')),
+    formatSchemaForLlm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 const formatSchemaForLlmMock = formatSchemaForLlm as MockedFunction<typeof formatSchemaForLlm>;

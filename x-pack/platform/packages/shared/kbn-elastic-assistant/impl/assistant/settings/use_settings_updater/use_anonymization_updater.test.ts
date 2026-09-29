@@ -16,11 +16,11 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 import type { BatchUpdateListItem } from '../../../data_anonymization_editor/context_editor/types';
 
 vi.mock('../../api/anonymization_fields/bulk_update_anonymization_fields', () => {
-      const mocked = {
-      bulkUpdateAnonymizationFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkUpdateAnonymizationFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockField = {
   timestamp: '2025-02-04T16:47:17.791Z',
   createdAt: '2025-02-04T16:47:17.791Z',

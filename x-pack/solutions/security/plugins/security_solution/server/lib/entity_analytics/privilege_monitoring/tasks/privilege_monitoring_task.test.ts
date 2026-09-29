@@ -10,13 +10,13 @@ import { vi } from 'vitest';
 // jest.mock calls are hoisted before imports. Keep them at the top and avoid
 // referencing outer bindings (temporal dead zone).
 vi.mock('../auth/api_key', () => {
-      const mocked = {
-      getApiKeyManager: vi.fn().mockReturnValue({
-        getClient: vi.fn().mockResolvedValue(undefined),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApiKeyManager: vi.fn().mockReturnValue({
+      getClient: vi.fn().mockResolvedValue(undefined),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

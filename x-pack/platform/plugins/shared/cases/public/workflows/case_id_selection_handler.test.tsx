@@ -21,12 +21,12 @@ const mockContext: SelectionContext = {
 };
 
 vi.mock('../containers/api', () => {
-      const mocked = {
-      getCases: vi.fn(),
-      resolveCase: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCases: vi.fn(),
+    resolveCase: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('caseIdSelection', () => {
   const getCasesMock = vi.mocked(getCases);

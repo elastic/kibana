@@ -15,14 +15,14 @@ const mockSaveTraces = vi.fn();
 let mockIsSaving = false;
 
 vi.mock('./use_save_ai_index_traces', () => {
-      const mocked = {
-      useSaveAiIndexTraces: () => ({
-        saveTraces: mockSaveTraces,
-        isSaving: mockIsSaving,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSaveAiIndexTraces: () => ({
+      saveTraces: mockSaveTraces,
+      isSaving: mockIsSaving,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',

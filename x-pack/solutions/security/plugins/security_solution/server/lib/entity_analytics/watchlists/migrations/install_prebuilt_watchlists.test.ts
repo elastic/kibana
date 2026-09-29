@@ -31,35 +31,35 @@ const mockEntitySourceCreate = vi.fn();
 const mockEntitySourceList = vi.fn();
 
 vi.mock('../entity_sources/infra', () => {
-      const mocked = {
-      WatchlistEntitySourceClient: vi.fn().mockImplementation(() => ({
-        create: (...args: unknown[]) => mockEntitySourceCreate(...args),
-        list: (...args: unknown[]) => mockEntitySourceList(...args),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistEntitySourceClient: vi.fn().mockImplementation(() => ({
+      create: (...args: unknown[]) => mockEntitySourceCreate(...args),
+      list: (...args: unknown[]) => mockEntitySourceList(...args),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../management/watchlist_config', () => {
-      const mocked = {
-      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
-        get: (...args: unknown[]) => mockWatchlistGet(...args),
-        create: (...args: unknown[]) => mockWatchlistCreate(...args),
-        addEntitySourceReference: (...args: unknown[]) => mockAddEntitySourceReference(...args),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+      get: (...args: unknown[]) => mockWatchlistGet(...args),
+      create: (...args: unknown[]) => mockWatchlistCreate(...args),
+      addEntitySourceReference: (...args: unknown[]) => mockAddEntitySourceReference(...args),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Captured reference so tests can control soClient behaviour (e.g. cleanup checks)
 let mockScopedSoClient: ReturnType<typeof mockSavedObjectsClient.create>;
 
 vi.mock('../../risk_score/tasks/helpers', () => {
-      const mocked = {
-      buildScopedInternalSavedObjectsClientUnsafe: vi.fn(() => mockScopedSoClient),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildScopedInternalSavedObjectsClientUnsafe: vi.fn(() => mockScopedSoClient),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildSpacesResponse = (spaceIds: string[]) => ({
   page: 1,
@@ -127,16 +127,14 @@ describe('installPrebuiltWatchlists', function () {
     // Mirror core `find` behavior: the hidden `space` type is only queryable when
     // it is explicitly passed via `includedHiddenTypes`; otherwise `find` returns
     // an empty result. This guards against regressing back to an un-scoped repo.
-    mockCreateInternalRepository = vi
-      .fn()
-      .mockImplementation((includedHiddenTypes?: string[]) => {
-        if (includedHiddenTypes?.includes('space')) {
-          return mockSoClient;
-        }
-        const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
-        repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
-        return repoWithoutSpaceAccess;
-      });
+    mockCreateInternalRepository = vi.fn().mockImplementation((includedHiddenTypes?: string[]) => {
+      if (includedHiddenTypes?.includes('space')) {
+        return mockSoClient;
+      }
+      const repoWithoutSpaceAccess = mockSavedObjectsClient.create();
+      repoWithoutSpaceAccess.find.mockResolvedValue(buildEmptySpacesResponse());
+      return repoWithoutSpaceAccess;
+    });
     mockGetStartServices.mockResolvedValue([
       {
         savedObjects: {

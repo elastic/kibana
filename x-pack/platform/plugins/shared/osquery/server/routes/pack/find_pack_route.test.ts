@@ -16,11 +16,12 @@ import { findPackRoute } from './find_pack_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('findPackRoute', () => {
   let routeHandler: RequestHandler;
@@ -70,9 +71,7 @@ describe('findPackRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
   });
 
   const setupRoute = () => {

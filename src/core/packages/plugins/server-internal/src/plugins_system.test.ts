@@ -764,12 +764,12 @@ describe('asynchronous plugins', () => {
     pluginsSystem.addPlugin(syncPlugin);
 
     const asyncPlugin = createPlugin('async-plugin');
-    vi
-      .spyOn(asyncPlugin, 'setup')
-      .mockReturnValue(asyncSetup ? Promise.resolve('setup-async') : 'setup-sync');
-    vi
-      .spyOn(asyncPlugin, 'start')
-      .mockReturnValue(asyncStart ? Promise.resolve('start-async') : 'start-sync');
+    vi.spyOn(asyncPlugin, 'setup').mockReturnValue(
+      asyncSetup ? Promise.resolve('setup-async') : 'setup-sync'
+    );
+    vi.spyOn(asyncPlugin, 'start').mockReturnValue(
+      asyncStart ? Promise.resolve('start-async') : 'start-sync'
+    );
     pluginsSystem.addPlugin(asyncPlugin);
 
     await pluginsSystem.setupPlugins(setupDeps);

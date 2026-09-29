@@ -11,6 +11,6 @@ import { vi } from 'vitest';
 
 export const getNextRollingTimeMock = vi.fn();
 vi.doMock('./get_next_rolling_time', () => {
-      const mocked = { getNextRollingTime: getNextRollingTimeMock };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getNextRollingTime: getNextRollingTimeMock };
+  return { ...mocked, default: mocked };
+});

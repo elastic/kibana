@@ -174,11 +174,7 @@ describe('CreateDataSourceFlyout', () => {
     const { getByTestId, queryByTestId, findByText, queryByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <CreateDataSourceFlyout
-            onClose={vi.fn()}
-            onSave={onSave}
-            existingDataSourceNames={[]}
-          />
+          <CreateDataSourceFlyout onClose={vi.fn()} onSave={onSave} existingDataSourceNames={[]} />
         </KibanaContextProvider>
       </EuiProvider>
     );
@@ -250,11 +246,7 @@ describe('CreateDataSourceFlyout', () => {
     const { getByTestId, findByText } = render(
       <EuiProvider>
         <KibanaContextProvider services={services}>
-          <CreateDataSourceFlyout
-            onClose={vi.fn()}
-            onSave={onSave}
-            existingDataSourceNames={[]}
-          />
+          <CreateDataSourceFlyout onClose={vi.fn()} onSave={onSave} existingDataSourceNames={[]} />
         </KibanaContextProvider>
       </EuiProvider>
     );

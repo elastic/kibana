@@ -15,11 +15,11 @@ import { bulkMarkApiKeysForInvalidation } from '../../../../invalidate_pending_a
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as Mock;
 
@@ -691,7 +691,7 @@ describe('updateRuleApiKey()', () => {
     });
 
     test('logs the change only after the OCC retry succeeds (no logging on the failed attempt)', async () => {
-      const { SavedObjectsErrorHelpers } = (await vi.importActual('@kbn/core/server'));
+      const { SavedObjectsErrorHelpers } = await vi.importActual('@kbn/core/server');
       const changeTrackingService = createChangeTrackingService();
       const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
       setRuleType();

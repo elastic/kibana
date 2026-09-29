@@ -18,31 +18,31 @@ import { SKILL_ATTACHMENT_TYPE, type SkillAttachment } from '../../../common/att
 import { createSkillAttachmentDefinition } from './skill_attachment';
 
 vi.mock('@kbn/agent-builder-plugin/public', () => {
-      const mocked = {
-      SKILLS_API_PATH: '/api/agent_builder/skills',
-      AGENTBUILDER_APP_ID: 'agent_builder',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SKILLS_API_PATH: '/api/agent_builder/skills',
+    AGENTBUILDER_APP_ID: 'agent_builder',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./skill_diff_viewer', () => {
-      const mocked = {
-      SkillDiffViewer: ({
-        beforeContent,
-        afterContent,
-      }: {
-        beforeContent: string;
-        afterContent: string;
-      }) => (
-        <div
-          data-test-subj="skillDiffViewerStub"
-          data-before={beforeContent}
-          data-after={afterContent}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SkillDiffViewer: ({
+      beforeContent,
+      afterContent,
+    }: {
+      beforeContent: string;
+      afterContent: string;
+    }) => (
+      <div
+        data-test-subj="skillDiffViewerStub"
+        data-before={beforeContent}
+        data-after={afterContent}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SHOW_DIFF_LABEL = 'Show diff';
 

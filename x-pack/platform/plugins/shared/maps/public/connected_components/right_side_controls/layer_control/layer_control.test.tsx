@@ -8,22 +8,22 @@
 import { vi } from 'vitest';
 
 vi.mock('./layer_toc', () => {
-      const mocked = {
-      LayerTOC: () => {
-        return <div>mockLayerTOC</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LayerTOC: () => {
+      return <div>mockLayerTOC</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../kibana_services', () => {
-      const mocked = {
-      isScreenshotMode: () => {
-        return false;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isScreenshotMode: () => {
+      return false;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

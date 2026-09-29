@@ -25,42 +25,42 @@ import { selectOverviewStatus } from '../../../../../state/overview_status';
 import { useFilters } from '../../../common/monitor_filters/use_filters';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/monitor_filters/use_filters', () => {
-      const mocked = {
-      useFilters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFilters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Stub the accordion so the test doesn't pull in trend-fetching internals; it
 // just exposes each rendered group's stable id and its member monitor ids.
 vi.mock('./grid_group_item', () => {
-      const mocked = {
-      GroupGridItem: ({
-        groupId,
-        groupLabel,
-        groupMonitors,
-      }: {
-        groupId?: string;
-        groupLabel: string;
-        groupMonitors: OverviewStatusMetaData[];
-      }) => (
-        <div data-test-subj={`group-${groupId ?? groupLabel}`}>
-          {groupMonitors.map((monitor) => (
-            <span key={monitor.configId}>{monitor.configId}</span>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GroupGridItem: ({
+      groupId,
+      groupLabel,
+      groupMonitors,
+    }: {
+      groupId?: string;
+      groupLabel: string;
+      groupMonitors: OverviewStatusMetaData[];
+    }) => (
+      <div data-test-subj={`group-${groupId ?? groupLabel}`}>
+        {groupMonitors.map((monitor) => (
+          <span key={monitor.configId}>{monitor.configId}</span>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const heartbeatMonitor = {
   configId: 'hb1',

@@ -21,7 +21,7 @@ const mockUseEuiTablePersist = vi.fn().mockReturnValue({
 });
 
 vi.mock('./use_table_persist', async () => {
-  const original = (await vi.importActual('./use_table_persist'));
+  const original = await vi.importActual('./use_table_persist');
 
   return {
     ...original,

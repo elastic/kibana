@@ -14,23 +14,23 @@ import { useCalculateEntityRiskScore } from './use_calculate_entity_risk_score';
 
 const mockCalculateEntityRiskScoreV2 = vi.fn();
 vi.mock('../api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        calculateEntityRiskScoreV2: mockCalculateEntityRiskScoreV2,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      calculateEntityRiskScoreV2: mockCalculateEntityRiskScoreV2,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddError = vi.fn();
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addError: () => mockAddError(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addError: () => mockAddError(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const identifierType = EntityType.user;
 const identifier = 'test-user';

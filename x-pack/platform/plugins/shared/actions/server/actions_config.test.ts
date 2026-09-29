@@ -470,7 +470,7 @@ describe('getProxySettings', () => {
 });
 
 vi.mock('fs', () => {
-  const actual = (require('fs') as typeof import('fs'));
+  const actual = require('fs') as typeof import('fs');
   return { ...actual, readFileSync: vi.fn().mockImplementation(actual.readFileSync) };
 });
 

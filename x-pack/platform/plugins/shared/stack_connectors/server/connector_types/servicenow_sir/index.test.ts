@@ -18,17 +18,17 @@ import { api } from './api';
 import type { ServiceNowPublicConfigurationType } from '@kbn/connector-schemas/servicenow';
 
 vi.mock('./api', () => {
-      const mocked = {
-      api: {
-        getChoices: vi.fn(),
-        getFields: vi.fn(),
-        getIncident: vi.fn(),
-        handshake: vi.fn(),
-        pushToService: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    api: {
+      getChoices: vi.fn(),
+      getFields: vi.fn(),
+      getIncident: vi.fn(),
+      handshake: vi.fn(),
+      pushToService: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = actionsMock.createServices();
 const mockedLogger: Mocked<Logger> = loggerMock.create();
@@ -76,9 +76,7 @@ describe('ServiceNow', () => {
           ExecutorParams
         >;
         await connectorType.executor(executorOptions);
-        expect((api.pushToService as Mock).mock.calls[0][0].commentFieldKey).toBe(
-          'work_notes'
-        );
+        expect((api.pushToService as Mock).mock.calls[0][0].commentFieldKey).toBe('work_notes');
       });
 
       test('calls getIncident sub action correctly', async () => {
@@ -100,9 +98,7 @@ describe('ServiceNow', () => {
           ExecutorParams
         >;
         await connectorType.executor(executorOptions);
-        expect((api.getIncident as Mock).mock.calls[0][0].params.externalId).toBe(
-          'incident-1'
-        );
+        expect((api.getIncident as Mock).mock.calls[0][0].params.externalId).toBe('incident-1');
       });
     });
   });

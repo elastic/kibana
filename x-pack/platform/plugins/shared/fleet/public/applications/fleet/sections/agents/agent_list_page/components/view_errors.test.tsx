@@ -37,16 +37,16 @@ vi.mock('../../../../hooks', async () => {
 const mockUseStartServices = useStartServices as Mock;
 
 vi.mock('@kbn/shared-ux-link-redirect-app', () => {
-      const mocked = {
-      RedirectAppLinks: (props: any) => {
-        return <div>{props.children}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectAppLinks: (props: any) => {
+      return <div>{props.children}</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/logs-shared-plugin/common', async () => {
-  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
+  const originalModule = await vi.importActual('@kbn/logs-shared-plugin/common');
   return {
     ...originalModule,
     getLogsLocatorFromUrlService: vi

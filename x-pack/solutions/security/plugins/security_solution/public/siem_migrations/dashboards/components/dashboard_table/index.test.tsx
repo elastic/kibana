@@ -163,12 +163,10 @@ vi.spyOn(useGetMigrationDashboardsModule, 'useGetMigrationDashboards').mockRetur
   isLoading: false,
 } as unknown as ReturnType<typeof useGetMigrationDashboardsModule.useGetMigrationDashboards>);
 
-vi
-  .spyOn(useGetMigrationTranslationStatsModule, 'useGetMigrationTranslationStats')
-  .mockReturnValue({
-    data: mockTranslationStats,
-    isLoading: false,
-  } as unknown as ReturnType<typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats>);
+vi.spyOn(useGetMigrationTranslationStatsModule, 'useGetMigrationTranslationStats').mockReturnValue({
+  data: mockTranslationStats,
+  isLoading: false,
+} as unknown as ReturnType<typeof useGetMigrationTranslationStatsModule.useGetMigrationTranslationStats>);
 
 const mockInstallMigrationDashboards = vi.fn();
 const mockInstallMigrationDashboard = vi.fn();

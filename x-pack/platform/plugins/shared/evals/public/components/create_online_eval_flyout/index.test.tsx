@@ -19,7 +19,7 @@ vi.mock('../../hooks/use_online_eval_workflows');
 vi.mock('../../hooks/use_experiments_api');
 vi.mock('../../hooks/use_model_connectors');
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   const MockEuiComboBox = ({
     options = [],

@@ -24,28 +24,28 @@ import type {
 } from './change_point_summary_series';
 
 vi.mock('./change_point_summary_chart', () => {
-      const mocked = {
-      ChangePointSummaryChart: ({
-        points,
-        annotationTime,
-      }: {
-        points: Array<{ x: number; y: number }>;
-        annotationTime?: number;
-      }) => (
-        <div
-          data-test-subj="changePointSummaryChartMock"
-          data-points={points.length}
-          data-annotation={annotationTime ?? ''}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangePointSummaryChart: ({
+      points,
+      annotationTime,
+    }: {
+      points: Array<{ x: number; y: number }>;
+      annotationTime?: number;
+    }) => (
+      <div
+        data-test-subj="changePointSummaryChartMock"
+        data-points={points.length}
+        data-annotation={annotationTime ?? ''}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseChangePointSummarySeries = vi.fn();
 
 vi.mock('./change_point_summary_series', async () => {
-  const actual = (await vi.importActual('./change_point_summary_series'));
+  const actual = await vi.importActual('./change_point_summary_series');
   return {
     ...actual,
     useChangePointSummarySeries: (...args: unknown[]) => mockUseChangePointSummarySeries(...args),

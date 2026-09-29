@@ -20,29 +20,29 @@ import { LoadingCallout } from '../../../loading_callout';
 const mockFutureTime = '2025-05-19T23:20:15.933Z';
 
 vi.mock('./get_approximate_future_time', () => {
-      const mocked = {
-      getApproximateFutureTime: vi.fn(() => new Date(mockFutureTime)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApproximateFutureTime: vi.fn(() => new Date(mockFutureTime)),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../utils/get_connector_name_from_id', () => {
-      const mocked = {
-      getConnectorNameFromId: vi.fn(() => 'Mock Connector Name'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorNameFromId: vi.fn(() => 'Mock Connector Name'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../loading_callout', () => {
-      const mocked = {
-      LoadingCallout: vi.fn(() => <div data-test-subj="loadingCallout" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadingCallout: vi.fn(() => <div data-test-subj="loadingCallout" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../use_attack_discovery/helpers', () => {
-      const mocked = {
-      getGenAiConfig: vi.fn(() => ({ defaultModel: 'gpt-4o' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getGenAiConfig: vi.fn(() => ({ defaultModel: 'gpt-4o' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockLoadingCallout = LoadingCallout as MockedFunction<typeof LoadingCallout>;
 

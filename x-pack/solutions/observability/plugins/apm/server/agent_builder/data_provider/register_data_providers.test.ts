@@ -21,12 +21,12 @@ vi.mock('./get_change_points');
 vi.mock('../utils/build_apm_tool_resources');
 vi.mock('../../routes/service_map/get_service_map_service_badges');
 vi.mock('../../routes/service_map/get_service_anomalies', () => {
-      const mocked = {
-      getServiceAnomalies: vi.fn(),
-      DEFAULT_ANOMALIES: { mlJobIds: [], serviceAnomalies: [] },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServiceAnomalies: vi.fn(),
+    DEFAULT_ANOMALIES: { mlJobIds: [], serviceAnomalies: [] },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const apmEventClient = {} as any;
 const apmAlertsClient = {} as any;

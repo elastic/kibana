@@ -28,23 +28,23 @@ import { EntityGraphPreviewContainer } from './entity_graph_preview_container';
 vi.mock('../../../../../common/hooks/use_upselling');
 vi.mock('../../../../shared/hooks/use_should_show_graph');
 vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
-      const mocked = {
-      useFetchGraphData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGraphData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: { trackUiMetric: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: { trackUiMetric: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture-graph', () => {
-      const mocked = {
-      Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUpsellingComponent = useUpsellingComponent as Mock;
 const mockUseShouldShowGraph = useShouldShowGraph as Mock;

@@ -15,13 +15,13 @@ import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query'
 
 vi.mock('../utils/kibana_react');
 vi.mock('@kbn/alerts-ui-shared', () => {
-      const mocked = {
-      AlertsSearchBar: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsSearchBar: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useKibana } = (await vi.importMock('../utils/kibana_react'));
+const { useKibana } = await vi.importMock('../utils/kibana_react');
 
 describe('MaintenanceWindowScopedQuery', () => {
   let appMockRenderer: AppMockRenderer;

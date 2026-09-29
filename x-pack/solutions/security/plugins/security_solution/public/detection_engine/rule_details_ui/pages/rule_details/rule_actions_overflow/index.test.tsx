@@ -34,7 +34,7 @@ vi.mock('../../../../../common/components/user_privileges');
 
 const mockReportEvent = vi.fn();
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: vi.fn().mockImplementation(() => {

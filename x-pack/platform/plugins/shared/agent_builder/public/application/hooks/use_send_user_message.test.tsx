@@ -20,9 +20,11 @@ vi.mock('./use_agent_builder_service');
 vi.mock('../context/conversation/use_conversation_id');
 vi.mock('../context/conversation/conversation_context');
 
-const { useAgentBuilderServices } = (await vi.importMock('./use_agent_builder_service'));
-const { useConversationId } = (await vi.importMock('../context/conversation/use_conversation_id'));
-const { useConversationContext } = (await vi.importMock('../context/conversation/conversation_context'));
+const { useAgentBuilderServices } = await vi.importMock('./use_agent_builder_service');
+const { useConversationId } = await vi.importMock('../context/conversation/use_conversation_id');
+const { useConversationContext } = await vi.importMock(
+  '../context/conversation/conversation_context'
+);
 
 const conversationId = 'conv-1';
 const updatedConversation = { id: conversationId, events: [{ id: 'evt-1', type: 'user_message' }] };

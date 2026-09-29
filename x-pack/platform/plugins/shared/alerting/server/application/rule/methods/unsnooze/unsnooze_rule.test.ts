@@ -254,7 +254,7 @@ describe('unsnoozeRule change tracking', () => {
   });
 
   test('logs the change only after the OCC retry succeeds', async () => {
-    const { SavedObjectsErrorHelpers } = (await vi.importActual('@kbn/core/server'));
+    const { SavedObjectsErrorHelpers } = await vi.importActual('@kbn/core/server');
     const changeTrackingService = createChangeTrackingService();
     const trackingClient = new RulesClient({ ...rulesClientParams, changeTrackingService });
 

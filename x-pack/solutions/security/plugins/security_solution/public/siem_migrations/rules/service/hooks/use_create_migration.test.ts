@@ -15,11 +15,11 @@ import type { CreateRuleMigrationRulesRequestBody } from '../../../../../common/
 import { MigrationSource } from '../../../common/types';
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 

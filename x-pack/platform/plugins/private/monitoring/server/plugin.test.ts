@@ -13,39 +13,39 @@ import { MonitoringPlugin } from './plugin';
 import { RulesFactory } from './rules';
 
 vi.mock('./es_client/instantiate_client', () => {
-      const mocked = {
-      instantiateClient: vi.fn().mockImplementation(() => ({
-        cluster: {},
-      })),
-      instantiateLegacyClient: vi.fn().mockImplementation(() => ({
-        cluster: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    instantiateClient: vi.fn().mockImplementation(() => ({
+      cluster: {},
+    })),
+    instantiateLegacyClient: vi.fn().mockImplementation(() => ({
+      cluster: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./license_service', () => {
-      const mocked = {
-      LicenseService: vi.fn().mockImplementation(() => ({
-        setup: vi.fn().mockImplementation(() => ({})),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LicenseService: vi.fn().mockImplementation(() => ({
+      setup: vi.fn().mockImplementation(() => ({})),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./kibana_monitoring/collectors', () => {
-      const mocked = {
-      registerCollectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerCollectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./config', () => {
-      const mocked = {
-      createConfig: (config: any) => config,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createConfig: (config: any) => config,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Monitoring plugin', () => {
   const coreSetup = coreMock.createSetup();

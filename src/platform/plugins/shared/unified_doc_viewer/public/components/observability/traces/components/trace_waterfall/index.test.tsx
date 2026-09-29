@@ -20,53 +20,53 @@ import type { UnifiedDocViewerServices } from '../../../../../types';
 import type { FullScreenWaterfallProps } from '../full_screen_waterfall';
 
 vi.mock('../../../../../hooks/use_data_sources', () => {
-      const mocked = {
-      useDataSourcesContext: () => ({
-        indexes: { apm: { traces: 'apm-traces-*' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataSourcesContext: () => ({
+      indexes: { apm: { traces: 'apm-traces-*' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
-      const mocked = {
-      useDiscoverLinkAndEsqlQuery: () => ({
-        discoverUrl: 'http://localhost/discover',
-        esqlQueryString: 'FROM traces',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoverLinkAndEsqlQuery: () => ({
+      discoverUrl: 'http://localhost/discover',
+      esqlQueryString: 'FROM traces',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_open_in_discover_section_action', () => {
-      const mocked = {
-      useOpenInDiscoverSectionAction: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOpenInDiscoverSectionAction: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./full_screen_waterfall_tour_step', () => {
-      const mocked = {
-      TraceWaterfallTourStep: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfallTourStep: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
-      const mocked = {
-      ContentFrameworkSection: ({ children, actions }: any) => (
-        <div data-test-subj="contentFrameworkSection">
-          {actions?.map((action: any, i: number) => (
-            <button key={i} data-test-subj={action.dataTestSubj} onClick={action.onClick}>
-              {action.label}
-            </button>
-          ))}
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkSection: ({ children, actions }: any) => (
+      <div data-test-subj="contentFrameworkSection">
+        {actions?.map((action: any, i: number) => (
+          <button key={i} data-test-subj={action.dataTestSubj} onClick={action.onClick}>
+            {action.label}
+          </button>
+        ))}
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFullScreenWaterfall = vi.fn(
   ({
@@ -85,11 +85,11 @@ const mockFullScreenWaterfall = vi.fn(
 );
 
 vi.mock('../full_screen_waterfall', () => {
-      const mocked = {
-      FullScreenWaterfall: (props: FullScreenWaterfallProps) => mockFullScreenWaterfall(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FullScreenWaterfall: (props: FullScreenWaterfallProps) => mockFullScreenWaterfall(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TraceWaterfall', () => {
   const defaultProps = {

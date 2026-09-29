@@ -23,7 +23,7 @@ import type { ScanActionRequestBody } from '../../../../common/api/endpoint';
 const useMutationMock = _useMutation as Mock;
 
 vi.mock('@kbn/react-query', async () => {
-  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
+  const actualReactQueryModule = await vi.importActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
+import { vi } from 'vitest';
 import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { useWorkflowExecutionPolling } from './use_workflow_execution_polling';
@@ -23,20 +22,20 @@ const mockGetExecution = vi.fn();
 const mockGetExecutionSteps = vi.fn();
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => ({
-        getExecution: mockGetExecution,
-        getExecutionSteps: mockGetExecutionSteps,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => ({
+      getExecution: mockGetExecution,
+      getExecutionSteps: mockGetExecutionSteps,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../store/workflow_detail/utils/computation', () => {
-      const mocked = {
-      performComputation: vi.fn(() => ({ yamlString: 'test' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performComputation: vi.fn(() => ({ yamlString: 'test' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useWorkflowExecutionPolling', () => {
   const mockWorkflowExecutionId = 'test-execution-id';

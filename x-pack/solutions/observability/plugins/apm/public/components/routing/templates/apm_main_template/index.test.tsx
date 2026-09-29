@@ -20,19 +20,19 @@ const mockUseApmAppMenuConfig = vi.fn((): AppMenuConfig | undefined => undefined
 const mockRegisterAppMenu = vi.fn(({ config }: { config: AppMenuConfig }) => null);
 
 vi.mock('@kbn/core-chrome-browser-hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/core-chrome-browser-hooks')),
-      RegisterAppMenu: (props: { config: AppMenuConfig }) => mockRegisterAppMenu(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/core-chrome-browser-hooks')),
+    RegisterAppMenu: (props: { config: AppMenuConfig }) => mockRegisterAppMenu(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../app_root/apm_app_menu/apm_app_menu_context', () => {
-      const mocked = {
-      useApmAppMenuConfig: () => mockUseApmAppMenuConfig(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmAppMenuConfig: () => mockUseApmAppMenuConfig(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPageTemplate = vi.fn(
   ({ children, pageHeader }: { children: React.ReactNode; pageHeader?: unknown }) => (
@@ -44,40 +44,40 @@ const mockPageTemplate = vi.fn(
 );
 
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-      useFetcher: () => ({ data: { hasData: true }, status: 'success' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+    useFetcher: () => ({ data: { hasData: true }, status: 'success' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_default_ai_assistant_starter_prompts_for_apm', () => {
-      const mocked = {
-      useDefaultAiAssistantStarterPromptsForAPM: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultAiAssistantStarterPromptsForAPM: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: { links: { observability: { guide: 'https://example.com' } } },
-          observabilityShared: {
-            navigation: { PageTemplate: mockPageTemplate },
-          },
-          application: { capabilities: { savedObjectsManagement: { edit: false } } },
-          share: { url: { locators: { get: () => undefined } } },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: { links: { observability: { guide: 'https://example.com' } } },
+        observabilityShared: {
+          navigation: { PageTemplate: mockPageTemplate },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: { capabilities: { savedObjectsManagement: { edit: false } } },
+        share: { url: { locators: { get: () => undefined } } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const registeredMenu: AppMenuConfig = {
   items: [

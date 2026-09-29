@@ -18,105 +18,105 @@ import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 
 // Mock the hooks
 vi.mock('./azure_hooks', () => {
-      const mocked = {
-      useAzureCredentialsForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAzureCredentialsForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_cloud_setup_context', () => {
-      const mocked = {
-      useCloudSetup: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudSetup: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('./azure_setup_info', () => {
-      const mocked = {
-      AzureSetupInfoContent: ({ documentationLink }: { documentationLink: string }) => (
-        <div data-test-subj="azure-setup-info">
-          {'Azure Setup Info - Link: '}
-          {documentationLink}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AzureSetupInfoContent: ({ documentationLink }: { documentationLink: string }) => (
+      <div data-test-subj="azure-setup-info">
+        {'Azure Setup Info - Link: '}
+        {documentationLink}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./azure_credential_type_selector', () => {
-      const mocked = {
-      AzureCredentialTypeSelector: ({ onChange }: { onChange: (value: string) => void }) => (
-        <div data-test-subj="azure-credential-type-selector">
-          {'Azure Credential Type Selector'}
-          <select
-            data-test-subj="azure-credential-type-select"
-            onBlur={(e) => onChange(e.target.value)}
-          >
-            <option value="arm_template">{'ARM Template'}</option>
-            <option value="service_principal_with_client_secret">{'Service Principal'}</option>
-          </select>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AzureCredentialTypeSelector: ({ onChange }: { onChange: (value: string) => void }) => (
+      <div data-test-subj="azure-credential-type-selector">
+        {'Azure Credential Type Selector'}
+        <select
+          data-test-subj="azure-credential-type-select"
+          onBlur={(e) => onChange(e.target.value)}
+        >
+          <option value="arm_template">{'ARM Template'}</option>
+          <option value="service_principal_with_client_secret">{'Service Principal'}</option>
+        </select>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./azure_input_var_fields', () => {
-      const mocked = {
-      AzureInputVarFields: ({
-        hasInvalidRequiredVars,
-        onChange,
-      }: {
-        hasInvalidRequiredVars: boolean;
-        onChange: (key: string, value: string) => void;
-      }) => (
-        <div data-test-subj="azure-input-var-fields">
-          {'Azure Input Fields - Has Invalid: '}
-          {String(hasInvalidRequiredVars)}
-          <input
-            data-test-subj="azure-field-azure.tenant_id"
-            onBlur={(e) => onChange('azure.tenant_id', e.target.value)}
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AzureInputVarFields: ({
+      hasInvalidRequiredVars,
+      onChange,
+    }: {
+      hasInvalidRequiredVars: boolean;
+      onChange: (key: string, value: string) => void;
+    }) => (
+      <div data-test-subj="azure-input-var-fields">
+        {'Azure Input Fields - Has Invalid: '}
+        {String(hasInvalidRequiredVars)}
+        <input
+          data-test-subj="azure-field-azure.tenant_id"
+          onBlur={(e) => onChange('azure.tenant_id', e.target.value)}
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../csp_boxed_radio_group', () => {
-      const mocked = {
-      RadioGroup: ({
-        options,
-        idSelected,
-        onChange,
-        disabled,
-      }: {
-        options: Array<{ id: string; label: string; testId: string }>;
-        idSelected: string;
-        onChange: (id: string) => void;
-        disabled: boolean;
-      }) => (
-        <div data-test-subj="setup-format-radio-group">
-          {options.map((option) => (
-            <label key={option.id}>
-              <input
-                type="radio"
-                name="setupFormat"
-                value={option.id}
-                checked={idSelected === option.id}
-                onChange={() => onChange(option.id)}
-                disabled={disabled}
-                data-test-subj={option.testId}
-              />
-              {option.label}
-            </label>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RadioGroup: ({
+      options,
+      idSelected,
+      onChange,
+      disabled,
+    }: {
+      options: Array<{ id: string; label: string; testId: string }>;
+      idSelected: string;
+      onChange: (id: string) => void;
+      disabled: boolean;
+    }) => (
+      <div data-test-subj="setup-format-radio-group">
+        {options.map((option) => (
+          <label key={option.id}>
+            <input
+              type="radio"
+              name="setupFormat"
+              value={option.id}
+              checked={idSelected === option.id}
+              onChange={() => onChange(option.id)}
+              disabled={disabled}
+              data-test-subj={option.testId}
+            />
+            {option.label}
+          </label>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);
@@ -162,7 +162,8 @@ describe('AzureCredentialsForm', async () => {
     hasInvalidRequiredVars: false,
   };
 
-  const mockUseAzureCredentialsForm = (await vi.importMock('./azure_hooks')).useAzureCredentialsForm;
+  const mockUseAzureCredentialsForm = (await vi.importMock('./azure_hooks'))
+    .useAzureCredentialsForm;
   const mockUseCloudSetup = (await vi.importMock('../hooks/use_cloud_setup_context')).useCloudSetup;
 
   beforeEach(() => {

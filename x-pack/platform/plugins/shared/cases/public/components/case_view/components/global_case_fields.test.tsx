@@ -19,29 +19,29 @@ const render = (ui: React.ReactElement) => renderWithTestingProviders(ui);
 
 const mockUseGetTemplate = vi.fn();
 vi.mock('../../templates_v2/hooks/use_get_template', () => {
-      const mocked = {
-      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../field_library/hooks/use_resolved_fields', () => {
-      const mocked = {
-      useResolvedFields: (fields: unknown[]) => ({
-        resolvedFields: fields,
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolvedFields: (fields: unknown[]) => ({
+      resolvedFields: fields,
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GlobalCaseFields', () => {
   const caseData = {

@@ -17,53 +17,53 @@ import type { SchemaField } from '../types';
 import { SchemaEditorFlyout } from '.';
 
 vi.mock('../../../../../hooks/use_streams_app_router', () => {
-      const mocked = {
-      useStreamsAppRouter: () => ({
-        link: () => '#',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppRouter: () => ({
+      link: () => '#',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        dependencies: {
-          start: {
-            fieldsMetadata: {
-              useFieldsMetadata: () => ({
-                fieldsMetadata: {},
-                loading: false,
-              }),
+  const mocked = {
+    useKibana: () => ({
+      dependencies: {
+        start: {
+          fieldsMetadata: {
+            useFieldsMetadata: () => ({
+              fieldsMetadata: {},
+              loading: false,
+            }),
+          },
+        },
+      },
+      core: {
+        docLinks: {
+          links: {
+            elasticsearch: {
+              mappingParameters: 'https://example.invalid',
             },
           },
         },
-        core: {
-          docLinks: {
-            links: {
-              elasticsearch: {
-                mappingParameters: 'https://example.invalid',
-              },
-            },
-          },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
-        <textarea
-          data-test-subj="mockCodeEditor"
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({ value, onChange }: { value: string; onChange: (value: string) => void }) => (
+      <textarea
+        data-test-subj="mockCodeEditor"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Setup userEvent with pointerEventsCheck disabled to avoid issues with EUI animation
 const user = userEvent.setup({ pointerEventsCheck: 0 });

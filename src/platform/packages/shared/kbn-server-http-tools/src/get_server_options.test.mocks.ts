@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const getServerListenerMock = vi.fn();
 
 vi.doMock('./get_listener', async () => {
-  const actual = (await vi.importActual('./get_listener'));
+  const actual = await vi.importActual('./get_listener');
   return {
     ...actual,
     getServerListener: getServerListenerMock,

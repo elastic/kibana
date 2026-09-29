@@ -28,20 +28,20 @@ vi.mock(
   '../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rule_base_version_query'
 );
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: { http: { basePath: { prepend: vi.fn() } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: { http: { basePath: { prepend: vi.fn() } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../rule_management/logic', () => {
-      const mocked = {
-      importRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    importRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const hideImportModal = vi.fn();
 
@@ -50,15 +50,15 @@ const mockInvalidateFetchCoverageOverviewQuery = vi.fn();
 const mockInvalidateFetchRuleManagementFilters = vi.fn();
 const mockInvalidateFetchPrebuiltRuleBaseVerison = vi.fn();
 vi.mocked(useInvalidateFindRulesQuery).mockReturnValue(mockInvalidateFindRulesQuery);
-vi
-  .mocked(useInvalidateFetchCoverageOverviewQuery)
-  .mockReturnValue(mockInvalidateFetchCoverageOverviewQuery);
-vi
-  .mocked(useInvalidateFetchRuleManagementFiltersQuery)
-  .mockReturnValue(mockInvalidateFetchRuleManagementFilters);
-vi
-  .mocked(useInvalidateFetchPrebuiltRuleBaseVersionQuery)
-  .mockReturnValue(mockInvalidateFetchPrebuiltRuleBaseVerison);
+vi.mocked(useInvalidateFetchCoverageOverviewQuery).mockReturnValue(
+  mockInvalidateFetchCoverageOverviewQuery
+);
+vi.mocked(useInvalidateFetchRuleManagementFiltersQuery).mockReturnValue(
+  mockInvalidateFetchRuleManagementFilters
+);
+vi.mocked(useInvalidateFetchPrebuiltRuleBaseVersionQuery).mockReturnValue(
+  mockInvalidateFetchPrebuiltRuleBaseVerison
+);
 
 const file = new File(['file'], 'rules.json', { type: 'application/x-ndjson' });
 

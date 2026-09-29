@@ -19,17 +19,17 @@ import { EuiProvider } from '@elastic/eui';
 import { faker } from '@faker-js/faker';
 
 vi.mock('../../../../../components/auto_sizer', () => {
-      const mocked = {
-      AutoSizer: ({ children }: AutoSizerProps) => {
-        return children({
-          bounds: { height: 800, width: 1200 },
-          content: { height: 800, width: 1200 },
-          measureRef: vi.fn(),
-        });
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AutoSizer: ({ children }: AutoSizerProps) => {
+      return children({
+        bounds: { height: 800, width: 1200 },
+        content: { height: 800, width: 1200 },
+        measureRef: vi.fn(),
+      });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (children: React.ReactNode) =>
   render(<EuiProvider>{children}</EuiProvider>);

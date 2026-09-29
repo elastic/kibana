@@ -21,28 +21,28 @@ import { useAuthentications } from '../../containers/authentications';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 
 vi.mock('../../../common/containers/query_toggle', () => {
-      const mocked = {
-      useQueryToggle: vi.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryToggle: vi.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../containers/authentications', () => {
-      const mocked = {
-      useAuthentications: vi.fn().mockReturnValue([
-        false,
-        {
-          authentications: [],
-          totalCount: 0,
-          pageInfo: {},
-          loadPage: vi.fn(),
-          inspect: {},
-          isInspected: false,
-          refetch: vi.fn(),
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAuthentications: vi.fn().mockReturnValue([
+      false,
+      {
+        authentications: [],
+        totalCount: 0,
+        pageInfo: {},
+        loadPage: vi.fn(),
+        inspect: {},
+        isInspected: false,
+        refetch: vi.fn(),
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Authentication Host Table Component', () => {
   const mockUseAuthentications = useAuthentications as Mock;

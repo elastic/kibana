@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';

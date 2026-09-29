@@ -19,31 +19,31 @@ import { HEADER_TEST_ID } from '../../../shared/components/expandable_section';
 import { useKibana as mockUseKibana } from '../../../../common/lib/kibana/__mocks__';
 
 vi.mock('../../../../common/hooks/use_ai_connectors', () => {
-      const mocked = {
-      useAIConnectors: vi.fn().mockReturnValue({
-        aiConnectors: [
-          {
-            id: 'test-connector-id',
-            name: 'Test Connector',
-            actionTypeId: '.gen-ai',
-          },
-        ],
-        isLoading: false,
-        error: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAIConnectors: vi.fn().mockReturnValue({
+      aiConnectors: [
+        {
+          id: 'test-connector-id',
+          name: 'Test Connector',
+          actionTypeId: '.gen-ai',
+        },
+      ],
+      isLoading: false,
+      error: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_anonymization_toggle', () => {
-      const mocked = {
-      useAnonymizationToggle: () => ({
-        showAnonymizedValues: false,
-        setShowAnonymizedValues: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnonymizationToggle: () => ({
+      showAnonymizedValues: false,
+      setShowAnonymizedValues: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseKibana = {
   ...mockUseKibana(),

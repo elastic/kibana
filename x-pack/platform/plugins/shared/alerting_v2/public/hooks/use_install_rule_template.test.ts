@@ -18,11 +18,11 @@ import { useInstallRuleTemplate } from './use_install_rule_template';
 vi.mock('@kbn/core-di-browser');
 vi.mock('../services/rules_api');
 vi.mock('./invalidate_rules_content_list', () => {
-      const mocked = {
-      invalidateRulesContentList: vi.fn(() => Promise.resolve()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invalidateRulesContentList: vi.fn(() => Promise.resolve()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseService = useService as MockedFunction<typeof useService>;
 const mockCoreStart = CoreStart as MockedFunction<typeof CoreStart>;

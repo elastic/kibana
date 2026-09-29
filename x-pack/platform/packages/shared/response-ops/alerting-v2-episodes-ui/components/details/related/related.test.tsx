@@ -26,18 +26,18 @@ const loadedRuleState = {
 } as const;
 
 vi.mock('./group_subsection', () => {
-      const mocked = {
-      RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RelatedEpisodesGroupSubsection: () => <div data-test-subj="mockGroupSubsection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_subsection', () => {
-      const mocked = {
-      RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RelatedEpisodesRuleSubsection: () => <div data-test-subj="mockRuleSubsection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertEpisodesRelated', () => {
   it('renders the section heading', () => {

@@ -21,16 +21,17 @@ import {
 } from '../common/test_utils/actions_test_utils';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-      useRuleFormScreenContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+    useRuleFormScreenContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } =
-  (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } = await vi.importMock(
+  '../hooks'
+);
 
 const mockConnectors: ActionConnector[] = [getConnector('1'), getConnector('2')];
 

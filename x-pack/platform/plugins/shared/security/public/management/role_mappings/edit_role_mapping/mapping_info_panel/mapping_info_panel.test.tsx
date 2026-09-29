@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';

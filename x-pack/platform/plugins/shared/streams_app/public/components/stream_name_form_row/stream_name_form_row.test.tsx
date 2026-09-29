@@ -28,11 +28,11 @@ const mockRouter: StatefulStreamsAppRouter = {
 } as StatefulStreamsAppRouter;
 
 vi.mock('../../hooks/use_streams_app_router', () => {
-      const mocked = {
-      useStreamsAppRouter: () => mockRouter,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppRouter: () => mockRouter,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRoutingContext = {
   definition: {
@@ -44,14 +44,14 @@ const mockRoutingContext = {
 vi.mock(
   '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine',
   () => {
-      const mocked = {
-        // Note: `<T,>` syntax avoids TSX parsing this as JSX
-        useStreamsRoutingSelector: <TSelected,>(
-          selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
-        ): TSelected => selector({ context: mockRoutingContext }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      // Note: `<T,>` syntax avoids TSX parsing this as JSX
+      useStreamsRoutingSelector: <TSelected,>(
+        selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
+      ): TSelected => selector({ context: mockRoutingContext }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('StreamNameFormRow', () => {

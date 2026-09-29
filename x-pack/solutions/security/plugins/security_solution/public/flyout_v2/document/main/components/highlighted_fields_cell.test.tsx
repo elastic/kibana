@@ -36,7 +36,7 @@ vi.mock('@kbn/expandable-flyout');
 const mockedTelemetry = createTelemetryServiceMock();
 const mockOpenSystemFlyout = vi.fn();
 vi.mock('../../../../common/lib/kibana', async () => {
-  const kibanaActual = (await vi.importActual('../../../../common/lib/kibana'));
+  const kibanaActual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...kibanaActual,
     useKibana: () => ({

@@ -16,21 +16,21 @@ import { generateScoutConfigManifest, updateScoutConfigManifests } from './manif
 import { playwrightCLI } from '../playwright/cli_wrapper';
 
 vi.mock('../playwright/cli_wrapper', () => {
-      const mocked = {
-      playwrightCLI: { test: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    playwrightCLI: { test: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/scout-reporting', () => {
-      const mocked = {
-      testConfigs: { all: [], log: null },
-      testConfigManifests: { findPaths: vi.fn().mockReturnValue([]) },
-      getGitSHA1ForPath: vi.fn().mockResolvedValue('abc123'),
-      testableModules: { allIncludingConfigs: [] },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    testConfigs: { all: [], log: null },
+    testConfigManifests: { findPaths: vi.fn().mockReturnValue([]) },
+    getGitSHA1ForPath: vi.fn().mockResolvedValue('abc123'),
+    testableModules: { allIncludingConfigs: [] },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('generateScoutConfigManifest', () => {
   const playwrightTestMock = playwrightCLI.test as Mock;
@@ -71,7 +71,7 @@ describe('generateScoutConfigManifest', () => {
 
 describe('updateScoutConfigManifests', async () => {
   const playwrightTestMock = playwrightCLI.test as Mock;
-  const mockScoutReporting = (await vi.importMock('@kbn/scout-reporting'));
+  const mockScoutReporting = await vi.importMock('@kbn/scout-reporting');
 
   const configPath = 'x-pack/some/test/scout/api/playwright.config.ts';
   const mockConfig = {

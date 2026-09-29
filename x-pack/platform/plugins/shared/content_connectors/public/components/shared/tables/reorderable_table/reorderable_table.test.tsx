@@ -10,16 +10,16 @@ import { vi } from 'vitest';
 import React from 'react';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiDragDropContext: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-      EuiDroppable: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
-      EuiDraggable: vi.fn(({ children }: { children: (provided: object) => React.ReactNode }) => (
-        <>{children({ dragHandleProps: {} })}</>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiDragDropContext: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    EuiDroppable: vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>),
+    EuiDraggable: vi.fn(({ children }: { children: (provided: object) => React.ReactNode }) => (
+      <>{children({ dragHandleProps: {} })}</>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { screen } from '@testing-library/react';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';

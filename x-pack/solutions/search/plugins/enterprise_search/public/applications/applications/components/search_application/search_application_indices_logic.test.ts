@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter } from '../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import type { EnterpriseSearchApplicationDetails } from '../../../../../common/types/search_applications';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';

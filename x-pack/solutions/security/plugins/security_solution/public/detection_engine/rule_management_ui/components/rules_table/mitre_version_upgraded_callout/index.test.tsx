@@ -18,20 +18,20 @@ const dismissalKeyFor = (displayVersion: string) =>
 
 const mockUseIsExperimentalFeatureEnabled = vi.fn();
 vi.mock('../../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
-        mockUseIsExperimentalFeatureEnabled(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+      mockUseIsExperimentalFeatureEnabled(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMitreConfiguration = vi.fn();
 vi.mock('../../../../../common/hooks/mitre/use_mitre_configuration', () => {
-      const mocked = {
-      useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Version returned by the mock — raw (adapter-normalised, no leading 'v').
 const MOCK_RAW_VERSION = '16.1';

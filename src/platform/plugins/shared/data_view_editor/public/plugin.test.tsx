@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 import type React from 'react';
 
 vi.mock('@kbn/react-kibana-mount', async () => {
-  const original = (await vi.importActual('@kbn/react-kibana-mount'));
+  const original = await vi.importActual('@kbn/react-kibana-mount');
 
   return {
     ...original,

@@ -15,19 +15,19 @@ import { Content } from './content';
 const mockCspBody = vi.fn(() => <div data-test-subj="mockCspFlyoutBody" />);
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          cloudSecurityPosture: {
-            getCloudSecurityPostureMisconfigurationFlyout: () => ({
-              Body: mockCspBody,
-            }),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        cloudSecurityPosture: {
+          getCloudSecurityPostureMisconfigurationFlyout: () => ({
+            Body: mockCspBody,
+          }),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const finding = { rule: { name: 'My Rule' } } as unknown as CspFinding;
 

@@ -24,89 +24,89 @@ function CaptureMenuConfig() {
 }
 
 vi.mock('../../alerting/ui_components/alerting_flyout', () => {
-      const mocked = {
-      AlertingFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAlertingCapabilities = vi.fn();
 vi.mock('../../alerting/utils/get_alerting_capabilities', () => {
-      const mocked = {
-      getAlertingCapabilities: () => mockGetAlertingCapabilities(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAlertingCapabilities: () => mockGetAlertingCapabilities(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/anomaly_detection_jobs/use_anomaly_detection_jobs_context', () => {
-      const mocked = {
-      useAnomalyDetectionJobsContext: () => ({
-        anomalyDetectionSetupState: 'upToDate',
-        anomalyDetectionJobsData: undefined,
-        anomalyDetectionJobsStatus: 'success',
-        anomalyDetectionJobsRefetch: () => {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnomalyDetectionJobsContext: () => ({
+      anomalyDetectionSetupState: 'upToDate',
+      anomalyDetectionJobsData: undefined,
+      anomalyDetectionJobsStatus: 'success',
+      anomalyDetectionJobsRefetch: () => {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/environments_context/use_environments_context', () => {
-      const mocked = {
-      useEnvironmentsContext: () => ({
-        environment: 'ENVIRONMENT_ALL',
-        preferredEnvironment: 'ENVIRONMENT_ALL',
-        environments: [],
-        status: 'success',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnvironmentsContext: () => ({
+      environment: 'ENVIRONMENT_ALL',
+      preferredEnvironment: 'ENVIRONMENT_ALL',
+      environments: [],
+      status: 'success',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => ({
-        query: { environment: 'ENVIRONMENT_ALL' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => ({
+      query: { environment: 'ENVIRONMENT_ALL' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_manage_slos_url', () => {
-      const mocked = {
-      useManageSlosUrl: () => '/app/slos?filters=apm',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManageSlosUrl: () => '/app/slos?filters=apm',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_service_name', () => {
-      const mocked = {
-      useServiceName: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceName: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useInspectorContext: () => ({ inspectorAdapters: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useInspectorContext: () => ({ inspectorAdapters: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUiSettingsGet = vi.fn().mockReturnValue(false);
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: () => ({
-        services: {
-          uiSettings: { get: mockUiSettingsGet },
-          slo: undefined,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: () => ({
+      services: {
+        uiSettings: { get: mockUiSettingsGet },
+        slo: undefined,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface MockContextOptions {
   canSaveApm?: boolean;

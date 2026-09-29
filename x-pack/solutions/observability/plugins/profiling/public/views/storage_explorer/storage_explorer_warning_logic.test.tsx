@@ -14,20 +14,20 @@ import { DistinctProbabilisticValuesWarning } from './distinct_probabilistic_val
 
 // Mock the profiling dependencies
 vi.mock('../../components/contexts/profiling_dependencies/use_profiling_dependencies', () => {
-      const mocked = {
-      useProfilingDependencies: () => ({
-        start: {
-          core: {
-            docLinks: {
-              ELASTIC_WEBSITE_URL: 'https://www.elastic.co',
-              DOC_LINK_VERSION: 'current',
-            },
+  const mocked = {
+    useProfilingDependencies: () => ({
+      start: {
+        core: {
+          docLinks: {
+            ELASTIC_WEBSITE_URL: 'https://www.elastic.co',
+            DOC_LINK_VERSION: 'current',
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Test component that mimics the storage explorer warning logic
 function StorageExplorerWarningLogic({

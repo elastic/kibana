@@ -17,24 +17,24 @@ import { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 import { registerTranslationsRoute } from './translations';
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      ...require('fs/promises'),
-      open: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('fs/promises'),
+    open: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        getTranslation: vi.fn().mockReturnValue({ locale: 'en', messages: {} }),
-      },
-      i18nLoader: {
-        getTranslationsByLocale: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      getTranslation: vi.fn().mockReturnValue({ locale: 'en', messages: {} }),
+    },
+    i18nLoader: {
+      getTranslationsByLocale: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { open } from 'fs/promises';
 import { i18n } from '@kbn/i18n';

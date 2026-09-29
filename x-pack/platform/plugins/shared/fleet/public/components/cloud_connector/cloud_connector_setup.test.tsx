@@ -27,40 +27,40 @@ import { AWS_PROVIDER, ORGANIZATION_ACCOUNT, SINGLE_ACCOUNT } from './constants'
 
 // Mock child components
 vi.mock('./form/new_cloud_connector_form', () => {
-      const mocked = {
-      NewCloudConnectorForm: vi.fn(() => (
-        <div data-testid="new-cloud-connector-form">{'MockedNewForm'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewCloudConnectorForm: vi.fn(() => (
+      <div data-testid="new-cloud-connector-form">{'MockedNewForm'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./form/reusable_cloud_connector_form', () => {
-      const mocked = {
-      ReusableCloudConnectorForm: vi.fn(() => (
-        <div data-testid="reusable-cloud-connector-form">{'MockedReusableForm'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReusableCloudConnectorForm: vi.fn(() => (
+      <div data-testid="reusable-cloud-connector-form">{'MockedReusableForm'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cloud_connector_tabs', () => {
-      const mocked = {
-      CloudConnectorTabs: vi.fn(() => <div data-testid="cloud-connector-tabs">{'MockedTabs'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CloudConnectorTabs: vi.fn(() => <div data-testid="cloud-connector-tabs">{'MockedTabs'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock hooks
 vi.mock('./hooks/use_get_cloud_connectors');
 vi.mock('./hooks/use_cloud_connector_setup');
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      isCloudConnectorReusableEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    isCloudConnectorReusableEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Get typed references to mocked components and hooks
 const mockCloudConnectorTabs = CloudConnectorTabs as MockedFunction<typeof CloudConnectorTabs>;

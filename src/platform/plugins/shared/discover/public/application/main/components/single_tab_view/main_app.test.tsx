@@ -22,11 +22,11 @@ import { internalStateActions } from '../../state_management/redux';
 import { DiscoverToolkitTestProvider } from '../../../../__mocks__/test_provider';
 
 vi.mock('../top_nav/discover_topnav', () => {
-      const mocked = {
-      DiscoverTopNav: vi.fn(() => <div data-test-subj="discoverTopNavMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverTopNav: vi.fn(() => <div data-test-subj="discoverTopNavMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DiscoverMainApp', () => {
   test('renders', async () => {

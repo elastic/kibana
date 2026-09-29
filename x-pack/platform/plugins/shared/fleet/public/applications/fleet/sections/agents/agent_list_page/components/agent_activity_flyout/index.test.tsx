@@ -27,11 +27,11 @@ vi.mock('../../../../../../../hooks/use_request/agent_policy');
 vi.mock('../../../../../../../hooks/use_authz');
 
 vi.mock('@kbn/shared-ux-link-redirect-app', () => {
-      const mocked = {
-      RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectAppLinks: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseActionStatus = useActionStatus as Mock;
 const mockUseGetAgentPolicies = useGetAgentPolicies as Mock;
@@ -39,7 +39,7 @@ const mockUseGetAgentPolicies = useGetAgentPolicies as Mock;
 const mockedUseAuthz = useAuthz as Mock;
 
 vi.mock('@kbn/logs-shared-plugin/common', async () => {
-  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
+  const originalModule = await vi.importActual('@kbn/logs-shared-plugin/common');
   return {
     ...originalModule,
     getLogsLocatorFromUrlService: vi

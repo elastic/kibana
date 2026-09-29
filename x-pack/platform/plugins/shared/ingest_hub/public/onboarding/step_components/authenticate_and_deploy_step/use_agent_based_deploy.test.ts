@@ -13,53 +13,53 @@ import { renderHook, act } from '@testing-library/react';
 // ── Mocks ────────────────────────────────────────────────────────────────────
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 vi.mock('./agent_based_deploy', () => {
-      const mocked = {
-      buildAgentBasedTargets: vi.fn(),
-      deployNewAgentPolicy: vi.fn(),
-      deployToExistingAgentPolicies: vi.fn(),
-      buildAgentBasedInstanceStatuses: vi.fn(),
-      extractErrorMessage: vi.fn(),
-      buildAgentPolicyName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAgentBasedTargets: vi.fn(),
+    deployNewAgentPolicy: vi.fn(),
+    deployToExistingAgentPolicies: vi.fn(),
+    buildAgentBasedInstanceStatuses: vi.fn(),
+    extractErrorMessage: vi.fn(),
+    buildAgentPolicyName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_onboarding_so', () => {
-      const mocked = {
-      useOnboardingSO: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingSO: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./package_inputs', () => {
-      const mocked = {
-      toSOServiceVars: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toSOServiceVars: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_based_section/credential_method_selector', () => {
-      const mocked = {
-      toSOAuthMethod: vi.fn().mockReturnValue('static_keys'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toSOAuthMethod: vi.fn().mockReturnValue('static_keys'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./policy_cleanup_agent_based', () => {
-      const mocked = {
-      cleanupAgentBasedPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cleanupAgentBasedPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';

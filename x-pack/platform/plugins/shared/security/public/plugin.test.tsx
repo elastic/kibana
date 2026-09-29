@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { Observable } from 'rxjs';
+import { vi } from 'vitest';
 
 import type { CoreSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';

@@ -16,13 +16,13 @@ import { ensureClonedRepo } from './ensure_cloned_repo';
 
 vi.mock('./ensure_cloned_repo');
 vi.mock('./workspace_controller', () => {
-      const mocked = {
-      WorkspaceController: vi.fn().mockImplementation(() => ({
-        fromSourceRepo: vi.fn().mockResolvedValue({ getDir: () => '/path/to/repo' }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkspaceController: vi.fn().mockImplementation(() => ({
+      fromSourceRepo: vi.fn().mockResolvedValue({ getDir: () => '/path/to/repo' }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEnsureClonedRepo = ensureClonedRepo as MockedFunction<typeof ensureClonedRepo>;
 

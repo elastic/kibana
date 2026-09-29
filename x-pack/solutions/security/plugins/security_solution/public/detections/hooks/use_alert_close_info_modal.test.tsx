@@ -12,11 +12,11 @@ import { hasAlertsInSuppressionWindow } from './use_alert_close_info_modal';
 import { fetchQueryAlerts } from '../containers/detection_engine/alerts/api';
 
 vi.mock('../containers/detection_engine/alerts/api', () => {
-      const mocked = {
-      fetchQueryAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchQueryAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('hasAlertsInSuppressionWindow', () => {
   const fetchQueryAlertsMock = fetchQueryAlerts as Mock;

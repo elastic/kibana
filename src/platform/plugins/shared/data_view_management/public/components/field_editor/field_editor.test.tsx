@@ -21,51 +21,55 @@ import { userEvent } from '@testing-library/user-event';
 const monacoModuleName = '@kbn/monaco';
 
 vi.doMock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({
-        height: _height,
-        languageId: _languageId,
-        onChange,
-        value,
-        width: _width,
-        ...props
-      }: {
-        height: string;
-        languageId: string;
-        onChange: (value: string) => void;
-        value: string;
-        width: string;
-      }) => (
-        <textarea {...props} onChange={(event) => onChange(event.currentTarget.value)} value={value} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({
+      height: _height,
+      languageId: _languageId,
+      onChange,
+      value,
+      width: _width,
+      ...props
+    }: {
+      height: string;
+      languageId: string;
+      onChange: (value: string) => void;
+      value: string;
+      width: string;
+    }) => (
+      <textarea
+        {...props}
+        onChange={(event) => onChange(event.currentTarget.value)}
+        value={value}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock(monacoModuleName, () => {
-      const mocked = {
-      PainlessLang: {
-        ID: 'painless',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PainlessLang: {
+      ID: 'painless',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/scripting_help', () => {
-      const mocked = {
-      ScriptingHelpFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScriptingHelpFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../scripting_languages', () => {
-      const mocked = {
-      getDeprecatedScriptingLanguages: () => ['testlang'],
-      getEnabledScriptingLanguages: () => ['painless', 'testlang'],
-      getSupportedScriptingLanguages: () => ['painless'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDeprecatedScriptingLanguages: () => ['testlang'],
+    getEnabledScriptingLanguages: () => ['painless', 'testlang'],
+    getSupportedScriptingLanguages: () => ['painless'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DefaultFormat = FieldFormat.from((value: unknown) => String(value));
 DefaultFormat.fieldType = '*';
@@ -159,9 +163,11 @@ type TestFieldEditorProps = Omit<FieldEdiorProps, 'services'> & {
   services: TestServices;
 };
 
-const FieldEditor = (await vi.importActual<{
-  FieldEditor: React.ComponentType<TestFieldEditorProps>;
-}>('./field_editor')).FieldEditor;
+const FieldEditor = (
+  await vi.importActual<{
+    FieldEditor: React.ComponentType<TestFieldEditorProps>;
+  }>('./field_editor')
+).FieldEditor;
 
 describe('FieldEditor', () => {
   let mockedContext: ReturnType<typeof createMockedContext>;

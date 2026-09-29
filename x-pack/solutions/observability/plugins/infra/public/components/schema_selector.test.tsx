@@ -16,17 +16,17 @@ import { SchemaSelector } from './schema_selector';
 const mockReportSchemaSelectorInteraction = vi.fn();
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          telemetry: {
-            reportSchemaSelectorInteraction: mockReportSchemaSelectorInteraction,
-          },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        telemetry: {
+          reportSchemaSelectorInteraction: mockReportSchemaSelectorInteraction,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderSelector = (
   props: Partial<React.ComponentProps<typeof SchemaSelector>> &

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StepExecuteManualForm } from './step_execute_manual_form';
 

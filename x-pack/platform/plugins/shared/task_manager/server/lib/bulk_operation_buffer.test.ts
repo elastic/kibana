@@ -153,15 +153,13 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('handles both resolutions and rejections at individual task level', async () => {
-      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(
-        ([task1, task2, task3]) => {
-          return Promise.resolve([
-            incrementAttempts(task1),
-            errorAttempts(task2),
-            incrementAttempts(task3),
-          ]);
-        }
-      );
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(([task1, task2, task3]) => {
+        return Promise.resolve([
+          incrementAttempts(task1),
+          errorAttempts(task2),
+          incrementAttempts(task3),
+        ]);
+      });
 
       const bufferedUpdate = createBuffer(bulkUpdate, {});
 
@@ -216,15 +214,13 @@ describe('Bulk Operation Buffer', () => {
     });
 
     test('logs unknown bulk operation results', async () => {
-      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(
-        ([task1, task2, task3]) => {
-          return Promise.resolve([
-            incrementAttempts(task1),
-            errorAttempts(createTask()),
-            incrementAttempts(createTask()),
-          ]);
-        }
-      );
+      const bulkUpdate: Mocked<BulkOperation<TaskInstance>> = vi.fn(([task1, task2, task3]) => {
+        return Promise.resolve([
+          incrementAttempts(task1),
+          errorAttempts(createTask()),
+          incrementAttempts(createTask()),
+        ]);
+      });
 
       const logger = mockLogger();
 

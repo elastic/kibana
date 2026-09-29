@@ -24,33 +24,35 @@ describe('jobIdValidator', () => {
   const makeJobCreator = (jobId: string, mlApi: any) => ({ jobId, mlApi } as any);
 
   it('emits valid=true when id does not exist', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const mlApi = makeMlApi({}); // no existing ids
-          const source$ = new Subject<any>();
-          jobIdValidator(source$).subscribe((v) => {
-            expect(v?.jobIdExists.valid).toBe(true);
-            done();
-          });
-          source$.next(makeJobCreator('new_id', mlApi));
-        
-      }));
+      const mlApi = makeMlApi({}); // no existing ids
+      const source$ = new Subject<any>();
+      jobIdValidator(source$).subscribe((v) => {
+        expect(v?.jobIdExists.valid).toBe(true);
+        done();
+      });
+      source$.next(makeJobCreator('new_id', mlApi));
+    }));
 
   it('emits valid=false when id exists', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const mlApi = makeMlApi({ taken_id: true });
-          const source$ = new Subject<any>();
-          jobIdValidator(source$).subscribe((v) => {
-            expect(v?.jobIdExists.valid).toBe(false);
-            expect(v?.jobIdExists.message).toBeDefined();
-            done();
-          });
-          source$.next(makeJobCreator('taken_id', mlApi));
-        
-      }));
+      const mlApi = makeMlApi({ taken_id: true });
+      const source$ = new Subject<any>();
+      jobIdValidator(source$).subscribe((v) => {
+        expect(v?.jobIdExists.valid).toBe(false);
+        expect(v?.jobIdExists.message).toBeDefined();
+        done();
+      });
+      source$.next(makeJobCreator('taken_id', mlApi));
+    }));
 
   it('suppresses emission when jobId unchanged', () => {
     const mlApi = makeMlApi({});

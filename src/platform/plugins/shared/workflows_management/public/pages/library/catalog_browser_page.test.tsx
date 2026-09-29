@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import type { Template } from '@kbn/workflows-library';
 import { LibraryCatalogBrowserPage } from './catalog_browser_page';
 import { WorkflowsPageName } from '../../deep_links';
@@ -27,27 +26,27 @@ function buildEnabledServices(): StartServicesMock {
 }
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      CatalogBrowser: ({ onSelect }: { onSelect: (template: Template) => void }) => (
-        <button
-          type="button"
-          data-test-subj="mockCatalogBrowserSelectButton"
-          onClick={() => onSelect({ slug: 'ip-reputation-check' } as Template)}
-        >
-          {'Select'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    CatalogBrowser: ({ onSelect }: { onSelect: (template: Template) => void }) => (
+      <button
+        type="button"
+        data-test-subj="mockCatalogBrowserSelectButton"
+        onClick={() => onSelect({ slug: 'ip-reputation-check' } as Template)}
+      >
+        {'Select'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
-      const mocked = {
-      useWorkflowsBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('LibraryCatalogBrowserPage', () => {
   it('renders the catalog browser when the library is enabled', () => {

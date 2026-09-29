@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { Subject } from 'rxjs';
 import { License } from '@kbn/licensing-plugin/common/license';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense } from '@kbn/licensing-types';

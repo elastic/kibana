@@ -161,11 +161,11 @@ mockBulkGetMaintenanceWindows.mockResolvedValue({
 
 // AlertsDataGrid mock
 vi.mock('./alerts_data_grid', () => {
-      const mocked = {
-      AlertsDataGrid: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsDataGrid: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockAlertsDataGrid = vi.mocked(AlertsDataGrid);
 
 const applicationMock = applicationServiceMock.createStartContract();
@@ -244,7 +244,7 @@ describe('AlertsTable', () => {
   let refreshSpy: MockInstance<void, []>;
 
   const realAlertsDataGridMockImplementation = async (props: AlertsDataGridProps) => {
-    const { AlertsDataGrid: ActualAlertsDataGrid } = (await vi.importActual('./alerts_data_grid'));
+    const { AlertsDataGrid: ActualAlertsDataGrid } = await vi.importActual('./alerts_data_grid');
     onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;
@@ -459,9 +459,7 @@ describe('AlertsTable', () => {
     });
 
     it('should not fetch cases if the user does not have permissions', async () => {
-      mockCaseService.helpers.canUseCases = vi
-        .fn()
-        .mockReturnValue({ create: false, read: false });
+      mockCaseService.helpers.canUseCases = vi.fn().mockReturnValue({ create: false, read: false });
 
       render(<AlertsTable {...casesTableProps} />);
 
@@ -544,9 +542,7 @@ describe('AlertsTable', () => {
     it('should call the cases context with correct permissions', async () => {
       const CasesContextMock = vi.fn().mockReturnValue(null);
       mockCaseService.ui.getCasesContext = vi.fn().mockReturnValue(CasesContextMock);
-      mockCaseService.helpers.canUseCases = vi
-        .fn()
-        .mockReturnValue({ create: false, read: false });
+      mockCaseService.helpers.canUseCases = vi.fn().mockReturnValue({ create: false, read: false });
 
       render(<AlertsTable {...casesTableProps} />);
       expect(CasesContextMock).toHaveBeenCalledWith(

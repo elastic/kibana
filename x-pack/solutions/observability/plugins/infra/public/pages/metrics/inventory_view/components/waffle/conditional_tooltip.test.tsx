@@ -16,11 +16,11 @@ import type { SnapshotNodeResponse } from '../../../../../../common/http_api';
 import type { InfraWaffleMapNode } from '../../../../../common/inventory/types';
 
 vi.mock('../../../../../containers/metrics_source', () => {
-      const mocked = {
-      useSourceContext: () => ({ sourceId: 'default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSourceContext: () => ({ sourceId: 'default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../containers/plugin_config_context');
 vi.mock('../../hooks/use_snaphot');
@@ -29,11 +29,11 @@ import type { UseSnapshotRequest } from '../../hooks/use_snaphot';
 import { useSnapshot } from '../../hooks/use_snaphot';
 vi.mock('../../hooks/use_waffle_options');
 vi.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => {
-      const mocked = {
-      useIsPodSchemaSelectorEnabled: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsPodSchemaSelectorEnabled: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 

@@ -17,11 +17,11 @@ import { createTestQueryClient } from '../../test_utils';
 import { useQueryExecution } from './use_query_execution';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLResults: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLResults: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLResults = getESQLResults as Mock;
 

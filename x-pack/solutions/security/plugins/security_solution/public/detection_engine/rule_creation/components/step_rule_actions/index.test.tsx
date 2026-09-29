@@ -44,18 +44,18 @@ const mockUseKibana = vi.fn().mockReturnValue({
   },
 });
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const actionMessageParams = {
   context: [],

@@ -13,11 +13,11 @@ import { z } from '@kbn/zod';
 import { transformPanelsIn } from './transform_panels_in';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'mock-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'mock-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformPanelsIn', () => {
   it('should split panels into panelsJSON and sections', () => {

@@ -18,11 +18,11 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 const mockedIsInferenceEndpointExists = isInferenceEndpointExists as Mock;
 
 vi.mock('@kbn/inference-endpoint-ui-common', () => {
-      const mocked = {
-      isInferenceEndpointExists: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInferenceEndpointExists: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Inference Params Fields renders', () => {
   mockedIsInferenceEndpointExists.mockResolvedValue(true);

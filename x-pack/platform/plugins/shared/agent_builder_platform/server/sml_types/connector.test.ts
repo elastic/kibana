@@ -15,21 +15,21 @@ import { CONNECTOR_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types'
 import { createConnectorSmlType } from './connector';
 
 vi.mock('@kbn/connector-specs', () => {
-      const mocked = {
-      getConnectorSpec: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorSpec: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../skills/connector_authoring/utils', () => {
-      const mocked = {
-      isChatCallableConnectorType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isChatCallableConnectorType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getConnectorSpec } = (await vi.importMock('@kbn/connector-specs'));
-const { isChatCallableConnectorType } = (await vi.importMock('../skills/connector_authoring/utils'));
+const { getConnectorSpec } = await vi.importMock('@kbn/connector-specs');
+const { isChatCallableConnectorType } = await vi.importMock('../skills/connector_authoring/utils');
 
 const mockFinder = {
   find: vi.fn(),

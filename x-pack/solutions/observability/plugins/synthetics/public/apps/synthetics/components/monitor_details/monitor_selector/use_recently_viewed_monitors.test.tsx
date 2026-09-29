@@ -22,20 +22,20 @@ import { WrappedHelper } from '../../../utils/testing';
 import { MONITOR_ROUTE } from '../../../../../../common/constants';
 
 vi.mock('../../../state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../state')),
-      fetchMonitorManagementList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../state')),
+    fetchMonitorManagementList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRecentlyViewedMonitors', () => {
   beforeEach(() => {
@@ -73,13 +73,15 @@ describe('useRecentlyViewedMonitors', () => {
       persistedIds = ids;
     });
 
-    vi
-      .spyOn(useMonitorQueryModule, 'useMonitorQueryId')
-      .mockImplementation(() => currentMonitorQueryId);
+    vi.spyOn(useMonitorQueryModule, 'useMonitorQueryId').mockImplementation(
+      () => currentMonitorQueryId
+    );
 
-    vi
-      .spyOn(localStorageModule, 'default')
-      .mockImplementation(() => [persistedIds, setPersistedIdsMock, () => {}]);
+    vi.spyOn(localStorageModule, 'default').mockImplementation(() => [
+      persistedIds,
+      setPersistedIdsMock,
+      () => {},
+    ]);
 
     (useFetcher as Mock).mockImplementation((callback) => {
       callback();

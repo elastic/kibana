@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import type { MemoryHistory } from 'history';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';

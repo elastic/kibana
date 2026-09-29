@@ -13,13 +13,13 @@ import { createVisualizationAttachmentType } from './visualization';
 const mockToAPIFormat = vi.fn().mockReturnValue({ type: 'xy', layers: [] });
 
 vi.mock('@kbn/lens-embeddable-utils', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn().mockImplementation(() => ({
-        toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
+      toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const resolveMock = vi.fn();
 

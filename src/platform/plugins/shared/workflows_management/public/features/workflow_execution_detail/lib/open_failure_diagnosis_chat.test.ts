@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 
-import { Subject } from 'rxjs';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common/chat/events';
 import type { HttpSetup } from '@kbn/core-http-browser';

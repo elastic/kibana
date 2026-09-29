@@ -14,11 +14,11 @@ import { EmptyMigration } from '.';
 import { useGetSecuritySolutionLinkProps } from '../../../../common/components/links';
 
 vi.mock('../../../../common/components/links', () => {
-      const mocked = {
-      useGetSecuritySolutionLinkProps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionLinkProps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EmptyMigration', () => {
   const onClickMock = vi.fn();

@@ -14,7 +14,7 @@ export const onSystemThemeChangeMock = vi.fn();
 export const browsersSupportsSystemThemeMock = vi.fn();
 
 vi.doMock('./system_theme', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     systemThemeIsDark: systemThemeIsDarkMock,
@@ -26,7 +26,7 @@ vi.doMock('./system_theme', async () => {
 export const createStyleSheetMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     createStyleSheet: createStyleSheetMock,
@@ -36,7 +36,7 @@ vi.doMock('./utils', async () => {
 export const setDarkModeMock = vi.fn();
 
 vi.doMock('@kbn/ui-theme', async () => {
-  const actual = (await vi.importActual('@kbn/ui-theme'));
+  const actual = await vi.importActual('@kbn/ui-theme');
   return {
     ...actual,
     _setDarkMode: setDarkModeMock,

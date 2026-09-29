@@ -24,16 +24,16 @@ import type { EvidenceRound, InstrumentationProfile } from './evidence/types';
 import type { TraceAccessorWithSearch } from './trace_accessor';
 
 vi.mock('./evidence/evidence_service', async () => {
-      const mocked = {
-      ...(await vi.importActual('./evidence/evidence_service')),
-      hasTraceDocuments: vi.fn(),
-      hasRootSpan: vi.fn(),
-      extractEvidence: vi.fn(),
-      extractProfilesEvidence: vi.fn(),
-      extractSelectedEvidence: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./evidence/evidence_service')),
+    hasTraceDocuments: vi.fn(),
+    hasRootSpan: vi.fn(),
+    extractEvidence: vi.fn(),
+    extractProfilesEvidence: vi.fn(),
+    extractSelectedEvidence: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type ResponseErrorArgs = ConstructorParameters<typeof EsErrors.ResponseError>[0];
 
@@ -215,8 +215,7 @@ describe('awaitTraceReady', () => {
     extractEvidenceMock
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValue(buildExtraction(changedRound));
-    vi
-      .spyOn(Date, 'now')
+    vi.spyOn(Date, 'now')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(10)
       .mockReturnValueOnce(15)
@@ -490,8 +489,7 @@ describe('awaitTraceReady', () => {
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND))
       .mockResolvedValueOnce(buildExtraction(READY_ROUND));
-    vi
-      .spyOn(Date, 'now')
+    vi.spyOn(Date, 'now')
       .mockReturnValueOnce(0)
       .mockReturnValueOnce(5)
       .mockReturnValueOnce(10)

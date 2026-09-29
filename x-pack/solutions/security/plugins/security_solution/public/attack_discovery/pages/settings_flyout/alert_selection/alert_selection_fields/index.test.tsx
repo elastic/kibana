@@ -19,23 +19,23 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from '../translations';
 
 vi.mock('react-router', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('../../../../../data_view_manager/hooks/use_data_view');
 vi.mock('../../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   connectorId: 'test-connector',

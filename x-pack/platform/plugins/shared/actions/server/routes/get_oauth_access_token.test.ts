@@ -17,11 +17,11 @@ import { actionsConfigMock } from '../actions_config.mock';
 import { actionsClientMock } from '../actions_client/actions_client.mock';
 
 vi.mock('./verify_access_and_context', () => {
-      const mocked = {
-      verifyAccessAndContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyAccessAndContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const configurationUtilities = actionsConfigMock.create();
 

@@ -21,25 +21,25 @@ import {
 } from './tool';
 
 vi.mock('../../../routes/utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
-      const mocked = {
-      assertCanManageSignificantEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanManageSignificantEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./handler', () => {
-      const mocked = {
-      updateEventStatusToolHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateEventStatusToolHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('event_status_update tool', () => {
   const telemetry = { trackAgentToolEventStatusUpdate: vi.fn() };

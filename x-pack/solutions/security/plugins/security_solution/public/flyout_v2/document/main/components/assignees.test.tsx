@@ -40,7 +40,7 @@ vi.mock('../../../shared/hooks/use_flyout_telemetry');
 const mockUseFlyoutTelemetry = useFlyoutTelemetry as Mock;
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,
@@ -63,23 +63,23 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../../common/components/assignees/assignees_apply_panel', () => {
-      const mocked = {
-      AssigneesApplyPanel: ({
-        onApply,
-      }: {
-        onApply: (assignees: { add: string[]; remove: string[] }) => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="mock-assignees-apply-panel"
-          onClick={() => onApply({ add: ['user-id-3'], remove: [] })}
-        >
-          {'Apply assignees'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssigneesApplyPanel: ({
+      onApply,
+    }: {
+      onApply: (assignees: { add: string[]; remove: string[] }) => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mock-assignees-apply-panel"
+        onClick={() => onApply({ add: ['user-id-3'], remove: [] })}
+      >
+        {'Apply assignees'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
 vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');

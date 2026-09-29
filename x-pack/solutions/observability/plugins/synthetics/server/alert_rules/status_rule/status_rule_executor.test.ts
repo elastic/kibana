@@ -29,11 +29,11 @@ import { ALERT_GROUPING } from '@kbn/rule-data-utils';
 
 // Mock the step information functions
 vi.mock('./queries/get_step_information', () => {
-      const mocked = {
-      getStepInformation: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getStepInformation: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('StatusRuleExecutor', () => {
   // @ts-ignore
@@ -152,9 +152,9 @@ describe('StatusRuleExecutor', () => {
       );
 
       // Mock the getAll method to return test monitors with a location
-      vi
-        .spyOn(statusRuleWithEmptyLocations.monitorConfigRepository, 'getAll')
-        .mockResolvedValue(testMonitors);
+      vi.spyOn(statusRuleWithEmptyLocations.monitorConfigRepository, 'getAll').mockResolvedValue(
+        testMonitors
+      );
 
       // Execute
       await statusRuleWithEmptyLocations.getConfigs({});
@@ -981,10 +981,7 @@ describe('StatusRuleExecutor', () => {
     };
 
     beforeEach(() => {
-      schedulePendingAlertPerConfigIdSpy = vi.spyOn(
-        statusRule,
-        'schedulePendingAlertPerConfigId'
-      );
+      schedulePendingAlertPerConfigIdSpy = vi.spyOn(statusRule, 'schedulePendingAlertPerConfigId');
       schedulePendingAlertPerConfigIdPerLocationSpy = vi.spyOn(
         statusRule,
         'schedulePendingAlertPerConfigIdPerLocation'

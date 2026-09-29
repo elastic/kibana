@@ -21,7 +21,9 @@ import { getMockFormState } from './create_field.helpers';
 const mockDispatch = vi.fn();
 
 vi.mock('../../../public/application/components/mappings_editor/shared_imports', async () => {
-  const actual = (await vi.importActual('../../../public/application/components/mappings_editor/shared_imports'));
+  const actual = await vi.importActual(
+    '../../../public/application/components/mappings_editor/shared_imports'
+  );
   const {
     getMockFormState: getMockFormStateFromHelpers,
     resetForm: resetFormState,
@@ -136,61 +138,66 @@ vi.mock(
 vi.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/reference_field_selects',
   () => {
-      const mocked = {
-        ReferenceFieldSelects: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      ReferenceFieldSelects: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock(
   '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id',
   () => {
-      const mocked = {
-        SelectInferenceId: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      SelectInferenceId: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
-vi.mock('../../../public/application/components/mappings_editor/mappings_state_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../public/application/components/mappings_editor/mappings_state_context')),
+vi.mock(
+  '../../../public/application/components/mappings_editor/mappings_state_context',
+  async () => {
+    const mocked = {
+      ...(await vi.importActual(
+        '../../../public/application/components/mappings_editor/mappings_state_context'
+      )),
       useMappingsState: () => ({
         fields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
         mappingViewFields: { byId: {}, rootLevelFields: [], aliases: {}, maxNestedDepth: 0 },
       }),
       useDispatch: () => mockDispatch,
     };
-      return { ...mocked, default: mocked };
-    });
+    return { ...mocked, default: mocked };
+  }
+);
 
 vi.mock('../../../public/application/app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../public/application/app_context')),
-      useAppContext: vi.fn(() => ({
-        config: { enforceAdaptiveAllocations: false },
-        services: {
-          notificationService: {
-            toasts: {},
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../public/application/app_context')),
+    useAppContext: vi.fn(() => ({
+      config: { enforceAdaptiveAllocations: false },
+      services: {
+        notificationService: {
+          toasts: {},
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../public/application/services/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../public/application/services/api')),
-      useLoadInferenceEndpoints: vi.fn().mockReturnValue({
-        data: [],
-        isLoading: false,
-        resendRequest: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../public/application/services/api')),
+    useLoadInferenceEndpoints: vi.fn().mockReturnValue({
+      data: [],
+      isLoading: false,
+      resendRequest: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const emptyAllFields: NormalizedFields['byId'] = {};
 

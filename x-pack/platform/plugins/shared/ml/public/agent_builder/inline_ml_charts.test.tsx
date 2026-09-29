@@ -32,7 +32,7 @@ const mockedUseVisPreviewUnifiedSearch = useVisPreviewUnifiedSearch as MockedFun
 >;
 
 vi.mock('@kbn/agent-builder-visualizations', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-visualizations'));
+  const actual = await vi.importActual('@kbn/agent-builder-visualizations');
   return {
     ...actual,
     useVisPreviewUnifiedSearch: vi.fn(actual.useVisPreviewUnifiedSearch),
@@ -40,31 +40,31 @@ vi.mock('@kbn/agent-builder-visualizations', async () => {
 });
 
 vi.mock('@kbn/embeddable-plugin/public', () => {
-      const mocked = {
-      EmbeddableRenderer: () => <div data-test-subj="mockMlEmbeddable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmbeddableRenderer: () => <div data-test-subj="mockMlEmbeddable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/presentation-util-plugin/public', () => {
-      const mocked = {
-      SavedObjectSaveModalDashboard: ({
-        onSave,
-      }: {
-        onSave: (args: { dashboardId: string; newTitle: string; newDescription: string }) => void;
-      }) => (
-        <button
-          type="button"
-          onClick={() =>
-            onSave({ dashboardId: 'new', newTitle: 'Saved chart', newDescription: 'desc' })
-          }
-        >
-          confirm-save
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedObjectSaveModalDashboard: ({
+      onSave,
+    }: {
+      onSave: (args: { dashboardId: string; newTitle: string; newDescription: string }) => void;
+    }) => (
+      <button
+        type="button"
+        onClick={() =>
+          onSave({ dashboardId: 'new', newTitle: 'Saved chart', newDescription: 'desc' })
+        }
+      >
+        confirm-save
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(ui, {

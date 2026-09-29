@@ -12,19 +12,19 @@ import { fetchElasticsearchVersions } from './fetch_elasticsearch_versions';
 import type { estypes } from '@elastic/elasticsearch';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 import { Globals } from '../../static_globals';
 
 describe('fetchElasticsearchVersions', () => {

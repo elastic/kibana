@@ -32,22 +32,22 @@ vi.mock('./sml_crawler_state_storage', () => {
 });
 
 vi.mock('./sml_storage', () => {
-      const mocked = {
-      smlIndexName: '.test-sml-data',
-      INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
-      reconcileSmlIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    smlIndexName: '.test-sml-data',
+    INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
+    reconcileSmlIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/es-errors', () => {
-      const mocked = {
-      isResponseError: vi.fn(
-        (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isResponseError: vi.fn(
+      (error: unknown) => typeof (error as { statusCode?: unknown })?.statusCode === 'number'
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockStateClient = () =>
   (createSmlCrawlerStateStorage as Mock)({ logger: {}, esClient: {} }).getClient();

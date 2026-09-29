@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STEPS_UI_PAGE_SIZE } from '../../../../../common';
@@ -21,7 +20,7 @@ import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
 
 // Mock the workflows module functions
 vi.mock('@kbn/workflows', async () => {
-  const actual = (await vi.importActual('@kbn/workflows'));
+  const actual = await vi.importActual('@kbn/workflows');
   return {
     ...actual,
     isTerminalStatus: vi.fn(),
@@ -32,248 +31,250 @@ vi.mock('@kbn/workflows', async () => {
 
 // Mock buildStepExecutionsTree function
 vi.mock('../build_step_executions_tree', () => {
-      const mocked = {
-      buildStepExecutionsTree: vi.fn(),
-      injectChildWorkflowSteps: vi.fn((tree) => ({ tree, childStepExecutions: [] })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildStepExecutionsTree: vi.fn(),
+    injectChildWorkflowSteps: vi.fn((tree) => ({ tree, childStepExecutions: [] })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/use_error_panel_diagnose_availability', () => {
-      const mocked = {
-      useErrorPanelDiagnoseAvailability: () => ({
-        state: 'd',
-        rawState: 'd',
-        requiredLicenseTier: 'enterprise',
-        diagnoseFeatureEnabled: false,
-        isDiagnoseHandoffInFlight: false,
-        openDiagnose: vi.fn(),
-        openLicenseManagement: vi.fn(),
-        licenseManagementHref: '/app/management/license_management',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorPanelDiagnoseAvailability: () => ({
+      state: 'd',
+      rawState: 'd',
+      requiredLicenseTier: 'enterprise',
+      diagnoseFeatureEnabled: false,
+      isDiagnoseHandoffInFlight: false,
+      openDiagnose: vi.fn(),
+      openLicenseManagement: vi.fn(),
+      licenseManagementHref: '/app/management/license_management',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('../step_execution_tree_row', () => {
-      const mocked = {
-      TREE_ROW_CHEVRON_SLOT_PX: 16,
-      TREE_ROW_GAP_SIZE: 's',
-      TREE_ROW_PADDING_X_SIZE: 's',
-      TREE_INDENT_GUIDE_STANDOFF_PX: 2,
-      TREE_INDENT_GUIDE_WIDTH_PX: 1.5,
-      getTreeIndentGuideOffset: (paddingX: string) => `calc(${paddingX} + 8px)`,
-      StepExecutionTreeRow: ({
-        stepId,
-        stepType,
-        selected,
-        status,
-        executionTimeMs,
-        usage,
-        iterationPinKinds,
-        stateTags,
-        isExpandable,
-        isExpanded,
-        isBranchLabel,
-        attemptNumber,
-        isRetryAttempt,
-        retryAttemptCount,
-        retryMaxAttempts,
-        reserveChevronSlot,
-        error,
-        errorPanelMessageOverride,
-        errorPanelAriaLabel,
-        showAggregateDanger,
-        showDangerSelectionBorder,
-        arrivalPulse,
-        onSelect,
-        onToggleExpand,
-        'data-test-subj': dataTestSubj = 'step-execution-tree-item-label',
-      }: {
-        stepId: string;
-        stepType?: string;
-        selected: boolean;
-        status?: ExecutionStatus;
-        executionTimeMs?: number | null;
-        usage?: { totalTokens: number } | null;
-        iterationPinKinds?: string[];
-        stateTags?: string[];
-        isExpandable?: boolean;
-        isExpanded?: boolean;
-        isBranchLabel?: boolean;
-        attemptNumber?: number;
-        isRetryAttempt?: boolean;
-        retryAttemptCount?: number;
-        retryMaxAttempts?: number;
-        reserveChevronSlot?: boolean;
-        error?: unknown;
-        errorPanelMessageOverride?: string;
-        errorPanelAriaLabel?: string;
-        showAggregateDanger?: boolean;
-        showDangerSelectionBorder?: boolean;
-        arrivalPulse?: boolean;
-        onSelect: () => void;
-        onToggleExpand?: () => void;
-        'data-test-subj'?: string;
-      }) => (
-        <span
-          data-test-subj={dataTestSubj}
-          data-step-id={stepId}
-          data-step-type={stepType}
-          data-selected={selected}
-          data-status={status}
-          data-execution-time-ms={executionTimeMs}
-          data-attempt-number={attemptNumber}
-          data-is-retry-attempt={isRetryAttempt ? 'true' : 'false'}
-          data-retry-attempt-count={retryAttemptCount}
-          data-reserve-chevron-slot={reserveChevronSlot === false ? 'false' : 'true'}
-          data-pin-kinds={(iterationPinKinds ?? []).join(',')}
-          data-state-tags={(stateTags ?? []).join(',')}
-          data-is-expandable={isExpandable ? 'true' : 'false'}
-          data-is-expanded={isExpanded ? 'true' : 'false'}
-          data-is-branch-label={isBranchLabel ? 'true' : 'false'}
-          data-show-aggregate-danger={showAggregateDanger ? 'true' : 'false'}
-          data-has-error-panel={error ? 'true' : 'false'}
-          data-error-lead-in={errorPanelMessageOverride ?? ''}
-          data-error-aria-label={errorPanelAriaLabel ?? ''}
-          data-danger-fill={
-            status === 'failed' && (!isRetryAttempt || (stateTags ?? []).includes('final'))
-              ? 'true'
-              : 'false'
+  const mocked = {
+    TREE_ROW_CHEVRON_SLOT_PX: 16,
+    TREE_ROW_GAP_SIZE: 's',
+    TREE_ROW_PADDING_X_SIZE: 's',
+    TREE_INDENT_GUIDE_STANDOFF_PX: 2,
+    TREE_INDENT_GUIDE_WIDTH_PX: 1.5,
+    getTreeIndentGuideOffset: (paddingX: string) => `calc(${paddingX} + 8px)`,
+    StepExecutionTreeRow: ({
+      stepId,
+      stepType,
+      selected,
+      status,
+      executionTimeMs,
+      usage,
+      iterationPinKinds,
+      stateTags,
+      isExpandable,
+      isExpanded,
+      isBranchLabel,
+      attemptNumber,
+      isRetryAttempt,
+      retryAttemptCount,
+      retryMaxAttempts,
+      reserveChevronSlot,
+      error,
+      errorPanelMessageOverride,
+      errorPanelAriaLabel,
+      showAggregateDanger,
+      showDangerSelectionBorder,
+      arrivalPulse,
+      onSelect,
+      onToggleExpand,
+      'data-test-subj': dataTestSubj = 'step-execution-tree-item-label',
+    }: {
+      stepId: string;
+      stepType?: string;
+      selected: boolean;
+      status?: ExecutionStatus;
+      executionTimeMs?: number | null;
+      usage?: { totalTokens: number } | null;
+      iterationPinKinds?: string[];
+      stateTags?: string[];
+      isExpandable?: boolean;
+      isExpanded?: boolean;
+      isBranchLabel?: boolean;
+      attemptNumber?: number;
+      isRetryAttempt?: boolean;
+      retryAttemptCount?: number;
+      retryMaxAttempts?: number;
+      reserveChevronSlot?: boolean;
+      error?: unknown;
+      errorPanelMessageOverride?: string;
+      errorPanelAriaLabel?: string;
+      showAggregateDanger?: boolean;
+      showDangerSelectionBorder?: boolean;
+      arrivalPulse?: boolean;
+      onSelect: () => void;
+      onToggleExpand?: () => void;
+      'data-test-subj'?: string;
+    }) => (
+      <span
+        data-test-subj={dataTestSubj}
+        data-step-id={stepId}
+        data-step-type={stepType}
+        data-selected={selected}
+        data-status={status}
+        data-execution-time-ms={executionTimeMs}
+        data-attempt-number={attemptNumber}
+        data-is-retry-attempt={isRetryAttempt ? 'true' : 'false'}
+        data-retry-attempt-count={retryAttemptCount}
+        data-reserve-chevron-slot={reserveChevronSlot === false ? 'false' : 'true'}
+        data-pin-kinds={(iterationPinKinds ?? []).join(',')}
+        data-state-tags={(stateTags ?? []).join(',')}
+        data-is-expandable={isExpandable ? 'true' : 'false'}
+        data-is-expanded={isExpanded ? 'true' : 'false'}
+        data-is-branch-label={isBranchLabel ? 'true' : 'false'}
+        data-show-aggregate-danger={showAggregateDanger ? 'true' : 'false'}
+        data-has-error-panel={error ? 'true' : 'false'}
+        data-error-lead-in={errorPanelMessageOverride ?? ''}
+        data-error-aria-label={errorPanelAriaLabel ?? ''}
+        data-danger-fill={
+          status === 'failed' && (!isRetryAttempt || (stateTags ?? []).includes('final'))
+            ? 'true'
+            : 'false'
+        }
+        data-danger-selected={showDangerSelectionBorder ? 'true' : 'false'}
+        data-arrival-pulse={arrivalPulse ? 'true' : 'false'}
+        onClick={onSelect}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onSelect();
           }
-          data-danger-selected={showDangerSelectionBorder ? 'true' : 'false'}
-          data-arrival-pulse={arrivalPulse ? 'true' : 'false'}
-          onClick={onSelect}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              onSelect();
-            }
-          }}
-        >
-          {isExpandable ? (
-            <button
-              type="button"
-              data-test-subj="workflowStepTreeChevron"
-              aria-expanded={isExpanded}
-              onClick={(e) => {
-                e.stopPropagation();
-                onToggleExpand?.();
-              }}
-            />
-          ) : null}
-          {isBranchLabel ? <span data-test-subj="workflowStepTreeBranchGlyph">{'→'}</span> : null}
-          <span data-test-subj="workflowStepName">
-            {attemptNumber !== undefined ? `#${attemptNumber} ` : null}
-            {stepId}
-          </span>
-          {retryAttemptCount != null && retryAttemptCount > 0 && !isRetryAttempt ? (
-            <span data-test-subj="workflowStepTreeAttemptsBadge">
-              {retryMaxAttempts != null
-                ? `${retryAttemptCount} of ${retryMaxAttempts} attempts`
-                : `${retryAttemptCount} attempts`}
-            </span>
-          ) : null}
-          {(iterationPinKinds ?? []).map((kind) => (
-            <span key={kind} data-test-subj={`workflowStepTreeIterationTag-${kind}`}>
-              {kind}
-            </span>
-          ))}
-          {(stateTags ?? []).map((kind) => (
-            <span key={`state-${kind}`} data-test-subj={`workflowStepTreeIterationTag-${kind}`}>
-              {kind}
-            </span>
-          ))}
-          {error && (!isRetryAttempt || (stateTags ?? []).includes('final')) ? (
-            <span data-test-subj="workflowFailedStepErrorPanel" aria-label={errorPanelAriaLabel}>
-              {errorPanelMessageOverride ?? 'error'}
-            </span>
-          ) : null}
-          {usage && usage.totalTokens > 0 ? (
-            <span data-test-subj="workflowStepTreeTokenUsage">{usage.totalTokens}</span>
-          ) : null}
-          {status === 'skipped' || status === 'pending' ? (
-            <span data-test-subj="workflowStepTreeDuration">{'Not run'}</span>
-          ) : null}
+        }}
+      >
+        {isExpandable ? (
+          <button
+            type="button"
+            data-test-subj="workflowStepTreeChevron"
+            aria-expanded={isExpanded}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleExpand?.();
+            }}
+          />
+        ) : null}
+        {isBranchLabel ? <span data-test-subj="workflowStepTreeBranchGlyph">{'→'}</span> : null}
+        <span data-test-subj="workflowStepName">
+          {attemptNumber !== undefined ? `#${attemptNumber} ` : null}
+          {stepId}
         </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+        {retryAttemptCount != null && retryAttemptCount > 0 && !isRetryAttempt ? (
+          <span data-test-subj="workflowStepTreeAttemptsBadge">
+            {retryMaxAttempts != null
+              ? `${retryAttemptCount} of ${retryMaxAttempts} attempts`
+              : `${retryAttemptCount} attempts`}
+          </span>
+        ) : null}
+        {(iterationPinKinds ?? []).map((kind) => (
+          <span key={kind} data-test-subj={`workflowStepTreeIterationTag-${kind}`}>
+            {kind}
+          </span>
+        ))}
+        {(stateTags ?? []).map((kind) => (
+          <span key={`state-${kind}`} data-test-subj={`workflowStepTreeIterationTag-${kind}`}>
+            {kind}
+          </span>
+        ))}
+        {error && (!isRetryAttempt || (stateTags ?? []).includes('final')) ? (
+          <span data-test-subj="workflowFailedStepErrorPanel" aria-label={errorPanelAriaLabel}>
+            {errorPanelMessageOverride ?? 'error'}
+          </span>
+        ) : null}
+        {usage && usage.totalTokens > 0 ? (
+          <span data-test-subj="workflowStepTreeTokenUsage">{usage.totalTokens}</span>
+        ) : null}
+        {status === 'skipped' || status === 'pending' ? (
+          <span data-test-subj="workflowStepTreeDuration">{'Not run'}</span>
+        ) : null}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../iteration_gap_row', () => {
-      const mocked = {
-      IterationGapRow: ({
-        from,
-        to,
-        count,
-        isExpanded,
-        onToggle,
-      }: {
-        from: number;
-        to: number;
-        count: number;
-        isExpanded: boolean;
-        onToggle: () => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="workflowStepExecutionTreeIterationGap"
-          data-gap-from={from}
-          data-gap-to={to}
-          data-gap-count={count}
-          data-gap-expanded={isExpanded ? 'true' : 'false'}
-          onClick={onToggle}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              onToggle();
-            }
-          }}
-        >
-          {isExpanded ? `Hide iterations #${from}–#${to}` : `Show ${count} more iterations`}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IterationGapRow: ({
+      from,
+      to,
+      count,
+      isExpanded,
+      onToggle,
+    }: {
+      from: number;
+      to: number;
+      count: number;
+      isExpanded: boolean;
+      onToggle: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="workflowStepExecutionTreeIterationGap"
+        data-gap-from={from}
+        data-gap-to={to}
+        data-gap-count={count}
+        data-gap-expanded={isExpanded ? 'true' : 'false'}
+        onClick={onToggle}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onToggle();
+          }
+        }}
+      >
+        {isExpanded ? `Hide iterations #${from}–#${to}` : `Show ${count} more iterations`}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../shared/ui/step_icons/step_icon', () => {
-      const mocked = {
-      StepIcon: ({
-        stepType,
-        executionStatus,
-        onClick,
-      }: {
-        stepType: string;
-        executionStatus: ExecutionStatus | null;
-        onClick?: React.MouseEventHandler;
-      }) => (
-        <span
-          data-test-subj="step-icon"
-          data-step-type={stepType}
-          data-execution-status={executionStatus}
-          onClick={onClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              onClick?.(e as unknown as React.MouseEvent);
-            }
-          }}
-        >
-          {'Icon'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepIcon: ({
+      stepType,
+      executionStatus,
+      onClick,
+    }: {
+      stepType: string;
+      executionStatus: ExecutionStatus | null;
+      onClick?: React.MouseEventHandler;
+    }) => (
+      <span
+        data-test-subj="step-icon"
+        data-step-type={stepType}
+        data-execution-status={executionStatus}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onClick?.(e as unknown as React.MouseEvent);
+          }
+        }}
+      >
+        {'Icon'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowStepExecutionTree', async () => {
   // Import the mocked functions
-  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (await vi.importMock('@kbn/workflows')) as {
+  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (await vi.importMock(
+    '@kbn/workflows'
+  )) as {
     isTerminalStatus: Mock;
     isInProgressStatus: Mock;
     isDangerousStatus: Mock;

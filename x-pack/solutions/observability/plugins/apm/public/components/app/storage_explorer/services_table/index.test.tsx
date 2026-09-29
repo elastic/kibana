@@ -25,35 +25,35 @@ const mockUseApmParams = vi.fn<any, any>();
 const mockUseTimeRange = vi.fn<any, any>();
 
 vi.mock('../../../../hooks/use_progressive_fetcher', () => {
-      const mocked = {
-      useProgressiveFetcher: () => mockUseProgressiveFetcher(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProgressiveFetcher: () => mockUseProgressiveFetcher(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => mockUseApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => mockUseApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => mockUseTimeRange(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => mockUseTimeRange(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('./storage_details_per_service', () => {
-      const mocked = {
-      StorageDetailsPerService: ({ serviceName }: { serviceName: string }) => (
-        <div data-test-subj={`storage-details-${serviceName}`}>Storage Details for {serviceName}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StorageDetailsPerService: ({ serviceName }: { serviceName: string }) => (
+      <div data-test-subj={`storage-details-${serviceName}`}>Storage Details for {serviceName}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

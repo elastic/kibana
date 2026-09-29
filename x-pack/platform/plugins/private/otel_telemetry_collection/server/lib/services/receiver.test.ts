@@ -163,8 +163,7 @@ describe('OtelTelemetryReceiver', () => {
 
       await receiver.fetchAllSignals(defaultConfig);
 
-      const sampleAggs = (esClient.search as Mock).mock.calls[0][0].aggs.combos.aggs.sample
-        .aggs;
+      const sampleAggs = (esClient.search as Mock).mock.calls[0][0].aggs.combos.aggs.sample.aggs;
       expect(sampleAggs.scope_names.terms.size).toBe(100);
       expect(sampleAggs.sdk_names.terms.size).toBe(5);
     });

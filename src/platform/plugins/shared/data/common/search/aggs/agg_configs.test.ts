@@ -22,7 +22,7 @@ import { stubIndexPattern } from '../../stubs';
 
 // Mute moment.tz warnings about not finding a mock timezone
 vi.mock('../utils', async () => {
-  const original = (await vi.importActual('../utils'));
+  const original = await vi.importActual('../utils');
   return {
     ...original,
     getUserTimeZone: vi.fn(() => 'US/Pacific'),

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import { errors } from '@elastic/elasticsearch';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { Headers, RequestHandler, RouteConfig } from '@kbn/core/server';

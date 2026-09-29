@@ -20,7 +20,7 @@ import { CloudProviderIcon } from '../../../components/cloud_provider_icon';
 import { FINDINGS_GROUPING_OPTIONS } from '../../../common/constants';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: vi.fn(),
@@ -28,35 +28,35 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../components/compliance_score_bar', () => {
-      const mocked = {
-      ComplianceScoreBar: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComplianceScoreBar: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/cloud_security_grouping', async () => {
-      const mocked = {
-      firstNonNullValue: (await vi.importActual('../../../components/cloud_security_grouping'))
-        .firstNonNullValue,
-      LoadingGroup: () => <div data-test-subj="loading-group">Loading</div>,
-      NullGroup: ({ title }: { title: string }) => <div data-test-subj="null-group">{title}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    firstNonNullValue: (await vi.importActual('../../../components/cloud_security_grouping'))
+      .firstNonNullValue,
+    LoadingGroup: () => <div data-test-subj="loading-group">Loading</div>,
+    NullGroup: ({ title }: { title: string }) => <div data-test-subj="null-group">{title}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/cis_benchmark_icon', () => {
-      const mocked = {
-      CISBenchmarkIcon: vi.fn(() => <div data-test-subj="cis-benchmark-icon" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CISBenchmarkIcon: vi.fn(() => <div data-test-subj="cis-benchmark-icon" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/cloud_provider_icon', () => {
-      const mocked = {
-      CloudProviderIcon: vi.fn(() => <div data-test-subj="cloud-provider-icon" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CloudProviderIcon: vi.fn(() => <div data-test-subj="cloud-provider-icon" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<ComplianceBarComponent />', () => {
   beforeEach(() => {

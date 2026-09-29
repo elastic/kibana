@@ -21,12 +21,12 @@ import { COLLAPSE_LABEL, EXPAND_LABEL } from '../translations';
 import { act } from 'react-dom/test-utils';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useExpandedROw', () => {
   let expandedRowsObj = {};

@@ -17,8 +17,8 @@ export const mockOpsCollector = {
 };
 
 vi.doMock('./ops_metrics_collector', () => {
-      const mocked = {
-      OpsMetricsCollector: vi.fn().mockImplementation(() => mockOpsCollector),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OpsMetricsCollector: vi.fn().mockImplementation(() => mockOpsCollector),
+  };
+  return { ...mocked, default: mocked };
+});

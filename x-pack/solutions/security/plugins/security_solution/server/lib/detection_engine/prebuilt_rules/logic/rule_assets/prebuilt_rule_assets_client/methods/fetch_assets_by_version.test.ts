@@ -14,11 +14,11 @@ import { MAX_PREBUILT_RULES_COUNT } from '../../../../../rule_management/logic/s
 import { fetchAssetsByVersion } from './fetch_assets_by_version';
 
 vi.mock('../../prebuilt_rule_assets_validation', () => {
-      const mocked = {
-      validatePrebuiltRuleAssets: (assets: unknown[]) => assets,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validatePrebuiltRuleAssets: (assets: unknown[]) => assets,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const emptySearchResponse = {
   took: 1,

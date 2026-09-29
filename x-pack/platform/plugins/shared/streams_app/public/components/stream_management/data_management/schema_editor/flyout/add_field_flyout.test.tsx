@@ -19,52 +19,52 @@ import {
 import { SchemaEditorContextProvider } from '../schema_editor_context';
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          docLinks: {
-            links: {
-              elasticsearch: {
-                mappingParameters: 'https://elastic.co/docs/mapping-parameters',
-              },
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        docLinks: {
+          links: {
+            elasticsearch: {
+              mappingParameters: 'https://elastic.co/docs/mapping-parameters',
             },
           },
         },
-        dependencies: {
-          start: {
-            streams: {
-              streamsRepositoryClient: {
-                fetch: vi.fn(),
-              },
-            },
-            fieldsMetadata: {
-              useFieldsMetadata: () => ({
-                fieldsMetadata: {},
-                loading: false,
-              }),
+      },
+      dependencies: {
+        start: {
+          streams: {
+            streamsRepositoryClient: {
+              fetch: vi.fn(),
             },
           },
+          fieldsMetadata: {
+            useFieldsMetadata: () => ({
+              fieldsMetadata: {},
+              loading: false,
+            }),
+          },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_streams_app_router', () => {
-      const mocked = {
-      useStreamsAppRouter: () => ({
-        link: vi.fn(() => '/mock-link'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppRouter: () => ({
+      link: vi.fn(() => '/mock-link'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderAddFieldFlyout = (
   streamType: 'wired' | 'classic',

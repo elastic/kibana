@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mock, MockedClass, MockedFunction } from 'vitest';
 
 vi.mock('./verify_access_and_context', () => {
-      const mocked = {
-      verifyAccessAndContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyAccessAndContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/oauth_state_client');
 vi.mock('../lib/user_connector_token_client');
 vi.mock('../lib/request_oauth_authorization_code_token');
@@ -36,10 +36,9 @@ const MockOAuthStateClient = OAuthStateClient as MockedClass<typeof OAuthStateCl
 const MockUserConnectorTokenClient = UserConnectorTokenClient as MockedClass<
   typeof UserConnectorTokenClient
 >;
-const mockRequestOAuthAuthorizationCodeToken =
-  requestOAuthAuthorizationCodeToken as MockedFunction<
-    typeof requestOAuthAuthorizationCodeToken
-  >;
+const mockRequestOAuthAuthorizationCodeToken = requestOAuthAuthorizationCodeToken as MockedFunction<
+  typeof requestOAuthAuthorizationCodeToken
+>;
 const mockRequestEarsToken = requestEarsToken as MockedFunction<typeof requestEarsToken>;
 
 const configurationUtilities = actionsConfigMock.create();

@@ -17,15 +17,15 @@ import { RuleActionErrorLogFlyout } from './rule_action_error_log_flyout';
 import { loadActionErrorLog } from '../../../lib/rule_api/load_action_error_log';
 
 vi.mock('../../../lib/rule_api/load_action_error_log', () => {
-      const mocked = {
-      loadActionErrorLog: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadActionErrorLog: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsWithinBreakpoints = vi.fn();
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useIsWithinBreakpoints: () => mockUseIsWithinBreakpoints(),

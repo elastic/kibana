@@ -22,17 +22,17 @@ import { runWithReplacements } from '../../__mocks__/mock_runs';
 const mockLlm = vi.fn() as unknown as ActionsClientLlm;
 
 vi.mock('@langchain/classic/evaluation', () => {
-      const mocked = {
-      ...require('@langchain/classic/evaluation'),
-      loadEvaluator: vi.fn().mockResolvedValue({
-        evaluateStrings: vi.fn().mockResolvedValue({
-          key: 'correctness',
-          score: 0.9,
-        }),
+  const mocked = {
+    ...require('@langchain/classic/evaluation'),
+    loadEvaluator: vi.fn().mockResolvedValue({
+      evaluateStrings: vi.fn().mockResolvedValue({
+        key: 'correctness',
+        score: 0.9,
       }),
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const options: GetCustomEvaluatorOptions = {
   criteria: 'correctness',

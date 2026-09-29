@@ -12,11 +12,11 @@ import { getStructuredAnswerPrompt } from './answer_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 vi.mock('../utils/to_langchain_messages', () => {
-      const mocked = {
-      prepareMessages: vi.fn().mockResolvedValue([['human', 'history']]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prepareMessages: vi.fn().mockResolvedValue([['human', 'history']]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getStructuredAnswerPrompt', () => {
   const now = new Date().toISOString();

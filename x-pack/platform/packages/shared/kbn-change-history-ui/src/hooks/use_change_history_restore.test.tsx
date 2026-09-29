@@ -208,9 +208,9 @@ describe('useChangeHistoryRestore', () => {
       { canRestore: true },
       reportEvent
     );
-    vi
-      .spyOn(queryClient, 'invalidateQueries')
-      .mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 200)));
+    vi.spyOn(queryClient, 'invalidateQueries').mockImplementation(
+      () => new Promise((resolve) => setTimeout(resolve, 200))
+    );
 
     const { result } = renderHook(() => useChangeHistoryRestore({ onRestored }), { wrapper });
 

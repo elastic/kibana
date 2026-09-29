@@ -6,7 +6,6 @@
  */
 
 import type { Mocked } from 'vitest';
-
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListSummarySchema } from '@kbn/securitysolution-io-ts-list-types';
 import type { SavedObjectsClientContract } from '@kbn/core/server';

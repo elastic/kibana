@@ -20,11 +20,11 @@ import * as i18n from './translations';
 const certTypeDefaultValue: SSLCertType = SSLCertType.CRT;
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-      const mocked = {
-      useConnectorContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConnectorContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SSLCertFields', () => {
   beforeEach(() => {

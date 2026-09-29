@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 import type { HttpError } from '../../../../../common/types/api';

@@ -20,14 +20,14 @@ import { narrowRuleResponseFields } from '../api/narrow_rule_response_fields';
 vi.mock(
   '../../rule_management/logic/detection_rules_client/converters/convert_prebuilt_rule_asset_to_rule_response',
   () => {
-      const mocked = { convertPrebuiltRuleAssetToRuleResponse: vi.fn() };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = { convertPrebuiltRuleAssetToRuleResponse: vi.fn() };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock('../api/narrow_rule_response_fields', () => {
-      const mocked = { narrowRuleResponseFields: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { narrowRuleResponseFields: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockConvert = vi.mocked(convertPrebuiltRuleAssetToRuleResponse);
 const mockNarrow = vi.mocked(narrowRuleResponseFields);

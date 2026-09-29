@@ -41,205 +41,208 @@ vi.mock('../../common/components/links/link_props', () => {
 });
 
 vi.mock('../../common/components/link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl:
-        () =>
-        ({ deepLinkId, path = '' }: { deepLinkId: string; path?: string }) =>
-          `/app/security/${deepLinkId}${path}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl:
+      () =>
+      ({ deepLinkId, path = '' }: { deepLinkId: string; path?: string }) =>
+        `/app/security/${deepLinkId}${path}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/home/dynamic_risk_level_panel', () => {
-      const mocked = {
-      DynamicRiskLevelPanel: () => (
-        <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DynamicRiskLevelPanel: () => (
+      <div data-test-subj="dynamic-risk-level-panel">{'Dynamic Risk Level Panel'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_license');
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => ({ data: [] })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => ({ data: [] })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(() => ({
-        dataView: { id: 'test', matchedIndices: ['index-1'] },
-        status: 'ready',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(() => ({
+      dataView: { id: 'test', matchedIndices: ['index-1'] },
+      status: 'ready',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/home/anomalies_panel', () => {
-      const mocked = {
-      EntityAnalyticsRecentAnomalies: () => (
-        <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityAnalyticsRecentAnomalies: () => (
+      <div data-test-subj="recent-anomalies-panel">{'Recent anomalies'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/home/entities_table', () => {
-      const mocked = {
-      EntitiesTableSection: () => (
-        <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
-      ),
-      DataViewContext: {
-        Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      },
-      useEntityURLState: vi.fn(() => ({
-        sort: [],
-        filters: [],
-        query: { bool: { filter: [], must: [], must_not: [], should: [] } },
-        pageIndex: 0,
-        setUrlQuery: vi.fn(),
-        pageSize: 25,
-        onChangeItemsPerPage: vi.fn(),
-        onChangePage: vi.fn(),
-        onSort: vi.fn(),
-        onResetFilters: vi.fn(),
-        getRowsFromPages: vi.fn(() => []),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntitiesTableSection: () => (
+      <div data-test-subj="entity-analytics-home-entities-table">{'Entities Table'}</div>
+    ),
+    DataViewContext: {
+      Provider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    },
+    useEntityURLState: vi.fn(() => ({
+      sort: [],
+      filters: [],
+      query: { bool: { filter: [], must: [], must_not: [], should: [] } },
+      pageIndex: 0,
+      setUrlQuery: vi.fn(),
+      pageSize: 25,
+      onChangeItemsPerPage: vi.fn(),
+      onChangePage: vi.fn(),
+      onSort: vi.fn(),
+      onResetFilters: vi.fn(),
+      getRowsFromPages: vi.fn(() => []),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/home/use_entity_store_data_view', () => {
-      const mocked = {
-      useEntityStoreDataView: vi.fn(() => ({
-        dataView: { id: 'test-entity-store', fields: [] },
-        isLoading: false,
-        error: undefined,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreDataView: vi.fn(() => ({
+      dataView: { id: 'test-entity-store', fields: [] },
+      isLoading: false,
+      error: undefined,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/entity_store/hooks/use_entity_store', () => {
-      const mocked = {
-      useEntityStoreStatus: vi.fn(() => ({
-        data: { status: 'running', engines: [] },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreStatus: vi.fn(() => ({
+      data: { status: 'running', engines: [] },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_missing_risk_engine_privileges', () => {
-      const mocked = {
-      useMissingRiskEnginePrivileges: vi.fn(() => ({
-        isLoading: false,
-        hasAllRequiredPrivileges: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMissingRiskEnginePrivileges: vi.fn(() => ({
+      isLoading: false,
+      hasAllRequiredPrivileges: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => {
-      const mocked = {
-      useEntityEnginePrivileges: vi.fn(() => ({
-        isLoading: false,
-        data: { has_read_permissions: true, privileges: { elasticsearch: { index: {} }, kibana: [] } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityEnginePrivileges: vi.fn(() => ({
+      isLoading: false,
+      data: {
+        has_read_permissions: true,
+        privileges: { elasticsearch: { index: {} }, kibana: [] },
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../api/hooks/use_lead_generation_privileges', () => {
-      const mocked = {
-      useLeadGenerationPrivileges: vi.fn(() => ({
-        isLoading: false,
-        data: undefined,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLeadGenerationPrivileges: vi.fn(() => ({
+      isLoading: false,
+      data: undefined,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/threat_hunting/top_threat_hunting_leads/use_hunting_leads', () => {
-      const mocked = {
-      useHuntingLeads: vi.fn(() => ({
-        leads: [],
-        totalCount: 0,
-        isLoading: false,
-        isGenerating: false,
-        hasGenerated: false,
-        lastRunTimestamp: null,
-        generate: vi.fn(),
-        refetch: vi.fn(),
-        isScheduled: false,
-        toggleSchedule: vi.fn(),
-        readPermissionError: false,
-        writePermissionError: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHuntingLeads: vi.fn(() => ({
+      leads: [],
+      totalCount: 0,
+      isLoading: false,
+      isGenerating: false,
+      hasGenerated: false,
+      lastRunTimestamp: null,
+      generate: vi.fn(),
+      refetch: vi.fn(),
+      isScheduled: false,
+      toggleSchedule: vi.fn(),
+      readPermissionError: false,
+      writePermissionError: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/threat_hunting/top_threat_hunting_leads/use_lead_attachment', () => {
-      const mocked = {
-      useLeadAttachment: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLeadAttachment: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/threat_hunting/top_threat_hunting_leads', () => {
-      const mocked = {
-      TopThreatHuntingLeads: ({ onHuntInChat }: { onHuntInChat: () => void }) => (
-        <div data-test-subj="top-threat-hunting-leads">
-          {'Top Threat Hunting Leads'}
-          <button type="button" data-test-subj="mockHuntInChatButton" onClick={onHuntInChat}>
-            {'Hunt with AI'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TopThreatHuntingLeads: ({ onHuntInChat }: { onHuntInChat: () => void }) => (
+      <div data-test-subj="top-threat-hunting-leads">
+        {'Top Threat Hunting Leads'}
+        <button type="button" data-test-subj="mockHuntInChatButton" onClick={onHuntInChat}>
+          {'Hunt with AI'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../onboarding/components/hooks/use_stored_state', () => {
-      const mocked = {
-      useStoredAssistantConnectorId: vi.fn(() => ['', vi.fn()]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStoredAssistantConnectorId: vi.fn(() => ['', vi.fn()]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(() => ({ isAgentChatExperienceEnabled: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(() => ({ isAgentChatExperienceEnabled: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // useEntityURLState is already mocked inside the entities_table mock above
 
 vi.mock('../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn(() => 'default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn(() => 'default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(() => ({
-        openRightPanel: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(() => ({
+      openRightPanel: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEntityStoreDataView = useEntityStoreDataView as Mock;
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;

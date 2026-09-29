@@ -17,21 +17,21 @@ const mockDeleteTransform = vi.fn();
 const mockRemoveRiskScoringTask = vi.fn();
 
 vi.mock('../../utils/transforms', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../utils/transforms')),
-      stopTransform: (...args: unknown[]) => mockStopTransform(...args),
-      deleteTransform: (...args: unknown[]) => mockDeleteTransform(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../utils/transforms')),
+    stopTransform: (...args: unknown[]) => mockStopTransform(...args),
+    deleteTransform: (...args: unknown[]) => mockDeleteTransform(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../risk_score/tasks/risk_scoring_task', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../risk_score/tasks/risk_scoring_task')),
-      removeRiskScoringTask: (...args: unknown[]) => mockRemoveRiskScoringTask(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../risk_score/tasks/risk_scoring_task')),
+    removeRiskScoringTask: (...args: unknown[]) => mockRemoveRiskScoringTask(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('cleanupLegacyRiskEngine', () => {
   const logger = loggingSystemMock.createLogger();

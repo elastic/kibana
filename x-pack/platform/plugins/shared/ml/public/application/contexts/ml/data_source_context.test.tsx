@@ -15,36 +15,36 @@ import { DataSourceContextProvider } from './data_source_context';
 import { useMlKibana } from '../kibana';
 
 vi.mock('../kibana', () => {
-      const mocked = {
-      useMlKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../util/index_utils', () => {
-      const mocked = {
-      getDataViewAndSavedSearchCallback: vi.fn(() => async (id: string) => ({
-        dataView: { id, title: 'mock-saved-search-data-view' },
-        savedSearch: { id: 'mock-saved-search' },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewAndSavedSearchCallback: vi.fn(() => async (id: string) => ({
+      dataView: { id, title: 'mock-saved-search-data-view' },
+      savedSearch: { id: 'mock-saved-search' },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../jobs/new_job/utils/new_job_utils', () => {
-      const mocked = {
-      createSearchItems: vi.fn(() => ({ combinedQuery: { match_all: {} } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSearchItems: vi.fn(() => ({ combinedQuery: { match_all: {} } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLocationSearch = vi.fn(() => '');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => ({ pathname: '/', search: mockLocationSearch() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => ({ pathname: '/', search: mockLocationSearch() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGet = vi.fn();
 const mockGetDefaultId = vi.fn();
@@ -153,7 +153,7 @@ describe('DataSourceContextProvider', () => {
   });
 
   it('renders children when savedSearchId URL param is present', async () => {
-    const { getDataViewAndSavedSearchCallback } = (await vi.importMock('../../util/index_utils'));
+    const { getDataViewAndSavedSearchCallback } = await vi.importMock('../../util/index_utils');
     getDataViewAndSavedSearchCallback.mockReturnValue(async (id: string) => ({
       dataView: { id: 'dv-from-saved-search', title: 'From Saved Search' },
       savedSearch: { id },

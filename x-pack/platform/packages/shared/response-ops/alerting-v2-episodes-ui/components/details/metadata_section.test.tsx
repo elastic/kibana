@@ -28,11 +28,11 @@ vi.mock('../../utils/run_esql_async_search');
 vi.mock('../../hooks/use_alerting_episode_source_data_view');
 
 vi.mock('@kbn/discover-utils', () => {
-      const mocked = {
-      buildDataTableRecord: vi.fn((doc) => ({ id: 'mock-id', raw: doc, flattened: {} })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildDataTableRecord: vi.fn((doc) => ({ id: 'mock-id', raw: doc, flattened: {} })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 const buildDataTableRecordMock = vi.mocked(buildDataTableRecord);

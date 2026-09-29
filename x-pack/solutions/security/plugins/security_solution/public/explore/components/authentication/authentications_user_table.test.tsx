@@ -21,28 +21,28 @@ import { usersModel } from '../../users/store';
 import { AuthStackByField } from '../../../../common/search_strategy';
 
 vi.mock('../../../common/containers/query_toggle', () => {
-      const mocked = {
-      useQueryToggle: vi.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryToggle: vi.fn().mockReturnValue({ toggleStatus: true, setToggleStatus: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../containers/authentications', () => {
-      const mocked = {
-      useAuthentications: vi.fn().mockReturnValue([
-        false,
-        {
-          authentications: [],
-          totalCount: 0,
-          pageInfo: {},
-          loadPage: vi.fn(),
-          inspect: {},
-          isInspected: false,
-          refetch: vi.fn(),
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAuthentications: vi.fn().mockReturnValue([
+      false,
+      {
+        authentications: [],
+        totalCount: 0,
+        pageInfo: {},
+        loadPage: vi.fn(),
+        inspect: {},
+        isInspected: false,
+        refetch: vi.fn(),
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Authentication User Table Component', () => {
   const mockUseAuthentications = useAuthentications as Mock;

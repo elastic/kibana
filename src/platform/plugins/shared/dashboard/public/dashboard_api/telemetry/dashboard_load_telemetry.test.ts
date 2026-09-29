@@ -23,14 +23,14 @@ import { buildMockDashboardApi } from '../../mocks';
 
 const mockMetricEvent = vi.fn();
 vi.mock('@kbn/ebt-tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ebt-tools')),
-      reportPerformanceMetricEvent: (_: CoreStart['analytics'], args: PerformanceMetricEvent) => {
-        mockMetricEvent(args);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/ebt-tools')),
+    reportPerformanceMetricEvent: (_: CoreStart['analytics'], args: PerformanceMetricEvent) => {
+      mockMetricEvent(args);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDashboard = (
   children: {} = {}

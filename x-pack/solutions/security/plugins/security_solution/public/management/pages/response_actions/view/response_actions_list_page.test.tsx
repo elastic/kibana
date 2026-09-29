@@ -31,7 +31,9 @@ let mockUseGetEndpointActionList: {
   refetch: () => unknown;
 };
 vi.mock('../../../hooks/response_actions/use_get_endpoint_action_list', async () => {
-  const original = (await vi.importActual('../../../hooks/response_actions/use_get_endpoint_action_list'));
+  const original = await vi.importActual(
+    '../../../hooks/response_actions/use_get_endpoint_action_list'
+  );
   return {
     ...original,
     useGetEndpointActionList: () => mockUseGetEndpointActionList,
@@ -39,7 +41,7 @@ vi.mock('../../../hooks/response_actions/use_get_endpoint_action_list', async ()
 });
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => ({

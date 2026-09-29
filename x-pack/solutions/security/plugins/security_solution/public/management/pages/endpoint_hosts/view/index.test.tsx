@@ -69,9 +69,9 @@ const mockUserPrivileges = useUserPrivileges as Mock;
 // not sure why this can't be imported from '../../../../common/mock/formatted_relative';
 // but sure enough, it needs to be inline in this one file
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
   const FormattedRelative = vi.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -82,7 +82,7 @@ vi.mock('@kbn/i18n-react', async () => {
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../../../../common/components/link_to');
 vi.mock('../../../services/policies/ingest', async () => {
-  const originalModule = (await vi.importActual('../../../services/policies/ingest'));
+  const originalModule = await vi.importActual('../../../services/policies/ingest');
   return {
     ...originalModule,
     sendGetEndpointSecurityPackage: () => Promise.resolve({}),
@@ -93,24 +93,24 @@ vi.mock('../../../hooks/agents/use_get_agent_status');
 const useGetAgentStatusMock = _useGetAgentStatus as Mock;
 
 vi.mock('../../../services/policies/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../services/policies/hooks')),
-      useBulkGetAgentPolicies: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../services/policies/hooks')),
+    useBulkGetAgentPolicies: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
   () => {
-      const mocked = {
-        useFetchAnonymizationFields: vi.fn().mockReturnValue({
-          data: { data: [], total: 0, page: 1, perPage: 10 },
-          isLoading: false,
-          refetch: vi.fn(),
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useFetchAnonymizationFields: vi.fn().mockReturnValue({
+        data: { data: [], total: 0, page: 1, perPage: 10 },
+        isLoading: false,
+        refetch: vi.fn(),
+      }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 const useBulkGetAgentPoliciesMock = useBulkGetAgentPolicies as unknown as Mock<
   DeepPartial<ReturnType<typeof useBulkGetAgentPolicies>>
@@ -171,11 +171,11 @@ const timepickerRanges = [
 ];
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn().mockReturnValue({ isLoading: false, data: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn().mockReturnValue({ isLoading: false, data: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/hooks/use_license');
 vi.mock('../../../hooks/endpoint/use_get_endpoint_details');

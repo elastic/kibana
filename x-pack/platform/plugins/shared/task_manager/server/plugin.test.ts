@@ -119,9 +119,7 @@ describe('TaskManagerPlugin', () => {
       const taskManagerPlugin = new TaskManagerPlugin(pluginInitializerContext);
       taskManagerPlugin.setup(coreMock.createSetup(), { usageCollection: undefined });
       expect((logger.warn as Mock).mock.calls.length).toBe(1);
-      expect((logger.warn as Mock).mock.calls[0][0]).toBe(
-        'Excluding task types from execution: *'
-      );
+      expect((logger.warn as Mock).mock.calls[0][0]).toBe('Excluding task types from execution: *');
     });
 
     test('it logs a warning when the unsafe `authenticate_background_task_utilization` config is set to false', async () => {

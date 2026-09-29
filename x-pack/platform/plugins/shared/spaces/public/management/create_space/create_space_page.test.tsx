@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock, Mocked } from 'vitest';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import React from 'react';
+import type { Mock, Mocked } from 'vitest';
+import { vi } from 'vitest';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { OverlayStart } from '@kbn/core/public';

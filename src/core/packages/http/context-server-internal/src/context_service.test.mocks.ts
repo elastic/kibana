@@ -27,8 +27,8 @@ const createContextMock = (mockContext: any = {}) => {
 
 export const MockContextConstructor = vi.fn(createContextMock);
 vi.doMock('./context_container', () => {
-      const mocked = {
-      ContextContainer: MockContextConstructor,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContextContainer: MockContextConstructor,
+  };
+  return { ...mocked, default: mocked };
+});

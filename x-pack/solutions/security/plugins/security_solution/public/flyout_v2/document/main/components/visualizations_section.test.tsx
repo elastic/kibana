@@ -27,85 +27,89 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../detections/hooks/use_is_analyzer_enabled', () => {
-      const mocked = {
-      useIsAnalyzerEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsAnalyzerEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(() => ({
-        status: 'ready',
-        dataView: {
-          hasMatchedIndices: () => true,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(() => ({
+      status: 'ready',
+      dataView: {
+        hasMatchedIndices: () => true,
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./analyzer_preview', () => {
-      const mocked = {
-      AnalyzerPreview: () => <div data-test-subj="analyzerPreviewMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnalyzerPreview: () => <div data-test-subj="analyzerPreviewMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./session_preview_container', () => {
-      const mocked = {
-      SessionPreviewContainer: ({ onShowSessionView }: { onShowSessionView: () => void }) => (
-        <button type="button" data-test-subj="sessionPreviewContainerMock" onClick={onShowSessionView}>
-          {'SessionPreview'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SessionPreviewContainer: ({ onShowSessionView }: { onShowSessionView: () => void }) => (
+      <button
+        type="button"
+        data-test-subj="sessionPreviewContainerMock"
+        onClick={onShowSessionView}
+      >
+        {'SessionPreview'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./graph_preview_container', () => {
-      const mocked = {
-      GraphPreviewContainer: ({ onShowGraph }: { onShowGraph: () => void }) => (
-        <button type="button" data-test-subj="graphPreviewContainerMock" onClick={onShowGraph}>
-          {'GraphPreview'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GraphPreviewContainer: ({ onShowGraph }: { onShowGraph: () => void }) => (
+      <button type="button" data-test-subj="graphPreviewContainerMock" onClick={onShowGraph}>
+        {'GraphPreview'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../tools/graph', () => {
-      const mocked = {
-      GraphDetails: () => <div data-test-subj="graphDetailsMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GraphDetails: () => <div data-test-subj="graphDetailsMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_graph_preview', () => {
-      const mocked = {
-      useGraphPreview: vi.fn(() => ({ hasGraphData: true })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGraphPreview: vi.fn(() => ({ hasGraphData: true })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

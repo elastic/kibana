@@ -31,21 +31,21 @@ const mockIsValidVis = vi.fn();
 const mockSortColumns = vi.fn();
 
 vi.mock('../../common/convert_to_lens/lib/metrics', () => {
-      const mocked = {
-      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/convert_to_lens/lib/buckets', () => {
-      const mocked = {
-      convertBucketToColumns: vi.fn(() => mockConvertBucketToColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertBucketToColumns: vi.fn(() => mockConvertBucketToColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/convert_to_lens/lib/utils', async () => {
-  const utils = (await vi.importActual('../../common/convert_to_lens/lib/utils'));
+  const utils = await vi.importActual('../../common/convert_to_lens/lib/utils');
   return {
     ...utils,
     getCustomBucketsFromSiblingAggs: vi.fn(() => mockGetCutomBucketsFromSiblingAggs()),
@@ -53,25 +53,25 @@ vi.mock('../../common/convert_to_lens/lib/utils', async () => {
 });
 
 vi.mock('../vis_schemas', () => {
-      const mocked = {
-      getVisSchemas: vi.fn(() => mockGetVisSchemas()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getVisSchemas: vi.fn(() => mockGetVisSchemas()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils', () => {
-      const mocked = {
-      getBucketCollapseFn: vi.fn(() => mockGetBucketCollapseFn()),
-      getBucketColumns: vi.fn(() => mockGetBucketColumns()),
-      getColumnIds: vi.fn(() => mockGetColumnIds()),
-      getColumnsWithoutReferenced: vi.fn(() => mockGetColumnsWithoutReferenced()),
-      getMetricsWithoutDuplicates: vi.fn(() => mockGetMetricsWithoutDuplicates()),
-      isValidVis: vi.fn(() => mockIsValidVis()),
-      sortColumns: vi.fn(() => mockSortColumns()),
-      getCustomBucketColumns: vi.fn(() => mockGetCustomBucketColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBucketCollapseFn: vi.fn(() => mockGetBucketCollapseFn()),
+    getBucketColumns: vi.fn(() => mockGetBucketColumns()),
+    getColumnIds: vi.fn(() => mockGetColumnIds()),
+    getColumnsWithoutReferenced: vi.fn(() => mockGetColumnsWithoutReferenced()),
+    getMetricsWithoutDuplicates: vi.fn(() => mockGetMetricsWithoutDuplicates()),
+    isValidVis: vi.fn(() => mockIsValidVis()),
+    sortColumns: vi.fn(() => mockSortColumns()),
+    getCustomBucketColumns: vi.fn(() => mockGetCustomBucketColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getColumnsFromVis', () => {
   const dataServiceMock = dataPluginMock.createStartContract();

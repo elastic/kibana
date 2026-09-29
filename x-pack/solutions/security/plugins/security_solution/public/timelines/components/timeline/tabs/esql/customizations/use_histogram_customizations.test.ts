@@ -100,9 +100,9 @@ describe('useHistogramCustomization', () => {
   describe('onFilterCallback', () => {
     beforeEach(() => vi.clearAllMocks());
     it('should apply filter correctly, in case of single value click Trigger', async () => {
-      (
-        mockDataService.actions.createFiltersFromValueClickAction as Mock
-      ).mockResolvedValueOnce('some_filter');
+      (mockDataService.actions.createFiltersFromValueClickAction as Mock).mockResolvedValueOnce(
+        'some_filter'
+      );
 
       const renderHookResult = renderHookWithContext();
 

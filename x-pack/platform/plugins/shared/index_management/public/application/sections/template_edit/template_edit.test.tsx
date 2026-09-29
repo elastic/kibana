@@ -25,12 +25,12 @@ import type { UseRequestResponse, Error as EsUiSharedError } from '../../../shar
 
 const mockUseAppContext = vi.fn();
 vi.mock('../../app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../app_context')),
-      useAppContext: () => mockUseAppContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../app_context')),
+    useAppContext: () => mockUseAppContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/use_request', () => ({
   __esModule: true,
@@ -39,17 +39,17 @@ vi.mock('../../services/use_request', () => ({
 }));
 
 vi.mock('../../../shared_imports', () => {
-      const mocked = {
-      PageLoading: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="pageLoading">{children}</div>
-      ),
-      PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-        <div data-test-subj={dataTestSubj ?? 'pageError'} />
-      ),
-      attemptToURIDecode: (value: string) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageLoading: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="pageLoading">{children}</div>
+    ),
+    PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+      <div data-test-subj={dataTestSubj ?? 'pageError'} />
+    ),
+    attemptToURIDecode: (value: string) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components', () => ({
   __esModule: true,
@@ -229,9 +229,9 @@ describe('TemplateEdit', () => {
 
   test('wires save to PUT /index_templates/{name} and navigates', async () => {
     const template = makeTemplate();
-    vi
-      .mocked(useRequest)
-      .mockReturnValue(getUseRequestMock({ isLoading: false, error: null, data: template }));
+    vi.mocked(useRequest).mockReturnValue(
+      getUseRequestMock({ isLoading: false, error: null, data: template })
+    );
     const { history, location, match } = createRouterProps({ name: template.name });
     const pushSpy = vi.spyOn(history, 'push');
 

@@ -15,33 +15,33 @@ import { useMonitorAgentAssignments } from '../../settings/private_locations/hoo
 import type { MonitorLocationAssignment } from '../../../../../../common/types';
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => ({ basePath: '' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => ({ basePath: '' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockHasEnterprise = false;
 vi.mock('../../../hooks/use_license', () => {
-      const mocked = {
-      useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../settings/private_locations/hooks/use_monitor_agent_assignments', () => {
-      const mocked = {
-      useMonitorAgentAssignments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMonitorAgentAssignments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAssignments = useMonitorAgentAssignments as MockedFunction<
   typeof useMonitorAgentAssignments

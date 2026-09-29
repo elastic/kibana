@@ -49,21 +49,21 @@ import {
 } from '../../attack_details/constants/panel_keys';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      useExpandableFlyoutState: vi.fn(),
-      useExpandableFlyoutHistory: vi.fn(),
-      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    useExpandableFlyoutState: vi.fn(),
+    useExpandableFlyoutHistory: vi.fn(),
+    ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
-      const mocked = {
-      useFindAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 vi.mock('../../document_details/shared/hooks/use_basic_data_from_details_data');
 vi.mock('../../../flyout_v2/rule/main/hooks/use_rule_details');

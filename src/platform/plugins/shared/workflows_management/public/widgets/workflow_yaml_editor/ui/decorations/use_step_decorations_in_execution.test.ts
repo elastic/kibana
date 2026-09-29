@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import type { monaco } from '@kbn/monaco';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
@@ -31,7 +30,7 @@ import { createStepInfo } from '../../../../shared/test_utils';
 
 // Mock Monaco Range
 vi.mock('@kbn/monaco', async () => {
-  const actualMonaco = (await vi.importActual('@kbn/monaco'));
+  const actualMonaco = await vi.importActual('@kbn/monaco');
   return {
     ...actualMonaco,
     monaco: {
@@ -48,7 +47,7 @@ vi.mock('@kbn/monaco', async () => {
 
 // Mock useEuiTheme
 vi.mock('@elastic/eui', async () => {
-  const actualEui = (await vi.importActual('@elastic/eui'));
+  const actualEui = await vi.importActual('@elastic/eui');
   return {
     ...actualEui,
     useEuiTheme: vi.fn(() => ({
@@ -223,8 +222,8 @@ describe('useStepDecorationsInExecution', () => {
       const mockEditor = createMockEditor();
       renderHookWithProviders(mockEditor);
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       expect(decorationsCollection.clear).toHaveBeenCalled();
     });
@@ -237,8 +236,8 @@ describe('useStepDecorationsInExecution', () => {
         store.dispatch(setExecution(createExecution([])));
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       expect(decorationsCollection.set).not.toHaveBeenCalled();
     });
@@ -268,8 +267,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       expect(decorationsCollection.set).not.toHaveBeenCalled();
     });
@@ -289,8 +288,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();
@@ -333,8 +332,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();
@@ -362,8 +361,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();
@@ -401,8 +400,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();
@@ -443,8 +442,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();
@@ -473,8 +472,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       // Must not paint decorations on the editable YAML editor
       await waitFor(() => {
@@ -498,8 +497,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();
@@ -524,8 +523,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
       const firstCallCount = decorationsCollection.set.mock.calls.length;
 
       act(() => {
@@ -557,8 +556,8 @@ describe('useStepDecorationsInExecution', () => {
         rerender();
       });
 
-      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock
-        .results[0].value;
+      const decorationsCollection = (mockEditor.createDecorationsCollection as Mock).mock.results[0]
+        .value;
 
       await waitFor(() => {
         expect(decorationsCollection.set).toHaveBeenCalled();

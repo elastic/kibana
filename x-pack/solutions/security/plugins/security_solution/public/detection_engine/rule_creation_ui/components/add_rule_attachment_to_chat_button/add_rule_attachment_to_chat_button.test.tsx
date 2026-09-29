@@ -72,35 +72,39 @@ const mockKibanaServices = () => ({
 });
 
 vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => {
-      const mocked = {
-      useAgentBuilderAttachment: (attachment: unknown) => {
-        mockUseAgentBuilderAttachment(attachment);
-        return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAttachment: (attachment: unknown) => {
+      mockUseAgentBuilderAttachment(attachment);
+      return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => {
-      const mocked = {
-      NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => {
-        mockNewAgentBuilderAttachment(props);
-        return (
-          <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
-            {props.telemetry?.pathway ?? 'no-pathway'}
-          </button>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => {
+      mockNewAgentBuilderAttachment(props);
+      return (
+        <button
+          type="button"
+          data-test-subj="newAgentBuilderAttachmentMock"
+          onClick={props.onClick}
+        >
+          {props.telemetry?.pathway ?? 'no-pathway'}
+        </button>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../pages/rule_creation/helpers', () => {
-      const mocked = {
-      formatRule: (...args: unknown[]) => mockFormatRule(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatRule: (...args: unknown[]) => mockFormatRule(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AddRuleAttachmentToChatButton', () => {
   beforeEach(() => {

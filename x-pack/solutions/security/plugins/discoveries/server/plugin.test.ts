@@ -19,69 +19,69 @@ import { DiscoveriesPlugin } from './plugin';
 import type { DiscoveriesPluginSetupDeps, DiscoveriesPluginStartDeps } from './types';
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/alert_fields', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_ALERTS_CONTEXT: 'security.attack.discovery',
-      attackDiscoveryAlertFieldMap: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_ALERTS_CONTEXT: 'security.attack.discovery',
+    attackDiscoveryAlertFieldMap: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lib/schedules/workflow_executor', () => {
-      const mocked = {
-      workflowExecutor: vi.fn().mockResolvedValue({ state: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    workflowExecutor: vi.fn().mockResolvedValue({ state: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Default the feature flag to ON so the scheduled factory proceeds; individual
 // tests override with `mockResolvedValueOnce(false)` to exercise the kill-switch.
 const mockIsWorkflowsEnabled = vi.fn().mockResolvedValue(true);
 vi.mock('@kbn/discoveries/impl/lib/helpers/is_workflows_enabled', () => {
-      const mocked = {
-      isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./routes', () => {
-      const mocked = {
-      registerRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_builder/skills/register_skills', () => {
-      const mocked = {
-      registerSkills: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerSkills: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflows/register_workflow_steps', () => {
-      const mocked = {
-      registerWorkflowSteps: vi.fn().mockReturnValue({ failedSteps: [], registeredSteps: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerWorkflowSteps: vi.fn().mockReturnValue({ failedSteps: [], registeredSteps: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-plugin/common', () => {
-      const mocked = {
-      mappingFromFieldMap: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mappingFromFieldMap: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./managed_workflows/install_static', () => {
-      const mocked = {
-      AD_WORKFLOW_IDS: ['system-mock-1', 'system-mock-2'],
-      installStatic: vi.fn().mockResolvedValue({ failedIds: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AD_WORKFLOW_IDS: ['system-mock-1', 'system-mock-2'],
+    installStatic: vi.fn().mockResolvedValue({ failedIds: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { workflowExecutor } = (await vi.importMock('./lib/schedules/workflow_executor'));
-const { installStatic } = (await vi.importMock('./managed_workflows/install_static'));
-const { registerSkills } = (await vi.importMock('./agent_builder/skills/register_skills'));
+const { workflowExecutor } = await vi.importMock('./lib/schedules/workflow_executor');
+const { installStatic } = await vi.importMock('./managed_workflows/install_static');
+const { registerSkills } = await vi.importMock('./agent_builder/skills/register_skills');
 
 /** Drains the microtask + macrotask queues so deferred `getStartServices().then()` work runs. */
 const flushPromises = async () => {

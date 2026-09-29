@@ -18,14 +18,14 @@ vi.mock('../hooks/use_document_flyout_title');
 
 const mockToolsFlyoutHeaderProps = vi.fn();
 vi.mock('./tools_flyout_header', () => {
-      const mocked = {
-      ToolsFlyoutHeader: (props: Record<string, unknown>) => {
-        mockToolsFlyoutHeaderProps(props);
-        return <div data-test-subj="mockToolsFlyoutHeader" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolsFlyoutHeader: (props: Record<string, unknown>) => {
+      mockToolsFlyoutHeaderProps(props);
+      return <div data-test-subj="mockToolsFlyoutHeader" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useDocumentFlyoutTitleMock = useDocumentFlyoutTitle as Mock;
 

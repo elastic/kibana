@@ -16,11 +16,11 @@ import { deleteListItem } from './delete_list_item';
 import { getDeleteListItemOptionsMock } from './delete_list_item.mock';
 
 vi.mock('./get_list_item', () => {
-      const mocked = {
-      getListItem: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListItem: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('delete_list_item', () => {
   beforeEach(() => {
@@ -40,9 +40,7 @@ describe('delete_list_item', () => {
 
   test('Delete returns the same list item if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as Mock)
-      .mockResolvedValueOnce(listItem)
-      .mockResolvedValueOnce(null);
+    (getListItem as unknown as Mock).mockResolvedValueOnce(listItem).mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
     (options.esClient.deleteByQuery as unknown as Mock).mockResolvedValueOnce({
       deleted: true,
@@ -53,9 +51,7 @@ describe('delete_list_item', () => {
 
   test('Delete calls "deleteByQuery" if a list item is returned from "getListItem"', async () => {
     const listItem = getListItemResponseMock();
-    (getListItem as unknown as Mock)
-      .mockResolvedValueOnce(listItem)
-      .mockResolvedValueOnce(null);
+    (getListItem as unknown as Mock).mockResolvedValueOnce(listItem).mockResolvedValueOnce(null);
     const options = getDeleteListItemOptionsMock();
     (options.esClient.deleteByQuery as unknown as Mock).mockResolvedValueOnce({
       deleted: true,

@@ -17,7 +17,7 @@ import {
 } from './extract_image_info';
 
 vi.mock('execa');
-const execa = (await vi.importMock('execa'));
+const execa = await vi.importMock('execa');
 
 describe('extractImageInfo', () => {
   beforeEach(() => {

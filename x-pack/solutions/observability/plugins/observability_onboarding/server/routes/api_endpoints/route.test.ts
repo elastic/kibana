@@ -23,35 +23,35 @@ import { getManagedOtlpServiceUrl } from '../../lib/get_managed_otlp_service_url
 import { IS_VENDOR_ENDPOINTS_ENABLED } from '../../../common/feature_flags';
 
 vi.mock('../../lib/get_managed_otlp_service_url', () => {
-      const mocked = {
-      getManagedOtlpServiceUrl: vi.fn().mockReturnValue('https://otlp.example.com:443'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getManagedOtlpServiceUrl: vi.fn().mockReturnValue('https://otlp.example.com:443'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/get_fallback_urls', () => {
-      const mocked = {
-      getFallbackESUrl: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFallbackESUrl: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/api_key/has_api_key_privileges', () => {
-      const mocked = {
-      hasApiKeyPrivileges: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasApiKeyPrivileges: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/api_key/has_log_monitoring_privileges', () => {
-      const mocked = {
-      hasLogMonitoringPrivileges: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasLogMonitoringPrivileges: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/api_key/resolve_api_key_factory', () => {
-      const mocked = {
-      resolveApiKeyFactory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveApiKeyFactory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('hasManagedElasticsearchBulkEndpoint', () => {
   it('uses managed URL presence as the Elasticsearch-compatible bulk endpoint availability signal', () => {

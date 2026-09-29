@@ -32,11 +32,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it renders the expected title when a timeline is selected', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal
-        title={'Privilege Escalation'}
-        onDelete={vi.fn()}
-        closeModal={vi.fn()}
-      />
+      <DeleteTimelineModal title={'Privilege Escalation'} onDelete={vi.fn()} closeModal={vi.fn()} />
     );
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
@@ -59,9 +55,7 @@ describe('DeleteTimelineModal', () => {
   });
 
   test('it displays `Untitled Timeline` in the title when title is undefined', () => {
-    const wrapper = mountWithIntl(
-      <DeleteTimelineModal onDelete={vi.fn()} closeModal={vi.fn()} />
-    );
+    const wrapper = mountWithIntl(<DeleteTimelineModal onDelete={vi.fn()} closeModal={vi.fn()} />);
 
     expect(wrapper.find('[data-test-subj="confirmModalTitleText"]').first().text()).toEqual(
       'Delete "Untitled Timeline"?'
@@ -90,11 +84,7 @@ describe('DeleteTimelineModal', () => {
 
   test('it renders a deletion warning', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal
-        title="Privilege Escalation"
-        onDelete={vi.fn()}
-        closeModal={vi.fn()}
-      />
+      <DeleteTimelineModal title="Privilege Escalation" onDelete={vi.fn()} closeModal={vi.fn()} />
     );
 
     expect(wrapper.find('[data-test-subj="warning"]').first().text()).toEqual(
@@ -122,11 +112,7 @@ describe('DeleteTimelineModal', () => {
     const onDelete = vi.fn();
 
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal
-        title="Privilege Escalation"
-        onDelete={onDelete}
-        closeModal={vi.fn()}
-      />
+      <DeleteTimelineModal title="Privilege Escalation" onDelete={onDelete} closeModal={vi.fn()} />
     );
 
     wrapper.find('button[data-test-subj="confirmModalConfirmButton"]').first().simulate('click');
@@ -142,11 +128,7 @@ describe('DeleteTimelineTemplateModal', () => {
 
   test('it renders a deletion warning', () => {
     const wrapper = mountWithIntl(
-      <DeleteTimelineModal
-        title="Privilege Escalation"
-        onDelete={vi.fn()}
-        closeModal={vi.fn()}
-      />
+      <DeleteTimelineModal title="Privilege Escalation" onDelete={vi.fn()} closeModal={vi.fn()} />
     );
 
     expect(wrapper.find('[data-test-subj="warning"]').first().text()).toEqual(

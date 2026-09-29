@@ -18,18 +18,18 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { SubAgentExecutionFlyout } from './sub_agent_execution_flyout';
 
 vi.mock('../../../../../hooks/use_follow_execution', () => {
-      const mocked = {
-      useFollowExecution: vi.fn().mockReturnValue({
-        steps: [],
-        response: null,
-        streamingMessage: null,
-        error: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFollowExecution: vi.fn().mockReturnValue({
+      steps: [],
+      response: null,
+      streamingMessage: null,
+      error: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useFollowExecution } = (await vi.importMock('../../../../../hooks/use_follow_execution'));
+const { useFollowExecution } = await vi.importMock('../../../../../hooks/use_follow_execution');
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(

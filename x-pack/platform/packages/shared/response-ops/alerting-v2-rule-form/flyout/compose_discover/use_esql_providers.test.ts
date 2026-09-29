@@ -21,40 +21,40 @@ const mockDisposeCodeActions = vi.fn();
 const mockDisposeDocumentHighlight = vi.fn();
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      ESQL_LANG_ID: 'esql',
-      ESQLLang: {
-        getSuggestionProvider: vi.fn(),
-        getSignatureProvider: vi.fn(),
-        getHoverProvider: vi.fn(),
-        getInlineCompletionsProvider: vi.fn(),
-        getCodeActionProvider: vi.fn(),
-        getDocumentHighlightProvider: vi.fn(),
+  const mocked = {
+    ESQL_LANG_ID: 'esql',
+    ESQLLang: {
+      getSuggestionProvider: vi.fn(),
+      getSignatureProvider: vi.fn(),
+      getHoverProvider: vi.fn(),
+      getInlineCompletionsProvider: vi.fn(),
+      getCodeActionProvider: vi.fn(),
+      getDocumentHighlightProvider: vi.fn(),
+    },
+    monaco: {
+      languages: {
+        registerCompletionItemProvider: vi.fn(),
+        registerSignatureHelpProvider: vi.fn(),
+        registerHoverProvider: vi.fn(),
+        registerInlineCompletionsProvider: vi.fn(),
+        registerCodeActionProvider: vi.fn(),
+        registerDocumentHighlightProvider: vi.fn(),
       },
-      monaco: {
-        languages: {
-          registerCompletionItemProvider: vi.fn(),
-          registerSignatureHelpProvider: vi.fn(),
-          registerHoverProvider: vi.fn(),
-          registerInlineCompletionsProvider: vi.fn(),
-          registerCodeActionProvider: vi.fn(),
-          registerDocumentHighlightProvider: vi.fn(),
-        },
-        editor: {
-          addKeybindingRule: vi.fn(),
-        },
-        KeyCode: { Tab: 2 },
+      editor: {
+        addKeybindingRule: vi.fn(),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      KeyCode: { Tab: 2 },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/hooks/use_esql_callbacks', () => {
-      const mocked = {
-      useEsqlCallbacks: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlCallbacks: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useEsqlAutocomplete', () => {
   const services = createMockServices();
@@ -82,24 +82,24 @@ describe('useEsqlAutocomplete', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .mocked(monaco.languages.registerCompletionItemProvider)
-      .mockReturnValue({ dispose: mockDisposeSuggestion });
-    vi
-      .mocked(monaco.languages.registerSignatureHelpProvider)
-      .mockReturnValue({ dispose: mockDisposeSignature });
-    vi
-      .mocked(monaco.languages.registerHoverProvider)
-      .mockReturnValue({ dispose: mockDisposeHover });
-    vi
-      .mocked(monaco.languages.registerInlineCompletionsProvider)
-      .mockReturnValue({ dispose: mockDisposeInlineCompletions });
-    vi
-      .mocked(monaco.languages.registerCodeActionProvider)
-      .mockReturnValue({ dispose: mockDisposeCodeActions });
-    vi
-      .mocked(monaco.languages.registerDocumentHighlightProvider)
-      .mockReturnValue({ dispose: mockDisposeDocumentHighlight });
+    vi.mocked(monaco.languages.registerCompletionItemProvider).mockReturnValue({
+      dispose: mockDisposeSuggestion,
+    });
+    vi.mocked(monaco.languages.registerSignatureHelpProvider).mockReturnValue({
+      dispose: mockDisposeSignature,
+    });
+    vi.mocked(monaco.languages.registerHoverProvider).mockReturnValue({
+      dispose: mockDisposeHover,
+    });
+    vi.mocked(monaco.languages.registerInlineCompletionsProvider).mockReturnValue({
+      dispose: mockDisposeInlineCompletions,
+    });
+    vi.mocked(monaco.languages.registerCodeActionProvider).mockReturnValue({
+      dispose: mockDisposeCodeActions,
+    });
+    vi.mocked(monaco.languages.registerDocumentHighlightProvider).mockReturnValue({
+      dispose: mockDisposeDocumentHighlight,
+    });
     vi.mocked(ESQLLang.getSuggestionProvider).mockReturnValue(suggestionProvider);
     vi.mocked(ESQLLang.getSignatureProvider!).mockReturnValue(signatureProvider);
     vi.mocked(ESQLLang.getHoverProvider!).mockReturnValue(hoverProvider);

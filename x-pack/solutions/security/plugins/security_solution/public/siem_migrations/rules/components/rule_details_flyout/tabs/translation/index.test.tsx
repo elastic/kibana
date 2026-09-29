@@ -16,19 +16,19 @@ import { MigrationTranslationResult } from '../../../../../../../common/siem_mig
 import * as i18n from './translations';
 
 vi.mock('./callout', () => {
-      const mocked = {
-      TranslationCallOut: () => <div data-test-subj="translationCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TranslationCallOut: () => <div data-test-subj="translationCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./query_details', () => {
-      const mocked = {
-      OriginalRuleQuery: () => <div data-test-subj="originalRuleQuery" />,
-      TranslatedRuleQuery: () => <div data-test-subj="translatedRuleQuery" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OriginalRuleQuery: () => <div data-test-subj="originalRuleQuery" />,
+    TranslatedRuleQuery: () => <div data-test-subj="translatedRuleQuery" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TranslationTab', () => {
   it('renders callout and query details when not installed', () => {

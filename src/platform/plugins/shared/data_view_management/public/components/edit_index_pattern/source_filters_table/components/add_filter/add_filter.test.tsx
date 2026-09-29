@@ -20,7 +20,7 @@ type RenderAddFilterComponentProps = React.ComponentProps<typeof AddFilter>;
 const mockMakeRegExTest = vi.fn(() => true);
 
 vi.mock('@kbn/kibana-utils-plugin/common/field_wildcard', async () => {
-  const originalModule = (await vi.importActual('@kbn/kibana-utils-plugin/common/field_wildcard'));
+  const originalModule = await vi.importActual('@kbn/kibana-utils-plugin/common/field_wildcard');
   return {
     ...originalModule,
     makeRegEx: () => {

@@ -27,10 +27,9 @@ const createWorkflowScheduleMock = createWorkflowSchedule as MockedFunction<
 >;
 
 const invalidateFindWorkflowSchedulesMock = vi.fn();
-const mockUseInvalidateFindWorkflowSchedules =
-  useInvalidateFindWorkflowSchedules as MockedFunction<
-    typeof useInvalidateFindWorkflowSchedules
-  >;
+const mockUseInvalidateFindWorkflowSchedules = useInvalidateFindWorkflowSchedules as MockedFunction<
+  typeof useInvalidateFindWorkflowSchedules
+>;
 
 const mockScheduleToCreate: AttackDiscoveryScheduleCreateProps = {
   name: 'Test Workflow Schedule',

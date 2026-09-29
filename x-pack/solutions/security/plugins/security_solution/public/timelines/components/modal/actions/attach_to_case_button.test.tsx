@@ -23,7 +23,7 @@ import { AttachToCaseButton } from './attach_to_case_button';
 import { SecurityPageName } from '../../../../../common/constants';
 
 vi.mock('../../../../common/components/link_to', async () => {
-  const original = (await vi.importActual('../../../../common/components/link_to'));
+  const original = await vi.importActual('../../../../common/components/link_to');
   return {
     ...original,
     useFormatUrl: vi.fn().mockReturnValue({

@@ -8,11 +8,11 @@
 import { vi } from 'vitest';
 
 vi.mock('./nav_link_helpers', () => {
-      const mocked = {
-      generateNavLink: vi.fn(({ to, items }) => ({ href: to, items })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateNavLink: vi.fn(({ to, items }) => ({ href: to, items })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
 

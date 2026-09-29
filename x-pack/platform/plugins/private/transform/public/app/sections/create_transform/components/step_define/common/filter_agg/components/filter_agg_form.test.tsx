@@ -18,12 +18,12 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { FilterTermForm } from './filter_term_form';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiIconTip: () => '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiIconTip: () => '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FilterAggForm', () => {
   const runtimeMappings: RuntimeMappings = {

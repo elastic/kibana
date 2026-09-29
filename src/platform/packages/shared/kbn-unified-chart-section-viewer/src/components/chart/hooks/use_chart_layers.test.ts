@@ -16,13 +16,13 @@ import { createMetricAggregation } from '../../../common/utils';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 vi.mock('../../../common/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/utils')),
-      createMetricAggregation: vi.fn(({ metricName }) => `AVG(${metricName})`),
-      createTimeBucketAggregation: vi.fn(() => 'time_bucket_agg'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/utils')),
+    createMetricAggregation: vi.fn(({ metricName }) => `AVG(${metricName})`),
+    createTimeBucketAggregation: vi.fn(() => 'time_bucket_agg'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type MetricItemInput = Parameters<typeof useChartLayers>[0]['metricItem'];
 

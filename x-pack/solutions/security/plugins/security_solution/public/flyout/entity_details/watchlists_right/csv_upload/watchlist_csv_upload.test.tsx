@@ -15,15 +15,15 @@ import { TestProviders } from '../../../../common/mock';
 const mockInvalidateQueries = vi.fn();
 
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiFilePicker: (props: {
@@ -42,13 +42,13 @@ vi.mock('@elastic/eui', async () => {
 const mockUploadWatchlistCsv = vi.fn();
 
 vi.mock('../../../../entity_analytics/api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        uploadWatchlistCsv: mockUploadWatchlistCsv,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      uploadWatchlistCsv: mockUploadWatchlistCsv,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = (watchlistId = 'test-watchlist-id') =>
   render(<WatchlistCsvUpload watchlistId={watchlistId} />, { wrapper: TestProviders });

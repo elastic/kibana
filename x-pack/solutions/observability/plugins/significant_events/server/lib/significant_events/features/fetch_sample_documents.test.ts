@@ -17,17 +17,17 @@ import { getDiverseSampleDocuments } from '@kbn/nightshift-ai';
 import { fetchSampleDocuments } from './fetch_sample_documents';
 
 vi.mock('@kbn/ai-tools', () => {
-      const mocked = {
-      getSampleDocumentsEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSampleDocumentsEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/nightshift-ai', () => {
-      const mocked = {
-      getDiverseSampleDocuments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDiverseSampleDocuments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getDiverseSampleDocumentsMock = vi.mocked(getDiverseSampleDocuments);
 const getSampleDocumentsEsqlMock = vi.mocked(getSampleDocumentsEsql);

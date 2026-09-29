@@ -22,7 +22,7 @@ import {
 } from '../entity_explore_navigation';
 
 vi.mock('../entity_explore_navigation', async () => {
-  const actual = (await vi.importActual('../entity_explore_navigation'));
+  const actual = await vi.importActual('../entity_explore_navigation');
   return {
     ...actual,
     navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),

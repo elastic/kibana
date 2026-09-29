@@ -28,13 +28,13 @@ import {
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 vi.mock('../utils/route_error_handlers', () => {
-      const mocked = {
-      handleRouteError: vi.fn((response: { customError: Mock }, error: Error) =>
-        response.customError({ statusCode: 500, body: { message: String(error) } })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handleRouteError: vi.fn((response: { customError: Mock }, error: Error) =>
+      response.customError({ statusCode: 500, body: { message: String(error) } })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createLicensingContext = () => ({
   workflows: Promise.resolve({

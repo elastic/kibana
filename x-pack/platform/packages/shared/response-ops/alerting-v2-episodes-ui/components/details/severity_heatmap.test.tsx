@@ -20,45 +20,45 @@ let capturedHeatmapData: unknown;
 let capturedOnElementClick: ElementClickListener | undefined;
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          charts: {
-            theme: {
-              useChartsBaseTheme: () => ({}),
-            },
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => ({}),
           },
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/charts', () => {
-      const mocked = {
-      Chart: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="mockSeverityHeatmapChart">{children}</div>
-      ),
-      Settings: ({
-        onElementClick,
-        children,
-      }: {
-        onElementClick?: ElementClickListener;
-        children?: React.ReactNode;
-      }) => {
-        capturedOnElementClick = onElementClick;
-        return <div data-test-subj="mockSeverityHeatmapSettings">{children}</div>;
-      },
-      Heatmap: ({ data }: { data: unknown }) => {
-        capturedHeatmapData = data;
-        return null;
-      },
-      Tooltip: () => null,
-      Predicate: { NumAsc: 'NumAsc' },
-      ScaleType: { Ordinal: 'ordinal' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="mockSeverityHeatmapChart">{children}</div>
+    ),
+    Settings: ({
+      onElementClick,
+      children,
+    }: {
+      onElementClick?: ElementClickListener;
+      children?: React.ReactNode;
+    }) => {
+      capturedOnElementClick = onElementClick;
+      return <div data-test-subj="mockSeverityHeatmapSettings">{children}</div>;
+    },
+    Heatmap: ({ data }: { data: unknown }) => {
+      capturedHeatmapData = data;
+      return null;
+    },
+    Tooltip: () => null,
+    Predicate: { NumAsc: 'NumAsc' },
+    ScaleType: { Ordinal: 'ordinal' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createEventRow = (overrides: Partial<EpisodeEventRow> = {}): EpisodeEventRow => ({
   '@timestamp': '2024-01-01T00:00:00.000Z',

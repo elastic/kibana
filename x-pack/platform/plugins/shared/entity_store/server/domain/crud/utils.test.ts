@@ -20,16 +20,14 @@ import { BadCRUDRequestError } from '../errors';
 import { validateAndTransformDoc, validateDocIdentification } from './utils';
 
 vi.mock('../../../common/domain/definitions/registry', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/domain/definitions/registry')),
-      getEntityDefinition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/domain/definitions/registry')),
+    getEntityDefinition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockGetEntityDefinition = getEntityDefinition as MockedFunction<
-  typeof getEntityDefinition
->;
+const mockGetEntityDefinition = getEntityDefinition as MockedFunction<typeof getEntityDefinition>;
 
 const createField = (source: string, allowAPIUpdate = true): EntityField => ({
   allowAPIUpdate,

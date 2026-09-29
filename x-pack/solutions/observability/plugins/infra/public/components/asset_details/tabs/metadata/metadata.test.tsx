@@ -31,22 +31,17 @@ vi.mock('../../hooks/use_data_views');
 const useMetadataStateContextMock = useMetadataStateContext as MockedFunction<
   typeof useMetadataStateContext
 >;
-const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as MockedFunction<
-    typeof useAssetDetailsRenderPropsContext
-  >;
+const useAssetDetailsRenderPropsContextMock = useAssetDetailsRenderPropsContext as MockedFunction<
+  typeof useAssetDetailsRenderPropsContext
+>;
 const useAssetDetailsUrlStateMock = useAssetDetailsUrlState as MockedFunction<
   typeof useAssetDetailsUrlState
 >;
-const useKibanaMock = useKibanaContextForPlugin as MockedFunction<
-  typeof useKibanaContextForPlugin
->;
+const useKibanaMock = useKibanaContextForPlugin as MockedFunction<typeof useKibanaContextForPlugin>;
 const useUnifiedSearchContextMock = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
-const useDataViewsContextMock = useDataViewsContext as MockedFunction<
-  typeof useDataViewsContext
->;
+const useDataViewsContextMock = useDataViewsContext as MockedFunction<typeof useDataViewsContext>;
 
 const defaultRenderProps = {
   entity: { id: 'host-1', name: 'host-1', type: 'host' as const },

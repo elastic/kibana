@@ -18,21 +18,21 @@ import { useRulesTableContextMock } from '../../../rule_management_ui/components
 vi.mock('../../api/hooks/use_get_space_health');
 vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_table_context');
 vi.mock('../../../../common/components/charts/donutchart', () => {
-      const mocked = {
-      DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetSpaceHealth = useGetSpaceHealth as Mock;
 const mockInvalidate = vi.fn();
 vi.mock('../../api/hooks/use_get_space_health', () => {
-      const mocked = {
-      useGetSpaceHealth: vi.fn(),
-      useInvalidateGetSpaceHealthQuery: () => mockInvalidate,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSpaceHealth: vi.fn(),
+    useInvalidateGetSpaceHealthQuery: () => mockInvalidate,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createSpaceHealthResponse = ({
   succeeded = 0,

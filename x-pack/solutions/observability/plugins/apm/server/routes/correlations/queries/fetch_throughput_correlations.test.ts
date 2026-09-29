@@ -18,9 +18,7 @@ import {
 
 vi.mock('@kbn/es-query');
 
-const mockIsNonLocalIndexName = isNonLocalIndexName as MockedFunction<
-  typeof isNonLocalIndexName
->;
+const mockIsNonLocalIndexName = isNonLocalIndexName as MockedFunction<typeof isNonLocalIndexName>;
 
 // ---------------------------------------------------------------------------
 // computeIntervalString

@@ -19,36 +19,36 @@ import { DeleteActionModal } from './delete_action_modal';
 import { useDeleteAction } from './use_delete_action';
 
 vi.mock('../../../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: vi.fn(() => false),
-      createPermissionFailureMessage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: vi.fn(() => false),
+    createPermissionFailureMessage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../contexts/kibana', () => {
-      const mocked = {
-      useMlApi: vi.fn(),
-      useMlKibana: () => ({
-        services: { ...mockCoreServices.createStart(), data: { data_view: { find: vi.fn() } } },
-      }),
-      useNotifications: () => {
-        return {
-          toasts: { addSuccess: vi.fn(), addDanger: vi.fn(), addError: vi.fn() },
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlApi: vi.fn(),
+    useMlKibana: () => ({
+      services: { ...mockCoreServices.createStart(), data: { data_view: { find: vi.fn() } } },
+    }),
+    useNotifications: () => {
+      return {
+        toasts: { addSuccess: vi.fn(), addDanger: vi.fn(), addError: vi.fn() },
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const MockI18nService = i18nServiceMock.create();
 export const I18nServiceConstructor = vi.fn().mockImplementation(() => MockI18nService);
 vi.doMock('@kbn/i18n', () => {
-      const mocked = {
-      I18nService: I18nServiceConstructor,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    I18nService: I18nServiceConstructor,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DeleteAction', () => {
   afterEach(() => {

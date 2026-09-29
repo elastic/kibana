@@ -39,11 +39,11 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 vi.mock('../../../../common/components/local_storage', () => {
-      const mocked = {
-      useLocalStorage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocalStorage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 vi.mock('../../../../flyout_v2/use_flyout_api');
@@ -53,62 +53,62 @@ vi.mock('../../../containers/detection_engine/lists/use_lists_config');
 vi.mock('../../../hooks/attacks/use_get_default_group_title_renderers');
 vi.mock('../../../hooks/attacks/use_attack_group_handler');
 vi.mock('../../alerts_table/alerts_grouping', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../alerts_table/alerts_grouping')),
-      GroupedAlertsTable: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../alerts_table/alerts_grouping')),
+    GroupedAlertsTable: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./empty_results_prompt', () => {
-      const mocked = {
-      EmptyResultsPrompt: vi.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmptyResultsPrompt: vi.fn(() => <div data-test-subj="mock-empty-results-prompt" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attacks_view_options_popover', () => {
-      const mocked = {
-      AttacksViewOptionsPopover: vi.fn(
-        ({ showAnonymized, onToggleShowAnonymized, showAttacksOnly, onToggleShowAttacksOnly }) => (
-          <div data-test-subj="mock-attacks-view-options-popover">
-            <button
-              type="button"
-              data-test-subj="mock-toggle-anonymized"
-              onClick={onToggleShowAnonymized}
-              role="switch"
-              aria-checked={showAnonymized}
-            >
-              {'Anonymized'}
-            </button>
-            <button
-              type="button"
-              data-test-subj="mock-toggle-attacks-only"
-              onClick={onToggleShowAttacksOnly}
-              role="switch"
-              aria-checked={showAttacksOnly}
-            >
-              {'Attacks Only'}
-            </button>
-          </div>
-        )
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksViewOptionsPopover: vi.fn(
+      ({ showAnonymized, onToggleShowAnonymized, showAttacksOnly, onToggleShowAttacksOnly }) => (
+        <div data-test-subj="mock-attacks-view-options-popover">
+          <button
+            type="button"
+            data-test-subj="mock-toggle-anonymized"
+            onClick={onToggleShowAnonymized}
+            role="switch"
+            aria-checked={showAnonymized}
+          >
+            {'Anonymized'}
+          </button>
+          <button
+            type="button"
+            data-test-subj="mock-toggle-attacks-only"
+            onClick={onToggleShowAttacksOnly}
+            role="switch"
+            aria-checked={showAttacksOnly}
+          >
+            {'Attacks Only'}
+          </button>
+        </div>
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./grouping_settings/use_group_stats');
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useStore: () => ({ getState: vi.fn(), dispatch: vi.fn(), subscribe: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useStore: () => ({ getState: vi.fn(), dispatch: vi.fn(), subscribe: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView: DataView = createStubDataView({
   spec: { title: '.alerts-security.alerts-default' },
@@ -137,10 +137,7 @@ describe('<TableSection />', () => {
   let flyoutApi: ReturnType<typeof createFlyoutApiMock>;
 
   beforeEach(() => {
-    (useLocalStorage as Mock).mockReturnValue([
-      [{ latestTimestamp: { order: 'desc' } }],
-      vi.fn(),
-    ]);
+    (useLocalStorage as Mock).mockReturnValue([[{ latestTimestamp: { order: 'desc' } }], vi.fn()]);
 
     flyoutApi = createFlyoutApiMock();
     vi.mocked(useFlyoutApi).mockReturnValue(flyoutApi);

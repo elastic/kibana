@@ -14,20 +14,20 @@ import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../constants';
 import { reviewUpgrade, updatePackage } from './update';
 
 vi.mock('./get', () => {
-      const mocked = {
-      getInstallationObject: vi.fn(),
-      getPackageInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstallationObject: vi.fn(),
+    getPackageInfo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../audit_logging', () => {
-      const mocked = {
-      auditLoggingService: { writeCustomSoAuditLog: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    auditLoggingService: { writeCustomSoAuditLog: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getInstallationObject, getPackageInfo } = (await vi.importMock('./get'));
+const { getInstallationObject, getPackageInfo } = await vi.importMock('./get');
 
 const pendingReview = {
   target_version: '2.0.0',

@@ -29,46 +29,46 @@ vi.mock('../../../../common/hooks/use_upselling');
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../shared/context');
 vi.mock('../components/graph_visualization', () => {
-      const mocked = {
-      GRAPH_ID: 'graph-id',
-      GraphVisualization: () => (
-        <div data-test-subj={mockGraphVisualizationTestId}>{'Graph Visualization'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GRAPH_ID: 'graph-id',
+    GraphVisualization: () => (
+      <div data-test-subj={mockGraphVisualizationTestId}>{'Graph Visualization'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../components/analyze_graph', () => {
-      const mocked = {
-      ANALYZE_GRAPH_ID: 'analyze-graph-id',
-      AnalyzeGraph: () => <div data-test-subj={mockAnalyzeGraphTestId}>{'Analyze Graph'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ANALYZE_GRAPH_ID: 'analyze-graph-id',
+    AnalyzeGraph: () => <div data-test-subj={mockAnalyzeGraphTestId}>{'Analyze Graph'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../components/session_view', () => {
-      const mocked = {
-      SESSION_VIEW_ID: 'session-view-id',
-      SessionView: () => <div data-test-subj={mockSessionViewTestId}>{'Session View'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SESSION_VIEW_ID: 'session-view-id',
+    SessionView: () => <div data-test-subj={mockSessionViewTestId}>{'Session View'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: {
-        trackUiMetric: vi.fn(),
-      },
-      GRAPH_INVESTIGATION: 'graph-investigation',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: {
+      trackUiMetric: vi.fn(),
+    },
+    GRAPH_INVESTIGATION: 'graph-investigation',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/apm/use_start_transaction', () => {
-      const mocked = {
-      useStartTransaction: () => ({
-        startTransaction: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartTransaction: () => ({
+      startTransaction: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderVisualizeTab = () => {
   return render(

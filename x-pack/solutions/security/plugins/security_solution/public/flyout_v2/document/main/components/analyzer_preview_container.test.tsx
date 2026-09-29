@@ -31,7 +31,7 @@ vi.mock('../../../../data_view_manager/hooks/use_selected_patterns');
 const mockUiSettingsGet = vi.fn();
 let mockServerless: unknown;
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: () => ({
@@ -49,11 +49,11 @@ const mockAnalyzerPreview = vi.fn((_props: unknown) => (
   <div data-test-subj="analyzerPreviewStub" />
 ));
 vi.mock('./analyzer_preview', () => {
-      const mocked = {
-      AnalyzerPreview: (props: unknown) => mockAnalyzerPreview(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnalyzerPreview: (props: unknown) => mockAnalyzerPreview(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

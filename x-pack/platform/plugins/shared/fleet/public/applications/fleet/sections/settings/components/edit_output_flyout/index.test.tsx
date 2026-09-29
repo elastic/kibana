@@ -21,30 +21,30 @@ import { EditOutputFlyout } from '.';
 
 // mock yaml code editor
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => <>CODE EDITOR</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => <>CODE EDITOR</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiIconTip: () => '',
-      useGeneratedHtmlId: () => 'mocked-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiIconTip: () => '',
+    useGeneratedHtmlId: () => 'mocked-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks/use_fleet_status', () => {
-      const mocked = {
-      FleetStatusProvider: (props: any) => {
-        return props.children;
-      },
-      useFleetStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FleetStatusProvider: (props: any) => {
+      return props.children;
+    },
+    useFleetStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks', async () => {
   return {
@@ -56,11 +56,11 @@ vi.mock('../../../../hooks', async () => {
 });
 
 vi.mock('./confirm_update', () => {
-      const mocked = {
-      confirmUpdate: () => vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    confirmUpdate: () => vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendPutOutput = sendPutOutput as MockedFunction<typeof sendPutOutput>;
 const mockUseStartServices = useStartServices as Mock;
@@ -566,9 +566,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should render the flyout if the output provided is a remote ES output and license is at least enterprise', async () => {
-    vi
-      .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
@@ -625,9 +625,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should not render the flyout if the output is a remote ES output and the license is not at least enterprise', async () => {
-    vi
-      .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
     mockedUseFleetStatus.mockReturnValue({
@@ -662,9 +662,9 @@ describe('EditOutputFlyout', () => {
   });
 
   it('should populate secret service token input with plain text value when editing remote ES output', async () => {
-    vi
-      .spyOn(ExperimentalFeaturesService, 'get')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
 
     mockedUseFleetStatus.mockReturnValue({
@@ -905,9 +905,9 @@ describe('EditOutputFlyout', () => {
 
     it('should show the OTel exporter configuration section for remote ES output', async () => {
       vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
-      vi
-        .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableSyncIntegrationsOnRemote: true,
+      } as any);
 
       const { utils } = renderFlyout({
         type: 'remote_elasticsearch',
@@ -1009,9 +1009,9 @@ describe('EditOutputFlyout', () => {
       'should block saving a $type output when otel_exporter_config_yaml is invalid YAML',
       async ({ type, outputId, outputName, extra }) => {
         vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
-        vi
-          .spyOn(ExperimentalFeaturesService, 'get')
-          .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+        vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+          enableSyncIntegrationsOnRemote: true,
+        } as any);
         mockedUseFleetStatus.mockReturnValue({
           isLoading: false,
           isReady: true,
@@ -1052,9 +1052,9 @@ describe('EditOutputFlyout', () => {
 
     it('should include otel_exporter_config_yaml in the save payload when editing a remote ES output', async () => {
       vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
-      vi
-        .spyOn(ExperimentalFeaturesService, 'get')
-        .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+      vi.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({
+        enableSyncIntegrationsOnRemote: true,
+      } as any);
       mockedUseFleetStatus.mockReturnValue({
         isLoading: false,
         isReady: true,

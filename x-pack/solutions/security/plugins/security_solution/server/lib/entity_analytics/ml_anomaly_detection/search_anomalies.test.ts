@@ -14,24 +14,24 @@ import { buildScoreRangeFilter, searchEntityAnomalies } from './search_anomalies
 import { makeHit, makeResponse } from './test_helpers';
 
 vi.mock('./get_security_ml_job_ids', () => {
-      const mocked = {
-      getSecurityMlJobIds: vi.fn().mockResolvedValue(['security-job-1', 'security-job-2']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSecurityMlJobIds: vi.fn().mockResolvedValue(['security-job-1', 'security-job-2']),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        dsl: {
-          getEuidFilterBasedOnEntityRecord: vi
-            .fn()
-            .mockReturnValue({ term: { 'user.name': 'alice' } }),
-        },
+  const mocked = {
+    euid: {
+      dsl: {
+        getEuidFilterBasedOnEntityRecord: vi
+          .fn()
+          .mockReturnValue({ term: { 'user.name': 'alice' } }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEntityFilter = { term: { 'user.name': 'alice' } };
 
@@ -62,7 +62,7 @@ beforeEach(() => {
 
 describe('searchEntityAnomalies', () => {
   it('returns empty result without querying ML when no security job IDs are known', async () => {
-    const { getSecurityMlJobIds } = (await vi.importMock('./get_security_ml_job_ids'));
+    const { getSecurityMlJobIds } = await vi.importMock('./get_security_ml_job_ids');
     getSecurityMlJobIds.mockResolvedValueOnce([]);
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
@@ -87,7 +87,7 @@ describe('searchEntityAnomalies', () => {
   });
 
   it('sends the correct base query to mlAnomalySearch', async () => {
-    const { euid } = (await vi.importMock('@kbn/entity-store/common/euid_helpers'));
+    const { euid } = await vi.importMock('@kbn/entity-store/common/euid_helpers');
 
     await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });
 
@@ -352,7 +352,7 @@ describe('searchEntityAnomalies', () => {
   });
 
   it('returns empty result and logs a warning when entity filter cannot be built', async () => {
-    const { euid } = (await vi.importMock('@kbn/entity-store/common/euid_helpers'));
+    const { euid } = await vi.importMock('@kbn/entity-store/common/euid_helpers');
     euid.dsl.getEuidFilterBasedOnEntityRecord.mockReturnValueOnce(undefined);
 
     const result = await searchEntityAnomalies({ ...defaultOpts, logger, ml: mockMl, soClient });

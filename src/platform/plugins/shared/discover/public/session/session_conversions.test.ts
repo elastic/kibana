@@ -47,9 +47,9 @@ type ApiInlineDataView = Extract<
 >;
 
 vi.mock('uuid', () => {
-      const mocked = { v4: vi.fn(() => 'runtime-inline-id') };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: vi.fn(() => 'runtime-inline-id') };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUuidv4 = uuidv4 as MockedFunction<() => string>;
 

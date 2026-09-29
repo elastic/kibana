@@ -24,9 +24,7 @@ vi.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as MockedFunction<
   typeof useApmIndexSettingsContext
 >;
-const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
-  typeof useApmPluginContext
->;
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 
 const mockGetRedirectUrl = vi.fn();
 const mockLocatorGet = vi.fn().mockReturnValue({

@@ -29,8 +29,8 @@ import { useUiSetting } from '../../../../common/lib/kibana';
 import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_entity_from_store';
 
 vi.mock('@kbn/entity-store/public', async () => {
-  const actual = (await vi.importActual('@kbn/entity-store/public'));
-  const { euid } = (await vi.importActual('@kbn/entity-store/common/euid_helpers'));
+  const actual = await vi.importActual('@kbn/entity-store/public');
+  const { euid } = await vi.importActual('@kbn/entity-store/common/euid_helpers');
   return {
     ...actual,
     useEntityStoreEuidApi: vi.fn(() => ({ euid })),
@@ -38,7 +38,7 @@ vi.mock('@kbn/entity-store/public', async () => {
 });
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return { ...actual, useUiSetting: vi.fn() };
 });
 vi.mock('../../../entity_details/shared/hooks/use_entity_from_store');
@@ -63,47 +63,46 @@ vi.mock('react-redux-v7', () => {
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
 vi.mock('../../../../common/containers/use_global_time', async () => {
-  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
+  const actual = await vi.importActual('../../../../common/containers/use_global_time');
   return {
     ...actual,
-    useGlobalTime: vi
-      .fn()
-      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
+    useGlobalTime: vi.fn().mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as Mock;
 
 const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
 vi.mock('../../../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => {
-      const mocked = {
-      AnomalyTableProvider: ({
-        children,
-      }: {
-        children: (args: {
-          anomaliesData: Anomalies;
-          isLoadingAnomaliesData: boolean;
-          jobNameById: Record<string, string | undefined>;
-        }) => React.ReactNode;
-      }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyTableProvider: ({
+      children,
+    }: {
+      children: (args: {
+        anomaliesData: Anomalies;
+        isLoadingAnomaliesData: boolean;
+        jobNameById: Record<string, string | undefined>;
+      }) => React.ReactNode;
+    }) =>
+      children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../explore/hosts/containers/hosts/details');
 const mockUseHostDetails = useHostDetails as Mock;

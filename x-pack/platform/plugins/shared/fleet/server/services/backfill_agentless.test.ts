@@ -11,22 +11,22 @@ import { backfillPackagePolicySupportsAgentless } from './backfill_agentless';
 import { packagePolicyService } from './package_policy';
 
 vi.mock('./audit_logging', () => {
-      const mocked = {
-      auditLoggingService: {
-        writeCustomSoAuditLog: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    auditLoggingService: {
+      writeCustomSoAuditLog: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./settings', () => {
-      const mocked = {
-      getSettingsOrUndefined: () => ({
-        use_space_awareness_migration_status: 'success',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSettingsOrUndefined: () => ({
+      use_space_awareness_migration_status: 'success',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./app_context', () => {
   return {
@@ -70,14 +70,14 @@ vi.mock('./app_context', () => {
 });
 
 vi.mock('./package_policy', () => {
-      const mocked = {
-      packagePolicyService: {
-        update: vi.fn(),
-      },
-      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('ingest-package-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    packagePolicyService: {
+      update: vi.fn(),
+    },
+    getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('ingest-package-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('backfill agentless package policies', () => {
   it('should backfill package policies missing supports_agentless', async () => {

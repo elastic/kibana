@@ -20,11 +20,11 @@ import { simulateProcessing } from './simulation_handler';
 import type { ProcessingSimulationResponse } from '@kbn/streams-schema';
 
 vi.mock('./simulation_handler', () => {
-      const mocked = {
-      simulateProcessing: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    simulateProcessing: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSimulateProcessing = simulateProcessing as MockedFunction<typeof simulateProcessing>;
 

@@ -25,20 +25,20 @@ import { SECURITY_FEATURE_ID } from '../../test/constants';
 const chance = new Chance();
 
 vi.mock('./use_csp_benchmark_rules', () => {
-      const mocked = {
-      useFindCspBenchmarkRule: vi.fn(),
-      useBulkUpdateCspBenchmarkRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindCspBenchmarkRule: vi.fn(),
+    useBulkUpdateCspBenchmarkRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

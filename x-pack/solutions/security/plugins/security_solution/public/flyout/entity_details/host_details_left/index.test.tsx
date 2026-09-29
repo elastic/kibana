@@ -41,11 +41,11 @@ const riskScore: HostRiskScore = {
 const mockUseRiskScore = vi.fn().mockReturnValue({ loading: false, data: [riskScore] });
 
 vi.mock('../../../entity_analytics/api/hooks/use_risk_score', () => {
-      const mocked = {
-      useRiskScore: () => mockUseRiskScore(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: () => mockUseRiskScore(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('HostDetailsPanel', () => {
   it('render risk inputs panel', () => {

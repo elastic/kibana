@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getManagedWorkflowSelectorVisibilityContext } from '@kbn/workflows';
@@ -26,19 +26,19 @@ import {
 
 // Mock useKibana hook
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('@kbn/workflows-ui/src/api/workflows_api', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Suppress known React warnings/errors from UI library components in tests
 // These are expected and don't affect test functionality:

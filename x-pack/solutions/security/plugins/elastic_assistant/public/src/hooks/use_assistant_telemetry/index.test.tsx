@@ -19,7 +19,7 @@ const mockedTelemetry = {
 };
 
 vi.mock('../../context/typed_kibana_context/typed_kibana_context', async () => {
-  const original = (await vi.importActual('../../context/typed_kibana_context/typed_kibana_context'));
+  const original = await vi.importActual('../../context/typed_kibana_context/typed_kibana_context');
 
   return {
     ...original,
@@ -32,17 +32,17 @@ vi.mock('../../context/typed_kibana_context/typed_kibana_context', async () => {
 });
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      getConversationById: vi.fn().mockReturnValue({
-        id: customId,
-        title: 'Custom',
-        apiConfig: {},
-        replacements: {},
-        messages: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConversationById: vi.fn().mockReturnValue({
+      id: customId,
+      title: 'Custom',
+      apiConfig: {},
+      replacements: {},
+      messages: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const trackingFns = [
   { name: 'reportAssistantInvoked', eventType: AssistantEventTypes.AssistantInvoked },

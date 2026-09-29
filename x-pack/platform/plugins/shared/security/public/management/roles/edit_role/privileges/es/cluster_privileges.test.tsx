@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { EuiComboBox } from '@elastic/eui';
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { I18nProvider } from '@kbn/i18n-react';
 
@@ -18,7 +17,7 @@ import { ClusterPrivileges } from './cluster_privileges';
 import type { Role } from '../../../../../../common';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiComboBox: vi.fn((props: any) => <actual.EuiComboBox {...props} />),

@@ -17,9 +17,9 @@ import { useKibana } from '../hooks/use_kibana';
 import { AddDataSection } from './add_data_section';
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 

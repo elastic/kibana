@@ -25,9 +25,9 @@ import { ByteSizeValue } from '@kbn/config-schema';
 
 describe('migrationsStateActionMachine', () => {
   beforeAll(() => {
-    vi
-      .spyOn(global.Date, 'now')
-      .mockImplementation(() => new Date('2021-04-12T16:00:00.000Z').valueOf());
+    vi.spyOn(global.Date, 'now').mockImplementation(() =>
+      new Date('2021-04-12T16:00:00.000Z').valueOf()
+    );
   });
   beforeEach(() => {
     vi.clearAllMocks();

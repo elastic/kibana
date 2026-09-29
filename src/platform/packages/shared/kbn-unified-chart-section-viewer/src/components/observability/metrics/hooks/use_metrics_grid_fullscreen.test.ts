@@ -21,13 +21,13 @@ import {
 
 // Mock only what's needed for the hook test
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: vi.fn(),
-      useGeneratedHtmlId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: vi.fn(),
+    useGeneratedHtmlId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEuiTheme = useEuiTheme as MockedFunction<typeof useEuiTheme>;
 const mockUseGeneratedHtmlId = useGeneratedHtmlId as MockedFunction<typeof useGeneratedHtmlId>;

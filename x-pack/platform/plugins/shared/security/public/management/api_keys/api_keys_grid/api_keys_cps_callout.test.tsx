@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { cpsPluginMock } from '@kbn/cps/public/mocks';

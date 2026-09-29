@@ -20,11 +20,11 @@ import {
 } from './eval_connector';
 
 vi.mock('@kbn/gen-ai-functional-testing', () => {
-      const mocked = {
-      getAvailableConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAvailableConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getAvailableConnectorsMock = getAvailableConnectors as MockedFunction<
   typeof getAvailableConnectors

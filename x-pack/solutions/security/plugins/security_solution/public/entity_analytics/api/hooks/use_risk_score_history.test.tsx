@@ -19,17 +19,17 @@ import { EntityType } from '../../../../common/entity_analytics/types';
 
 vi.mock('../api');
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_error_toast', () => {
-      const mocked = {
-      useErrorToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchRiskScoreHistory = vi.fn();
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (

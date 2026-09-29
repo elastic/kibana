@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import { BehaviorSubject } from 'rxjs';
 
 import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';

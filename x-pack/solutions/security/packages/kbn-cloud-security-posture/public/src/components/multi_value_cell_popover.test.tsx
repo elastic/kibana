@@ -18,12 +18,12 @@ const RENDER_ITEM_TEST_ID = 'item-renderer-test-id';
 
 // Mock EUI theme hook
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({ euiTheme: { size: { s: '8px' } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({ euiTheme: { size: { s: '8px' } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MultiValueCellPopover', () => {
   const mockObject = { id: '1' };

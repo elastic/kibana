@@ -18,12 +18,12 @@ import { fireEvent } from '@testing-library/react';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useGeneratedHtmlId: () => 'mocked-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useGeneratedHtmlId: () => 'mocked-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GettingStartedPage', () => {
   beforeEach(() => {

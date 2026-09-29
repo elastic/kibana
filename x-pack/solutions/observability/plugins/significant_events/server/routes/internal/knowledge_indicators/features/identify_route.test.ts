@@ -18,11 +18,11 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { internalIdentifyKIFeaturesRoutes } from './identify_route';
 
 vi.mock('../../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetStreamSamplingSource = vi.fn();
 const mockGetStreamTypeFromDefinition = vi.fn();
@@ -31,43 +31,43 @@ const mockIdentifyComputedFeatures = vi.fn();
 const mockShouldIdentifyFeatures = vi.fn();
 
 vi.mock('@kbn/streams-schema', () => {
-      const mocked = {
-      getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
-      getStreamTypeFromDefinition: (...args: unknown[]) => mockGetStreamTypeFromDefinition(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getStreamSamplingSource: (...args: unknown[]) => mockGetStreamSamplingSource(...args),
+    getStreamTypeFromDefinition: (...args: unknown[]) => mockGetStreamTypeFromDefinition(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/significant_events/features', () => {
-      const mocked = {
-      MS_PER_DAY: 86_400_000,
-      MAX_INFERENCE_DOCUMENTS_BYTES: 288 * 1024,
-      MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
-      MAX_INFERENCE_DOCUMENT_FIELDS: 100,
-      MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
-      buildTelemetry: vi.fn(),
-      prepareInferredSampling: vi.fn(),
-      identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
-      identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MS_PER_DAY: 86_400_000,
+    MAX_INFERENCE_DOCUMENTS_BYTES: 288 * 1024,
+    MAX_INFERENCE_DOCUMENT_BYTES: 32 * 1024,
+    MAX_INFERENCE_DOCUMENT_FIELDS: 100,
+    MAX_INFERENCE_FIELD_NAME_LENGTH: 1024,
+    buildTelemetry: vi.fn(),
+    prepareInferredSampling: vi.fn(),
+    identifyInferredFeatures: (...args: unknown[]) => mockIdentifyInferredFeatures(...args),
+    identifyComputedFeatures: (...args: unknown[]) => mockIdentifyComputedFeatures(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/significant_events/features/should_identify_features', () => {
-      const mocked = {
-      shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldIdentifyFeatures: (...args: unknown[]) => mockShouldIdentifyFeatures(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../lib/semantic_code_search_grounding/is_significant_events_semantic_code_search_grounding_enabled',
   () => {
-      const mocked = {
-        isSignificantEventsSemanticCodeSearchGroundingEnabled: vi.fn().mockResolvedValue(false),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      isSignificantEventsSemanticCodeSearchGroundingEnabled: vi.fn().mockResolvedValue(false),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const prepareRoute =

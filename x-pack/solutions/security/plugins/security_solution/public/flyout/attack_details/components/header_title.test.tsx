@@ -18,64 +18,64 @@ import { useAttackDetailsContext } from '../context';
 import { useNavigateToAttackDetailsLeftPanel } from '../hooks/use_navigate_to_attack_details_left_panel';
 
 vi.mock('../../../flyout_v2/attack/main/components/header_title', () => {
-      const mocked = {
-      HeaderTitle: () => <div data-test-subj="v2-header-title" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HeaderTitle: () => <div data-test-subj="v2-header-title" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/attack/main/components/alerts_count', () => {
-      const mocked = {
-      AlertsCount: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="alerts-count" data-hit-id={hit.id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsCount: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="alerts-count" data-hit-id={hit.id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context', () => {
-      const mocked = {
-      useAttackDetailsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDetailsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_navigate_to_attack_details_left_panel', () => {
-      const mocked = {
-      useNavigateToAttackDetailsLeftPanel: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToAttackDetailsLeftPanel: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/attack/main/components/status', () => {
-      const mocked = {
-      Status: () => <div data-test-subj="status" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Status: () => <div data-test-subj="status" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/attack/main/components/assignees', () => {
-      const mocked = {
-      Assignees: () => <div data-test-subj="assignees" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Assignees: () => <div data-test-subj="assignees" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/shared/components/notes', () => {
-      const mocked = {
-      Notes: ({ documentId }: { documentId: string }) => (
-        <div data-test-subj="notes" data-document-id={documentId} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Notes: ({ documentId }: { documentId: string }) => (
+      <div data-test-subj="notes" data-document-id={documentId} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/shared/components/flyout_header_block', () => {
-      const mocked = {
-      flyoutHeaderBlockStyles: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutHeaderBlockStyles: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseAttackDetailsContext = useAttackDetailsContext as Mock;
 const mockedUseNavigateToAttackDetailsLeftPanel = useNavigateToAttackDetailsLeftPanel as Mock;
@@ -155,7 +155,9 @@ describe('HeaderTitle (legacy wrapper)', () => {
   });
 
   it('builds the hit from the searchHit and passes it to v2 HeaderTitle', async () => {
-    const { HeaderTitle: MockedV2HeaderTitle } = (await vi.importMock('../../../flyout_v2/attack/main/components/header_title'));
+    const { HeaderTitle: MockedV2HeaderTitle } = await vi.importMock(
+      '../../../flyout_v2/attack/main/components/header_title'
+    );
     const spy = vi.spyOn({ MockedV2HeaderTitle }, 'MockedV2HeaderTitle');
 
     const mockHit = buildDataTableRecord(mockSearchHit);

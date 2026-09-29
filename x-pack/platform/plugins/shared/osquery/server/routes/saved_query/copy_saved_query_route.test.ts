@@ -17,18 +17,20 @@ import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_inte
 import { getUserInfo } from '../../lib/get_user_info';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/get_user_info', () => {
-      const mocked = {
-      getUserInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUserInfo: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('copySavedQueryRoute', () => {
   let routeHandler: RequestHandler;
@@ -109,9 +111,7 @@ describe('copySavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
     (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
@@ -157,9 +157,7 @@ describe('copySavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
     (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();
@@ -181,9 +179,7 @@ describe('copySavedQueryRoute', () => {
       get: vi.fn().mockRejectedValue(new Error('Not found')),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
 
     setupRoute();
 
@@ -218,9 +214,7 @@ describe('copySavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
     (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     setupRoute();

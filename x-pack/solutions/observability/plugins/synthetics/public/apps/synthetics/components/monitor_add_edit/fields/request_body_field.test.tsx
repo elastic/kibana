@@ -17,12 +17,12 @@ import { RequestBodyField } from './request_body_field';
 import { CodeEditorMode } from '../types';
 
 vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
-      htmlIdGenerator: () => () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+    htmlIdGenerator: () => () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<RequestBodyField />', () => {
   let user: UserEvent;

@@ -13,20 +13,20 @@ import { waitFor, renderHook, act } from '@testing-library/react';
 
 const mockSetCard = vi.fn();
 vi.mock('../../hooks/use_url_detail', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_url_detail')),
-      useUrlDetail: () => ({ setCard: mockSetCard }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_url_detail')),
+    useUrlDetail: () => ({ setCard: mockSetCard }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: () => ({ hash: '#card-1', pathname: '/test' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: () => ({ hash: '#card-1', pathname: '/test' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useExpandedCard Hook', () => {
   const mockCardId = 'card-1' as OnboardingCardId;

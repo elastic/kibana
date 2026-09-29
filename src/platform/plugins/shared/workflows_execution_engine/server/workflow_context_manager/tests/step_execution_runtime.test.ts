@@ -373,16 +373,14 @@ describe('StepExecutionRuntime', () => {
   describe('finishStep', () => {
     beforeEach(() => {
       mockDateNow = new Date('2025-08-06T00:00:00.000Z');
-      (workflowExecutionState.getStepExecution as Mock).mockImplementation(
-        (stepExecutionId) => {
-          if (stepExecutionId === 'fake_step_execution_id') {
-            return {
-              stepId: 'fakeStepId1',
-              startedAt: '2025-08-06T00:00:00.000Z',
-            } as Partial<EsWorkflowStepExecution>;
-          }
+      (workflowExecutionState.getStepExecution as Mock).mockImplementation((stepExecutionId) => {
+        if (stepExecutionId === 'fake_step_execution_id') {
+          return {
+            stepId: 'fakeStepId1',
+            startedAt: '2025-08-06T00:00:00.000Z',
+          } as Partial<EsWorkflowStepExecution>;
         }
-      );
+      });
       workflowExecutionState.getWorkflowExecution = vi.fn().mockReturnValue({
         id: 'testWorkflowExecutionId',
         currentNodeId: 'node1',
@@ -408,18 +406,16 @@ describe('StepExecutionRuntime', () => {
 
     describe('step execution succeeds', () => {
       beforeEach(() => {
-        (workflowExecutionState.getStepExecution as Mock).mockImplementation(
-          (stepExecutionId) => {
-            if (stepExecutionId === 'fake_step_execution_id') {
-              return {
-                stepId: 'fakeStepId1',
-                startedAt: '2025-08-05T00:00:00.000Z',
-                output: { success: true, data: {} },
-                error: undefined,
-              } as Partial<EsWorkflowStepExecution>;
-            }
+        (workflowExecutionState.getStepExecution as Mock).mockImplementation((stepExecutionId) => {
+          if (stepExecutionId === 'fake_step_execution_id') {
+            return {
+              stepId: 'fakeStepId1',
+              startedAt: '2025-08-05T00:00:00.000Z',
+              output: { success: true, data: {} },
+              error: undefined,
+            } as Partial<EsWorkflowStepExecution>;
           }
-        );
+        });
       });
 
       it('should upsert step with the fake step execution id', () => {
@@ -727,9 +723,9 @@ describe('StepExecutionRuntime', () => {
       };
 
       // Persisted on the step execution: type + message + details:{status}; no body/headers.
-      const [persistedStep] = (workflowExecutionState.upsertStep as Mock).mock.calls.at(
-        -1
-      ) as [EsWorkflowStepExecution];
+      const [persistedStep] = (workflowExecutionState.upsertStep as Mock).mock.calls.at(-1) as [
+        EsWorkflowStepExecution
+      ];
       expect(persistedStep.error).toEqual(expectedSerializedError);
       expect(persistedStep.error?.details).toEqual({ status: 500 });
       expect(persistedStep.error?.details).not.toHaveProperty('body');

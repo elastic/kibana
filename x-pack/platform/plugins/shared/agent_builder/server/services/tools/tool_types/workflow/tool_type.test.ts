@@ -25,25 +25,23 @@ import {
 } from '@kbn/agent-builder-tools-base/workflows';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
-      const mocked = {
-      executeWorkflow: vi.fn(),
-      hasWorkflowReadPrivilege: vi.fn(),
-      hasWorkflowExecutePrivilege: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeWorkflow: vi.fn(),
+    hasWorkflowReadPrivilege: vi.fn(),
+    hasWorkflowExecutePrivilege: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./validation', () => {
-      const mocked = {
-      validateWorkflowId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateWorkflowId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const executeWorkflowMock = executeWorkflow as MockedFunction<typeof executeWorkflow>;
-const hasReadMock = hasWorkflowReadPrivilege as MockedFunction<
-  typeof hasWorkflowReadPrivilege
->;
+const hasReadMock = hasWorkflowReadPrivilege as MockedFunction<typeof hasWorkflowReadPrivilege>;
 const hasExecuteMock = hasWorkflowExecutePrivilege as MockedFunction<
   typeof hasWorkflowExecutePrivilege
 >;

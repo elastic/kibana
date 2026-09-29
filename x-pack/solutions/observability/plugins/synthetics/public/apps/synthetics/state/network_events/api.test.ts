@@ -13,11 +13,11 @@ import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import { apiService } from '../../../../utils/api_service';
 
 vi.mock('../../../../utils/api_service', () => {
-      const mocked = {
-      apiService: { get: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiService: { get: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetchNetworkEvents remoteName plumbing', () => {
   const mockGet = apiService.get as Mock;

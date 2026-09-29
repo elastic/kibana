@@ -5,29 +5,29 @@
  * 2.0.
  */
 
+import { mockDependencies, MockRouter } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
-import { mockDependencies, MockRouter } from '../../__mocks__';
-
 vi.mock('../../lib/search_applications/field_capabilities', () => {
-      const mocked = {
-      fetchSearchApplicationFieldCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchSearchApplicationFieldCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/search_applications/fetch_indices_stats', () => {
-      const mocked = {
-      fetchIndicesStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchIndicesStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/search_applications/fetch_alias_indices', () => {
-      const mocked = {
-      fetchAliasIndices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAliasIndices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -138,9 +138,7 @@ describe('engines routes', () => {
         updated_at_millis: 1679847286355,
       };
 
-      (mockClient.asCurrentUser.searchApplication.get as Mock).mockResolvedValueOnce(
-        engineResult
-      );
+      (mockClient.asCurrentUser.searchApplication.get as Mock).mockResolvedValueOnce(engineResult);
 
       await mockRouter.callRoute({
         params: { engine_name: engineResult.name },
@@ -588,9 +586,7 @@ describe('engines routes', () => {
         name: 'unit-test',
       };
 
-      (mockClient.asCurrentUser.searchApplication.get as Mock).mockResolvedValueOnce(
-        engineResult
-      );
+      (mockClient.asCurrentUser.searchApplication.get as Mock).mockResolvedValueOnce(engineResult);
       (fetchSearchApplicationFieldCapabilities as Mock).mockResolvedValueOnce(
         fieldCapabilitiesResult
       );

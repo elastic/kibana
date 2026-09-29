@@ -17,26 +17,26 @@ import { getTimeRangeAsDays, formatDollars } from './metrics';
 
 // Mock dependencies
 vi.mock('./cost_savings_metric', () => {
-      const mocked = {
-      CostSavingsMetric: vi.fn(() => <div data-test-subj="mock-cost-savings-metric" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CostSavingsMetric: vi.fn(() => <div data-test-subj="mock-cost-savings-metric" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compare_percentage_badge', () => {
-      const mocked = {
-      ComparePercentageBadge: vi.fn(() => <div data-test-subj="mock-compare-percentage-badge" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComparePercentageBadge: vi.fn(() => <div data-test-subj="mock-compare-percentage-badge" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./metrics', () => {
-      const mocked = {
-      getTimeRangeAsDays: vi.fn(),
-      formatDollars: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimeRangeAsDays: vi.fn(),
+    formatDollars: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetTimeRangeAsDays = getTimeRangeAsDays as MockedFunction<typeof getTimeRangeAsDays>;
 const mockFormatDollars = formatDollars as MockedFunction<typeof formatDollars>;

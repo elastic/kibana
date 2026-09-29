@@ -24,56 +24,56 @@ import {
 } from '../../components/attacks/table/attack_group_content';
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
-      const mocked = {
-      AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }) => (
-        <div data-test-subj="mock-markdown-formatter">{markdown}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }) => (
+      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
   () => {
-      const mocked = {
-        getFormattedDate: vi.fn(() => '2023-10-27 10:00:00'),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getFormattedDate: vi.fn(() => '2023-10-27 10:00:00'),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockReportEvent = vi.fn();
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useDateFormat: vi.fn(() => vi.fn()),
-      useToasts: vi.fn(() => ({
-        addDanger: vi.fn(),
-        addSuccess: vi.fn(),
-      })),
-      useKibana: () => ({
-        services: {
-          telemetry: {
-            reportEvent: mockReportEvent,
-          },
+  const mocked = {
+    useDateFormat: vi.fn(() => vi.fn()),
+    useToasts: vi.fn(() => ({
+      addDanger: vi.fn(),
+      addSuccess: vi.fn(),
+    })),
+    useKibana: () => ({
+      services: {
+        telemetry: {
+          reportEvent: mockReportEvent,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
-      const mocked = {
-      useBulkGetUserProfiles: vi.fn(() => ({ data: [] })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetUserProfiles: vi.fn(() => ({ data: [] })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
 

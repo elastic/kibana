@@ -19,11 +19,11 @@ import {
 } from './identify_inferred_features';
 
 vi.mock('./identify_features_via_agent', () => {
-      const mocked = {
-      executeFeatureIdentificationAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeFeatureIdentificationAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecuteFeatureIdentificationAgent = vi.mocked(executeFeatureIdentificationAgent);
 

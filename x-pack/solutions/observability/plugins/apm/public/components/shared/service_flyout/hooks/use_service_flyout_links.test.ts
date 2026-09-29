@@ -12,26 +12,26 @@ import { APM_APP_LOCATOR_ID } from '../../../../locator/service_detail_locator';
 import { useServiceFlyoutLinks } from './use_service_flyout_links';
 
 vi.mock('../../../../hooks/use_manage_slos_url', () => {
-      const mocked = {
-      getManageSlosUrl: vi.fn(() => '/app/slos?serviceName=opbeans-java'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getManageSlosUrl: vi.fn(() => '/app/slos?serviceName=opbeans-java'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../footer/hooks/use_alerts_href', () => {
-      const mocked = {
-      useAlertsHref: vi.fn(() => '/app/observability/alerts?mock'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsHref: vi.fn(() => '/app/observability/alerts?mock'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFlyoutDiscoverHref = vi.fn();
 vi.mock('../utils/get_flyout_discover_navigation', () => {
-      const mocked = {
-      getFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFlyoutDiscoverNavigation: (args: unknown) => mockUseFlyoutDiscoverHref(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRedirectUrl = vi.fn(
   (payload: { serviceName: string; serviceOverviewTab?: string }) => {
@@ -43,11 +43,11 @@ const mockLocatorsGet = vi.fn(() => ({ getRedirectUrl: mockGetRedirectUrl }));
 
 const mockUseServiceFlyoutContext = vi.fn();
 vi.mock('../service_flyout_context', () => {
-      const mocked = {
-      useServiceFlyoutContext: (...args: unknown[]) => mockUseServiceFlyoutContext(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutContext: (...args: unknown[]) => mockUseServiceFlyoutContext(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function makeContext(overrides: { sloRead?: boolean; transactionType?: string } = {}) {
   const { sloRead = true, transactionType } = overrides;

@@ -18,11 +18,11 @@ import type { ScheduleBackfillResults } from '../../../../application/backfill/m
 import { asSpaceId } from '@kbn/core-spaces-common';
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fillGapByIdRoute', () => {
   let rulesClient: ReturnType<typeof rulesClientMock.create>;

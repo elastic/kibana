@@ -26,10 +26,9 @@ vi.mock('../../../../hooks/use_kibana');
 vi.mock('./use_hosts_table_url_state');
 vi.mock('react-use/lib/useAsync', () => vi.fn(() => ({ value: undefined })));
 
-const mockUseUnifiedSearchContext =
-  useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
-    typeof useUnifiedSearchHooks.useUnifiedSearchContext
-  >;
+const mockUseUnifiedSearchContext = useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
+  typeof useUnifiedSearchHooks.useUnifiedSearchContext
+>;
 const mockUseHostsViewContext = useHostsViewHooks.useHostsViewContext as MockedFunction<
   typeof useHostsViewHooks.useHostsViewContext
 >;

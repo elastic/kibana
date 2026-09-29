@@ -17,15 +17,15 @@ import type { RouteContext } from '../../types';
 
 // Mock the syncEditedMonitorBulk module
 vi.mock('../../monitor_cruds/bulk_cruds/edit_monitor_bulk', () => {
-      const mocked = {
-      syncEditedMonitorBulk: vi.fn().mockResolvedValue({
-        failedConfigs: [],
-        errors: [],
-        editedMonitors: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    syncEditedMonitorBulk: vi.fn().mockResolvedValue({
+      failedConfigs: [],
+      errors: [],
+      editedMonitors: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Import the mocked function
 import { syncEditedMonitorBulk } from '../../monitor_cruds/bulk_cruds/edit_monitor_bulk';

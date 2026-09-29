@@ -32,15 +32,15 @@ import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_vi
 import { asSpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 vi.mock('./lib/evaluate_rule', () => {
-      const mocked = { evaluateRule: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { evaluateRule: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/custom_threshold_rule/get_view_in_app_url', () => {
-      const mocked = {
-      getViewInAppUrl: vi.fn().mockReturnValue('mockedViewInApp'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getViewInAppUrl: vi.fn().mockReturnValue('mockedViewInApp'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type TestRuleState = Record<string, unknown> & {
   aRuleStateKey: string;
@@ -142,10 +142,9 @@ const mockOptions = {
 
 const mockTimeRange = { start: Date.now() - 60000, end: Date.now() };
 const setEvaluationResults = async (response: Array<Record<string, Evaluation>>) => {
-  return (await vi.importMock('./lib/evaluate_rule'))
-    .evaluateRule.mockImplementation(() =>
-      response.map((evaluations) => ({ evaluations, timeRange: mockTimeRange }))
-    );
+  return (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mockImplementation(() =>
+    response.map((evaluations) => ({ evaluations, timeRange: mockTimeRange }))
+  );
 };
 
 const mockLibs: any = {

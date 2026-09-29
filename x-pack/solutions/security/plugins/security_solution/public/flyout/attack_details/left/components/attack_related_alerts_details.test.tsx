@@ -26,12 +26,12 @@ vi.mock('../../hooks/use_original_alert_ids');
 vi.mock(
   '../../../../flyout_v2/document/tools/correlations/components/correlations_details_alerts_table',
   () => {
-      const mocked = {
-        CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
-          mockCorrelationsDetailsAlertsTable(props),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      CorrelationsDetailsAlertsTable: (props: { [key: string]: unknown }) =>
+        mockCorrelationsDetailsAlertsTable(props),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseAttackDetailsContext = useAttackDetailsContext as Mock;

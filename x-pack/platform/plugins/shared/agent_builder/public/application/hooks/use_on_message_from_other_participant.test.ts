@@ -19,39 +19,39 @@ import { createUserMessageEvent } from '../components/conversations/timeline/ite
 import { useOnMessageFromOtherParticipant } from './use_on_message_from_other_participant';
 
 vi.mock('../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context/streaming/streaming_context', () => {
-      const mocked = {
-      useStreamingContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamingContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_conversation', () => {
-      const mocked = {
-      useConversationStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_current_user', () => {
-      const mocked = {
-      useCurrentUser: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUser: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/conversations/timeline/use_timeline_items', () => {
-      const mocked = {
-      useTimelineItems: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineItems: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationId = vi.mocked(useConversationId);
 const mockUseStreamingContext = vi.mocked(useStreamingContext);

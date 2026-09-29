@@ -23,31 +23,31 @@ import { deleteWatches, useLoadWatches } from '../../lib/api';
 import { WatchListPage } from './watch_list_page';
 
 vi.mock('../../lib/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../lib/api')),
-      useLoadWatches: vi.fn(),
-      deleteWatches: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../lib/api')),
+    useLoadWatches: vi.fn(),
+    deleteWatches: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../lib/navigation')),
-      goToCreateThresholdAlert: vi.fn(),
-      goToCreateAdvancedWatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../lib/navigation')),
+    goToCreateThresholdAlert: vi.fn(),
+    goToCreateAdvancedWatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = vi.fn();
 vi.mock('../../app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../app_context')),
-      useAppContext: () => mockUseAppContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../app_context')),
+    useAppContext: () => mockUseAppContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useLoadWatchesMock = vi.mocked(useLoadWatches);
 const deleteWatchesMock = vi.mocked(deleteWatches);

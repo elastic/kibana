@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ToolResultType } from '@kbn/agent-builder-common';
 import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools';

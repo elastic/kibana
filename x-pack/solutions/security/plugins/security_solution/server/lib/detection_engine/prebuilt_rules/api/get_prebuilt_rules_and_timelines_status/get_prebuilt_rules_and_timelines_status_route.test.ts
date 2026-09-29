@@ -56,7 +56,7 @@ vi.mock('../../logic/rule_assets/prebuilt_rule_assets_client', () => {
 });
 
 vi.mock('../../../../timeline/utils/check_timelines_status', async () => {
-  const actual = (await vi.importActual('../../../../timeline/utils/check_timelines_status'));
+  const actual = await vi.importActual('../../../../timeline/utils/check_timelines_status');
   return {
     ...actual,
     checkTimelinesStatus: vi.fn(),
@@ -161,9 +161,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
     test('0 timelines installed, 3 timelines not installed, 0 timelines not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (checkTimelinesStatus as Mock).mockResolvedValue(
-        mockCheckTimelinesStatusBeforeInstallResult
-      );
+      (checkTimelinesStatus as Mock).mockResolvedValue(mockCheckTimelinesStatusBeforeInstallResult);
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 
@@ -181,9 +179,7 @@ describe('get_prepackaged_rule_status_route', () => {
 
     test('3 timelines installed, 0 timelines not installed, 0 timelines not updated', async () => {
       clients.rulesClient.find.mockResolvedValue(getEmptyFindResult());
-      (checkTimelinesStatus as Mock).mockResolvedValue(
-        mockCheckTimelinesStatusAfterInstallResult
-      );
+      (checkTimelinesStatus as Mock).mockResolvedValue(mockCheckTimelinesStatusAfterInstallResult);
       const request = getPrepackagedRulesStatusRequest();
       const response = await server.inject(request, requestContextMock.convertContext(context));
 

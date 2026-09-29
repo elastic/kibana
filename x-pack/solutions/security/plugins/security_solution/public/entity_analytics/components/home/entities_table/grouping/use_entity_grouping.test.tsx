@@ -26,33 +26,33 @@ import {
 } from './use_fetch_grouped_data';
 
 vi.mock('@kbn/grouping', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/grouping')),
-      useGrouping: vi.fn(() => ({
-        selectedGroups: [],
-        setSelectedGroups: vi.fn(),
-        groupsUnit: vi.fn(),
-        options: [],
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/grouping')),
+    useGrouping: vi.fn(() => ({
+      selectedGroups: [],
+      setSelectedGroups: vi.fn(),
+      groupsUnit: vi.fn(),
+      options: [],
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_has_entity_resolution_license', () => {
-      const mocked = {
-      useHasEntityResolutionLicense: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityResolutionLicense: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_fetch_grouped_data', () => {
-      const mocked = {
-      useFetchGroupedData: vi.fn(() => ({ data: undefined, isFetching: false })),
-      useFetchUnfilteredResolutionGroupData: vi.fn(() => ({ data: undefined, isFetching: false })),
-      useFetchFilteredResolutionGroupData: vi.fn(() => ({ data: undefined, isFetching: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGroupedData: vi.fn(() => ({ data: undefined, isFetching: false })),
+    useFetchUnfilteredResolutionGroupData: vi.fn(() => ({ data: undefined, isFetching: false })),
+    useFetchFilteredResolutionGroupData: vi.fn(() => ({ data: undefined, isFetching: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = { fields: [] } as unknown as DataView;
 

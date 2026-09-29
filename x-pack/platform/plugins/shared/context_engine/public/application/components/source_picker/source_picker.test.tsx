@@ -22,23 +22,23 @@ import { SourcePicker } from './source_picker';
 import type { SelectedSource } from './types';
 
 vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: ({
-        query,
-        onTextLangQueryChange,
-      }: {
-        query: { esql: string };
-        onTextLangQueryChange: (query: { esql: string }) => void;
-      }) => (
-        <textarea
-          data-test-subj="mockEsqlEditor"
-          value={query.esql}
-          onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLLangEditor: ({
+      query,
+      onTextLangQueryChange,
+    }: {
+      query: { esql: string };
+      onTextLangQueryChange: (query: { esql: string }) => void;
+    }) => (
+      <textarea
+        data-test-subj="mockEsqlEditor"
+        value={query.esql}
+        onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const CONNECTORS = [
   { id: 'connector-gdrive', name: 'Google Drive', connector_type_id: '.google_drive' },

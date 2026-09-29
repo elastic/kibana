@@ -16,37 +16,37 @@ import * as useBulkGetProfilesModule from '../../hooks/use_bulk_get_profiles';
 import * as useCurrentUserProfileModule from '../../hooks/use_current_user_profile';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          userProfile: {},
-          notifications: { toasts: { addError: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        userProfile: {},
+        notifications: { toasts: { addError: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/user-profile-components', () => {
-      const mocked = {
-      UserAvatar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserAvatar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_bulk_get_profiles', () => {
-      const mocked = {
-      useBulkGetProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_current_user_profile', () => {
-      const mocked = {
-      useCurrentUserProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUserProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseBulkGetProfiles = vi.mocked(useBulkGetProfilesModule.useBulkGetProfiles);
 const mockUseCurrentUserProfile = vi.mocked(useCurrentUserProfileModule.useCurrentUserProfile);

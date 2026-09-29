@@ -12,12 +12,12 @@ import { writeGenerationStartedEvent } from '.';
 const mockWriteAttackDiscoveryEvent = vi.fn();
 
 vi.mock('../../persistence/event_logging', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
-      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
+    writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('writeGenerationStartedEvent', () => {
   beforeEach(() => {

@@ -10,13 +10,13 @@ import { vi } from 'vitest';
 /* eslint @typescript-eslint/no-var-requires: 0 */
 
 vi.mock('../selectors/map_selectors', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 vi.mock('../reducers/non_serializable_instances', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 vi.mock('./data_request_actions', () => {
   return {
     syncDataForAllLayers: () => {},

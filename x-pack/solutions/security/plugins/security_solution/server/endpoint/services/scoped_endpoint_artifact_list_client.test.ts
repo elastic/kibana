@@ -18,140 +18,153 @@ import type { EndpointAppContextService } from '../endpoint_app_context_services
 import { ScopedEndpointArtifactListClient } from './scoped_endpoint_artifact_list_client';
 
 vi.mock('../../lists_integration/endpoint/utils/build_space_data_filter', () => {
-      const mocked = {
-      buildSpaceDataFilter: vi.fn().mockResolvedValue({ filter: 'space-filter-kql' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildSpaceDataFilter: vi.fn().mockResolvedValue({ filter: 'space-filter-kql' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidatePreSingleListFind = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('../../lists_integration/endpoint/validators/trusted_app_validator', () => {
-      const mocked = {
-      TrustedAppValidator: Object.assign(
-        vi.fn().mockImplementation(() => ({
-          validatePreSingleListFind: mockValidatePreSingleListFind,
-        })),
-        {
-          isTrustedApp: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_trusted_apps'),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TrustedAppValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: mockValidatePreSingleListFind,
+      })),
+      {
+        isTrustedApp: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_trusted_apps'),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lists_integration/endpoint/validators/trusted_device_validator', () => {
-      const mocked = {
-      TrustedDeviceValidator: Object.assign(
-        vi.fn().mockImplementation(() => ({
-          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
-        })),
-        {
-          isTrustedDevice: vi.fn(
-            ({ listId }: { listId: string }) => listId === 'endpoint_trusted_devices'
-          ),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
-
-vi.mock(
-  '../../lists_integration/endpoint/validators/host_isolation_exceptions_validator',
-  () => {
-      const mocked = {
-        HostIsolationExceptionsValidator: Object.assign(
-          vi.fn().mockImplementation(() => ({
-            validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
-          })),
-          {
-            isHostIsolationException: vi.fn(
-              ({ listId }: { listId: string }) => listId === 'endpoint_host_isolation_exceptions'
-            ),
-          }
+  const mocked = {
+    TrustedDeviceValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+      })),
+      {
+        isTrustedDevice: vi.fn(
+          ({ listId }: { listId: string }) => listId === 'endpoint_trusted_devices'
         ),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
+
+vi.mock('../../lists_integration/endpoint/validators/host_isolation_exceptions_validator', () => {
+  const mocked = {
+    HostIsolationExceptionsValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+      })),
+      {
+        isHostIsolationException: vi.fn(
+          ({ listId }: { listId: string }) => listId === 'endpoint_host_isolation_exceptions'
+        ),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lists_integration/endpoint/validators/event_filter_validator', () => {
-      const mocked = {
-      EventFilterValidator: Object.assign(
-        vi.fn().mockImplementation(() => ({
-          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
-        })),
-        {
-          isEventFilter: vi.fn(
-            ({ listId }: { listId: string }) => listId === 'endpoint_event_filters'
-          ),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventFilterValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+      })),
+      {
+        isEventFilter: vi.fn(
+          ({ listId }: { listId: string }) => listId === 'endpoint_event_filters'
+        ),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lists_integration/endpoint/validators/blocklist_validator', () => {
-      const mocked = {
-      BlocklistValidator: Object.assign(
-        vi.fn().mockImplementation(() => ({
-          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
-        })),
-        {
-          isBlocklist: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_blocklists'),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BlocklistValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+      })),
+      {
+        isBlocklist: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_blocklists'),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lists_integration/endpoint/validators/endpoint_exceptions_validator', () => {
-      const mocked = {
-      EndpointExceptionsValidator: Object.assign(
-        vi.fn().mockImplementation(() => ({
-          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
-        })),
-        {
-          isEndpointException: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_list'),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EndpointExceptionsValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+      })),
+      {
+        isEndpointException: vi.fn(({ listId }: { listId: string }) => listId === 'endpoint_list'),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lists_integration/endpoint/validators/custom_yara_signatures_validator', () => {
-      const mocked = {
-      CustomYaraSignaturesValidator: Object.assign(
-        vi.fn().mockImplementation(() => ({
-          validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
-        })),
-        {
-          isCustomYaraSignature: vi.fn(
-            ({ listId }: { listId: string }) => listId === 'endpoint_custom_yara_signatures'
-          ),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomYaraSignaturesValidator: Object.assign(
+      vi.fn().mockImplementation(() => ({
+        validatePreSingleListFind: vi.fn().mockResolvedValue(undefined),
+      })),
+      {
+        isCustomYaraSignature: vi.fn(
+          ({ listId }: { listId: string }) => listId === 'endpoint_custom_yara_signatures'
+        ),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { buildSpaceDataFilter } = (await vi.importMock('../../lists_integration/endpoint/utils/build_space_data_filter')) as { buildSpaceDataFilter: Mock };
+const { buildSpaceDataFilter } = (await vi.importMock(
+  '../../lists_integration/endpoint/utils/build_space_data_filter'
+)) as { buildSpaceDataFilter: Mock };
 
-const { TrustedAppValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/trusted_app_validator')) as { TrustedAppValidator: Mock & { isTrustedApp: Mock } };
+const { TrustedAppValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/trusted_app_validator'
+)) as { TrustedAppValidator: Mock & { isTrustedApp: Mock } };
 
-const { BlocklistValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/blocklist_validator')) as { BlocklistValidator: Mock & { isBlocklist: Mock } };
+const { BlocklistValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/blocklist_validator'
+)) as { BlocklistValidator: Mock & { isBlocklist: Mock } };
 
-const { TrustedDeviceValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/trusted_device_validator')) as { TrustedDeviceValidator: Mock & { isTrustedDevice: Mock } };
+const { TrustedDeviceValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/trusted_device_validator'
+)) as { TrustedDeviceValidator: Mock & { isTrustedDevice: Mock } };
 
-const { HostIsolationExceptionsValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/host_isolation_exceptions_validator')) as {
+const { HostIsolationExceptionsValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/host_isolation_exceptions_validator'
+)) as {
   HostIsolationExceptionsValidator: Mock & { isHostIsolationException: Mock };
 };
 
-const { EventFilterValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/event_filter_validator')) as { EventFilterValidator: Mock & { isEventFilter: Mock } };
+const { EventFilterValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/event_filter_validator'
+)) as { EventFilterValidator: Mock & { isEventFilter: Mock } };
 
-const { EndpointExceptionsValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/endpoint_exceptions_validator')) as { EndpointExceptionsValidator: Mock & { isEndpointException: Mock } };
+const { EndpointExceptionsValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/endpoint_exceptions_validator'
+)) as { EndpointExceptionsValidator: Mock & { isEndpointException: Mock } };
 
-const { CustomYaraSignaturesValidator } = (await vi.importMock('../../lists_integration/endpoint/validators/custom_yara_signatures_validator')) as { CustomYaraSignaturesValidator: Mock & { isCustomYaraSignature: Mock } };
+const { CustomYaraSignaturesValidator } = (await vi.importMock(
+  '../../lists_integration/endpoint/validators/custom_yara_signatures_validator'
+)) as { CustomYaraSignaturesValidator: Mock & { isCustomYaraSignature: Mock } };
 
 describe('ScopedEndpointArtifactListClient', () => {
   let mockExceptionListClient: Mocked<ExceptionListClient>;

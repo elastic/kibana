@@ -18,11 +18,11 @@ import { EventService } from '../../lib/significant_events/events/event_service'
 import { createSignificantEventSmlType } from './significant_event_sml_type';
 
 vi.mock('../../lib/significant_events/events/event_service', () => {
-      const mocked = {
-      EventService: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventService: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const event: SignificantEvent = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
@@ -45,9 +45,7 @@ const getDataStreams = vi.fn().mockResolvedValue({
 });
 const isAvailable = vi.fn().mockResolvedValue(true);
 
-const createGetScopedClients = (
-  events: SignificantEvent[]
-): MockedFunction<GetScopedClients> => {
+const createGetScopedClients = (events: SignificantEvent[]): MockedFunction<GetScopedClients> => {
   const getEventClient = vi.fn(() => ({
     findLatestByEventId: vi.fn().mockResolvedValue(events.at(-1)),
   }));

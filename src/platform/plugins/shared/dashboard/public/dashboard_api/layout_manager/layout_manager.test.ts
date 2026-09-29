@@ -34,20 +34,20 @@ import { deserializeLayout } from './deserialize_layout';
 import { initializeLayoutManager } from './layout_manager';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('54321'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('54321'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // disable distinctUntilChanged for the sake of testing
 vi.mock('rxjs', () => {
-      const mocked = {
-      ...require('rxjs'),
-      distinctUntilChanged: () => (v: any) => v, // pass through the value without filtering
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('rxjs'),
+    distinctUntilChanged: () => (v: any) => v, // pass through the value without filtering
+  };
+  return { ...mocked, default: mocked };
+});
 
 const trackPanelMock = {
   setScrollToPanelId: vi.fn(),
@@ -343,75 +343,78 @@ describe('layout manager', () => {
 
   describe('getChildApi', () => {
     test('should return api when api is available', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const layoutManager = initializeLayoutManager(
-                viewModeManagerMock,
-                [panel1],
-                [],
-                trackPanelMock
-              );
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [panel1],
+          [],
+          trackPanelMock
+        );
 
-              layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-                expect(api).toBe(panel1Api);
-                done();
-              });
+        layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
+          expect(api).toBe(panel1Api);
+          done();
+        });
 
-              layoutManager.api.registerChildApi(panel1Api);
-            
-        }));
+        layoutManager.api.registerChildApi(panel1Api);
+      }));
 
     test('should return api from panel in open section when api is available', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const layoutManager = initializeLayoutManager(
-                viewModeManagerMock,
-                [
-                  {
-                    ...section1,
-                    collapsed: false,
-                  },
-                ],
-                [],
-                trackPanelMock
-              );
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [
+            {
+              ...section1,
+              collapsed: false,
+            },
+          ],
+          [],
+          trackPanelMock
+        );
 
-              layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-                expect(api).toBe(panel1Api);
-                done();
-              });
+        layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
+          expect(api).toBe(panel1Api);
+          done();
+        });
 
-              layoutManager.api.registerChildApi(panel1Api);
-            
-        }));
+        layoutManager.api.registerChildApi(panel1Api);
+      }));
 
     test('should return undefined from panel in closed section', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const layoutManager = initializeLayoutManager(
-                viewModeManagerMock,
-                [
-                  {
-                    ...section1,
-                    collapsed: true,
-                  },
-                ],
-                [],
-                trackPanelMock
-              );
+        const layoutManager = initializeLayoutManager(
+          viewModeManagerMock,
+          [
+            {
+              ...section1,
+              collapsed: true,
+            },
+          ],
+          [],
+          trackPanelMock
+        );
 
-              layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
-                expect(api).toBeUndefined();
-                done();
-              });
+        layoutManager.api.getChildApi(PANEL_ONE_ID).then((api) => {
+          expect(api).toBeUndefined();
+          done();
+        });
 
-              // do not call layoutManager.internalApi.registerChildApi
-              // because api will never become available
-            
-        }));
+        // do not call layoutManager.internalApi.registerChildApi
+        // because api will never become available
+      }));
   });
 
   describe('pinned panels', () => {

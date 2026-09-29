@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import Boom from '@hapi/boom';
+import { vi } from 'vitest';
 
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';

@@ -19,13 +19,13 @@ import { SearchButton } from './search_button';
 import { CHROME_HEADER_TEST_SUBJECTS } from '../test_subjects';
 
 vi.mock('@kbn/shared-ux-utility', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/shared-ux-utility')),
-      isMac: true,
-      useKeyboardShortcut: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/shared-ux-utility')),
+    isMac: true,
+    useKeyboardShortcut: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { useKeyboardShortcut } = vi.mocked(
   (await vi.importMock('@kbn/shared-ux-utility')) as typeof import('@kbn/shared-ux-utility')

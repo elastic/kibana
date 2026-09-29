@@ -12,19 +12,19 @@ import { validateAndSanitizeFileData } from './file_content';
 
 // Mock the magic-bytes.js module
 vi.mock('magic-bytes.js', () => {
-      const mocked = {
-      filetypemime: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filetypemime: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the sanitizeSvg function
 vi.mock('../sanitizations/svg', () => {
-      const mocked = {
-      sanitizeSvg: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sanitizeSvg: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { filetypemime } from 'magic-bytes.js';
 import { sanitizeSvg } from '../sanitizations/svg';

@@ -17,33 +17,33 @@ import { EpisodeAssigneeInlineControl } from './episode_assignee_inline_control'
 const mockOnApply = vi.fn();
 
 vi.mock('./episode_assignee_panel', () => {
-      const mocked = {
-      EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
-      EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
-        <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
-          {'Apply'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
+    EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
+      <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
+        {'Apply'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../assignee_cell', () => {
-      const mocked = {
-      AlertEpisodeAssigneeCell: ({
-        assigneeUid,
-        isTooltipFocusable,
-      }: {
-        assigneeUid: string | null;
-        isTooltipFocusable?: boolean;
-      }) => (
-        <span data-test-subj="assigneeCellStub" data-tooltip-focusable={String(isTooltipFocusable)}>
-          {assigneeUid}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeAssigneeCell: ({
+      assigneeUid,
+      isTooltipFocusable,
+    }: {
+      assigneeUid: string | null;
+      isTooltipFocusable?: boolean;
+    }) => (
+      <span data-test-subj="assigneeCellStub" data-tooltip-focusable={String(isTooltipFocusable)}>
+        {assigneeUid}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUserProfile = {} as UserProfileService;
 

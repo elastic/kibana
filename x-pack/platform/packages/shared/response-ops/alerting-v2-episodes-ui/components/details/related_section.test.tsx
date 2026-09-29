@@ -26,11 +26,11 @@ import { RuleStateStatus } from '../../types/rule_state';
 vi.mock('../../utils/run_esql_async_search');
 
 vi.mock('./related/related', () => {
-      const mocked = {
-      AlertEpisodesRelated: vi.fn(() => <div data-test-subj="alertEpisodesRelatedStub" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodesRelated: vi.fn(() => <div data-test-subj="alertEpisodesRelatedStub" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { AlertEpisodesRelated } = (await vi.importMock('./related/related')) as {
   AlertEpisodesRelated: Mock;

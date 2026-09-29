@@ -12,12 +12,12 @@ import { lookupStepDefinitions, lookupTriggerDefinitions } from './lookup';
 import { dispatchToolCall } from './tools';
 
 vi.mock('./lookup', () => {
-      const mocked = {
-      lookupStepDefinitions: vi.fn(),
-      lookupTriggerDefinitions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    lookupStepDefinitions: vi.fn(),
+    lookupTriggerDefinitions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLookupStepDefinitions = lookupStepDefinitions as MockedFunction<
   typeof lookupStepDefinitions

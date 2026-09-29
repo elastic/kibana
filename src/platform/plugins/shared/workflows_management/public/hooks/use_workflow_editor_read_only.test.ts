@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
-import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
 import type { WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -26,12 +26,12 @@ import {
 import { getTestProvider } from '../shared/mocks/test_providers';
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui')) as {
   useWorkflowsCapabilities: Mock;

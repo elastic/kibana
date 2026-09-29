@@ -20,18 +20,18 @@ import {
 } from './use_significant_events_cost';
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_significant_events_run_quotas', () => {
-      const mocked = {
-      useRunQuotas: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunQuotas: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;

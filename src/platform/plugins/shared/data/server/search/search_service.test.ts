@@ -340,9 +340,7 @@ describe('Search service', () => {
       };
 
       it('cancels a saved object with no search ids', async () => {
-        mockSessionClient.getSearchIdMapping = vi
-          .fn()
-          .mockResolvedValue(new Map<string, string>());
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(new Map<string, string>());
         mockSessionClient.cancel = vi.fn().mockResolvedValue(mockSavedObject);
         const cancelSpy = vi.spyOn(mockScopedClient, 'cancel');
 
@@ -420,9 +418,7 @@ describe('Search service', () => {
       };
 
       it('deletes a saved object with no search ids', async () => {
-        mockSessionClient.getSearchIdMapping = vi
-          .fn()
-          .mockResolvedValue(new Map<string, string>());
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(new Map<string, string>());
         mockSessionClient.delete = vi.fn().mockResolvedValue(mockSavedObject);
         const cancelSpy = vi.spyOn(mockScopedClient, 'cancel');
 
@@ -500,9 +496,7 @@ describe('Search service', () => {
       };
 
       it('extends a saved object with no search ids', async () => {
-        mockSessionClient.getSearchIdMapping = vi
-          .fn()
-          .mockResolvedValue(new Map<string, string>());
+        mockSessionClient.getSearchIdMapping = vi.fn().mockResolvedValue(new Map<string, string>());
         mockSessionClient.extend = vi.fn().mockResolvedValue(mockSavedObject);
         mockStrategy.extend = vi.fn();
 

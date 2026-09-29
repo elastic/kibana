@@ -16,12 +16,12 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { DesignToolsButtonImpl } from './design_tools_button_impl';
 
 vi.mock('./edit/library/eui_icon_cache', () => {
-      const mocked = {
-      preloadAllEuiIcons: vi.fn().mockResolvedValue(undefined),
-      getIconTypes: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    preloadAllEuiIcons: vi.fn().mockResolvedValue(undefined),
+    getIconTypes: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DesignToolsButtonImpl', () => {
   it('should render the button', () => {

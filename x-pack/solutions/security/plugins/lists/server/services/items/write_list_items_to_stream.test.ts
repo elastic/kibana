@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
 import { LIST_ID, LIST_ITEM_INDEX } from '../../../common/constants.mock';
@@ -38,104 +37,108 @@ describe('write_list_items_to_stream', () => {
 
   describe('exportListItemsToStream', () => {
     test('It exports empty list items to the stream as an empty array', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getExportListItemsToStreamOptionsMock();
-              const firstResponse = getSearchListItemMock();
-              firstResponse.hits.hits = [];
-              const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-              esClient.search.mockResponse(firstResponse);
-              exportListItemsToStream({ ...options, esClient });
+        const options = getExportListItemsToStreamOptionsMock();
+        const firstResponse = getSearchListItemMock();
+        firstResponse.hits.hits = [];
+        const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+        esClient.search.mockResponse(firstResponse);
+        exportListItemsToStream({ ...options, esClient });
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.on('finish', () => {
-                expect(chunks).toEqual([]);
-                done();
-              });
-            
-        }));
+        options.stream.on('finish', () => {
+          expect(chunks).toEqual([]);
+          done();
+        });
+      }));
 
     test('It exports single list item to the stream', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getExportListItemsToStreamOptionsMock();
-              const response = getSearchListItemMock();
-              const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-              esClient.search.mockResponse(response);
-              exportListItemsToStream({ ...options, esClient });
+        const options = getExportListItemsToStreamOptionsMock();
+        const response = getSearchListItemMock();
+        const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+        esClient.search.mockResponse(response);
+        exportListItemsToStream({ ...options, esClient });
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.on('finish', () => {
-                expect(chunks).toEqual(['127.0.0.1']);
-                done();
-              });
-            
-        }));
+        options.stream.on('finish', () => {
+          expect(chunks).toEqual(['127.0.0.1']);
+          done();
+        });
+      }));
 
     test('It exports two list items to the stream', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getExportListItemsToStreamOptionsMock();
-              const firstResponse = getSearchListItemMock();
-              const secondResponse = getSearchListItemMock();
-              firstResponse.hits.hits = [...firstResponse.hits.hits, ...secondResponse.hits.hits];
-              const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-              esClient.search.mockResponse(firstResponse);
-              exportListItemsToStream({ ...options, esClient });
+        const options = getExportListItemsToStreamOptionsMock();
+        const firstResponse = getSearchListItemMock();
+        const secondResponse = getSearchListItemMock();
+        firstResponse.hits.hits = [...firstResponse.hits.hits, ...secondResponse.hits.hits];
+        const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+        esClient.search.mockResponse(firstResponse);
+        exportListItemsToStream({ ...options, esClient });
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.on('finish', () => {
-                expect(chunks).toEqual(['127.0.0.1', '127.0.0.1']);
-                done();
-              });
-            
-        }));
+        options.stream.on('finish', () => {
+          expect(chunks).toEqual(['127.0.0.1', '127.0.0.1']);
+          done();
+        });
+      }));
 
     test('It exports two list items to the stream with two separate calls', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getExportListItemsToStreamOptionsMock();
+        const options = getExportListItemsToStreamOptionsMock();
 
-              const firstResponse = getSearchListItemMock();
-              firstResponse.hits.hits[0].sort = ['some-sort-value'];
+        const firstResponse = getSearchListItemMock();
+        firstResponse.hits.hits[0].sort = ['some-sort-value'];
 
-              const secondResponse = getSearchListItemMock();
-              if (secondResponse.hits.hits[0]._source) {
-                secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
-              }
+        const secondResponse = getSearchListItemMock();
+        if (secondResponse.hits.hits[0]._source) {
+          secondResponse.hits.hits[0]._source.ip = '255.255.255.255';
+        }
 
-              const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
-              esClient.search.mockResponseOnce(firstResponse);
-              esClient.search.mockResponseOnce(secondResponse);
-              exportListItemsToStream({ ...options, esClient });
+        const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;
+        esClient.search.mockResponseOnce(firstResponse);
+        esClient.search.mockResponseOnce(secondResponse);
+        exportListItemsToStream({ ...options, esClient });
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.on('finish', () => {
-                expect(chunks).toEqual(['127.0.0.1', '255.255.255.255']);
-                done();
-              });
-            
-        }));
+        options.stream.on('finish', () => {
+          expect(chunks).toEqual(['127.0.0.1', '255.255.255.255']);
+          done();
+        });
+      }));
   });
 
   describe('writeNextResponse', () => {
@@ -236,87 +239,91 @@ describe('write_list_items_to_stream', () => {
 
   describe('writeResponseHitsToStream', () => {
     test('it will push into the stream the mock response', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getWriteResponseHitsToStreamOptionsMock();
-              writeResponseHitsToStream(options);
+        const options = getWriteResponseHitsToStreamOptionsMock();
+        writeResponseHitsToStream(options);
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.end(() => {
-                expect(chunks).toEqual(['127.0.0.1']);
-                done();
-              });
-            
-        }));
+        options.stream.end(() => {
+          expect(chunks).toEqual(['127.0.0.1']);
+          done();
+        });
+      }));
 
     test('it will push into the stream an empty mock response', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getWriteResponseHitsToStreamOptionsMock();
-              options.response.hits.hits = [];
-              writeResponseHitsToStream(options);
+        const options = getWriteResponseHitsToStreamOptionsMock();
+        options.response.hits.hits = [];
+        writeResponseHitsToStream(options);
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.on('finish', () => {
-                expect(chunks).toEqual([]);
-                done();
-              });
-              options.stream.end();
-            
-        }));
+        options.stream.on('finish', () => {
+          expect(chunks).toEqual([]);
+          done();
+        });
+        options.stream.end();
+      }));
 
     test('it will push into the stream 2 mock responses', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getWriteResponseHitsToStreamOptionsMock();
-              const secondResponse = getSearchListItemMock();
-              options.response.hits.hits = [...options.response.hits.hits, ...secondResponse.hits.hits];
-              writeResponseHitsToStream(options);
+        const options = getWriteResponseHitsToStreamOptionsMock();
+        const secondResponse = getSearchListItemMock();
+        options.response.hits.hits = [...options.response.hits.hits, ...secondResponse.hits.hits];
+        writeResponseHitsToStream(options);
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.end(() => {
-                expect(chunks).toEqual(['127.0.0.1', '127.0.0.1']);
-                done();
-              });
-            
-        }));
+        options.stream.end(() => {
+          expect(chunks).toEqual(['127.0.0.1', '127.0.0.1']);
+          done();
+        });
+      }));
 
     test('it will push an additional string given to it such as a new line character', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const options = getWriteResponseHitsToStreamOptionsMock();
-              const secondResponse = getSearchListItemMock();
-              options.response.hits.hits = [...options.response.hits.hits, ...secondResponse.hits.hits];
-              options.stringToAppend = '\n';
-              writeResponseHitsToStream(options);
+        const options = getWriteResponseHitsToStreamOptionsMock();
+        const secondResponse = getSearchListItemMock();
+        options.response.hits.hits = [...options.response.hits.hits, ...secondResponse.hits.hits];
+        options.stringToAppend = '\n';
+        writeResponseHitsToStream(options);
 
-              let chunks: string[] = [];
-              options.stream.on('data', (chunk: Buffer) => {
-                chunks = [...chunks, chunk.toString()];
-              });
+        let chunks: string[] = [];
+        options.stream.on('data', (chunk: Buffer) => {
+          chunks = [...chunks, chunk.toString()];
+        });
 
-              options.stream.end(() => {
-                expect(chunks).toEqual(['127.0.0.1\n', '127.0.0.1\n']);
-                done();
-              });
-            
-        }));
+        options.stream.end(() => {
+          expect(chunks).toEqual(['127.0.0.1\n', '127.0.0.1\n']);
+          done();
+        });
+      }));
 
     test('it will throw an exception with a status code if the hit_source is not a data type we expect', () => {
       const options = getWriteResponseHitsToStreamOptionsMock();

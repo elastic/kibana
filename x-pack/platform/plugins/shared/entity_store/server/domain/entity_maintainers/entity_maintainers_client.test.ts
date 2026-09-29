@@ -19,60 +19,60 @@ import { EntityMaintainerTaskStatus } from '../../tasks/entity_maintainers/types
 import type { EntityMaintainerTaskEntry } from '../../tasks/entity_maintainers/types';
 
 vi.mock('../../tasks/entity_maintainers', () => {
-      const mocked = {
-      getTaskId: vi.fn((id: string, namespace: string) => `${id}:${namespace}`),
-      removeEntityMaintainer: vi.fn().mockResolvedValue(undefined),
-      scheduleEntityMaintainerTask: vi.fn().mockResolvedValue(undefined),
-      startEntityMaintainer: vi.fn().mockResolvedValue(undefined),
-      stopEntityMaintainer: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTaskId: vi.fn((id: string, namespace: string) => `${id}:${namespace}`),
+    removeEntityMaintainer: vi.fn().mockResolvedValue(undefined),
+    scheduleEntityMaintainerTask: vi.fn().mockResolvedValue(undefined),
+    startEntityMaintainer: vi.fn().mockResolvedValue(undefined),
+    stopEntityMaintainer: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../tasks/entity_maintainers/execution', () => {
-      const mocked = {
-      canRunMaintainerWithLicense: vi.fn().mockResolvedValue(true),
-      createMaintainerStatus: vi.fn((params: { namespace?: string; initialState: object }) => ({
+  const mocked = {
+    canRunMaintainerWithLicense: vi.fn().mockResolvedValue(true),
+    createMaintainerStatus: vi.fn((params: { namespace?: string; initialState: object }) => ({
+      metadata: {
+        runs: 0,
+        lastSuccessTimestamp: null,
+        lastErrorTimestamp: null,
+        namespace: params.namespace ?? '',
+      },
+      state: params.initialState,
+      taskStatus: 'started',
+    })),
+    runEntityMaintainerTask: vi.fn().mockResolvedValue({
+      state: {
         metadata: {
-          runs: 0,
-          lastSuccessTimestamp: null,
+          runs: 1,
+          lastSuccessTimestamp: 'now',
           lastErrorTimestamp: null,
-          namespace: params.namespace ?? '',
+          namespace: 'default',
         },
-        state: params.initialState,
+        state: {},
         taskStatus: 'started',
-      })),
-      runEntityMaintainerTask: vi.fn().mockResolvedValue({
-        state: {
-          metadata: {
-            runs: 1,
-            lastSuccessTimestamp: 'now',
-            lastErrorTimestamp: null,
-            namespace: 'default',
-          },
-          state: {},
-          taskStatus: 'started',
-        },
-      }),
-      persistMaintainerState: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    persistMaintainerState: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => {
-      const mocked = {
-      entityMaintainersRegistry: {
-        hasId: vi.fn(),
-        getAll: vi.fn().mockReturnValue([]),
-        get: vi.fn(),
-        getLifecycle: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    entityMaintainersRegistry: {
+      hasId: vi.fn(),
+      getAll: vi.fn().mockReturnValue([]),
+      get: vi.fn(),
+      getLifecycle: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core/server', async () => {
-  const actual = (await vi.importActual('@kbn/core/server'));
+  const actual = await vi.importActual('@kbn/core/server');
   return {
     ...actual,
     SavedObjectsErrorHelpers: {
@@ -123,7 +123,9 @@ const {
   >;
 };
 
-const { entityMaintainersRegistry } = (await vi.importMock('../../tasks/entity_maintainers/entity_maintainers_registry')) as {
+const { entityMaintainersRegistry } = (await vi.importMock(
+  '../../tasks/entity_maintainers/entity_maintainers_registry'
+)) as {
   entityMaintainersRegistry: {
     hasId: MockedFunction<(id: string) => boolean>;
     getAll: MockedFunction<() => EntityMaintainerTaskEntry[]>;
@@ -166,9 +168,7 @@ function createClient(overrides?: {
   } as unknown as CoreStart;
 
   const licensing = {
-    getLicense: vi
-      .fn()
-      .mockResolvedValue({ check: vi.fn().mockReturnValue({ state: 'valid' }) }),
+    getLicense: vi.fn().mockResolvedValue({ check: vi.fn().mockReturnValue({ state: 'valid' }) }),
   } as unknown as LicensingPluginStart;
 
   return new EntityMaintainersClient({
@@ -475,9 +475,7 @@ describe('EntityMaintainersClient', () => {
         get: vi.fn().mockRejectedValue(new Error('Not found')),
       };
       mockSavedObjectsErrorHelpers.isNotFoundError.mockReturnValue(true);
-      (scheduleEntityMaintainerTask as Mock).mockRejectedValueOnce(
-        new Error('schedule failed')
-      );
+      (scheduleEntityMaintainerTask as Mock).mockRejectedValueOnce(new Error('schedule failed'));
       const client = createClient({ taskManager: taskManager as any });
       const request = createMockRequest();
 

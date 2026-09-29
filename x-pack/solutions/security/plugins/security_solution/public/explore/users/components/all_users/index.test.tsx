@@ -21,38 +21,38 @@ import { FLYOUT_ORIGIN } from '../../../../common/lib/telemetry';
 const mockUseMlCapabilities = vi.fn().mockReturnValue({ isPlatinumOrTrialLicense: false });
 
 vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => {
-      const mocked = {
-      useMlCapabilities: () => mockUseMlCapabilities(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlCapabilities: () => mockUseMlCapabilities(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenUserFlyout = vi.fn();
 const mockOpenFlyout = vi.fn();
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: () => ({
-        openUserFlyout: mockOpenUserFlyout,
-        openHostFlyout: vi.fn(),
-        openServiceFlyout: vi.fn(),
-        openGenericEntityFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: () => ({
+      openUserFlyout: mockOpenUserFlyout,
+      openHostFlyout: vi.fn(),
+      openServiceFlyout: vi.fn(),
+      openGenericEntityFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Users Table Component', () => {
   const loadPage = vi.fn();

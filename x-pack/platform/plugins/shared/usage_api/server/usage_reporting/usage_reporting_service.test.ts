@@ -17,19 +17,19 @@ import { METERING_RETRY_ATTEMPTS, METERING_RETRY_BASE_DELAY_MS } from './constan
 
 vi.mock('node-fetch');
 vi.mock('@kbn/server-http-tools', () => {
-      const mocked = {
-      SslConfig: vi.fn().mockImplementation(() => ({
-        rejectUnauthorized: true,
-        certificate: 'mock-cert-content',
-        key: 'mock-key-content',
-        certificateAuthorities: ['mock-ca-content'],
-      })),
-      sslSchema: {
-        validate: vi.fn().mockReturnValue({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SslConfig: vi.fn().mockImplementation(() => ({
+      rejectUnauthorized: true,
+      certificate: 'mock-cert-content',
+      key: 'mock-key-content',
+      certificateAuthorities: ['mock-ca-content'],
+    })),
+    sslSchema: {
+      validate: vi.fn().mockReturnValue({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetchMock = (await vi.importMock('node-fetch')).default as Mock;
 

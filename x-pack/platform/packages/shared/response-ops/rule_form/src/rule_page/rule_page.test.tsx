@@ -18,41 +18,41 @@ import {
 import type { RuleFormData } from '../types';
 
 vi.mock('../rule_definition', () => {
-      const mocked = {
-      RuleDefinition: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDefinition: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rule_actions', () => {
-      const mocked = {
-      RuleActions: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActions: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rule_details', () => {
-      const mocked = {
-      RuleDetails: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDetails: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_rule_form_state', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_rule_form_dispatch', () => {
-      const mocked = {
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState } = (await vi.importMock('../hooks/use_rule_form_state'));
+const { useRuleFormState } = await vi.importMock('../hooks/use_rule_form_state');
 
 const navigateToUrl = vi.fn();
 

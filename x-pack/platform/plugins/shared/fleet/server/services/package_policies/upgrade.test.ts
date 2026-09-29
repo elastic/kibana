@@ -148,27 +148,27 @@ vi.mock('../epm/packages', () => {
 });
 
 vi.mock('../../../common/services/package_to_package_policy', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/services/package_to_package_policy')),
-      packageToPackagePolicy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/services/package_to_package_policy')),
+    packageToPackagePolicy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../epm/registry', () => {
-      const mocked = {
-      getPackage: vi.fn().mockResolvedValue({ assetsMap: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackage: vi.fn().mockResolvedValue({ assetsMap: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../epm/packages/get', () => {
-      const mocked = {
-      getPackageAssetsMap: vi.fn().mockResolvedValue(new Map()),
-      getAgentTemplateAssetsMap: vi.fn().mockResolvedValue(new Map()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageAssetsMap: vi.fn().mockResolvedValue(new Map()),
+    getAgentTemplateAssetsMap: vi.fn().mockResolvedValue(new Map()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../agent_policy');
 const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
@@ -189,11 +189,11 @@ vi.mock('../audit_logging');
 const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
 vi.mock('../secrets', () => {
-      const mocked = {
-      isSecretStorageEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSecretStorageEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Upgrade', () => {
   beforeEach(() => {
@@ -323,13 +323,11 @@ describe('Upgrade', () => {
     });
 
     it('should return errors if there is a conflict to upgrade', async () => {
-      vi
-        .mocked(getAgentTemplateAssetsMap)
-        .mockResolvedValueOnce(
-          new Map([
-            ['/agent/input/stream.yml.hbs', Buffer.from('test: 1\n{{custom}}\n')],
-          ]) as PackagePolicyAssetsMap
-        );
+      vi.mocked(getAgentTemplateAssetsMap).mockResolvedValueOnce(
+        new Map([
+          ['/agent/input/stream.yml.hbs', Buffer.from('test: 1\n{{custom}}\n')],
+        ]) as PackagePolicyAssetsMap
+      );
       const res = await _packagePoliciesGetUpgradeDryRunDiff({
         id: 'package-policy-id',
         soClient: savedObjectsClient,

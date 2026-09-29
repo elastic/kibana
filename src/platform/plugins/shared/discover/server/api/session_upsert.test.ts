@@ -22,9 +22,9 @@ import { upsertDiscoverSession } from './session_upsert';
 import { assignStoredInlineDataViewIds } from './transforms/assign_stored_inline_data_view_ids';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: vi.fn(() => 'generated-inline-id') };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: vi.fn(() => 'generated-inline-id') };
+  return { ...mocked, default: mocked };
+});
 
 const { attributes: apiAttributes, references } =
   transformDiscoverSessionIn(discoverSessionApiData);

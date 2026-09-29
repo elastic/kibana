@@ -34,41 +34,41 @@ const queryClient = new QueryClient({
 });
 
 vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
-      const mocked = {
-      fetchUiConfig: vi
-        .fn()
-        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchUiConfig: vi
+      .fn()
+      .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({
-        push: vi.fn(),
-        createHref: vi.fn(({ pathname }: { pathname: string }) => pathname),
-      }),
-      useLocation: () => ({
-        pathname: '/triggersActions/rules/',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({
+      push: vi.fn(),
+      createHref: vi.fn(({ pathname }: { pathname: string }) => pathname),
+    }),
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cps-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/cps-utils')),
-      useRouteBasedCpsPickerAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/cps-utils')),
+    useRouteBasedCpsPickerAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseRouteBasedCpsPickerAccess = vi.mocked(useRouteBasedCpsPickerAccess);
 
 function renderWithIntl(ui: React.ReactElement) {

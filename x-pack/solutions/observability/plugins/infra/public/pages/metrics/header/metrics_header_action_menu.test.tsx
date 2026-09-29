@@ -24,69 +24,69 @@ const mockAnomalyFlyoutCapture: {
 } = {};
 
 vi.mock('../../../containers/plugin_config_context', () => {
-      const mocked = {
-      usePluginConfig: () => ({
-        featureFlags: { alertsAndRulesDropdownEnabled: true },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePluginConfig: () => ({
+      featureFlags: { alertsAndRulesDropdownEnabled: true },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/ml/infra_ml_capabilities', () => {
-      const mocked = {
-      useInfraMLCapabilitiesContext: () => mockMlVisibility,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInfraMLCapabilitiesContext: () => mockMlVisibility,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useLinkProps: () => ({ href: '/app/metrics/settings' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLinkProps: () => ({ href: '/app/metrics/settings' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => {
-      const mocked = {
-      AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
-        mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
-        mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
+      mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
+      mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alerting/common/components/metrics_alert_dropdown', () => {
-      const mocked = {
-      MetricsAlertDropdown: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsAlertDropdown: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/inspector_header_link', () => {
-      const mocked = {
-      InspectorHeaderLink: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InspectorHeaderLink: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderMenu(pathname: string) {
   return render(

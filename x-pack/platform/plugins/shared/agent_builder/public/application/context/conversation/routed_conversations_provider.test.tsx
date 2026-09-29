@@ -17,60 +17,60 @@ const mockUseParams = vi.fn();
 const mockUseLocation = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => mockUseParams(),
-      useLocation: () => mockUseLocation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => mockUseParams(),
+    useLocation: () => mockUseLocation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQueryClient: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryClient: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: vi.fn(() => ({
-        conversationsService: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: vi.fn(() => ({
+      conversationsService: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: { analytics: { reportEvent: vi.fn() } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: { analytics: { reportEvent: vi.fn() } },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_navigation', () => {
-      const mocked = {
-      useNavigation: vi.fn(() => ({
-        navigateToAgentBuilderUrl: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: vi.fn(() => ({
+      navigateToAgentBuilderUrl: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_conversation_actions', () => {
-      const mocked = {
-      useConversationActions: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationActions: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./conversation_change_notifier', () => {
-      const mocked = {
-      ConversationChangeNotifier: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConversationChangeNotifier: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockAttachment = (): ConversationAttachment => ({
   type: 'test.attachment',

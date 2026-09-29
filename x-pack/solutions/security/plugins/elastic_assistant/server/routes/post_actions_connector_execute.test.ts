@@ -35,11 +35,11 @@ import { createMockConnector } from '@kbn/actions-plugin/server/application/conn
 const license = licensingMock.createLicenseMock();
 const actionsClient = actionsClientMock.create();
 vi.mock('../lib/build_response', () => {
-      const mocked = {
-      buildResponse: vi.fn().mockImplementation((x) => x),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildResponse: vi.fn().mockImplementation((x) => x),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/prompt');
 const mockGetPrompt = getPrompt as Mock;
 const mockGetInferenceConnectorById = getInferenceConnectorById as Mock;
@@ -48,7 +48,7 @@ const mockStream = vi.fn().mockImplementation(() => new PassThrough());
 const mockLangChainExecute = langChainExecute as Mock;
 const mockAppendAssistantMessageToConversation = appendAssistantMessageToConversation as Mock;
 vi.mock('./helpers', async () => {
-  const original = (await vi.importActual('./helpers'));
+  const original = await vi.importActual('./helpers');
 
   return {
     ...original,

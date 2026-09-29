@@ -28,20 +28,20 @@ import { getConnectorType } from '.';
 import { api } from './api';
 
 vi.mock('./api', () => {
-      const mocked = {
-      api: {
-        getFields: vi.fn(),
-        handshake: vi.fn(),
-        pushToService: vi.fn(),
-        getIncident: vi.fn(),
-        issueTypes: vi.fn(),
-        fieldsByIssueType: vi.fn(),
-        issues: vi.fn(),
-        issue: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    api: {
+      getFields: vi.fn(),
+      handshake: vi.fn(),
+      pushToService: vi.fn(),
+      getIncident: vi.fn(),
+      issueTypes: vi.fn(),
+      fieldsByIssueType: vi.fn(),
+      issues: vi.fn(),
+      issue: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = actionsMock.createServices();
 const mockedLogger: Mocked<Logger> = loggerMock.create();

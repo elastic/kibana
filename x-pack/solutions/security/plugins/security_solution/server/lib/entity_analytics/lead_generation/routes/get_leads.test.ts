@@ -19,11 +19,11 @@ import {
 
 const mockFindLeads = vi.fn();
 vi.mock('../lead_data_client', () => {
-      const mocked = {
-      createLeadDataClient: () => ({ findLeads: mockFindLeads }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadDataClient: () => ({ findLeads: mockFindLeads }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeEsSecurityException = () => ({
   statusCode: 403,

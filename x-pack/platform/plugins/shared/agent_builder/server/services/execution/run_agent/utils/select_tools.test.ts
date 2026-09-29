@@ -25,7 +25,7 @@ import { selectTools } from './select_tools';
 
 vi.mock('../../../tools/builtin/attachments', async () => {
   // Keep mock dependencies local to the factory to satisfy Jest hoisting rules.
-  const { z: mockZ } = (await vi.importActual('@kbn/zod/v4'));
+  const { z: mockZ } = await vi.importActual('@kbn/zod/v4');
   return {
     createAttachmentTools: vi.fn(() => [
       {

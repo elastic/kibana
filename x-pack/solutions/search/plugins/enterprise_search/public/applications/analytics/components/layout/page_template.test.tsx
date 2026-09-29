@@ -5,35 +5,35 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues, mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 const mockUseEnterpriseSearchAnalyticsNav = vi.fn().mockReturnValue([]);
 
 vi.mock('../../../shared/layout/nav', () => {
-      const mocked = {
-      useEnterpriseSearchAnalyticsNav: (...args: any[]) => mockUseEnterpriseSearchAnalyticsNav(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnterpriseSearchAnalyticsNav: (...args: any[]) =>
+      mockUseEnterpriseSearchAnalyticsNav(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // SetAnalyticsChrome renders null — mock it so we can verify the page template passes the
 // correct trail prop. SendEnterpriseSearchTelemetry is verified via mockTelemetryActions
 // (the kea_logic mock overrides any factory placed here for that module).
 vi.mock('../../../shared/kibana_chrome', () => {
-      const mocked = {
-      SetAnalyticsChrome: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SetAnalyticsChrome: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { SetAnalyticsChrome } from '../../../shared/kibana_chrome';
 

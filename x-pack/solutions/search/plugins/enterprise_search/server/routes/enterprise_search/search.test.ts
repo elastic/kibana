@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { MockRouter, mockDependencies } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 
@@ -17,11 +17,11 @@ import { fetchSearchResults } from '@kbn/search-index-documents/lib';
 import { registerSearchRoute } from './search';
 
 vi.mock('@kbn/search-index-documents/lib', () => {
-      const mocked = {
-      fetchSearchResults: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchSearchResults: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Elasticsearch Search', () => {
   let mockRouter: MockRouter;

@@ -16,22 +16,22 @@ import { mockUseKibana, generateDataStreams } from '../../mocks';
 
 const mockUseLocation = vi.fn(() => ({ pathname: '/' }));
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: () => mockUseLocation(),
-      useHistory: vi.fn().mockReturnValue({
-        push: vi.fn(),
-        listen: vi.fn(),
-        location: {
-          search: '',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: () => mockUseLocation(),
+    useHistory: vi.fn().mockReturnValue({
+      push: vi.fn(),
+      listen: vi.fn(),
+      location: {
+        search: '',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => mockUseKibana,

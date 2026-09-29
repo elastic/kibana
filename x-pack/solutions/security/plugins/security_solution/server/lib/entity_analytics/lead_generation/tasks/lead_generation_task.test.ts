@@ -12,42 +12,42 @@ import type { Mock } from 'vitest';
 // factories (do NOT reference outer const variables — they are undefined at
 // hoist time due to the temporal dead zone).
 vi.mock('../run_pipeline', () => {
-      const mocked = {
-      runLeadGenerationPipeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runLeadGenerationPipeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../entity_conversion', () => {
-      const mocked = {
-      fetchCandidateEntities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchCandidateEntities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../saved_object', () => {
-      const mocked = {
-      getLeadGenerationConfig: vi.fn(),
-      updateLeadGenerationConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLeadGenerationConfig: vi.fn(),
+    updateLeadGenerationConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils', () => {
-      const mocked = {
-      resolveChatModel: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveChatModel: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../risk_score/risk_score_data_client', () => {
-      const mocked = {
-      RiskScoreDataClient: vi.fn().mockImplementation(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreDataClient: vi.fn().mockImplementation(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../risk_score/tasks/helpers', () => {
-      const mocked = {
-      buildScopedInternalSavedObjectsClientUnsafe: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildScopedInternalSavedObjectsClientUnsafe: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggingSystemMock, httpServerMock } from '@kbn/core/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';

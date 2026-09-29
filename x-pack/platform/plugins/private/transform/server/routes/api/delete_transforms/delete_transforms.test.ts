@@ -18,11 +18,11 @@ import type { DeleteTransformsResponseSchema } from '../../api_schemas/delete_tr
 import { deleteTransforms } from './delete_transforms';
 
 vi.mock('@kbn/ml-data-view-utils/actions/delete', () => {
-      const mocked = {
-      deleteDataViewFn: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteDataViewFn: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteDataViewFn = deleteDataViewFn as MockedFunction<typeof deleteDataViewFn>;
 

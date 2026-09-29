@@ -8,25 +8,25 @@
 import { vi } from 'vitest';
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: (
-          _id: string,
-          {
-            defaultMessage,
-            values,
-          }: { defaultMessage: string; values?: Record<string, string | number> }
-        ) => {
-          if (!values) return defaultMessage;
-          return Object.entries(values).reduce(
-            (msg, [key, value]) => msg.replace(`{${key}}`, String(value)),
-            defaultMessage
-          );
-        },
+  const mocked = {
+    i18n: {
+      translate: (
+        _id: string,
+        {
+          defaultMessage,
+          values,
+        }: { defaultMessage: string; values?: Record<string, string | number> }
+      ) => {
+        if (!values) return defaultMessage;
+        return Object.entries(values).reduce(
+          (msg, [key, value]) => msg.replace(`{${key}}`, String(value)),
+          defaultMessage
+        );
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';

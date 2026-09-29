@@ -24,7 +24,7 @@ vi.mock('../../../../common/lib/kibana');
 const mockSearch = vi.fn();
 
 vi.mock('../../../../common/containers/use_search_strategy', async () => {
-  const original = (await vi.importActual('../../../../common/containers/use_search_strategy'));
+  const original = await vi.importActual('../../../../common/containers/use_search_strategy');
   return {
     ...original,
     useSearchStrategy: () => ({

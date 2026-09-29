@@ -49,9 +49,9 @@ import type {
 import type { InfraLocators } from '../../infra_types';
 
 vi.mock('./lib/evaluate_rule', () => {
-      const mocked = { evaluateRule: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { evaluateRule: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const fakeLogger = <Meta extends LogMeta = LogMeta>(msg: string, meta?: Meta) => {};
 
@@ -127,7 +127,9 @@ const mockOptions = {
 };
 
 const setEvaluationResults = async (response: Array<Record<string, Evaluation>>) => {
-  return (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mockImplementation(() => response);
+  return (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mockImplementation(
+    () => response
+  );
 };
 
 describe('The metric threshold rule type', () => {
@@ -430,7 +432,9 @@ describe('The metric threshold rule type', () => {
       });
 
       expect(services.getDataViews).not.toHaveBeenCalled();
-      expect((await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6]).toBeUndefined();
+      expect(
+        (await vi.importMock('./lib/evaluate_rule')).evaluateRule.mock.calls[0][6]
+      ).toBeUndefined();
     });
 
     test('fetches a data view when the rule uses a filtered custom count metric', async () => {

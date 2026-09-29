@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('./process_router', async () => {
-  const module = (await vi.importActual('./process_router'));
+  const module = await vi.importActual('./process_router');
   return {
     ...module,
     processRouter: vi.fn(module.processRouter),
@@ -19,7 +19,7 @@ vi.mock('./process_router', async () => {
 });
 
 vi.mock('./process_versioned_router', async () => {
-  const module = (await vi.importActual('./process_versioned_router'));
+  const module = await vi.importActual('./process_versioned_router');
   return {
     ...module,
     processVersionedRouter: vi.fn(module.processVersionedRouter),
@@ -910,9 +910,8 @@ describe('generateOpenApiDocument', () => {
           );
         }
         if ((processVersionedRouter as Mock).mock.calls.length) {
-          (processVersionedRouter as Mock).mock.calls.forEach(
-            ([{ env: versionedRouterEnv }]) =>
-              expect(versionedRouterEnv).toEqual({ serverless: false, dummy: true })
+          (processVersionedRouter as Mock).mock.calls.forEach(([{ env: versionedRouterEnv }]) =>
+            expect(versionedRouterEnv).toEqual({ serverless: false, dummy: true })
           );
         }
 

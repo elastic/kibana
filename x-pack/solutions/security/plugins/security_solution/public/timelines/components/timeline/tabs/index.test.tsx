@@ -25,7 +25,7 @@ vi.mock('../../../../common/components/user_privileges');
 
 const mockUseUiSetting = vi.fn().mockReturnValue([false]);
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),
@@ -41,13 +41,13 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../../common/hooks/esql/use_esql_availability', () => {
-      const mocked = {
-      useEsqlAvailability: vi.fn().mockReturnValue({
-        isEsqlAdvancedSettingEnabled: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlAvailability: vi.fn().mockReturnValue({
+      isEsqlAdvancedSettingEnabled: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useEsqlAvailabilityMock = useEsqlAvailability as Mock;
 

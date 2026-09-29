@@ -35,15 +35,15 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import * as perf_hooks from 'perf_hooks';
 
 vi.mock('perf_hooks', () => {
-      const mocked = {
-      performance: {
-        now: vi.fn(),
-        eventLoopUtilization: vi.fn(),
-      },
-      monitorEventLoopDelay: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performance: {
+      now: vi.fn(),
+      eventLoopUtilization: vi.fn(),
+    },
+    monitorEventLoopDelay: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPerformance = performance as Mocked<typeof performance>;
 const mockMonitorEventLoopDelay = perf_hooks.monitorEventLoopDelay as MockedFunction<any>; // eslint-disable-line @typescript-eslint/no-explicit-any

@@ -12,23 +12,23 @@ import mockAnomaliesTableData from '../../../../common/__mocks__/mock_anomalies_
 import { getColumns } from './anomalies_table_columns';
 
 vi.mock('../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../license', () => {
-      const mocked = {
-      hasLicenseExpired: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasLicenseExpired: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../capabilities/get_capabilities', () => {
-      const mocked = {
-      getCapabilities: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCapabilities: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./links_menu', () => () => <div id="mocLinkCom">mocked link component</div>);
 vi.mock('./description_cell', () => () => (
   <div id="mockDescriptorCom">mocked description component</div>

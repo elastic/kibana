@@ -18,39 +18,39 @@ import type { TutorialType } from '../../../services/tutorials/types';
 const mockSetBreadcrumbs = vi.fn();
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        http: {
-          post: vi.fn().mockImplementation(async () => ({ count: 0 })),
-          basePath: { prepend: (path: string) => `/foo/${path}` },
+  const mocked = {
+    getServices: () => ({
+      http: {
+        post: vi.fn().mockImplementation(async () => ({ count: 0 })),
+        basePath: { prepend: (path: string) => `/foo/${path}` },
+      },
+      getBasePath: vi.fn(() => 'path'),
+      application: {
+        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+      },
+      history: {
+        location: { hash: '#/tutorial/apm' },
+      },
+      chrome: {
+        setBreadcrumbs: mockSetBreadcrumbs,
+      },
+      tutorialService: {
+        getModuleNotices: () => [],
+        getCustomComponent: vi.fn(),
+        getCustomStatusCheck: (
+          name: 'custom_status_check_has_data' | 'custom_status_check_no_data'
+        ) => {
+          const customStatusCheckMock = {
+            custom_status_check_has_data: async () => true,
+            custom_status_check_no_data: async () => false,
+          };
+          return customStatusCheckMock[name];
         },
-        getBasePath: vi.fn(() => 'path'),
-        application: {
-          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-        },
-        history: {
-          location: { hash: '#/tutorial/apm' },
-        },
-        chrome: {
-          setBreadcrumbs: mockSetBreadcrumbs,
-        },
-        tutorialService: {
-          getModuleNotices: () => [],
-          getCustomComponent: vi.fn(),
-          getCustomStatusCheck: (
-            name: 'custom_status_check_has_data' | 'custom_status_check_no_data'
-          ) => {
-            const customStatusCheckMock = {
-              custom_status_check_has_data: async () => true,
-              custom_status_check_no_data: async () => false,
-            };
-            return customStatusCheckMock[name];
-          },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function buildInstructionSet(type: string) {
   return {

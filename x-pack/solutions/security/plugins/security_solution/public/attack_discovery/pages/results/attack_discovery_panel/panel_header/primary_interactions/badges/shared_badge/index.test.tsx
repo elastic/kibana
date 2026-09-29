@@ -60,18 +60,18 @@ const mockMutateAsync = vi.fn();
 const mockIsAttackDiscoveryAlert = vi.fn();
 
 vi.mock('../../../../../../use_attack_discovery_bulk', () => {
-      const mocked = {
-      useAttackDiscoveryBulk: () => ({ mutateAsync: mockMutateAsync }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryBulk: () => ({ mutateAsync: mockMutateAsync }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../utils/is_attack_discovery_alert', () => {
-      const mocked = {
-      isAttackDiscoveryAlert: (...args: unknown[]) => mockIsAttackDiscoveryAlert(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAttackDiscoveryAlert: (...args: unknown[]) => mockIsAttackDiscoveryAlert(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SharedBadge', () => {
   const defaultProps = { attackDiscovery: mockAttackDiscoveryAlert };

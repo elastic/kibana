@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fetch from 'node-fetch';
+import { createHash } from 'node:crypto';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import fetch from 'node-fetch';
-import { createHash } from 'node:crypto';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import { LibraryFetchError, LibraryNotFoundError } from './errors';

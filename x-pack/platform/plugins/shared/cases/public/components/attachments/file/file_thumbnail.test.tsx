@@ -19,24 +19,24 @@ import { allCasesPermissions } from '../../../common/mock';
 import type { FileViewProps } from '.';
 
 vi.mock('@kbn/shared-ux-file-context', () => {
-      const mocked = {
-      useFilesContext: () => ({
-        client: {
-          getDownloadHref: vi.fn(() => 'http://example.com/file'),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFilesContext: () => ({
+      client: {
+        getDownloadHref: vi.fn(() => 'http://example.com/file'),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: () => ({
-        owner: ['securitySolution'],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: () => ({
+      owner: ['securitySolution'],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const validFileEntry = {
   name: basicFileMock.name,

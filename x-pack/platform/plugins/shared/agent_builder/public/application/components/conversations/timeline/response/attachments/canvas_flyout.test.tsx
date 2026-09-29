@@ -23,51 +23,51 @@ let mockCanvasState: {
 } | null = null;
 
 vi.mock('./canvas_context', () => {
-      const mocked = {
-      useCanvasContext: () => ({
-        canvasState: mockCanvasState,
-        closeCanvas: mockCloseCanvas,
-        setCanvasAttachmentOrigin: vi.fn(),
-        updateCanvasAttachment: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanvasContext: () => ({
+      canvasState: mockCanvasState,
+      closeCanvas: mockCloseCanvas,
+      setCanvasAttachmentOrigin: vi.fn(),
+      updateCanvasAttachment: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: () => mockConversationId,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: () => mockConversationId,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: () => ({
-        conversationActions: { invalidateConversation: vi.fn() },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: () => ({
+      conversationActions: { invalidateConversation: vi.fn() },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useConversation: () => ({
-        conversation: null,
-      }),
-      useAgentId: () => 'agent-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: () => ({
+      conversation: null,
+    }),
+    useAgentId: () => 'agent-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        openSidebarConversation: mockOpenSidebarConversation,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      openSidebarConversation: mockOpenSidebarConversation,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttachmentsService = {
   getAttachmentUiDefinition: vi.fn(),

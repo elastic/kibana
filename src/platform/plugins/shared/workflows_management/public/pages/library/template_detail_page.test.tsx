@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, render } from '@testing-library/react';
 import React from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { LibraryTemplateDetailPage } from './template_detail_page';
 import { createStartServicesMock, type StartServicesMock } from '../../mocks';
@@ -24,38 +23,38 @@ let mockOnLoaded: ((template: TemplateBody) => void) | undefined;
 let mockShowGraphPreview: boolean | undefined;
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      TemplateDetail: ({
-        slug,
-        onLoaded,
-        showGraphPreview,
-      }: {
-        slug: string;
-        onLoaded: (template: TemplateBody) => void;
-        showGraphPreview: boolean;
-      }) => {
-        mockOnLoaded = onLoaded;
-        mockShowGraphPreview = showGraphPreview;
-        return <div data-test-subj="mockTemplateDetail">{slug}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    TemplateDetail: ({
+      slug,
+      onLoaded,
+      showGraphPreview,
+    }: {
+      slug: string;
+      onLoaded: (template: TemplateBody) => void;
+      showGraphPreview: boolean;
+    }) => {
+      mockOnLoaded = onLoaded;
+      mockShowGraphPreview = showGraphPreview;
+      return <div data-test-subj="mockTemplateDetail">{slug}</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflows_experimental_ui_setting', () => {
-      const mocked = {
-      useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsExperimentalUiSetting: () => mockUseWorkflowsExperimentalUiSetting(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
-      const mocked = {
-      useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetWorkflowsBreadcrumbs: () => mockSetWorkflowsBreadcrumbs,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function buildEnabledServices(): StartServicesMock {
   const services = createStartServicesMock();

@@ -15,33 +15,33 @@ import { HeaderTitle } from './header_title';
 import { HEADER_BADGE_TEST_ID, HEADER_TITLE_TEST_ID } from '../constants/test_ids';
 
 vi.mock('../../../shared/components/flyout_title', () => {
-      const mocked = {
-      FlyoutTitle: ({
-        title,
-        'data-test-subj': dataTestSubj,
-      }: {
-        title: string;
-        'data-test-subj'?: string;
-      }) => <div data-test-subj={dataTestSubj ?? 'flyoutTitle'}>{title}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutTitle: ({
+      title,
+      'data-test-subj': dataTestSubj,
+    }: {
+      title: string;
+      'data-test-subj'?: string;
+    }) => <div data-test-subj={dataTestSubj ?? 'flyoutTitle'}>{title}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/timestamp', () => {
-      const mocked = {
-      Timestamp: ({ hit, children }: { hit: DataTableRecord; children?: React.ReactNode }) => {
-        const timestamp = hit.flattened?.['@timestamp'];
-        if (!timestamp) return null;
-        return (
-          <>
-            <div data-test-subj="timestamp">{String(timestamp)}</div>
-            {children}
-          </>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Timestamp: ({ hit, children }: { hit: DataTableRecord; children?: React.ReactNode }) => {
+      const timestamp = hit.flattened?.['@timestamp'];
+      if (!timestamp) return null;
+      return (
+        <>
+          <div data-test-subj="timestamp">{String(timestamp)}</div>
+          {children}
+        </>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   ({

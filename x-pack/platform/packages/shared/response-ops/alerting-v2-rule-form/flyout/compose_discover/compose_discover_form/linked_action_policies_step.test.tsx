@@ -18,12 +18,12 @@ import { useMatchedActionPolicies } from './use_matched_action_policies';
 import { useActionPolicyConnectorTypes } from './use_action_policy_connector_types';
 
 vi.mock('react-hook-form', () => {
-      const mocked = {
-      ...require('react-hook-form'),
-      useWatch: vi.fn().mockReturnValue({ name: '', tags: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-hook-form'),
+    useWatch: vi.fn().mockReturnValue({ name: '', tags: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_matched_action_policies');
 vi.mock('./use_action_policy_connector_types');

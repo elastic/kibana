@@ -30,43 +30,43 @@ const mockUseFetchContext = vi.fn();
 const mockServiceMapEmbeddable = vi.fn();
 const mockApmEmbeddableContext = vi.fn();
 vi.mock('@kbn/presentation-publishing', () => {
-      const mocked = {
-      initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
-      initializeTimeRangeManager: (...args: unknown[]) => mockInitializeTimeRangeManager(...args),
-      initializeStateManager: (...args: unknown[]) => mockInitializeStateManager(...args),
-      initializeStateApi: (...args: unknown[]) => mockInitializeStateApi(...args),
-      titleComparators: { title: 'referenceEquality' },
-      timeRangeComparators: { time_range: 'deepEquality' },
-      useBatchedPublishingSubjects: (...args: unknown[]) => mockUseBatchedPublishingSubjects(...args),
-      useFetchContext: (...args: unknown[]) => mockUseFetchContext(...args),
-      apiHasParentApi: (api: unknown) =>
-        Boolean((api as { parentApi?: unknown } | null)?.parentApi !== undefined),
-      apiCanExpandPanels: (api: unknown) =>
-        Boolean((api as { expandPanel?: unknown } | null)?.expandPanel !== undefined),
-      getViewModeSubject: (api: unknown) => (api as { viewMode$?: unknown } | null)?.viewMode$,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeTitleManager: (...args: unknown[]) => mockInitializeTitleManager(...args),
+    initializeTimeRangeManager: (...args: unknown[]) => mockInitializeTimeRangeManager(...args),
+    initializeStateManager: (...args: unknown[]) => mockInitializeStateManager(...args),
+    initializeStateApi: (...args: unknown[]) => mockInitializeStateApi(...args),
+    titleComparators: { title: 'referenceEquality' },
+    timeRangeComparators: { time_range: 'deepEquality' },
+    useBatchedPublishingSubjects: (...args: unknown[]) => mockUseBatchedPublishingSubjects(...args),
+    useFetchContext: (...args: unknown[]) => mockUseFetchContext(...args),
+    apiHasParentApi: (api: unknown) =>
+      Boolean((api as { parentApi?: unknown } | null)?.parentApi !== undefined),
+    apiCanExpandPanels: (api: unknown) =>
+      Boolean((api as { expandPanel?: unknown } | null)?.expandPanel !== undefined),
+    getViewModeSubject: (api: unknown) => (api as { viewMode$?: unknown } | null)?.viewMode$,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../embeddable_context', () => {
-      const mocked = {
-      ApmEmbeddableContext: (props: Record<string, unknown>) => {
-        mockApmEmbeddableContext(props);
-        return <>{props.children as React.ReactNode}</>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmEmbeddableContext: (props: Record<string, unknown>) => {
+      mockApmEmbeddableContext(props);
+      return <>{props.children as React.ReactNode}</>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./service_map_embeddable', () => {
-      const mocked = {
-      ServiceMapEmbeddable: (props: Record<string, unknown>) => {
-        mockServiceMapEmbeddable(props);
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceMapEmbeddable: (props: Record<string, unknown>) => {
+      mockServiceMapEmbeddable(props);
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getServiceMapEmbeddableFactory', () => {
   let titleAnyStateChange$: Subject<void>;

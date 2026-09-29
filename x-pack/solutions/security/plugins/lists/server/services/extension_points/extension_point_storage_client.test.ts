@@ -7,7 +7,6 @@
 
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
 import type { loggerMock } from '@kbn/logging-mocks';
 
 import type { CreateExceptionListItemOptions } from '../exception_lists/exception_list_client_types';

@@ -24,8 +24,9 @@ import { EngineDescriptorTypeName } from '../domain/saved_objects';
 vi.mock('../domain/asset_manager/install_assets');
 vi.mock('../domain/asset_manager/migrate_legacy_security_assets');
 
-const mockInstallSharedElasticsearchAssets =
-  installSharedElasticsearchAssets as MockedFunction<typeof installSharedElasticsearchAssets>;
+const mockInstallSharedElasticsearchAssets = installSharedElasticsearchAssets as MockedFunction<
+  typeof installSharedElasticsearchAssets
+>;
 const mockHasLegacySecurityAssets = hasLegacySecurityAssets as MockedFunction<
   typeof hasLegacySecurityAssets
 >;

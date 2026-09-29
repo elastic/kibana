@@ -22,11 +22,11 @@ vi.mock('../../../../containers/plugin_config_context');
 vi.mock('./use_unified_search');
 // Pin the first-paint gate open so the test needn't mount its upstream contexts.
 vi.mock('./use_hosts_page_ready', () => {
-      const mocked = {
-      useHostsPageReady: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHostsPageReady: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useHostCount', () => {
   vi.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({
@@ -174,12 +174,10 @@ describe('useHostCount', () => {
           error: null,
         });
 
-        vi
-          .spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext')
-          .mockReturnValue({
-            data: { preferredSchema: 'ecs', schemas: [] },
-            status: FETCH_STATUS.SUCCESS,
-          });
+        vi.spyOn(useTimeRangeMetadataContextModule, 'useTimeRangeMetadataContext').mockReturnValue({
+          data: { preferredSchema: 'ecs', schemas: [] },
+          status: FETCH_STATUS.SUCCESS,
+        });
 
         await renderHook(() => useHostCount());
 

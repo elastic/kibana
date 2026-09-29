@@ -12,19 +12,19 @@ import { vi } from 'vitest';
 import { welcomeServiceMock } from '../../services/welcome/welcome_service.mocks';
 
 vi.doMock('../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        addBasePath: (path: string) => `root${path}`,
-        trackUiMetric: () => {},
-        welcomeService: welcomeServiceMock.create(),
-        theme: {
-          getTheme: () => {
-            return {
-              theme$: vi.fn(),
-            };
-          },
+  const mocked = {
+    getServices: () => ({
+      addBasePath: (path: string) => `root${path}`,
+      trackUiMetric: () => {},
+      welcomeService: welcomeServiceMock.create(),
+      theme: {
+        getTheme: () => {
+          return {
+            theme$: vi.fn(),
+          };
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});

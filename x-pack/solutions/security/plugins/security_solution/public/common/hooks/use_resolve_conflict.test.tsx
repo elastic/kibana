@@ -24,13 +24,13 @@ vi.mock('react-router-dom', () => {
 vi.mock('../lib/kibana');
 vi.mock('./use_selector');
 vi.mock('../../timelines/store', () => {
-      const mocked = {
-      timelineSelectors: {
-        getTimelineByIdSelector: () => vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timelineSelectors: {
+      getTimelineByIdSelector: () => vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useResolveConflict', () => {
   const mockGetLegacyUrlConflict = vi.fn().mockReturnValue('Test!');

@@ -31,9 +31,7 @@ const mockedFleetServerHostService = fleetServerHostService as Mocked<
   typeof fleetServerHostService
 >;
 const mockedOutputService = outputService as Mocked<typeof outputService>;
-const mockedDownloadSourceService = downloadSourceService as Mocked<
-  typeof downloadSourceService
->;
+const mockedDownloadSourceService = downloadSourceService as Mocked<typeof downloadSourceService>;
 
 const PROXY_IDS = {
   PRECONFIGURED: 'test-preconfigured',

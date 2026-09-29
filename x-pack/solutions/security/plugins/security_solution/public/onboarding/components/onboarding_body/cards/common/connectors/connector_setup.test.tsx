@@ -16,18 +16,18 @@ import type { ActionType } from '@kbn/actions-plugin/common';
 import { createMockConnectorType } from '@kbn/actions-plugin/server/application/connector/mocks';
 import { useKibana } from '../../../../../../common/lib/kibana';
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant/impl/connectorland/add_connector_modal', () => {
-      const mocked = {
-      AddConnectorModal: vi.fn(() => <div data-test-subj="addConnectorModal">{'Mock Modal'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddConnectorModal: vi.fn(() => <div data-test-subj="addConnectorModal">{'Mock Modal'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ConnectorSetup', () => {
   const mockActionTypeRegistry = {

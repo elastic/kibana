@@ -17,11 +17,11 @@ import { snoozeRuleRoute } from './snooze_rule_route';
 
 const rulesClient = rulesClientMock.create();
 vi.mock('../../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SNOOZE_SCHEDULE = {
   rRule: {

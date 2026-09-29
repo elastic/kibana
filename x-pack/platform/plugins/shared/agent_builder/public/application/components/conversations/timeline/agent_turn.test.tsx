@@ -21,54 +21,54 @@ import type { TimelineItem } from './types';
 import { Timeline } from './timeline';
 
 vi.mock('../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: () => 'conv-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: () => 'conv-1',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./response/response_message', () => {
-      const mocked = {
-      ResponseMessage: ({
-        isLoading,
-        conversationId,
-        attachmentRefs,
-        conversationAttachments,
-      }: {
-        isLoading: boolean;
-        conversationId?: string;
-        attachmentRefs?: Array<{ attachment_id: string }>;
-        conversationAttachments?: Array<{ id: string }>;
-      }) => (
-        <div
-          data-test-subj="response"
-          data-conversation-id={conversationId}
-          data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
-          data-attachments={conversationAttachments?.map((attachment) => attachment.id).join(',')}
-        >
-          {isLoading ? 'loading' : 'done'}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponseMessage: ({
+      isLoading,
+      conversationId,
+      attachmentRefs,
+      conversationAttachments,
+    }: {
+      isLoading: boolean;
+      conversationId?: string;
+      attachmentRefs?: Array<{ attachment_id: string }>;
+      conversationAttachments?: Array<{ id: string }>;
+    }) => (
+      <div
+        data-test-subj="response"
+        data-conversation-id={conversationId}
+        data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
+        data-attachments={conversationAttachments?.map((attachment) => attachment.id).join(',')}
+      >
+        {isLoading ? 'loading' : 'done'}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attachments/attachment_references', () => {
-      const mocked = {
-      AttachmentReferences: ({
-        attachmentRefs,
-        actorFilter,
-      }: {
-        attachmentRefs?: Array<{ attachment_id: string }>;
-        actorFilter?: string[];
-      }) => (
-        <div
-          data-test-subj="references"
-          data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
-          data-actors={actorFilter?.join(',')}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentReferences: ({
+      attachmentRefs,
+      actorFilter,
+    }: {
+      attachmentRefs?: Array<{ attachment_id: string }>;
+      actorFilter?: string[];
+    }) => (
+      <div
+        data-test-subj="references"
+        data-refs={attachmentRefs?.map((ref) => ref.attachment_id).join(',')}
+        data-actors={actorFilter?.join(',')}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const steps = [
   createToolCallStep({ tool_call_id: 'tc-1', tool_id: 'search', params: {}, results: [] }),

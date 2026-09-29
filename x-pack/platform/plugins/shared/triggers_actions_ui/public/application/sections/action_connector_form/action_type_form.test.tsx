@@ -79,15 +79,17 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
-      const mocked = {
-      useGetRuleTypesPermissions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
+  const mocked = {
+    useGetRuleTypesPermissions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 vi.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', async () => {
-  const original = (await vi.importActual('@kbn/alerts-ui-shared/src/action_variables/transforms'));
+  const original = await vi.importActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: vi.fn(),
@@ -95,21 +97,21 @@ vi.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', async () => {
 });
 
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
-      const mocked = {
-      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_rule_alert_fields', () => {
-      const mocked = {
-      useRuleTypeAlertFields: () => ({
-        isLoading: false,
-        fields: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleTypeAlertFields: () => ({
+      isLoading: false,
+      fields: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('action_type_form', () => {
   afterEach(() => {

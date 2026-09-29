@@ -20,13 +20,13 @@ import { createMockToolContext, invokeHandler } from '../../../utils/test_helper
 import { createValidateQueriesTool } from './tool';
 
 vi.mock('@kbn/nightshift-ai', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/nightshift-ai')),
-      createQueryValidationContext: vi.fn(),
-      validateKIQueries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/nightshift-ai')),
+    createQueryValidationContext: vi.fn(),
+    validateKIQueries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createQueryValidationContextMock = createQueryValidationContext as MockedFunction<
   typeof createQueryValidationContext

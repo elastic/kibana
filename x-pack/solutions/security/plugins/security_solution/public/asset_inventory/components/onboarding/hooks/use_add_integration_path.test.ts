@@ -14,22 +14,22 @@ const mockGetUrlForApp = vi.fn();
 const mockUseAssetDiscoveryIntegration = vi.fn();
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: { getUrlForApp: mockGetUrlForApp },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: { getUrlForApp: mockGetUrlForApp },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_get_asset_discovery_integration', () => {
-      const mocked = {
-      useAssetDiscoveryIntegration: () => mockUseAssetDiscoveryIntegration(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetDiscoveryIntegration: () => mockUseAssetDiscoveryIntegration(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAddIntegrationPath', () => {
   beforeEach(() => {

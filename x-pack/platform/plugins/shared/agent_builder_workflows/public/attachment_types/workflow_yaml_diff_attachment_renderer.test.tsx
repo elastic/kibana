@@ -12,24 +12,24 @@ import { render } from '@testing-library/react';
 import React from 'react';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        editor: {
-          createModel: vi.fn(() => ({ dispose: vi.fn() })),
-          createDiffEditor: vi.fn(() => ({
-            setModel: vi.fn(),
-            updateOptions: vi.fn(),
-            getModifiedEditor: vi.fn(() => ({ layout: vi.fn() })),
-            dispose: vi.fn(),
-          })),
-        },
+  const mocked = {
+    monaco: {
+      editor: {
+        createModel: vi.fn(() => ({ dispose: vi.fn() })),
+        createDiffEditor: vi.fn(() => ({
+          setModel: vi.fn(),
+          updateOptions: vi.fn(),
+          getModifiedEditor: vi.fn(() => ({ layout: vi.fn() })),
+          dispose: vi.fn(),
+        })),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsMonacoTheme: vi.fn(),

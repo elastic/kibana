@@ -17,33 +17,33 @@ import { useNavigation } from '../../../hooks/use_navigation';
 import { useLastAgentId } from '../../../hooks/use_last_agent_id';
 
 vi.mock('../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_navigation', () => {
-      const mocked = {
-      useNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_last_agent_id', () => {
-      const mocked = {
-      useLastAgentId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLastAgentId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // EBT click props helper — irrelevant to these tests
 vi.mock('@kbn/ebt-click', () => {
-      const mocked = {
-      getEbtProps: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEbtProps: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationContext = vi.mocked(useConversationContext);
 const mockUseNavigation = vi.mocked(useNavigation);

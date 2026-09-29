@@ -19,11 +19,11 @@ import { FETCHER_OPERATION_IDS } from './fetcher_operation_ids';
 import * as reportFetchErrorModule from '../services/rest/report_fetch_error';
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: () => () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: () => () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const addToast = vi.fn();
 const addDangerToast = vi.fn();

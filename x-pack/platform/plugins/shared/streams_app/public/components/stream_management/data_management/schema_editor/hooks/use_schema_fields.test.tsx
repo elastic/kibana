@@ -32,51 +32,51 @@ const mockDataViews = {
 const mockRefreshDefinition = vi.fn();
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        dependencies: {
-          start: {
-            streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
-            data: { dataViews: mockDataViews },
-          },
+  const mocked = {
+    useKibana: () => ({
+      dependencies: {
+        start: {
+          streams: { streamsRepositoryClient: mockStreamsRepositoryClient },
+          data: { dataViews: mockDataViews },
         },
-        core: {
-          notifications: { toasts: mockToasts },
-        },
-        services: { telemetryClient: mockTelemetryClient },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      core: {
+        notifications: { toasts: mockToasts },
+      },
+      services: { telemetryClient: mockTelemetryClient },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the abort controller hook
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useAbortController: () => ({
-        signal: new AbortController().signal,
-        abort: vi.fn(),
-        refresh: vi.fn(),
-      }),
-      useAbortableAsync: vi.fn(() => ({
-        value: null,
-        loading: false,
-        refresh: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAbortController: () => ({
+      signal: new AbortController().signal,
+      abort: vi.fn(),
+      refresh: vi.fn(),
+    }),
+    useAbortableAsync: vi.fn(() => ({
+      value: null,
+      loading: false,
+      refresh: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useStreamsAppFetch
 vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: vi.fn(() => ({
-        value: null,
-        loading: false,
-        refresh: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: vi.fn(() => ({
+      value: null,
+      loading: false,
+      refresh: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseSchemaFields = (definition: Streams.ingest.all.GetResponse) =>
   renderHook(() =>

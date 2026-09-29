@@ -41,7 +41,7 @@ vi.mock('../../../overview/components/events_by_dataset');
 const mockNavigateToApp = vi.fn();
 const mockUseUiSetting$ = vi.fn();
 vi.mock('../../lib/kibana', async () => {
-  const original = (await vi.importActual('../../lib/kibana'));
+  const original = await vi.importActual('../../lib/kibana');
   return {
     ...original,
     useKibana: () => ({

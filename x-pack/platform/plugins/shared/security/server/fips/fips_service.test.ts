@@ -9,16 +9,16 @@ import { vi } from 'vitest';
 
 const mockGetFipsFn = vi.fn();
 vi.mock('crypto', () => {
-      const mocked = {
-      randomBytes: vi.fn(),
-      constants: require('crypto').constants,
-      createHash: require('crypto').createHash,
-      get getFips() {
-        return mockGetFipsFn;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    randomBytes: vi.fn(),
+    constants: require('crypto').constants,
+    createHash: require('crypto').createHash,
+    get getFips() {
+      return mockGetFipsFn;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, of } from 'rxjs';

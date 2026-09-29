@@ -14,7 +14,7 @@ import { createMockHoverContext, createMockStepContext } from './test_utils/mock
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 vi.mock('@kbn/workflows', async () => {
-  const actual = (await vi.importActual('@kbn/workflows'));
+  const actual = await vi.importActual('@kbn/workflows');
   return {
     ...actual,
     getBuiltInStepStability: vi.fn().mockReturnValue(undefined),

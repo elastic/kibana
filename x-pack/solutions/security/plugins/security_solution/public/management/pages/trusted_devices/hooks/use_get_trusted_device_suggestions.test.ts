@@ -15,7 +15,7 @@ import { useGetTrustedDeviceSuggestions } from './use_get_trusted_device_suggest
 import { TrustedDevicesApiClient } from '../service/api_client';
 
 vi.mock('@kbn/react-query', async () => {
-  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
+  const actualReactQueryModule = await vi.importActual('@kbn/react-query');
   return {
     ...actualReactQueryModule,
     useQuery: vi.fn((...args) => actualReactQueryModule.useQuery(...args)),

@@ -14,13 +14,13 @@ import { renderHook } from '@testing-library/react';
 import { useHighContrastModeStyles } from './use_high_contrast_mode_styles';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useEuiTheme } = (await vi.importMock('@elastic/eui'));
+const { useEuiTheme } = await vi.importMock('@elastic/eui');
 
 const themeMock = {
   euiTheme: {

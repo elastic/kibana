@@ -21,18 +21,14 @@ describe('ViewToggle', () => {
   });
 
   it('renders list and table toggle buttons', () => {
-    renderWithTestingProviders(
-      <ViewToggle idSelected={VIEW_TOGGLE_LIST_ID} onChange={vi.fn()} />
-    );
+    renderWithTestingProviders(<ViewToggle idSelected={VIEW_TOGGLE_LIST_ID} onChange={vi.fn()} />);
 
     expect(screen.getByRole('group', { name: /view toggle/i })).toBeInTheDocument();
     expect(screen.getAllByRole('button')).toHaveLength(2);
   });
 
   it('highlights the selected option', () => {
-    renderWithTestingProviders(
-      <ViewToggle idSelected={VIEW_TOGGLE_TABLE_ID} onChange={vi.fn()} />
-    );
+    renderWithTestingProviders(<ViewToggle idSelected={VIEW_TOGGLE_TABLE_ID} onChange={vi.fn()} />);
 
     expect(screen.getByRole('button', { name: /table view/i, pressed: true })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /list view/i, pressed: false })).toBeInTheDocument();

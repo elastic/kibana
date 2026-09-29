@@ -16,18 +16,18 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getRulesClientMockParams } from '../../../../test_utils';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const eventLogger = eventLoggerMock.create();
 

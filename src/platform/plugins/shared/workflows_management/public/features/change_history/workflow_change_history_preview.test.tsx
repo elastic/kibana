@@ -19,68 +19,68 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { renderWorkflowChangeHistoryPreview } from './workflow_change_history_preview';
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useDefineWorkflowsMonacoTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useDefineWorkflowsMonacoTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_workflow_change_history_preview_validation', () => {
-      const mocked = {
-      useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
-        validationResults: [],
-        isValidationLoading: false,
-        validationError: null,
-        handleValidationErrorClick: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
+      validationResults: [],
+      isValidationLoading: false,
+      validationError: null,
+      handleValidationErrorClick: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => {
-      const mocked = {
-      WorkflowYamlValidationAccordion: () => (
-        <div data-test-subj="workflowYamlEditorValidationErrorsList" />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYamlValidationAccordion: () => (
+      <div data-test-subj="workflowYamlEditorValidationErrorsList" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        MarkerSeverity: { Error: 8 },
-        editor: {
-          createModel: vi.fn((value: string) => ({ value, dispose: vi.fn() })),
-          create: vi.fn(() => ({
-            dispose: vi.fn(),
-            layout: vi.fn(),
-            getModel: vi.fn(() => ({ dispose: vi.fn() })),
+  const mocked = {
+    monaco: {
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        createModel: vi.fn((value: string) => ({ value, dispose: vi.fn() })),
+        create: vi.fn(() => ({
+          dispose: vi.fn(),
+          layout: vi.fn(),
+          getModel: vi.fn(() => ({ dispose: vi.fn() })),
+          updateOptions: vi.fn(),
+          createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+        })),
+        createDiffEditor: vi.fn(() => ({
+          setModel: vi.fn(),
+          dispose: vi.fn(),
+          layout: vi.fn(),
+          updateOptions: vi.fn(),
+          getLineChanges: vi.fn(() => []),
+          onDidUpdateDiff: vi.fn(() => ({ dispose: vi.fn() })),
+          getOriginalEditor: vi.fn(() => ({ updateOptions: vi.fn() })),
+          getModifiedEditor: vi.fn(() => ({
             updateOptions: vi.fn(),
+            getModel: vi.fn(() => ({ dispose: vi.fn() })),
             createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
           })),
-          createDiffEditor: vi.fn(() => ({
-            setModel: vi.fn(),
-            dispose: vi.fn(),
-            layout: vi.fn(),
-            updateOptions: vi.fn(),
-            getLineChanges: vi.fn(() => []),
-            onDidUpdateDiff: vi.fn(() => ({ dispose: vi.fn() })),
-            getOriginalEditor: vi.fn(() => ({ updateOptions: vi.fn() })),
-            getModifiedEditor: vi.fn(() => ({
-              updateOptions: vi.fn(),
-              getModel: vi.fn(() => ({ dispose: vi.fn() })),
-              createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
-            })),
-          })),
-          setModelMarkers: vi.fn(),
-          onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
-        },
+        })),
+        setModelMarkers: vi.fn(),
+        onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateEditor = monaco.editor.create as Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as Mock;

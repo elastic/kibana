@@ -14,35 +14,35 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = { useOnboardingFlow: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useOnboardingFlow: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_service_settings', () => {
-      const mocked = { useServiceSettings: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useServiceSettings: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./service_settings_flyout', () => {
-      const mocked = { ServiceSettingsFlyout: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ServiceSettingsFlyout: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./duplicate_service_modal', () => {
-      const mocked = {
-      DuplicateServiceModal: () => <div data-test-subj="duplicate-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DuplicateServiceModal: () => <div data-test-subj="duplicate-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../service_search_filter', () => {
-      const mocked = { ServiceSearchFilter: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ServiceSearchFilter: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./duplicate_name', () => {
-      const mocked = { buildDuplicateName: () => 'Copy' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { buildDuplicateName: () => 'Copy' };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ui-callout', () => {
-      const mocked = { KbnWarningCallout: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { KbnWarningCallout: () => null };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServiceSettings } from './use_service_settings';

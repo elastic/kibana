@@ -34,11 +34,11 @@ import { EventKind } from '../../../../flyout_v2/document/main/constants/event_k
 
 vi.mock('../../../../common/components/link_to');
 vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/user_privileges');
 
 const renderAboutSection = (searchHit = mockSearchHit) => {

@@ -27,40 +27,38 @@ import {
 } from './rollback';
 
 vi.mock('../..', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi
-          .fn()
-          .mockReturnValue({ info: vi.fn(), debug: vi.fn(), warn: vi.fn() } as any),
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-        getTelemetryEventsSender: vi.fn(),
-        getConfig: vi.fn().mockReturnValue({}),
-        getInternalUserSOClient: vi.fn(),
-        getExperimentalFeatures: vi.fn().mockReturnValue({}),
-      },
-      packagePolicyService: {
-        getPackagePolicySavedObjects: vi.fn(),
-        rollback: vi.fn(),
-        restoreRollback: vi.fn(),
-        cleanupRollbackSavedObjects: vi.fn(),
-        bumpAgentPolicyRevisionAfterRollback: vi.fn(),
-        findAllForAgentPolicy: vi.fn().mockResolvedValue([]),
-      },
-      agentPolicyService: {
-        getByIds: vi.fn().mockResolvedValue([]),
-        update: vi.fn().mockResolvedValue({ has_agent_version_conditions: false }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({ info: vi.fn(), debug: vi.fn(), warn: vi.fn() } as any),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+      getTelemetryEventsSender: vi.fn(),
+      getConfig: vi.fn().mockReturnValue({}),
+      getInternalUserSOClient: vi.fn(),
+      getExperimentalFeatures: vi.fn().mockReturnValue({}),
+    },
+    packagePolicyService: {
+      getPackagePolicySavedObjects: vi.fn(),
+      rollback: vi.fn(),
+      restoreRollback: vi.fn(),
+      cleanupRollbackSavedObjects: vi.fn(),
+      bumpAgentPolicyRevisionAfterRollback: vi.fn(),
+      findAllForAgentPolicy: vi.fn().mockResolvedValue([]),
+    },
+    agentPolicyService: {
+      getByIds: vi.fn().mockResolvedValue([]),
+      update: vi.fn().mockResolvedValue({ has_agent_version_conditions: false }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../agents', () => {
-      const mocked = {
-      getAgentsByKuery: vi.fn().mockResolvedValue({ total: 0, agents: [] }),
-      reassignAgents: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentsByKuery: vi.fn().mockResolvedValue({ total: 0, agents: [] }),
+    reassignAgents: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../audit_logging');
 
@@ -78,25 +76,25 @@ const spaceId = 'default';
 const sendTelemetryEventsMock = sendTelemetryEvents as Mock;
 
 vi.mock('./install', () => {
-      const mocked = {
-      installPackage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installPackage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./remove', () => {
-      const mocked = {
-      removeInstallation: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    removeInstallation: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../registry', () => {
-      const mocked = {
-      fetchInfo: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchInfo: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('rollbackInstallation', () => {
   afterEach(() => {
@@ -1344,48 +1342,46 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns unavailable when a freshly-installed dependency is still needed by another composable package', async () => {
       const depName = 'dep-pkg';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
-        {
-          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
-            if (search === pkgName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: pkgName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: pkgName,
-                      install_source: 'registry',
-                      previous_version: oldPkgVersion,
-                      version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previous_version: null }],
-                    },
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+        find: vi.fn().mockImplementation(({ search }: { search: string }) => {
+          if (search === pkgName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: pkgName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: pkgName,
+                    install_source: 'registry',
+                    previous_version: oldPkgVersion,
+                    version: newPkgVersion,
+                    previous_dependency_versions: [{ name: depName, previous_version: null }],
                   },
-                ],
-              });
-            }
-            if (search === depName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: depName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: depName,
-                      install_started_at: new Date().toISOString(),
-                      is_dependency_of: [
-                        { name: pkgName, version: newPkgVersion },
-                        { name: 'other-composable', version: '2.0.0' },
-                      ],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === depName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: depName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: depName,
+                    install_started_at: new Date().toISOString(),
+                    is_dependency_of: [
+                      { name: pkgName, version: newPkgVersion },
+                      { name: 'other-composable', version: '2.0.0' },
+                    ],
                   },
-                ],
-              });
-            }
-            return Promise.resolve({ saved_objects: [] });
-          }),
-        }
-      );
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ saved_objects: [] });
+        }),
+      });
       packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
         saved_objects: [],
       } as any);
@@ -1400,45 +1396,43 @@ describe('rollbackAvailableCheck', () => {
     it('returns unavailable when the previous registry version of an upgraded dependency is no longer available', async () => {
       const depName = 'dep-pkg';
       (fetchInfo as Mock).mockRejectedValueOnce(new Error('404 Not Found'));
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
-        {
-          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
-            if (search === pkgName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: pkgName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: pkgName,
-                      install_source: 'registry',
-                      previous_version: oldPkgVersion,
-                      version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
-                    },
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+        find: vi.fn().mockImplementation(({ search }: { search: string }) => {
+          if (search === pkgName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: pkgName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: pkgName,
+                    install_source: 'registry',
+                    previous_version: oldPkgVersion,
+                    version: newPkgVersion,
+                    previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                   },
-                ],
-              });
-            }
-            if (search === depName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: depName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: depName,
-                      install_started_at: new Date().toISOString(),
-                      is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === depName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: depName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: depName,
+                    install_started_at: new Date().toISOString(),
+                    is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
                   },
-                ],
-              });
-            }
-            return Promise.resolve({ saved_objects: [] });
-          }),
-        }
-      );
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ saved_objects: [] });
+        }),
+      });
       packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
         saved_objects: [],
       } as any);
@@ -1452,63 +1446,61 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns unavailable when rolling back a dependency would violate another package constraint', async () => {
       const depName = 'dep-pkg';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
-        {
-          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
-            if (search === pkgName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: pkgName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: pkgName,
-                      install_source: 'registry',
-                      previous_version: oldPkgVersion,
-                      version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
-                    },
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+        find: vi.fn().mockImplementation(({ search }: { search: string }) => {
+          if (search === pkgName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: pkgName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: pkgName,
+                    install_source: 'registry',
+                    previous_version: oldPkgVersion,
+                    version: newPkgVersion,
+                    previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                   },
-                ],
-              });
-            }
-            if (search === depName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: depName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: depName,
-                      install_started_at: new Date().toISOString(),
-                      is_dependency_of: [
-                        { name: pkgName, version: newPkgVersion },
-                        { name: 'other-composable', version: '3.0.0' },
-                      ],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === depName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: depName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: depName,
+                    install_started_at: new Date().toISOString(),
+                    is_dependency_of: [
+                      { name: pkgName, version: newPkgVersion },
+                      { name: 'other-composable', version: '3.0.0' },
+                    ],
                   },
-                ],
-              });
-            }
-            if (search === 'other-composable') {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: 'other-composable',
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: 'other-composable',
-                      // requires dep-pkg@^2.0.0, which 1.0.0 does not satisfy
-                      dependencies: [{ name: depName, version: '^2.0.0' }],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === 'other-composable') {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: 'other-composable',
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: 'other-composable',
+                    // requires dep-pkg@^2.0.0, which 1.0.0 does not satisfy
+                    dependencies: [{ name: depName, version: '^2.0.0' }],
                   },
-                ],
-              });
-            }
-            return Promise.resolve({ saved_objects: [] });
-          }),
-        }
-      );
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ saved_objects: [] });
+        }),
+      });
       packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
         saved_objects: [],
       } as any);
@@ -1522,63 +1514,61 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns available when rolling back a dependency still satisfies all other packages constraints', async () => {
       const depName = 'dep-pkg';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
-        {
-          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
-            if (search === pkgName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: pkgName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: pkgName,
-                      install_source: 'registry',
-                      previous_version: oldPkgVersion,
-                      version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previous_version: '1.5.0' }],
-                    },
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+        find: vi.fn().mockImplementation(({ search }: { search: string }) => {
+          if (search === pkgName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: pkgName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: pkgName,
+                    install_source: 'registry',
+                    previous_version: oldPkgVersion,
+                    version: newPkgVersion,
+                    previous_dependency_versions: [{ name: depName, previous_version: '1.5.0' }],
                   },
-                ],
-              });
-            }
-            if (search === depName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: depName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: depName,
-                      install_started_at: new Date().toISOString(),
-                      is_dependency_of: [
-                        { name: pkgName, version: newPkgVersion },
-                        { name: 'other-composable', version: '3.0.0' },
-                      ],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === depName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: depName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: depName,
+                    install_started_at: new Date().toISOString(),
+                    is_dependency_of: [
+                      { name: pkgName, version: newPkgVersion },
+                      { name: 'other-composable', version: '3.0.0' },
+                    ],
                   },
-                ],
-              });
-            }
-            if (search === 'other-composable') {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: 'other-composable',
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: 'other-composable',
-                      // requires dep-pkg@^1.0.0, which 1.5.0 satisfies
-                      dependencies: [{ name: depName, version: '^1.0.0' }],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === 'other-composable') {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: 'other-composable',
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: 'other-composable',
+                    // requires dep-pkg@^1.0.0, which 1.5.0 satisfies
+                    dependencies: [{ name: depName, version: '^1.0.0' }],
                   },
-                ],
-              });
-            }
-            return Promise.resolve({ saved_objects: [] });
-          }),
-        }
-      );
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ saved_objects: [] });
+        }),
+      });
       packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
         saved_objects: [],
       } as any);
@@ -1590,45 +1580,43 @@ describe('rollbackAvailableCheck', () => {
     it('returns unavailable when a dependency TTL is expired', async () => {
       const depName = 'dep-pkg';
       const eightDaysAgo = new Date(Date.now() - 8 * 24 * 60 * 60 * 1000).toISOString();
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
-        {
-          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
-            if (search === pkgName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: pkgName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: pkgName,
-                      install_source: 'registry',
-                      previous_version: oldPkgVersion,
-                      version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
-                    },
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+        find: vi.fn().mockImplementation(({ search }: { search: string }) => {
+          if (search === pkgName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: pkgName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: pkgName,
+                    install_source: 'registry',
+                    previous_version: oldPkgVersion,
+                    version: newPkgVersion,
+                    previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                   },
-                ],
-              });
-            }
-            if (search === depName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: depName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: depName,
-                      install_started_at: eightDaysAgo,
-                      is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
-                    },
+                },
+              ],
+            });
+          }
+          if (search === depName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: depName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: depName,
+                    install_started_at: eightDaysAgo,
+                    is_dependency_of: [{ name: pkgName, version: newPkgVersion }],
                   },
-                ],
-              });
-            }
-            return Promise.resolve({ saved_objects: [] });
-          }),
-        }
-      );
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ saved_objects: [] });
+        }),
+      });
       packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
         saved_objects: [],
       } as any);
@@ -1642,46 +1630,44 @@ describe('rollbackAvailableCheck', () => {
 
     it('returns unavailable when multiple saved objects match a dependency name', async () => {
       const depName = 'aws';
-      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue(
-        {
-          find: vi.fn().mockImplementation(({ search }: { search: string }) => {
-            if (search === pkgName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: pkgName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: {
-                      name: pkgName,
-                      install_source: 'registry',
-                      previous_version: oldPkgVersion,
-                      version: newPkgVersion,
-                      previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
-                    },
+      (appContextService.getInternalUserSOClientWithoutSpaceExtension as Mock).mockReturnValue({
+        find: vi.fn().mockImplementation(({ search }: { search: string }) => {
+          if (search === pkgName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: pkgName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: {
+                    name: pkgName,
+                    install_source: 'registry',
+                    previous_version: oldPkgVersion,
+                    version: newPkgVersion,
+                    previous_dependency_versions: [{ name: depName, previous_version: '1.0.0' }],
                   },
-                ],
-              });
-            }
-            if (search === depName) {
-              return Promise.resolve({
-                saved_objects: [
-                  {
-                    id: depName,
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: { name: depName, install_started_at: new Date().toISOString() },
-                  },
-                  {
-                    id: 'aws-logs',
-                    type: PACKAGES_SAVED_OBJECT_TYPE,
-                    attributes: { name: 'aws-logs', install_started_at: new Date().toISOString() },
-                  },
-                ],
-              });
-            }
-            return Promise.resolve({ saved_objects: [] });
-          }),
-        }
-      );
+                },
+              ],
+            });
+          }
+          if (search === depName) {
+            return Promise.resolve({
+              saved_objects: [
+                {
+                  id: depName,
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: { name: depName, install_started_at: new Date().toISOString() },
+                },
+                {
+                  id: 'aws-logs',
+                  type: PACKAGES_SAVED_OBJECT_TYPE,
+                  attributes: { name: 'aws-logs', install_started_at: new Date().toISOString() },
+                },
+              ],
+            });
+          }
+          return Promise.resolve({ saved_objects: [] });
+        }),
+      });
       packagePolicyServiceMock.getPackagePolicySavedObjects.mockResolvedValue({
         saved_objects: [],
       } as any);

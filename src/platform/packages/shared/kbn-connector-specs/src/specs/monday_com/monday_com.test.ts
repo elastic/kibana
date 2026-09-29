@@ -19,13 +19,13 @@ const mockCallTool = vi.fn();
 const mockListTools = vi.fn();
 
 vi.mock('../../lib/mcp/with_mcp_client', () => {
-      const mocked = {
-      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-        return fn({ callTool: mockCallTool, listTools: mockListTools });
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+      return fn({ callTool: mockCallTool, listTools: mockListTools });
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Apply Zod defaults the way the framework does before invoking a handler.
 const parse = <K extends keyof typeof MondayCom.actions>(action: K, raw: Record<string, unknown>) =>
@@ -581,7 +581,7 @@ describe('MondayCom', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
+      const { withMcpClient } = await vi.importMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
       await expect(MondayCom.test.handler(mockContext)).rejects.toThrow('connection refused');
     });

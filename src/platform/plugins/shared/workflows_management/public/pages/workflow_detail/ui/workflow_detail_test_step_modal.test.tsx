@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailTestStepModal } from './workflow_detail_test_step_modal';
 import { initialLoadingState } from '../../../entities/workflows/store/workflow_detail/utils/loading_states';
@@ -47,78 +47,78 @@ const mockKibanaValue = {
 };
 
 vi.mock('../../../hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => ({
-        setSelectedExecution: mockSetSelectedExecution,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => ({
+      setSelectedExecution: mockSetSelectedExecution,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_context_override_data', () => {
-      const mocked = {
-      useContextOverrideData: () => () => ({
-        contextOverride: { key: 'value' },
-        schema: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useContextOverrideData: () => () => ({
+      contextOverride: { key: 'value' },
+      schema: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
-      const mocked = {
-      useWorkflowActions: () => ({
-        runIndividualStep: {
-          mutateAsync: mockMutateAsync,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowActions: () => ({
+      runIndividualStep: {
+        mutateAsync: mockMutateAsync,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../features/run_workflow/ui/step_execute_modal', () => {
-      const mocked = {
-      StepExecuteModal: ({
-        onSubmit,
-        onClose,
-        stepId,
-      }: {
-        onSubmit: (params: { stepInputs: Record<string, unknown> }) => void;
-        onClose: () => void;
-        stepId: string;
-      }) => (
-        <div data-test-subj="step-execute-modal">
-          <div data-test-subj="modal-step-id">{stepId}</div>
-          <button
-            type="button"
-            data-test-subj="submit-step"
-            onClick={() => onSubmit({ stepInputs: { input1: 'val1' } })}
-          >
-            {'Submit'}
-          </button>
-          <button type="button" data-test-subj="close-modal" onClick={onClose}>
-            {'Close'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepExecuteModal: ({
+      onSubmit,
+      onClose,
+      stepId,
+    }: {
+      onSubmit: (params: { stepInputs: Record<string, unknown> }) => void;
+      onClose: () => void;
+      stepId: string;
+    }) => (
+      <div data-test-subj="step-execute-modal">
+        <div data-test-subj="modal-step-id">{stepId}</div>
+        <button
+          type="button"
+          data-test-subj="submit-step"
+          onClick={() => onSubmit({ stepInputs: { input1: 'val1' } })}
+        >
+          {'Submit'}
+        </button>
+        <button type="button" data-test-subj="close-modal" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities

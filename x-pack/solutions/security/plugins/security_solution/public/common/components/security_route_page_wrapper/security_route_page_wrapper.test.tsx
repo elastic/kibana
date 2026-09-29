@@ -23,11 +23,11 @@ import { SpyRoute } from '../../utils/route/spy_routes';
 vi.mock('../../links');
 vi.mock('../../hooks/use_upselling');
 vi.mock('../../utils/route/spy_routes', () => {
-      const mocked = {
-      SpyRoute: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpyRoute: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLinkInfo = useLinkInfo as Mock;
 const mockUseUpsellingPage = useUpsellingPage as Mock;
@@ -40,12 +40,12 @@ const defaultLinkInfo: LinkInfo = {
 
 const mockRedirect = vi.fn(() => null);
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      Redirect: () => mockRedirect(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    Redirect: () => mockRedirect(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_COMPONENT_SUBJ = 'test-component';
 const TestComponent = () => <div data-test-subj={TEST_COMPONENT_SUBJ} />;

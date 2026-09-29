@@ -18,15 +18,13 @@ import { stepVerifyAssets } from './step_verify_assets';
 
 vi.mock('../../verify_es_assets');
 vi.mock('../../utils', () => {
-      const mocked = {
-      withPackageSpan: (_label: string, fn: () => unknown) => fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withPackageSpan: (_label: string, fn: () => unknown) => fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockVerifyEsAssetsExist = verifyEsAssetsExist as MockedFunction<
-  typeof verifyEsAssetsExist
->;
+const mockVerifyEsAssetsExist = verifyEsAssetsExist as MockedFunction<typeof verifyEsAssetsExist>;
 
 describe('stepVerifyAssets', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

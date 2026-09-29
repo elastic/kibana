@@ -18,18 +18,18 @@ import { testQueryClient } from '../test_utils/test_query_client';
 import { useKibana } from '@kbn/reporting-public';
 
 vi.mock('@kbn/reporting-public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../apis/bulk_enable_scheduled_reports', () => {
-      const mocked = {
-      bulkEnableScheduledReports: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkEnableScheduledReports: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useBulkEnable', () => {
   const http = httpServiceMock.createStartContract();

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { render } from '@testing-library/react';
-import React from 'react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { StepIcon } from './step_icon';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -19,11 +19,11 @@ import { useKibana } from '../../../hooks/use_kibana';
 // Activates the __mocks__/use_kibana.ts auto-mock which uses createStartServicesMock()
 vi.mock('../../../hooks/use_kibana');
 vi.mock('@kbn/connector-specs/icons', () => {
-      const mocked = {
-      ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorIconsMap: new Map([['.sharepoint-online', 'logoKibana']]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Capture the services before any test resets mocks
 const mockServices = vi.mocked(useKibana)().services;
@@ -31,9 +31,7 @@ const mockServices = vi.mocked(useKibana)().services;
 beforeEach(() => {
   vi.restoreAllMocks();
   // Re-establish the auto-mock return value since restoreAllMocks clears it
-  vi
-    .mocked(useKibana)
-    .mockReturnValue({ services: mockServices } as ReturnType<typeof useKibana>);
+  vi.mocked(useKibana).mockReturnValue({ services: mockServices } as ReturnType<typeof useKibana>);
 });
 
 describe('StepIcon', () => {

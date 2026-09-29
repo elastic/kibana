@@ -15,11 +15,11 @@ import { useFetchIntegrations } from '../../../../../../../detections/hooks/aler
 import { useCreateEaseAlertsDataView } from '../../../../../../../detections/hooks/alert_summary/use_create_data_view';
 
 vi.mock('./table', () => {
-      const mocked = {
-      Table: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Table: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../../common/lib/kibana');
 vi.mock('../../../../../../../detections/hooks/alert_summary/use_fetch_integrations');
 vi.mock('../../../../../../../detections/hooks/alert_summary/use_create_data_view');
@@ -72,12 +72,12 @@ describe('<EaseAlertsTab />', () => {
     });
 
     vi.doMock('react', () => {
-          const mocked = {
-              ...require('react'),
-              useEffect: vi.fn((f) => f()),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        ...require('react'),
+        useEffect: vi.fn((f) => f()),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     render(<EaseAlertsTab id={id} query={query} />);
 

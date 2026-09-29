@@ -21,18 +21,18 @@ import type { UnifiedMetricsGridProps } from '../../../types';
 import { ESQLVariableType } from '@kbn/esql-types';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLQueryColumns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLQueryColumns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useEsqlQueryInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlQueryInfo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDeferred = <T>() => {
   let resolve!: (value: T) => void;

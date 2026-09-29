@@ -18,22 +18,22 @@ const mockUseAssistantOverlay = {
   showAssistantOverlay: vi.fn(),
 };
 vi.mock('../assistant/use_assistant_overlay', () => {
-      const mocked = {
-      useAssistantOverlay: () => mockUseAssistantOverlay,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantOverlay: () => mockUseAssistantOverlay,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockUseAssistantContext = {
   codeBlockRef: { current: null },
   assistantAvailability: { isAssistantVisible: true },
 };
 vi.mock('../..', () => {
-      const mocked = {
-      useAssistantContext: () => mockUseAssistantContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => mockUseAssistantContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: Props = {
   category: 'alert',

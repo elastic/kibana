@@ -29,9 +29,7 @@ const createFeatureFlagsMock = (enabled = true): FeatureFlagsStart =>
 
 it('returns true when every start requirement is available', async () => {
   const featureFlags = createFeatureFlagsMock(true);
-  const getForFeature = vi
-    .fn()
-    .mockResolvedValue({ endpoints: [{ connectorId: 'connector-1' }] });
+  const getForFeature = vi.fn().mockResolvedValue({ endpoints: [{ connectorId: 'connector-1' }] });
 
   await expect(
     isInvestigationAvailable({
@@ -92,9 +90,7 @@ it('returns false when any dependency, connector, or workflow definition is unav
       logger,
       searchInferenceEndpoints: {
         endpoints: {
-          getForFeature: vi
-            .fn()
-            .mockResolvedValue({ endpoints: [{ connectorId: 'connector-1' }] }),
+          getForFeature: vi.fn().mockResolvedValue({ endpoints: [{ connectorId: 'connector-1' }] }),
         },
       } as never,
       workflowsExtensions,

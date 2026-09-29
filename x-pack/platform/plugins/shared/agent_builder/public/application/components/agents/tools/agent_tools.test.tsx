@@ -16,96 +16,96 @@ import { EuiProvider } from '@elastic/eui';
 import { AgentTools } from './agent_tools';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => ({ agentId: 'agent-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => ({ agentId: 'agent-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_navigation', () => {
-      const mocked = {
-      useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_flyout_state');
 
 vi.mock('../../../hooks/use_query_state');
 
 vi.mock('../common/page_wrapper', () => {
-      const mocked = {
-      PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/styles', () => {
-      const mocked = {
-      useListDetailPageStyles: () => ({
-        loadingSpinner: {},
-        header: {},
-        body: {},
-        searchColumn: {},
-        searchInputWrapper: {},
-        scrollableList: {},
-        detailPanelWrapper: {},
-        noSelectionPlaceholder: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useListDetailPageStyles: () => ({
+      loadingSpinner: {},
+      header: {},
+      body: {},
+      searchColumn: {},
+      searchInputWrapper: {},
+      scrollableList: {},
+      detailPanelWrapper: {},
+      noSelectionPlaceholder: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tool_library_panel', () => {
-      const mocked = {
-      ToolLibraryPanel: () => <div data-test-subj="toolLibraryPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolLibraryPanel: () => <div data-test-subj="toolLibraryPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tool_create_flyout', () => {
-      const mocked = {
-      ToolCreateFlyout: ({ onToolCreated }: { onToolCreated?: (tool: { id: string }) => void }) => (
-        <div data-test-subj="toolCreateFlyout">
-          <button onClick={() => onToolCreated?.({ id: 'new-tool' })}>Simulate tool created</button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolCreateFlyout: ({ onToolCreated }: { onToolCreated?: (tool: { id: string }) => void }) => (
+      <div data-test-subj="toolCreateFlyout">
+        <button onClick={() => onToolCreated?.({ id: 'new-tool' })}>Simulate tool created</button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tool_detail_panel', () => {
-      const mocked = {
-      ToolDetailPanel: () => <div data-test-subj="toolDetailPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolDetailPanel: () => <div data-test-subj="toolDetailPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tools_customize_empty_state', () => {
-      const mocked = {
-      ToolsCustomizeEmptyState: () => <div data-test-subj="toolsCustomizeEmptyState" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolsCustomizeEmptyState: () => <div data-test-subj="toolsCustomizeEmptyState" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/active_item_row', () => {
-      const mocked = {
-      ActiveItemRow: () => <div data-test-subj="activeItemRow" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActiveItemRow: () => <div data-test-subj="activeItemRow" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/agents/use_agent_by_id');
 vi.mock('../../../hooks/agents/use_can_update_agent');
 vi.mock('../../../hooks/tools/use_tools');
 vi.mock('./use_tools_mutation');
 
-const { useAgentBuilderAgentById } = (await vi.importMock('../../../hooks/agents/use_agent_by_id'));
-const { useCanUpdateAgent } = (await vi.importMock('../../../hooks/agents/use_can_update_agent'));
-const { useToolsService } = (await vi.importMock('../../../hooks/tools/use_tools'));
-const { useToolsMutation } = (await vi.importMock('./use_tools_mutation'));
-const { useQueryState } = (await vi.importMock('../../../hooks/use_query_state'));
-const { useFlyoutState } = (await vi.importMock('../../../hooks/use_flyout_state'));
+const { useAgentBuilderAgentById } = await vi.importMock('../../../hooks/agents/use_agent_by_id');
+const { useCanUpdateAgent } = await vi.importMock('../../../hooks/agents/use_can_update_agent');
+const { useToolsService } = await vi.importMock('../../../hooks/tools/use_tools');
+const { useToolsMutation } = await vi.importMock('./use_tools_mutation');
+const { useQueryState } = await vi.importMock('../../../hooks/use_query_state');
+const { useFlyoutState } = await vi.importMock('../../../hooks/use_flyout_state');
 
 const renderComponent = () =>
   render(

@@ -25,29 +25,29 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ProposedActionsSlot } from './proposed_actions_slot';
 
 vi.mock('@kbn/proposals-plugin/public', () => {
-      const mocked = {
-      useConversationProposals: vi.fn(),
-      useApproveProposal: vi.fn(),
-      useDismissProposal: vi.fn(),
-      useIsApprovingProposal: vi.fn(),
-      useIsDecliningProposal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationProposals: vi.fn(),
+    useApproveProposal: vi.fn(),
+    useDismissProposal: vi.fn(),
+    useIsApprovingProposal: vi.fn(),
+    useIsDecliningProposal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agentic-investigations-plugin/public', () => {
-      const mocked = {
-      useCurrentUserProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUserProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationProposals = useConversationProposals as MockedFunction<
   typeof useConversationProposals

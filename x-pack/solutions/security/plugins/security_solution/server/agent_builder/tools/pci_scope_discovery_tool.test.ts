@@ -147,9 +147,9 @@ describe('pciScopeDiscoveryTool', () => {
 
       // cat.indices should have been called twice: once for initial discovery, once for the pattern
       expect(mockEsClient.asCurrentUser.cat.indices).toHaveBeenCalledTimes(2);
-      expect(
-        (mockEsClient.asCurrentUser.cat.indices as unknown as Mock).mock.calls[1][0]
-      ).toEqual(expect.objectContaining({ index: 'custom-firewall-*' }));
+      expect((mockEsClient.asCurrentUser.cat.indices as unknown as Mock).mock.calls[1][0]).toEqual(
+        expect.objectContaining({ index: 'custom-firewall-*' })
+      );
 
       const fieldCapsCall = (mockEsClient.asCurrentUser.fieldCaps as unknown as Mock).mock
         .calls[0][0];

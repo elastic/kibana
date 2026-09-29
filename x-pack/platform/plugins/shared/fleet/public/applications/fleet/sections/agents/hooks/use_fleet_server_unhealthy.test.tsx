@@ -14,15 +14,15 @@ import { useFleetServerUnhealthy } from './use_fleet_server_unhealthy';
 
 vi.mock('../../../../../hooks/use_request/settings');
 vi.mock('../../../../../hooks/use_authz', () => {
-      const mocked = {
-      useAuthz: vi.fn().mockReturnValue({
-        fleet: {
-          addAgents: true,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAuthz: vi.fn().mockReturnValue({
+      fleet: {
+        addAgents: true,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // FLAKY: https://github.com/elastic/kibana/issues/202359
 describe.skip('useFleetServerUnhealthy', () => {

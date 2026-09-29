@@ -1860,8 +1860,7 @@ describe('runRelationshipMaintainer', () => {
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
       const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
-      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: Mock })
-        .bulkUpdateEntity;
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: Mock }).bulkUpdateEntity;
       const callOrder: string[] = [];
       clearMock.mockImplementation(async () => {
         callOrder.push('clear');
@@ -1959,8 +1958,7 @@ describe('runRelationshipMaintainer', () => {
       const { crudClient, entityMetadataClient, relationshipsClient } = makeClients();
       const clearMock = (relationshipsClient as unknown as { clearRelationshipIds: Mock })
         .clearRelationshipIds;
-      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: Mock })
-        .bulkUpdateEntity;
+      const bulkUpdateMock = (crudClient as unknown as { bulkUpdateEntity: Mock }).bulkUpdateEntity;
       clearMock.mockRejectedValue(new Error('boom'));
       // Pre-flight passes so the run reaches the clear, which is what fails here.
       search.mockResolvedValueOnce(sourcePresenceResponse(1));

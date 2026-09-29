@@ -23,7 +23,9 @@ import * as urlParamHelpers from '../../context/url_params_context/helpers';
 import { LicenseContext } from '../../context/license/license_context';
 
 vi.mock('../../context/time_range_metadata/time_range_metadata_context', async () => {
-  const actual = (await vi.importActual('../../context/time_range_metadata/time_range_metadata_context'));
+  const actual = await vi.importActual(
+    '../../context/time_range_metadata/time_range_metadata_context'
+  );
   return {
     ...actual,
     TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
@@ -33,33 +35,35 @@ vi.mock('../../context/time_range_metadata/time_range_metadata_context', async (
 });
 
 vi.mock('../../context/apm_index_settings/apm_index_settings_context', () => {
-      const mocked = {
-      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The embeddable builds an es-query from dashboard filters via this hook; mock it so the test
 // doesn't hit the real `/internal/apm/data_view/index_pattern` API (which returns undefined here).
 vi.mock('../../hooks/use_adhoc_apm_data_view', () => {
-      const mocked = {
-      useAdHocApmDataView: () => ({
-        dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
-        apmIndices: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAdHocApmDataView: () => ({
+      dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+      apmIndices: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/app/service_map/use_service_map_badges', () => {
-      const mocked = {
-      useServiceMapBadges: ({ nodes, nodesStatus }: { nodes: unknown; nodesStatus: string }) => ({
-        nodes,
-        status: nodesStatus,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceMapBadges: ({ nodes, nodesStatus }: { nodes: unknown; nodesStatus: string }) => ({
+      nodes,
+      status: nodesStatus,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext

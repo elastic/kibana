@@ -48,19 +48,20 @@ describe('getSyntheticsEnablementRoute', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.spyOn(serviceApiKeyModule, 'getSyntheticsEnablement').mockResolvedValue(enablement);
-    vi
-      .spyOn(serviceApiKeyModule, 'getAPIKeyForSyntheticsService')
-      .mockResolvedValue({ isValid: false });
-    vi
-      .spyOn(shardingApiKeyModule, 'getPrivateLocationShardingApiKey')
-      .mockResolvedValue({ isValid: false });
-    vi
-      .spyOn(shardingApiKeyModule, 'generateAndSavePrivateLocationShardingApiKey')
-      .mockResolvedValue({
-        id: 'sharding-key',
-        name: 'synthetics-private-location-sharding',
-        apiKey: 'secret',
-      });
+    vi.spyOn(serviceApiKeyModule, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+      isValid: false,
+    });
+    vi.spyOn(shardingApiKeyModule, 'getPrivateLocationShardingApiKey').mockResolvedValue({
+      isValid: false,
+    });
+    vi.spyOn(
+      shardingApiKeyModule,
+      'generateAndSavePrivateLocationShardingApiKey'
+    ).mockResolvedValue({
+      id: 'sharding-key',
+      name: 'synthetics-private-location-sharding',
+      apiKey: 'secret',
+    });
   });
 
   it('creates a dedicated sharding key on self-managed when no service key is available', async () => {
@@ -90,9 +91,10 @@ describe('getSyntheticsEnablementRoute', () => {
   });
 
   it('does not block self-managed enablement when the sharding key cannot be created', async () => {
-    vi
-      .spyOn(shardingApiKeyModule, 'generateAndSavePrivateLocationShardingApiKey')
-      .mockRejectedValue(new Error('insufficient privileges'));
+    vi.spyOn(
+      shardingApiKeyModule,
+      'generateAndSavePrivateLocationShardingApiKey'
+    ).mockRejectedValue(new Error('insufficient privileges'));
 
     await expect(
       getSyntheticsEnablementRoute().handler(createContext() as never)

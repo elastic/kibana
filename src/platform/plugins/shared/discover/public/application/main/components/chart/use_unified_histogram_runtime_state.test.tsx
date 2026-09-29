@@ -20,11 +20,11 @@ import React from 'react';
 import { DEFAULT_HISTOGRAM_KEY_PREFIX, selectTabRuntimeState } from '../../state_management/redux';
 
 vi.mock('./use_discover_histogram', () => {
-      const mocked = {
-      useDiscoverHistogram: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoverHistogram: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useDiscoverHistogramMock = useDiscoverHistogram as MockedFunction<
   typeof useDiscoverHistogram

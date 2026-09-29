@@ -29,11 +29,11 @@ vi.mock('../../../../../common/lib/kibana');
 vi.mock('../../../../../common/components/link_to');
 vi.mock('../../../../../common/components/user_privileges');
 vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../flyout_v2/use_flyout_api');
 
 const useUserPrivilegesMock = useUserPrivileges as Mock;

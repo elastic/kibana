@@ -16,11 +16,11 @@ import { runInvalidate } from './lib';
 import { taskRunner } from './invalidate_api_keys_task';
 
 vi.mock('./lib', () => {
-      const mocked = {
-      runInvalidate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runInvalidate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runInvalidateMock = runInvalidate as Mock;
 
@@ -56,8 +56,8 @@ describe('invalidate api keys task runner', () => {
       expect.arrayContaining([INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME])
     );
 
-    const expectedClient = (coreStart.savedObjects.createInternalRepository as Mock).mock
-      .results[0].value;
+    const expectedClient = (coreStart.savedObjects.createInternalRepository as Mock).mock.results[0]
+      .value;
     expect(runInvalidateMock).toHaveBeenCalledWith(
       expect.objectContaining({ savedObjectsClient: expectedClient })
     );

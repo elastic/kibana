@@ -21,7 +21,7 @@ const mockUseProjectPickerState = vi.fn();
 const mockUseProjectPickerActions = vi.fn();
 
 vi.mock('../../../state', async () => {
-  const actual = (await vi.importActual('../../../state'));
+  const actual = await vi.importActual('../../../state');
   return {
     ...actual,
     useProjectPickerState: () => mockUseProjectPickerState(),

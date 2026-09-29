@@ -14,11 +14,11 @@ import { TransactionDetailFlyoutSummary } from './summary';
 
 const mockUseTransactionDetailFlyoutContext = vi.fn();
 vi.mock('./transaction_detail_flyout_context', () => {
-      const mocked = {
-      useTransactionDetailFlyoutContext: () => mockUseTransactionDetailFlyoutContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTransactionDetailFlyoutContext: () => mockUseTransactionDetailFlyoutContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FILTERS = {
   serviceName: 'checkout',

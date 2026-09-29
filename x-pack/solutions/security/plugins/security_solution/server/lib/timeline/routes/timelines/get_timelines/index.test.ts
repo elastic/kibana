@@ -15,11 +15,11 @@ import { getTimelinesRoute } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 vi.mock('../../../saved_object/timelines', () => {
-      const mocked = {
-      getAllTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('get all timelines', () => {
   let server: ReturnType<typeof serverMock.create>;

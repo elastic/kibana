@@ -39,9 +39,9 @@ const visualizeAction = new ActionInternal({
   getHref: async () => '/app/test',
 });
 
-vi
-  .spyOn(uiActions, 'getTriggerCompatibleActions')
-  .mockResolvedValue([visualizeAction as ActionInternal<object>]);
+vi.spyOn(uiActions, 'getTriggerCompatibleActions').mockResolvedValue([
+  visualizeAction as ActionInternal<object>,
+]);
 
 describe('UnifiedFieldList <FieldVisualizeButton />', () => {
   it('should render correctly', async () => {

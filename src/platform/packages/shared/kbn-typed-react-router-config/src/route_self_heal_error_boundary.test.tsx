@@ -18,13 +18,13 @@ import { RouteSelfHealErrorBoundary } from './route_self_heal_error_boundary';
 import { InvalidRouteParamsException } from './errors';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: vi.fn(),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: vi.fn(),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Captures errors that propagate out of RouteSelfHealErrorBoundary.
 let caughtError: Error | null = null;

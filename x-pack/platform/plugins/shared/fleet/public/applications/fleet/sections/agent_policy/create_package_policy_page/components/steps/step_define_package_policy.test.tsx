@@ -26,39 +26,39 @@ import { useOutputs } from './components/hooks';
 import { StepDefinePackagePolicy } from './step_define_package_policy';
 
 vi.mock('./components/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('./components/hooks')),
-      useOutputs: vi.fn().mockReturnValue({
-        isLoading: false,
-        canUseOutputPerIntegration: true,
-        allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./components/hooks')),
+    useOutputs: vi.fn().mockReturnValue({
+      isLoading: false,
+      canUseOutputPerIntegration: true,
+      allowedOutputs: [{ id: 'output-1', name: 'Default output', type: 'elasticsearch' }],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useGetPackagePoliciesQuery: vi.fn().mockReturnValue({ data: { items: [] } }),
-      useGetIlmPoliciesQuery: vi.fn().mockReturnValue({
-        data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useGetPackagePoliciesQuery: vi.fn().mockReturnValue({ data: { items: [] } }),
+    useGetIlmPoliciesQuery: vi.fn().mockReturnValue({
+      data: { has_manage_ilm: true, items: ['policy-a', 'policy-b'] },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/use_space_settings_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../../hooks/use_space_settings_context')),
-      useSpaceSettingsContext: vi.fn().mockReturnValue({
-        allowedNamespacePrefixes: [],
-        defaultNamespace: 'default',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../../hooks/use_space_settings_context')),
+    useSpaceSettingsContext: vi.fn().mockReturnValue({
+      allowedNamespacePrefixes: [],
+      defaultNamespace: 'default',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('StepDefinePackagePolicy', () => {
   const packageInfo: PackageInfo = {

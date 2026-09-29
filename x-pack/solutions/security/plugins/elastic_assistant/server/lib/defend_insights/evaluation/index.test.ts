@@ -24,38 +24,38 @@ import { evaluateDefendInsights } from '.';
 
 vi.mock('./run_evaluations');
 vi.mock('@kbn/langchain/server', () => {
-      const mocked = {
-      ActionsClientLlm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionsClientLlm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/langchain/server/tracers/langsmith', () => {
-      const mocked = {
-      getLangSmithTracer: vi.fn().mockReturnValue(['mockTracer']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLangSmithTracer: vi.fn().mockReturnValue(['mockTracer']),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../routes/utils', () => {
-      const mocked = {
-      getLlmType: vi.fn().mockReturnValue('mock-llm-type'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLlmType: vi.fn().mockReturnValue('mock-llm-type'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../prompts', () => {
-      const mocked = {
-      getDefendInsightsPrompt: vi.fn().mockReturnValue({
-        default: 'default',
-        refine: 'refine',
-        continue: 'continue',
-        group: 'group',
-        events: 'events',
-        eventsId: 'eventsId',
-        eventsEndpointId: 'eventsEndpointId',
-        eventsValue: 'eventsValue',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefendInsightsPrompt: vi.fn().mockReturnValue({
+      default: 'default',
+      refine: 'refine',
+      continue: 'continue',
+      group: 'group',
+      events: 'events',
+      eventsId: 'eventsId',
+      eventsEndpointId: 'eventsEndpointId',
+      eventsValue: 'eventsValue',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = { debug: vi.fn(), error: vi.fn(), warn: vi.fn(), info: vi.fn() };
 

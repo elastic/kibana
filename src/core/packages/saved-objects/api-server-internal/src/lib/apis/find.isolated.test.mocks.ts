@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const isSupportedEsServerMock = vi.fn();
 
 vi.doMock('@kbn/core-elasticsearch-server-internal', async () => {
-  const actual = (await vi.importActual('@kbn/core-elasticsearch-server-internal'));
+  const actual = await vi.importActual('@kbn/core-elasticsearch-server-internal');
   return {
     ...actual,
     isSupportedEsServer: isSupportedEsServerMock,

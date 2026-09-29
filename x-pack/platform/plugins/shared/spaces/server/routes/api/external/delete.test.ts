@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidatorConfig } from '@kbn/core/server';

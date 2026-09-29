@@ -16,11 +16,11 @@ import type { CoreStart } from '@kbn/core/public';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn((x) => x), // identity for simplicity
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn((x) => x), // identity for simplicity
+  };
+  return { ...mocked, default: mocked };
+});
 
 const overlayRef = { close: vi.fn() } as unknown as OverlayRef;
 const openFlyout = vi.fn(() => overlayRef);

@@ -14,33 +14,33 @@ export const getReferenceTransformsMock = vi.fn();
 export const getConversionTransformsMock = vi.fn();
 
 vi.doMock('./internal_transforms', () => {
-      const mocked = {
-      getCoreTransforms: getCoreTransformsMock,
-      getReferenceTransforms: getReferenceTransformsMock,
-      getConversionTransforms: getConversionTransformsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCoreTransforms: getCoreTransformsMock,
+    getReferenceTransforms: getReferenceTransformsMock,
+    getConversionTransforms: getConversionTransformsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getModelVersionTransformsMock = vi.fn();
 export const getModelVersionSchemasMock = vi.fn();
 
 vi.doMock('./model_version', () => {
-      const mocked = {
-      getModelVersionTransforms: getModelVersionTransformsMock,
-      getModelVersionSchemas: getModelVersionSchemasMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getModelVersionTransforms: getModelVersionTransformsMock,
+    getModelVersionSchemas: getModelVersionSchemasMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const validateTypeMigrationsMock = vi.fn();
 
 vi.doMock('./validate_migrations', () => {
-      const mocked = {
-      validateTypeMigrations: validateTypeMigrationsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateTypeMigrations: validateTypeMigrationsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const resetAllMocks = () => {
   getCoreTransformsMock.mockReset().mockReturnValue([]);

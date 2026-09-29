@@ -22,7 +22,7 @@ import {
 } from '../actions';
 
 vi.mock('../actions', async () => {
-  const actual = (await vi.importActual('../actions'));
+  const actual = await vi.importActual('../actions');
   const endTLSaving = vi.fn((...args) => actual.endTimelineSaving(...args));
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
@@ -39,7 +39,7 @@ vi.mock('../actions', async () => {
 vi.mock('../../containers/pinned_event/api');
 const mockTimelineSavedObjectId = 'mockTimelineSavedObjectId';
 vi.mock('./helpers', async () => {
-  const actual = (await vi.importActual('./helpers'));
+  const actual = await vi.importActual('./helpers');
   return {
     ...actual,
     ensureTimelineIsSaved: vi.fn().mockImplementation(() => ({

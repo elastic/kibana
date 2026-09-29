@@ -53,65 +53,65 @@ let mockLastPageTemplateProps: {
 } = {};
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      useSourceContext: () => mockSourceState,
-      useMetricsDataViewContext: () => ({ error: undefined, refetch: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSourceContext: () => mockSourceState,
+    useMetricsDataViewContext: () => ({ error: undefined, refetch: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          observabilityAIAssistant: undefined,
-          observabilityShared: {
-            navigation: {
-              PageTemplate: (props: {
-                'data-test-subj'?: string;
-                noDataConfig?: NoDataConfig;
-                children?: React.ReactNode;
-              }) => {
-                mockLastPageTemplateProps = {
-                  'data-test-subj': props['data-test-subj'],
-                  noDataConfig: props.noDataConfig,
-                };
-                return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
-              },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        observabilityAIAssistant: undefined,
+        observabilityShared: {
+          navigation: {
+            PageTemplate: (props: {
+              'data-test-subj'?: string;
+              noDataConfig?: NoDataConfig;
+              children?: React.ReactNode;
+            }) => {
+              mockLastPageTemplateProps = {
+                'data-test-subj': props['data-test-subj'],
+                noDataConfig: props.noDataConfig,
+              };
+              return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
             },
           },
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-              },
-            },
-          },
-          docLinks: { links: { observability: { guide: 'https://docs.example' } } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
+        },
+        docLinks: { links: { observability: { guide: 'https://docs.example' } } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      isPending: (status: string) =>
-        status === 'loading' || status === 'not_initiated' || status === 'pending',
-      useFetcher: () => ({
-        data: { hasData: mockFetcherState.hasData },
-        status: mockFetcherState.status,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isPending: (status: string) =>
+      status === 'loading' || status === 'not_initiated' || status === 'pending',
+    useFetcher: () => ({
+      data: { hasData: mockFetcherState.hasData },
+      status: mockFetcherState.status,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useLinkProps: () => ({ href: '/app/metrics/settings' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLinkProps: () => ({ href: '/app/metrics/settings' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const resetSharedMocks = () => {
   vi.clearAllMocks();

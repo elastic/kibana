@@ -12,59 +12,59 @@ import { render } from '../../../../../lib/helper/rtl_helpers';
 import { WaterfallTooltipContent } from './waterfall_tooltip_content';
 
 vi.mock('../context/waterfall_chart', () => {
-      const mocked = {
-      useWaterfallContext: vi.fn().mockReturnValue({
-        data: [
-          {
-            x: 0,
-            config: {
-              url: 'https://www.elastic.co',
-              tooltipProps: {
-                colour: '#000000',
-                value: 'test-val',
-              },
-              showTooltip: true,
-            },
-          },
-          {
-            x: 0,
-            config: {
-              url: 'https://www.elastic.co/with/missing/tooltip.props',
-              showTooltip: true,
-            },
-          },
-          {
-            x: 1,
-            config: {
-              url: 'https://www.elastic.co/someresource.path',
-              tooltipProps: {
-                colour: '#010000',
-                value: 'test-val-missing',
-              },
-              showTooltip: true,
-            },
-          },
-        ],
-        renderTooltipItem: (props: any) => (
-          <div aria-label="tooltip item">
-            <div>{props.colour}</div>
-            <div>{props.value}</div>
-          </div>
-        ),
-        sidebarItems: [
-          {
-            isHighlighted: true,
-            index: 0,
-            offsetIndex: 1,
+  const mocked = {
+    useWaterfallContext: vi.fn().mockReturnValue({
+      data: [
+        {
+          x: 0,
+          config: {
             url: 'https://www.elastic.co',
-            status: 200,
-            method: 'GET',
+            tooltipProps: {
+              colour: '#000000',
+              value: 'test-val',
+            },
+            showTooltip: true,
           },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        },
+        {
+          x: 0,
+          config: {
+            url: 'https://www.elastic.co/with/missing/tooltip.props',
+            showTooltip: true,
+          },
+        },
+        {
+          x: 1,
+          config: {
+            url: 'https://www.elastic.co/someresource.path',
+            tooltipProps: {
+              colour: '#010000',
+              value: 'test-val-missing',
+            },
+            showTooltip: true,
+          },
+        },
+      ],
+      renderTooltipItem: (props: any) => (
+        <div aria-label="tooltip item">
+          <div>{props.colour}</div>
+          <div>{props.value}</div>
+        </div>
+      ),
+      sidebarItems: [
+        {
+          isHighlighted: true,
+          index: 0,
+          offsetIndex: 1,
+          url: 'https://www.elastic.co',
+          status: 200,
+          method: 'GET',
+        },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WaterfallTooltipContent', () => {
   it('renders tooltip', () => {

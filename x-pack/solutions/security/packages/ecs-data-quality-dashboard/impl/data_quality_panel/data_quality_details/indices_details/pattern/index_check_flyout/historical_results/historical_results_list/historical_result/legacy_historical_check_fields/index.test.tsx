@@ -20,7 +20,7 @@ import {
 } from '../../../../../../../../mock/test_providers/test_providers';
 
 vi.mock('@elastic/eui', async () => {
-  const originalModule = (await vi.importActual('@elastic/eui'));
+  const originalModule = await vi.importActual('@elastic/eui');
 
   return {
     ...originalModule,

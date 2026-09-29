@@ -17,85 +17,85 @@ import { ProductLine, ProductTier } from '../common/product';
 // ── Heavy module mocks ────────────────────────────────────────────────────────
 
 vi.mock('./config', () => {
-      const mocked = {
-      createConfig: vi.fn().mockReturnValue({
-        productTypes: [],
-        experimentalFeatures: {
-          enableAlertsAndAttacksAlignment: false,
-          ruleChangesHistoryEnabled: false,
-        },
-        usageApi: { enabled: false, url: undefined },
-        usageReportingTaskInterval: '1h',
-        cloudSecurityUsageReportingTaskInterval: '30m',
-        ai4SocUsageReportingTaskInterval: '1h',
-        usageReportingTaskTimeout: '1m',
-        cloudSecurityMetering: { cspm: { enabled: false } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createConfig: vi.fn().mockReturnValue({
+      productTypes: [],
+      experimentalFeatures: {
+        enableAlertsAndAttacksAlignment: false,
+        ruleChangesHistoryEnabled: false,
+      },
+      usageApi: { enabled: false, url: undefined },
+      usageReportingTaskInterval: '1h',
+      cloudSecurityUsageReportingTaskInterval: '30m',
+      ai4SocUsageReportingTaskInterval: '1h',
+      usageReportingTaskTimeout: '1m',
+      cloudSecurityMetering: { cspm: { enabled: false } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./product_features', () => {
-      const mocked = {
-      registerProductFeatures: vi.fn(),
-      getSecurityAiSocProductTier: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerProductFeatures: vi.fn(),
+    getSecurityAiSocProductTier: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/pli/pli_features', () => {
-      const mocked = {
-      getEnabledProductFeatures: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEnabledProductFeatures: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./task_manager/usage_reporting_task', () => {
-      const mocked = {
-      SecurityUsageReportingTask: vi.fn().mockImplementation(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecurityUsageReportingTask: vi.fn().mockImplementation(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./task_manager/nlp_cleanup_task/nlp_cleanup_task', () => {
-      const mocked = {
-      NLPCleanupTask: vi.fn().mockImplementation(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NLPCleanupTask: vi.fn().mockImplementation(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./telemetry/event_based_telemetry', () => {
-      const mocked = {
-      telemetryEvents: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    telemetryEvents: [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./common/services/usage_reporting_service', () => {
-      const mocked = {
-      UsageReportingService: vi.fn().mockImplementation(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UsageReportingService: vi.fn().mockImplementation(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./ai4soc/services', () => {
-      const mocked = {
-      ai4SocMeteringService: { getUsageRecords: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ai4SocMeteringService: { getUsageRecords: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cloud_security/cloud_security_metering_task_config', () => {
-      const mocked = {
-      cloudSecurityMetringTaskProperties: {
-        taskType: 'mock-task-type',
-        taskTitle: 'mock-task-title',
-        version: '1.0.0',
-        meteringCallback: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cloudSecurityMetringTaskProperties: {
+      taskType: 'mock-task-type',
+      taskTitle: 'mock-task-title',
+      version: '1.0.0',
+      meteringCallback: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ─────────────────────────────────────────────────────────────────────────────
 

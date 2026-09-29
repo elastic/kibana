@@ -19,25 +19,25 @@ import * as FocusedTraceWaterfallModule from '.';
 import * as useGetServiceBadgeHrefFromCoreModule from '../trace_waterfall/use_get_service_badge_href_from_core';
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useAbortableAsync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAbortableAsync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('.', () => {
-      const mocked = {
-      FocusedTraceWaterfall: vi.fn(() => <div data-test-subj="focusedTraceWaterfall" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FocusedTraceWaterfall: vi.fn(() => <div data-test-subj="focusedTraceWaterfall" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../trace_waterfall/use_get_service_badge_href_from_core', () => {
-      const mocked = {
-      useGetServiceBadgeHrefFromCore: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetServiceBadgeHrefFromCore: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAbortableAsync = useAbortableAsyncModule.useAbortableAsync as Mock;
 const mockFocusedTraceWaterfall = FocusedTraceWaterfallModule.FocusedTraceWaterfall as Mock;

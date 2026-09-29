@@ -16,12 +16,14 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+    )),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ExchangeFormFields renders', () => {
   const actionConnector = createMockActionConnector({

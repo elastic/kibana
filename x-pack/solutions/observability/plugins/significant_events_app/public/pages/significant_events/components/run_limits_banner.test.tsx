@@ -17,11 +17,11 @@ import { RunLimitsBanner } from './run_limits_banner';
 
 vi.mock('../../../hooks/use_significant_events_run_quotas');
 vi.mock('../../../hooks/use_significant_events_app_router', () => {
-      const mocked = {
-      useSignificantEventsAppRouter: () => ({ link: vi.fn().mockReturnValue('#settings') }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsAppRouter: () => ({ link: vi.fn().mockReturnValue('#settings') }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRunQuotas = useRunQuotas as MockedFunction<typeof useRunQuotas>;
 

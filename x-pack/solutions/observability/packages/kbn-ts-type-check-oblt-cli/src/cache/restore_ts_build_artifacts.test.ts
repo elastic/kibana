@@ -31,43 +31,43 @@ import {
 } from './utils';
 
 vi.mock('./utils', () => {
-      const mocked = {
-      buildCandidateShaList: vi.fn(),
-      cleanTypeCheckArtifacts: vi.fn().mockResolvedValue(undefined),
-      getPullRequestNumber: vi.fn(),
-      isCiEnvironment: vi.fn(),
-      readRecentCommitShas: vi.fn(),
-      readMainBranchCommitShas: vi.fn().mockResolvedValue([]),
-      resolveCurrentCommitSha: vi.fn(),
-      resolveUpstreamRemote: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildCandidateShaList: vi.fn(),
+    cleanTypeCheckArtifacts: vi.fn().mockResolvedValue(undefined),
+    getPullRequestNumber: vi.fn(),
+    isCiEnvironment: vi.fn(),
+    readRecentCommitShas: vi.fn(),
+    readMainBranchCommitShas: vi.fn().mockResolvedValue([]),
+    resolveCurrentCommitSha: vi.fn(),
+    resolveUpstreamRemote: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./file_system/gcs_file_system', () => {
-      const mocked = {
-      GcsFileSystem: vi.fn().mockImplementation(() => ({
-        listAvailableCommitShas: vi.fn().mockResolvedValue({ shas: new Set(), elapsedMs: 0 }),
-        restoreArchive: vi.fn().mockResolvedValue(undefined),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GcsFileSystem: vi.fn().mockImplementation(() => ({
+      listAvailableCommitShas: vi.fn().mockResolvedValue({ shas: new Set(), elapsedMs: 0 }),
+      restoreArchive: vi.fn().mockResolvedValue(undefined),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cache_server_client', () => {
-      const mocked = {
-      isCacheServerAvailable: vi.fn().mockResolvedValue(false),
-      tryRestoreFromCacheServer: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isCacheServerAvailable: vi.fn().mockResolvedValue(false),
+    tryRestoreFromCacheServer: vi.fn().mockResolvedValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./detect_stale_artifacts', () => {
-      const mocked = {
-      detectStaleArtifacts: vi.fn().mockResolvedValue(new Set()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    detectStaleArtifacts: vi.fn().mockResolvedValue(new Set()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock execa to simulate a fresh checkout (no existing build artifacts)
 // and prevent actual git/gcloud commands from running during tests.
@@ -94,9 +94,7 @@ const mockedResolveUpstreamRemote = resolveUpstreamRemote as MockedFunction<
 >;
 
 const { detectStaleArtifacts } = (await vi.importMock('./detect_stale_artifacts')) as {
-  detectStaleArtifacts: MockedFunction<
-    (opts: Record<string, unknown>) => Promise<Set<string>>
-  >;
+  detectStaleArtifacts: MockedFunction<(opts: Record<string, unknown>) => Promise<Set<string>>>;
 };
 
 const createLog = (): SomeDevLog => {
@@ -137,9 +135,7 @@ describe('restoreTSBuildArtifacts', () => {
     vi.spyOn(Fs.promises, 'readFile').mockResolvedValue(JSON.stringify([]));
     // Mock Fs.promises.access so the local cache path is considered reachable in tests.
     vi.spyOn(Fs.promises, 'access').mockResolvedValue(undefined);
-    restoreSpy = vi
-      .spyOn(LocalFileSystem.prototype, 'restoreArchive')
-      .mockResolvedValue(undefined);
+    restoreSpy = vi.spyOn(LocalFileSystem.prototype, 'restoreArchive').mockResolvedValue(undefined);
   });
 
   afterEach(() => {
@@ -312,9 +308,7 @@ describe('resolveRestoreStrategy', () => {
     );
 
     // No local artifacts by default — empty config-paths.json, no state file.
-    readFileSpy = vi
-      .spyOn(Fs.promises, 'readFile')
-      .mockImplementation(makeReadFileMock(null, []));
+    readFileSpy = vi.spyOn(Fs.promises, 'readFile').mockImplementation(makeReadFileMock(null, []));
     writeFileSpy = vi.spyOn(Fs.promises, 'writeFile').mockResolvedValue(undefined);
     mkdirSpy = vi.spyOn(Fs.promises, 'mkdir').mockResolvedValue(undefined);
     accessSpy = vi.spyOn(Fs.promises, 'access').mockRejectedValue(new Error('ENOENT'));
@@ -786,12 +780,12 @@ describe('computeEffectiveRebuildSet', () => {
 // ── selectBestArchive ──────────────────────────────────────────────────────
 
 vi.mock('./gcs_archive_resolver', async () => {
-      const mocked = {
-      ...(await vi.importActual('./gcs_archive_resolver')),
-      computeEffectiveRebuildCountFromSha: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./gcs_archive_resolver')),
+    computeEffectiveRebuildCountFromSha: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { computeEffectiveRebuildCountFromSha } from './gcs_archive_resolver';
 

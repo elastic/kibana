@@ -493,9 +493,7 @@ describe('import timeline templates', () => {
 
     vi.doMock('./create_timelines_stream_from_ndjson', () => {
       return {
-        createTimelinesStreamFromNdJson: vi
-          .fn()
-          .mockReturnValue(mockParsedTemplateTimelineObjects),
+        createTimelinesStreamFromNdJson: vi.fn().mockReturnValue(mockParsedTemplateTimelineObjects),
       };
     });
 
@@ -516,11 +514,11 @@ describe('import timeline templates', () => {
     });
 
     vi.doMock('uuid', () => {
-          const mocked = {
-              v4: vi.fn().mockReturnValue(mockNewTemplateTimelineId),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        v4: vi.fn().mockReturnValue(mockNewTemplateTimelineId),
+      };
+      return { ...mocked, default: mocked };
+    });
   });
 
   describe('Import a new timeline template', () => {

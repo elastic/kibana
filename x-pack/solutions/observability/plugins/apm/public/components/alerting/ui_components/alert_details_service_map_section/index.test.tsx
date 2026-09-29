@@ -33,36 +33,36 @@ import { SERVICE_MAP_EBT_ELEMENTS } from '../../../app/service_map/ebt_constants
 const mockUseApmEmbeddableDeps = vi.fn();
 
 vi.mock('../../context/apm_embeddable_deps_context', () => {
-      const mocked = {
-      useApmEmbeddableDeps: () => mockUseApmEmbeddableDeps(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmEmbeddableDeps: () => mockUseApmEmbeddableDeps(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../embeddable/embeddable_context', () => {
-      const mocked = {
-      ApmEmbeddableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmEmbeddableContext: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServiceMapEmbeddable = vi.fn((_props: unknown) => (
   <div data-test-subj="mockServiceMapEmbeddable" />
 ));
 
 vi.mock('../../../../embeddable/service_map/service_map_embeddable', () => {
-      const mocked = {
-      ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../embeddable/service_map/get_service_map_url', () => {
-      const mocked = {
-      getServiceMapUrl: vi.fn(() => '/app/apm/service-map'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServiceMapUrl: vi.fn(() => '/app/apm/service-map'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function makeAlert(
   fields: Partial<AlertDetailsAppSectionProps['alert']['fields']> = {}

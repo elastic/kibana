@@ -249,8 +249,7 @@ describe('addObservable', () => {
       mockCasesClient
     );
 
-    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as Mock).mock
-      .calls;
+    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as Mock).mock.calls;
     expect(payload).not.toHaveProperty('value');
     expect(payload).not.toHaveProperty('description');
     expect(payload).not.toHaveProperty('observables');
@@ -645,8 +644,7 @@ describe('bulkAddObservables', () => {
     );
 
     expect(mockClientArgs.casesEventBus.emitObservablesAdded).toHaveBeenCalledTimes(1);
-    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as Mock).mock
-      .calls;
+    const [[, payload]] = (mockClientArgs.casesEventBus.emitObservablesAdded as Mock).mock.calls;
 
     expect(payload.observableIds).toHaveLength(3);
     expect(payload.observableTypeKeys).toHaveLength(3);

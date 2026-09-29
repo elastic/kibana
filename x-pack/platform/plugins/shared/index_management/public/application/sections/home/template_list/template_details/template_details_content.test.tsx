@@ -22,31 +22,31 @@ import { TemplateDetailsContent } from './template_details_content';
 import type { UseRequestResponse, Error as EsUiSharedError } from '../../../../../shared_imports';
 
 vi.mock('../../../../services/api', () => {
-      const mocked = {
-      useLoadIndexTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadIndexTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../app_context', () => {
-      const mocked = {
-      useServices: vi.fn(),
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServices: vi.fn(),
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-        <span>{defaultMessage}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+      <span>{defaultMessage}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../shared_imports', async () => {
-  const actual = (await vi.importActual('../../../../../shared_imports'));
+  const actual = await vi.importActual('../../../../../shared_imports');
   return {
     ...actual,
     SectionLoading: ({ children }: { children: React.ReactNode }) => (
@@ -56,50 +56,50 @@ vi.mock('../../../../../shared_imports', async () => {
 });
 
 vi.mock('../../../../components', () => {
-      const mocked = {
-      TemplateDeleteModal: ({ templatesToDelete }: { templatesToDelete: Array<{ name: string }> }) =>
-        templatesToDelete?.length ? (
-          <div
-            data-test-subj="templateDeleteModal"
-            data-template-names={templatesToDelete.map((t) => t.name).join(',')}
-          />
-        ) : null,
-      SectionError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-        <div data-test-subj={dataTestSubj ?? 'sectionError'} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateDeleteModal: ({ templatesToDelete }: { templatesToDelete: Array<{ name: string }> }) =>
+      templatesToDelete?.length ? (
+        <div
+          data-test-subj="templateDeleteModal"
+          data-template-names={templatesToDelete.map((t) => t.name).join(',')}
+        />
+      ) : null,
+    SectionError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+      <div data-test-subj={dataTestSubj ?? 'sectionError'} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/shared', () => {
-      const mocked = {
-      TabAliases: () => <div data-test-subj="tabAliasesPanel" />,
-      TabMappings: () => <div data-test-subj="tabMappingsPanel" />,
-      TabSettings: () => <div data-test-subj="tabSettingsPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TabAliases: () => <div data-test-subj="tabAliasesPanel" />,
+    TabMappings: () => <div data-test-subj="tabMappingsPanel" />,
+    TabSettings: () => <div data-test-subj="tabSettingsPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components', () => {
-      const mocked = {
-      TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
-        <span data-test-subj={`templateType-${templateType}`} />
-      ),
-      TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
+      <span data-test-subj={`templateType-${templateType}`} />
+    ),
+    TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tabs', () => {
-      const mocked = {
-      TabSummary: () => <div data-test-subj="tabSummaryPanel" />,
-      TabPreview: () => <div data-test-subj="tabPreviewPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TabSummary: () => <div data-test-subj="tabSummaryPanel" />,
+    TabPreview: () => <div data-test-subj="tabPreviewPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiPopover: ({

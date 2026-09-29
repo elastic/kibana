@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { vi } from 'vitest';
 import type { Mock, Mocked, MockedFunction } from 'vitest';
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import { isDynamicConnector, StepCategory } from '@kbn/workflows';
 import type { WorkflowsExtensionsPublicPluginStart } from '@kbn/workflows-extensions/public';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/public/mocks';
@@ -22,35 +22,35 @@ import type { ActionOptionData } from '../types';
 import { isActionGroup, isActionOption } from '../types';
 
 vi.mock('../../../../common/schema', () => {
-      const mocked = {
-      getAllConnectors: vi.fn(),
-      isDeprecatedStepType: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: vi.fn(),
+    isDeprecatedStepType: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: { getTriggerDefinitions: vi.fn(() => []) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: { getTriggerDefinitions: vi.fn(() => []) },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      isDynamicConnector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    isDynamicConnector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: vi.fn(
-          (key: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage
-        ),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: vi.fn(
+        (key: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage
+      ),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getActionOptions', () => {
   const mockEuiTheme = {

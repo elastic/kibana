@@ -33,14 +33,12 @@ describe('When using CommandExecutionOutput component', () => {
       throw new Error('cmd1 command not found in test mocks');
     }
 
-    (cmd1.RenderComponent as Mock).mockImplementation(
-      (props: CommandExecutionComponentProps) => {
-        setCmd1ToComplete = () => props.setStatus('success');
-        setCmd1Status = (status) => props.setStatus(status);
+    (cmd1.RenderComponent as Mock).mockImplementation((props: CommandExecutionComponentProps) => {
+      setCmd1ToComplete = () => props.setStatus('success');
+      setCmd1Status = (status) => props.setStatus(status);
 
-        return <div>{'output'}</div>;
-      }
-    );
+      return <div>{'output'}</div>;
+    });
 
     render = async (props = {}) => {
       renderResult = renderConsole(props);

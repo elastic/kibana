@@ -28,18 +28,18 @@ import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution
 
 vi.mock('./factories');
 vi.mock('./should_delete_orphaned_task', () => {
-      const mocked = {
-      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 // wrapTaskRun adds a tracing span around the run callback; here it just invokes it.
 vi.mock('../telemetry/traces', () => {
-      const mocked = {
-      wrapTaskRun: vi.fn(({ run }: { run: () => Promise<unknown> }) => run()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapTaskRun: vi.fn(({ run }: { run: () => Promise<unknown> }) => run()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAssetManagerClientMock = createAssetManagerClient as Mock;
 

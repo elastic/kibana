@@ -17,30 +17,32 @@ const mockModelInvoke = vi.fn();
 const mockFormatMessages = vi.fn();
 
 vi.mock('./prompts', () => {
-      const mocked = {
-      CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT: {
+  const mocked = {
+    CREATE_ESQL_RULE_NAME_AND_DESCRIPTION_PROMPT: {
+      pipe: vi.fn(() => ({
         pipe: vi.fn(() => ({
-          pipe: vi.fn(() => ({
-            invoke: mockChainInvoke,
-          })),
+          invoke: mockChainInvoke,
         })),
-        formatMessages: mockFormatMessages,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      })),
+      formatMessages: mockFormatMessages,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@langchain/core/output_parsers', () => {
-      const mocked = {
-      ...require('@langchain/core/output_parsers'),
-      JsonOutputParser: vi.fn().mockImplementation(() => ({
-        invoke: mockJsonParserInvoke,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('@langchain/core/output_parsers'),
+    JsonOutputParser: vi.fn().mockImplementation(() => ({
+      invoke: mockJsonParserInvoke,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { createRuleNameAndDescriptionNode } = (await vi.importActual('./create_rule_name_and_description')) as typeof import('./create_rule_name_and_description');
+const { createRuleNameAndDescriptionNode } = (await vi.importActual(
+  './create_rule_name_and_description'
+)) as typeof import('./create_rule_name_and_description');
 
 const createState = (overrides: Partial<RuleCreationState> = {}): RuleCreationState => ({
   userQuery: 'detect brute force logins',

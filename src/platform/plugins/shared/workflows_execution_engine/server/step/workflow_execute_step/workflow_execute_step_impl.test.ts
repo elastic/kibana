@@ -352,8 +352,7 @@ describe('WorkflowExecuteStepImpl', () => {
       const step = new WorkflowExecuteStepImpl(init);
       await step.run();
 
-      const engine =
-        init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
+      const engine = init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
       expect(engine.executeWorkflow).toHaveBeenCalled();
     });
 
@@ -569,8 +568,7 @@ describe('WorkflowExecuteStepImpl', () => {
       const step = new WorkflowExecuteStepImpl(init);
       await step.onCancel();
 
-      const engine =
-        init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
+      const engine = init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
       expect(engine.cancelWorkflowExecution).toHaveBeenCalledWith(
         'child-exec-1',
         'default',
@@ -587,8 +585,7 @@ describe('WorkflowExecuteStepImpl', () => {
       const step = new WorkflowExecuteStepImpl(init);
       await step.onCancel();
 
-      const engine =
-        init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
+      const engine = init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
       expect(engine.cancelWorkflowExecution).not.toHaveBeenCalled();
     });
 
@@ -601,8 +598,7 @@ describe('WorkflowExecuteStepImpl', () => {
       const step = new WorkflowExecuteStepImpl(init);
       await step.onCancel();
 
-      const engine =
-        init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
+      const engine = init.workflowsExecutionEngine as Mocked<WorkflowsExecutionEnginePluginStart>;
       expect(engine.cancelWorkflowExecution).not.toHaveBeenCalled();
     });
   });

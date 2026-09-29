@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock, MockedFunction } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import type { Mock, MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { ChangeHistoryModalContext } from '@kbn/change-history-ui';
 import { useWorkflowsCapabilities, type WorkflowsManagementCapabilities } from '@kbn/workflows-ui';
@@ -40,35 +39,35 @@ const mockUseMemoCss = vi.fn();
 let mockNavigateToApp: Mock;
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => mockUseParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => mockUseParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useCurrentEuiBreakpoint: () => 'xl',
-      // Keep app menu breakpoint checks on xl so its items render inline in tests.
-      useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useCurrentEuiBreakpoint: () => 'xl',
+    // Keep app menu breakpoint checks on xl so its items render inline in tests.
+    useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
@@ -76,35 +75,35 @@ const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
 const defaultWorkflowsCapabilities = createMockWorkflowsCapabilities();
 
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../entities/workflows/model/use_save_yaml', () => {
-      const mocked = {
-      useSaveYaml: () => mockUseSaveYaml(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSaveYaml: () => mockUseSaveYaml(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../entities/workflows/model/use_update_workflow', () => {
-      const mocked = {
-      useUpdateWorkflow: () => mockUseUpdateWorkflow(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateWorkflow: () => mockUseUpdateWorkflow(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/css-utils/public/use_memo_css', () => {
-      const mocked = {
-      useMemoCss: (styles: any) => mockUseMemoCss(styles),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMemoCss: (styles: any) => mockUseMemoCss(styles),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_workflows_experimental_ui_setting', () => {
-      const mocked = {
-      useWorkflowsExperimentalUiSetting: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsExperimentalUiSetting: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The run action renders inline in the app menu.
 const openRunWorkflowButton = async (): Promise<HTMLElement> =>
@@ -196,14 +195,12 @@ describe('WorkflowDetailHeader', () => {
             },
           },
           navigateToApp: mockNavigateToApp,
-          getUrlForApp: vi.fn(
-            (appId: string, options?: { deepLinkId?: string; path?: string }) => {
-              const deepLinkPath = options?.deepLinkId
-                ? `/insightsAndAlerting/${options.deepLinkId}`
-                : '';
-              return `/app/${appId}${deepLinkPath}${options?.path ?? ''}`;
-            }
-          ),
+          getUrlForApp: vi.fn((appId: string, options?: { deepLinkId?: string; path?: string }) => {
+            const deepLinkPath = options?.deepLinkId
+              ? `/insightsAndAlerting/${options.deepLinkId}`
+              : '';
+            return `/app/${appId}${deepLinkPath}${options?.path ?? ''}`;
+          }),
           applications$: of(
             new Map([['context_engine', { id: 'context_engine', title: 'Context Engine' }]])
           ),

@@ -12,9 +12,9 @@ import { vi } from 'vitest';
 export const mockCreateWriteStream = vi.fn();
 export const mockMkdirSync = vi.fn();
 vi.mock('fs', () => {
-      const mocked = { createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { createWriteStream: mockCreateWriteStream, mkdirSync: mockMkdirSync };
+  return { ...mocked, default: mocked };
+});
 
 export const resetAllMocks = () => {
   mockCreateWriteStream.mockReset();

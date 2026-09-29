@@ -21,35 +21,33 @@ export const mockPersistedLogFactory = vi.fn<Mocked<typeof mockPersistedLog>, an
   return mockPersistedLog;
 });
 
-export const mockFetchIndexPatterns = vi
-  .fn()
-  .mockReturnValue(Promise.resolve([stubIndexPattern]));
+export const mockFetchIndexPatterns = vi.fn().mockReturnValue(Promise.resolve([stubIndexPattern]));
 
 vi.mock('@kbn/data-plugin/public/query/persisted_log', () => {
-      const mocked = {
-      PersistedLog: mockPersistedLogFactory,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PersistedLog: mockPersistedLogFactory,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./fetch_index_patterns', () => {
-      const mocked = {
-      fetchIndexPatterns: mockFetchIndexPatterns,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchIndexPatterns: mockFetchIndexPatterns,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import _ from 'lodash';
 // Using doMock to avoid hoisting so that I can override only the debounce method in lodash
 vi.doMock('lodash', () => {
-      const mocked = {
-      ..._,
-      debounce: (func: any) => {
-        const debounced: any = func;
-        debounced.flush = vi.fn();
-        debounced.cancel = vi.fn();
-        return debounced;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ..._,
+    debounce: (func: any) => {
+      const debounced: any = func;
+      debounced.flush = vi.fn();
+      debounced.cancel = vi.fn();
+      return debounced;
+    },
+  };
+  return { ...mocked, default: mocked };
+});

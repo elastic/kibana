@@ -30,13 +30,13 @@ const DATA = {
 };
 
 vi.mock('./hover_actions_popover', () => {
-      const mocked = {
-      HoverActionsPopover: vi.fn((props) => (
-        <span data-test-subj="hoverActionsPopover">{props.anchorPosition}</span>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HoverActionsPopover: vi.fn((props) => (
+      <span data-test-subj="hoverActionsPopover">{props.anchorPosition}</span>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('CellActions', () => {
   it('renders', async () => {
     const getActionsPromise = Promise.resolve([]);

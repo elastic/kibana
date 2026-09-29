@@ -16,12 +16,12 @@ import { getServiceUrls } from './get_service_urls';
 const mockedFetch = vi.spyOn(global, 'fetch');
 vi.mock('./ssl');
 vi.mock('./get_service_urls', async () => {
-      const mocked = {
-      ...(await vi.importActual('./get_service_urls')),
-      discoverAuth: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./get_service_urls')),
+    discoverAuth: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = createLogger(LogLevel.debug);
 const runOptions = {

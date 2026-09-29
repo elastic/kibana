@@ -24,22 +24,22 @@ const mockUseWorkflowsUIEnabledSetting = vi.fn();
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../cases_context/use_cases_context');
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-      useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+    useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+  };
+  return { ...mocked, default: mocked };
+});
 // Mock the executor to keep tests deterministic
 vi.mock('../../workflows/use_run_workflow_on_cases', () => {
-      const mocked = {
-      useRunWorkflowOnCases: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunWorkflowOnCases: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useCasesContext } = (await vi.importMock('../../cases_context/use_cases_context'));
-const { useCasesConfig } = (await vi.importMock('../../../common/lib/kibana'));
+const { useCasesContext } = await vi.importMock('../../cases_context/use_cases_context');
+const { useCasesConfig } = await vi.importMock('../../../common/lib/kibana');
 
 const setupMocks = ({
   permissionsUpdate = true,

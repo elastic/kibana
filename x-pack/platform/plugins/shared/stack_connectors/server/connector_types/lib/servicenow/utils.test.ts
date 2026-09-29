@@ -32,20 +32,20 @@ import { TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 
 vi.mock('@kbn/actions-plugin/server/lib/get_oauth_jwt_access_token', () => {
-      const mocked = {
-      getOAuthJwtAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthJwtAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('axios', () => {
-      const mocked = {
-      create: vi.fn(),
-      AxiosHeaders: require('axios').AxiosHeaders,
-      AxiosError: require('axios').AxiosError,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    create: vi.fn(),
+    AxiosHeaders: require('axios').AxiosHeaders,
+    AxiosError: require('axios').AxiosError,
+  };
+  return { ...mocked, default: mocked };
+});
 const createAxiosInstanceMock = axios.create as Mock;
 const axiosInstanceMock = {
   interceptors: {

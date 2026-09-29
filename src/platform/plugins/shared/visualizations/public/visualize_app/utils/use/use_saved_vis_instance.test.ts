@@ -42,23 +42,24 @@ const mockSavedVisInstance = {
 };
 
 vi.mock('../get_visualization_instance', () => {
-      const mocked = {
-      getVisualizationInstance: vi.fn(() => mockSavedVisInstance),
-    };
-      return { ...mocked, default: mocked };
-    });
-const mockGetVisualizationInstance = (await vi.importMock('../get_visualization_instance')).getVisualizationInstance;
+  const mocked = {
+    getVisualizationInstance: vi.fn(() => mockSavedVisInstance),
+  };
+  return { ...mocked, default: mocked };
+});
+const mockGetVisualizationInstance = (await vi.importMock('../get_visualization_instance'))
+  .getVisualizationInstance;
 
 vi.mock('../breadcrumbs', () => {
-      const mocked = {
-      getEditBreadcrumbs: vi.fn((args, title) => title),
-      getCreateBreadcrumbs: vi.fn((text) => text),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEditBreadcrumbs: vi.fn((args, title) => title),
+    getCreateBreadcrumbs: vi.fn((text) => text),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-utils-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
+  const actual = await vi.importActual('@kbn/kibana-utils-plugin/public');
   return {
     ...actual,
     redirectWhenMissing: vi.fn(),

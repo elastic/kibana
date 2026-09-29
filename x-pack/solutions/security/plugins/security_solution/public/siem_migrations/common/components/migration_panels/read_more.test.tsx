@@ -13,21 +13,21 @@ import { MigrationsReadMore } from './read_more';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('../../../../common/lib/kibana/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              securitySolution: {
-                siemMigrations: 'https://example.com/docs',
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              siemMigrations: 'https://example.com/docs',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MigrationsReadMore', () => {
   it('renders rule-specific data-test-subj', () => {

@@ -15,18 +15,18 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 import { METRICS_ITEMS_DEFAULT_STATE, METRICS_LISTS_DEFAULT_STATE } from './utils';
 
 vi.mock('./queries/get_lists_overview', () => {
-      const mocked = {
-      getListsOverview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListsOverview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./queries/get_list_items_overview', () => {
-      const mocked = {
-      getListItemsOverview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListItemsOverview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getValueListsMetrics', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;

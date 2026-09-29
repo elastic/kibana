@@ -17,13 +17,13 @@ import { render } from '@testing-library/react';
 const SNAPSHOT_CHART_HEIGHT = 144;
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockImplementation(() => ({
-        services: mockCore(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockImplementation(() => ({
+      services: mockCore(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ChartWrapper component', () => {
   it('renders the component with loading false', () => {

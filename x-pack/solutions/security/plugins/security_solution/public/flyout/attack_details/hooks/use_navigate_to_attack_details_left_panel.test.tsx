@@ -17,18 +17,18 @@ const mockOpenLeftPanel = vi.fn();
 const mockOpenFlyout = vi.fn();
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context', () => {
-      const mocked = {
-      useAttackDetailsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDetailsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useNavigateToAttackDetailsLeftPanel', () => {
   const attackId = 'attack-1';

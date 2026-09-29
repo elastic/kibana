@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailEditor } from './workflow_detail_editor';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
@@ -43,44 +43,44 @@ const mockUseSelector = vi.fn();
 const mockUseParams = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-      useUiSetting$: (key: string, defaultValue: boolean) => mockUseUiSetting$(key, defaultValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+    useUiSetting$: (key: string, defaultValue: boolean) => mockUseUiSetting$(key, defaultValue),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => mockUseParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => mockUseParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
-      const mocked = {
-      useWorkflowActions: () => mockUseWorkflowActions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowActions: () => mockUseWorkflowActions(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
-      const mocked = {
-      useFetchConnector: () => vi.fn(() => ({ data: undefined, isLoading: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchConnector: () => vi.fn(() => ({ data: undefined, isLoading: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: (selector: any) => mockUseSelector(selector),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: (selector: any) => mockUseSelector(selector),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock lazy loaded components
 const WorkflowYAMLEditorMock = ({
@@ -114,66 +114,66 @@ const WorkflowYAMLEditorMock = ({
 };
 
 vi.mock('../../../widgets/workflow_yaml_editor/ui/workflow_yaml_editor', () => {
-      const mocked = {
-      WorkflowYAMLEditor: WorkflowYAMLEditorMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYAMLEditor: WorkflowYAMLEditorMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../widgets/workflow_yaml_editor', () => {
-      const mocked = {
-      WorkflowYAMLEditor: WorkflowYAMLEditorMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYAMLEditor: WorkflowYAMLEditorMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../features/workflow_visual_editor', () => {
-      const mocked = {
-      WorkflowVisualEditor: () => (
-        <div data-test-subj="workflow-visual-editor">
-          <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowVisualEditor: () => (
+      <div data-test-subj="workflow-visual-editor">
+        <div data-test-subj="visual-editor-content">{'Visual Editor'}</div>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../features/debug_graph/execution_graph', () => {
-      const mocked = {
-      ExecutionGraph: () => (
-        <div data-test-subj="execution-graph">
-          <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExecutionGraph: () => (
+      <div data-test-subj="execution-graph">
+        <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseContextOverrideData = vi.fn((stepId: string) => ({
   stepContext: { mockKey: 'mockValue' },
   schema: {},
 }));
 vi.mock('./use_context_override_data', () => {
-      const mocked = {
-      useContextOverrideData: () => mockUseContextOverrideData,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useContextOverrideData: () => mockUseContextOverrideData,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_workflows_experimental_ui_setting', () => {
-      const mocked = {
-      useWorkflowsExperimentalUiSetting: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsExperimentalUiSetting: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities

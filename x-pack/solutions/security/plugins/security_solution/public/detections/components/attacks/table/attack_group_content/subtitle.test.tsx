@@ -20,61 +20,58 @@ import { getFormattedDate } from '../../../../../attack_discovery/pages/loading_
 vi.mock(
   '../../../../../attack_discovery/pages/loading_callout/loading_messages/get_formatted_time',
   () => {
-      const mocked = {
-        getFormattedDate: vi.fn(() => '2023-10-27 10:00:00'),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getFormattedDate: vi.fn(() => '2023-10-27 10:00:00'),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useDateFormat: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateFormat: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
-vi.mock(
-  '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => {
-      const mocked = {
-        AttackDiscoveryMarkdownFormatter: vi.fn(
-          ({
-            markdown,
-            alertIds,
-            disableActions,
-          }: {
-            markdown: string;
-            alertIds?: string[];
-            disableActions?: boolean;
-          }) => (
-            <div
-              data-test-subj="mock-markdown-formatter"
-              data-alert-ids={JSON.stringify(alertIds)}
-              data-disable-actions={String(disableActions)}
-            >
-              {markdown}
-            </div>
-          )
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
+  const mocked = {
+    AttackDiscoveryMarkdownFormatter: vi.fn(
+      ({
+        markdown,
+        alertIds,
+        disableActions,
+      }: {
+        markdown: string;
+        alertIds?: string[];
+        disableActions?: boolean;
+      }) => (
+        <div
+          data-test-subj="mock-markdown-formatter"
+          data-alert-ids={JSON.stringify(alertIds)}
+          data-disable-actions={String(disableActions)}
+        >
+          {markdown}
+        </div>
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
-      const mocked = {
-      useBulkGetUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../attack_discovery/helpers', () => {
-      const mocked = {
-      getOriginalAlertIds: vi.fn((alertIds: string[]) => alertIds),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOriginalAlertIds: vi.fn((alertIds: string[]) => alertIds),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 

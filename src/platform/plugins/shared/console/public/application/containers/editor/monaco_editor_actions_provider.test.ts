@@ -21,7 +21,7 @@ const mockGetParsedRequests = vi.fn();
 const mockPopulateContext = vi.fn();
 
 vi.mock('@kbn/monaco', async () => {
-  const original = (await vi.importActual('@kbn/monaco'));
+  const original = await vi.importActual('@kbn/monaco');
   return {
     ...original,
     getParsedRequestsProvider: () => {
@@ -52,11 +52,11 @@ vi.mock('../../../lib/autocomplete/engine', () => {
 });
 
 vi.mock('../../hooks', () => {
-      const mocked = {
-      sendRequest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendRequest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { MonacoEditorActionsProvider } from './monaco_editor_actions_provider';
 import type { monaco } from '@kbn/monaco';
@@ -3164,14 +3164,14 @@ describe('Editor actions provider', () => {
       (sendRequest as Mock).mockResolvedValue([]);
 
       const context = serviceContextMock.create();
-      vi
-        .spyOn(context.services.settings, 'getSelectedHost')
-        .mockReturnValue('http://localhost:9300/');
+      vi.spyOn(context.services.settings, 'getSelectedHost').mockReturnValue(
+        'http://localhost:9300/'
+      );
       const setSelectedHostSpy = vi.spyOn(context.services.settings, 'setSelectedHost');
       vi.spyOn(context.services.esHostService, 'waitForInitialization').mockResolvedValue();
-      vi
-        .spyOn(context.services.esHostService, 'getAllHosts')
-        .mockReturnValue(['https://localhost:9200/']);
+      vi.spyOn(context.services.esHostService, 'getAllHosts').mockReturnValue([
+        'https://localhost:9200/',
+      ]);
 
       // Use a custom provider that includes getErrors so sendRequests can proceed past validation
       const provider = new MonacoEditorActionsProvider(editor, vi.fn(), '.className', {

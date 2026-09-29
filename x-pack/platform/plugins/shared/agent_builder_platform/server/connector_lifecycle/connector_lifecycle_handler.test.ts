@@ -15,12 +15,12 @@ import { getConnectorSpec } from '@kbn/connector-specs';
 import { createConnectorLifecycleHandler } from './connector_lifecycle_handler';
 
 vi.mock('@kbn/connector-specs', () => {
-      const mocked = {
-      connectorsSpecs: {},
-      getConnectorSpec: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    connectorsSpecs: {},
+    getConnectorSpec: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 

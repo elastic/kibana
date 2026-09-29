@@ -75,9 +75,7 @@ const runEngine = async (
 
 describe('LeadGenerationEngine', () => {
   const logger = loggingSystemMock.createLogger();
-  const mockLlmSynthesizeBatch = llmSynthesizeBatch as MockedFunction<
-    typeof llmSynthesizeBatch
-  >;
+  const mockLlmSynthesizeBatch = llmSynthesizeBatch as MockedFunction<typeof llmSynthesizeBatch>;
   const fakeChatModel = { invoke: vi.fn() } as unknown as InferenceChatModel;
 
   beforeEach(() => {
@@ -416,9 +414,7 @@ describe('LeadGenerationEngine', () => {
       );
 
       const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 3 } });
-      engine.registerModule(
-        createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations))
-      );
+      engine.registerModule(createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations)));
 
       const leads = await runEngine(engine, entities, fakeChatModel);
       expect(leads).toHaveLength(3);
@@ -431,9 +427,7 @@ describe('LeadGenerationEngine', () => {
       );
 
       const engine = createLeadGenerationEngine({ logger, config: { maxLeads: 3 } });
-      engine.registerModule(
-        createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations))
-      );
+      engine.registerModule(createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations)));
 
       const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
 
@@ -451,9 +445,7 @@ describe('LeadGenerationEngine', () => {
       );
 
       const engine = createLeadGenerationEngine({ logger });
-      engine.registerModule(
-        createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations))
-      );
+      engine.registerModule(createMockModule('mod', 0.5, vi.fn().mockResolvedValue(observations)));
 
       const { confident, exploratory } = await engine.prepareLeadCandidates(entities);
 

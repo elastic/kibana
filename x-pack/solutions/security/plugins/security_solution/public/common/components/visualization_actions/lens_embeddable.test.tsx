@@ -30,13 +30,14 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('./use_visualization_response', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_visualization_response')),
-      useVisualizationResponse: (await vi.importActual('./use_visualization_response.mock'))
-        .useVisualizationResponseMock.create(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_visualization_response')),
+    useVisualizationResponse: (
+      await vi.importActual('./use_visualization_response.mock')
+    ).useVisualizationResponseMock.create(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/kibana', () => {
   return {

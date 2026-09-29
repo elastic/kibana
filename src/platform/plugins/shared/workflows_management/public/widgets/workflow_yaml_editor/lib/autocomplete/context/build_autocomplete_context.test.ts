@@ -208,9 +208,7 @@ steps: []
       description: 'Example trigger',
       eventSchema: z.object({ severity: z.string() }),
     };
-    const getDef = vi
-      .spyOn(triggerSchemas, 'getTriggerDefinition')
-      .mockReturnValue(mockDefinition);
+    const getDef = vi.spyOn(triggerSchemas, 'getTriggerDefinition').mockReturnValue(mockDefinition);
 
     const result = buildAutocompleteContext(
       getFakeAutocompleteContextParams(`

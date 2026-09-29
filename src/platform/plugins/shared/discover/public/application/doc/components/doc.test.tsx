@@ -27,20 +27,20 @@ const services = createDiscoverServicesMock();
 const mockSearchApi = vi.fn();
 
 vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
-      const mocked = {
-      useEsDocSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsDocSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseDocSearch = vi.mocked(useEsDocSearch);
 
 vi.mock('./single_doc_viewer', () => {
-      const mocked = {
-      SingleDocViewer: () => <div data-test-subj="singleDocViewerMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SingleDocViewer: () => <div data-test-subj="singleDocViewerMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function setupDoc() {
   setUnifiedDocViewerServices({

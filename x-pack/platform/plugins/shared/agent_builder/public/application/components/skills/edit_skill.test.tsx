@@ -14,12 +14,12 @@ import { EditSkill } from './edit_skill';
 import { SkillFormMode } from './skill_form';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => ({ skillId: 'skill-1' }),
-      Redirect: () => <div data-test-subj="redirect" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => ({ skillId: 'skill-1' }),
+    Redirect: () => <div data-test-subj="redirect" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/skills/use_edit_skill');
 vi.mock('../../hooks/use_ui_privileges');
@@ -27,15 +27,15 @@ vi.mock('../../hooks/use_ui_privileges');
 // Render the SkillForm as a lightweight stub that surfaces the `mode` prop so the test can assert
 // whether EditSkill chose the editable or read-only variant.
 vi.mock('./skill_form', async () => {
-  const actual = (await vi.importActual('./skill_form'));
+  const actual = await vi.importActual('./skill_form');
   return {
     SkillFormMode: actual.SkillFormMode,
     SkillForm: ({ mode }: { mode: string }) => <div data-test-subj={`skillForm-${mode}`} />,
   };
 });
 
-const { useEditSkill } = (await vi.importMock('../../hooks/skills/use_edit_skill'));
-const { useUiPrivileges } = (await vi.importMock('../../hooks/use_ui_privileges'));
+const { useEditSkill } = await vi.importMock('../../hooks/skills/use_edit_skill');
+const { useUiPrivileges } = await vi.importMock('../../hooks/use_ui_privileges');
 
 describe('EditSkill', () => {
   beforeEach(() => {

@@ -14,11 +14,11 @@ import { fireEvent } from '@testing-library/react';
 import { EventsTable } from './events_table';
 
 vi.mock('../../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testProps = {
   canCreateCalendar: true,

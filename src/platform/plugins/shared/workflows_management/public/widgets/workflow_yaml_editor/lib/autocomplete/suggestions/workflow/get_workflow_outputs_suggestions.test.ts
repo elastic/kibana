@@ -21,32 +21,36 @@ import { createStepInfo as createBaseStepInfo } from '../../../../../../shared/t
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 
 vi.mock('@kbn/workflows/spec/lib/field_conversion', () => {
-      const mocked = {
-      normalizeFieldsToJsonSchema: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    normalizeFieldsToJsonSchema: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_input_placeholder', () => {
-      const mocked = {
-      getPlaceholderForProperty: vi.fn().mockReturnValue('"placeholder"'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPlaceholderForProperty: vi.fn().mockReturnValue('"placeholder"'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml',
   () => {
-      const mocked = {
-        getOutputsFromYamlDocument: vi.fn().mockReturnValue(undefined),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getOutputsFromYamlDocument: vi.fn().mockReturnValue(undefined),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
-const { normalizeFieldsToJsonSchema } = (await vi.importMock('@kbn/workflows/spec/lib/field_conversion'));
-const { getOutputsFromYamlDocument } = (await vi.importMock('../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml'));
-const { getPlaceholderForProperty } = (await vi.importMock('./workflow_input_placeholder'));
+const { normalizeFieldsToJsonSchema } = await vi.importMock(
+  '@kbn/workflows/spec/lib/field_conversion'
+);
+const { getOutputsFromYamlDocument } = await vi.importMock(
+  '../../../../../../features/validate_workflow_yaml/lib/validate_workflow_outputs_in_yaml'
+);
+const { getPlaceholderForProperty } = await vi.importMock('./workflow_input_placeholder');
 
 const createMockRange = (): monaco.IRange => ({
   startLineNumber: 5,

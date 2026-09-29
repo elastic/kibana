@@ -24,18 +24,18 @@ import {
 } from '../../../../edit_engine/clone_element';
 
 vi.mock('../../../../edit_engine/clone_element', () => {
-      const mocked = {
-      reflowAfterStyleChange: vi.fn(),
-      reflowAfterTextChange: vi.fn(),
-      collectTextReflowDimensions: vi.fn(() => []),
-      collectStyleReflowDimensions: vi.fn(() => []),
-      setImportant: (el: HTMLElement, prop: string, value: string) => {
-        el.style.setProperty(prop, value, 'important');
-      },
-      restoreDimensions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reflowAfterStyleChange: vi.fn(),
+    reflowAfterTextChange: vi.fn(),
+    collectTextReflowDimensions: vi.fn(() => []),
+    collectStyleReflowDimensions: vi.fn(() => []),
+    setImportant: (el: HTMLElement, prop: string, value: string) => {
+      el.style.setProperty(prop, value, 'important');
+    },
+    restoreDimensions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createArgs = (overrides: Partial<Parameters<typeof useModalChangeHandlers>[0]> = {}) => {
   const el = document.createElement('div');

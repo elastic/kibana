@@ -14,11 +14,11 @@ import { DismissEventModal } from './dismiss_event_modal';
 import { useUpdateSignificantEvent } from '../../../../hooks/use_update_significant_event';
 
 vi.mock('../../../../hooks/use_update_significant_event', () => {
-      const mocked = {
-      useUpdateSignificantEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateSignificantEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUpdateSignificantEvent = useUpdateSignificantEvent as MockedFunction<
   typeof useUpdateSignificantEvent

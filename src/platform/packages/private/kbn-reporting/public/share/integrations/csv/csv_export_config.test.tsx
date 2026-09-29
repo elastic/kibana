@@ -13,14 +13,14 @@ import crypto from 'crypto';
 import { NEVER } from 'rxjs';
 
 vi.mock('../../shared/get_search_csv_job_params', () => {
-      const mocked = {
-      getSearchCsvJobParams: vi.fn(() => ({
-        reportType: 'csv_v2',
-        decoratedJobParams: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSearchCsvJobParams: vi.fn(() => ({
+      reportType: 'csv_v2',
+      decoratedJobParams: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getSearchCsvJobParams } from '../../shared/get_search_csv_job_params';
 import { getCsvReportParams, getShareMenuItems } from './csv_export_config';

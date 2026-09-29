@@ -14,11 +14,11 @@ import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_inte
 import { putCriblRoutingPipeline } from './handlers/put_cribl_routing_pipeline';
 
 vi.mock('./handlers/put_cribl_routing_pipeline', () => {
-      const mocked = {
-      putCriblRoutingPipeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    putCriblRoutingPipeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const putCriblRoutingPipelineMock = putCriblRoutingPipeline as MockedFunction<
   typeof putCriblRoutingPipeline

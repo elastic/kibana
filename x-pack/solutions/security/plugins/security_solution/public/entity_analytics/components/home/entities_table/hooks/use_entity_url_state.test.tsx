@@ -33,37 +33,37 @@ const mockUrlQuery = {
 };
 
 vi.mock('./use_url_query', () => {
-      const mocked = {
-      useUrlQuery: () => ({ urlQuery: mockUrlQuery, setUrlQuery: mockSetUrlQuery }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUrlQuery: () => ({ urlQuery: mockUrlQuery, setUrlQuery: mockSetUrlQuery }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_page_size', () => {
-      const mocked = {
-      usePageSize: () => ({ pageSize: 25, setPageSize: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePageSize: () => ({ pageSize: 25, setPageSize: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_base_es_query', () => {
-      const mocked = {
-      useBaseEsQuery: () => ({
-        query: { bool: { must: [], filter: [], should: [], must_not: [] } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBaseEsQuery: () => ({
+      query: { bool: { must: [], filter: [], should: [], must_not: [] } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_persisted_query', () => {
-      const mocked = {
-      usePersistedQuery:
-        <T,>(getter: (params: EntitiesBaseURLQuery) => T) =>
-        () =>
-          getter({ filters: [], query: { query: '', language: 'kuery' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePersistedQuery:
+      <T,>(getter: (params: EntitiesBaseURLQuery) => T) =>
+      () =>
+        getter({ filters: [], query: { query: '', language: 'kuery' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.mocked(useKibana);
 

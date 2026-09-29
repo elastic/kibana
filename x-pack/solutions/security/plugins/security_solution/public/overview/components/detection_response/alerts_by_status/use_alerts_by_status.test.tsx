@@ -47,32 +47,32 @@ vi.mock('../../../../common/containers/use_global_time', () => {
 });
 
 vi.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: vi.fn(() => ({
-        entity: null,
-        entityRecord: null,
-        firstSeen: null,
-        lastSeen: null,
-        isLoading: false,
-        error: null,
-        refetch: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: vi.fn(() => ({
+      entity: null,
+      entityRecord: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return { ...actual, useUiSetting: vi.fn(() => false) };
 });
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-      useEntityStoreEuidApi: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+    useEntityStoreEuidApi: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUiSetting = useUiSetting as Mock;
 const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;

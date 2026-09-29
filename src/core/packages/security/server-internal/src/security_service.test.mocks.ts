@@ -13,7 +13,7 @@ export const getDefaultSecurityImplementationMock = vi.fn();
 export const convertSecurityApiMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     getDefaultSecurityImplementation: getDefaultSecurityImplementationMock,

@@ -21,41 +21,41 @@ vi.mock('../../../common/navigation/hooks');
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('./activity/case_view_activity', () => {
-      const mocked = {
-      CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewActivity: () => <div data-test-subj="case-view-activity" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./case_view_attachments', () => {
-      const mocked = {
-      CaseViewAttachments: () => <div data-test-subj="case-view-attachments" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewAttachments: () => <div data-test-subj="case-view-attachments" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./case_view_similar_cases', () => {
-      const mocked = {
-      CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewSimilarCases: () => <div data-test-subj="case-view-similar-cases" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./sidebar/case_view_sidebar', () => {
-      const mocked = {
-      CaseViewSidebar: () => <div data-test-subj="case-view-page-sidebar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewSidebar: () => <div data-test-subj="case-view-page-sidebar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./sidebar/sidebar_toggle_button', () => {
-      const mocked = {
-      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../case_view_tabs', () => {
-      const mocked = {
-      CaseViewTabs: () => <div data-test-subj="case-view-tabs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewTabs: () => <div data-test-subj="case-view-tabs" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useUrlParamsMock = useUrlParams as Mock;
 

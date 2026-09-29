@@ -24,25 +24,25 @@ import { RuleExecutionStatusValues } from '@kbn/alerting-plugin/common';
 import type { AlertState } from '../../../common/types/alerts';
 
 vi.mock('../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          uiSettings: {
-            get: () => '',
-          },
+  const mocked = {
+    Legacy: {
+      shims: {
+        uiSettings: {
+          get: () => '',
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/formatting', () => {
-      const mocked = {
-      getDateFromNow: (timestamp: number) => `triggered:${timestamp}`,
-      getCalendar: (timestamp: number) => `triggered:${timestamp}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDateFromNow: (timestamp: number) => `triggered:${timestamp}`,
+    getCalendar: (timestamp: number) => `triggered:${timestamp}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAlert = {
   enabled: true,

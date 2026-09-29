@@ -18,11 +18,11 @@ import { extractAndCreateCloudConnectorSecrets } from './cloud_connector';
 import { createSecrets } from './common';
 
 vi.mock('./common', () => {
-      const mocked = {
-      createSecrets: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSecrets: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateSecrets = createSecrets as MockedFunction<typeof createSecrets>;
 

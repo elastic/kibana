@@ -20,51 +20,51 @@ import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { mockTelemetryClient } from '../../../services/telemetry/__mocks__/telemetry_client_mock';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: vi.fn(),
-      useAnyOfApmParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: vi.fn(),
+    useAnyOfApmParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_manage_slos_url', () => {
-      const mocked = {
-      useManageSlosUrl: () => '/app/slo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManageSlosUrl: () => '/app/slo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = vi.fn();
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-      isPending: (status: string) => status === 'loading' || status === 'not_initiated',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+    isPending: (status: string) => status === 'loading' || status === 'not_initiated',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useGeneratedHtmlId: () => 'test-id',

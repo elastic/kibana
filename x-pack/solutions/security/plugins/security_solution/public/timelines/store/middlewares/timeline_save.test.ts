@@ -33,7 +33,7 @@ import { getMockDataViewWithMatchedIndices } from '../../../data_view_manager/mo
 import { mockDataViewManagerState } from '../../../data_view_manager/redux/mock';
 
 vi.mock('../actions', async () => {
-  const actual = (await vi.importActual('../actions'));
+  const actual = await vi.importActual('../actions');
   const endTLSaving = vi.fn((...args) => actual.endTimelineSaving(...args));
   (endTLSaving as unknown as { match: Function }).match = () => false;
   return {
@@ -49,12 +49,13 @@ vi.mock('../actions', async () => {
 });
 vi.mock('../../containers/api');
 vi.mock('./helpers', async () => {
-      const mocked = {
-      refreshTimelines: vi.fn(),
-      extractTimelineIdsAndVersions: (await vi.importActual('./helpers')).extractTimelineIdsAndVersions,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    refreshTimelines: vi.fn(),
+    extractTimelineIdsAndVersions: (await vi.importActual('./helpers'))
+      .extractTimelineIdsAndVersions,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const startTimelineSavingMock = startTimelineSaving as unknown as Mock;
 const endTimelineSavingMock = endTimelineSaving as unknown as Mock;

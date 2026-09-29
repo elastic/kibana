@@ -30,11 +30,11 @@ const mockMeasure = vi.fn();
 
 // Mock uuid to return predictable values
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'test-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'test-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Performance Tracker', () => {
   beforeAll(() => {

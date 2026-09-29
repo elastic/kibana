@@ -21,7 +21,7 @@ import { SecurityPageName } from '@kbn/deeplinks-security';
 vi.mock('../../..');
 vi.mock('react-use/lib/useLocalStorage');
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiTourStep: ({ children, footerAction, panelProps }: EuiTourStepProps) =>
@@ -40,7 +40,7 @@ vi.mock('@elastic/eui', async () => {
 
 const mockToursIsEnabled = vi.fn(() => true);
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
+  const { notificationServiceMock } = await vi.importActual('@kbn/core/public/mocks');
   return {
     useKibana: () => ({
       services: {

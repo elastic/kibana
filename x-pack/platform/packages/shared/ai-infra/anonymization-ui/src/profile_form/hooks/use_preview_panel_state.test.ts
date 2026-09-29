@@ -13,11 +13,11 @@ import { usePreviewDocumentLoader } from './use_preview_document_loader';
 import { usePreviewPanelState } from './use_preview_panel_state';
 
 vi.mock('./use_preview_document_loader', () => {
-      const mocked = {
-      usePreviewDocumentLoader: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePreviewDocumentLoader: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setupLoaderMock = ({
   isLoadingPreviewDocument = false,

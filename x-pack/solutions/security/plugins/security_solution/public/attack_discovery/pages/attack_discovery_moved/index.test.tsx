@@ -20,16 +20,16 @@ const mockReportEvent = vi.fn();
 const mockGetUrlForApp = vi.fn(() => '/app/management/kibana/settings?query=Enable+alerts');
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: { getUrlForApp: mockGetUrlForApp },
-          telemetry: { reportEvent: mockReportEvent },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: { getUrlForApp: mockGetUrlForApp },
+        telemetry: { reportEvent: mockReportEvent },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./assets/simplify.light.svg', () => 'simplify-light-svg-stub');
 vi.mock('./assets/simplify.dark.svg', () => 'simplify-dark-svg-stub');

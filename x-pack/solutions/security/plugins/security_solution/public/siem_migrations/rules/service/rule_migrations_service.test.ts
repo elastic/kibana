@@ -52,69 +52,69 @@ import { SiemMigrationsRuleEventTypes } from '../../../common/lib/telemetry/even
 // --- Mocks for external modules ---
 
 vi.mock('../api', () => {
-      const mocked = {
-      createRuleMigration: vi.fn(),
-      upsertMigrationResources: vi.fn(),
-      startRuleMigration: vi.fn(),
-      stopRuleMigration: vi.fn(),
-      getRuleMigrationStats: vi.fn(),
-      getRuleMigrationsStatsAll: vi.fn(),
-      getMissingResources: vi.fn(),
-      getIntegrations: vi.fn(),
-      addRulesToMigration: vi.fn(),
-      addRulesToQRadarMigration: vi.fn(),
-      addRulesToSentinelMigration: vi.fn(),
-      deleteMigration: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRuleMigration: vi.fn(),
+    upsertMigrationResources: vi.fn(),
+    startRuleMigration: vi.fn(),
+    stopRuleMigration: vi.fn(),
+    getRuleMigrationStats: vi.fn(),
+    getRuleMigrationsStatsAll: vi.fn(),
+    getMissingResources: vi.fn(),
+    getIntegrations: vi.fn(),
+    addRulesToMigration: vi.fn(),
+    addRulesToQRadarMigration: vi.fn(),
+    addRulesToSentinelMigration: vi.fn(),
+    deleteMigration: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/service/capabilities', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/service/capabilities')),
-      getMissingCapabilitiesChecker: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/service/capabilities')),
+    getMissingCapabilitiesChecker: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: vi.fn(() => ({ siemMigrationsDisabled: false })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: vi.fn(() => ({ siemMigrationsDisabled: false })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_license', () => {
-      const mocked = {
-      licenseService: {
-        isEnterprise: vi.fn(() => true),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    licenseService: {
+      isEnterprise: vi.fn(() => true),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./notification/success_notification', () => {
-      const mocked = {
-      raiseSuccessToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    raiseSuccessToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/service/notifications/no_connector_notification', () => {
-      const mocked = {
-      getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/service/notifications/missing_capabilities_notification', () => {
-      const mocked = {
-      getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRuleMigrationStats = getRuleMigrationStats as Mock;
 const mockGetRuleMigrationsStatsAll = getRuleMigrationsStatsAll as Mock;

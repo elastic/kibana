@@ -27,7 +27,7 @@ const mockShowDataGridColumnChartErrorMessageToast = vi.fn();
 const mockUseGetHistogramsForFields = vi.fn();
 
 vi.mock('@kbn/ml-data-grid', async () => {
-  const actual = (await vi.importActual('@kbn/ml-data-grid'));
+  const actual = await vi.importActual('@kbn/ml-data-grid');
 
   return {
     ...actual,
@@ -38,11 +38,11 @@ vi.mock('@kbn/ml-data-grid', async () => {
 });
 
 vi.mock('./use_get_histograms_for_fields', () => {
-      const mocked = {
-      useGetHistogramsForFields: (...args: unknown[]) => mockUseGetHistogramsForFields(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetHistogramsForFields: (...args: unknown[]) => mockUseGetHistogramsForFields(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const query: SimpleQuery = {
   query_string: {

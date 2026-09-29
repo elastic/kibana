@@ -18,7 +18,7 @@ import { TestProviders } from '../../common/mock';
 import { DashboardRenderer } from './dashboard_renderer';
 
 vi.mock('@kbn/dashboard-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/dashboard-plugin/public'));
+  const actual = await vi.importActual('@kbn/dashboard-plugin/public');
   return {
     ...actual,
     DashboardRenderer: vi.fn(() => <div data-test-subj="dashboardRenderer" />),

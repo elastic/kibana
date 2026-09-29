@@ -21,11 +21,11 @@ import { naturalLanguageToEsql } from '@kbn/inference-plugin/server';
 import type { GenerateEsqlAnnotation } from '../../state';
 
 vi.mock('@kbn/inference-plugin/server', () => {
-      const mocked = {
-      naturalLanguageToEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    naturalLanguageToEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('nl to esql agent', () => {
   const request = {

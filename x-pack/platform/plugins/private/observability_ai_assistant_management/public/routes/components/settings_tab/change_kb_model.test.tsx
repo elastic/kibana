@@ -31,18 +31,18 @@ import {
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 vi.mock('@kbn/ai-assistant/src/hooks', () => {
-      const mocked = {
-      useInferenceEndpoints: () => ({
-        inferenceEndpoints: [],
-        isLoading: false,
-        error: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInferenceEndpoints: () => ({
+      inferenceEndpoints: [],
+      isLoading: false,
+      error: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
+  const { notificationServiceMock } = await vi.importActual('@kbn/core/public/mocks');
 
   return {
     useKibana: () => ({
@@ -59,7 +59,7 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 const mockSetEisKnowledgeBaseCalloutDismissed = vi.fn();
 
 vi.mock('@kbn/observability-ai-assistant-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/observability-ai-assistant-plugin/public'));
+  const actual = await vi.importActual('@kbn/observability-ai-assistant-plugin/public');
   return {
     ...actual,
     useEisKnowledgeBaseCalloutDismissed: vi.fn(() => [

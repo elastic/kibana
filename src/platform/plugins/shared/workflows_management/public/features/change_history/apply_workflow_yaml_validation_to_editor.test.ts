@@ -13,11 +13,11 @@ import type { Mock } from 'vitest';
 import { monaco } from '@kbn/code-editor';
 
 vi.mock('../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
-      const mocked = {
-      validateEsqlSteps: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlSteps: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { BATCHED_CUSTOM_MARKER_OWNER } from '@kbn/workflows-yaml';

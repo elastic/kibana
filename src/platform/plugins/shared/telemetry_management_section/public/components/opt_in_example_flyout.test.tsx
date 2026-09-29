@@ -16,9 +16,7 @@ import { OptInExampleFlyout } from './opt_in_example_flyout';
 describe('OptInDetailsComponent', () => {
   it('renders as expected', () => {
     expect(
-      shallowWithIntl(
-        <OptInExampleFlyout fetchExample={vi.fn(async () => [])} onClose={vi.fn()} />
-      )
+      shallowWithIntl(<OptInExampleFlyout fetchExample={vi.fn(async () => [])} onClose={vi.fn()} />)
     ).toMatchSnapshot();
   });
 });

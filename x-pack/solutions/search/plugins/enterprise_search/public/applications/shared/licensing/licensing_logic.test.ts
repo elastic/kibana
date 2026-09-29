@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { resetContext } from 'kea';
 import { BehaviorSubject } from 'rxjs';
+import { vi } from 'vitest';
 
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 

@@ -19,11 +19,11 @@ import type { MigrationState } from '../../../use_migration_state';
 import { MigrationProgress } from './progress';
 
 vi.mock('./progress_title', () => {
-      const mocked = {
-      MigrateDocumentsStepTitle: () => <span data-test-subj="migrateDocumentsTitle" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrateDocumentsStepTitle: () => <span data-test-subj="migrateDocumentsTitle" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MigrationProgress', () => {
   it('renders the per-status counts for reindex resolution type', () => {

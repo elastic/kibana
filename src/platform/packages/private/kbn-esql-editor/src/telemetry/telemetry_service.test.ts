@@ -31,11 +31,11 @@ import {
 import { reportEsqlError } from '../report_error';
 
 vi.mock('../report_error', () => {
-      const mocked = {
-      reportEsqlError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reportEsqlError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ESQLEditorTelemetryService', () => {
   let mockAnalytics: Mocked<AnalyticsServiceStart>;

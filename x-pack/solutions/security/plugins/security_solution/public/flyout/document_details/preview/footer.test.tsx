@@ -33,18 +33,16 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../common/lib/kibana');
-vi.mock(
-  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
-);
+vi.mock('../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline');
 vi.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 vi.mock('../shared/components/take_action_button', () => {
-      const mocked = {
-      TakeActionButton: () => (
-        <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TakeActionButton: () => (
+      <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedTelemetry = createTelemetryServiceMock();
 

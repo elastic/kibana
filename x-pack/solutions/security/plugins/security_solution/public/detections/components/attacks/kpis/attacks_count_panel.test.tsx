@@ -18,32 +18,32 @@ import { useUserData } from '../../user_info';
 
 // Mock dependencies
 vi.mock('./common/use_attacks_kpi_state', () => {
-      const mocked = {
-      useAttacksKpiState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttacksKpiState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/use_combo_box_reset', () => {
-      const mocked = {
-      useEuiComboBoxReset: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiComboBoxReset: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../alerts_kpis/alerts_count_panel', () => {
-      const mocked = {
-      AlertsCountPanel: vi.fn(() => <div data-test-subj="alerts-count-panel" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsCountPanel: vi.fn(() => <div data-test-subj="alerts-count-panel" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../user_info', () => {
-      const mocked = {
-      useUserData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttacksCountPanel', () => {
   const mockSetStackBy0 = vi.fn();

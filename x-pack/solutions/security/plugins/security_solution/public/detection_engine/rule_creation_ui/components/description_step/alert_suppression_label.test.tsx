@@ -17,11 +17,11 @@ import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/ut
 
 vi.mock('../../../../common/hooks/use_upselling');
 vi.mock('../../../../../common/detection_engine/utils', () => {
-      const mocked = {
-      isSuppressionRuleInGA: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSuppressionRuleInGA: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const isSuppressionRuleInGAMock = isSuppressionRuleInGA as Mock;
 

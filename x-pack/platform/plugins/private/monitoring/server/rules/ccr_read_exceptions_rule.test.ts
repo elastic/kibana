@@ -29,35 +29,35 @@ type ICCRReadExceptionsRuleMock = CCRReadExceptionsRule & {
 const RealDate = Date;
 
 vi.mock('../lib/alerts/fetch_ccr_read_exceptions', () => {
-      const mocked = {
-      fetchCCRReadExceptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchCCRReadExceptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/alerts/fetch_clusters', () => {
-      const mocked = {
-      fetchClusters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: () => ({ debug: vi.fn() }),
-          url: 'http://localhost:5601',
-          config: {
-            ui: {
-              ccs: { enabled: true },
-              container: { elasticsearch: { enabled: false } },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: () => ({ debug: vi.fn() }),
+        url: 'http://localhost:5601',
+        config: {
+          ui: {
+            ccs: { enabled: true },
+            container: { elasticsearch: { enabled: false } },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CCRReadExceptionsRule', () => {
   it('should have defaults', () => {

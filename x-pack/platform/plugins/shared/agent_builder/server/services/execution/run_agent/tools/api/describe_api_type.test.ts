@@ -19,36 +19,36 @@ import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
 
 vi.mock('../../api/registry', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../api/registry')),
-      getRegistries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../api/registry')),
+    getRegistries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBigDescription = 'x'.repeat(2_000);
 
 vi.mock('@elastic/schemas/es/json/_types.json', () => {
-      const mocked = {
-      $defs: {
-        Duration: { type: 'string', description: 'A duration such as "30s".' },
-        QueryContainer: {
-          type: 'object',
-          description: 'x'.repeat(2_000),
-          properties: {
-            bool: { $ref: './_types.json#/$defs/BoolQuery' },
-            term: { $ref: './_types.json#/$defs/OversizedTermQuery' },
-          },
+  const mocked = {
+    $defs: {
+      Duration: { type: 'string', description: 'A duration such as "30s".' },
+      QueryContainer: {
+        type: 'object',
+        description: 'x'.repeat(2_000),
+        properties: {
+          bool: { $ref: './_types.json#/$defs/BoolQuery' },
+          term: { $ref: './_types.json#/$defs/OversizedTermQuery' },
         },
-        BoolQuery: {
-          type: 'object',
-          properties: { must: { $ref: './_types.json#/$defs/Duration' } },
-        },
-        OversizedTermQuery: { type: 'object', description: 'x'.repeat(2_000) },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      BoolQuery: {
+        type: 'object',
+        properties: { must: { $ref: './_types.json#/$defs/Duration' } },
+      },
+      OversizedTermQuery: { type: 'object', description: 'x'.repeat(2_000) },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRegistries = vi.mocked(getRegistries);
 

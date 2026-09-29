@@ -15,11 +15,11 @@ import type { ParsedTemplateEntry } from '../hooks/use_parse_yaml';
 import { TemplateFieldRenderer } from '../field_types/field_renderer';
 
 vi.mock('../field_types/field_renderer', () => {
-      const mocked = {
-      TemplateFieldRenderer: vi.fn(() => <div data-test-subj="template-field-renderer" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateFieldRenderer: vi.fn(() => <div data-test-subj="template-field-renderer" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplatePreviewPanel', () => {
   const mockOnClose = vi.fn();

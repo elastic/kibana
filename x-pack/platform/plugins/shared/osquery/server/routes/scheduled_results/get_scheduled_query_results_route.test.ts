@@ -20,11 +20,12 @@ import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledQueryResultsRoute } from './get_scheduled_query_results_route';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/results';
 

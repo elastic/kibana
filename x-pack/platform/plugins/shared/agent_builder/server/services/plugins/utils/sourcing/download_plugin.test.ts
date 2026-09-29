@@ -15,25 +15,25 @@ import type { ZipArchive } from '../archive';
 
 const mockOpenZipArchive = vi.fn();
 vi.mock('../archive', () => {
-      const mocked = {
-      openZipArchive: (...args: unknown[]) => mockOpenZipArchive(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openZipArchive: (...args: unknown[]) => mockOpenZipArchive(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockParsePluginZipFile = vi.fn();
 vi.mock('../parsing', () => {
-      const mocked = {
-      parsePluginZipFile: (...args: unknown[]) => mockParsePluginZipFile(...args),
-      PluginArchiveError: class PluginArchiveError extends Error {
-        constructor(message: string) {
-          super(message);
-          this.name = 'PluginArchiveError';
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parsePluginZipFile: (...args: unknown[]) => mockParsePluginZipFile(...args),
+    PluginArchiveError: class PluginArchiveError extends Error {
+      constructor(message: string) {
+        super(message);
+        this.name = 'PluginArchiveError';
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { parsePluginFromFile, createSizeLimitTransform } from './download_plugin';
 

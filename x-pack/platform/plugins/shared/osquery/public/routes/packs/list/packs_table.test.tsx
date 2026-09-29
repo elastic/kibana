@@ -20,36 +20,39 @@ import { ROLE_CAPABILITIES } from '../../../__test_helpers__/create_mock_kibana_
 const mockPush = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: mockPush }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: mockPush }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 const mockUseRouterNavigate = vi.fn();
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-      useRouterNavigate: (path: string) => {
-        mockUseRouterNavigate(path);
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+    useRouterNavigate: (path: string) => {
+      mockUseRouterNavigate(path);
 
-        return { onClick: vi.fn(), href: path };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return { onClick: vi.fn(), href: path };
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/use_persisted_page_size', () => {
-      const mocked = {
-      usePersistedPageSize: vi.fn(() => [20, vi.fn()]),
-      PAGE_SIZE_OPTIONS: [10, 20, 50],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePersistedPageSize: vi.fn(() => [20, vi.fn()]),
+    PAGE_SIZE_OPTIONS: [10, 20, 50],
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUsePackUsers = vi.fn(() => ({
   users: [],
@@ -58,68 +61,76 @@ const mockUsePackUsers = vi.fn(() => ({
 }));
 
 vi.mock('../../../common/use_saved_object_users', () => {
-      const mocked = {
-      usePackUsers: () => mockUsePackUsers(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePackUsers: () => mockUsePackUsers(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../packs/active_state_switch', () => {
-      const mocked = {
-      ActiveStateSwitch: ({ item }: { item: { enabled: boolean; name: string } }) => (
-        <div data-test-subj={`pack-switch-${item.name}`}>{item.enabled ? 'Active' : 'Inactive'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActiveStateSwitch: ({ item }: { item: { enabled: boolean; name: string } }) => (
+      <div data-test-subj={`pack-switch-${item.name}`}>{item.enabled ? 'Active' : 'Inactive'}</div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../packs/pack_row_actions', () => {
-      const mocked = {
-      PackRowActions: ({ item }: { item: { name: string } }) => (
-        <div data-test-subj={`pack-row-actions-${item.name}`}>Actions Menu</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackRowActions: ({ item }: { item: { name: string } }) => (
+      <div data-test-subj={`pack-row-actions-${item.name}`}>Actions Menu</div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./empty_state', () => {
-      const mocked = {
-      PacksTableEmptyState: () => <div data-test-subj="packsEmptyState">No packs</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PacksTableEmptyState: () => <div data-test-subj="packsEmptyState">No packs</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./load_integration_assets', () => {
-      const mocked = {
-      LoadIntegrationAssetsButton: () => (
-        <button data-test-subj="loadIntegrationAssets">Load integration assets</button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadIntegrationAssetsButton: () => (
+      <button data-test-subj="loadIntegrationAssets">Load integration assets</button>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/table_toolbar', () => {
-      const mocked = {
-      TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../actions/components/run_by_column', () => {
-      const mocked = {
-      RunByColumn: ({ userId }: { userId?: string }) => <span>{userId ?? 'unknown'}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunByColumn: ({ userId }: { userId?: string }) => <span>{userId ?? 'unknown'}</span>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUsePacks = vi.fn();
 
 vi.mock('../../../packs/use_packs', () => {
-      const mocked = {
-      usePacks: (...args: unknown[]) => mockUsePacks(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePacks: (...args: unknown[]) => mockUsePacks(...args),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createPack = (overrides: Record<string, unknown> = {}) => ({
   name: 'test-pack',

@@ -114,62 +114,64 @@ describe('withActiveSpan', () => {
   });
 
   it('handles observables – sets OK status and ends span on completion', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const span = createMockSpan();
-          const tracer = createMockTracer(span);
+      const span = createMockSpan();
+      const tracer = createMockTracer(span);
 
-          const obs$ = withActiveSpan('observable', { tracer }, () => of(1, 2));
+      const obs$ = withActiveSpan('observable', { tracer }, () => of(1, 2));
 
-          const receivedValues: number[] = [];
-          obs$.subscribe({
-            next: (v) => receivedValues.push(v),
-            error: (err) => done(err),
-            complete: () => {
-              try {
-                expect(receivedValues).toEqual([1, 2]);
-                expect(span.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
-                expect(span.end).toHaveBeenCalled();
-                done();
-              } catch (e) {
-                done(e);
-              }
-            },
-          });
-        
-      }));
+      const receivedValues: number[] = [];
+      obs$.subscribe({
+        next: (v) => receivedValues.push(v),
+        error: (err) => done(err),
+        complete: () => {
+          try {
+            expect(receivedValues).toEqual([1, 2]);
+            expect(span.setStatus).toHaveBeenCalledWith({ code: SpanStatusCode.OK });
+            expect(span.end).toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
+        },
+      });
+    }));
 
   it('handles observable errors – records exception, sets ERROR status and ends span', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const span = createMockSpan();
-          const tracer = createMockTracer(span);
-          const error = new Error('observable-failed');
+      const span = createMockSpan();
+      const tracer = createMockTracer(span);
+      const error = new Error('observable-failed');
 
-          const obs$ = withActiveSpan('observable-error', { tracer }, () => throwError(() => error));
+      const obs$ = withActiveSpan('observable-error', { tracer }, () => throwError(() => error));
 
-          obs$.subscribe({
-            next: () => {},
-            error: (err) => {
-              try {
-                expect(err).toBe(error);
-                expect(span.recordException).toHaveBeenCalledWith(error);
-                expect(span.setStatus).toHaveBeenCalledWith({
-                  code: SpanStatusCode.ERROR,
-                  message: error.message,
-                });
-                expect(span.end).toHaveBeenCalled();
-                done();
-              } catch (e) {
-                done(e);
-              }
-            },
-            complete: () => done(new Error('should not complete')),
-          });
-        
-      }));
+      obs$.subscribe({
+        next: () => {},
+        error: (err) => {
+          try {
+            expect(err).toBe(error);
+            expect(span.recordException).toHaveBeenCalledWith(error);
+            expect(span.setStatus).toHaveBeenCalledWith({
+              code: SpanStatusCode.ERROR,
+              message: error.message,
+            });
+            expect(span.end).toHaveBeenCalled();
+            done();
+          } catch (e) {
+            done(e);
+          }
+        },
+        complete: () => done(new Error('should not complete')),
+      });
+    }));
 
   it('starts the next promise span as a sibling under the same parent span', async () => {
     const { tracer, exporter } = setupInMemoryTracer();
@@ -213,54 +215,55 @@ describe('withActiveSpan', () => {
   });
 
   it('starts the next observable span as a sibling under the same parent span (including inner children)', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const { tracer, exporter } = setupInMemoryTracer();
+      const { tracer, exporter } = setupInMemoryTracer();
 
-          const parent = tracer.startSpan('parent');
+      const parent = tracer.startSpan('parent');
 
-          context.with(trace.setSpan(context.active(), parent), () => {
-            const obs$ = withActiveSpan('obs-first', { tracer }, () => {
-              // create grandchildren spans inside the first observable callback
-              withActiveSpan('obs-first-inner', { tracer }, () => 'inner-1');
-              withActiveSpan('obs-second-inner', { tracer }, () => 'inner-2');
-              return of(1);
-            });
+      context.with(trace.setSpan(context.active(), parent), () => {
+        const obs$ = withActiveSpan('obs-first', { tracer }, () => {
+          // create grandchildren spans inside the first observable callback
+          withActiveSpan('obs-first-inner', { tracer }, () => 'inner-1');
+          withActiveSpan('obs-second-inner', { tracer }, () => 'inner-2');
+          return of(1);
+        });
 
-            obs$.subscribe({
-              complete: () => {
-                // After completion, start a second span
-                withActiveSpan('obs-second', { tracer }, () => 'ok');
+        obs$.subscribe({
+          complete: () => {
+            // After completion, start a second span
+            withActiveSpan('obs-second', { tracer }, () => 'ok');
 
-                parent.end();
+            parent.end();
 
-                try {
-                  const spans = exporter.getFinishedSpans();
-                  expect(spans).toHaveLength(5); // parent + two children + two grandchildren
+            try {
+              const spans = exporter.getFinishedSpans();
+              expect(spans).toHaveLength(5); // parent + two children + two grandchildren
 
-                  const first = spans.find((s) => s.name === 'obs-first')!;
-                  const second = spans.find((s) => s.name === 'obs-second')!;
-                  const firstInner = spans.find((s) => s.name === 'obs-first-inner')!;
-                  const secondInner = spans.find((s) => s.name === 'obs-second-inner')!;
+              const first = spans.find((s) => s.name === 'obs-first')!;
+              const second = spans.find((s) => s.name === 'obs-second')!;
+              const firstInner = spans.find((s) => s.name === 'obs-first-inner')!;
+              const secondInner = spans.find((s) => s.name === 'obs-second-inner')!;
 
-                  // Sibling children of parent
-                  expect(first.parentSpanContext?.spanId).toBe(parent.spanContext().spanId);
-                  expect(second.parentSpanContext?.spanId).toBe(parent.spanContext().spanId);
-                  expect(second.parentSpanContext?.spanId).not.toBe(first.spanContext().spanId);
+              // Sibling children of parent
+              expect(first.parentSpanContext?.spanId).toBe(parent.spanContext().spanId);
+              expect(second.parentSpanContext?.spanId).toBe(parent.spanContext().spanId);
+              expect(second.parentSpanContext?.spanId).not.toBe(first.spanContext().spanId);
 
-                  // Grandchildren parented by obs-first
-                  expect(firstInner.parentSpanContext?.spanId).toBe(first.spanContext().spanId);
-                  expect(secondInner.parentSpanContext?.spanId).toBe(first.spanContext().spanId);
+              // Grandchildren parented by obs-first
+              expect(firstInner.parentSpanContext?.spanId).toBe(first.spanContext().spanId);
+              expect(secondInner.parentSpanContext?.spanId).toBe(first.spanContext().spanId);
 
-                  done();
-                } catch (e) {
-                  done(e);
-                }
-              },
-              error: done,
-            });
-          });
-        
-      }));
+              done();
+            } catch (e) {
+              done(e);
+            }
+          },
+          error: done,
+        });
+      });
+    }));
 });

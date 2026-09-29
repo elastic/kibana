@@ -30,7 +30,7 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
@@ -42,82 +42,82 @@ vi.mock('@elastic/eui', async () => {
 
 // Mock APM plugin context
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          uiSettings: {
-            get: vi.fn().mockReturnValue(false),
-          },
-          application: {
-            capabilities: {
-              slo: { read: true },
-            },
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        uiSettings: {
+          get: vi.fn().mockReturnValue(false),
+        },
+        application: {
+          capabilities: {
+            slo: { read: true },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_route_path', () => {
-      const mocked = {
-      useApmRoutePath: () => '/service-map',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRoutePath: () => '/service-map',
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock APM router
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({
-        link: vi.fn((path: string) => `/app/apm${path}`),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({
+      link: vi.fn((path: string) => `/app/apm${path}`),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock APM params
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        query: {
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          comparisonEnabled: false,
-          offset: undefined,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      query: {
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        comparisonEnabled: false,
+        offset: undefined,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock time range hook
 vi.mock('../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start: '2023-01-01T00:00:00.000Z',
-        end: '2023-01-01T01:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start: '2023-01-01T00:00:00.000Z',
+      end: '2023-01-01T01:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock fetcher
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-      useFetcher: () => ({
-        data: { currentPeriod: {}, previousPeriod: undefined },
-        status: 'success',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+    useFetcher: () => ({
+      data: { currentPeriod: {}, previousPeriod: undefined },
+      status: 'success',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useReactFlow
 const mockGetViewport = vi.fn(() => ({ x: 0, y: 0, zoom: 1 }));
@@ -140,11 +140,11 @@ vi.mock('@xyflow/react', () => {
 
 // Mock service map components
 vi.mock('./popover/edge_contents', () => {
-      const mocked = {
-      EdgeContents: vi.fn(() => <div data-testid="edge-contents" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EdgeContents: vi.fn(() => <div data-testid="edge-contents" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MapPopover', () => {
   const defaultProps = {

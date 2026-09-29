@@ -107,25 +107,25 @@ const MULTI_URL_PROFILE_STATE_DEF: ProfileStateDefinition<MultiUrlProfileState> 
 };
 
 vi.mock('../data_fetching/fetch_documents', () => {
-      const mocked = {
-      fetchDocuments: vi.fn().mockResolvedValue({ records: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchDocuments: vi.fn().mockResolvedValue({ records: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../data_fetching/fetch_esql', () => {
-      const mocked = {
-      fetchEsql: vi.fn().mockResolvedValue({ records: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsql: vi.fn().mockResolvedValue({ records: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      reportPerformanceMetricEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reportPerformanceMetricEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 async function getState(
   url: string = '/',
@@ -703,9 +703,7 @@ describe('Discover state', () => {
       };
       const apiClient: Mocked<DiscoverSessionClient> = {
         create: vi.fn(respondToSave),
-        upsert: vi.fn((_id: string, data: DiscoverSessionClientRequestData) =>
-          respondToSave(data)
-        ),
+        upsert: vi.fn((_id: string, data: DiscoverSessionClientRequestData) => respondToSave(data)),
         get: vi.fn(async (_id: string) => ({ ...cloneDeep(savedResponse), resolve: {} })),
       };
       const sessionService = createSessionService({
@@ -714,9 +712,9 @@ describe('Discover state', () => {
         useHttpApi: true,
       });
       // Exercise HTTP through the existing save boundary without connecting production callers.
-      vi
-        .spyOn(services.savedSearch, 'saveDiscoverSession')
-        .mockImplementation((session, options = {}) => sessionService.save(session, options));
+      vi.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation(
+        (session, options = {}) => sessionService.save(session, options)
+      );
 
       await firstLoad.saveDiscoverSession({ newCopyOnSave: copyOnSave });
 
@@ -799,9 +797,9 @@ describe('Discover state', () => {
       );
       services.storage = new Storage(localStorage);
       services.history = createMemoryHistory({ initialEntries: [location.path] });
-      vi
-        .spyOn(services, 'getScopedHistory')
-        .mockReturnValue(scopedHistoryMock.create({ state: location.state }));
+      vi.spyOn(services, 'getScopedHistory').mockReturnValue(
+        scopedHistoryMock.create({ state: location.state })
+      );
       const state = createState(services);
 
       expect(localStorage.getItem(TABS_LOCAL_STORAGE_KEY)).toBeNull();
@@ -1068,12 +1066,10 @@ describe('Discover state', () => {
           to: '2025-12-31T00:00:00.000Z',
           mode: 'absolute',
         };
-        vi
-          .mocked(services.data.query.timefilter.timefilter.getTime)
-          .mockReturnValue(relativeTime);
-        vi
-          .mocked(services.data.query.timefilter.timefilter.getAbsoluteTime)
-          .mockReturnValue(absoluteTime);
+        vi.mocked(services.data.query.timefilter.timefilter.getTime).mockReturnValue(relativeTime);
+        vi.mocked(services.data.query.timefilter.timefilter.getAbsoluteTime).mockReturnValue(
+          absoluteTime
+        );
         const searchSessionInfoProvider = await setupSearchSessionInfoProvider({ services });
         const { initialState, restoreState } = await searchSessionInfoProvider.getLocatorData();
         expect(initialState.timeRange).toBe(relativeTime);

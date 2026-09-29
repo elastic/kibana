@@ -17,7 +17,7 @@ import { TemplateTable } from './template_table';
 let mockSelectedNames = new Set<string>();
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   const renderColumnCell = (column: any, item: any) => {
     if (column.actions) {
@@ -116,70 +116,70 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/shared-ux-table-persist', () => {
-      const mocked = {
-      useEuiTablePersist: () => ({
-        pageSize: 20,
-        sorting: {},
-        onTableChange: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTablePersist: () => ({
+      pageSize: 20,
+      sorting: {},
+      onTableChange: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-        <span>{defaultMessage}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+      <span>{defaultMessage}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../app_context', () => {
-      const mocked = {
-      useServices: vi.fn(),
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServices: vi.fn(),
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useAppContext, useServices } from '../../../../app_context';
 
 vi.mock('../../../../../shared_imports', () => {
-      const mocked = {
-      reactRouterNavigate: (_history: unknown, _path: unknown, onNavigateCallback?: () => void) => ({
-        href: '#',
-        onClick: () => {
-          onNavigateCallback?.();
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reactRouterNavigate: (_history: unknown, _path: unknown, onNavigateCallback?: () => void) => ({
+      href: '#',
+      onClick: () => {
+        onNavigateCallback?.();
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components', () => {
-      const mocked = {
-      TemplateDeleteModal: () => <div data-test-subj="templateDeleteModal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateDeleteModal: () => <div data-test-subj="templateDeleteModal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/shared', () => {
-      const mocked = {
-      TemplateContentIndicator: () => <span data-test-subj="templateContentIndicator" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateContentIndicator: () => <span data-test-subj="templateContentIndicator" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components', () => {
-      const mocked = {
-      TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
-        <span data-test-subj={`templateType-${templateType}`} />
-      ),
-      TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateTypeIndicator: ({ templateType }: { templateType: string }) => (
+      <span data-test-subj={`templateType-${templateType}`} />
+    ),
+    TemplateDeprecatedBadge: () => <span data-test-subj="templateDeprecatedBadge" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createTemplate = (overrides: Partial<TemplateListItem> = {}): TemplateListItem => {
   const base: TemplateListItem = {

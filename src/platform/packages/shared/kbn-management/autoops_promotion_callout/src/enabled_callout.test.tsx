@@ -20,16 +20,16 @@ import {
 } from './callout';
 
 vi.mock('@elastic/eui-illustrations', () => {
-      const mocked = {
-      megaphone: {
-        id: 'megaphone',
-        title: 'Megaphone',
-        light: '<svg></svg>',
-        dark: '<svg></svg>',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    megaphone: {
+      id: 'megaphone',
+      title: 'Megaphone',
+      light: '<svg></svg>',
+      dark: '<svg></svg>',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_AUTOOPS_URL = 'https://cloud.elastic.co/performance/abc123';
 const TEST_DOCS_URL = 'https://www.elastic.co/docs/current/en/autoops';

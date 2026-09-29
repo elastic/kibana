@@ -32,9 +32,9 @@ describe('useAlertSuppression', () => {
     });
   });
 
-  vi
-    .spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled')
-    .mockReturnValue(false);
+  vi.spyOn(useIsExperimentalFeatureEnabledMock, 'useIsExperimentalFeatureEnabled').mockReturnValue(
+    false
+  );
   it('should return isSuppressionEnabled false for eql sequence query when feature flag is disabled', () => {
     const { result } = renderHook(() => useAlertSuppression(undefined));
     expect(result.current.isSuppressionEnabled).toBe(false);

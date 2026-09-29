@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import type { Client } from '@elastic/elasticsearch';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import { ByteSizeValue } from '@kbn/config-schema';

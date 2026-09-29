@@ -50,22 +50,22 @@ const mockHistoryPush = vi.fn();
 const mockUseHistory = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-      useHistory: () => mockUseHistory(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+    useHistory: () => mockUseHistory(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public');
 vi.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_composite_slo_enabled', () => {
-      const mocked = {
-      useCompositeSloEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCompositeSloEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_license');
 vi.mock('../../hooks/use_fetch_slo_list');
 vi.mock('../../hooks/use_fetch_slo_definitions');
@@ -83,11 +83,11 @@ vi.mock('../../hooks/use_create_data_view');
 vi.mock('../../hooks/use_space');
 vi.mock('./components/slo_list_search_bar');
 vi.mock('./components/slo_sparkline', () => {
-      const mocked = {
-      SloSparkline: () => <div data-test-subj="mockedSparkline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloSparkline: () => <div data-test-subj="mockedSparkline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ebt-tools');
 
 const useGetSettingsMock = useGetSettings as Mock;
@@ -133,11 +133,11 @@ const mockAddError = vi.fn();
 const mockLocator = vi.fn();
 
 vi.mock('@kbn/response-ops-rule-form/flyout', () => {
-      const mocked = {
-      RuleFormFlyout: vi.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleFormFlyout: vi.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -237,12 +237,18 @@ describe('SLOs Page', () => {
       isLoading: false,
       data: { hasAllReadRequested: true, hasAllWriteRequested: true },
     });
-    vi
-      .spyOn(Router, 'useLocation')
-      .mockReturnValue({ pathname: '/slos', search: '', state: '', hash: '' });
-    vi
-      .spyOn(Router, 'useRouteMatch')
-      .mockReturnValue({ url: '/slos', path: '/slos', isExact: true, params: {} });
+    vi.spyOn(Router, 'useLocation').mockReturnValue({
+      pathname: '/slos',
+      search: '',
+      state: '',
+      hash: '',
+    });
+    vi.spyOn(Router, 'useRouteMatch').mockReturnValue({
+      url: '/slos',
+      path: '/slos',
+      isExact: true,
+      params: {},
+    });
   });
 
   describe('when the incorrect license is found', () => {

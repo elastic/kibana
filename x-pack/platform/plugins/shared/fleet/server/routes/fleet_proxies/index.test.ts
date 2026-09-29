@@ -30,36 +30,36 @@ import {
 } from './handler';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/fleet_proxies', () => {
-      const mocked = {
-      listFleetProxies: vi.fn(),
-      createFleetProxy: vi.fn(),
-      updateFleetProxy: vi.fn(),
-      getFleetProxyRelatedSavedObjects: vi.fn().mockResolvedValue({
-        fleetServerHosts: [],
-        outputs: [],
-        downloadSources: [],
-      }),
-      getFleetProxy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    listFleetProxies: vi.fn(),
+    createFleetProxy: vi.fn(),
+    updateFleetProxy: vi.fn(),
+    getFleetProxyRelatedSavedObjects: vi.fn().mockResolvedValue({
+      fleetServerHosts: [],
+      outputs: [],
+      downloadSources: [],
+    }),
+    getFleetProxy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./handler', async () => {
-      const mocked = {
-      ...(await vi.importActual('./handler')),
-      bumpRelatedPolicies: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./handler')),
+    bumpRelatedPolicies: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

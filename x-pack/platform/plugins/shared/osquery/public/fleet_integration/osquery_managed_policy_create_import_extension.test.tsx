@@ -27,35 +27,38 @@ const mockUseFetchStatus = vi.fn().mockReturnValue({
 });
 
 vi.mock('./use_fetch_status', () => {
-      const mocked = {
-      useFetchStatus: () => mockUseFetchStatus(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchStatus: () => mockUseFetchStatus(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
-          },
-          http: {
-            fetch: vi.fn().mockResolvedValue({ results: { total: 0 } }),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        http: {
+          fetch: vi.fn().mockResolvedValue({ results: { total: 0 } }),
+        },
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => <div data-test-subj="code-editor-mock" />,
-      CodeEditorField: () => <div data-test-subj="code-editor-field-mock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => <div data-test-subj="code-editor-mock" />,
+    CodeEditorField: () => <div data-test-subj="code-editor-field-mock" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });

@@ -19,19 +19,19 @@ import { createDocsRegistry } from '.';
 import { EMBEDDABLE_RESIZE_EVENT } from '../embeddable';
 
 vi.mock('react-dom/client', () => {
-      const mocked = {
-      createRoot: vi.fn(() => ({ render: vi.fn(), unmount: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRoot: vi.fn(() => ({ render: vi.fn(), unmount: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@storybook/react', () => {
-      const mocked = {
-      setProjectAnnotations: (annotations: unknown) => annotations,
-      composeStories: (storyModule: { stories: Record<string, unknown> }) => storyModule.stories,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setProjectAnnotations: (annotations: unknown) => annotations,
+    composeStories: (storyModule: { stories: Record<string, unknown> }) => storyModule.stories,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@emotion/cache', () => ({
   __esModule: true,
@@ -39,30 +39,30 @@ vi.mock('@emotion/cache', () => ({
 }));
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      EuiProvider: function MockEuiProvider() {
-        return null;
-      },
-      euiStylisPrefixer: { name: 'euiStylisPrefixer' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EuiProvider: function MockEuiProvider() {
+      return null;
+    },
+    euiStylisPrefixer: { name: 'euiStylisPrefixer' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: { getIsInitialized: vi.fn(() => false), init: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: { getIsInitialized: vi.fn(() => false), init: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      I18nProvider: function MockI18nProvider() {
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    I18nProvider: function MockI18nProvider() {
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const composeStory = (id: string, parameters?: Record<string, unknown>) =>
   Object.assign(() => null, { id, parameters });

@@ -147,7 +147,7 @@ vi.mock('./agent_policy_create');
 vi.mock('./epm/packages/install');
 vi.mock('./epm/packages');
 vi.mock('./utils/version_specific_policies', async () => {
-  const actual = (await vi.importActual('./utils/version_specific_policies'));
+  const actual = await vi.importActual('./utils/version_specific_policies');
   return {
     ...actual,
     reassignAgentsFromVersionSpecificPolicies: vi.fn(),
@@ -162,14 +162,10 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 const mockOutputsHelpers = outputsHelpers as Mocked<typeof outputsHelpers>;
 const mockedOutputService = outputService as Mocked<typeof outputService>;
-const mockedDownloadSourceService = downloadSourceService as Mocked<
-  typeof downloadSourceService
->;
+const mockedDownloadSourceService = downloadSourceService as Mocked<typeof downloadSourceService>;
 const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
-const mockedGetFullAgentPolicy = getFullAgentPolicy as Mock<
-  ReturnType<typeof getFullAgentPolicy>
->;
+const mockedGetFullAgentPolicy = getFullAgentPolicy as Mock<ReturnType<typeof getFullAgentPolicy>>;
 const mockedCreateAgentPolicyWithPackages = createAgentPolicyWithPackages as MockedFunction<
   typeof createAgentPolicyWithPackages
 >;
@@ -210,9 +206,7 @@ describe('Agent policy', () => {
     mockedAppContextService.getLogger.mockReturnValue(mockedLogger);
     mockedAppContextService.getExperimentalFeatures.mockReturnValue({} as any);
     vi.mocked(isSpaceAwarenessEnabled).mockResolvedValue(true);
-    vi
-      .mocked(getPackagePolicySavedObjectType)
-      .mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
+    vi.mocked(getPackagePolicySavedObjectType).mockResolvedValue(PACKAGE_POLICY_SAVED_OBJECT_TYPE);
     vi.spyOn(apm, 'startTransaction').mockReturnValue({ end: vi.fn() } as any);
     mockedPackagePolicyService.findAllForAgentPolicy.mockResolvedValue([]);
   });
@@ -371,9 +365,9 @@ describe('Agent policy', () => {
     });
 
     it('should throw AgentPolicyInvalidError if support_agentless is defined in stateful without agentless enabled', async () => {
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: false } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isServerlessEnabled: false,
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -392,9 +386,7 @@ describe('Agent policy', () => {
     });
 
     it('should throw AgentPolicyInvalidError if agentless is disabled in serverless', async () => {
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -413,12 +405,10 @@ describe('Agent policy', () => {
     });
 
     it('should create an agentless policy when agentless config is set and in serverless env', async () => {
-      vi
-        .spyOn(appContextService, 'getConfig')
-        .mockReturnValue({ agentless: { enabled: true } } as any);
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -493,12 +483,10 @@ describe('Agent policy', () => {
     });
 
     it('should create an agentless policy with a fallback fleet_server_host_id if not provided', async () => {
-      vi
-        .spyOn(appContextService, 'getConfig')
-        .mockReturnValue({ agentless: { enabled: true } } as any);
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -538,9 +526,10 @@ describe('Agent policy', () => {
         agentless: { enabled: false },
       } as any);
 
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isCloudEnabled: true,
+        isServerlessEnabled: false,
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -573,13 +562,14 @@ describe('Agent policy', () => {
     });
 
     it('should throw error when attempting to create policy with supports_agentless true on serverless environment that does not support the agentless feature', async () => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ agentless: false } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        agentless: false,
+      } as any);
 
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: true,
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -601,9 +591,10 @@ describe('Agent policy', () => {
       vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isServerlessEnabled: false,
+        isCloudEnabled: true,
+      } as any);
 
       const generateTokenForPolicyId = vi.fn().mockResolvedValue(undefined);
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
@@ -2062,9 +2053,7 @@ describe('Agent policy', () => {
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       mockedAppContextService.getUninstallTokenService.mockReturnValueOnce({
-        checkTokenValidityForPolicy: vi
-          .fn()
-          .mockResolvedValueOnce({ error: new Error('reason') }),
+        checkTokenValidityForPolicy: vi.fn().mockResolvedValueOnce({ error: new Error('reason') }),
       } as unknown as UninstallTokenServiceInterface);
 
       const soClient = getAgentPolicyCreateMock();
@@ -2094,9 +2083,10 @@ describe('Agent policy', () => {
       vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: false, isCloudEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isServerlessEnabled: false,
+        isCloudEnabled: true,
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -2124,9 +2114,10 @@ describe('Agent policy', () => {
       vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: { enabled: true },
       } as any);
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true, isCloudEnabled: false } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isServerlessEnabled: true,
+        isCloudEnabled: false,
+      } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -2151,12 +2142,10 @@ describe('Agent policy', () => {
     });
 
     it('should not throw in serverless if support_agentless and agentless config is set', async () => {
-      vi
-        .spyOn(appContextService, 'getConfig')
-        .mockReturnValue({ agentless: { enabled: true } } as any);
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getConfig').mockReturnValue({
+        agentless: { enabled: true },
+      } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
 
       const soClient = getAgentPolicyCreateMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -2832,9 +2821,9 @@ describe('Agent policy', () => {
     it('should throw on error during agentless API calls for agentless policies', async () => {
       const soClient = createSavedObjectClientMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      vi
-        .mocked(agentlessAgentService.createAgentlessAgent)
-        .mockRejectedValueOnce(new Error('createAgentlessAgent error'));
+      vi.mocked(agentlessAgentService.createAgentlessAgent).mockRejectedValueOnce(
+        new Error('createAgentlessAgent error')
+      );
       mockedAppContextService.getInternalUserESClient.mockReturnValue(esClient);
       mockedOutputService.getDefaultDataOutputId.mockResolvedValueOnce('default-output');
       mockedGetFullAgentPolicy.mockResolvedValue({

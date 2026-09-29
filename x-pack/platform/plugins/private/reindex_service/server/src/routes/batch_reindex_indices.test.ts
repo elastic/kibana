@@ -32,11 +32,11 @@ const mockReindexService = {
 };
 
 vi.mock('../lib/reindex_service', () => {
-      const mocked = {
-      reindexServiceFactory: () => mockReindexService,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reindexServiceFactory: () => mockReindexService,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { credentialStoreFactory } from '../lib/credential_store';
 import { registerBatchReindexIndicesRoutes } from './batch_reindex_indices';

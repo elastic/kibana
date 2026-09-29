@@ -14,48 +14,48 @@ import { useMisconfigurationFinding } from '@kbn/cloud-security-posture/src/hook
 import { Misconfiguration } from '.';
 
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => {
-      const mocked = {
-      useMisconfigurationFinding: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMisconfigurationFinding: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/flyout_error', () => {
-      const mocked = {
-      FlyoutError: () => <div data-test-subj="mockFlyoutError" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutError: () => <div data-test-subj="mockFlyoutError" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/flyout_loading', () => {
-      const mocked = {
-      FlyoutLoading: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-        <div data-test-subj={dataTestSubj ?? 'mockFlyoutLoading'} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutLoading: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+      <div data-test-subj={dataTestSubj ?? 'mockFlyoutLoading'} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./header', () => {
-      const mocked = {
-      Header: () => <div data-test-subj="mockMisconfigurationHeader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Header: () => <div data-test-subj="mockMisconfigurationHeader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./content', () => {
-      const mocked = {
-      Content: () => <div data-test-subj="mockMisconfigurationContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Content: () => <div data-test-subj="mockMisconfigurationContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./footer', () => {
-      const mocked = {
-      Footer: () => <div data-test-subj="mockMisconfigurationFooter" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Footer: () => <div data-test-subj="mockMisconfigurationFooter" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useMisconfigurationFindingMock = useMisconfigurationFinding as Mock;
 

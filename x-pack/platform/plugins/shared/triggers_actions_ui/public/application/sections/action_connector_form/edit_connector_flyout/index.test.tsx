@@ -21,7 +21,7 @@ import { createAppMockRenderer } from '../../test_utils';
 import { TECH_PREVIEW_LABEL } from '../../translations';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeIsDual: vi.fn((id: string) => id === '.dual'),
@@ -1417,9 +1417,7 @@ describe('EditConnectorFlyout', () => {
     });
 
     it('throws an error correctly', async () => {
-      appMockRenderer.coreStart.http.post = vi
-        .fn()
-        .mockRejectedValue(new Error('error executing'));
+      appMockRenderer.coreStart.http.post = vi.fn().mockRejectedValue(new Error('error executing'));
 
       const { getByTestId } = appMockRenderer.render(
         <EditConnectorFlyout

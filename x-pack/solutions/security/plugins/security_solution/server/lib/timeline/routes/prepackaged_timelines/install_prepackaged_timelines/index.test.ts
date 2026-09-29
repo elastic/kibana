@@ -27,14 +27,14 @@ import { installPrepackedTimelinesRoute } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      installPrepackagedTimelines: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installPrepackagedTimelines: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../utils/check_timelines_status', async () => {
-  const actual = (await vi.importActual('../../../utils/check_timelines_status'));
+  const actual = await vi.importActual('../../../utils/check_timelines_status');
   return {
     ...actual,
     checkTimelinesStatus: vi.fn(),
@@ -61,9 +61,7 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should call installPrepackagedTimelines ', async () => {
-    (checkTimelinesStatus as Mock).mockReturnValue(
-      mockCheckTimelinesStatusBeforeInstallResult
-    );
+    (checkTimelinesStatus as Mock).mockReturnValue(mockCheckTimelinesStatusBeforeInstallResult);
 
     await server.inject(
       installPrepackedTimelinesRequest(),
@@ -74,9 +72,7 @@ describe('installPrepackagedTimelines', () => {
   });
 
   test('should return installPrepackagedTimelines result ', async () => {
-    (checkTimelinesStatus as Mock).mockReturnValue(
-      mockCheckTimelinesStatusBeforeInstallResult
-    );
+    (checkTimelinesStatus as Mock).mockReturnValue(mockCheckTimelinesStatusBeforeInstallResult);
     (installPrepackagedTimelines as Mock).mockReturnValue({
       errors: [],
       success: true,

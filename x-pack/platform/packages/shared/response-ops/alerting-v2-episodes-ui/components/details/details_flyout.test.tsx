@@ -33,102 +33,104 @@ import { AlertEpisodeDetailsFlyout } from './details_flyout';
 
 vi.mock('../../hooks/use_episode_details_header_data');
 vi.mock('../../hooks/use_invalidate_episode_queries', () => {
-      const mocked = {
-      useInvalidateEpisodeQueries: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateEpisodeQueries: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Renders children so containment assertions still work, while recording props
 // so the border can be asserted without depending on the accordion's own DOM.
 vi.mock('@kbn/flyout-sections', () => {
-      const mocked = {
-      FlyoutAccordion: vi.fn(
-        ({ children, 'data-test-subj': testSubj }: Record<string, React.ReactNode>) => (
-          <div data-test-subj={testSubj as string}>{children}</div>
-        )
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutAccordion: vi.fn(
+      ({ children, 'data-test-subj': testSubj }: Record<string, React.ReactNode>) => (
+        <div data-test-subj={testSubj as string}>{children}</div>
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./grouping_section', () => {
-      const mocked = {
-      AlertEpisodeGroupingSection: () => <div data-test-subj="groupingSectionStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeGroupingSection: () => <div data-test-subj="groupingSectionStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./trend_chart_section', () => {
-      const mocked = {
-      AlertEpisodeTrendChartSection: () => <div data-test-subj="trendChartSectionStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTrendChartSection: () => <div data-test-subj="trendChartSectionStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./timeline_heatmaps_section', () => {
-      const mocked = {
-      AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="timelineHeatmapsSectionStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="timelineHeatmapsSectionStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./rule_overview_panel_section', () => {
-      const mocked = {
-      AlertEpisodeRuleOverviewPanelSection: () => <div data-test-subj="ruleOverviewPanelSectionStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeRuleOverviewPanelSection: () => (
+      <div data-test-subj="ruleOverviewPanelSectionStub" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./related_section', () => {
-      const mocked = {
-      AlertEpisodesRelatedSection: vi.fn(() => <div data-test-subj="relatedSectionStub" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodesRelatedSection: vi.fn(() => <div data-test-subj="relatedSectionStub" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./runbook_section', () => {
-      const mocked = {
-      AlertEpisodeRunbookSection: vi.fn(() => <div data-test-subj="runbookSectionStub" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeRunbookSection: vi.fn(() => <div data-test-subj="runbookSectionStub" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./timeline_section', () => {
-      const mocked = {
-      AlertEpisodeTimelineSection: () => <div data-test-subj="timelineSectionStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTimelineSection: () => <div data-test-subj="timelineSectionStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./metadata_section', () => {
-      const mocked = {
-      AlertEpisodeMetadataSection: vi.fn(() => (
-        <div data-test-subj="metadataSectionStub">
-          <div>
-            <input type="search" />
-          </div>
-          <div>
-            <input type="checkbox" role="switch" aria-checked={false} />
-          </div>
+  const mocked = {
+    AlertEpisodeMetadataSection: vi.fn(() => (
+      <div data-test-subj="metadataSectionStub">
+        <div>
+          <input type="search" />
         </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+        <div>
+          <input type="checkbox" role="switch" aria-checked={false} />
+        </div>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../assignee_cell', () => {
-      const mocked = {
-      AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
-        <div data-test-subj="alertingV2EpisodeAssigneeCell">{assigneeUid ?? 'No assignee'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
+      <div data-test-subj="alertingV2EpisodeAssigneeCell">{assigneeUid ?? 'No assignee'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../user_profile_display', () => {
-      const mocked = {
-      UserProfileDisplay: ({
-        userProfileUid,
-        emptyState = '—',
-      }: {
-        userProfileUid: string | null | undefined;
-        emptyState?: React.ReactNode;
-      }) => <div data-test-subj="alertingV2UserProfileDisplay">{userProfileUid ?? emptyState}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserProfileDisplay: ({
+      userProfileUid,
+      emptyState = '—',
+    }: {
+      userProfileUid: string | null | undefined;
+      emptyState?: React.ReactNode;
+    }) => <div data-test-subj="alertingV2UserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEpisodeDetailsHeaderData = vi.mocked(useEpisodeDetailsHeaderData);
 const mockFlyoutAccordion = vi.mocked(FlyoutAccordion);

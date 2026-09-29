@@ -35,44 +35,44 @@ const getUiSettingsMock = vi.fn().mockImplementation((key) => {
 });
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      reportPerformanceMetricEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reportPerformanceMetricEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../confirm_overlays', () => {
-      const mocked = {
-      confirmCreateWithUnsaved: vi.fn().mockImplementation((fn) => fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    confirmCreateWithUnsaved: vi.fn().mockImplementation((fn) => fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../_dashboard_listing_strings', () => {
-      const mocked = {
-      dashboardListingTableStrings: {
-        getEntityName: vi.fn().mockReturnValue('Dashboard'),
-        getTableListTitle: vi.fn().mockReturnValue('Dashboard List'),
-        getEntityNamePlural: vi.fn().mockReturnValue('Dashboards'),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    dashboardListingTableStrings: {
+      getEntityName: vi.fn().mockReturnValue('Dashboard'),
+      getTableListTitle: vi.fn().mockReturnValue('Dashboard List'),
+      getEntityNamePlural: vi.fn().mockReturnValue('Dashboards'),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../dashboard_client', () => {
-      const mocked = {
-      dashboardClient: {
-        delete: vi.fn().mockResolvedValue(true),
-        update: vi.fn().mockResolvedValue(true),
-      },
-      findService: {
-        findById: vi.fn(),
-        search: vi.fn().mockResolvedValue({ data: [], meta: { total: 0, page: 1, per_page: 20 } }),
-      },
-      checkForDuplicateDashboardTitle: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    dashboardClient: {
+      delete: vi.fn().mockResolvedValue(true),
+      update: vi.fn().mockResolvedValue(true),
+    },
+    findService: {
+      findById: vi.fn(),
+      search: vi.fn().mockResolvedValue({ data: [], meta: { total: 0, page: 1, per_page: 20 } }),
+    },
+    checkForDuplicateDashboardTitle: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDashboardListingTable', () => {
   const dashboardBackupService = getDashboardBackupService();

@@ -7,40 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { WorkflowYamlPreview } from './workflow_yaml_preview';
 import { WorkflowsUiServicesProvider } from '../../../context';
 import { createMockWorkflowsUiServices } from '../../../context/__mocks__/mocks';
 
 vi.mock('../../../hooks/use_workflows_monaco_theme', () => {
-      const mocked = {
-      useWorkflowsMonacoTheme: vi.fn(),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsMonacoTheme: vi.fn(),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        editor: { TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 } },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    monaco: {
+      editor: { TrackedRangeStickiness: { NeverGrowsWhenTypingAtEdges: 0 } },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetTypeIconDataUrl = vi.fn(
   async (_params: { type: string; kind: string }) => 'data:image/svg+xml;base64,AAA'
 );
 vi.mock('./get_type_icon_data_url', () => {
-      const mocked = {
-      getTypeIconDataUrl: (params: { type: string; kind: string }) => mockGetTypeIconDataUrl(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTypeIconDataUrl: (params: { type: string; kind: string }) => mockGetTypeIconDataUrl(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateDecorationsCollection = vi.fn((_decorations: unknown[]) => ({
   clear: vi.fn(),

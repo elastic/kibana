@@ -46,9 +46,9 @@ describe('buildEditFieldButton', () => {
   });
 
   it('should return null if the data view is not editable', () => {
-    vi
-      .spyOn(servicesMock.dataViewEditor.userPermissions, 'editDataView')
-      .mockReturnValueOnce(false);
+    vi.spyOn(servicesMock.dataViewEditor.userPermissions, 'editDataView').mockReturnValueOnce(
+      false
+    );
 
     const field = getField('bytes');
     const button = buildEditFieldButton({

@@ -16,42 +16,42 @@ import { TableId } from '@kbn/securitysolution-data-table';
 import { AlertsTable } from '../../../../detections/components/alerts_table';
 
 vi.mock('../../../../detections/components/alerts_table', () => {
-      const mocked = {
-      AlertsTable: vi.fn(() => <div>{'Mocked Alerts Table'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTable: vi.fn(() => <div>{'Mocked Alerts Table'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('mocked-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('mocked-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          triggersActionsUi: {
-            actionTypeRegistry: {
-              has: vi.fn(),
-              register: vi.fn(),
-              get: vi.fn(),
-              list: vi.fn(),
-            },
-            ruleTypeRegistry: {
-              has: vi.fn(),
-              register: vi.fn(),
-              get: vi.fn(),
-              list: vi.fn(),
-            },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            has: vi.fn(),
+            register: vi.fn(),
+            get: vi.fn(),
+            list: vi.fn(),
+          },
+          ruleTypeRegistry: {
+            has: vi.fn(),
+            register: vi.fn(),
+            get: vi.fn(),
+            list: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertsPreview', () => {
   it('renders the alerts preview', () => {

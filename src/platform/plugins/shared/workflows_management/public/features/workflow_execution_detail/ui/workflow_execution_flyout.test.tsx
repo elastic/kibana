@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionFlyout } from './workflow_execution_flyout';
 import { createStartServicesMock } from '../../../mocks';
@@ -21,36 +20,36 @@ import {
 } from '../../../shared/test_utils';
 
 vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
-      const mocked = {
-      useNavigateToExecution: ({
-        workflowId,
-        executionId,
-      }: {
-        workflowId: string;
-        executionId?: string;
-      }) => ({
-        href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
-        navigate: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToExecution: ({
+      workflowId,
+      executionId,
+    }: {
+      workflowId: string;
+      executionId?: string;
+    }) => ({
+      href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
+      navigate: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
-      const mocked = {
-      useAvailableConnectors: () => undefined,
-      useFetchConnector: () => ({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAvailableConnectors: () => undefined,
+    useFetchConnector: () => ({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockChildExecutions = new Map();
 vi.mock('../model/use_child_workflow_executions', () => {
-      const mocked = {
-      useChildWorkflowExecutions: () => ({ childExecutions: mockChildExecutions, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChildWorkflowExecutions: () => ({ childExecutions: mockChildExecutions, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWaitingStepResume = {
   waitingStepExecutionId: undefined as string | undefined,
@@ -61,66 +60,66 @@ const mockWaitingStepResume = {
 };
 
 vi.mock('../model/use_waiting_step_resume', () => {
-      const mocked = {
-      useWaitingStepResume: () => mockWaitingStepResume,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWaitingStepResume: () => mockWaitingStepResume,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./resume_execution_button', () => {
-      const mocked = {
-      ResumeExecutionButton: (props: { autoOpen?: boolean; waitingStepExecutionId?: string }) => (
-        <div
-          data-test-subj="resume-execution-button"
-          data-auto-open={String(Boolean(props.autoOpen))}
-          data-waiting-step={props.waitingStepExecutionId ?? ''}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResumeExecutionButton: (props: { autoOpen?: boolean; waitingStepExecutionId?: string }) => (
+      <div
+        data-test-subj="resume-execution-button"
+        data-auto-open={String(Boolean(props.autoOpen))}
+        data-waiting-step={props.waitingStepExecutionId ?? ''}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_step_execution_tree', () => {
-      const mocked = {
-      WorkflowStepExecutionTree: ({
-        onStepExecutionClick,
-      }: {
-        onStepExecutionClick: (id: string) => void;
-      }) => (
-        <>
-          <button
-            type="button"
-            data-test-subj="select-waiting-step"
-            onClick={() => onStepExecutionClick('step-wait')}
-          >
-            {'Select waiting step'}
-          </button>
-          <button
-            type="button"
-            data-test-subj="select-execute-step"
-            onClick={() => onStepExecutionClick('parent-execute')}
-          >
-            {'Select execute step'}
-          </button>
-          <button
-            type="button"
-            data-test-subj="select-child-step"
-            onClick={() => onStepExecutionClick('child-lookup')}
-          >
-            {'Select child step'}
-          </button>
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowStepExecutionTree: ({
+      onStepExecutionClick,
+    }: {
+      onStepExecutionClick: (id: string) => void;
+    }) => (
+      <>
+        <button
+          type="button"
+          data-test-subj="select-waiting-step"
+          onClick={() => onStepExecutionClick('step-wait')}
+        >
+          {'Select waiting step'}
+        </button>
+        <button
+          type="button"
+          data-test-subj="select-execute-step"
+          onClick={() => onStepExecutionClick('parent-execute')}
+        >
+          {'Select execute step'}
+        </button>
+        <button
+          type="button"
+          data-test-subj="select-child-step"
+          onClick={() => onStepExecutionClick('child-lookup')}
+        >
+          {'Select child step'}
+        </button>
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./execution_take_action_split_button', () => {
-      const mocked = {
-      ExecutionTakeActionSplitButton: () => <div data-test-subj="take-action" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExecutionTakeActionSplitButton: () => <div data-test-subj="take-action" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPollingResult = {
   workflowExecution: undefined as ReturnType<typeof createMockWorkflowExecutionDto> | undefined,
@@ -128,11 +127,11 @@ const mockPollingResult = {
 };
 
 vi.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => {
-      const mocked = {
-      useWorkflowExecutionPolling: () => mockPollingResult,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowExecutionPolling: () => mockPollingResult,
+  };
+  return { ...mocked, default: mocked };
+});
 
 type UseStepExecutionParams = Parameters<
   typeof import('../model/use_step_execution').useStepExecution
@@ -155,11 +154,11 @@ const mockUseStepExecution = vi.fn<UseStepExecutionQueryStub, UseStepExecutionPa
 }));
 
 vi.mock('../model/use_step_execution', () => {
-      const mocked = {
-      useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowExecutionFlyout resume', () => {
   const services = createStartServicesMock();

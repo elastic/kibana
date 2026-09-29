@@ -20,15 +20,15 @@ import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 
 vi.mock('../validation', () => {
-      const mocked = {
-      hasExpressionValidationErrors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { hasExpressionValidationErrors } = (await vi.importMock('../validation'));
+  const mocked = {
+    hasExpressionValidationErrors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { hasExpressionValidationErrors } = await vi.importMock('../validation');
 
 vi.mock('@kbn/data-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/data-plugin/public'));
+  const actual = await vi.importActual('@kbn/data-plugin/public');
   return {
     ...actual,
     getEsQueryConfig: vi.fn().mockReturnValue({
@@ -40,14 +40,14 @@ vi.mock('@kbn/data-plugin/public', async () => {
 });
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
-  const module = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const module = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...module,
   };
 });
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common', async () => {
-  const module = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public/common'));
+  const module = await vi.importActual('@kbn/triggers-actions-ui-plugin/public/common');
   return {
     ...module,
     getTimeOptions: vi.fn(),
@@ -73,8 +73,10 @@ vi.mock('@kbn/esql-utils', () => {
   };
 });
 
-const esqlUtilsMock = (await vi.importMock('@kbn/esql-utils'));
-const triggersActionsCommonMock = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/common'));
+const esqlUtilsMock = await vi.importMock('@kbn/esql-utils');
+const triggersActionsCommonMock = await vi.importMock(
+  '@kbn/triggers-actions-ui-plugin/public/common'
+);
 const { getProjectRoutingFromEsqlQuery } = esqlUtilsMock;
 
 const AppWrapper = React.memo<PropsWithChildren<unknown>>(({ children }) => (

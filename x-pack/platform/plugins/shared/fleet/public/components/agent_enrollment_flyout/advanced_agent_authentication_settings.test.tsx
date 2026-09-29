@@ -17,15 +17,15 @@ import { AdvancedAgentAuthenticationSettings } from './advanced_agent_authentica
 const mockSendGetEnrollmentAPIKeys = vi.fn();
 
 vi.mock('../../applications/fleet/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../applications/fleet/hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: { toasts: { addError: vi.fn(), addSuccess: vi.fn() } },
-      }),
-      sendGetEnrollmentAPIKeys: (...args: unknown[]) => mockSendGetEnrollmentAPIKeys(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../applications/fleet/hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: { toasts: { addError: vi.fn(), addSuccess: vi.fn() } },
+    }),
+    sendGetEnrollmentAPIKeys: (...args: unknown[]) => mockSendGetEnrollmentAPIKeys(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const key = (id: string, extra: Record<string, unknown> = {}) => ({
   id,

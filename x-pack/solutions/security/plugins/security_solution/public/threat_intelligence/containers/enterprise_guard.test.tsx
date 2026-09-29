@@ -16,11 +16,11 @@ import { EnterpriseGuard } from './enterprise_guard';
 import { useLicense } from '../../common/hooks/use_license';
 
 vi.mock('../../app/home/template_wrapper', () => {
-      const mocked = {
-      SecuritySolutionTemplateWrapper: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecuritySolutionTemplateWrapper: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/use_license');
 
 describe('<EnterpriseGuard />', () => {

@@ -12,11 +12,11 @@ import type { OverviewTrend } from '../../../../../../../../common/types';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getMetricValueProps', () => {
   it('returns loading state props when trendData is loading', () => {

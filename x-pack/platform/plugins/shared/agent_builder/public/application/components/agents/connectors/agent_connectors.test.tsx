@@ -16,86 +16,86 @@ import { EuiProvider } from '@elastic/eui';
 import { AgentConnectors } from './agent_connectors';
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          plugins: {
-            triggersActionsUi: {
-              actionTypeRegistry: { has: () => false, get: () => ({}) },
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        plugins: {
+          triggersActionsUi: {
+            actionTypeRegistry: { has: () => false, get: () => ({}) },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_navigation', () => {
-      const mocked = {
-      useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: () => ({ createAgentBuilderUrl: () => '#' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_flyout_state', () => {
-      const mocked = {
-      useFlyoutState: () => ({ isOpen: false, openFlyout: vi.fn(), closeFlyout: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutState: () => ({ isOpen: false, openFlyout: vi.fn(), closeFlyout: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_query_state');
 
 vi.mock('../common/page_wrapper', () => {
-      const mocked = {
-      PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageWrapper: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/styles', () => {
-      const mocked = {
-      useListDetailPageStyles: () => ({
-        loadingSpinner: {},
-        header: {},
-        body: {},
-        searchColumn: {},
-        searchInputWrapper: {},
-        scrollableList: {},
-        detailPanelWrapper: {},
-        noSelectionPlaceholder: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useListDetailPageStyles: () => ({
+      loadingSpinner: {},
+      header: {},
+      body: {},
+      searchColumn: {},
+      searchInputWrapper: {},
+      scrollableList: {},
+      detailPanelWrapper: {},
+      noSelectionPlaceholder: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./active_connector_row', () => {
-      const mocked = {
-      ActiveConnectorRow: () => <div data-test-subj="activeConnectorRow" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActiveConnectorRow: () => <div data-test-subj="activeConnectorRow" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./connector_detail_panel', () => {
-      const mocked = {
-      ConnectorDetailPanel: vi.fn(() => <div data-test-subj="connectorDetailPanel" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorDetailPanel: vi.fn(() => <div data-test-subj="connectorDetailPanel" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./connector_library_panel', () => {
-      const mocked = {
-      ConnectorLibraryPanel: () => <div data-test-subj="connectorLibraryPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorLibraryPanel: () => <div data-test-subj="connectorLibraryPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./connectors_customize_empty_state', () => {
-      const mocked = {
-      ConnectorsCustomizeEmptyState: () => <div data-test-subj="connectorsCustomizeEmptyState" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorsCustomizeEmptyState: () => <div data-test-subj="connectorsCustomizeEmptyState" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/agents/use_agent_by_id');
 vi.mock('../../../hooks/agents/use_can_update_agent');
@@ -103,13 +103,17 @@ vi.mock('../../../hooks/connectors/use_agent_connectors');
 vi.mock('../../../hooks/use_has_connectors_all_privileges');
 vi.mock('../../../context/connectors_provider');
 
-const { useAgentBuilderAgentById } = (await vi.importMock('../../../hooks/agents/use_agent_by_id'));
-const { useCanUpdateAgent } = (await vi.importMock('../../../hooks/agents/use_can_update_agent'));
-const { useAgentConnectors } = (await vi.importMock('../../../hooks/connectors/use_agent_connectors'));
-const { useHasConnectorsAllPrivileges } = (await vi.importMock('../../../hooks/use_has_connectors_all_privileges'));
-const { useConnectorsActions } = (await vi.importMock('../../../context/connectors_provider'));
-const { useQueryState } = (await vi.importMock('../../../hooks/use_query_state'));
-const { ConnectorDetailPanel } = (await vi.importMock('./connector_detail_panel'));
+const { useAgentBuilderAgentById } = await vi.importMock('../../../hooks/agents/use_agent_by_id');
+const { useCanUpdateAgent } = await vi.importMock('../../../hooks/agents/use_can_update_agent');
+const { useAgentConnectors } = await vi.importMock(
+  '../../../hooks/connectors/use_agent_connectors'
+);
+const { useHasConnectorsAllPrivileges } = await vi.importMock(
+  '../../../hooks/use_has_connectors_all_privileges'
+);
+const { useConnectorsActions } = await vi.importMock('../../../context/connectors_provider');
+const { useQueryState } = await vi.importMock('../../../hooks/use_query_state');
+const { ConnectorDetailPanel } = await vi.importMock('./connector_detail_panel');
 
 const openCreateFlyout = vi.fn();
 

@@ -25,9 +25,7 @@ describe('setAttackStatusStepDefinition', () => {
     mockContextManager = {
       callKibanaApi: vi.fn(),
       getFakeRequest: vi.fn(),
-    } as unknown as Mocked<
-      StepHandlerContext<typeof setAttackStatusInputSchema>['contextManager']
-    >;
+    } as unknown as Mocked<StepHandlerContext<typeof setAttackStatusInputSchema>['contextManager']>;
 
     mockContext = {
       input: {

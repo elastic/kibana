@@ -18,7 +18,7 @@ const TOUR_2 = 'tour2' as TourId;
 
 // Mock getOrder to return mocked TOUR_REGISTRY orders
 vi.mock('..', async () => {
-  const actual = (await vi.importActual('..'));
+  const actual = await vi.importActual('..');
   return {
     ...actual,
     getOrder: vi.fn((tourId: TourId) => {

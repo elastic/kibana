@@ -21,11 +21,11 @@ import { useKibana } from '../../../common/lib/kibana';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('@kbn/core-overlays-browser', () => {
-      const mocked = {
-      useSystemFlyoutType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSystemFlyoutType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStorage = { get: vi.fn(), set: vi.fn() };
 const storage = mockStorage as unknown as Storage;

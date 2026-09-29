@@ -38,20 +38,22 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { RecoveredActionGroup } from '../../../../../common';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../rules_client/lib/untrack_rule_alerts', () => {
-      const mocked = {
-      untrackRuleAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    untrackRuleAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { untrackRuleAlerts } = (await vi.importMock('../../../../rules_client/lib/untrack_rule_alerts'));
+const { untrackRuleAlerts } = await vi.importMock(
+  '../../../../rules_client/lib/untrack_rule_alerts'
+);
 
 const logger = loggerMock.create();
 const eventLogger = eventLoggerMock.create();

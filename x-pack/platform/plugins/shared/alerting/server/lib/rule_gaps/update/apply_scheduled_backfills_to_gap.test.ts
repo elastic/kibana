@@ -21,11 +21,11 @@ import type { ScheduledItem } from './utils';
 import { backfillInitiator } from '../../../../common/constants';
 
 vi.mock('./calculate_gaps_state', () => {
-      const mocked = {
-      calculateGapStateFromAllBackfills: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    calculateGapStateFromAllBackfills: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./update_gap_from_schedule');
 
 const calculateGapStateFromAllBackfillsMock = calculateGapStateFromAllBackfills as Mock;
@@ -60,11 +60,7 @@ const gap = new Gap({
   },
 });
 
-const testToHaveBeenCalledBefore = (
-  calledFirst: Mock,
-  calledSecond: Mock,
-  timesCalled = 1
-) => {
+const testToHaveBeenCalledBefore = (calledFirst: Mock, calledSecond: Mock, timesCalled = 1) => {
   const calledFirstOrder = calledFirst.mock.invocationCallOrder;
   const calledSecondOrder = calledSecond.mock.invocationCallOrder;
 

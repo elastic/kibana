@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { mockLogger } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-import { mockLogger } from '../../__mocks__';
 
 import { collectConnectorStats } from '@kbn/search-connectors';
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
@@ -18,11 +18,11 @@ import type { ConnectorStats } from '../../../common/types';
 import { registerTelemetryUsageCollector } from './telemetry';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      collectConnectorStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    collectConnectorStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Connectors Telemetry Usage Collector', () => {
   const makeUsageCollectorStub = vi.fn();

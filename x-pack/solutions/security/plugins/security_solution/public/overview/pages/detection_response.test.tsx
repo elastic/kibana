@@ -19,60 +19,60 @@ import { getMockDataViewWithMatchedIndices } from '../../data_view_manager/mocks
 import { defaultImplementation } from '../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('../components/detection_response/alerts_by_status', () => {
-      const mocked = {
-      AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsByStatus: () => <div data-test-subj="mock_AlertsByStatus" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/detection_response/cases_table', () => {
-      const mocked = {
-      CasesTable: () => <div data-test-subj="mock_CasesTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CasesTable: () => <div data-test-subj="mock_CasesTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/detection_response/host_alerts_table', () => {
-      const mocked = {
-      HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostAlertsTable: () => <div data-test-subj="mock_HostAlertsTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/detection_response/rule_alerts_table', () => {
-      const mocked = {
-      RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleAlertsTable: () => <div data-test-subj="mock_RuleAlertsTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/detection_response/user_alerts_table', () => {
-      const mocked = {
-      UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserAlertsTable: () => <div data-test-subj="mock_UserAlertsTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/detection_response/cases_by_status', () => {
-      const mocked = {
-      CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CasesByStatus: () => <div data-test-subj="mock_CasesByStatus" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => <div data-test-subj="mock_globalSearchBar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/filters_global', () => {
-      const mocked = {
-      FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/empty_prompt');
 
@@ -87,18 +87,18 @@ const defaultUseSignalIndexReturn = {
 
 const mockUseSignalIndex = vi.fn(() => defaultUseSignalIndexReturn);
 vi.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => {
-      const mocked = {
-      useSignalIndex: () => mockUseSignalIndex(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndex: () => mockUseSignalIndex(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseAlertsPrivileges = vi.fn(() => defaultUseAlertsPrivilegesReturn);
 vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
-      const mocked = {
-      useAlertsPrivileges: () => mockUseAlertsPrivileges(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsPrivileges: () => mockUseAlertsPrivileges(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultUseCasesPermissionsReturn = readCasesPermissions();
 
@@ -106,7 +106,7 @@ const mockedUseKibana = mockUseKibana();
 const mockCanUseCases = vi.fn();
 
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
 
   return {
     ...original,
@@ -128,9 +128,10 @@ describe('DetectionResponse', () => {
     mockUseAlertsPrivileges.mockReturnValue(defaultUseAlertsPrivilegesReturn);
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
     mockCanUseCases.mockReturnValue(defaultUseCasesPermissionsReturn);
-    vi
-      .mocked(useDataView)
-      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'ready' });
+    vi.mocked(useDataView).mockReturnValue({
+      dataView: getMockDataViewWithMatchedIndices(),
+      status: 'ready',
+    });
   });
 
   it('should render default page', () => {
@@ -166,9 +167,10 @@ describe('DetectionResponse', () => {
   });
 
   it('should render loader if dataview is loading', () => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(), status: 'loading' });
+    vi.mocked(useDataView).mockReturnValue({
+      dataView: getMockDataViewWithMatchedIndices(),
+      status: 'loading',
+    });
 
     const result = render(
       <TestProviders>

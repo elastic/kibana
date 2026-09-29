@@ -28,62 +28,62 @@ import {
 const mockOpenSystemFlyout = vi.fn();
 const mockReportEvent = vi.fn();
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: vi.fn(), location: { pathname: '/' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: vi.fn(), location: { pathname: '/' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useStore: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useStore: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => {
-      const mocked = {
-      useDefaultDocumentFlyoutProperties: () => ({
-        ownFocus: false,
-        paddingSize: 'm',
-        resizable: true,
-        size: 's',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultDocumentFlyoutProperties: () => ({
+      ownFocus: false,
+      paddingSize: 'm',
+      resizable: true,
+      size: 's',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/utils/build_flyout_content', () => {
-      const mocked = {
-      buildFlyoutContent: vi.fn((field: string, value: string) => {
-        if (field === 'kibana.alert.rule.name' && value) {
-          return <div data-test-subj="mock-rule-flyout" />;
-        }
-        return null;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildFlyoutContent: vi.fn((field: string, value: string) => {
+      if (field === 'kibana.alert.rule.name' && value) {
+        return <div data-test-subj="mock-rule-flyout" />;
+      }
+      return null;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = {
   overlays: { openSystemFlyout: mockOpenSystemFlyout },

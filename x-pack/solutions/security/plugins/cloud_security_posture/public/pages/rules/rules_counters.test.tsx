@@ -25,11 +25,11 @@ import { benchmarkValuesMock, itemsDataMock, paramsMock } from './__mocks__';
 
 vi.mock('../../common/hooks/use_benchmark_dynamic_values');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings');
 vi.mock('../benchmarks/use_csp_benchmark_integrations');
 vi.mock('../../common/hooks/use_kibana');

@@ -14,20 +14,20 @@ const mockCreateWriteStream = vi.fn();
 const mockDeleteFile = vi.fn();
 
 vi.mock('@kbn/fs', () => {
-      const mocked = {
-      getSafePath: (...args: unknown[]) => mockGetSafePath(...args),
-      createWriteStream: (...args: unknown[]) => mockCreateWriteStream(...args),
-      deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSafePath: (...args: unknown[]) => mockGetSafePath(...args),
+    createWriteStream: (...args: unknown[]) => mockCreateWriteStream(...args),
+    deleteFile: (...args: unknown[]) => mockDeleteFile(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('crypto', () => {
-      const mocked = {
-      randomUUID: () => 'test-uuid-1234',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    randomUUID: () => 'test-uuid-1234',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { saveUploadedFile } from './save_uploaded_file';
 

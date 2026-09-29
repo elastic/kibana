@@ -18,55 +18,55 @@ import { GCP_CREDENTIALS_TYPE } from '../constants';
 
 // Mock the LazyPackagePolicyInputVarField component
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LazyPackagePolicyInputVarField: ({
-        varDef,
-        value,
-        onChange,
-        'data-test-subj': testSubj,
-      }: {
-        varDef?: { title?: string };
-        value?: string;
-        onChange?: (value: string) => void;
-        'data-test-subj'?: string;
-      }) => (
-        <div data-test-subj={testSubj || 'mock-lazy-field'}>
-          <textarea
-            data-test-subj="mock-textarea"
-            value={value || ''}
-            onChange={(e) => onChange && onChange(e.target.value)}
-            placeholder={varDef?.title || 'Mock field'}
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazyPackagePolicyInputVarField: ({
+      varDef,
+      value,
+      onChange,
+      'data-test-subj': testSubj,
+    }: {
+      varDef?: { title?: string };
+      value?: string;
+      onChange?: (value: string) => void;
+      'data-test-subj'?: string;
+    }) => (
+      <div data-test-subj={testSubj || 'mock-lazy-field'}>
+        <textarea
+          data-test-subj="mock-textarea"
+          value={value || ''}
+          onChange={(e) => onChange && onChange(e.target.value)}
+          placeholder={varDef?.title || 'Mock field'}
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the utils
 vi.mock('../utils', () => {
-      const mocked = {
-      fieldIsInvalid: vi.fn((value, hasInvalidRequiredVars) => {
-        return hasInvalidRequiredVars && (!value || value.trim() === '');
-      }),
-      findVariableDef: vi.fn((packageInfo, fieldId) => ({
-        name: fieldId,
-        title: `Mock ${fieldId} title`,
-        type: 'text',
-        required: true,
-      })),
-      gcpField: {
-        fields: {
-          'gcp.organization_id': { label: 'Organization ID' },
-          'gcp.project_id': { label: 'Project ID' },
-          'gcp.credentials.type': { label: 'Credentials Type' },
-          'gcp.credentials.file': { label: 'Credentials File' },
-          'gcp.credentials.json': { label: 'Credentials JSON' },
-        },
+  const mocked = {
+    fieldIsInvalid: vi.fn((value, hasInvalidRequiredVars) => {
+      return hasInvalidRequiredVars && (!value || value.trim() === '');
+    }),
+    findVariableDef: vi.fn((packageInfo, fieldId) => ({
+      name: fieldId,
+      title: `Mock ${fieldId} title`,
+      type: 'text',
+      required: true,
+    })),
+    gcpField: {
+      fields: {
+        'gcp.organization_id': { label: 'Organization ID' },
+        'gcp.project_id': { label: 'Project ID' },
+        'gcp.credentials.type': { label: 'Credentials Type' },
+        'gcp.credentials.file': { label: 'Credentials File' },
+        'gcp.credentials.json': { label: 'Credentials JSON' },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);

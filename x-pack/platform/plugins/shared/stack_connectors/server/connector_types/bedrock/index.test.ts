@@ -18,7 +18,7 @@ import { DEFAULT_MODEL } from '@kbn/connector-schemas/bedrock';
 
 vi.mock('axios');
 vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
-  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
+  const originalUtils = await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: vi.fn(),

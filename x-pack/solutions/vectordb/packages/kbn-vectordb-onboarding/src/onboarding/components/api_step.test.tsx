@@ -20,27 +20,27 @@ import { useOnboardingCredentials } from '../../hooks/use_onboarding_credentials
 import type { OnboardingServices } from '../../services';
 
 vi.mock('../../hooks/use_onboarding_credentials', () => {
-      const mocked = {
-      useOnboardingCredentials: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingCredentials: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/try-in-console', () => {
-      const mocked = {
-      TryInConsoleButton: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TryInConsoleButton: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCopy = vi.fn();
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCopy: vi.fn(({ children }) => children(mockCopy)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCopy: vi.fn(({ children }) => children(mockCopy)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseOnboardingCredentials = useOnboardingCredentials as Mock;
 const mockTryInConsoleButton = TryInConsoleButton as unknown as Mock;

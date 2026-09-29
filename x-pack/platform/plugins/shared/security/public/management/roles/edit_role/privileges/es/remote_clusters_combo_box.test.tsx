@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
+import { vi } from 'vitest';
 
 import '@kbn/code-editor-mock/jest_helper';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';

@@ -28,31 +28,31 @@ import { TEST_PROFILE_STATE_DEF } from '../../context_awareness/__mocks__/profil
 let mockContextAppProps: ContextAppProps | undefined;
 
 vi.mock('./context_app', () => {
-      const mocked = {
-      ContextApp: (props: ContextAppProps) => {
-        mockContextAppProps = props;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContextApp: (props: ContextAppProps) => {
+      mockContextAppProps = props;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../context_awareness/hooks/use_root_profile', () => {
-      const mocked = {
-      useRootProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRootProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/unified-data-table', async () => {
-  const actual = (await vi.importActual('@kbn/unified-data-table'));
+  const actual = await vi.importActual('@kbn/unified-data-table');
   return {
     ...actual,
     popularizeField: vi.fn(actual.popularizeField),
@@ -96,12 +96,10 @@ describe('ContextAppRoute', () => {
     let capturedToolkit: ContextAwarenessToolkit | undefined;
 
     services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    vi
-      .spyOn(services.profilesManager, 'createScopedProfilesManager')
-      .mockImplementation((args) => {
-        capturedToolkit = args.toolkit;
-        return originalCreateScopedProfilesManager(args);
-      });
+    vi.spyOn(services.profilesManager, 'createScopedProfilesManager').mockImplementation((args) => {
+      capturedToolkit = args.toolkit;
+      return originalCreateScopedProfilesManager(args);
+    });
 
     renderContextAppRoute(services);
 

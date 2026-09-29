@@ -22,9 +22,10 @@ type ServiceInstanceDetails =
 
 describe('InstanceDetails', () => {
   it('renders loading spinner when data is being fetched', () => {
-    vi
-      .spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher')
-      .mockReturnValue({ data: undefined, status: FETCH_STATUS.LOADING });
+    vi.spyOn(useInstanceDetailsFetcher, 'useInstanceDetailsFetcher').mockReturnValue({
+      data: undefined,
+      status: FETCH_STATUS.LOADING,
+    });
     const { getByTestId } = renderWithTheme(
       <InstanceDetails serviceName="foo" serviceNodeName="bar" kuery="" />
     );

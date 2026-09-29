@@ -24,7 +24,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
+  const original = await vi.importActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     getIndexPatterns: () => {

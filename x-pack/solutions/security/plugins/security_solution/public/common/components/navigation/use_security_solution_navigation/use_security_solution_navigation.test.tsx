@@ -16,19 +16,19 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 
 const mockUseBreadcrumbsNav = vi.fn();
 vi.mock('../breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbsNav: () => mockUseBreadcrumbsNav(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSecuritySideNav = vi.fn(() => <div data-test-subj="SecuritySideNav" />);
 vi.mock('../security_side_nav', () => {
-      const mocked = {
-      SecuritySideNav: () => mockSecuritySideNav(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecuritySideNav: () => mockSecuritySideNav(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetChromeStyle$ = vi.fn().mockReturnValue(of('classic'));
 

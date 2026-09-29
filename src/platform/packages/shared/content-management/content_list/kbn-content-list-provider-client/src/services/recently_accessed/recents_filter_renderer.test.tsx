@@ -22,11 +22,7 @@ describe('RecentsFilterRenderer', () => {
 
   it('renders nothing when the recently-accessed source is empty', () => {
     const { container } = render(
-      <RecentsFilterRenderer
-        service={buildSource([])}
-        query={Query.parse('')}
-        onChange={vi.fn()}
-      />
+      <RecentsFilterRenderer service={buildSource([])} query={Query.parse('')} onChange={vi.fn()} />
     );
     expect(container).toBeEmptyDOMElement();
   });

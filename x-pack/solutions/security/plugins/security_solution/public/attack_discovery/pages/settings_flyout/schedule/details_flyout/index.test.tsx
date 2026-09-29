@@ -27,21 +27,21 @@ vi.mock('../logic/use_update_schedule');
 vi.mock('../logic/use_get_schedule');
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('../utils/convert_form_data', () => {
-      const mocked = {
-      convertFormDataInBaseSchedule: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertFormDataInBaseSchedule: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConnectors: unknown[] = [
   {

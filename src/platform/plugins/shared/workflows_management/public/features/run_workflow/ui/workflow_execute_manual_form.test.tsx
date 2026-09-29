@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { render, screen } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json_model_schema';
 import { WorkflowExecuteManualForm } from './workflow_execute_manual_form';
@@ -19,58 +19,58 @@ import { INPUT_STRING_PLACEHOLDER } from '../../../../common/consts/placeholders
 
 // Mock CodeEditor
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: (props: any) => (
-        <textarea
-          data-test-subj={props.dataTestSubj || 'code-editor'}
-          value={props.value}
-          onChange={(e) => props.onChange?.(e.target.value)}
-          readOnly={props.options?.readOnly}
-          aria-label={props['aria-label']}
-        />
-      ),
-      monaco: {
-        languages: {
-          json: {
-            jsonDefaults: {
-              setDiagnosticsOptions: vi.fn(),
-            },
+  const mocked = {
+    CodeEditor: (props: any) => (
+      <textarea
+        data-test-subj={props.dataTestSubj || 'code-editor'}
+        value={props.value}
+        onChange={(e) => props.onChange?.(e.target.value)}
+        readOnly={props.options?.readOnly}
+        aria-label={props['aria-label']}
+      />
+    ),
+    monaco: {
+      languages: {
+        json: {
+          jsonDefaults: {
+            setDiagnosticsOptions: vi.fn(),
           },
         },
-        editor: {},
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      editor: {},
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock input validation callout
 vi.mock('./input_validation_callout', () => {
-      const mocked = {
-      InputValidationCallout: ({ errors }: { errors: string }) => (
-        <div data-test-subj="workflow-input-validation-callout">{errors}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InputValidationCallout: ({ errors }: { errors: string }) => (
+      <div data-test-subj="workflow-input-validation-callout">{errors}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock buildFieldsZodValidator
 vi.mock('@kbn/workflows/spec/lib/build_fields_zod_validator', () => {
-      const mocked = {
-      buildFieldsZodValidator: vi.fn(() => ({
-        safeParse: vi.fn(() => ({ success: true })),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildFieldsZodValidator: vi.fn(() => ({
+      safeParse: vi.fn(() => ({ success: true })),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock theme constant
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });

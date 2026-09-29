@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { usePager } from '@kbn/discover-utils';
 import { I18nProvider } from '@kbn/i18n-react';
 import { JSONDataTable } from './json_data_table';
@@ -25,63 +24,63 @@ const mockFieldName = vi.fn();
 const mockTableFieldValue = vi.fn();
 
 vi.mock('./field_name', () => {
-      const mocked = {
-      FieldName: (props: any) => {
-        mockFieldName(props);
-        return (
-          <div data-test-subj={`mocked-field-name-${props.fieldName}`}>
-            {`${props.fieldName} (${props.fieldType})`}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldName: (props: any) => {
+      mockFieldName(props);
+      return (
+        <div data-test-subj={`mocked-field-name-${props.fieldName}`}>
+          {`${props.fieldName} (${props.fieldType})`}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table_field_value', () => {
-      const mocked = {
-      TableFieldValue: (props: any) => {
-        mockTableFieldValue(props);
-        return <div data-test-subj={`mocked-field-value-${props.field}`}>{props.formattedValue}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableFieldValue: (props: any) => {
+      mockTableFieldValue(props);
+      return <div data-test-subj={`mocked-field-value-${props.field}`}>{props.formattedValue}</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useGetFormattedDateTime hook
 const mockGetFormattedDateTime = vi.fn((date: Date) => date.toISOString());
 
 vi.mock('../use_formatted_date', () => {
-      const mocked = {
-      useGetFormattedDateTime: () => mockGetFormattedDateTime,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFormattedDateTime: () => mockGetFormattedDateTime,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock usePager hook
 const mockChangePageIndex = vi.fn();
 const mockChangePageSize = vi.fn();
 
 vi.mock('@kbn/discover-utils', () => {
-      const mocked = {
-      usePager: vi.fn(() => ({
-        curPageIndex: 0,
-        pageSize: 20,
-        changePageIndex: mockChangePageIndex,
-        changePageSize: mockChangePageSize,
-      })),
-      IgnoredReason: {
-        IGNORE_ABOVE: 'ignore_above',
-        MALFORMED: 'malformed',
-        UNKNOWN: 'unknown',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePager: vi.fn(() => ({
+      curPageIndex: 0,
+      pageSize: 20,
+      changePageIndex: mockChangePageIndex,
+      changePageSize: mockChangePageSize,
+    })),
+    IgnoredReason: {
+      IGNORE_ABOVE: 'ignore_above',
+      MALFORMED: 'malformed',
+      UNKNOWN: 'unknown',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock @elastic/eui
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     copyToClipboard: vi.fn(),

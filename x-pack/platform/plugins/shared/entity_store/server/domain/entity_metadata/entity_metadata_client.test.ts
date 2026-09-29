@@ -16,7 +16,7 @@ import { runWithSpan } from '../../telemetry/traces';
 import { ensureMetadataDataStreamMappingsOnce } from '../asset_manager/ensure_metadata_mappings';
 
 vi.mock('../../telemetry/traces', async () => {
-  const actual = (await vi.importActual('../../telemetry/traces'));
+  const actual = await vi.importActual('../../telemetry/traces');
   return {
     ...actual,
     runWithSpan: vi.fn(actual.runWithSpan),
@@ -24,11 +24,11 @@ vi.mock('../../telemetry/traces', async () => {
 });
 
 vi.mock('../asset_manager/ensure_metadata_mappings', () => {
-      const mocked = {
-      ensureMetadataDataStreamMappingsOnce: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ensureMetadataDataStreamMappingsOnce: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): RelationshipMetadataDoc =>
   ({

@@ -18,8 +18,7 @@ describe('transform connector for export', () => {
     id: 'test',
     name: 'Test',
   });
-  const actionTypeRegistry: Mocked<ActionTypeRegistryContract> =
-    actionTypeRegistryMock.create();
+  const actionTypeRegistry: Mocked<ActionTypeRegistryContract> = actionTypeRegistryMock.create();
 
   const connectorsWithNoSecrets = [
     {

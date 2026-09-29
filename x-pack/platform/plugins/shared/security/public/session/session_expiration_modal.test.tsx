@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { I18nProvider } from '@kbn/i18n-react';
 

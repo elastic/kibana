@@ -23,38 +23,38 @@ const mockUseSearchItems = vi.fn();
 const mockUseGetTransform = vi.fn();
 
 vi.mock('../../hooks', () => {
-      const mocked = {
-      useGetTransform: (...args: unknown[]) => mockUseGetTransform(...args),
-      useTransformCapabilities: () => ({
-        canGetTransform: true,
-        canPreviewTransform: true,
-        canCreateTransform: true,
-        canStartStopTransform: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTransform: (...args: unknown[]) => mockUseGetTransform(...args),
+    useTransformCapabilities: () => ({
+      canGetTransform: true,
+      canPreviewTransform: true,
+      canCreateTransform: true,
+      canStartStopTransform: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_documentation_links', () => {
-      const mocked = {
-      useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_search_items', () => {
-      const mocked = {
-      useSearchItems: () => mockUseSearchItems(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchItems: () => mockUseSearchItems(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../create_transform/components/wizard', () => {
-      const mocked = {
-      Wizard: () => <div data-test-subj="mockedCloneWizard" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Wizard: () => <div data-test-subj="mockedCloneWizard" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderCloneSection = (search = '?dataViewId=test-data-view') => {
   const history = createMemoryHistory({ initialEntries: [`/clone/transform-1${search}`] });

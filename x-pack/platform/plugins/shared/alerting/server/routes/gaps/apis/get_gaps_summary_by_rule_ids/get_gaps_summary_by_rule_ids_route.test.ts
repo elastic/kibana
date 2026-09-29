@@ -18,11 +18,11 @@ import { gapFillStatus } from '../../../../../common';
 import { gapReasonType } from '../../../../../common/constants/gap_reason';
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rulesClient = rulesClientMock.create();
 

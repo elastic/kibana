@@ -18,15 +18,15 @@ const mockGenerateAmazonS3BucketObjectPresignedUrl = vi.fn();
 const mockDownloadAmazonS3BucketObject = vi.fn();
 
 vi.mock('./amazon_s3_api', () => {
-      const mocked = {
-      listAmazonS3Buckets: mockListAmazonS3Buckets,
-      listAmazonS3BucketObjects: mockListAmazonS3BucketObjects,
-      getAmazonS3BucketObjectMetadata: mockGetAmazonS3BucketObjectMetadata,
-      generateAmazonS3BucketObjectPresignedUrl: mockGenerateAmazonS3BucketObjectPresignedUrl,
-      downloadAmazonS3BucketObject: mockDownloadAmazonS3BucketObject,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    listAmazonS3Buckets: mockListAmazonS3Buckets,
+    listAmazonS3BucketObjects: mockListAmazonS3BucketObjects,
+    getAmazonS3BucketObjectMetadata: mockGetAmazonS3BucketObjectMetadata,
+    generateAmazonS3BucketObjectPresignedUrl: mockGenerateAmazonS3BucketObjectPresignedUrl,
+    downloadAmazonS3BucketObject: mockDownloadAmazonS3BucketObject,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Load the module under test after mocks are in place
 // eslint-disable-next-line @typescript-eslint/no-var-requires

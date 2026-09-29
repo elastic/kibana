@@ -20,80 +20,80 @@ import type { StartServices } from '../../types';
 import { noopCellActionRenderer } from '../../flyout_v2/shared/components/cell_actions';
 
 vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
-      const mocked = {
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOverviewTab = vi.fn((_: unknown) => <div>{'MockOverviewTab'}</div>);
 
 vi.mock('../../flyout_v2/document/main/tabs/overview_tab', () => {
-      const mocked = {
-      OverviewTab: (props: unknown) => mockOverviewTab(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewTab: (props: unknown) => mockOverviewTab(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
-      const mocked = {
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/components/discover_in_timeline/provider', () => {
-      const mocked = {
-      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases/components/provider/provider', () => {
-      const mocked = {
-      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../assistant/provider', () => {
-      const mocked = {
-      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => {
-      const mocked = {
-      MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInitDataViewManager = vi.fn();
 vi.mock('../../data_view_manager/hooks/use_init_data_view_manager', () => {
-      const mocked = {
-      useInitDataViewManager: () => mockUseInitDataViewManager(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInitDataViewManager: () => mockUseInitDataViewManager(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsExperimentalFeatureEnabled = vi.fn();
 vi.mock('../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: (feature: string) =>
-        mockUseIsExperimentalFeatureEnabled(feature),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: (feature: string) =>
+      mockUseIsExperimentalFeatureEnabled(feature),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsInSecurityApp = vi.fn();
 vi.mock('../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: () => mockUseIsInSecurityApp(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: () => mockUseIsInSecurityApp(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertFlyoutOverviewTab', () => {
   const onAlertUpdated = vi.fn();

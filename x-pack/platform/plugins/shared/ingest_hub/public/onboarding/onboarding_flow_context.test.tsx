@@ -12,13 +12,11 @@ import React from 'react';
 import { renderHook, act } from '@testing-library/react';
 
 vi.mock('./use_aws_service_matrix', () => {
-      const mocked = {
-      useAwsServiceMatrix: vi
-        .fn()
-        .mockReturnValue({ matrix: [], isError: false, refetch: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAwsServiceMatrix: vi.fn().mockReturnValue({ matrix: [], isError: false, refetch: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 

@@ -17,12 +17,12 @@ import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
 import { createVisPanelResolver } from './vis_panel_resolver';
 
 vi.mock('@kbn/agent-builder-visualizations-server', () => {
-      const mocked = {
-      buildLensConfig: vi.fn(),
-      buildVegaConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildLensConfig: vi.fn(),
+    buildVegaConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedBuildLensConfig = vi.mocked(buildLensConfig);
 const mockedBuildVegaConfig = vi.mocked(buildVegaConfig);

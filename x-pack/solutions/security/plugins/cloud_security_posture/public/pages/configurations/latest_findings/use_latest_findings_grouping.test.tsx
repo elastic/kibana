@@ -20,16 +20,16 @@ vi.mock('../../../components/cloud_security_grouping');
 vi.mock('../../../common/contexts/data_view_context');
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_get_benchmark_rules_state_api');
 vi.mock('@kbn/grouping', () => {
-      const mocked = {
-      getGroupingQuery: vi.fn().mockImplementation((params) => {
-        return {
-          query: { bool: {} },
-        };
-      }),
-      parseGroupingQuery: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getGroupingQuery: vi.fn().mockImplementation((params) => {
+      return {
+        query: { bool: {} },
+      };
+    }),
+    parseGroupingQuery: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_grouped_findings');
 
 describe('useLatestFindingsGrouping', () => {

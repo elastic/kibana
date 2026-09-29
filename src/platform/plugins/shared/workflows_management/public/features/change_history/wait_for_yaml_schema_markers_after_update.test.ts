@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { SchemasSettings } from 'monaco-yaml';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import type { SchemasSettings } from 'monaco-yaml';
 import { monaco } from '@kbn/code-editor';
 import { waitForPreviewYamlSchemaMarkers } from './wait_for_yaml_schema_markers_after_update';
 import {
@@ -20,15 +20,17 @@ import {
 } from './workflow_change_history_preview_constants';
 
 vi.mock('../../shared/ui/yaml_editor/yaml_language_service', () => {
-      const mocked = {
-      yamlLanguageService: {
-        update: vi.fn(() => Promise.resolve()),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    yamlLanguageService: {
+      update: vi.fn(() => Promise.resolve()),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { yamlLanguageService } = (await vi.importMock('../../shared/ui/yaml_editor/yaml_language_service')) as {
+const { yamlLanguageService } = (await vi.importMock(
+  '../../shared/ui/yaml_editor/yaml_language_service'
+)) as {
   yamlLanguageService: { update: Mock };
 };
 

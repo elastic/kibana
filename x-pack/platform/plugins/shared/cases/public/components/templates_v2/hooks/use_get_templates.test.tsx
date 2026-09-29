@@ -49,11 +49,9 @@ describe('useGetTemplates', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     apiMock.getTemplates.mockResolvedValue(mockTemplatesResponse);
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
   });
 
   it('fetches templates successfully', async () => {

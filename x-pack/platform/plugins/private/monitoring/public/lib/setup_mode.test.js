@@ -96,18 +96,18 @@ describe('setup_mode', () => {
 
       const addDanger = vi.fn();
       vi.doMock('../legacy_shims', () => {
-            const mocked = {
-                  Legacy: {
-                    shims: {
-                      toastNotifications: {
-                        addDanger,
-                      },
-                      I18nContext: '<div>',
-                    },
-                  },
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          Legacy: {
+            shims: {
+              toastNotifications: {
+                addDanger,
+              },
+              I18nContext: '<div>',
+            },
+          },
+        };
+        return { ...mocked, default: mocked };
+      });
 
       setModulesAndMocks();
       await initSetupModeState(globalState, httpServiceMock, handleErrorsMock, callbackMock);

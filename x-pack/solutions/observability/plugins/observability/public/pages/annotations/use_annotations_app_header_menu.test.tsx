@@ -20,9 +20,9 @@ const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
 onboardingLocator.useUrl.mockReturnValue(onboardingHref);
-vi
-  .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
-  .mockReturnValue(onboardingLocator);
+vi.spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get').mockReturnValue(
+  onboardingLocator
+);
 
 vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,

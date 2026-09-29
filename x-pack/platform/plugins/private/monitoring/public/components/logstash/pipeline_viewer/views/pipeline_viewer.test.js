@@ -12,11 +12,11 @@ import { PipelineViewer } from './pipeline_viewer';
 import { shallow } from 'enzyme';
 
 vi.mock('../../../sparkline', () => {
-      const mocked = {
-      Sparkline: () => 'Sparkline',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Sparkline: () => 'Sparkline',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PipelineViewer component', () => {
   let pipeline;

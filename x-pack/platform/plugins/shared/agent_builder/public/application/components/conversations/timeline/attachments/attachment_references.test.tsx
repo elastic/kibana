@@ -27,13 +27,13 @@ const render = (ui: React.ReactElement) => rtlRender(<EuiThemeProvider>{ui}</Eui
 
 const mockGetAttachmentUiDefinition = vi.fn();
 vi.mock('../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeVersioned = (
   id: string,

@@ -36,22 +36,22 @@ vi.mock('../../utils/discover_links/get_apm_traces_esql_link');
 
 let capturedOnBarClick: ((timeRange: TimeRange, eventType: SloEventType) => void) | undefined;
 vi.mock('./good_bad_events_chart', () => {
-      const mocked = {
-      GoodBadEventsChart: (props: {
-        onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
-      }) => {
-        capturedOnBarClick = props.onBarClick;
-        return <div />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GoodBadEventsChart: (props: {
+      onBarClick?: (timeRange: TimeRange, eventType: SloEventType) => void;
+    }) => {
+      capturedOnBarClick = props.onBarClick;
+      return <div />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./metric_timeslice_events_chart', () => {
-      const mocked = {
-      MetricTimesliceEventsChart: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricTimesliceEventsChart: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useFetchApmIndicesMock = useFetchApmIndices as Mock;

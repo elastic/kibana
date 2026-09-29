@@ -13,71 +13,71 @@ import { Plugin } from './plugin';
 import { PRIVATE_LOCATIONS_SYNC_TASK_ID } from './tasks/sync_private_locations_monitors_task';
 
 vi.mock('./synthetics_service/synthetics_service', () => {
-      const mocked = {
-      SyntheticsService: vi.fn().mockImplementation(() => ({
-        setup: vi.fn().mockResolvedValue(undefined),
-        start: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SyntheticsService: vi.fn().mockImplementation(() => ({
+      setup: vi.fn().mockResolvedValue(undefined),
+      start: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./synthetics_service/synthetics_monitor/synthetics_monitor_client', () => {
-      const mocked = {
-      SyntheticsMonitorClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SyntheticsMonitorClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./server', () => {
-      const mocked = {
-      initSyntheticsServer: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initSyntheticsServer: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./saved_objects/saved_objects', () => {
-      const mocked = {
-      registerSyntheticsSavedObjects: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerSyntheticsSavedObjects: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./telemetry/sender', () => {
-      const mocked = {
-      TelemetryEventsSender: vi.fn().mockImplementation(() => ({
-        setup: vi.fn(),
-        start: vi.fn().mockResolvedValue(undefined),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TelemetryEventsSender: vi.fn().mockImplementation(() => ({
+      setup: vi.fn(),
+      start: vi.fn().mockResolvedValue(undefined),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tasks/rebalance_private_location_shards_task', () => {
-      const mocked = {
-      RebalancePrivateLocationShardsTask: vi.fn().mockImplementation(() => ({
-        registerTaskDefinition: vi.fn(),
-        start: vi.fn().mockResolvedValue(undefined),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RebalancePrivateLocationShardsTask: vi.fn().mockImplementation(() => ({
+      registerTaskDefinition: vi.fn(),
+      start: vi.fn().mockResolvedValue(undefined),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tasks/sync_global_params_task', () => {
-      const mocked = {
-      SyncGlobalParamsPrivateLocationsTask: vi.fn().mockImplementation(() => ({
-        registerTaskDefinition: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SyncGlobalParamsPrivateLocationsTask: vi.fn().mockImplementation(() => ({
+      registerTaskDefinition: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_builder/register_data_provider', () => {
-      const mocked = {
-      registerDataProviders: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerDataProviders: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const flushStart = () => new Promise((resolve) => setImmediate(resolve));
 

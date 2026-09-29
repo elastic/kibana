@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowTriggersAndSteps } from './workflow_triggers_and_steps';
 import { getWorkflowNextExecutionTime } from '../../../lib/next_execution_time';
@@ -29,9 +28,7 @@ describe('WorkflowTriggersAndSteps', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.useFakeTimers({ legacyFakeTimers: true });
-    (getWorkflowNextExecutionTime as Mock).mockImplementation(
-      mockGetWorkflowNextExecutionTime
-    );
+    (getWorkflowNextExecutionTime as Mock).mockImplementation(mockGetWorkflowNextExecutionTime);
     (useGetFormattedDateTime as Mock).mockReturnValue(mockGetFormattedDateTime);
 
     global.ResizeObserver = vi.fn().mockImplementation(() => ({

@@ -15,18 +15,18 @@ vi.mock('../../services/job_service', () => 'mlJobService');
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = vi.fn(() => true);
 vi.mock('../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: (privilege) => mockCheckPermission(privilege),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: (privilege) => mockCheckPermission(privilege),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../contexts/kibana/use_create_url', () => {
-      const mocked = {
-      useCreateAndNavigateToManagementMlLink: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateAndNavigateToManagementMlLink: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';

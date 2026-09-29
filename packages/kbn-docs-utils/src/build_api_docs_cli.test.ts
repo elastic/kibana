@@ -37,40 +37,40 @@ vi.mock('elastic-apm-node', () => {
 });
 
 vi.mock('@kbn/apm-config-loader', () => {
-      const mocked = {
-      initApm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initApm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let registeredHandler: any;
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn((handler: any) => {
-        registeredHandler = handler;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn((handler: any) => {
+      registeredHandler = handler;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cli', () => {
-      const mocked = {
-      parseCliFlags: vi.fn(),
-      setupProject: vi.fn(),
-      buildApiMap: vi.fn(),
-      collectStats: vi.fn(),
-      reportMetrics: vi.fn(),
-      writeDocs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseCliFlags: vi.fn(),
+    setupProject: vi.fn(),
+    buildApiMap: vi.fn(),
+    collectStats: vi.fn(),
+    reportMetrics: vi.fn(),
+    writeDocs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./check_package_docs_cli', () => {
-      const mocked = {
-      runCheckPackageDocs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runCheckPackageDocs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTx = (apm as any).__tx;
 

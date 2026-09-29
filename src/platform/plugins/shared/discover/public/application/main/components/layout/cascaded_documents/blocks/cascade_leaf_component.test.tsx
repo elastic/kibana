@@ -38,12 +38,12 @@ import {
 import type { DiscoverServices } from '../../../../../../build_services';
 
 vi.mock('@kbn/unified-data-table', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/unified-data-table')),
-      UnifiedDataTable: vi.fn(() => <div data-test-subj="unifiedDataTableMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/unified-data-table')),
+    UnifiedDataTable: vi.fn(() => <div data-test-subj="unifiedDataTableMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const unifiedDataTableMock = vi.mocked(UnifiedDataTable);
 

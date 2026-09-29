@@ -17,13 +17,13 @@ import { AZURE_CREDENTIALS_TYPE } from '../constants';
 
 // Mock the utils function
 vi.mock('../utils', () => {
-      const mocked = {
-      getAzureCredentialsType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAzureCredentialsType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getAzureCredentialsType } = (await vi.importMock('../utils'));
+const { getAzureCredentialsType } = await vi.importMock('../utils');
 
 // Shared mock factories for Azure tests
 const createBaseMockInput = (): NewPackagePolicyInput => ({

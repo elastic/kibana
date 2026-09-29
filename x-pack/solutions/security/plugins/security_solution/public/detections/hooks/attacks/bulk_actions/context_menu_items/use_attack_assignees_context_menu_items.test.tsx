@@ -138,9 +138,7 @@ describe('useAttackAssigneesContextMenuItems', () => {
   });
 
   it('should pass correct props to panel renderContent', () => {
-    const mockRenderContent = vi.fn((props) =>
-      React.createElement('div', null, 'Assignees Panel')
-    );
+    const mockRenderContent = vi.fn((props) => React.createElement('div', null, 'Assignees Panel'));
     mockUseBulkAttackAssigneesItems.mockReturnValue({
       items: [],
       panels: [

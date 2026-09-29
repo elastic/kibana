@@ -53,9 +53,7 @@ describe('generateAllComputedFeatures', () => {
       logSamplesGenerator,
       logPatternsGenerator,
       errorLogsGenerator,
-    ].forEach((generator) =>
-      vi.spyOn(generator, 'generate').mockRejectedValue(new Error('boom'))
-    );
+    ].forEach((generator) => vi.spyOn(generator, 'generate').mockRejectedValue(new Error('boom')));
     vi.spyOn(codeAnalysisGenerator, 'generate').mockResolvedValue(undefined);
 
     await expect(generateAllComputedFeatures(options)).rejects.toThrow(

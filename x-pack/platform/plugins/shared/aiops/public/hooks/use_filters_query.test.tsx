@@ -23,22 +23,22 @@ vi.mock('./use_aiops_app_context');
 vi.mock('./use_reload');
 
 vi.mock('@kbn/ml-date-picker', () => {
-      const mocked = {
-      useTimeRangeUpdates: vi.fn(() => {
-        return { from: 'now-24h', to: 'now' };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRangeUpdates: vi.fn(() => {
+      return { from: 'now-24h', to: 'now' };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ml-date-picker', () => {
-      const mocked = {
-      useTimeRangeUpdates: vi.fn(() => {
-        return { from: 'now-24h', to: 'now' };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRangeUpdates: vi.fn(() => {
+      return { from: 'now-24h', to: 'now' };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFilterQueryUpdates', () => {
   beforeEach(() => {

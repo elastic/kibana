@@ -13,18 +13,18 @@ import type { AgentStat, LocationAgentStats } from '../../../../../../common/typ
 import { PolicyName } from './policy_name';
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_policy_details_flyout', () => {
-      const mocked = {
-      AgentPolicyDetailsFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentPolicyDetailsFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   host: 'agent-a',

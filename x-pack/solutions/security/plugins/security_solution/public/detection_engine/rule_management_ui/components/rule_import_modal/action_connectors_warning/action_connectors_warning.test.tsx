@@ -11,13 +11,13 @@ import { render } from '@testing-library/react';
 import { ActionConnectorWarnings } from '.';
 
 vi.mock('../../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: { http: { basePath: { prepend: vi.fn() } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: { http: { basePath: { prepend: vi.fn() } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('ActionConnectorWarnings', () => {
   test('should not render if importedActionConnectorsCount is falsy and empty warnings array', () => {
     const wrapper = render(

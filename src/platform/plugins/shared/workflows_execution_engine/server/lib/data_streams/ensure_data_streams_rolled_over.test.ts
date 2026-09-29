@@ -11,11 +11,11 @@ import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('./roll_data_stream_if_required', () => {
-      const mocked = {
-      rollDataStreamIfRequired: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    rollDataStreamIfRequired: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ensureWorkflowsDataStreamsRolledOver } from './ensure_data_streams_rolled_over';

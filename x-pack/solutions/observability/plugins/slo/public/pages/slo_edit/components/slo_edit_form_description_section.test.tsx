@@ -20,11 +20,11 @@ vi.mock('../hooks/use_fetch_suggestions');
 // The dashboards selector needs uiActions/embeddable wiring that is irrelevant to the
 // tags field under test; stub it out to keep the tags combo box the only combo box.
 vi.mock('@kbn/dashboards-selector', () => {
-      const mocked = {
-      DashboardsSelector: () => <div data-test-subj="dashboardsSelectorMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardsSelector: () => <div data-test-subj="dashboardsSelectorMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useFetchSLOSuggestionsMock = useFetchSLOSuggestions as Mock;
 

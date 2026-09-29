@@ -53,14 +53,14 @@ vi.mock('../../templates_v2/components/template_yaml_editor', () => {
 
 const mockActionsMenu = vi.fn();
 vi.mock('../../templates_v2/components/template_actions_menu', () => {
-      const mocked = {
-      TemplateActionsMenu: (props: Record<string, unknown>) => {
-        mockActionsMenu(props);
-        return <div data-test-subj="mockActionsMenu" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateActionsMenu: (props: Record<string, unknown>) => {
+      mockActionsMenu(props);
+      return <div data-test-subj="mockActionsMenu" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { FieldDefinitionYamlEditor } from './field_definition_yaml_editor';
 

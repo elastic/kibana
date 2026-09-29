@@ -14,18 +14,18 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import { createImageAction } from './create_image_action';
 
 vi.mock('@kbn/presentation-util', () => {
-      const mocked = {
-      openLazyFlyout: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openLazyFlyout: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services/kibana_services', () => {
-      const mocked = {
-      coreServices: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    coreServices: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createImageAction', () => {
   it('returns focus to Add when the image editor closes', async () => {

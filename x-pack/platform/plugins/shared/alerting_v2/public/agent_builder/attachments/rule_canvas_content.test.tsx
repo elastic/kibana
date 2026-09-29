@@ -19,52 +19,52 @@ const mockAddSuccess = vi.fn();
 const mockPrepend = (path: string) => `/base${path}`;
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return { navigateToUrl: mockNavigateToUrl };
-        }
-        if (token === 'http') {
-          return { basePath: { prepend: mockPrepend } };
-        }
-        if (token === 'notifications') {
-          return { toasts: { addSuccess: mockAddSuccess } };
-        }
-        return { upsertRule: mockUpsertRule };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return { navigateToUrl: mockNavigateToUrl };
+      }
+      if (token === 'http') {
+        return { basePath: { prepend: mockPrepend } };
+      }
+      if (token === 'notifications') {
+        return { toasts: { addSuccess: mockAddSuccess } };
+      }
+      return { upsertRule: mockUpsertRule };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/rule_details/rule_context', () => {
-      const mocked = {
-      RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/rule_details/rule_summary_header', () => {
-      const mocked = {
-      RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
-      RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleHeaderDescription: () => <div data-test-subj="mockRuleHeaderDescription" />,
+    RuleTagsList: () => <div data-test-subj="mockRuleTagsList" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/rule_details/sidebar/rule_sidebar', () => {
-      const mocked = {
-      RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSidebar: () => <div data-test-subj="mockRuleSidebar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/rules_api', () => {
-      const mocked = {
-      RulesApi: Symbol('RulesApi'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesApi: Symbol('RulesApi'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAttachment = (
   overrides: { origin?: string; enabled?: boolean; dataId?: string } = {}

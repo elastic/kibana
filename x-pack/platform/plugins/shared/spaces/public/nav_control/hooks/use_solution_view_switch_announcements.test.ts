@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act, renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import type { Capabilities } from '@kbn/core/public';
 import { asSpaceId } from '@kbn/core-spaces-common';

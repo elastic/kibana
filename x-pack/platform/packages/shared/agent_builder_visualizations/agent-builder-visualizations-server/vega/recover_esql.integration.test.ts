@@ -17,34 +17,34 @@ import { buildVegaConfig } from './build_config';
 
 // Stub only the LLM/ES boundaries; the real build_config + real graph run.
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-      executeEsql: vi.fn(),
-      validateEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+    executeEsql: vi.fn(),
+    validateEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
-      const mocked = {
-      buildTimeRangeParams: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildTimeRangeParams: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-server-utils', () => {
-      const mocked = {
-      buildServerESQLCallbacks: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildServerESQLCallbacks: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/extract_text_from_message', () => {
-      const mocked = {
-      extractTextFromMessage: (message: unknown) => String(message),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractTextFromMessage: (message: unknown) => String(message),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGenerateEsql = vi.mocked(generateEsql);
 const mockedExecuteEsql = vi.mocked(executeEsql);

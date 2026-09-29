@@ -922,6 +922,17 @@ module.exports = {
     },
 
     /**
+     * Vitest unit tests load the actual (unmocked) npm module with Node's `require()`, the
+     * synchronous replacement for `jest.requireActual()`.
+     */
+    {
+      files: ['**/*.test.{js,ts,tsx}', '**/*.test.mocks.{js,ts,tsx}'],
+      rules: {
+        '@typescript-eslint/no-var-requires': 'off',
+      },
+    },
+
+    /**
      * Single package.json rules, it tells eslint to ignore the child package.json files
      * and look for dependencies declarations in the single and root level package.json
      */

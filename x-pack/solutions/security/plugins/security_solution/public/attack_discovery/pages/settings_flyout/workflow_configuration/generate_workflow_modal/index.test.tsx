@@ -21,19 +21,19 @@ import {
 } from './translations';
 
 vi.mock('../../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      ConnectorSelectorInline: () => <div data-test-subj="connectorSelectorInline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    ConnectorSelectorInline: () => <div data-test-subj="connectorSelectorInline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   connectorId: 'test-connector-id',

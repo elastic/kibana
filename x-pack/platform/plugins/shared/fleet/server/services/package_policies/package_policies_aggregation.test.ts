@@ -15,11 +15,11 @@ import { getPackagePoliciesCountByPackageName } from './package_policies_aggrega
 const MOCKED_SO_TYPE = 'ingest-package-policies';
 
 vi.mock('../package_policy', () => {
-      const mocked = {
-      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('ingest-package-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('ingest-package-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getPackagePoliciesCountByPackageName', () => {
   it('uses NOT latest_revision:false filter so policies without the field are included', async () => {

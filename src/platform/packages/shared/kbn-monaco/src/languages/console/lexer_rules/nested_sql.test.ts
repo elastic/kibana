@@ -20,7 +20,7 @@ const getNextState = (
 };
 
 vi.mock('../../sql/lexer_rules', async () => {
-  const actual = (await vi.importActual('../../sql/lexer_rules'));
+  const actual = await vi.importActual('../../sql/lexer_rules');
   return {
     ...actual,
     lexerRules: {
@@ -107,7 +107,7 @@ describe('Console nested SQL lexer rules', () => {
     it('handles missing string and strings arrays gracefully', () => {
       vi.resetModules();
       vi.doMock('../../sql/lexer_rules', async () => {
-        const actual = (await vi.importActual('../../sql/lexer_rules'));
+        const actual = await vi.importActual('../../sql/lexer_rules');
         return {
           ...actual,
           lexerRules: {

@@ -24,39 +24,39 @@ const mockAddSuccess = vi.fn();
 const mockReportSetupMacrosQueryCopied = vi.fn();
 
 vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            dashboards: {
-              api: {},
-              telemetry: {
-                reportSetupMacrosQueryCopied: mockReportSetupMacrosQueryCopied,
-              },
-            },
-          },
-          notifications: {
-            toasts: {
-              addError: mockAddError,
-              addSuccess: mockAddSuccess,
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          dashboards: {
+            api: {},
+            telemetry: {
+              reportSetupMacrosQueryCopied: mockReportSetupMacrosQueryCopied,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: {
+          toasts: {
+            addError: mockAddError,
+            addSuccess: mockAddSuccess,
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../common/hooks/use_app_toasts');
 vi.mock('../../../../../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: () => ({
-          splunkV2DashboardsEnabled: false,
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: () => ({
+        splunkV2DashboardsEnabled: false,
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MacrosDataInput', () => {
   let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;

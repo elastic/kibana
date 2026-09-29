@@ -32,14 +32,14 @@ expect.addSnapshotSerializer(
 );
 
 vi.mock('./build', () => {
-      const mocked = {
-      Build: vi.fn().mockImplementation(() => ({
-        getBufferLogs: vi.fn().mockReturnValue(true),
-        getBuildDesc: vi.fn().mockReturnValue('test-build'),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Build: vi.fn().mockImplementation(() => ({
+      getBufferLogs: vi.fn().mockReturnValue(true),
+      getBuildDesc: vi.fn().mockReturnValue('test-build'),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const config = getMockConfig();
 

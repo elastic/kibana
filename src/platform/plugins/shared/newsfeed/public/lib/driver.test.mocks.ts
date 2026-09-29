@@ -11,8 +11,8 @@ import { vi } from 'vitest';
 
 export const convertItemsMock = vi.fn();
 vi.doMock('./convert_items', () => {
-      const mocked = {
-      convertItems: convertItemsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertItems: convertItemsMock,
+  };
+  return { ...mocked, default: mocked };
+});

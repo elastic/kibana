@@ -51,12 +51,12 @@ import {
 vi.mock(
   '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy',
   () => {
-      const mocked = {
-        indexFleetEndpointPolicy: vi.fn(),
-        deleteIndexedFleetEndpointPolicies: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      indexFleetEndpointPolicy: vi.fn(),
+      deleteIndexedFleetEndpointPolicies: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const createLog = (): Mocked<ToolingLog> =>
@@ -444,8 +444,7 @@ describe('policy management package policy fixtures', () => {
     });
 
     it('deletes every captured resource when the second side fails after the first indexed', async () => {
-      vi
-        .mocked(indexFleetEndpointPolicy)
+      vi.mocked(indexFleetEndpointPolicy)
         .mockResolvedValueOnce(preventIndexed)
         .mockRejectedValueOnce(new Error('detect index failed'));
 

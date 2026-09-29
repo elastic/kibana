@@ -28,12 +28,10 @@ describe('SingleDocRoute', () => {
     let capturedToolkit: ContextAwarenessToolkit | undefined;
 
     services.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
-    vi
-      .spyOn(services.profilesManager, 'createScopedProfilesManager')
-      .mockImplementation((args) => {
-        capturedToolkit = args.toolkit;
-        return originalCreateScopedProfilesManager(args);
-      });
+    vi.spyOn(services.profilesManager, 'createScopedProfilesManager').mockImplementation((args) => {
+      capturedToolkit = args.toolkit;
+      return originalCreateScopedProfilesManager(args);
+    });
 
     render(
       <DiscoverTestProvider services={services}>

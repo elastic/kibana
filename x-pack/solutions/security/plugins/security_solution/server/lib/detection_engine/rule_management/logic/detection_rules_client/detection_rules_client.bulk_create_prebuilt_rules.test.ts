@@ -30,24 +30,24 @@ import { getMockRulesAuthz } from '../../__mocks__/authz';
 import { convertRuleResponseToAlertingRule } from './converters/convert_rule_response_to_alerting_rule';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      ...require('uuid'),
-      v4: vi.fn(() => require('uuid').v4()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('uuid'),
+    v4: vi.fn(() => require('uuid').v4()),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../machine_learning/authz');
 vi.mock('../../../../machine_learning/validation');
 vi.mock('./converters/convert_rule_response_to_alerting_rule', async () => {
-      const mocked = {
-      ...(await vi.importActual('./converters/convert_rule_response_to_alerting_rule')),
-      convertRuleResponseToAlertingRule: vi.fn(
-        (await vi.importActual('./converters/convert_rule_response_to_alerting_rule'))
-          .convertRuleResponseToAlertingRule
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./converters/convert_rule_response_to_alerting_rule')),
+    convertRuleResponseToAlertingRule: vi.fn(
+      (await vi.importActual('./converters/convert_rule_response_to_alerting_rule'))
+        .convertRuleResponseToAlertingRule
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // bulkCreatePrebuiltRules always supplies options.id (see methods/bulk_create_prebuilt_rules.ts),
 // even though the alerting plugin's public types mark it optional.
@@ -377,7 +377,8 @@ describe('DetectionRulesClient.bulkCreatePrebuiltRules', () => {
     const goodRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'good-rule' };
     const badRule = { ...getCreateRulesSchemaMock(), version: 1, rule_id: 'bad-rule' };
 
-    const realImpl = (await vi.importActual('./converters/convert_rule_response_to_alerting_rule')).convertRuleResponseToAlertingRule;
+    const realImpl = (await vi.importActual('./converters/convert_rule_response_to_alerting_rule'))
+      .convertRuleResponseToAlertingRule;
     let callCount = 0;
     (convertRuleResponseToAlertingRule as Mock).mockImplementation((...args: unknown[]) => {
       callCount++;

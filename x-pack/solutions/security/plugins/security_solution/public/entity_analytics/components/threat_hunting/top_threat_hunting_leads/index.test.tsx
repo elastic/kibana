@@ -17,45 +17,45 @@ import type { HuntingLead, Observation } from './types';
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: vi.fn(() => '/app/management/ai/genAiSettings'),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: vi.fn(() => '/app/management/ai/genAiSettings'),
         },
-      }),
-      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      useTimeZone: vi.fn(() => 'UTC'),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+    useTimeZone: vi.fn(() => 'UTC'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenFlyout = vi.fn();
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({
-        openFlyout: mockOpenFlyout,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({
+      openFlyout: mockOpenFlyout,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: () => ({
-        openEntityFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: () => ({
+      openEntityFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockObservation = (overrides: Partial<Observation> = {}): Observation => ({
   entityId: 'entity-1',

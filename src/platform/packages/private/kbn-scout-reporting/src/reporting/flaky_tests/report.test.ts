@@ -250,15 +250,13 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('drops tests of an excluded classification before the per-test lookups', async () => {
-    vi
-      .spyOn(queries, 'fetchFailingFiles')
-      .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
-    vi
-      .spyOn(queries, 'fetchTestStats')
-      .mockResolvedValue([
-        statsRow({ testId: 'jest-flaky', failedBuilds: 3 }),
-        statsRow({ testId: 'jest-broken', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
-      ]);
+    vi.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
+      { framework: 'jest', filePath: 'a.test.ts' },
+    ]);
+    vi.spyOn(queries, 'fetchTestStats').mockResolvedValue([
+      statsRow({ testId: 'jest-flaky', failedBuilds: 3 }),
+      statsRow({ testId: 'jest-broken', runs: 20, fails: 20, builds: 20, failedBuilds: 20 }),
+    ]);
     const fetchBranchCounts = vi
       .spyOn(queries, 'fetchBranchCounts')
       .mockResolvedValue(activeCounts(['jest-flaky']));
@@ -625,12 +623,12 @@ describe('ScoutFlakyTests.fromElasticsearch', () => {
   });
 
   it('skips the remaining lookups once no test qualifies on a branch of its own', async () => {
-    vi
-      .spyOn(queries, 'fetchFailingFiles')
-      .mockResolvedValue([{ framework: 'jest', filePath: 'a.test.ts' }]);
-    vi
-      .spyOn(queries, 'fetchTestStats')
-      .mockResolvedValue([statsRow({ testId: 'skipped-since', failedBuilds: 30 })]);
+    vi.spyOn(queries, 'fetchFailingFiles').mockResolvedValue([
+      { framework: 'jest', filePath: 'a.test.ts' },
+    ]);
+    vi.spyOn(queries, 'fetchTestStats').mockResolvedValue([
+      statsRow({ testId: 'skipped-since', failedBuilds: 30 }),
+    ]);
     vi.spyOn(queries, 'fetchBranchCounts').mockResolvedValue(new Map());
     const fetchTestMetadata = vi.spyOn(queries, 'fetchTestMetadata');
     const fetchBranchStats = vi.spyOn(queries, 'fetchBranchStats');

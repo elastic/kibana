@@ -27,98 +27,98 @@ const mockTrackUiMetric = vi.fn();
 const mockWelcomeOnRendered = vi.fn();
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        getBasePath: () => 'path',
-        tutorialVariables: () => ({}),
-        homeConfig: { disableWelcomeScreen: false },
-        chrome: {
-          setBreadcrumbs: mockSetBreadcrumbs,
-        },
-        application: {
-          navigateToUrl: mockNavigateToUrl,
-          navigateToApp: vi.fn(),
-          capabilities: {
-            navLinks: {
-              integrations: mockHasIntegrationsPermission,
-            },
+  const mocked = {
+    getServices: () => ({
+      getBasePath: () => 'path',
+      tutorialVariables: () => ({}),
+      homeConfig: { disableWelcomeScreen: false },
+      chrome: {
+        setBreadcrumbs: mockSetBreadcrumbs,
+      },
+      application: {
+        navigateToUrl: mockNavigateToUrl,
+        navigateToApp: vi.fn(),
+        capabilities: {
+          navLinks: {
+            integrations: mockHasIntegrationsPermission,
           },
         },
-        trackUiMetric: mockTrackUiMetric,
-        welcomeService: {
-          onRendered: mockWelcomeOnRendered,
-          renderTelemetryNotice: () => null,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      trackUiMetric: mockTrackUiMetric,
+      welcomeService: {
+        onRendered: mockWelcomeOnRendered,
+        renderTelemetryNotice: () => null,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      OverviewPageFooter: () => <div data-test-subj="overviewPageFooter" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewPageFooter: () => <div data-test-subj="overviewPageFooter" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-page-kibana-template', () => {
-      const mocked = {
-      KibanaPageTemplate: ({
-        children,
-        ...rest
-      }: {
-        children?: React.ReactNode;
-        'data-test-subj'?: string;
-      }) => <div data-test-subj={rest['data-test-subj']}>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaPageTemplate: ({
+      children,
+      ...rest
+    }: {
+      children?: React.ReactNode;
+      'data-test-subj'?: string;
+    }) => <div data-test-subj={rest['data-test-subj']}>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./add_data', () => {
-      const mocked = {
-      AddData: () => <div data-test-subj="addData" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddData: () => <div data-test-subj="addData" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./manage_data', () => {
-      const mocked = {
-      ManageData: ({ features }: { features: Array<{ id: string }> }) => (
-        <div data-test-subj="manageData">
-          {features.map((feature) => (
-            <div key={feature.id} data-test-subj={`manage-feature-${feature.id}`} />
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ManageData: ({ features }: { features: Array<{ id: string }> }) => (
+      <div data-test-subj="manageData">
+        {features.map((feature) => (
+          <div key={feature.id} data-test-subj={`manage-feature-${feature.id}`} />
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./solutions_section', () => {
-      const mocked = {
-      SolutionsSection: ({ solutions }: { solutions: Array<{ id: string; title: string }> }) => (
-        <div data-test-subj="solutionsSection">
-          {solutions.map((solution) => (
-            <div key={solution.id} data-test-subj={`solution-${solution.id}`}>
-              {solution.title}
-            </div>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SolutionsSection: ({ solutions }: { solutions: Array<{ id: string; title: string }> }) => (
+      <div data-test-subj="solutionsSection">
+        {solutions.map((solution) => (
+          <div key={solution.id} data-test-subj={`solution-${solution.id}`}>
+            {solution.title}
+          </div>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sample_data', () => {
-      const mocked = {
-      SampleDataCard: ({ onDecline }: { onDecline: () => void }) => (
-        <button type="button" data-test-subj="skipWelcomeScreen" onClick={onDecline}>
-          Explore on my own
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SampleDataCard: ({ onDecline }: { onDecline: () => void }) => (
+      <button type="button" data-test-subj="skipWelcomeScreen" onClick={onDecline}>
+        Explore on my own
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createSolution = (
   overrides: Partial<FeatureCatalogueSolution> & Pick<FeatureCatalogueSolution, 'id' | 'title'>

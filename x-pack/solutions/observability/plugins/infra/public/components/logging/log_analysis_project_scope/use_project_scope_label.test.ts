@@ -60,9 +60,7 @@ describe('useProjectScopeLabel', () => {
   it('counts an origin-only scope like any other', async () => {
     const cpsManager = createCpsManager({
       totalProjectCount: 3,
-      fetchProjects: vi
-        .fn()
-        .mockResolvedValue({ origin: asProject('origin'), linkedProjects: [] }),
+      fetchProjects: vi.fn().mockResolvedValue({ origin: asProject('origin'), linkedProjects: [] }),
     });
 
     const { result } = renderProjectScopeLabel(cpsManager, PROJECT_ROUTING.ORIGIN);

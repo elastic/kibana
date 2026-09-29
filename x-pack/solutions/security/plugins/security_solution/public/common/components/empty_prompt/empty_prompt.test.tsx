@@ -19,11 +19,11 @@ const mockNavigateTo = vi.fn();
 const mockUseNavigateTo = useNavigateTo as Mock;
 
 vi.mock('../../lib/kibana', () => {
-      const mocked = {
-      useNavigateTo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateTo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EmptyPromptComponent component', () => {
   beforeEach(() => {

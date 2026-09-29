@@ -13,45 +13,45 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { getLogAiInsights, type GetLogAiInsightsParams } from './get_log_ai_insights';
 
 vi.mock('./get_log_document_by_id', () => {
-      const mocked = {
-      getLogDocumentById: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLogDocumentById: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../tools/get_traces/handler', () => {
-      const mocked = {
-      getToolHandler: vi.fn().mockResolvedValue({ traces: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getToolHandler: vi.fn().mockResolvedValue({ traces: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/warning_and_above_log_filter', () => {
-      const mocked = {
-      isWarningOrAbove: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isWarningOrAbove: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/get_entity_linking_instructions', () => {
-      const mocked = {
-      getEntityLinkingInstructions: vi.fn().mockReturnValue(''),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEntityLinkingInstructions: vi.fn().mockReturnValue(''),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./types', () => {
-      const mocked = {
-      createAiInsightResult: vi.fn((context: string, _connector: unknown, events$: unknown) => ({
-        context,
-        events$,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createAiInsightResult: vi.fn((context: string, _connector: unknown, events$: unknown) => ({
+      context,
+      events$,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getLogDocumentById } = (await vi.importMock('./get_log_document_by_id'));
-const { getToolHandler: getTraces } = (await vi.importMock('../../tools/get_traces/handler'));
+const { getLogDocumentById } = await vi.importMock('./get_log_document_by_id');
+const { getToolHandler: getTraces } = await vi.importMock('../../tools/get_traces/handler');
 
 const mockLogger = { debug: vi.fn(), error: vi.fn() } as unknown as Logger;
 

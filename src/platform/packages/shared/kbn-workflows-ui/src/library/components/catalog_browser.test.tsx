@@ -7,36 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { Template } from '@kbn/workflows-library';
 import { CatalogBrowser } from './catalog_browser';
 import { useActiveSolution } from '../hooks/use_active_solution';
 import { useCatalog } from '../hooks/use_catalog';
 
 vi.mock('@kbn/connector-specs/icons', () => {
-      const mocked = {
-      ConnectorIconsMap: new Map(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorIconsMap: new Map(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../context/workflows_ui_services');
 
 vi.mock('../hooks/use_catalog', () => {
-      const mocked = {
-      useCatalog: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCatalog: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_active_solution', () => {
-      const mocked = {
-      useActiveSolution: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useActiveSolution: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderBrowser = (onSelect = vi.fn()) => render(<CatalogBrowser onSelect={onSelect} />);
 

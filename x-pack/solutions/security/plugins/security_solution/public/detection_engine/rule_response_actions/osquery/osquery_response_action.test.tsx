@@ -27,46 +27,46 @@ const mockCapabilities = {
 };
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          osquery: {
-            fetchInstallationStatus: mockFetchInstallationStatus,
-            LiveQueryField: vi.fn(() => null),
-          },
-          application: {
-            capabilities: mockCapabilities,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        osquery: {
+          fetchInstallationStatus: mockFetchInstallationStatus,
+          LiveQueryField: vi.fn(() => null),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          capabilities: mockCapabilities,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useIsMounted to always return true
 vi.mock('@kbn/securitysolution-hook-utils', () => {
-      const mocked = {
-      useIsMounted: () => () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsMounted: () => () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock shared_imports to avoid form context dependency
 vi.mock('../../../shared_imports', () => {
-      const mocked = {
-      UseField: ({ component: Component }: { component: React.ComponentType }) =>
-        Component ? <Component /> : null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UseField: ({ component: Component }: { component: React.ComponentType }) =>
+      Component ? <Component /> : null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the form field to avoid deep osquery plugin dependencies
 vi.mock('./osquery_response_action_form_field', () => {
-      const mocked = {
-      ResponseActionFormField: () => <div data-test-subj="osquery-response-action-form" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponseActionFormField: () => <div data-test-subj="osquery-response-action-form" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useUpsellingComponentSpy = vi.spyOn(useUpsellingModule, 'useUpsellingComponent');
 

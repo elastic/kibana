@@ -18,17 +18,17 @@ import {
 } from '../../../../common/lib';
 
 vi.mock('../../../../common/lib', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/lib')),
-      deserializeComponentTemplate: vi.fn(
-        (await vi.importActual('../../../../common/lib')).deserializeComponentTemplate
-      ),
-      deserializeComponentTemplateList: vi.fn(
-        (await vi.importActual('../../../../common/lib')).deserializeComponentTemplateList
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/lib')),
+    deserializeComponentTemplate: vi.fn(
+      (await vi.importActual('../../../../common/lib')).deserializeComponentTemplate
+    ),
+    deserializeComponentTemplateList: vi.fn(
+      (await vi.importActual('../../../../common/lib')).deserializeComponentTemplateList
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const router = new RouterMock();
 const getComponentTemplate = router.getMockESApiFn('cluster.getComponentTemplate');
@@ -44,7 +44,7 @@ beforeEach(async () => {
     router,
   });
 
-  const actualLib = (await vi.importActual('../../../../common/lib'));
+  const actualLib = await vi.importActual('../../../../common/lib');
   deserializeComponentTemplateMock.mockImplementation(actualLib.deserializeComponentTemplate);
   deserializeComponentTemplateListMock.mockImplementation(
     actualLib.deserializeComponentTemplateList

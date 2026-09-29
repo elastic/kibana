@@ -19,12 +19,12 @@ import type { SimulationActorSnapshot } from './state_management/simulation_stat
 
 // Mock the EUI functions
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      copyToClipboard: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    copyToClipboard: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('dev_console_helpers', () => {
   // Suppress console logs during tests

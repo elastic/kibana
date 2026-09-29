@@ -24,24 +24,24 @@ import {
 } from './handler';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
-        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-      },
-      agentPolicyService: {
-        bumpAllAgentPoliciesForFleetServerHosts: vi.fn().mockResolvedValue({}),
-      },
-      fleetServerHostService: {
-        list: vi.fn(),
-        get: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn().mockResolvedValue({}),
-        delete: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+      getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
+    },
+    agentPolicyService: {
+      bumpAllAgentPoliciesForFleetServerHosts: vi.fn().mockResolvedValue({}),
+    },
+    fleetServerHostService: {
+      list: vi.fn(),
+      get: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn().mockResolvedValue({}),
+      delete: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

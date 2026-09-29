@@ -35,9 +35,12 @@ describe('Ping Timestamp component', () => {
   it.each([[FETCH_STATUS.PENDING], [FETCH_STATUS.LOADING]])(
     'displays spinner when loading step image',
     (fetchStatus) => {
-      vi
-        .spyOn(observabilitySharedPublic, 'useFetcher')
-        .mockReturnValue({ status: fetchStatus, data: null, refetch: () => null, loading: true });
+      vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+        status: fetchStatus,
+        data: null,
+        refetch: () => null,
+        loading: true,
+      });
       const { getByTestId } = render(
         <PingTimestamp checkGroup={checkGroup} label={getShortTimeStamp(moment(timestamp))} />
       );
@@ -46,9 +49,11 @@ describe('Ping Timestamp component', () => {
   );
 
   it('displays no image available when img src is unavailable and fetch status is successful', () => {
-    vi
-      .spyOn(observabilitySharedPublic, 'useFetcher')
-      .mockReturnValue({ status: FETCH_STATUS.SUCCESS, data: null, refetch: () => null });
+    vi.spyOn(observabilitySharedPublic, 'useFetcher').mockReturnValue({
+      status: FETCH_STATUS.SUCCESS,
+      data: null,
+      refetch: () => null,
+    });
     const { getByTestId } = render(
       <PingTimestamp
         checkGroup={checkGroup}

@@ -22,22 +22,22 @@ const mockDigest = vi.fn();
 
 vi.mock('fs');
 vi.mock('fs/promises', () => {
-      const mocked = {
-      mkdir: vi.fn().mockResolvedValue(undefined),
-      readdir: vi.fn().mockResolvedValue([]),
-      stat: vi.fn(),
-      unlink: vi.fn().mockResolvedValue(undefined),
-      writeFile: vi.fn().mockResolvedValue(undefined),
-      readFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mkdir: vi.fn().mockResolvedValue(undefined),
+    readdir: vi.fn().mockResolvedValue([]),
+    stat: vi.fn(),
+    unlink: vi.fn().mockResolvedValue(undefined),
+    writeFile: vi.fn().mockResolvedValue(undefined),
+    readFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('stream/promises', () => {
-      const mocked = {
-      finished: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    finished: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('stream', () => {
   const actual = require('stream');
   return {
@@ -51,25 +51,25 @@ vi.mock('stream', () => {
   };
 });
 vi.mock('crypto', () => {
-      const mocked = {
-      createHash: vi.fn(() => ({
-        digest: mockDigest,
-        update: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createHash: vi.fn(() => ({
+      digest: mockDigest,
+      update: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/endpoint/data_loaders/utils', () => {
-      const mocked = {
-      createToolingLogger: vi.fn(() => ({
-        debug: vi.fn(),
-        info: vi.fn(),
-        warning: vi.fn(),
-        error: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createToolingLogger: vi.fn(() => ({
+      debug: vi.fn(),
+      info: vi.fn(),
+      warning: vi.fn(),
+      error: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const settingsJson = JSON.stringify({
   lastCleanup: new Date(0).toISOString(),
@@ -366,7 +366,7 @@ describe('AgentDownloadStorage', () => {
 
   describe('cleanupDownloads', () => {
     it('deletes sidecar file alongside expired tarball', async () => {
-      const { readdir, stat } = (await vi.importMock('fs/promises'));
+      const { readdir, stat } = await vi.importMock('fs/promises');
       const oldDate = new Date(Date.now() - 1.728e8 - 1000); // older than maxFileAge
 
       // Settings with old lastCleanup to trigger cleanup
@@ -386,9 +386,7 @@ describe('AgentDownloadStorage', () => {
       expect(result.deleted.length).toBe(1);
       expect(result.deleted[0]).toContain(fileName);
       // Should have also attempted to delete the sidecar
-      const unlinkCalls = (unlink as unknown as Mock).mock.calls.map(
-        (call: string[]) => call[0]
-      );
+      const unlinkCalls = (unlink as unknown as Mock).mock.calls.map((call: string[]) => call[0]);
       expect(unlinkCalls.some((path: string) => path.endsWith('.sha512'))).toBe(true);
     });
   });

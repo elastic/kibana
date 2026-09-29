@@ -21,13 +21,13 @@ const mockGetLabel = vi.fn();
 const mockGetLabelForPercentile = vi.fn();
 
 vi.mock('../utils', () => {
-      const mocked = {
-      getFieldNameFromField: vi.fn(() => mockGetFieldNameFromField()),
-      getLabel: vi.fn(() => mockGetLabel()),
-      getLabelForPercentile: vi.fn(() => mockGetLabelForPercentile()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFieldNameFromField: vi.fn(() => mockGetFieldNameFromField()),
+    getLabel: vi.fn(() => mockGetLabel()),
+    getLabelForPercentile: vi.fn(() => mockGetLabelForPercentile()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToPercentileRankColumn', () => {
   const visType = 'heatmap';

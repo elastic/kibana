@@ -17,20 +17,20 @@ import { CasesByStatus } from './cases_by_status';
 vi.mock('../../../../common/components/link_to');
 vi.mock('../../../../common/containers/query_toggle');
 vi.mock('./use_cases_by_status', () => {
-      const mocked = {
-      useCasesByStatus: vi.fn().mockReturnValue({
-        closed: 1,
-        inProgress: 2,
-        isLoading: false,
-        open: 3,
-        totalCounts: 6,
-        updatedAt: new Date('2022-04-08T12:00:00.000Z').valueOf(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesByStatus: vi.fn().mockReturnValue({
+      closed: 1,
+      inProgress: 2,
+      isLoading: false,
+      open: 3,
+      totalCounts: 6,
+      updatedAt: new Date('2022-04-08T12:00:00.000Z').valueOf(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useNavigation: vi.fn().mockReturnValue({
@@ -40,11 +40,11 @@ vi.mock('../../../../common/lib/kibana', async () => {
   };
 });
 vi.mock('../../../../common/components/charts/barchart', () => {
-      const mocked = {
-      BarChart: vi.fn((props: BarChartComponentProps) => <div data-test-subj="barChart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BarChart: vi.fn((props: BarChartComponentProps) => <div data-test-subj="barChart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetToggle = vi.fn();
 (useQueryToggle as Mock).mockReturnValue({

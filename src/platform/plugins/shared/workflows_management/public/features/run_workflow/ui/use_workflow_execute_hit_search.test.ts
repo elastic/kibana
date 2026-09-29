@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { act, renderHook, waitFor } from '@testing-library/react';
 import type { EsHitRecord } from '@kbn/discover-utils/types';
 import {
   buildWorkflowExecuteHitSearchIdentityKey,

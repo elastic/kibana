@@ -14,20 +14,20 @@ import { runGenerationStep } from '.';
 const mockLogHealthCheck = vi.fn();
 
 vi.mock('../../../../../lib/log_health_check', () => {
-      const mocked = {
-      logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvokeGenerationWorkflow = vi.fn();
 
 vi.mock('../../../invoke_generation_workflow', () => {
-      const mocked = {
-      invokeGenerationWorkflow: (...args: unknown[]) => mockInvokeGenerationWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invokeGenerationWorkflow: (...args: unknown[]) => mockInvokeGenerationWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = {
   debug: vi.fn(),

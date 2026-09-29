@@ -16,20 +16,20 @@ import { TableFieldValueCell } from './table_field_value_cell';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', () => {
-      const mocked = {
-      FormattedFieldValue: (props: { value: string }) => (
-        <span data-test-subj="formatted-field-value">{props.value}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedFieldValue: (props: { value: string }) => (
+      <span data-test-subj="formatted-field-value">{props.value}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/utils/get_field_format', () => {
-      const mocked = {
-      getFieldFormat: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFieldFormat: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const attackId = 'attack-id';
 

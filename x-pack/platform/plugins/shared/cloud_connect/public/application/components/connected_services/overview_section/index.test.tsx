@@ -14,13 +14,13 @@ import { OverviewSection } from '.';
 
 // Mock the SubscriptionBadge component
 vi.mock('./subscription_badge', () => {
-      const mocked = {
-      SubscriptionBadge: ({ subscription }: { subscription: string }) => (
-        <span data-test-subj="subscription-badge-mock">{subscription}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SubscriptionBadge: ({ subscription }: { subscription: string }) => (
+      <span data-test-subj="subscription-badge-mock">{subscription}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(

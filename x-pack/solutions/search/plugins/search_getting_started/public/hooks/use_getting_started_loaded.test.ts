@@ -15,11 +15,11 @@ import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../common';
 
 vi.mock('../contexts/usage_tracker_context', () => {
-      const mocked = {
-      useUsageTracker: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUsageTracker: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUsageTracker = useUsageTracker as Mock;
 

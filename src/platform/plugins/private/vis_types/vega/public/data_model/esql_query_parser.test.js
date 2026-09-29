@@ -15,12 +15,12 @@ import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlQueryParser } from './esql_query_parser';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLTimeField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLTimeField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rangeStart = 1000000;
 const rangeEnd = 2000000;
@@ -54,11 +54,11 @@ function createParser(min = rangeStart, max = rangeEnd, dashboardCtx = {}, esqlV
 }
 
 vi.mock('../services', () => {
-      const mocked = {
-      getHttp: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getHttp: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   getESQLTimeField.mockReset();

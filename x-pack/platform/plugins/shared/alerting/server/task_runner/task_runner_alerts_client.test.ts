@@ -122,18 +122,18 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/wrap_scoped_cluster_client', () => {
-      const mocked = {
-      createWrappedScopedClusterClientFactory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createWrappedScopedClusterClientFactory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/alerting_event_logger/alerting_event_logger');
 
@@ -205,9 +205,7 @@ describe('Task Runner', () => {
     const uiSettingsService = uiSettingsServiceMock.createStartContract();
     const inMemoryMetrics = inMemoryMetricsMock.create();
     const dataViewsMock = {
-      dataViewsServiceFactory: vi
-        .fn()
-        .mockResolvedValue(dataViewPluginMocks.createStartContract()),
+      dataViewsServiceFactory: vi.fn().mockResolvedValue(dataViewPluginMocks.createStartContract()),
       getScriptedFieldsEnabled: vi.fn().mockReturnValue(true),
     } as DataViewsServerPluginStart;
     const mockAlertsService = alertsServiceMock.create();
@@ -255,15 +253,16 @@ describe('Task Runner', () => {
     describe(`using ${label} for alert indices`, () => {
       beforeEach(async () => {
         vi.clearAllMocks();
-        (await vi.importMock('../lib/wrap_scoped_cluster_client'))
-          .createWrappedScopedClusterClientFactory.mockReturnValue({
-            client: () => services.scopedClusterClient,
-            getMetrics: () => ({
-              numSearches: 3,
-              esSearchDurationMs: 33,
-              totalSearchDurationMs: 23423,
-            }),
-          });
+        (
+          await vi.importMock('../lib/wrap_scoped_cluster_client')
+        ).createWrappedScopedClusterClientFactory.mockReturnValue({
+          client: () => services.scopedClusterClient,
+          getMetrics: () => ({
+            numSearches: 3,
+            esSearchDurationMs: 33,
+            totalSearchDurationMs: 23423,
+          }),
+        });
         savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
         elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
         taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(

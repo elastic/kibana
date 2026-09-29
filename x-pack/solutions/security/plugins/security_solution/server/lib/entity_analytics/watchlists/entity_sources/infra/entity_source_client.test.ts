@@ -26,13 +26,13 @@ const mockInvalidateEntitySourceApiKey = vi.fn();
 const mockGrantEntitySourceApiKey = vi.fn();
 
 vi.mock('../entity_source_api_key', () => {
-      const mocked = {
-      validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-      invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
-      grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+    invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+    grantEntitySourceApiKey: (...args: unknown[]) => mockGrantEntitySourceApiKey(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WatchlistEntitySourceClient', () => {
   let soClient: ReturnType<typeof savedObjectsClientMock.create>;

@@ -47,9 +47,8 @@ describe('communicatesWithMaintainer', () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    vi
-      .spyOn(engineModule, 'runRelationshipMaintainer')
-      .mockImplementation(async ({ telemetryCollector }) => {
+    vi.spyOn(engineModule, 'runRelationshipMaintainer').mockImplementation(
+      async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push(
             { id: 'okta', scanned: 5, qualified: 4, outcome: 'producing' },
@@ -72,7 +71,8 @@ describe('communicatesWithMaintainer', () => {
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
         };
-      });
+      }
+    );
 
     await communicatesWithMaintainer.run(ctx);
 

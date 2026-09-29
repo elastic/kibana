@@ -14,10 +14,10 @@ const realFs = require('fs');
 export const mockReadFile = vi.fn();
 const mockStat = vi.fn();
 vi.doMock('fs', () => {
-      const mocked = {
-      ...realFs,
-      readFile: mockReadFile,
-      stat: mockStat,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...realFs,
+    readFile: mockReadFile,
+    stat: mockStat,
+  };
+  return { ...mocked, default: mocked };
+});

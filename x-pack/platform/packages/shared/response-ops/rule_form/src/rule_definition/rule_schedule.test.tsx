@@ -15,14 +15,14 @@ import { RuleSchedule } from './rule_schedule';
 const mockOnChange = vi.fn();
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
 describe('RuleSchedule', () => {
   beforeEach(() => {

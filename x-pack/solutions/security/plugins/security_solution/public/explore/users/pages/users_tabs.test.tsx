@@ -19,22 +19,22 @@ import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data
 
 vi.mock('../../../common/components/empty_prompt');
 vi.mock('../../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/visualization_actions/actions');
 vi.mock('../../../common/components/visualization_actions/lens_embeddable');
 const mockNavigateToApp = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
 
   return {
     ...original,

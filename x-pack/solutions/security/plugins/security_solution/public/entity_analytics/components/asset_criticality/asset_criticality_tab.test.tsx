@@ -49,45 +49,46 @@ const privilegesMissingWrite = {
 
 const mockUseAssetCriticalityPrivileges = vi.fn();
 vi.mock('./use_asset_criticality', () => {
-      const mocked = {
-      useAssetCriticalityPrivileges: (...args: unknown[]) => mockUseAssetCriticalityPrivileges(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetCriticalityPrivileges: (...args: unknown[]) =>
+      mockUseAssetCriticalityPrivileges(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseHasSecurityCapability = vi.fn();
 vi.mock('../../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: (...args: unknown[]) => mockUseHasSecurityCapability(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: (...args: unknown[]) => mockUseHasSecurityCapability(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              securitySolution: {
-                entityAnalytics: {
-                  assetCriticality: 'https://example.com/asset-criticality',
-                },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              entityAnalytics: {
+                assetCriticality: 'https://example.com/asset-criticality',
               },
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../asset_criticality_file_uploader/asset_criticality_file_uploader', () => {
-      const mocked = {
-      AssetCriticalityFileUploader: () => <div data-test-subj="asset-criticality-file-uploader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssetCriticalityFileUploader: () => <div data-test-subj="asset-criticality-file-uploader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>

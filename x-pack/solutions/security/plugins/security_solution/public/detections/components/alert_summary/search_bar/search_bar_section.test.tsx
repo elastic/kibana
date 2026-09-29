@@ -20,12 +20,12 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useIntegrations } from '../../../hooks/alert_summary/use_integrations';
 
 vi.mock('../../../../common/components/search_bar', () => {
-      const mocked = {
-      // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-      SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
+    SiemSearchBar: () => <div data-test-subj={'alert-summary-search-bar'} />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../hooks/alert_summary/use_integrations');
 

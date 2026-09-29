@@ -66,163 +66,167 @@ describe.skip('BulkUploader', () => {
     });
 
     it('should skip bulk upload if payload is empty', () =>
-        new Promise((resolve, reject) => {
-        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const collectors = new MockCollectorSet(server, [
-                {
-                  type: 'type_collector_test',
-                  fetch: noop, // empty payloads,
-                  isReady: () => true,
-                },
-              ]);
+        const collectors = new MockCollectorSet(server, [
+          {
+            type: 'type_collector_test',
+            fetch: noop, // empty payloads,
+            isReady: () => true,
+          },
+        ]);
 
-              const uploader = new BulkUploader({
-                ...server,
-                interval: FETCH_INTERVAL,
-              });
+        const uploader = new BulkUploader({
+          ...server,
+          interval: FETCH_INTERVAL,
+        });
 
-              uploader.start(collectors);
+        uploader.start(collectors);
 
-              // allow interval to tick a few times
-              setTimeout(() => {
-                uploader.stop();
+        // allow interval to tick a few times
+        setTimeout(() => {
+          uploader.stop();
 
-                const loggingCalls = server.log.getCalls();
-                expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
-                expect(loggingCalls[0].args).to.eql([
-                  ['info', 'monitoring', 'kibana-monitoring'],
-                  'Starting monitoring stats collection',
-                ]);
-                expect(loggingCalls[1].args).to.eql([
-                  ['debug', 'monitoring', 'kibana-monitoring'],
-                  'Skipping bulk uploading of an empty stats payload',
-                ]);
-                expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
-                  ['info', 'monitoring', 'kibana-monitoring'],
-                  'Monitoring stats collection is stopped',
-                ]);
+          const loggingCalls = server.log.getCalls();
+          expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
+          expect(loggingCalls[0].args).to.eql([
+            ['info', 'monitoring', 'kibana-monitoring'],
+            'Starting monitoring stats collection',
+          ]);
+          expect(loggingCalls[1].args).to.eql([
+            ['debug', 'monitoring', 'kibana-monitoring'],
+            'Skipping bulk uploading of an empty stats payload',
+          ]);
+          expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
+            ['info', 'monitoring', 'kibana-monitoring'],
+            'Monitoring stats collection is stopped',
+          ]);
 
-                done();
-              }, CHECK_DELAY);
-            
-        }));
+          done();
+        }, CHECK_DELAY);
+      }));
 
     it('should not upload if some collectors are not ready', () =>
-        new Promise((resolve, reject) => {
-        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const collectors = new MockCollectorSet(server, [
-                {
-                  type: 'type_collector_test',
-                  fetch: noop, // empty payloads,
-                  isReady: () => false,
-                },
-                {
-                  type: 'type_collector_test2',
-                  fetch: noop, // empty payloads,
-                  isReady: () => true,
-                },
-              ]);
+        const collectors = new MockCollectorSet(server, [
+          {
+            type: 'type_collector_test',
+            fetch: noop, // empty payloads,
+            isReady: () => false,
+          },
+          {
+            type: 'type_collector_test2',
+            fetch: noop, // empty payloads,
+            isReady: () => true,
+          },
+        ]);
 
-              const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
+        const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
-              uploader.start(collectors);
+        uploader.start(collectors);
 
-              // allow interval to tick a few times
-              setTimeout(() => {
-                uploader.stop();
+        // allow interval to tick a few times
+        setTimeout(() => {
+          uploader.stop();
 
-                const loggingCalls = server.log.getCalls();
-                expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
-                expect(loggingCalls[0].args).to.eql([
-                  ['info', 'monitoring', 'kibana-monitoring'],
-                  'Starting monitoring stats collection',
-                ]);
-                expect(loggingCalls[1].args).to.eql([
-                  ['debug', 'monitoring', 'kibana-monitoring'],
-                  'Skipping bulk uploading because not all collectors are ready',
-                ]);
-                expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
-                  ['info', 'monitoring', 'kibana-monitoring'],
-                  'Monitoring stats collection is stopped',
-                ]);
+          const loggingCalls = server.log.getCalls();
+          expect(loggingCalls.length).to.be.greaterThan(2); // should be 3-5: start, fetch, skip, fetch, skip
+          expect(loggingCalls[0].args).to.eql([
+            ['info', 'monitoring', 'kibana-monitoring'],
+            'Starting monitoring stats collection',
+          ]);
+          expect(loggingCalls[1].args).to.eql([
+            ['debug', 'monitoring', 'kibana-monitoring'],
+            'Skipping bulk uploading because not all collectors are ready',
+          ]);
+          expect(loggingCalls[loggingCalls.length - 1].args).to.eql([
+            ['info', 'monitoring', 'kibana-monitoring'],
+            'Monitoring stats collection is stopped',
+          ]);
 
-                done();
-              }, CHECK_DELAY);
-            
-        }));
+          done();
+        }, CHECK_DELAY);
+      }));
 
     it('should run the bulk upload handler', () =>
-        new Promise((resolve, reject) => {
-        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const collectors = new MockCollectorSet(server, [
-                {
-                  fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
-                  isReady: () => true,
-                },
-              ]);
-              const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
+        const collectors = new MockCollectorSet(server, [
+          {
+            fetch: () => ({ type: 'type_collector_test', result: { testData: 12345 } }),
+            isReady: () => true,
+          },
+        ]);
+        const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
 
-              uploader.start(collectors);
+        uploader.start(collectors);
 
-              // allow interval to tick a few times
-              setTimeout(() => {
-                uploader.stop();
+        // allow interval to tick a few times
+        setTimeout(() => {
+          uploader.stop();
 
-                const loggingCalls = server.log.getCalls();
-                // If we are properly awaiting the bulk upload call, we shouldn't see
-                // the last 2 logs as the call takes longer than this timeout (see the above mock)
-                expect(loggingCalls.length).to.be(4);
-                expect(loggingCalls[0].args).to.eql([
-                  ['info', 'monitoring', 'kibana-monitoring'],
-                  'Starting monitoring stats collection',
-                ]);
-                expect(loggingCalls[1].args).to.eql([
-                  ['debug', 'monitoring', 'kibana-monitoring'],
-                  'Uploading bulk stats payload to the local cluster',
-                ]);
+          const loggingCalls = server.log.getCalls();
+          // If we are properly awaiting the bulk upload call, we shouldn't see
+          // the last 2 logs as the call takes longer than this timeout (see the above mock)
+          expect(loggingCalls.length).to.be(4);
+          expect(loggingCalls[0].args).to.eql([
+            ['info', 'monitoring', 'kibana-monitoring'],
+            'Starting monitoring stats collection',
+          ]);
+          expect(loggingCalls[1].args).to.eql([
+            ['debug', 'monitoring', 'kibana-monitoring'],
+            'Uploading bulk stats payload to the local cluster',
+          ]);
 
-                done();
-              }, CHECK_DELAY);
-            
-        }));
+          done();
+        }, CHECK_DELAY);
+      }));
 
     it('does not call UsageCollectors if last reported is within the usageInterval', () =>
-        new Promise((resolve, reject) => {
-        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const usageCollectorFetch = sinon.stub();
-              const collectorFetch = sinon
-                .stub()
-                .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+        const usageCollectorFetch = sinon.stub();
+        const collectorFetch = sinon
+          .stub()
+          .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
 
-              const collectors = new MockCollectorSet(server, [
-                {
-                  fetch: usageCollectorFetch,
-                  isReady: () => true,
-                  isUsageCollector: true,
-                },
-                {
-                  fetch: collectorFetch,
-                  isReady: () => true,
-                  isUsageCollector: false,
-                },
-              ]);
+        const collectors = new MockCollectorSet(server, [
+          {
+            fetch: usageCollectorFetch,
+            isReady: () => true,
+            isUsageCollector: true,
+          },
+          {
+            fetch: collectorFetch,
+            isReady: () => true,
+            isUsageCollector: false,
+          },
+        ]);
 
-              const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
-              uploader._lastFetchUsageTime = Date.now();
+        const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
+        uploader._lastFetchUsageTime = Date.now();
 
-              uploader.start(collectors);
-              setTimeout(() => {
-                uploader.stop();
-                expect(collectorFetch.callCount).to.be.greaterThan(0);
-                expect(usageCollectorFetch.callCount).to.eql(0);
-                done();
-              }, CHECK_DELAY);
-            
-        }));
+        uploader.start(collectors);
+        setTimeout(() => {
+          uploader.stop();
+          expect(collectorFetch.callCount).to.be.greaterThan(0);
+          expect(usageCollectorFetch.callCount).to.eql(0);
+          done();
+        }, CHECK_DELAY);
+      }));
 
     it('stops refetching UsageCollectors if uploading to local cluster was not successful', async () => {
       const usageCollectorFetch = sinon
@@ -288,38 +292,39 @@ describe.skip('BulkUploader', () => {
     });
 
     it('calls UsageCollectors if last reported exceeds during a _usageInterval', () =>
-        new Promise((resolve, reject) => {
-        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const usageCollectorFetch = sinon.stub();
-              const collectorFetch = sinon
-                .stub()
-                .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
+        const usageCollectorFetch = sinon.stub();
+        const collectorFetch = sinon
+          .stub()
+          .returns({ type: 'type_usage_collector_test', result: { testData: 12345 } });
 
-              const collectors = new MockCollectorSet(server, [
-                {
-                  fetch: usageCollectorFetch,
-                  isReady: () => true,
-                  isUsageCollector: true,
-                },
-                {
-                  fetch: collectorFetch,
-                  isReady: () => true,
-                  isUsageCollector: false,
-                },
-              ]);
+        const collectors = new MockCollectorSet(server, [
+          {
+            fetch: usageCollectorFetch,
+            isReady: () => true,
+            isUsageCollector: true,
+          },
+          {
+            fetch: collectorFetch,
+            isReady: () => true,
+            isUsageCollector: false,
+          },
+        ]);
 
-              const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
-              uploader._lastFetchUsageTime = Date.now() - uploader._usageInterval;
+        const uploader = new BulkUploader({ ...server, interval: FETCH_INTERVAL });
+        uploader._lastFetchUsageTime = Date.now() - uploader._usageInterval;
 
-              uploader.start(collectors);
-              setTimeout(() => {
-                uploader.stop();
-                expect(collectorFetch.callCount).to.be.greaterThan(0);
-                expect(usageCollectorFetch.callCount).to.be.greaterThan(0);
-                done();
-              }, CHECK_DELAY);
-            
-        }));
+        uploader.start(collectors);
+        setTimeout(() => {
+          uploader.stop();
+          expect(collectorFetch.callCount).to.be.greaterThan(0);
+          expect(usageCollectorFetch.callCount).to.be.greaterThan(0);
+          done();
+        }, CHECK_DELAY);
+      }));
   });
 });

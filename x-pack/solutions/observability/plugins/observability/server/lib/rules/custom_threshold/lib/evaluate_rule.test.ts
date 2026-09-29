@@ -23,9 +23,7 @@ vi.mock('./get_data');
 vi.mock('./check_missing_group');
 
 const mockedGetData = getData as MockedFunction<typeof getData>;
-const mockedCheckMissingGroups = checkMissingGroups as MockedFunction<
-  typeof checkMissingGroups
->;
+const mockedCheckMissingGroups = checkMissingGroups as MockedFunction<typeof checkMissingGroups>;
 
 const logger = { debug: vi.fn() } as unknown as Logger;
 const esClient = {} as ElasticsearchClient;

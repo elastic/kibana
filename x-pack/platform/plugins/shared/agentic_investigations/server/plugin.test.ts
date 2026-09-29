@@ -27,18 +27,18 @@ import { registerEscalationRoutes } from './escalations/routes/register_routes';
 import { AgenticInvestigationsPlugin } from './plugin';
 
 vi.mock('./impact/routes/register_routes', () => {
-      const mocked = {
-      registerImpactRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerImpactRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./escalations/routes/register_routes', () => {
-      const mocked = {
-      registerEscalationRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerEscalationRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createContext = () =>
   ({

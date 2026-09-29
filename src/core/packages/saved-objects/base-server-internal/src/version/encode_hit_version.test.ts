@@ -10,11 +10,11 @@
 import { vi } from 'vitest';
 
 vi.mock('./encode_version', () => {
-      const mocked = {
-      encodeVersion: vi.fn().mockReturnValue('foo'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    encodeVersion: vi.fn().mockReturnValue('foo'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { encodeHitVersion } from './encode_hit_version';
 import { encodeVersion } from './encode_version';

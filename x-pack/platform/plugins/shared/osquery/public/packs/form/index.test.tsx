@@ -35,53 +35,57 @@ beforeAll(() => {
 });
 
 vi.mock('../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/lib/kibana')),
-      useRouterNavigate: (path: string) => {
-        mockUseRouterNavigate(path);
+  const mocked = {
+    ...(await vi.importActual('../../common/lib/kibana')),
+    useRouterNavigate: (path: string) => {
+      mockUseRouterNavigate(path);
 
-        return {
-          onClick: vi.fn(),
-          href: path,
-        };
+      return {
+        onClick: vi.fn(),
+        href: path,
+      };
+    },
+    useKibana: () => ({
+      services: {
+        notifications: { toasts: { addDanger: mockAddDanger } },
       },
-      useKibana: () => ({
-        services: {
-          notifications: { toasts: { addDanger: mockAddDanger } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../agent_policies', () => {
-      const mocked = {
-      useAgentPolicies: () => ({
-        data: {
-          agentPoliciesById: {},
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentPolicies: () => ({
+      data: {
+        agentPoliciesById: {},
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_create_pack', () => {
-      const mocked = {
-      useCreatePack: () => ({
-        mutateAsync: (...args: unknown[]) => mockCreateAsync(...args),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreatePack: () => ({
+      mutateAsync: (...args: unknown[]) => mockCreateAsync(...args),
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_update_pack', () => {
-      const mocked = {
-      useUpdatePack: () => ({
-        mutateAsync: (...args: unknown[]) => mockUpdateAsync(...args),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdatePack: () => ({
+      mutateAsync: (...args: unknown[]) => mockUpdateAsync(...args),
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(

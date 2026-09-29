@@ -20,11 +20,11 @@ vi.mock('fs/promises');
 
 // Mock getAllDocFileIds
 vi.mock('./mdx/get_all_doc_file_ids', () => {
-      const mocked = {
-      getAllDocFileIds: vi.fn(() => Promise.resolve(['doc1', 'doc2', 'doc3'])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllDocFileIds: vi.fn(() => Promise.resolve(['doc1', 'doc2', 'doc3'])),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const log = new ToolingLog({
   level: 'silent',

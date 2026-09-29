@@ -21,32 +21,32 @@ import { MigrationSource } from '../../common/types';
 
 vi.mock('../api');
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addSuccess: vi.fn(),
-        addError: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_get_migration_dashboards', () => {
-      const mocked = {
-      useInvalidateGetMigrationDashboards: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateGetMigrationDashboards: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_get_migration_translation_stats', () => {
-      const mocked = {
-      useInvalidateGetMigrationTranslationStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateGetMigrationTranslationStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResponse = { installed: 2 };
 const mockError = new Error('API error');

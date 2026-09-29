@@ -43,9 +43,7 @@ interface AutomaticImportServicePrivate {
   samplesIndexService:
     | AutomaticImportSamplesIndexService
     | Partial<Record<'addSamplesToDataStream' | 'deleteSamplesForDataStream', Mock>>;
-  taskManagerService:
-    | TaskManagerService
-    | Partial<Record<'removeDataStreamCreationTask', Mock>>;
+  taskManagerService: TaskManagerService | Partial<Record<'removeDataStreamCreationTask', Mock>>;
 }
 
 interface TaskManagerWithPrivate {
@@ -117,7 +115,9 @@ describe('AutomaticImportSetupService', () => {
 
   describe('constructor', () => {
     it('should initialize the AutomaticImportSamplesIndexService with correct parameters', async () => {
-      const { AutomaticImportSamplesIndexService: MockedService } = (await vi.importMock('./samples_index/index_service'));
+      const { AutomaticImportSamplesIndexService: MockedService } = await vi.importMock(
+        './samples_index/index_service'
+      );
 
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
     });
@@ -396,28 +396,29 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should emit to all subscribers before completing', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const pluginStop$ = asPrivate(service).pluginStop$;
-              let emittedValue: void | undefined;
-              let completed = false;
+        const pluginStop$ = asPrivate(service).pluginStop$;
+        let emittedValue: void | undefined;
+        let completed = false;
 
-              pluginStop$.subscribe({
-                next: (value: void) => {
-                  emittedValue = value;
-                },
-                complete: () => {
-                  completed = true;
-                  expect(emittedValue).toBeUndefined();
-                  expect(completed).toBe(true);
-                  done();
-                },
-              });
+        pluginStop$.subscribe({
+          next: (value: void) => {
+            emittedValue = value;
+          },
+          complete: () => {
+            completed = true;
+            expect(emittedValue).toBeUndefined();
+            expect(completed).toBe(true);
+            done();
+          },
+        });
 
-              service.stop();
-            
-        }));
+        service.stop();
+      }));
 
     it('should be safe to call multiple times', () => {
       const pluginStop$ = asPrivate(service).pluginStop$;
@@ -810,7 +811,9 @@ describe('AutomaticImportSetupService', () => {
 
   describe('integration', () => {
     it('should properly initialize and setup the service', async () => {
-      const { AutomaticImportSamplesIndexService: MockedService } = (await vi.importMock('./samples_index/index_service'));
+      const { AutomaticImportSamplesIndexService: MockedService } = await vi.importMock(
+        './samples_index/index_service'
+      );
 
       // Verify constructor was called
       expect(MockedService).toHaveBeenCalledWith(mockLoggerFactory);
@@ -837,7 +840,9 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should initialize samples index service with logger factory only', async () => {
-      const { AutomaticImportSamplesIndexService: MockedService } = (await vi.importMock('./samples_index/index_service'));
+      const { AutomaticImportSamplesIndexService: MockedService } = await vi.importMock(
+        './samples_index/index_service'
+      );
 
       const constructorCall = MockedService.mock.calls[0];
       expect(constructorCall[0]).toBe(mockLoggerFactory);

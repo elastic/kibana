@@ -13,14 +13,14 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { initializeUiamContainers, runUiamContainer, UIAM_CONTAINERS } from './docker_uiam';
 
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn(() => Promise.resolve()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn(() => Promise.resolve()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('execa');
-const execa = (await vi.importMock('execa'));
+const execa = await vi.importMock('execa');
 
 // Mock undici
 vi.mock('undici', () => {
@@ -46,12 +46,12 @@ const mockUndiciFetch = vi.mocked(undici.fetch);
 const mockUndiciAgent = vi.mocked(undici.Agent);
 
 vi.mock('../paths', () => {
-      const mocked = {
-      SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
-      SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SERVERLESS_UIAM_ENTRYPOINT_PATH: '/some_path/run_java_with_custom_ca.sh',
+    SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH: '/some_path/uiam_cosmosdb.pfx',
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.useFakeTimers().setSystemTime(new Date(Date.UTC(2000, 0, 1)));

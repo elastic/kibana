@@ -32,45 +32,45 @@ import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 // Mock dependencies
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getLookupIndicesFromQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLookupIndicesFromQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_lookup_index_privileges', () => {
-      const mocked = {
-      useLookupIndexPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLookupIndexPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./append_index_to_join_command', () => {
-      const mocked = {
-      appendIndexToJoinCommandByName: vi.fn(),
-      appendIndexToJoinCommandByPosition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appendIndexToJoinCommandByName: vi.fn(),
+    appendIndexToJoinCommandByPosition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebounceFn: vi.fn((fn) => ({ run: fn })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebounceFn: vi.fn((fn) => ({ run: fn })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: () => ({
-        euiTheme: {
-          colors: { textParagraph: '#000' },
-          border: { width: { thick: '2px' } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: { textParagraph: '#000' },
+        border: { width: { thick: '2px' } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = {
   ...coreMock.createStart(),
@@ -361,9 +361,7 @@ describe('useLookupIndexCommand', () => {
   });
 
   it('should handle flyout close with index creation', async () => {
-    (appendIndexToJoinCommandByName as Mock).mockReturnValue(
-      'FROM logs | JOIN new-index ON field'
-    );
+    (appendIndexToJoinCommandByName as Mock).mockReturnValue('FROM logs | JOIN new-index ON field');
 
     renderHook(
       () =>

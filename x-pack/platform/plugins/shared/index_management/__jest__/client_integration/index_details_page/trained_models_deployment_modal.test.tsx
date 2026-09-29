@@ -24,57 +24,57 @@ import {
 } from './trained_models_deployment_modal.helpers';
 
 vi.mock('../../../public/application/app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn().mockReturnValue({
-        url: undefined,
-        plugins: {
-          ml: {
-            mlApi: {
-              trainedModels: {
-                getModelsDownloadStatus: vi.fn().mockResolvedValue({}),
-                getTrainedModels: vi.fn().mockResolvedValue([
+  const mocked = {
+    useAppContext: vi.fn().mockReturnValue({
+      url: undefined,
+      plugins: {
+        ml: {
+          mlApi: {
+            trainedModels: {
+              getModelsDownloadStatus: vi.fn().mockResolvedValue({}),
+              getTrainedModels: vi.fn().mockResolvedValue([
+                {
+                  model_id: '.elser_model_2',
+                  model_type: 'pytorch',
+                  model_package: {
+                    packaged_model_id: 'elser_model_2',
+                    model_repository: 'https://ml-models.elastic.co',
+                    minimum_version: '11.0.0',
+                    size: 438123914,
+                    sha256: '',
+                    metadata: {},
+                    tags: [],
+                    vocabulary_file: 'elser_model_2.vocab.json',
+                  },
+                  description: 'Elastic Learned Sparse EncodeR v2',
+                  tags: ['elastic'],
+                },
+              ]),
+              getTrainedModelStats: vi.fn().mockResolvedValue({
+                count: 1,
+                trained_model_stats: [
                   {
                     model_id: '.elser_model_2',
-                    model_type: 'pytorch',
-                    model_package: {
-                      packaged_model_id: 'elser_model_2',
-                      model_repository: 'https://ml-models.elastic.co',
-                      minimum_version: '11.0.0',
-                      size: 438123914,
-                      sha256: '',
-                      metadata: {},
-                      tags: [],
-                      vocabulary_file: 'elser_model_2.vocab.json',
-                    },
-                    description: 'Elastic Learned Sparse EncodeR v2',
-                    tags: ['elastic'],
-                  },
-                ]),
-                getTrainedModelStats: vi.fn().mockResolvedValue({
-                  count: 1,
-                  trained_model_stats: [
-                    {
-                      model_id: '.elser_model_2',
 
-                      deployment_stats: {
-                        deployment_id: 'elser_model_2',
-                        model_id: '.elser_model_2',
-                        threads_per_allocation: 1,
-                        number_of_allocations: 1,
-                        queue_capacity: 1024,
-                        state: 'started',
-                      },
+                    deployment_stats: {
+                      deployment_id: 'elser_model_2',
+                      model_id: '.elser_model_2',
+                      threads_per_allocation: 1,
+                      number_of_allocations: 1,
+                      queue_capacity: 1024,
+                      state: 'started',
                     },
-                  ],
-                }),
-              },
+                  },
+                ],
+              }),
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../public/application/components/mappings_editor/mappings_state_context');
 

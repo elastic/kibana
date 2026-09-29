@@ -54,9 +54,7 @@ describe('PATCH: update script API route', () => {
 
     httpRequestMock.params = { script_id: '123' };
 
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
-      'space_a'
-    );
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue('space_a');
 
     registerPatchUpdateScriptRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
@@ -75,9 +73,7 @@ describe('PATCH: update script API route', () => {
     });
 
     it('should error if user has no authz to api', async () => {
-      (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-      ).mockResolvedValue(
+      ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteScriptsLibrary: false,
           canReadScriptsLibrary: true,

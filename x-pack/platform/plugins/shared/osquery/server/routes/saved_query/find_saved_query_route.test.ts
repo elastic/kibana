@@ -17,19 +17,21 @@ import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_inte
 import { getInstalledSavedQueriesMap } from './utils';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      getInstalledSavedQueriesMap: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    getInstalledSavedQueriesMap: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('findSavedQueryRoute', () => {
   let routeHandler: RequestHandler;
@@ -83,9 +85,7 @@ describe('findSavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
     (getInstalledSavedQueriesMap as Mock).mockResolvedValue({});
   });
 

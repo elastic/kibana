@@ -15,7 +15,7 @@ import { internalLifecycleRoutes } from './route';
 vi.mock('../../../../lib/streams/lifecycle/get_effective_lifecycle');
 
 vi.mock('@kbn/streams-schema', async () => {
-  const actual = (await vi.importActual('@kbn/streams-schema'));
+  const actual = await vi.importActual('@kbn/streams-schema');
   return {
     ...actual,
     Streams: {

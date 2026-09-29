@@ -13,11 +13,11 @@ import { useKibana } from './use_kibana';
 import { useUsageTracker } from './use_usage_tracker';
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUsageTracker', () => {
   let reportUiCounter: Mock;

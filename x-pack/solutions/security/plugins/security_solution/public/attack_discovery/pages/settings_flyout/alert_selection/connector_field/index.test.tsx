@@ -17,11 +17,11 @@ import { useSpaceId } from '../../../../../common/hooks/use_space_id';
 import { CONNECTOR, CUSTOMIZE_THE_CONNECTOR_AND_ALERTS } from '../translations';
 
 vi.mock('../../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 

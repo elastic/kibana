@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { MockRouter, mockDependencies } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
@@ -16,11 +16,11 @@ import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { createIndexPatternsStartMock } from '@kbn/data-views-plugin/server/mocks';
 
 vi.mock('../../lib/analytics/fetch_analytics_collection', () => {
-      const mocked = {
-      fetchAnalyticsCollections: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAnalyticsCollections: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { AnalyticsCollection } from '../../../common/types/analytics';
 import { ErrorCode } from '../../../common/types/error_codes';

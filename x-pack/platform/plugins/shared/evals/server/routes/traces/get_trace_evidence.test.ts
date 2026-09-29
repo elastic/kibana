@@ -34,12 +34,12 @@ import { registerGetTraceEvidenceRoute } from './get_trace_evidence';
 
 vi.mock('../../evaluators/evidence/evidence_service');
 vi.mock('../../evaluators/trace_readiness', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../evaluators/trace_readiness')),
-      awaitTraceReady: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../evaluators/trace_readiness')),
+    awaitTraceReady: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TRACE_ID = '0af7651916cd43dd8448eb211c80319c';
 const ROUND: EvidenceRound = {

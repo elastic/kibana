@@ -14,11 +14,11 @@ import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryBody } from './rule_summary_body';
 
 vi.mock('../../../services/user_capabilities', () => {
-      const mocked = {
-      UserCapabilities: 'UserCapabilities',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserCapabilities: 'UserCapabilities',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
   const canRead = vi.fn(() => true);
@@ -33,38 +33,38 @@ const { mockCanRead } = (await vi.importMock('@kbn/core-di-browser')) as {
 };
 
 vi.mock('./rule_summary_about_section', () => {
-      const mocked = {
-      RuleSummaryAboutSection: ({ rule }: { rule: RuleApiResponse }) => (
-        <div data-test-subj="mockAboutSection">{rule.metadata.name}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryAboutSection: ({ rule }: { rule: RuleApiResponse }) => (
+      <div data-test-subj="mockAboutSection">{rule.metadata.name}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_summary_investigation_section', () => {
-      const mocked = {
-      RuleSummaryInvestigationSection: ({ rule }: { rule: RuleApiResponse }) => (
-        <div data-test-subj="mockInvestigationSection">{rule.metadata.name}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryInvestigationSection: ({ rule }: { rule: RuleApiResponse }) => (
+      <div data-test-subj="mockInvestigationSection">{rule.metadata.name}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_summary_action_policies_section', () => {
-      const mocked = {
-      RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryActionPoliciesSection: () => <div data-test-subj="mockActionPoliciesSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_summary_artifacts_section', () => {
-      const mocked = {
-      RuleSummaryArtifactsSection: ({ rule }: { rule: RuleApiResponse }) => (
-        <div data-test-subj="mockArtifactsSection">{rule.metadata.name}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryArtifactsSection: ({ rule }: { rule: RuleApiResponse }) => (
+      <div data-test-subj="mockArtifactsSection">{rule.metadata.name}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rule: RuleApiResponse = {
   id: 'rule-1',

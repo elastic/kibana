@@ -33,11 +33,11 @@ const mockUseCasesFeatures = vi.fn(() => ({
   isExtractObservablesEnabled: true,
 }));
 vi.mock('../../../common/use_cases_features', () => {
-      const mocked = {
-      useCasesFeatures: () => mockUseCasesFeatures(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesFeatures: () => mockUseCasesFeatures(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplateSettingsForm', () => {
   const base = {

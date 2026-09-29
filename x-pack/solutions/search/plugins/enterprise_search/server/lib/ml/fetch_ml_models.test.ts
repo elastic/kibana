@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockLogger } from '../../__mocks__';
+
+import { vi } from 'vitest';
 
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 

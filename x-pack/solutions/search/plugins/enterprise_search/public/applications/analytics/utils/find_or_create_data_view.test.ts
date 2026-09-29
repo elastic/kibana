@@ -15,20 +15,20 @@ import { KibanaLogic } from '../../shared/kibana/kibana_logic';
 import { findOrCreateDataView } from './find_or_create_data_view';
 
 vi.mock('../../shared/kibana/kibana_logic', () => {
-      const mocked = {
-      KibanaLogic: {
-        values: {
-          data: {
-            dataViews: {
-              createAndSave: vi.fn(),
-              find: vi.fn(() => Promise.resolve([])),
-            },
+  const mocked = {
+    KibanaLogic: {
+      values: {
+        data: {
+          dataViews: {
+            createAndSave: vi.fn(),
+            find: vi.fn(() => Promise.resolve([])),
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('findOrCreateDataView', () => {
   beforeEach(() => {
@@ -53,9 +53,7 @@ describe('findOrCreateDataView', () => {
   it('should create, save and set dataView when analytics collection fetched but dataView is not found', async () => {
     const dataView = { id: 'test21' } as DataView;
     if (KibanaLogic.values.data) {
-      vi
-        .spyOn(KibanaLogic.values.data.dataViews, 'createAndSave')
-        .mockResolvedValueOnce(dataView);
+      vi.spyOn(KibanaLogic.values.data.dataViews, 'createAndSave').mockResolvedValueOnce(dataView);
     }
 
     expect(

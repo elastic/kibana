@@ -18,13 +18,13 @@ import {
 const mockFetchPrivilegeMonitoringEngineStatus = vi.fn();
 
 vi.mock('../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchPrivilegeMonitoringEngineStatus: mockFetchPrivilegeMonitoringEngineStatus,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchPrivilegeMonitoringEngineStatus: mockFetchPrivilegeMonitoringEngineStatus,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const healthResponse: PrivMonHealthResponse = {
   status: 'started',

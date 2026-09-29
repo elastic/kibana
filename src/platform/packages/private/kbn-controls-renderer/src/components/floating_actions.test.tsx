@@ -35,11 +35,11 @@ const mockServices = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockImplementation(() => mockServices),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockImplementation(() => mockServices),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FloatingActions', () => {
   beforeEach(() => {

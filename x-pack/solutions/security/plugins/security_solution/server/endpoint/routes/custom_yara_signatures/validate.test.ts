@@ -26,12 +26,12 @@ import { registerCustomYaraSignaturesRoutes } from '.';
 import { registerValidateCustomYaraSignatureRoute } from './validate';
 
 vi.mock('../../lib/custom_yara_signatures', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../lib/custom_yara_signatures')),
-      validateCustomYaraRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../lib/custom_yara_signatures')),
+    validateCustomYaraRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateCustomYaraRule = validateCustomYaraRule as MockedFunction<
   typeof validateCustomYaraRule
@@ -134,9 +134,7 @@ describe('POST: validate custom YARA signature', () => {
     });
 
     it('should error if user has no write authz to api', async () => {
-      (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-      ).mockResolvedValue(
+      ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteCustomYaraSignatures: false,
           canReadCustomYaraSignatures: true,

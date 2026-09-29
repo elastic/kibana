@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import {
   WorkflowExecutionDurationCell,
@@ -21,18 +20,18 @@ import {
 import { getTestProvider } from '../../shared/mocks/test_providers';
 
 vi.mock('../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => {
-      const mocked = {
-      FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/ui/use_formatted_date', () => {
-      const mocked = {
-      useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createExecution = (
   overrides: Partial<WorkflowExecutionListItemDto> = {}

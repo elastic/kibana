@@ -20,11 +20,11 @@ import { getESQLSources } from '@kbn/esql-utils';
 import { SourcesDropdown } from './sources_dropdown';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLSources: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLSources: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDeferred = <T,>() => {
   let resolve!: (value: T) => void;

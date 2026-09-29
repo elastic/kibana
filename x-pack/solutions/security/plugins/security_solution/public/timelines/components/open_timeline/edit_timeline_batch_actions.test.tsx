@@ -20,44 +20,44 @@ const mockHandleOpen = vi.fn();
 const mockUseSuperTimelineGate = vi.fn();
 
 vi.mock('./use_super_timeline_gate', () => {
-      const mocked = {
-      useSuperTimelineGate: (...args: unknown[]) => mockUseSuperTimelineGate(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSuperTimelineGate: (...args: unknown[]) => mockUseSuperTimelineGate(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_timeline_actions', () => {
-      const mocked = {
-      useEditTimelineActions: () => ({
-        enableExportTimelineDownloader: vi.fn(),
-        disableExportTimelineDownloader: vi.fn(),
-        isEnableDownloader: false,
-        isDeleteTimelineModalOpen: false,
-        onOpenDeleteTimelineModal: vi.fn(),
-        onCloseDeleteTimelineModal: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEditTimelineActions: () => ({
+      enableExportTimelineDownloader: vi.fn(),
+      disableExportTimelineDownloader: vi.fn(),
+      isEnableDownloader: false,
+      isDeleteTimelineModalOpen: false,
+      onOpenDeleteTimelineModal: vi.fn(),
+      onCloseDeleteTimelineModal: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./export_timeline', () => {
-      const mocked = {
-      EditTimelineActions: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTimelineActions: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('.', () => {
-      const mocked = {
-      getSelectedTimelineIdsAndSearchIds: (items: OpenTimelineResult[]) =>
-        items.map((i) => ({ savedObjectId: i.savedObjectId, searchId: undefined })),
-      getRequestIds: (items: Array<{ savedObjectId?: string }>) => ({
-        timelineIds: items.map((i) => i.savedObjectId).filter(Boolean),
-        searchIds: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSelectedTimelineIdsAndSearchIds: (items: OpenTimelineResult[]) =>
+      items.map((i) => ({ savedObjectId: i.savedObjectId, searchId: undefined })),
+    getRequestIds: (items: Array<{ savedObjectId?: string }>) => ({
+      timelineIds: items.map((i) => i.savedObjectId).filter(Boolean),
+      searchIds: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

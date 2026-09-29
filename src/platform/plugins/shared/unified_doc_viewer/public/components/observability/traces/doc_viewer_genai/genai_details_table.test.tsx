@@ -25,11 +25,11 @@ const mockContentFrameworkTable = vi.fn((props: ContentFrameworkTableProps) => (
 ));
 
 vi.mock('../../../content_framework', () => {
-      const mocked = {
-      ContentFrameworkTable: (props: ContentFrameworkTableProps) => mockContentFrameworkTable(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkTable: (props: ContentFrameworkTableProps) => mockContentFrameworkTable(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function buildHit(flattened: Record<string, unknown>): DataTableRecord {
   return {

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
@@ -35,63 +34,65 @@ const mockGetExecutionSteps = vi.fn();
 const mockGetExecution = vi.fn();
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-      WorkflowApi: vi.fn().mockImplementation(() => ({
-        getExecutionSteps: mockGetExecutionSteps,
-        getExecution: mockGetExecution,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+    WorkflowApi: vi.fn().mockImplementation(() => ({
+      getExecutionSteps: mockGetExecutionSteps,
+      getExecution: mockGetExecution,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('./cancel_execution_button', () => {
-      const mocked = {
-      CancelExecutionButton: ({ executionId }: { executionId: string }) => (
-        <div data-test-subj="cancel-execution-button">
-          {'Cancel Execution'} {executionId}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CancelExecutionButton: ({ executionId }: { executionId: string }) => (
+      <div data-test-subj="cancel-execution-button">
+        {'Cancel Execution'} {executionId}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_step_execution_tree', () => {
-      const mocked = {
-      WorkflowStepExecutionTree: ({
-        definition,
-        execution,
-        error,
-        onStepExecutionClick,
-        selectedId,
-      }: {
-        definition: WorkflowYaml | null;
-        execution: WorkflowExecutionDto | null;
-        error: Error | null;
-        onStepExecutionClick: (stepExecutionId: string) => void;
-        selectedId: string | null;
-      }) => (
-        <div data-test-subj="workflow-step-execution-tree">
-          <div data-test-subj="tree-definition">{definition ? 'Has Definition' : 'No Definition'}</div>
-          <div data-test-subj="tree-execution">
-            {execution ? `Execution: ${execution.id}` : 'No Execution'}
-          </div>
-          <div data-test-subj="tree-error">{error ? `Error: ${error.message}` : 'No Error'}</div>
-          <div data-test-subj="tree-selected-id">{selectedId || 'No Selection'}</div>
-          <button
-            type="button"
-            data-test-subj="mock-step-click"
-            onClick={() => onStepExecutionClick('step-123')}
-          >
-            {'Click Step'}
-          </button>
+  const mocked = {
+    WorkflowStepExecutionTree: ({
+      definition,
+      execution,
+      error,
+      onStepExecutionClick,
+      selectedId,
+    }: {
+      definition: WorkflowYaml | null;
+      execution: WorkflowExecutionDto | null;
+      error: Error | null;
+      onStepExecutionClick: (stepExecutionId: string) => void;
+      selectedId: string | null;
+    }) => (
+      <div data-test-subj="workflow-step-execution-tree">
+        <div data-test-subj="tree-definition">
+          {definition ? 'Has Definition' : 'No Definition'}
         </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+        <div data-test-subj="tree-execution">
+          {execution ? `Execution: ${execution.id}` : 'No Execution'}
+        </div>
+        <div data-test-subj="tree-error">{error ? `Error: ${error.message}` : 'No Error'}</div>
+        <div data-test-subj="tree-selected-id">{selectedId || 'No Selection'}</div>
+        <button
+          type="button"
+          data-test-subj="mock-step-click"
+          onClick={() => onStepExecutionClick('step-123')}
+        >
+          {'Click Step'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowExecutionPanel', () => {
   const mockExecution: WorkflowExecutionDto = {

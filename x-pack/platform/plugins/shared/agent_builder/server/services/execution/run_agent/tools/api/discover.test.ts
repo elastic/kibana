@@ -17,12 +17,12 @@ import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryMeta } from '../../api';
 
 vi.mock('../../api/registry', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../api/registry')),
-      getRegistries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../api/registry')),
+    getRegistries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRegistries = vi.mocked(getRegistries);
 

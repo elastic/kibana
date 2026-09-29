@@ -9,55 +9,55 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('../agents', () => {
-      const mocked = {
-      getAvailableVersions: vi
-        .fn()
-        .mockResolvedValue(['9.3.0', '9.1.0', '8.6.0', '8.9.0', '8.8.0', '7.17.0']),
-      getAgentsByKuery: vi.fn(),
-      reassignAgents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAvailableVersions: vi
+      .fn()
+      .mockResolvedValue(['9.3.0', '9.1.0', '8.6.0', '8.9.0', '8.8.0', '7.17.0']),
+    getAgentsByKuery: vi.fn(),
+    reassignAgents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getKibanaVersion: () => '9.3.0',
-        getLogger: () => ({
-          debug: vi.fn(),
-          info: vi.fn(),
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getKibanaVersion: () => '9.3.0',
+      getLogger: () => ({
+        debug: vi.fn(),
+        info: vi.fn(),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        getFullAgentPolicy: vi.fn().mockImplementation(async (_, id, { agentVersion }) => {
-          const inputs = agentVersion.startsWith('9.')
-            ? [
-                {
-                  type: 'cel',
-                },
-              ]
-            : [];
+  const mocked = {
+    agentPolicyService: {
+      getFullAgentPolicy: vi.fn().mockImplementation(async (_, id, { agentVersion }) => {
+        const inputs = agentVersion.startsWith('9.')
+          ? [
+              {
+                type: 'cel',
+              },
+            ]
+          : [];
 
-          if (id === 'policyBothConditions') {
-            inputs.unshift({
-              meta: { package: { agentVersion: '>=9.3.0' } },
-            } as any);
-          }
+        if (id === 'policyBothConditions') {
+          inputs.unshift({
+            meta: { package: { agentVersion: '>=9.3.0' } },
+          } as any);
+        }
 
-          return {
-            inputs,
-          };
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        return {
+          inputs,
+        };
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import * as AgentService from '../agents';
 
@@ -256,7 +256,9 @@ describe('getVersionSpecificPolicies', () => {
   });
 
   it('uses the rebuilt policy secret_references when the policy is rebuilt for the agent version', async () => {
-    const { agentPolicyService: mockedAgentPolicyService } = (await vi.importMock('../agent_policy')) as any;
+    const { agentPolicyService: mockedAgentPolicyService } = (await vi.importMock(
+      '../agent_policy'
+    )) as any;
     mockedAgentPolicyService.getFullAgentPolicy.mockImplementation(
       async (_: any, id: string, { agentVersion }: { agentVersion: string }) => ({
         id,

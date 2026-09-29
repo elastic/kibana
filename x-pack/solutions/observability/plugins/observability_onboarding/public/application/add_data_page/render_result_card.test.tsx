@@ -20,11 +20,11 @@ expect.extend(matchers);
 
 // Type-only import above survives this mock: types are erased at runtime.
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      CardIcon: () => <span data-test-subj="resultCardIconStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CardIcon: () => <span data-test-subj="resultCardIconStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const item: IntegrationCardItem = {
   id: 'epr:nginx',

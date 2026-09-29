@@ -11,14 +11,14 @@ import { getKbnPalettes } from '@kbn/palettes';
 import { getColorAccessorFn } from './color_mapping_accessor';
 
 vi.mock('@kbn/coloring', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/coloring')),
-      getColorFactory: vi
-        .fn()
-        .mockReturnValue((v: string | number) => (v === '123' ? 'blue' : 'red')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/coloring')),
+    getColorFactory: vi
+      .fn()
+      .mockReturnValue((v: string | number) => (v === '123' ? 'blue' : 'red')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getColorAccessorFn', () => {
   const palettes = getKbnPalettes({ name: 'amsterdam', darkMode: false });

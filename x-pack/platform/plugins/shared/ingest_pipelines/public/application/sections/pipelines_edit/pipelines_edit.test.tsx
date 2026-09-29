@@ -57,30 +57,30 @@ const createServicesWithLoadPipeline = (
 };
 
 vi.mock('../../../shared_imports', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../shared_imports')),
-      useKibana: () => mockUseKibana(),
-      SectionLoading: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="sectionLoading">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../shared_imports')),
+    useKibana: () => mockUseKibana(),
+    SectionLoading: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="sectionLoading">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components', () => {
-      const mocked = {
-      PipelineForm: (props: { defaultValue?: { name: string }; isEditing: boolean }) => (
-        <div data-test-subj="pipelineForm">
-          <div data-test-subj="formDefaultValue">
-            {props.defaultValue ? props.defaultValue.name : 'no-default'}
-          </div>
-          <div data-test-subj="isEditing">{String(props.isEditing)}</div>
+  const mocked = {
+    PipelineForm: (props: { defaultValue?: { name: string }; isEditing: boolean }) => (
+      <div data-test-subj="pipelineForm">
+        <div data-test-subj="formDefaultValue">
+          {props.defaultValue ? props.defaultValue.name : 'no-default'}
         </div>
-      ),
-      PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+        <div data-test-subj="isEditing">{String(props.isEditing)}</div>
+      </div>
+    ),
+    PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithRoute = (initialRouteEntry: string, services: DeepPartialMockServices) => {
   // window location is being used in normalizePipelineNameFromParams

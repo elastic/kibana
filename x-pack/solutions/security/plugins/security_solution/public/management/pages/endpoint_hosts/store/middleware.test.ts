@@ -50,32 +50,32 @@ import { canFetchPackageAndAgentPolicies } from '../../../../../common/endpoint/
 
 const mockSendBulkGetPackagePolicies = vi.fn();
 vi.mock('../../../services/policies/ingest', () => {
-      const mocked = {
-      sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
-      sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
-      sendBulkGetPackagePolicies: () => mockSendBulkGetPackagePolicies(),
-      sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetAgentConfigList: () => Promise.resolve({ items: [] }),
+    sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+    sendBulkGetPackagePolicies: () => mockSendBulkGetPackagePolicies(),
+    sendGetEndpointSecurityPackage: () => Promise.resolve({ version: '1.1.1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana');
 const mockFirstValueFrom = vi.fn();
 vi.mock('rxjs', () => {
-      const mocked = {
-      ...require('rxjs'),
-      firstValueFrom: () => mockFirstValueFrom(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('rxjs'),
+    firstValueFrom: () => mockFirstValueFrom(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/endpoint/service/authz/authz', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../common/endpoint/service/authz/authz')),
-      canFetchPackageAndAgentPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../common/endpoint/service/authz/authz')),
+    canFetchPackageAndAgentPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const canFetchAgentPoliciesMock = canFetchPackageAndAgentPolicies as Mock;
 
 type EndpointListStore = Store<Immutable<EndpointState>, Immutable<AppAction>>;

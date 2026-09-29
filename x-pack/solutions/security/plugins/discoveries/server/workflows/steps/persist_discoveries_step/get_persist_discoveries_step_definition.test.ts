@@ -17,25 +17,25 @@ import { validateAttackDiscoveries } from '../../../routes/post/validate/helpers
 import { authenticateAndGetSpace } from '../default_validation_step/helpers/authenticate_and_get_space';
 
 vi.mock('../../helpers/resolve_connector_details', () => {
-      const mocked = {
-      resolveConnectorDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../routes/post/validate/helpers/validate_attack_discoveries', () => {
-      const mocked = {
-      validateAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../default_validation_step/helpers/authenticate_and_get_space', () => {
-      const mocked = {
-      authenticateAndGetSpace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    authenticateAndGetSpace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResolveConnectorDetails = resolveConnectorDetails as MockedFunction<
   typeof resolveConnectorDetails

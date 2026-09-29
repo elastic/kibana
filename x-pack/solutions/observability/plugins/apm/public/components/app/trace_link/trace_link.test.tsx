@@ -21,23 +21,23 @@ import * as useApmParamsHooks from '../../../hooks/use_apm_params';
 import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      Redirect: vi.fn(({ to }) => (
-        <a href={to} data-test-subj="redirect-link">
-          Test link
-        </a>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    Redirect: vi.fn(({ to }) => (
+      <a href={to} data-test-subj="redirect-link">
+        Test link
+      </a>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

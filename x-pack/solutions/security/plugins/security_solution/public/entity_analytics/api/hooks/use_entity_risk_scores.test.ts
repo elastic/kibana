@@ -15,23 +15,23 @@ import { useResolutionGroup } from '../../components/entity_resolution/hooks/use
 import { EntityType } from '../../../../common/entity_analytics/types';
 
 vi.mock('./use_risk_score', () => {
-      const mocked = {
-      useRiskScore: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/entity_resolution/hooks/use_resolution_group', () => {
-      const mocked = {
-      useResolutionGroup: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolutionGroup: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/entity_resolution/helpers', () => {
-      const mocked = {
-      getEntityId: vi.fn().mockReturnValue('target-user'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEntityId: vi.fn().mockReturnValue('target-user'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRiskScore = useRiskScore as Mock;
 const mockUseResolutionGroup = useResolutionGroup as Mock;

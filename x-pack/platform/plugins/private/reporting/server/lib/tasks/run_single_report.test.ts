@@ -127,12 +127,12 @@ const mockGetContentStream = vi.fn();
 const mockEventTracker = eventTrackerMock.create();
 
 vi.mock('../content_stream', () => {
-      const mocked = {
-      getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
-      finishedWithNoPendingCallbacks: () => Promise.resolve(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
+    finishedWithNoPendingCallbacks: () => Promise.resolve(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = loggingSystemMock.createLogger();
 const fakeRawRequest: FakeRawRequest = {

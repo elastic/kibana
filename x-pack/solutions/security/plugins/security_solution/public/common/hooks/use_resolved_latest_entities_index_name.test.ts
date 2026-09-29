@@ -15,13 +15,13 @@ import { useKibana } from '../lib/kibana';
 import { useResolvedLatestEntitiesIndexName } from './use_resolved_latest_entities_index_name';
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = { useQuery: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useQuery: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuery = useQuery as Mock;
 const mockUseKibana = useKibana as Mock;

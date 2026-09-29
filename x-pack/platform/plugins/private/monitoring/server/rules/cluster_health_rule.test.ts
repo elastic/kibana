@@ -19,33 +19,33 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 const RealDate = Date;
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: () => ({ debug: vi.fn() }),
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: () => ({ debug: vi.fn() }),
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/alerts/fetch_cluster_health', () => {
-      const mocked = {
-      fetchClusterHealth: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusterHealth: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/alerts/fetch_clusters', () => {
-      const mocked = {
-      fetchClusters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ClusterHealthRule', () => {
   it('should have defaults', () => {

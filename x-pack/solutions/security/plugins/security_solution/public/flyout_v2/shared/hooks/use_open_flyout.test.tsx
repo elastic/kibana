@@ -25,27 +25,27 @@ import {
 } from '../../../common/lib/telemetry';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useStore: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useStore: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/hooks/is_in_security_app');
 vi.mock('../components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenSystemFlyout = vi.fn();
 const mockReportEvent = vi.fn();

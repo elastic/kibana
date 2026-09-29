@@ -16,7 +16,7 @@ import { TestProviders } from '../../../common/mock';
 
 const mockNavigateTo = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => ({
@@ -26,19 +26,19 @@ vi.mock('../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../common/hooks/integrations/use_integration_link_state', () => {
-      const mocked = {
-      useIntegrationLinkState: vi.fn(() => {}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIntegrationLinkState: vi.fn(() => {}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddPathParamToUrl = vi.fn((...args: unknown[]) => 'URL_WITH_PARAMS');
 vi.mock('../../../common/utils/integrations', () => {
-      const mocked = {
-      addPathParamToUrl: (...args: unknown[]) => mockAddPathParamToUrl(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addPathParamToUrl: (...args: unknown[]) => mockAddPathParamToUrl(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const uninstalledOktaIntegration = {
   packageInfo: {
@@ -69,11 +69,11 @@ const mockIntegrations = [uninstalledOktaIntegration, installedAdIntegration];
 const mockUseEntityAnalyticsIntegrations = vi.fn(() => mockIntegrations);
 
 vi.mock('./hooks/use_entity_analytics_integrations', () => {
-      const mocked = {
-      useEntityAnalyticsIntegrations: () => mockUseEntityAnalyticsIntegrations(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsIntegrations: () => mockUseEntityAnalyticsIntegrations(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Helper component to wrap IntegrationCards with Suspense
 const IntegrationCardsWithSuspense = (props: IntegrationCardsProps) => (

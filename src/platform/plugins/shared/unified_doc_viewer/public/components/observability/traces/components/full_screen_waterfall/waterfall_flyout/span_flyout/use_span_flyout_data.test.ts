@@ -16,21 +16,21 @@ import { useSpanFlyoutData } from './use_span_flyout_data';
 const mockUseFetchSpan = vi.fn();
 
 vi.mock('../../hooks/use_fetch_span', () => {
-      const mocked = {
-      useFetchSpan: (params: { spanId: string; traceId: string }) => mockUseFetchSpan(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSpan: (params: { spanId: string; traceId: string }) => mockUseFetchSpan(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers/is_span', () => {
-      const mocked = {
-      isSpanHit: vi.fn((hit) => {
-        if (!hit) return false;
-        return hit.flattened?.['span.id'] !== undefined;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSpanHit: vi.fn((hit) => {
+      if (!hit) return false;
+      return hit.flattened?.['span.id'] !== undefined;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useSpanFlyoutData', () => {
   const spanId = 'test-span-id';

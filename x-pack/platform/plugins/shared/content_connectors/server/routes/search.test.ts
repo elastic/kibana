@@ -16,11 +16,11 @@ import { registerSearchRoute } from './search';
 import { mockDependencies, MockRouter } from '../__mocks__';
 
 vi.mock('@kbn/search-index-documents/lib', () => {
-      const mocked = {
-      fetchSearchResults: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchSearchResults: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Elasticsearch Search', () => {
   let mockRouter: MockRouter;

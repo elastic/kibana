@@ -28,9 +28,9 @@ describe('useUpdateAssociatedDsMappings', () => {
     } as any);
   });
   it('should do nothing if there no impacted data_streams', async () => {
-    vi
-      .mocked(useComponentTemplatesContext().api.getComponentTemplateDatastreams)
-      .mockResolvedValue({ data: { data_streams: [] }, error: undefined });
+    vi.mocked(useComponentTemplatesContext().api.getComponentTemplateDatastreams).mockResolvedValue(
+      { data: { data_streams: [] }, error: undefined }
+    );
 
     const {
       result: {
@@ -54,9 +54,9 @@ describe('useUpdateAssociatedDsMappings', () => {
       data: { data_streams: [] },
     });
 
-    vi
-      .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
-      .mockReturnValue({ onClose: vi.fn() } as any);
+    vi.mocked(useComponentTemplatesContext().startServices.overlays.openModal).mockReturnValue({
+      onClose: vi.fn(),
+    } as any);
 
     const {
       result: {
@@ -83,9 +83,9 @@ describe('useUpdateAssociatedDsMappings', () => {
       data: { data_streams: [] },
     });
 
-    vi
-      .mocked(useComponentTemplatesContext().startServices.overlays.openModal)
-      .mockReturnValue({ onClose: vi.fn() } as any);
+    vi.mocked(useComponentTemplatesContext().startServices.overlays.openModal).mockReturnValue({
+      onClose: vi.fn(),
+    } as any);
 
     const {
       result: {

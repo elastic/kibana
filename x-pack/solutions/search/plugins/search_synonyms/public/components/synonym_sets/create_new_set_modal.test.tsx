@@ -17,13 +17,13 @@ import { CreateSynonymsSetModal } from './create_new_set_modal';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../../hooks/use_put_synonyms_set', () => {
-      const mocked = {
-      usePutSynonymsSet: vi.fn().mockReturnValue({
-        mutate: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePutSynonymsSet: vi.fn().mockReturnValue({
+      mutate: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CreateNewSetModal', () => {
   const conflictError = new Error('Conflict') as unknown as {

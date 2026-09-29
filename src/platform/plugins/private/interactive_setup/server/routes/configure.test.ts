@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Mocked } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
+import type { Mocked } from 'vitest';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { IRouter, RequestHandler, RequestHandlerContext, RouteConfig } from '@kbn/core/server';

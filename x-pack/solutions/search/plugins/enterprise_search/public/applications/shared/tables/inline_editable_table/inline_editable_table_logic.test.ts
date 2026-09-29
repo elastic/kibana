@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
@@ -16,6 +15,7 @@ import { vi } from 'vitest';
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import { omit } from 'lodash';
+import { vi } from 'vitest';
 
 import { InlineEditableTableLogic } from './inline_editable_table_logic';
 

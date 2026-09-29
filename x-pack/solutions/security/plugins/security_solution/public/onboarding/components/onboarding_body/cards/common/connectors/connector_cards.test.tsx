@@ -18,38 +18,38 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 
 vi.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types');
 vi.mock('@kbn/elastic-assistant/impl/connectorland/use_load_action_types', () => {
-      const mocked = {
-      useLoadActionTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadActionTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          settings: {
-            client: { get: vi.fn() },
-          },
-          http: {
-            get: vi.fn(),
-          },
-          notifications: {
-            toasts: {
-              addDanger: vi.fn(),
-              addSuccess: vi.fn(),
-            },
-          },
-          triggersActionsUi: {
-            actionTypeRegistry: {
-              get: vi.fn(() => ({ iconClass: 'testIcon' })),
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        settings: {
+          client: { get: vi.fn() },
+        },
+        http: {
+          get: vi.fn(),
+        },
+        notifications: {
+          toasts: {
+            addDanger: vi.fn(),
+            addSuccess: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: vi.fn(() => ({ iconClass: 'testIcon' })),
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConnectors: AIConnector[] = [
   createMockActionConnector({

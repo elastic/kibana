@@ -20,11 +20,11 @@ import type { DataViewBase } from '@kbn/es-query';
 
 vi.mock('../../lib/kibana');
 vi.mock('../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EntryItem', () => {
   test('it renders field labels if "showLabel" is "true"', () => {

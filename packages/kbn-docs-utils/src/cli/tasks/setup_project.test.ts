@@ -18,11 +18,11 @@ import type { FindPluginsOptions } from '../../find_plugins';
 
 // Mock dependencies - order matters: mock get_all_doc_file_ids first to prevent globby from loading
 vi.mock('../../mdx/get_all_doc_file_ids', () => {
-      const mocked = {
-      getAllDocFileIds: vi.fn(() => Promise.resolve([])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllDocFileIds: vi.fn(() => Promise.resolve([])),
+  };
+  return { ...mocked, default: mocked };
+});
 // Mock fs before @kbn/repo-info since it uses fs internally
 // Use jest.requireActual to preserve all fs functions that globby needs
 vi.mock('fs', () => {
@@ -41,20 +41,20 @@ vi.mock('fs', () => {
   };
 });
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../find_plugins');
 vi.mock('../../get_paths_by_package');
 vi.mock('fs/promises', () => {
-      const mocked = {
-      rm: vi.fn(() => Promise.resolve()),
-      mkdir: vi.fn(() => Promise.resolve()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    rm: vi.fn(() => Promise.resolve()),
+    mkdir: vi.fn(() => Promise.resolve()),
+  };
+  return { ...mocked, default: mocked };
+});
 // Mock ts-morph to avoid Node.js internals access issues in Jest
 vi.mock('ts-morph', () => {
   const mockProject = {
@@ -131,7 +131,7 @@ describe('setupProject', () => {
   });
 
   it('collects initial doc IDs when output folder exists and no plugin filter', async () => {
-    const Fs = (await vi.importMock('fs'));
+    const Fs = await vi.importMock('fs');
     Fs.existsSync.mockReturnValue(true);
     (getAllDocFileIds as Mock).mockResolvedValue(['doc1', 'doc2']);
 
@@ -145,7 +145,7 @@ describe('setupProject', () => {
   });
 
   it('does not collect initial doc IDs when plugin filter is provided', async () => {
-    const Fs = (await vi.importMock('fs'));
+    const Fs = await vi.importMock('fs');
     Fs.existsSync.mockReturnValue(true);
 
     const mockPlugin = {
@@ -201,7 +201,7 @@ describe('setupProject', () => {
   });
 
   it('scopes TypeScript project to single plugin directory when pluginFilter has one plugin', async () => {
-    const { Project } = (await vi.importMock('ts-morph'));
+    const { Project } = await vi.importMock('ts-morph');
     const mockProject = Project();
 
     vi.clearAllMocks();
@@ -246,7 +246,7 @@ describe('setupProject', () => {
   });
 
   it('loads full codebase and resolves dependencies when no pluginFilter', async () => {
-    const { Project } = (await vi.importMock('ts-morph'));
+    const { Project } = await vi.importMock('ts-morph');
     const mockProject = Project();
 
     vi.clearAllMocks();

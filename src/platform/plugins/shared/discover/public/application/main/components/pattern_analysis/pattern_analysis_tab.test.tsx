@@ -22,21 +22,21 @@ const dataView = dataViewWithTimefieldMock;
 
 // Mock the PatternAnalysisTable component to make testing easier
 vi.mock('./pattern_analysis_table', () => {
-      const mocked = {
-      PatternAnalysisTable: vi.fn(({ savedSearch }) => (
-        <div data-test-subj="mockPatternAnalysisTable">
-          <div data-test-subj="searchSourceData">
-            {JSON.stringify({
-              query: savedSearch?.searchSource?.getSerializedFields?.()?.query,
-              filters: savedSearch?.searchSource?.getSerializedFields?.()?.filter,
-              dataViewId: savedSearch?.searchSource?.getSerializedFields?.()?.index,
-            })}
-          </div>
+  const mocked = {
+    PatternAnalysisTable: vi.fn(({ savedSearch }) => (
+      <div data-test-subj="mockPatternAnalysisTable">
+        <div data-test-subj="searchSourceData">
+          {JSON.stringify({
+            query: savedSearch?.searchSource?.getSerializedFields?.()?.query,
+            filters: savedSearch?.searchSource?.getSerializedFields?.()?.filter,
+            dataViewId: savedSearch?.searchSource?.getSerializedFields?.()?.index,
+          })}
         </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PatternAnalysisTab', () => {
   beforeEach(() => {

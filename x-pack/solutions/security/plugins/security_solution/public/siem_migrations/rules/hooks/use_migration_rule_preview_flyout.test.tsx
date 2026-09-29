@@ -15,13 +15,13 @@ import { migrationRules } from '../__mocks__/migration_rules';
 import { useMigrationRuleDetailsFlyout } from './use_migration_rule_preview_flyout';
 
 vi.mock('../components/rule_details_flyout', () => {
-      const mocked = {
-      MigrationRuleDetailsFlyout: (props: { children: React.ReactNode }) => (
-        <div data-test-subj="migration-rule-details-flyout">{props.children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationRuleDetailsFlyout: (props: { children: React.ReactNode }) => (
+      <div data-test-subj="migration-rule-details-flyout">{props.children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMigrationRuleDetailsFlyout', () => {
   const mockRule = migrationRules[0];

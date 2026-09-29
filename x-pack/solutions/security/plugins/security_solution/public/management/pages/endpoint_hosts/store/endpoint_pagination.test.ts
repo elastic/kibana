@@ -36,12 +36,12 @@ import { getEndpointListPath } from '../../../common/routing';
 import { HOST_METADATA_LIST_ROUTE } from '../../../../../common/endpoint/constants';
 
 vi.mock('../../../services/policies/ingest', () => {
-      const mocked = {
-      sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
-      sendGetEndpointSecurityPackage: () => Promise.resolve({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetAgentPolicyList: () => Promise.resolve({ items: [] }),
+    sendGetEndpointSecurityPackage: () => Promise.resolve({}),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('endpoint list pagination: ', () => {
   let fakeCoreStart: Mocked<CoreStart>;
   let depsStart: DepsStartMock;

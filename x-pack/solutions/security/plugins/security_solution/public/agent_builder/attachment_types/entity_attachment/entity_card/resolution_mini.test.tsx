@@ -17,29 +17,26 @@ import { ResolutionMini } from './resolution_mini';
 vi.mock(
   '../../../../entity_analytics/components/entity_resolution/hooks/use_resolution_group',
   () => {
-      const mocked = {
-        useResolutionGroup: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useResolutionGroup: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
-vi.mock(
-  '../../../../entity_analytics/components/entity_resolution/resolution_group_table',
-  () => {
-      const mocked = {
-        ResolutionGroupTable: (props: Record<string, unknown>) => (
-          <div
-            data-test-subj="resolutionGroupTableMock"
-            data-target-id={String(props.targetEntityId ?? '')}
-            data-show-actions={String(props.showActions)}
-            data-current-id={String(props.currentEntityId ?? '')}
-          />
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../entity_analytics/components/entity_resolution/resolution_group_table', () => {
+  const mocked = {
+    ResolutionGroupTable: (props: Record<string, unknown>) => (
+      <div
+        data-test-subj="resolutionGroupTableMock"
+        data-target-id={String(props.targetEntityId ?? '')}
+        data-show-actions={String(props.showActions)}
+        data-current-id={String(props.currentEntityId ?? '')}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseResolutionGroup = useResolutionGroup as Mock;
 

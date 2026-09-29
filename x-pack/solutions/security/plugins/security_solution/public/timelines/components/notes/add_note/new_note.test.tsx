@@ -13,11 +13,11 @@ import React from 'react';
 import { NewNote } from './new_note';
 
 vi.mock('../../../../common/hooks/use_upselling', () => {
-      const mocked = {
-      useUpsellingMessage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpsellingMessage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('NewNote', () => {
   const note = 'The contents of a new note';

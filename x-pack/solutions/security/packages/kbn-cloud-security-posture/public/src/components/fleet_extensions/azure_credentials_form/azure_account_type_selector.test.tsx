@@ -21,27 +21,27 @@ vi.spyOn(cloudSetupContext, 'useCloudSetup').mockImplementation(mockUseCloudSetu
 
 // Mock the updatePolicyWithInputs utility
 vi.mock('../utils', () => {
-      const mocked = {
-      updatePolicyWithInputs: vi.fn((policy, policyType, inputs) => ({
-        ...policy,
-        inputs: [
-          {
-            ...policy.inputs[0],
-            streams: [
-              {
-                ...policy.inputs[0].streams[0],
-                vars: {
-                  ...policy.inputs[0].streams[0].vars,
-                  ...inputs,
-                },
+  const mocked = {
+    updatePolicyWithInputs: vi.fn((policy, policyType, inputs) => ({
+      ...policy,
+      inputs: [
+        {
+          ...policy.inputs[0],
+          streams: [
+            {
+              ...policy.inputs[0].streams[0],
+              vars: {
+                ...policy.inputs[0].streams[0].vars,
+                ...inputs,
               },
-            ],
-          },
-        ],
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+            },
+          ],
+        },
+      ],
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultMockCloudSetup = {
   isAwsCloudConnectorEnabled: false,

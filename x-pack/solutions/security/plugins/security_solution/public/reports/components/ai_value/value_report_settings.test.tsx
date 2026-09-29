@@ -13,11 +13,11 @@ import { render, fireEvent } from '@testing-library/react';
 import { ValueReportSettings } from './value_report_settings';
 import { useNavigation } from '@kbn/security-solution-navigation';
 vi.mock('@kbn/security-solution-navigation', () => {
-      const mocked = {
-      useNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseNavigation = useNavigation as MockedFunction<typeof useNavigation>;
 

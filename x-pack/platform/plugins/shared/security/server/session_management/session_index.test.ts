@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
 import type {
   BulkResponse,
@@ -16,6 +14,7 @@ import type {
   OpenPointInTimeResponse,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { vi } from 'vitest';
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';

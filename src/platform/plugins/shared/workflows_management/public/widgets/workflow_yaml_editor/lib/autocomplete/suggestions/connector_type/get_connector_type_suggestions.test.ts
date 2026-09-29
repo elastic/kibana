@@ -16,25 +16,25 @@ import { getConnectorTypeSuggestions } from './get_connector_type_suggestions';
 
 // Mock the dependencies
 vi.mock('../../../connectors_cache', () => {
-      const mocked = {
-      getCachedAllConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../snippets/generate_builtin_step_snippet', () => {
-      const mocked = {
-      generateBuiltInStepSnippet: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateBuiltInStepSnippet: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../snippets/generate_connector_snippet', () => {
-      const mocked = {
-      generateConnectorSnippet: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateConnectorSnippet: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getCachedAllConnectors } from '../../../connectors_cache';
 import { generateBuiltInStepSnippet } from '../../../snippets/generate_builtin_step_snippet';

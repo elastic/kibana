@@ -15,38 +15,38 @@ import { RuleProvider } from '../rule_context';
 import type { RuleApiResponse } from '../../../services/rules_api';
 
 vi.mock('./alert_timeline/alert_timeline_section', () => {
-      const mocked = {
-      AlertTimelineSection: () => <div data-test-subj="alertTimelineSectionMock">timeline</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertTimelineSection: () => <div data-test-subj="alertTimelineSectionMock">timeline</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./signal_rule_overview', () => {
-      const mocked = {
-      SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SignalRuleOverview: () => <div data-test-subj="signalRuleOverviewMock">signal</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./artifacts', () => {
-      const mocked = {
-      ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
-      SignalArtifactsSection: () => (
-        <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ArtifactsSection: () => <div data-test-subj="artifactsSectionMock">artifacts</div>,
+    SignalArtifactsSection: () => (
+      <div data-test-subj="signalArtifactsSectionMock">signal artifacts</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCanRead = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: () => ({ canRead: mockCanRead }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: () => ({ canRead: mockCanRead }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

@@ -54,26 +54,26 @@ const getEmptySavedObjectConfiguration = () => ({
 });
 
 vi.mock('@kbn/alerting-plugin/server', () => {
-      const mocked = {
-      createOrUpdateComponentTemplate: vi.fn(),
-      createOrUpdateIndexTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateComponentTemplate: vi.fn(),
+    createOrUpdateIndexTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/create_datastream', () => {
-      const mocked = {
-      createDataStream: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createDataStream: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/create_or_update_index', () => {
-      const mocked = {
-      createOrUpdateIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());
 vi.spyOn(transforms, 'scheduleTransformNow').mockResolvedValue(Promise.resolve());
@@ -244,9 +244,9 @@ describe('RiskEngineDataClient', () => {
           return Promise.resolve(getSavedObjectConfiguration().saved_objects[0]);
         });
 
-        vi
-          .spyOn(savedObjectConfig, 'initSavedObjects')
-          .mockResolvedValue({} as unknown as SavedObject<RiskEngineConfiguration>);
+        vi.spyOn(savedObjectConfig, 'initSavedObjects').mockResolvedValue(
+          {} as unknown as SavedObject<RiskEngineConfiguration>
+        );
       });
 
       afterEach(() => {

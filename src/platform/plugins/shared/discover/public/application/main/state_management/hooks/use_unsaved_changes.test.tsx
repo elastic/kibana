@@ -27,7 +27,7 @@ import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 const mockSelectHasUnsavedChanges = vi.mocked(selectHasUnsavedChanges);
 
 vi.mock('../redux/selectors', async () => {
-  const originalModule = (await vi.importActual('../redux/selectors'));
+  const originalModule = await vi.importActual('../redux/selectors');
   return {
     ...originalModule,
     selectHasUnsavedChanges: vi.fn(originalModule.selectHasUnsavedChanges),

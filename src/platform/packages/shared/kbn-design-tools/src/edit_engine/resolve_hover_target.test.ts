@@ -14,31 +14,31 @@ import { makeRect } from '../lib/tests/helpers';
 
 const mockGetElementUnder = vi.fn<HTMLElement | null, [number, number]>();
 vi.mock('../lib/dom/get_element_under', () => {
-      const mocked = {
-      getElementUnder: (x: number, y: number) => mockGetElementUnder(x, y),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getElementUnder: (x: number, y: number) => mockGetElementUnder(x, y),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFindNearHandle = vi.fn();
 vi.mock('./resize_helpers', () => {
-      const mocked = {
-      findNearHandle: (...args: unknown[]) => mockFindNearHandle(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findNearHandle: (...args: unknown[]) => mockFindNearHandle(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsInRoundedDeadZone = vi.fn<boolean, [number, number, DOMRect]>();
 const mockHasSignificantRounding = vi.fn<boolean, [HTMLElement]>();
 vi.mock('./rounded_dead_zone', () => {
-      const mocked = {
-      isInRoundedDeadZone: (...args: unknown[]) =>
-        mockIsInRoundedDeadZone(...(args as [number, number, DOMRect])),
-      hasSignificantRounding: (...args: unknown[]) =>
-        mockHasSignificantRounding(...(args as [HTMLElement])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInRoundedDeadZone: (...args: unknown[]) =>
+      mockIsInRoundedDeadZone(...(args as [number, number, DOMRect])),
+    hasSignificantRounding: (...args: unknown[]) =>
+      mockHasSignificantRounding(...(args as [HTMLElement])),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resolveHoverTarget', () => {
   let currentTarget: HTMLElement;

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 
-import { BehaviorSubject } from 'rxjs';
 import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';

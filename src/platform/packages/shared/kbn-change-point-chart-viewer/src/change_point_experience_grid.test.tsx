@@ -22,47 +22,47 @@ import type { UnifiedChangePointGridProps } from './types';
 vi.mock('@elastic/apm-rum');
 
 vi.mock('@kbn/unified-histogram', () => {
-      const mocked = {
-      // Render children directly so we can test the grid content in isolation.
-      ChartSectionTemplate: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Render children directly so we can test the grid content in isolation.
+    ChartSectionTemplate: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getChangePointSeriesColumns: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getChangePointSeriesColumns: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/derive_change_point_cards', () => {
-      const mocked = {
-      buildChangePointCards: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildChangePointCards: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/get_esql_query', () => {
-      const mocked = {
-      getEsqlQuery: vi.fn().mockReturnValue('FROM logs-* | CHANGE_POINT count ON @timestamp'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsqlQuery: vi.fn().mockReturnValue('FROM logs-* | CHANGE_POINT count ON @timestamp'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Stub out ChangePointExperienceGridContent so happy-path tests don't need Lens.
 vi.mock('./change_point_experience_grid_content', () => {
-      const mocked = {
-      ChangePointExperienceGridContent: () => (
-        <div data-test-subj="changePointExperienceGridContent">grid content stub</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangePointExperienceGridContent: () => (
+      <div data-test-subj="changePointExperienceGridContent">grid content stub</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render EuiDelayRender children immediately to avoid timer flakiness in loading tests.
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiDelayRender: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
@@ -124,7 +124,9 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
 
   afterEach(async () => {
     vi.restoreAllMocks();
-    (await vi.importMock('./utils/derive_change_point_cards')).buildChangePointCards.mockReturnValue([]);
+    (
+      await vi.importMock('./utils/derive_change_point_cards')
+    ).buildChangePointCards.mockReturnValue([]);
   });
 
   it('renders the grid without errors under normal conditions', () => {
@@ -139,10 +141,11 @@ describe('ChangePointExperienceGrid error boundary integration', () => {
   it('shows the section error boundary UI instead of crashing when buildChangePointCards throws', async () => {
     // Simulate the kind of synchronous render-time crash the error boundary is there to catch
     // (e.g. malformed data, unexpected null reference inside a memoised helper).
-    (await vi.importMock('./utils/derive_change_point_cards'))
-      .buildChangePointCards.mockImplementation(() => {
-        throw new Error('Simulated crash in buildChangePointCards');
-      });
+    (
+      await vi.importMock('./utils/derive_change_point_cards')
+    ).buildChangePointCards.mockImplementation(() => {
+      throw new Error('Simulated crash in buildChangePointCards');
+    });
 
     renderWithBoundary();
 

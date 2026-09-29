@@ -24,107 +24,107 @@ const mockUseTimeRange = vi.fn();
 const mockUseLocalStorage = vi.fn();
 
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-      isPending: vi.fn((status) => status === 'loading'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+    isPending: vi.fn((status) => status === 'loading'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_progressive_fetcher', () => {
-      const mocked = {
-      useProgressiveFetcher: () => mockUseProgressiveFetcher(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProgressiveFetcher: () => mockUseProgressiveFetcher(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => mockUseApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => mockUseApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => mockUseTimeRange(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => mockUseTimeRange(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_local_storage', () => {
-      const mocked = {
-      useLocalStorage: () => mockUseLocalStorage(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocalStorage: () => mockUseLocalStorage(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('../../shared/environment_filter', () => {
-      const mocked = {
-      ApmEnvironmentFilter: () => <div data-test-subj="environment-filter">Environment Filter</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmEnvironmentFilter: () => <div data-test-subj="environment-filter">Environment Filter</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./index_lifecycle_phase_select', () => {
-      const mocked = {
-      IndexLifecyclePhaseSelect: () => (
-        <div data-test-subj="lifecycle-phase-select">Lifecycle Phase Select</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IndexLifecyclePhaseSelect: () => (
+      <div data-test-subj="lifecycle-phase-select">Lifecycle Phase Select</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./summary_stats', () => {
-      const mocked = {
-      SummaryStats: ({ summaryStatsData }: { summaryStatsData: any }) => (
-        <div data-test-subj="summary-stats">
-          Summary Stats: {summaryStatsData ? 'with data' : 'no data'}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SummaryStats: ({ summaryStatsData }: { summaryStatsData: any }) => (
+      <div data-test-subj="summary-stats">
+        Summary Stats: {summaryStatsData ? 'with data' : 'no data'}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./storage_chart', () => {
-      const mocked = {
-      StorageChart: () => <div data-test-subj="storage-chart">Storage Chart</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StorageChart: () => <div data-test-subj="storage-chart">Storage Chart</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services_table', () => {
-      const mocked = {
-      ServicesTable: ({ summaryStatsData, loadingSummaryStats }: any) => (
-        <div data-test-subj="services-table">
-          Services Table: {loadingSummaryStats ? 'loading' : 'loaded'}, Data:{' '}
-          {summaryStatsData ? 'present' : 'absent'}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServicesTable: ({ summaryStatsData, loadingSummaryStats }: any) => (
+      <div data-test-subj="services-table">
+        Services Table: {loadingSummaryStats ? 'loading' : 'loaded'}, Data:{' '}
+        {summaryStatsData ? 'present' : 'absent'}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./prompts/permission_denied', () => {
-      const mocked = {
-      PermissionDenied: () => <div data-test-subj="permission-denied">Permission Denied</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PermissionDenied: () => <div data-test-subj="permission-denied">Permission Denied</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./resources/tips_and_resources', () => {
-      const mocked = {
-      TipsAndResources: () => <div data-test-subj="tips-and-resources">Tips and Resources</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TipsAndResources: () => <div data-test-subj="tips-and-resources">Tips and Resources</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (
@@ -154,10 +154,7 @@ describe('StorageExplorer', () => {
     end: '2023-01-02T00:00:00Z',
   };
 
-  const defaultLocalStorage = [
-    { crossClusterSearch: false, optimizePerformance: false },
-    vi.fn(),
-  ];
+  const defaultLocalStorage = [{ crossClusterSearch: false, optimizePerformance: false }, vi.fn()];
 
   beforeEach(() => {
     vi.clearAllMocks();

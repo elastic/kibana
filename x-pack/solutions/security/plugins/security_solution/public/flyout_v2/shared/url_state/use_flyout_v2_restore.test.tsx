@@ -33,11 +33,11 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/ty
 vi.mock('../../use_flyout_api');
 vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
 vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
-      const mocked = {
-      useEsDocSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsDocSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../data_view_manager/hooks/use_data_view');
 
 const mockFlyoutApi = createFlyoutApiMock();

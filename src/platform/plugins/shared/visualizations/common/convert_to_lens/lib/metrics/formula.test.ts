@@ -24,7 +24,7 @@ const mockGetFieldByName = vi.fn();
 const originalGetFieldByName = stubLogstashDataView.getFieldByName;
 
 vi.mock('../utils', async () => {
-  const utils = (await vi.importActual('../utils'));
+  const utils = await vi.importActual('../utils');
   return {
     ...utils,
     getFieldNameFromField: vi.fn((field) => field),

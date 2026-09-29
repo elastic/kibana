@@ -22,18 +22,20 @@ import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_inte
 import { getUserInfo } from '../../lib/get_user_info';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/get_user_info', () => {
-      const mocked = {
-      getUserInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUserInfo: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchAllItems = (items: unknown[] = []) =>
   vi.fn().mockResolvedValue(
@@ -3846,9 +3848,7 @@ describe('updatePackRoute', () => {
       delete (siblingPolicy.inputs[0].config.osquery.value.packs as Record<string, unknown>)[
         'default--my-pack'
       ];
-      const packagePolicyList = vi
-        .fn()
-        .mockResolvedValue({ items: [legacyPolicy, siblingPolicy] });
+      const packagePolicyList = vi.fn().mockResolvedValue({ items: [legacyPolicy, siblingPolicy] });
 
       (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockClient);
 

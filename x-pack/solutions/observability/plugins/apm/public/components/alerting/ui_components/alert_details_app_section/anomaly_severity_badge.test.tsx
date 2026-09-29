@@ -14,7 +14,7 @@ import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { AnomalySeverityBadge } from './anomaly_severity_badge';
 
 vi.mock('@kbn/ml-anomaly-utils', async () => {
-  const { getSeverityColor } = (await vi.importActual('@kbn/ml-anomaly-utils/get_severity_color'));
+  const { getSeverityColor } = await vi.importActual('@kbn/ml-anomaly-utils/get_severity_color');
 
   return {
     useSeverityColor: getSeverityColor,

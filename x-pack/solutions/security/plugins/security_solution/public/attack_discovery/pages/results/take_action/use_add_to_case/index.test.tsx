@@ -15,21 +15,21 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { TestProviders } from '../../../../../common/mock';
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          cases: {
-            hooks: {
-              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
-                open: vi.fn(),
-              }),
-            },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
+              open: vi.fn(),
+            }),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAddToCase', () => {
   const mockCanUserCreateAndReadCases = vi.fn();

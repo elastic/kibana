@@ -20,33 +20,33 @@ import type {
 import { getRouteContextMock } from '../../mocks/route_context_mock';
 
 vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
-      const mocked = {
-      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../telemetry/monitor_upgrade_sender', () => {
-      const mocked = {
-      sendTelemetryEvents: vi.fn(),
-      formatTelemetryUpdateEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendTelemetryEvents: vi.fn(),
+    formatTelemetryUpdateEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Only used by editSyntheticsMonitorRoute (not syncEditedMonitor, tested below),
 // mocked here to reach the route's space-authorization check without exercising
 // the full monitor/location validation and normalization pipeline.
 vi.mock('./monitor_locations_utils', () => {
-      const mocked = {
-      assertCanPerformMonitorBulkActionInAllSpaces: vi.fn(),
-      validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanPerformMonitorBulkActionInAllSpaces: vi.fn(),
+    validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./monitor_validation', async () => {
-  const actual = (await vi.importActual('./monitor_validation'));
+  const actual = await vi.importActual('./monitor_validation');
   return {
     ...actual,
     validateMonitor: vi.fn(),
@@ -55,12 +55,12 @@ vi.mock('./monitor_validation', async () => {
 });
 
 vi.mock('./formatters/saved_object_to_monitor', () => {
-      const mocked = {
-      mergeSourceMonitor: vi.fn(),
-      mapSavedObjectToMonitor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mergeSourceMonitor: vi.fn(),
+    mapSavedObjectToMonitor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('syncEditedMonitor', () => {
   const editedMonitor = {
@@ -199,7 +199,7 @@ describe('editSyntheticsMonitorRoute', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
 
-    const { validateMonitor, normalizeAPIConfig } = (await vi.importMock('./monitor_validation'));
+    const { validateMonitor, normalizeAPIConfig } = await vi.importMock('./monitor_validation');
     normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
     validateMonitor.mockImplementation((m: Record<string, unknown>) => ({
       valid: true,
@@ -212,7 +212,7 @@ describe('editSyntheticsMonitorRoute', () => {
     // Drop the previous monitor's `locations` from the merge so the edit is
     // treated as a private-only, location-unchanged update - keeping this test
     // focused on space authorization instead of the location-parsing paths.
-    const { mergeSourceMonitor } = (await vi.importMock('./formatters/saved_object_to_monitor'));
+    const { mergeSourceMonitor } = await vi.importMock('./formatters/saved_object_to_monitor');
     mergeSourceMonitor.mockImplementation(
       (prevAttrs: Record<string, unknown>, patch: Record<string, unknown>) => {
         const { locations, ...restPrev } = prevAttrs;
@@ -222,7 +222,9 @@ describe('editSyntheticsMonitorRoute', () => {
   });
 
   it("authorizes the union of the monitor's previous and newly-submitted spaces, not just the new ones", async () => {
-    const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('./monitor_locations_utils'));
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+      './monitor_locations_utils'
+    );
     const forbidden = { status: 403 };
     assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 

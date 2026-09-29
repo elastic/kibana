@@ -15,18 +15,18 @@ import { ensureGlobalAnonymizationProfile } from './global_profile_initializer';
 import { migrateLegacyUiSettingsIntoGlobalProfile } from './legacy_ui_settings_migration';
 
 vi.mock('./global_profile_initializer', () => {
-      const mocked = {
-      ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./legacy_ui_settings_migration', () => {
-      const mocked = {
-      migrateLegacyUiSettingsIntoGlobalProfile: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    migrateLegacyUiSettingsIntoGlobalProfile: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ensureGlobalProfileForNamespace', () => {
   const logger = loggingSystemMock.createLogger();

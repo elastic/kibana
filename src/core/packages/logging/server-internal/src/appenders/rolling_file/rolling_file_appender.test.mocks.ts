@@ -16,49 +16,49 @@ export const LayoutsMock = {
   configSchema: schema.any(),
 };
 vi.doMock('../../layouts/layouts', () => {
-      const mocked = {
-      Layouts: LayoutsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Layouts: LayoutsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createTriggeringPolicyMock = vi.fn();
 vi.doMock('./policies', () => {
-      const mocked = {
-      triggeringPolicyConfigSchema: schema.any(),
-      createTriggeringPolicy: createTriggeringPolicyMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggeringPolicyConfigSchema: schema.any(),
+    createTriggeringPolicy: createTriggeringPolicyMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createRollingStrategyMock = vi.fn();
 vi.doMock('./strategies', () => {
-      const mocked = {
-      rollingStrategyConfigSchema: schema.any(),
-      createRollingStrategy: createRollingStrategyMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    rollingStrategyConfigSchema: schema.any(),
+    createRollingStrategy: createRollingStrategyMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const RollingFileManagerMock = vi.fn();
 vi.doMock('./rolling_file_manager', () => {
-      const mocked = {
-      RollingFileManager: RollingFileManagerMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RollingFileManager: RollingFileManagerMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const RollingFileContextMock = vi.fn();
 vi.doMock('./rolling_file_context', () => {
-      const mocked = {
-      RollingFileContext: RollingFileContextMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RollingFileContext: RollingFileContextMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createRetentionPolicyMock = vi.fn();
 vi.doMock('./retention', async () => {
-  const actual = (await vi.importActual('./retention'));
+  const actual = await vi.importActual('./retention');
   return {
     ...actual,
     createRetentionPolicy: createRetentionPolicyMock,

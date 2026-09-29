@@ -8,14 +8,14 @@
 import { vi } from 'vitest';
 
 vi.mock('../../store/actions', () => {
-      const mocked = {
-      getAutoFollowPattern: vi.fn(() => ({ type: 'MOCK/GET_AUTO_FOLLOW_PATTERN' })),
-      updateAutoFollowPattern: vi.fn(() => ({ type: 'MOCK/UPDATE_AUTO_FOLLOW_PATTERN' })),
-      selectEditAutoFollowPattern: vi.fn(() => ({ type: 'MOCK/SELECT_EDIT_AUTO_FOLLOW_PATTERN' })),
-      clearApiError: vi.fn((scope: string) => ({ type: 'MOCK/CLEAR_API_ERROR', payload: scope })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAutoFollowPattern: vi.fn(() => ({ type: 'MOCK/GET_AUTO_FOLLOW_PATTERN' })),
+    updateAutoFollowPattern: vi.fn(() => ({ type: 'MOCK/UPDATE_AUTO_FOLLOW_PATTERN' })),
+    selectEditAutoFollowPattern: vi.fn(() => ({ type: 'MOCK/SELECT_EDIT_AUTO_FOLLOW_PATTERN' })),
+    clearApiError: vi.fn((scope: string) => ({ type: 'MOCK/CLEAR_API_ERROR', payload: scope })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { mapDispatchToProps } from './auto_follow_pattern_edit.container';
 import {

@@ -18,17 +18,19 @@ import { buildPolicyIdKuery } from '../../common/utils/build_policy_id_kuery';
 
 vi.mock('../common/lib/kibana');
 vi.mock('../common/hooks/use_error_toast', () => {
-      const mocked = {
-      useErrorToast: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorToast: () => vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_osquery_policies', () => {
-      const mocked = {
-      useOsqueryPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOsqueryPolicies: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 const useOsqueryPoliciesMock = useOsqueryPolicies as MockedFunction<typeof useOsqueryPolicies>;

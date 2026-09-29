@@ -14,25 +14,25 @@ import { ResponseActions } from './response_actions';
 import { ResponseMessage } from './response_message';
 
 vi.mock('./chat_message_text', () => {
-      const mocked = {
-      ChatMessageText: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChatMessageText: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./streaming_text', () => {
-      const mocked = {
-      StreamingText: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StreamingText: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./response_actions', () => {
-      const mocked = {
-      ResponseActions: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponseActions: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const responseActionsMock = vi.mocked(ResponseActions);
 

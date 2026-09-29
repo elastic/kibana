@@ -42,8 +42,7 @@ vi.mock('../../../common/lib/kibana');
 const mockUsePerformUpgradeRules = usePerformUpgradeRules as Mock;
 const mockUsePrebuiltRulesUpgradeReview = usePrebuiltRulesUpgradeReview as Mock;
 const mockUsePrebuiltRulesCustomizationStatus = usePrebuiltRulesCustomizationStatus as Mock;
-const mockUseIsInitializingPrebuiltRulesPackage =
-  useIsInitializingPrebuiltRulesPackage as Mock;
+const mockUseIsInitializingPrebuiltRulesPackage = useIsInitializingPrebuiltRulesPackage as Mock;
 const mockUseOutdatedMlJobsUpgradeModal = useOutdatedMlJobsUpgradeModal as Mock;
 const mockUseUpgradeWithConflictsModal = useUpgradeWithConflictsModal as Mock;
 

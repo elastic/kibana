@@ -15,11 +15,11 @@ import { getColumnState } from '.';
 const mockGetPalette = vi.fn();
 
 vi.mock('../palette', () => {
-      const mocked = {
-      getPalette: vi.fn(() => mockGetPalette()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPalette: vi.fn(() => mockGetPalette()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getColumnState', () => {
   beforeEach(() => {

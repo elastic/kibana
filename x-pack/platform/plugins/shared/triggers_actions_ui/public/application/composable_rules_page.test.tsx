@@ -21,11 +21,11 @@ import type { ClassicRulesPageInternalDeps } from './classic_rules_page';
 import type { TriggersAndActionsUiServices } from './rules_app';
 
 vi.mock('./rules_page_app', () => {
-      const mocked = {
-      RulesPageApp: vi.fn(() => <div data-test-subj="rulesPageApp" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesPageApp: vi.fn(() => <div data-test-subj="rulesPageApp" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rulesPageAppMock = RulesPageApp as MockedFunction<typeof RulesPageApp>;
 

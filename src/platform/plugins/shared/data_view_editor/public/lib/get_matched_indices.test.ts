@@ -14,11 +14,11 @@ import type { Tag } from '@kbn/data-views-plugin/public/types';
 import { getMatchedIndices } from './get_matched_indices';
 
 vi.mock('../constants', () => {
-      const mocked = {
-      MAX_NUMBER_OF_MATCHING_INDICES: 6,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MAX_NUMBER_OF_MATCHING_INDICES: 6,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const tags: Tag[] = [];
 const indices = [

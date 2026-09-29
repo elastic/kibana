@@ -18,11 +18,11 @@ import { updateFlappingSettingsRoute } from './update_flapping_settings';
 let rulesSettingsClient: RulesSettingsClientMock;
 
 vi.mock('../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -75,8 +75,7 @@ describe('updateFlappingSettingsRoute', () => {
     await handler(context, req, res);
 
     expect(rulesSettingsClient.flapping().update).toHaveBeenCalledTimes(1);
-    expect((rulesSettingsClient.flapping().update as Mock).mock.calls[0])
-      .toMatchInlineSnapshot(`
+    expect((rulesSettingsClient.flapping().update as Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "enabled": false,

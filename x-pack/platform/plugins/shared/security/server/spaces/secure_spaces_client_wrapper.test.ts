@@ -138,9 +138,7 @@ const setup = ({ securityEnabled = false }: Opts = {}) => {
   };
 };
 
-const expectNoAuthorizationCheck = (
-  authorization: Mocked<AuthorizationServiceSetupInternal>
-) => {
+const expectNoAuthorizationCheck = (authorization: Mocked<AuthorizationServiceSetupInternal>) => {
   expect(authorization.checkPrivilegesDynamicallyWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkPrivilegesWithRequest).not.toHaveBeenCalled();
   expect(authorization.checkSavedObjectsPrivilegesWithRequest).not.toHaveBeenCalled();

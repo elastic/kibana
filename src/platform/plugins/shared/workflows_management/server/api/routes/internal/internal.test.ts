@@ -49,9 +49,7 @@ describe('Internal Routes', () => {
 
   let routeHandlers: Record<string, { handler: MockRouteHandler }>;
   let mockApi: {
-    disableAllWorkflows: MockedFunction<
-      (spaceId: string, request: unknown) => Promise<unknown>
-    >;
+    disableAllWorkflows: MockedFunction<(spaceId: string, request: unknown) => Promise<unknown>>;
     getHistoryForWorkflow: Mock;
     restoreWorkflowVersion: Mock;
   };

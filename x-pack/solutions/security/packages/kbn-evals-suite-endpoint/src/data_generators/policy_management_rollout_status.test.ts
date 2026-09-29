@@ -34,12 +34,12 @@ import {
 vi.mock(
   '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy',
   () => {
-      const mocked = {
-        indexFleetEndpointPolicy: vi.fn(),
-        deleteIndexedFleetEndpointPolicies: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      indexFleetEndpointPolicy: vi.fn(),
+      deleteIndexedFleetEndpointPolicies: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const createLog = (): Mocked<ToolingLog> =>

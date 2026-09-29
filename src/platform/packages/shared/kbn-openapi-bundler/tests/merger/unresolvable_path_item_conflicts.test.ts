@@ -60,11 +60,11 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
     ],
   ])('throws an error when path items %s do not match', async (_, spec1, spec2) => {
     await expect(
-            mergeSpecs({
-              1: spec1,
-              2: spec2,
-            })
-          ).rejects.toThrow(/value .+ doesn't match to already encountered/);
+      mergeSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    ).rejects.toThrow(/value .+ doesn't match to already encountered/);
   });
 
   it("throws an error when path item's parameters do not match", async () => {
@@ -101,11 +101,11 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
     });
 
     await expect(
-            mergeSpecs({
-              1: spec1,
-              2: spec2,
-            })
-          ).rejects.toThrow('definition is duplicated and differs from previously encountered');
+      mergeSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    ).rejects.toThrow('definition is duplicated and differs from previously encountered');
   });
 
   it('throws an error when path item has a top level $ref', async () => {
@@ -132,10 +132,10 @@ describe('OpenAPI Merger - unresolvable path item object conflicts', () => {
     });
 
     await expect(
-            mergeSpecs({
-              1: spec1,
-              2: spec2,
-            })
-          ).rejects.toThrow('Path item top level $ref is not supported');
+      mergeSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    ).rejects.toThrow('Path item top level $ref is not supported');
   });
 });

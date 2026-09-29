@@ -41,15 +41,17 @@ let lastStepConfigureProps: any;
 let lastLayoutProps: any;
 
 vi.mock('../../../../../services/use_yaml', () => {
-      const mocked = {
-      useYaml: () => require('yaml'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useYaml: () => require('yaml'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../create_package_policy_page/components/steps/components/use_policies', async () => {
   return {
-    ...(await vi.importActual('../create_package_policy_page/components/steps/components/use_policies')),
+    ...(await vi.importActual(
+      '../create_package_policy_page/components/steps/components/use_policies'
+    )),
     useAllNonManagedAgentPolicies: vi
       .fn()
       .mockReturnValue([{ id: 'agent-policy-1', name: 'Agent policy 1' }]),
@@ -214,7 +216,7 @@ vi.mock('../../../../integrations/hooks', async () => {
 });
 
 vi.mock('../create_package_policy_page/components', async () => {
-  const actual = (await vi.importActual('../create_package_policy_page/components'));
+  const actual = await vi.importActual('../create_package_policy_page/components');
   return {
     ...actual,
     StepConfigurePackagePolicy: vi.fn((props) => {
@@ -226,7 +228,9 @@ vi.mock('../create_package_policy_page/components', async () => {
 
 vi.mock('../create_package_policy_page/single_page_layout/components', async () => {
   const { createElement } = require('react');
-  const { CreatePackagePolicySinglePageLayout: ActualLayout } = (await vi.importActual('../create_package_policy_page/single_page_layout/components/layout'));
+  const { CreatePackagePolicySinglePageLayout: ActualLayout } = await vi.importActual(
+    '../create_package_policy_page/single_page_layout/components/layout'
+  );
   return {
     ...(await vi.importActual('../create_package_policy_page/single_page_layout/components')),
     CreatePackagePolicySinglePageLayout: vi.fn((props) => {
@@ -237,17 +241,17 @@ vi.mock('../create_package_policy_page/single_page_layout/components', async () 
 });
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useRouteMatch: vi.fn().mockReturnValue({
-        params: {
-          packagePolicyId: 'nginx-1',
-          policyId: 'agent-policy-1',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useRouteMatch: vi.fn().mockReturnValue({
+      params: {
+        packagePolicyId: 'nginx-1',
+        policyId: 'agent-policy-1',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPackagePolicy = {
   id: 'nginx-1',

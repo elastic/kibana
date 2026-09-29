@@ -11,11 +11,11 @@ import { getErrorSampleDetails } from './get_error_sample_details';
 
 const mockGetTransaction = vi.fn();
 vi.mock('../../transactions/get_transaction', () => {
-      const mocked = {
-      getTransaction: (...args: any[]) => mockGetTransaction(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTransaction: (...args: any[]) => mockGetTransaction(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const errorHitFields = {
   _id: ['error-doc-id'],

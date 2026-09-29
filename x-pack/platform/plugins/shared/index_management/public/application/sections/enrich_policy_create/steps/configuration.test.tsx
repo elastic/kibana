@@ -26,28 +26,28 @@ import { getLastSetStateValue, selectComboBoxOption } from './test_utils';
 // runtime fields plugin. Only the ES|QL/Painless language registration is loaded there, and that
 // pulls in every generated definition plus their i18n messages at import time.
 vi.mock('@kbn/monaco', () => {
-      const mocked = { PainlessLang: { ID: 'painless' } };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { PainlessLang: { ID: 'painless' } };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
-      CodeEditor: ({ value }: { value?: string }) => (
-        <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
+    CodeEditor: ({ value }: { value?: string }) => (
+      <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../services/api')),
-      getMatchingDataStreams: vi.fn(),
-      getMatchingIndices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../services/api')),
+    getMatchingDataStreams: vi.fn(),
+    getMatchingIndices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMatchingDataStreamsMock = vi.mocked(getMatchingDataStreams);
 const getMatchingIndicesMock = vi.mocked(getMatchingIndices);

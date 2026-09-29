@@ -32,29 +32,29 @@ const mockRegisteredStepDefinitions = new Map<string, { id: string }>([
 ]);
 
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
-      getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
+    getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getStepDefinition: (id: string) => mockRegisteredStepDefinitions.get(id),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getStepDefinition: (id: string) => mockRegisteredStepDefinitions.get(id),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      getCachedAllConnectorsMap: vi.fn().mockReturnValue(new Map()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectorsMap: vi.fn().mockReturnValue(new Map()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resolveBaseConnectorType', () => {
   describe('built-in step types preserve full type', () => {

@@ -40,19 +40,19 @@ const mockExportJsonFlyoutContent = vi.fn(
 );
 
 vi.mock('@kbn/as-code-export-flyout-component', () => {
-      const mocked = {
-      ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
-        mockExportJsonFlyoutContent(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
+      mockExportJsonFlyoutContent(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/share-plugin/public', () => {
-      const mocked = {
-      downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DashboardPanelExportJsonFlyout', () => {
   it('adapts the Dashboard panel controls and callbacks', async () => {

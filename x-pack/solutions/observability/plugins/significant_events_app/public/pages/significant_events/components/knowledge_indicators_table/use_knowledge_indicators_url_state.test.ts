@@ -18,25 +18,25 @@ const mockReplace = vi.fn();
 let mockQuery: Record<string, unknown> = {};
 
 vi.mock('../../../../hooks/use_significant_events_app_params', () => {
-      const mocked = {
-      useSignificantEventsAppParams: () => ({ query: mockQuery }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsAppParams: () => ({ query: mockQuery }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_significant_events_app_router', () => {
-      const mocked = {
-      useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebouncedValue: (value: string) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebouncedValue: (value: string) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function makeFeatureKI(
   overrides: Partial<Feature> & { uuid: string; stream_name: string } & Record<string, unknown>

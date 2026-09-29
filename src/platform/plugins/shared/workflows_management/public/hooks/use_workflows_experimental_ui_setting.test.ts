@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import {
   WORKFLOWS_EXPERIMENTAL_FEATURES_SETTING_ID,
   WORKFLOWS_UI_SHOW_EXECUTOR_SETTING_ID,
@@ -19,12 +19,12 @@ import { useWorkflowsExperimentalUiSetting } from './use_workflows_experimental_
 const mockUseUiSetting = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: (settingId: string, defaultValue?: boolean) =>
-        mockUseUiSetting(settingId, defaultValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: (settingId: string, defaultValue?: boolean) =>
+      mockUseUiSetting(settingId, defaultValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useWorkflowsExperimentalUiSetting', () => {
   beforeEach(() => {

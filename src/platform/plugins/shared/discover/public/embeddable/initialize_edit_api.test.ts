@@ -64,32 +64,26 @@ describe('initialize edit api', () => {
 
       if (useRedirect) {
         // This is the "by value with ad hoc data view" (redirect) case.
-        vi
-          .spyOn(discoverServiceMock.locator, 'getUrl')
+        vi.spyOn(discoverServiceMock.locator, 'getUrl')
           .mockClear()
           .mockResolvedValueOnce('/base/state-url-for-redirect'); // For urlWithoutLocationState
-        vi
-          .spyOn(discoverServiceMock.locator, 'getLocation')
+        vi.spyOn(discoverServiceMock.locator, 'getLocation')
           .mockClear()
           .mockResolvedValueOnce({ app: 'r', path: '/state-url-for-redirect', state: {} })
           .mockResolvedValueOnce({ app: 'r', path: '/state-url-for-redirect', state: {} });
-        vi
-          .spyOn(discoverServiceMock.core.http.basePath, 'remove')
+        vi.spyOn(discoverServiceMock.core.http.basePath, 'remove')
           .mockClear()
           .mockReturnValueOnce('/mock-url'); // For editPath (applied to getRedirectUrl result)
       } else {
         // This is a "by reference" or "by value with persisted data view" (non-redirect) case.
-        vi
-          .spyOn(discoverServiceMock.locator, 'getUrl')
+        vi.spyOn(discoverServiceMock.locator, 'getUrl')
           .mockClear()
           .mockResolvedValueOnce('/base/discover-home')
           .mockResolvedValueOnce('/base/mock-url'); // For getUrl(locatorParams) -> raw editUrl
-        vi
-          .spyOn(discoverServiceMock.core.http.basePath, 'remove')
+        vi.spyOn(discoverServiceMock.core.http.basePath, 'remove')
           .mockClear()
           .mockReturnValueOnce('/mock-url'); // For remove('/base/mock-url') -> editPath
-        vi
-          .spyOn(discoverServiceMock.locator, 'getLocation')
+        vi.spyOn(discoverServiceMock.locator, 'getLocation')
           .mockClear()
           .mockResolvedValueOnce({ app: 'discover', path: '/discover-home', state: {} })
           .mockResolvedValueOnce({ app: 'discover', path: '/mock-url', state: {} });
@@ -146,8 +140,7 @@ describe('initialize edit api', () => {
 
     it('should correctly output edit link params for by value saved search with ad hoc data view', async () => {
       // This specific test case mocks getRedirectUrl because it's unique to the redirect flow
-      vi
-        .spyOn(discoverServiceMock.locator, 'getRedirectUrl')
+      vi.spyOn(discoverServiceMock.locator, 'getRedirectUrl')
         .mockClear()
         .mockReturnValueOnce('/base/mock-url'); // This will be the raw editUrl
 

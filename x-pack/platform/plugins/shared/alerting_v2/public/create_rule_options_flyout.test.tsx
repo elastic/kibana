@@ -58,31 +58,34 @@ const createMockServices = (): AlertingV2KibanaServices => {
 
 let capturedSelectorProps: Record<string, unknown> = {};
 vi.mock('./components/rule_create_options/rule_create_options_flyout', () => {
-      const mocked = {
-      RuleCreateOptionsFlyout: (props: Record<string, unknown>) => {
-        capturedSelectorProps = props;
-        return (
-          <div data-test-subj="mockRuleCreateOptionsFlyout">
-            <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
-            <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
-            <button data-test-subj="thresholdBtn" onClick={props.onCreateThresholdRule as () => void} />
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleCreateOptionsFlyout: (props: Record<string, unknown>) => {
+      capturedSelectorProps = props;
+      return (
+        <div data-test-subj="mockRuleCreateOptionsFlyout">
+          <button data-test-subj="esqlBtn" onClick={props.onCreateEsqlRule as () => void} />
+          <button data-test-subj="agentBtn" onClick={props.onCreateWithAgent as () => void} />
+          <button
+            data-test-subj="thresholdBtn"
+            onClick={props.onCreateThresholdRule as () => void}
+          />
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedComposeProps: Record<string, unknown> = {};
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
-        capturedComposeProps = props;
-        return <div data-test-subj="mockComposeDiscoverFlyout" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
+      capturedComposeProps = props;
+      return <div data-test-subj="mockComposeDiscoverFlyout" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Collects all pending resolvers from untilPluginStartServicesReady calls so the test
 // can resolve both the useAsync call and the currentAppId$ effect in one go.
@@ -92,23 +95,23 @@ const resolveServices = (services: AlertingV2KibanaServices) => {
   pendingResolvers.length = 0;
 };
 vi.mock('./kibana_services', () => {
-      const mocked = {
-      untilPluginStartServicesReady: () =>
-        new Promise<AlertingV2KibanaServices>((resolve) => {
-          pendingResolvers.push(resolve);
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    untilPluginStartServicesReady: () =>
+      new Promise<AlertingV2KibanaServices>((resolve) => {
+        pendingResolvers.push(resolve);
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/rules_api', () => {
-      const mocked = {
-      RulesApi: vi.fn().mockImplementation(() => ({
-        createRule: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesApi: vi.fn().mockImplementation(() => ({
+      createRule: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { CreateRuleOptionsFlyout } from './create_rule_options_flyout';
 import { RulesApi } from './services/rules_api';

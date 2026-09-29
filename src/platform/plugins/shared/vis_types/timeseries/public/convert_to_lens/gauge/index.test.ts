@@ -29,30 +29,30 @@ const mockExtractOrGenerateDatasourceInfo = vi.fn();
 const mockGetSeriesAgg = vi.fn();
 
 vi.mock('../../services', () => {
-      const mocked = {
-      getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/series', () => {
-      const mocked = {
-      getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
-      getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
-      getSeriesAgg: vi.fn(() => mockGetSeriesAgg()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
+    getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
+    getSeriesAgg: vi.fn(() => mockGetSeriesAgg()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/configurations/metric', () => {
-      const mocked = {
-      getConfigurationForGauge: vi.fn(() => mockGetConfigurationForGauge()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigurationForGauge: vi.fn(() => mockGetConfigurationForGauge()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/metrics', async () => {
-  const actual = (await vi.importActual('../lib/metrics'));
+  const actual = await vi.importActual('../lib/metrics');
   return {
     isValidMetrics: vi.fn(() => mockIsValidMetrics()),
     getReducedTimeRange: vi.fn().mockReturnValue('10'),
@@ -62,11 +62,11 @@ vi.mock('../lib/metrics', async () => {
 });
 
 vi.mock('../lib/datasource', () => {
-      const mocked = {
-      extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToLens', () => {
   const metric = { id: 'some-id', type: METRIC_TYPES.AVG, field: 'test-field' };

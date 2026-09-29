@@ -44,11 +44,11 @@ vi.mock('react-router-dom', () => {
   return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../resolver/view/use_resolver_query_params_cleaner');
 vi.mock('../../shared/hooks/use_which_flyout');
 vi.mock('../../../../detections/hooks/use_is_analyzer_enabled');
@@ -59,7 +59,7 @@ vi.mock('../../../../flyout_v2/use_flyout_api');
 const mockUiSettingsGet = vi.fn();
 let mockServerless: unknown;
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: () => ({

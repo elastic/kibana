@@ -36,12 +36,12 @@ import {
 } from '@kbn/agent-builder-common';
 
 vi.mock('@kbn/agent-builder-server/tools/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-server/tools/utils')),
-      getToolResultId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-server/tools/utils')),
+    getToolResultId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getToolResultIdMock = getToolResultId as MockedFunction<typeof getToolResultId>;
 

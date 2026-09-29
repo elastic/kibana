@@ -116,10 +116,7 @@ describe('POST /internal/evals/scores', () => {
       body,
     });
 
-  const mockWriteResult = (
-    evaluationScoreService: { write: Mock },
-    result: WriteResult
-  ): void => {
+  const mockWriteResult = (evaluationScoreService: { write: Mock }, result: WriteResult): void => {
     evaluationScoreService.write.mockResolvedValueOnce(result);
   };
 

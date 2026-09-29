@@ -16,13 +16,13 @@ import { useDeleteRuleset } from '../../hooks/use_delete_query_rules_ruleset';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 vi.mock('../../hooks/use_delete_query_rules_ruleset', () => {
-      const mocked = {
-      useDeleteRuleset: vi.fn(() => ({
-        mutate: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteRuleset: vi.fn(() => ({
+      mutate: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DeleteRulesetModal', () => {
   const queryClient = new QueryClient();
@@ -111,9 +111,7 @@ describe('DeleteRulesetModal', () => {
     expect(mutate).toHaveBeenCalledWith({ rulesetId: '123' });
 
     act(() => {
-      (useDeleteRuleset as unknown as Mock).mock.calls[0][1](
-        'Ruleset is attached to an index'
-      );
+      (useDeleteRuleset as unknown as Mock).mock.calls[0][1]('Ruleset is attached to an index');
     });
 
     expect(screen.getByText('Ruleset is attached to an index')).toBeInTheDocument();

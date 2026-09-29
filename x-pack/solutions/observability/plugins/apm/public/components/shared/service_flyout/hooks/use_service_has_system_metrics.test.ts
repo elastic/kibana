@@ -13,29 +13,29 @@ import { useServiceHasSystemMetrics } from './use_service_has_system_metrics';
 const mockUseAbortableAsync = vi.fn();
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start: '2024-01-01T00:00:00.000Z',
-        end: '2024-01-01T01:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start: '2024-01-01T00:00:00.000Z',
+      end: '2024-01-01T01:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCallApmApi = vi.fn();
 vi.mock('../../../../plugin', () => {
-      const mocked = {
-      getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseParams = {
   serviceName: 'opbeans-java',

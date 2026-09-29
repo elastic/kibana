@@ -11,16 +11,16 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('./actions', () => {
-      const mocked = {
-      loadAction: vi.fn().mockResolvedValue({}),
-      saveAction: vi.fn(),
-      unloadAction: vi.fn(),
-      rebuildAllAction: vi.fn(),
-      emptyKibanaIndexAction: vi.fn(),
-      editAction: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadAction: vi.fn().mockResolvedValue({}),
+    saveAction: vi.fn(),
+    unloadAction: vi.fn(),
+    rebuildAllAction: vi.fn(),
+    emptyKibanaIndexAction: vi.fn(),
+    editAction: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { Client } from '@elastic/elasticsearch';
 import type { KbnClient } from '@kbn/test';

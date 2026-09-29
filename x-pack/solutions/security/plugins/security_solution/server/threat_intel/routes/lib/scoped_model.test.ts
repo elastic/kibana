@@ -23,9 +23,7 @@ const createInference = (): Mocked<InferenceServerStart> =>
   ({
     getChatModel: vi.fn().mockResolvedValue({ chatModel: true }),
     getClient: vi.fn().mockReturnValue({ client: true }),
-    getConnectorById: vi
-      .fn()
-      .mockImplementation(async (connectorId: string) => ({ connectorId })),
+    getConnectorById: vi.fn().mockImplementation(async (connectorId: string) => ({ connectorId })),
     getDefaultConnector: vi.fn().mockResolvedValue(undefined),
   } as unknown as Mocked<InferenceServerStart>);
 

@@ -21,31 +21,31 @@ import {
 import { useTargetIdField } from './use_target_id_field';
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/services/target_lookup/client', () => {
-      const mocked = {
-      createTargetLookupClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTargetLookupClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/services/target_lookup/hooks/use_data_views_list', () => {
-      const mocked = {
-      useDataViewsList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataViewsList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/services/target_lookup/hooks/use_resolve_index', () => {
-      const mocked = {
-      useResolveIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolveIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const targetLookupClient = {
   getDataViews: vi.fn(),

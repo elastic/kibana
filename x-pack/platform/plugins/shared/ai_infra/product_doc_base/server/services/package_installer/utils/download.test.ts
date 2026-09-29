@@ -15,39 +15,39 @@ import { ProxyAgent } from 'undici';
 import { ArtifactNotFoundError, checkArtifactAvailable, downloadToDisk } from './download';
 
 vi.mock('@kbn/fs', () => {
-      const mocked = {
-      createWriteStream: vi.fn(() => ({
-        on: vi.fn((event, callback) => {
-          if (event === 'finish') {
-            callback();
-          }
-        }),
-        pipe: vi.fn(),
-      })),
-      getSafePath: vi.fn().mockReturnValue({
-        fullPath: 'artifacts/package_installer/file.txt',
-        alias: 'disk:artifacts/package_installer/file.txt',
+  const mocked = {
+    createWriteStream: vi.fn(() => ({
+      on: vi.fn((event, callback) => {
+        if (event === 'finish') {
+          callback();
+        }
       }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      pipe: vi.fn(),
+    })),
+    getSafePath: vi.fn().mockReturnValue({
+      fullPath: 'artifacts/package_installer/file.txt',
+      alias: 'disk:artifacts/package_installer/file.txt',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs', () => {
-      const mocked = {
-      createReadStream: vi.fn().mockReturnValue({
-        on: vi.fn(),
-        pipe: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createReadStream: vi.fn().mockReturnValue({
+      on: vi.fn(),
+      pipe: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('stream/promises', () => {
-      const mocked = {
-      pipeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pipeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetchMock = vi.spyOn(global, 'fetch');
 

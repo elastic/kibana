@@ -30,23 +30,23 @@ import { usePreviewInvocationCount } from './use_preview_invocation_count';
 vi.mock('../../../../common/lib/kibana');
 vi.mock('./use_preview_route');
 vi.mock('../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({
-        from: '2020-07-07T08:20:18.966Z',
-        isInitializing: false,
-        to: '2020-07-08T08:20:18.966Z',
-        setQuery: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({
+      from: '2020-07-07T08:20:18.966Z',
+      isInitializing: false,
+      to: '2020-07-08T08:20:18.966Z',
+      setQuery: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_preview_invocation_count');
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const verifyRuleDefinitionMock = vi.fn().mockResolvedValue(true);
 

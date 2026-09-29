@@ -17,11 +17,11 @@ import { AppHeaderLoadingView } from './app_header_loading';
 import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 
 vi.mock('@kbn/ui-chrome-layout', () => {
-      const mocked = {
-      useCurrentChromeApplicationBreakpoint: () => 'xl',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentChromeApplicationBreakpoint: () => 'xl',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AppHeaderLoadingView', () => {
   it('skeletons the title and the default overflow + primary menu', () => {

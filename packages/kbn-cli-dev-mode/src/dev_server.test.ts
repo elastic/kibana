@@ -44,7 +44,7 @@ class MockProc extends EventEmitter {
 }
 
 vi.mock('execa');
-const execa = (await vi.importMock('execa'));
+const execa = await vi.importMock('execa');
 
 let currentProc: MockProc | undefined;
 execa.node.mockImplementation(() => {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
-
 import nodeCrypto from '@elastic/node-crypto';
 import crypto from 'crypto';
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';

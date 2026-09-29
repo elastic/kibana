@@ -19,18 +19,18 @@ import { basicCaseFixture } from './test_fixtures';
 import { CustomFieldTypes } from '../../common/types/domain';
 
 vi.mock('./api', () => {
-      const mocked = {
-      getCase: vi.fn(),
-      replaceCustomField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCase: vi.fn(),
+    replaceCustomField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/use_cases_toast', () => {
-      const mocked = {
-      useCasesToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useReplaceCustomField', () => {
   const sampleData = {
@@ -207,9 +207,9 @@ describe('useReplaceCustomField', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    vi
-      .spyOn(api, 'replaceCustomField')
-      .mockRejectedValue(new Error('useUpdateComment: Test error'));
+    vi.spyOn(api, 'replaceCustomField').mockRejectedValue(
+      new Error('useUpdateComment: Test error')
+    );
     const queryClient = createQueryClient();
 
     const { result } = renderHook(() => useReplaceCustomField(), {

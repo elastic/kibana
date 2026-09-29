@@ -17,11 +17,11 @@ const mockGetUserWatchlistPrivileges = vi.fn();
 vi.mock(
   '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
   () => {
-      const mocked = {
-        getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 import { getWatchlistIdTool } from './get_watchlist_id_tool';

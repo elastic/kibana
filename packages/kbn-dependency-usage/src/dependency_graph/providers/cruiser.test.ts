@@ -40,11 +40,11 @@ const codeOwners: Record<string, string[]> = {
 };
 
 vi.mock('dependency-cruiser', () => {
-      const mocked = {
-      cruise: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cruise: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCruiseResult = {
   output: {
@@ -92,12 +92,12 @@ const mockCruiseResult = {
 };
 
 vi.mock('../../lib/code_owners', () => {
-      const mocked = {
-      getCodeOwnersForFile: vi.fn().mockImplementation((filePath: string) => codeOwners[filePath]),
-      getPathsWithOwnersReversed: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCodeOwnersForFile: vi.fn().mockImplementation((filePath: string) => codeOwners[filePath]),
+    getPathsWithOwnersReversed: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('identifyDependencyUsage', () => {
   beforeEach(() => {

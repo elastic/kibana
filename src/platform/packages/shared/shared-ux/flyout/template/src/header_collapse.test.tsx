@@ -602,12 +602,15 @@ describe('FlyoutTemplate Header collapsed prop', () => {
   const trackScrollListenerTargets = (renderFlyout: () => void): HTMLElement[] => {
     const targets: HTMLElement[] = [];
     const original = HTMLElement.prototype.addEventListener;
-    vi
-      .spyOn(HTMLElement.prototype, 'addEventListener')
-      .mockImplementation(function (this: HTMLElement, type, listener, options) {
-        if (type === 'scroll') targets.push(this);
-        original.call(this, type, listener, options);
-      });
+    vi.spyOn(HTMLElement.prototype, 'addEventListener').mockImplementation(function (
+      this: HTMLElement,
+      type,
+      listener,
+      options
+    ) {
+      if (type === 'scroll') targets.push(this);
+      original.call(this, type, listener, options);
+    });
     renderFlyout();
     return targets.filter((el) => el.classList.contains('euiFlyoutBody__overflow'));
   };

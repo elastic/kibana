@@ -16,11 +16,11 @@ import { createCustomEventItem } from './timeline_item.factory';
 import { CustomEvent } from './custom_event';
 
 vi.mock('../../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CustomEvent', () => {
   beforeEach(() => {

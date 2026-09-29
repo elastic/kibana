@@ -65,9 +65,9 @@ describe('dynamic settings routes', () => {
 
   describe('createGetDynamicSettingsRoute', () => {
     it('defaults rebalancePrivateLocationShardsEnabled to true when the task is unset', async () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
 
       const route = createGetDynamicSettingsRoute();
       const result = await route.handler(buildRouteContext());
@@ -76,9 +76,9 @@ describe('dynamic settings routes', () => {
     });
 
     it('returns false when the rebalance task is disabled', async () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
       const server = buildServer();
       (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
         state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false },
@@ -93,9 +93,9 @@ describe('dynamic settings routes', () => {
 
   describe('createPostDynamicSettingsRoute', () => {
     it('persists rebalancePrivateLocationShardsEnabled on the rebalance task, not the space settings SO', async () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
       const setSpy = vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
@@ -130,12 +130,12 @@ describe('dynamic settings routes', () => {
     });
 
     it('does not clear pins when turning shard rebalance on', async () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      vi
-        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
-        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
+      vi.spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings').mockImplementation(
+        async (_client, settings: DynamicSettingsAttributes) => settings
+      );
       const server = buildServer();
       (server.pluginsStart.taskManager.get as Mock)
         .mockResolvedValueOnce({ state: { [REBALANCE_SHARDS_ENABLED_STATE_KEY]: false } })
@@ -165,12 +165,12 @@ describe('dynamic settings routes', () => {
     });
 
     it('returns 409 when the rebalance flag does not persist on the task', async () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      vi
-        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
-        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
+      vi.spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings').mockImplementation(
+        async (_client, settings: DynamicSettingsAttributes) => settings
+      );
       const server = buildServer();
       // Live task state stays on after a requested off — the write did not stick.
       (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
@@ -201,12 +201,12 @@ describe('dynamic settings routes', () => {
     });
 
     it('returns 409 when the sync interval does not persist on the task', async () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
-      vi
-        .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
-        .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
+      vi.spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings').mockImplementation(
+        async (_client, settings: DynamicSettingsAttributes) => settings
+      );
       const server = buildServer();
       (server.pluginsStart.taskManager.get as Mock).mockResolvedValue({
         schedule: { interval: '5m' },
@@ -238,9 +238,9 @@ describe('dynamic settings routes', () => {
 
   describe('cluster-wide settings privilege', () => {
     const mockSettingsSO = () => {
-      vi
-        .spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings')
-        .mockResolvedValue(DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES);
+      vi.spyOn(syntheticsSettingsModule, 'getSyntheticsDynamicSettings').mockResolvedValue(
+        DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES
+      );
       return vi
         .spyOn(syntheticsSettingsModule, 'setSyntheticsDynamicSettings')
         .mockImplementation(async (_client, settings: DynamicSettingsAttributes) => settings);

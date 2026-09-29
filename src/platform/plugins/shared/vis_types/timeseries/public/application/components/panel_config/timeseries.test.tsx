@@ -13,11 +13,11 @@ import React from 'react';
 import { shallowWithIntl as shallow } from '@kbn/test-jest-helpers';
 
 vi.mock('../lib/get_default_query_language', () => {
-      const mocked = {
-      getDefaultQueryLanguage: () => 'kuery',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultQueryLanguage: () => 'kuery',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { TimeseriesPanelConfig } from './timeseries';
 import type { PanelConfigProps } from './types';

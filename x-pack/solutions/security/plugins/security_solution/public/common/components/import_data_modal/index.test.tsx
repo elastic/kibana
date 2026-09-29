@@ -15,22 +15,22 @@ import { ImportDataModalComponent } from '.';
 vi.mock('../../lib/kibana');
 
 vi.mock('../../lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: { http: { basePath: { prepend: vi.fn() } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: { http: { basePath: { prepend: vi.fn() } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ImportDataModal', () => {
   beforeEach(() => {

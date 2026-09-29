@@ -378,26 +378,24 @@ describe('SyntheticsService', () => {
       async (isExpired, errorMessage) => {
         const { service, locations } = getMockedService();
 
-        mockCoreStart.elasticsearch.client.asInternalUser.license.get = vi
-          .fn()
-          .mockResolvedValue({
-            license: isExpired
-              ? {
-                  status: 'expired',
-                  uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
-                  type: 'platinum',
-                  issue_date: '2022-11-29T00:00:00.000Z',
-                  issue_date_in_millis: 1669680000000,
-                  expiry_date: '2022-12-31T23:59:59.999Z',
-                  expiry_date_in_millis: 1735689599999,
-                  max_nodes: 100,
-                  max_resource_units: null,
-                  issued_to: 'Elastic - INTERNAL (development environments)',
-                  issuer: 'API',
-                  start_date_in_millis: 1669680000000,
-                }
-              : undefined,
-          });
+        mockCoreStart.elasticsearch.client.asInternalUser.license.get = vi.fn().mockResolvedValue({
+          license: isExpired
+            ? {
+                status: 'expired',
+                uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+                type: 'platinum',
+                issue_date: '2022-11-29T00:00:00.000Z',
+                issue_date_in_millis: 1669680000000,
+                expiry_date: '2022-12-31T23:59:59.999Z',
+                expiry_date_in_millis: 1735689599999,
+                max_nodes: 100,
+                max_resource_units: null,
+                issued_to: 'Elastic - INTERNAL (development environments)',
+                issuer: 'API',
+                start_date_in_millis: 1669680000000,
+              }
+            : undefined,
+        });
 
         serverMock.encryptedSavedObjects = mockEncryptedSO({
           monitors: {

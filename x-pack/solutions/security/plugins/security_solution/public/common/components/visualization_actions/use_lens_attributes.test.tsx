@@ -36,27 +36,27 @@ import {
 } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_global_filter_query', () => {
-      const mocked = {
-      useGlobalFilterQuery: () => () => ({
-        filterQuery: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFilterQuery: () => () => ({
+      filterQuery: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const params = {
   euiTheme: {} as EuiThemeComputed,
@@ -385,9 +385,9 @@ describe('useLensAttributes', () => {
     // The "should return null if no indices exist" test (above this one in execution order)
     // changes useDataView to the default (no matched indices), so restore it here.
     // The scope includes both event and alert-backing index patterns.
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['auditbeat-*', '.alerts-security.alerts-default']));
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(['auditbeat-*', '.alerts-security.alerts-default'])
+    );
 
     const excludedPatterns = ['.alerts-security.alerts-default'];
 

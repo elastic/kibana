@@ -18,7 +18,7 @@ import { ErrorCallout } from './error_callout';
 const mockRenderSearchError = vi.fn();
 
 vi.mock('@kbn/search-errors', async () => {
-  const originalModule = (await vi.importActual('@kbn/search-errors'));
+  const originalModule = await vi.importActual('@kbn/search-errors');
 
   return {
     ...originalModule,

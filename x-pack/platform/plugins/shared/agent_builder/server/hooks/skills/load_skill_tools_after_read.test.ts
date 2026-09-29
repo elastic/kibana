@@ -24,15 +24,11 @@ import type { AnalyticsService, TrackingService } from '../../telemetry';
 import { createToolHandlerContextMock, type ToolHandlerContextMock } from '../../test_utils/runner';
 import { createLoadSkillToolsAfterRead } from './load_skill_tools_after_read';
 
-const createAnalyticsServiceMock = (): Mocked<
-  Pick<AnalyticsService, 'reportSkillInvoked'>
-> => ({
+const createAnalyticsServiceMock = (): Mocked<Pick<AnalyticsService, 'reportSkillInvoked'>> => ({
   reportSkillInvoked: vi.fn(),
 });
 
-const createTrackingServiceMock = (): Mocked<
-  Pick<TrackingService, 'trackSkillInvocation'>
-> => ({
+const createTrackingServiceMock = (): Mocked<Pick<TrackingService, 'trackSkillInvocation'>> => ({
   trackSkillInvocation: vi.fn(),
 });
 

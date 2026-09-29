@@ -23,91 +23,89 @@ import { useDownloadAIValueReport } from '../hooks/use_download_ai_value_report'
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 
 vi.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => {
-      const mocked = {
-      useSyncTimerangeUrlParam: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyncTimerangeUrlParam: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
-      const mocked = {
-      useAlertsPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_selector', () => {
-      const mocked = {
-      useDeepEqualSelector: vi.fn(),
-      useShallowEqualSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeepEqualSelector: vi.fn(),
+    useShallowEqualSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../providers/ai_value/export_provider', () => {
-      const mocked = {
-      AIValueExportProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      useAIValueExportContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AIValueExportProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    useAIValueExportContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_download_ai_value_report', () => {
-      const mocked = {
-      useDownloadAIValueReport: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDownloadAIValueReport: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/ai_value', () => {
-      const mocked = {
-      AIValueReport: vi.fn(() => <div data-test-subj="ai-value-report" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AIValueReport: vi.fn(() => <div data-test-subj="ai-value-report" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/super_date_picker', () => {
-      const mocked = {
-      SuperDatePicker: vi.fn(() => <div data-test-subj="mock-super-date-picker" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SuperDatePicker: vi.fn(() => <div data-test-subj="mock-super-date-picker" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/ai_value/value_report_exporter', () => {
-      const mocked = {
-      ValueReportExporter: ({ children }: { children: (exportPDF: () => void) => React.ReactNode }) =>
-        children(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ValueReportExporter: ({ children }: { children: (exportPDF: () => void) => React.ReactNode }) =>
+      children(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/no_privileges', () => {
-      const mocked = {
-      NoPrivileges: () => <div data-test-subj="no-privileges" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoPrivileges: () => <div data-test-subj="no-privileges" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseDeepEqualSelector = useDeepEqualSelector as MockedFunction<
   typeof useDeepEqualSelector
 >;
-const mockUseAlertsPrivileges = useAlertsPrivileges as MockedFunction<
-  typeof useAlertsPrivileges
->;
+const mockUseAlertsPrivileges = useAlertsPrivileges as MockedFunction<typeof useAlertsPrivileges>;
 const mockUseDataView = useDataView as MockedFunction<typeof useDataView>;
 const mockUseHasSecurityCapability = useHasSecurityCapability as MockedFunction<
   typeof useHasSecurityCapability

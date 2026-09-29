@@ -14,7 +14,7 @@ export const getOutdatedDocumentsQueryMock = vi.fn();
 export const createDocumentTransformFnMock = vi.fn();
 
 vi.doMock('../../utils', async () => {
-  const realModule = (await vi.importActual('../../utils'));
+  const realModule = await vi.importActual('../../utils');
   return {
     ...realModule,
     checkVersionCompatibility: checkVersionCompatibilityMock,

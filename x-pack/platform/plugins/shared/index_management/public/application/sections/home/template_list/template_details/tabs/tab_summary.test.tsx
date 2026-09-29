@@ -14,16 +14,16 @@ import type { TemplateDeserialized } from '../../../../../../../common';
 import { TabSummary } from './tab_summary';
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
-        <span>{defaultMessage}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => (
+      <span>{defaultMessage}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiIconTip: ({ content }: { content: string }) => (
@@ -34,33 +34,33 @@ vi.mock('@elastic/eui', async () => {
 
 const mockUseAppContext = vi.fn();
 vi.mock('../../../../../app_context', () => {
-      const mocked = {
-      useAppContext: () => mockUseAppContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: () => mockUseAppContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLoadFailureStoreSettings = vi.fn();
 vi.mock('../../../../../services/api', () => {
-      const mocked = {
-      useLoadFailureStoreSettings: () => mockUseLoadFailureStoreSettings(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadFailureStoreSettings: () => mockUseLoadFailureStoreSettings(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services/use_ilm_locator', () => {
-      const mocked = {
-      useIlmLocator: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmLocator: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services/use_ingest_pipeline_locator', () => {
-      const mocked = {
-      useIngestPipelinesLocator: () => '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIngestPipelinesLocator: () => '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeTemplateDetails = (
   overrides: Partial<TemplateDeserialized> = {}

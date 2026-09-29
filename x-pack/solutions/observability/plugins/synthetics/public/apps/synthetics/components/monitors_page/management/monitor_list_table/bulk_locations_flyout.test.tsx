@@ -20,44 +20,44 @@ import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkLocationsFlyout } from './bulk_locations_flyout';
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useGetUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useGetUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_locations', () => {
-      const mocked = {
-      useLocations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../state')),
-      fetchBulkUpdateMonitors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../state')),
+    fetchBulkUpdateMonitors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The real combobox is an EuiComboBox; a lightweight stand-in keeps these tests
 // focused on the flyout's add/remove/overwrite payload logic. Clicking it selects
 // the "us_east" location.
 vi.mock('../../../monitor_add_edit/form/field_wrappers', () => {
-      const mocked = {
-      LocationsComboBox: ({ onChange }: { onChange: (val: unknown[]) => void }) => (
-        <button
-          data-test-subj="syntheticsBulkLocationsComboBox"
-          onClick={() => onChange([{ id: 'us_east', label: 'US East', isServiceManaged: true }])}
-        >
-          {'select us_east'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LocationsComboBox: ({ onChange }: { onChange: (val: unknown[]) => void }) => (
+      <button
+        data-test-subj="syntheticsBulkLocationsComboBox"
+        onClick={() => onChange([{ id: 'us_east', label: 'US East', isServiceManaged: true }])}
+      >
+        {'select us_east'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetUrlParamsMock = useGetUrlParams as MockedFunction<typeof useGetUrlParams>;
 const useLocationsMock = useLocations as MockedFunction<typeof useLocations>;

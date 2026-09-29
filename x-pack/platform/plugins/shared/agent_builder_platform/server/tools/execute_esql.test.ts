@@ -14,7 +14,7 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { executeEsqlTool } from './execute_esql';
 
 vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-genai-utils/tools/utils/esql'));
+  const actual = await vi.importActual('@kbn/agent-builder-genai-utils/tools/utils/esql');
   return {
     ...actual,
     executeEsql: vi.fn(),
@@ -22,12 +22,12 @@ vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', async () => {
 });
 
 vi.mock('@kbn/agent-builder-server/tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-server/tools')),
-      getToolResultId: vi.fn(() => 'tool-result-id'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-server/tools')),
+    getToolResultId: vi.fn(() => 'tool-result-id'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { executeEsql } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
 

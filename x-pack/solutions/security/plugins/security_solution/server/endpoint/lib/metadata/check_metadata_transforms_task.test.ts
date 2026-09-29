@@ -339,12 +339,10 @@ describe('check metadata transforms task', () => {
       let mockPackageClient: Mocked<PackageClient>;
 
       beforeEach(() => {
-        vi
-          .spyOn(
-            mockEndpointAppContext.service.getEndpointMetadataService(),
-            'getAllEndpointPackagePolicies'
-          )
-          .mockResolvedValue([{} as PackagePolicy]);
+        vi.spyOn(
+          mockEndpointAppContext.service.getEndpointMetadataService(),
+          'getAllEndpointPackagePolicies'
+        ).mockResolvedValue([{} as PackagePolicy]);
 
         mockPackageClient = mockEndpointAppContext.service.getInternalFleetServices()
           .packages as Mocked<PackageClient>;

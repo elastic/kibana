@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import {

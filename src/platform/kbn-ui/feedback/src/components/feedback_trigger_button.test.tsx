@@ -16,11 +16,11 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('./feedback_container', () => {
-      const mocked = {
-      FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FeedbackContainer: () => <div data-test-subj="feedbackContainer">Feedback Container</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockProps = ({
   isTelemetryGlobalSettingEnabled,

@@ -15,30 +15,32 @@ import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { RuleLibraryPage } from './rule_library_page';
 
 vi.mock('../../application/breadcrumb_context', () => {
-      const mocked = {
-      useSetBreadcrumbs: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetBreadcrumbs: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/app-header', () => {
-      const mocked = {
-      APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle' },
-      AppHeader: ({ title }: { title: string }) => (
-        <div>
-          <h1 data-test-subj="appHeaderTitle">{title}</h1>
-          <span data-test-subj="alertingV2ExperimentalBadge" />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    APP_HEADER_TEST_SUBJECTS: { title: 'appHeaderTitle' },
+    AppHeader: ({ title }: { title: string }) => (
+      <div>
+        <h1 data-test-subj="appHeaderTitle">{title}</h1>
+        <span data-test-subj="alertingV2ExperimentalBadge" />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRuleTemplate = vi.fn();
 const mockOpenCreateFromTemplateFlyout = vi.fn();
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { RuleTemplatesApi: ActualRuleTemplatesApi } = (await vi.importActual('../../services/rule_templates_api'));
+  const { RuleTemplatesApi: ActualRuleTemplatesApi } = await vi.importActual(
+    '../../services/rule_templates_api'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualRuleTemplatesApi) {
@@ -72,11 +74,11 @@ vi.mock('../../hooks/use_compose_discover_flyout', () => {
 });
 
 vi.mock('./rule_library_list', () => {
-      const mocked = {
-      RuleLibraryList: () => <div data-test-subj="mockedRuleLibraryList" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleLibraryList: () => <div data-test-subj="mockedRuleLibraryList" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreatePayload: CreateRuleData = {
   kind: 'signal',

@@ -13,29 +13,29 @@ import { useCurrentUser } from './use_current_user';
 const mockGetCurrent = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          userProfile: {
-            getCurrent: mockGetCurrent,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        userProfile: {
+          getCurrent: mockGetCurrent,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuery = vi.fn();
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: (options: {
-        queryKey: string[];
-        queryFn: () => Promise<{ uid: string; user: { username: string }; data?: unknown }>;
-        enabled: boolean;
-      }) => mockUseQuery(options),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: (options: {
+      queryKey: string[];
+      queryFn: () => Promise<{ uid: string; user: { username: string }; data?: unknown }>;
+      enabled: boolean;
+    }) => mockUseQuery(options),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useCurrentUser', () => {
   beforeEach(() => {

@@ -16,11 +16,11 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { useTabs } from './tabs';
 
 vi.mock('../../../common/hooks/use_has_entity_resolution_license', () => {
-      const mocked = {
-      useHasEntityResolutionLicense: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityResolutionLicense: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('service_details_left useTabs', () => {
   beforeEach(() => {

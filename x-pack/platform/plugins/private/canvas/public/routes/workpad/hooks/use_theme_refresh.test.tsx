@@ -20,18 +20,18 @@ const lightTheme: CoreTheme = { darkMode: false, name: 'borealis' };
 const darkTheme: CoreTheme = { darkMode: true, name: 'borealis' };
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/actions/elements', () => {
-      const mocked = {
-      fetchAllRenderables: () => refreshAction,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAllRenderables: () => refreshAction,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/kibana_services', () => {
   const { BehaviorSubject: MockBehaviorSubject } = require('rxjs');

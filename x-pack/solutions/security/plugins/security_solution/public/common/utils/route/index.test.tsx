@@ -20,11 +20,11 @@ import { SecurityPageName } from '../../../app/types';
 
 const mockUseRouteSpy: Mock = useRouteSpy as Mock;
 vi.mock('./use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Spy Routes', () => {
   let mockRoutes: ReturnType<typeof generateRoutesMock>;

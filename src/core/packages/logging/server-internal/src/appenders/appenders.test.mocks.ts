@@ -23,18 +23,18 @@ vi.mock('../layouts/layouts', () => {
 });
 
 vi.mock('@opentelemetry/sdk-logs', () => {
-      const mocked = {
-      LoggerProvider: vi.fn(() => ({ getLogger: vi.fn(() => ({ emit: vi.fn() })) })),
-      BatchLogRecordProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoggerProvider: vi.fn(() => ({ getLogger: vi.fn(() => ({ emit: vi.fn() })) })),
+    BatchLogRecordProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@opentelemetry/exporter-logs-otlp-http', () => {
-      const mocked = {
-      OTLPLogExporter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OTLPLogExporter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@elastic/opentelemetry-node/sdk', () => {
   interface MockResource {
     merge: Mock<MockResource>;
@@ -62,26 +62,26 @@ vi.mock('@opentelemetry/api', () => {
   return { ...actual, ROOT_CONTEXT: 'root-context', trace: mockTrace };
 });
 vi.mock('@kbn/apm-config-loader', () => {
-      const mocked = {
-      getConfiguration: vi.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: vi.fn(() => ({ serviceName: 'kibana', serviceVersion: '9.0.0' })),
+  };
+  return { ...mocked, default: mocked };
+});
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
 // @kbn/metrics. Those packages load heavy OTel SDK modules at require-time that are
 // unrelated to what otel_appender.ts actually uses (buildOtelResources). Mocking them
 // here prevents those module graphs from loading.
 vi.mock('@kbn/tracing', () => {
-      const mocked = {
-      initTracing: vi.fn(),
-      LateBindingSpanProcessor: { get: vi.fn() },
-      OTLPSpanProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initTracing: vi.fn(),
+    LateBindingSpanProcessor: { get: vi.fn() },
+    OTLPSpanProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/metrics', () => {
-      const mocked = {
-      initMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});

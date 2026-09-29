@@ -17,18 +17,18 @@ import { getMockAttackDiscoveryAlerts } from '../../../attack_discovery/pages/mo
 import { useAttackGroupHandler } from './use_attack_group_handler';
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
-      const mocked = {
-      useFindAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttacks = getMockAttackDiscoveryAlerts();
 

@@ -13,11 +13,11 @@ import { BehaviorSubject } from 'rxjs';
 import { useConnectorSelection, _resetConnectorSelectionStore } from './use_connector_selection';
 
 vi.mock('../use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '../use_kibana';
 import { storageKeys } from '../../storage_keys';

@@ -18,14 +18,14 @@ import {
 vi.mock('../../watchlist_config');
 vi.mock('../../../entity_sources/manual/service');
 vi.mock('@kbn/entity-store/server/domain/crud', () => {
-      const mocked = {
-      CRUDClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CRUDClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { mockWatchlistGet } = (await vi.importMock('../../watchlist_config'));
-const { mockUnassign } = (await vi.importMock('../../../entity_sources/manual/service'));
+const { mockWatchlistGet } = await vi.importMock('../../watchlist_config');
+const { mockUnassign } = await vi.importMock('../../../entity_sources/manual/service');
 
 import { unassignWatchlistEntitiesRoute } from './unassign';
 

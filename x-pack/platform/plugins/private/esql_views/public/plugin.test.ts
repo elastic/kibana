@@ -16,28 +16,28 @@ import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import { EsqlViewsPlugin } from './plugin';
 
 vi.mock('@kbn/app-header', () => {
-      const mocked = {
-      AppHeader: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AppHeader: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLLangEditor: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      createEsqlViewsManagementClient: () => ({
-        getViews: vi.fn().mockResolvedValue({ views: [] }),
-        deleteViews: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEsqlViewsManagementClient: () => ({
+      getViews: vi.fn().mockResolvedValue({ views: [] }),
+      deleteViews: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createPlugin = (enabled: boolean) =>
   new EsqlViewsPlugin(

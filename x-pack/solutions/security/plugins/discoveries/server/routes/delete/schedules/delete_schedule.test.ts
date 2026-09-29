@@ -18,11 +18,11 @@ import { createScheduleDataClient } from '../../../lib/schedules/create_schedule
 const mockAnalytics = coreMock.createSetup().analytics;
 
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/schedules/create_schedule_data_client');
 
 const mockDeleteSchedule = vi.fn();

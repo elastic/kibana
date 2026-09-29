@@ -17,43 +17,43 @@ const SAVING_TEXT = 'Saving...';
 const SAVED_TEXT = 'Saved';
 
 vi.mock('./template_form', () => {
-      const mocked = {
-      TemplateYamlEditor: ({
-        value,
-        onChange,
-        isSaving,
-        isSaved,
-      }: {
-        value: string;
-        onChange: (val: string) => void;
-        isSaving: boolean;
-        isSaved: boolean;
-      }) => (
-        <div data-test-subj="mockYamlEditor">
-          <textarea value={value} onChange={(e) => onChange(e.target.value)} />
-          {isSaving && <span>{SAVING_TEXT}</span>}
-          {isSaved && <span>{SAVED_TEXT}</span>}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateYamlEditor: ({
+      value,
+      onChange,
+      isSaving,
+      isSaved,
+    }: {
+      value: string;
+      onChange: (val: string) => void;
+      isSaving: boolean;
+      isSaved: boolean;
+    }) => (
+      <div data-test-subj="mockYamlEditor">
+        <textarea value={value} onChange={(e) => onChange(e.target.value)} />
+        {isSaving && <span>{SAVING_TEXT}</span>}
+        {isSaved && <span>{SAVED_TEXT}</span>}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./template_preview', () => {
-      const mocked = {
-      TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{'Preview'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplatePreview: () => <div data-test-subj="mockTemplatePreview">{'Preview'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./template_configuration_tab', () => {
-      const mocked = {
-      TemplateConfigurationTab: () => (
-        <div data-test-subj="mockConfigurationTab">{'Configuration'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateConfigurationTab: () => (
+      <div data-test-subj="mockConfigurationTab">{'Configuration'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplateEditorLayout', () => {
   const user = userEvent.setup({ pointerEventsCheck: 0 });

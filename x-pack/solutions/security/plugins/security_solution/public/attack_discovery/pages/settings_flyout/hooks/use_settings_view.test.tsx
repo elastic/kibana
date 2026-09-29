@@ -22,77 +22,77 @@ const mockFilterManager = createFilterManagerMock();
 // Mock EuiSuperDatePicker to capture onTimeChange
 const mockOnTimeChange = vi.fn();
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiSuperDatePicker: (props: { onTimeChange: Mock }) => {
-        if (props.onTimeChange) {
-          mockOnTimeChange.mockImplementation(props.onTimeChange);
-        }
-        return <div data-test-subj="alertSelectionDatePicker" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiSuperDatePicker: (props: { onTimeChange: Mock }) => {
+      if (props.onTimeChange) {
+        mockOnTimeChange.mockImplementation(props.onTimeChange);
+      }
+      return <div data-test-subj="alertSelectionDatePicker" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock for discover-utils UI_SETTINGS in case META_FIELDS is imported from there
 vi.mock('@kbn/discover-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/discover-utils/src/constants')),
-      UI_SETTINGS: {
-        META_FIELDS: 'metaFields',
-        SORT_DEFAULT_ORDER_SETTING: 'discover:sort:defaultOrder',
-        DOC_HIDE_TIME_COLUMN_SETTING: 'doc_table:hideTimeColumn',
-      },
-      buildDataTableRecord: vi.fn(),
-      getChartHidden: vi.fn().mockReturnValue(undefined),
-      getDefaultSort: vi.fn().mockReturnValue([]),
-      getSortArray: vi.fn().mockReturnValue([]),
-      getTableHidden: vi.fn().mockReturnValue(undefined),
-      getSidebarHidden: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/discover-utils/src/constants')),
+    UI_SETTINGS: {
+      META_FIELDS: 'metaFields',
+      SORT_DEFAULT_ORDER_SETTING: 'discover:sort:defaultOrder',
+      DOC_HIDE_TIME_COLUMN_SETTING: 'doc_table:hideTimeColumn',
+    },
+    buildDataTableRecord: vi.fn(),
+    getChartHidden: vi.fn().mockReturnValue(undefined),
+    getDefaultSort: vi.fn().mockReturnValue([]),
+    getSortArray: vi.fn().mockReturnValue([]),
+    getTableHidden: vi.fn().mockReturnValue(undefined),
+    getSidebarHidden: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/data-plugin/common', () => {
-      const mocked = {
-      getEsQueryConfig: vi.fn().mockReturnValue({}),
-      createEscapeValue: vi.fn().mockReturnValue(() => ''),
-      getCalculateAutoTimeExpression: vi.fn().mockReturnValue(vi.fn()),
-      UI_SETTINGS: {
-        HISTOGRAM_BAR_TARGET: 'HISTOGRAM_BAR_TARGET',
-        HISTOGRAM_MAX_BARS: 'HISTOGRAM_MAX_BARS',
-        SEARCH_QUERY_LANGUAGE: 'SEARCH_QUERY_LANGUAGE',
-        QUERY_ALLOW_LEADING_WILDCARDS: 'QUERY_ALLOW_LEADING_WILDCARDS',
-        META_FIELDS: 'metaFields',
-        // Add more keys as needed for coverage
-      },
-      KBN_FIELD_TYPES: {
-        DATE: 'date',
-        DATE_RANGE: 'date_range',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsQueryConfig: vi.fn().mockReturnValue({}),
+    createEscapeValue: vi.fn().mockReturnValue(() => ''),
+    getCalculateAutoTimeExpression: vi.fn().mockReturnValue(vi.fn()),
+    UI_SETTINGS: {
+      HISTOGRAM_BAR_TARGET: 'HISTOGRAM_BAR_TARGET',
+      HISTOGRAM_MAX_BARS: 'HISTOGRAM_MAX_BARS',
+      SEARCH_QUERY_LANGUAGE: 'SEARCH_QUERY_LANGUAGE',
+      QUERY_ALLOW_LEADING_WILDCARDS: 'QUERY_ALLOW_LEADING_WILDCARDS',
+      META_FIELDS: 'metaFields',
+      // Add more keys as needed for coverage
+    },
+    KBN_FIELD_TYPES: {
+      DATE: 'date',
+      DATE_RANGE: 'date_range',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOnQuerySubmit = vi.fn();
 
 vi.mock('react-router', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_workflow_health_check', () => {
-      const mocked = {
-      useWorkflowHealthCheck: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowHealthCheck: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana');
 
@@ -103,178 +103,178 @@ vi.mock('../../../../common/hooks/use_space_id', () => {
 });
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../workflow_configuration', () => {
-      const mocked = {
-      AlertRetrievalStep: ({
-        children,
-        hasError,
-      }: {
-        children: React.ReactNode;
-        hasError?: boolean;
-      }) => (
-        <div data-test-subj="alertRetrievalStep" data-has-error={String(hasError ?? false)}>
-          {children}
-        </div>
-      ),
-      GenerationStep: ({ children }: { children?: React.ReactNode }) => (
-        <div data-test-subj="generationStep">{children}</div>
-      ),
-      DefaultAlertRetrievalAccordion: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="defaultAlertRetrievalAccordion">{children}</div>
-      ),
-      PipelineIndicator: () => <div data-test-subj="pipelineIndicator" />,
-      QueryModeSelector: () => <div data-test-subj="queryModeSelector" />,
-      ValidationPanel: () => <div data-test-subj="validationPanel" />,
-      ValidationStep: ({ children, hasError }: { children: React.ReactNode; hasError?: boolean }) => (
-        <div data-test-subj="validationStep" data-has-error={String(hasError ?? false)}>
-          {children}
-        </div>
-      ),
-      RetrievalMethodSelector: () => <div data-test-subj="retrievalMethodSelector" />,
-      WorkflowConfigurationPanel: ({
-        onChange,
-      }: {
-        onChange: (config: {
-          alertRetrievalMode: string;
-          alertRetrievalWorkflowIds: string[];
-          alertRetrievalWorkflowsEnabled: boolean;
-          defaultRetrievalEnabled: boolean;
-          esqlQuery?: string;
-          skillEnabled: boolean;
-          validationWorkflowId: string;
-        }) => void;
-      }) => (
-        <div data-test-subj="workflowConfigurationPanel">
-          <button
-            data-test-subj="simulateWorkflowConfigChange"
-            onClick={() =>
-              onChange({
-                alertRetrievalMode: 'custom_query',
-                alertRetrievalWorkflowIds: [],
-                alertRetrievalWorkflowsEnabled: true,
-                defaultRetrievalEnabled: false,
-                esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 200',
-                skillEnabled: true,
-                validationWorkflowId: 'default',
-              })
-            }
-            type="button"
-          />
-        </div>
-      ),
-      hasAtLeastOneRetrievalToggle: ({
-        alertRetrievalWorkflowsEnabled,
-        defaultRetrievalEnabled,
-        skillEnabled,
-      }: {
-        alertRetrievalWorkflowsEnabled?: boolean;
-        defaultRetrievalEnabled?: boolean;
-        skillEnabled?: boolean;
-      }) => Boolean(skillEnabled || defaultRetrievalEnabled || alertRetrievalWorkflowsEnabled),
-      hasEmptyRequiredRetrievalWorkflows: ({
-        alertRetrievalWorkflowIds,
-        alertRetrievalWorkflowsEnabled,
-        defaultRetrievalEnabled,
-        skillEnabled,
-      }: {
-        alertRetrievalWorkflowIds?: string[];
-        alertRetrievalWorkflowsEnabled?: boolean;
-        defaultRetrievalEnabled?: boolean;
-        skillEnabled?: boolean;
-      }) =>
-        Boolean(alertRetrievalWorkflowsEnabled) &&
-        !skillEnabled &&
-        !defaultRetrievalEnabled &&
-        (alertRetrievalWorkflowIds?.length ?? 0) === 0,
-      useFetchDefaultEsqlQuery: vi.fn().mockReturnValue({
-        defaultEsqlQuery: undefined,
-        fetchDefaultEsqlQuery: vi.fn().mockResolvedValue(undefined),
-        isError: false,
-        isLoading: false,
-      }),
-      useWorkflowConfiguration: vi.fn().mockReturnValue({
-        clearSettings: vi.fn(),
-        isLoading: false,
-        updateSettings: vi.fn(),
-        workflowConfiguration: {
-          alertRetrievalMode: 'custom_query',
-          alertRetrievalWorkflowIds: [],
-          alertRetrievalWorkflowsEnabled: false,
-          defaultRetrievalEnabled: false,
-          skillEnabled: true,
-          validationWorkflowId: 'default',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertRetrievalStep: ({
+      children,
+      hasError,
+    }: {
+      children: React.ReactNode;
+      hasError?: boolean;
+    }) => (
+      <div data-test-subj="alertRetrievalStep" data-has-error={String(hasError ?? false)}>
+        {children}
+      </div>
+    ),
+    GenerationStep: ({ children }: { children?: React.ReactNode }) => (
+      <div data-test-subj="generationStep">{children}</div>
+    ),
+    DefaultAlertRetrievalAccordion: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="defaultAlertRetrievalAccordion">{children}</div>
+    ),
+    PipelineIndicator: () => <div data-test-subj="pipelineIndicator" />,
+    QueryModeSelector: () => <div data-test-subj="queryModeSelector" />,
+    ValidationPanel: () => <div data-test-subj="validationPanel" />,
+    ValidationStep: ({ children, hasError }: { children: React.ReactNode; hasError?: boolean }) => (
+      <div data-test-subj="validationStep" data-has-error={String(hasError ?? false)}>
+        {children}
+      </div>
+    ),
+    RetrievalMethodSelector: () => <div data-test-subj="retrievalMethodSelector" />,
+    WorkflowConfigurationPanel: ({
+      onChange,
+    }: {
+      onChange: (config: {
+        alertRetrievalMode: string;
+        alertRetrievalWorkflowIds: string[];
+        alertRetrievalWorkflowsEnabled: boolean;
+        defaultRetrievalEnabled: boolean;
+        esqlQuery?: string;
+        skillEnabled: boolean;
+        validationWorkflowId: string;
+      }) => void;
+    }) => (
+      <div data-test-subj="workflowConfigurationPanel">
+        <button
+          data-test-subj="simulateWorkflowConfigChange"
+          onClick={() =>
+            onChange({
+              alertRetrievalMode: 'custom_query',
+              alertRetrievalWorkflowIds: [],
+              alertRetrievalWorkflowsEnabled: true,
+              defaultRetrievalEnabled: false,
+              esqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 200',
+              skillEnabled: true,
+              validationWorkflowId: 'default',
+            })
+          }
+          type="button"
+        />
+      </div>
+    ),
+    hasAtLeastOneRetrievalToggle: ({
+      alertRetrievalWorkflowsEnabled,
+      defaultRetrievalEnabled,
+      skillEnabled,
+    }: {
+      alertRetrievalWorkflowsEnabled?: boolean;
+      defaultRetrievalEnabled?: boolean;
+      skillEnabled?: boolean;
+    }) => Boolean(skillEnabled || defaultRetrievalEnabled || alertRetrievalWorkflowsEnabled),
+    hasEmptyRequiredRetrievalWorkflows: ({
+      alertRetrievalWorkflowIds,
+      alertRetrievalWorkflowsEnabled,
+      defaultRetrievalEnabled,
+      skillEnabled,
+    }: {
+      alertRetrievalWorkflowIds?: string[];
+      alertRetrievalWorkflowsEnabled?: boolean;
+      defaultRetrievalEnabled?: boolean;
+      skillEnabled?: boolean;
+    }) =>
+      Boolean(alertRetrievalWorkflowsEnabled) &&
+      !skillEnabled &&
+      !defaultRetrievalEnabled &&
+      (alertRetrievalWorkflowIds?.length ?? 0) === 0,
+    useFetchDefaultEsqlQuery: vi.fn().mockReturnValue({
+      defaultEsqlQuery: undefined,
+      fetchDefaultEsqlQuery: vi.fn().mockResolvedValue(undefined),
+      isError: false,
+      isLoading: false,
+    }),
+    useWorkflowConfiguration: vi.fn().mockReturnValue({
+      clearSettings: vi.fn(),
+      isLoading: false,
+      updateSettings: vi.fn(),
+      workflowConfiguration: {
+        alertRetrievalMode: 'custom_query',
+        alertRetrievalWorkflowIds: [],
+        alertRetrievalWorkflowsEnabled: false,
+        defaultRetrievalEnabled: false,
+        skillEnabled: true,
+        validationWorkflowId: 'default',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../alert_selection/alert_selection_fields', () => {
-      const mocked = {
-      AlertSelectionFields: () => <div data-test-subj="alertSelectionFields" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertSelectionFields: () => <div data-test-subj="alertSelectionFields" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../alert_selection/alert_preview_tabs', () => {
-      const mocked = {
-      AlertPreviewTabs: () => <div data-test-subj="alertPreviewTabs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertPreviewTabs: () => <div data-test-subj="alertPreviewTabs" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn().mockReturnValue({
-        dataView: {
-          id: 'security',
-          title: 'security',
-        },
-        status: 'ready',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn().mockReturnValue({
+      dataView: {
+        id: 'security',
+        title: 'security',
+      },
+      status: 'ready',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kuery', () => {
-      const mocked = {
-      convertToBuildEsQuery: vi
-        .fn()
-        .mockReturnValue([
-          JSON.stringify({ bool: { must: [], filter: [], should: [], must_not: [] } }),
-          undefined,
-        ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToBuildEsQuery: vi
+      .fn()
+      .mockReturnValue([
+        JSON.stringify({ bool: { must: [], filter: [], should: [], must_not: [] } }),
+        undefined,
+      ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../parse_filter_query', () => {
-      const mocked = {
-      parseFilterQuery: vi
-        .fn()
-        .mockReturnValue({ bool: { must: [], filter: [], should: [], must_not: [] } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseFilterQuery: vi
+      .fn()
+      .mockReturnValue({ bool: { must: [], filter: [], should: [], must_not: [] } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock for data-plugin/public
 vi.mock('@kbn/data-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/data-plugin/public')),
-      FilterManager: vi.fn().mockImplementation(() => mockFilterManager),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/data-plugin/public')),
+    FilterManager: vi.fn().mockImplementation(() => mockFilterManager),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock FilterManager so useRef in the hook uses our mock instance
 vi.mock('@kbn/data-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/data-plugin/public'));
+  const actual = await vi.importActual('@kbn/data-plugin/public');
   return {
     ...actual,
     FilterManager: vi.fn().mockImplementation(() => mockFilterManager),
@@ -721,7 +721,9 @@ describe('useSettingsView', () => {
 
   describe('when workflow feature flag is enabled', () => {
     beforeEach(async () => {
-      const { useIsExperimentalFeatureEnabled } = (await vi.importMock('../../../../common/hooks/use_experimental_features'));
+      const { useIsExperimentalFeatureEnabled } = await vi.importMock(
+        '../../../../common/hooks/use_experimental_features'
+      );
       useIsExperimentalFeatureEnabled.mockReturnValue(true);
 
       // Mock the feature flag to return true; also enable the per-space uiSetting opt-in
@@ -794,7 +796,7 @@ describe('useSettingsView', () => {
 
     it('calls clearWorkflowSettings when reset is clicked', async () => {
       const clearSettings = vi.fn();
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings,
         isLoading: false,
@@ -832,7 +834,7 @@ describe('useSettingsView', () => {
     it('calls resetCache on the default ES|QL query hook when reset is clicked', async () => {
       const resetCache = vi.fn();
       const { useFetchDefaultEsqlQuery: mockUseFetchDefaultEsqlQuery, useWorkflowConfiguration } =
-        (await vi.importMock('../workflow_configuration'));
+        await vi.importMock('../workflow_configuration');
       mockUseFetchDefaultEsqlQuery.mockReturnValue({
         defaultEsqlQuery: 'FROM .alerts-security.alerts-default | LIMIT 100',
         fetchDefaultEsqlQuery: vi.fn().mockResolvedValue(undefined),
@@ -875,7 +877,7 @@ describe('useSettingsView', () => {
 
     describe('alertRetrievalHasError', () => {
       it('returns true when all retrieval toggles are disabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -904,7 +906,7 @@ describe('useSettingsView', () => {
       });
 
       it('returns false when only the skill toggle is enabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -933,7 +935,7 @@ describe('useSettingsView', () => {
       });
 
       it('returns false when default alert retrieval is enabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -962,7 +964,7 @@ describe('useSettingsView', () => {
       });
 
       it('returns false when alert retrieval workflows are enabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -991,7 +993,7 @@ describe('useSettingsView', () => {
       });
 
       it('returns false when workflows feature is disabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1018,7 +1020,7 @@ describe('useSettingsView', () => {
 
     describe('validationHasError', () => {
       it('returns true when validation workflow is empty', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1047,7 +1049,7 @@ describe('useSettingsView', () => {
       });
 
       it('returns false when validation workflow is selected', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1076,7 +1078,7 @@ describe('useSettingsView', () => {
       });
 
       it('returns false when workflows feature is disabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1102,7 +1104,7 @@ describe('useSettingsView', () => {
     });
 
     it('disables save button when workflow configuration is invalid', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1137,7 +1139,7 @@ describe('useSettingsView', () => {
     });
 
     it('enables save button when workflow configuration is valid', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1164,7 +1166,7 @@ describe('useSettingsView', () => {
     });
 
     it('shows validation callout when no alert retrieval method is selected', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1195,7 +1197,7 @@ describe('useSettingsView', () => {
     });
 
     it('does not show validation callout when default workflow is enabled', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1226,7 +1228,7 @@ describe('useSettingsView', () => {
     });
 
     it('does not show validation callout when alternative workflow is selected', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1274,7 +1276,7 @@ describe('useSettingsView', () => {
     });
 
     it('shows validation callout when validation workflow is not selected', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1305,7 +1307,7 @@ describe('useSettingsView', () => {
     });
 
     it('shows validation callout with multiple errors when both alert retrieval and validation workflow are missing', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1341,7 +1343,7 @@ describe('useSettingsView', () => {
     });
 
     it('disables save buttons when validation workflow is not selected', async () => {
-      const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+      const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
       useWorkflowConfiguration.mockReturnValue({
         clearSettings: vi.fn(),
         isLoading: false,
@@ -1376,7 +1378,7 @@ describe('useSettingsView', () => {
     describe('workflow configuration draft state (cancel behavior)', () => {
       it('does not persist workflow configuration changes to local storage when configuration changes', async () => {
         const updateSettingsMock = vi.fn();
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1416,7 +1418,7 @@ describe('useSettingsView', () => {
 
       it('persists the draft workflow configuration to local storage when save is clicked', async () => {
         const updateSettingsMock = vi.fn().mockReturnValue(true);
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1482,7 +1484,7 @@ describe('useSettingsView', () => {
       };
 
       const mockEmptyWorkflowsConfig = async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,
@@ -1610,7 +1612,7 @@ describe('useSettingsView', () => {
       });
 
       it('does NOT block the save when the skill toggle is also enabled', async () => {
-        const { useWorkflowConfiguration } = (await vi.importMock('../workflow_configuration'));
+        const { useWorkflowConfiguration } = await vi.importMock('../workflow_configuration');
         useWorkflowConfiguration.mockReturnValue({
           clearSettings: vi.fn(),
           isLoading: false,

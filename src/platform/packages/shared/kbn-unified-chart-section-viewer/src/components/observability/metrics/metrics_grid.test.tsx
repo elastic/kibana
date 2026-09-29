@@ -37,7 +37,7 @@ vi.mock('@kbn/discover-utils', async () => {
     METRICS_GRID_SETTINGS_DEFAULTS,
     METRICS_GRID_SIMPLE_AGGREGATIONS,
     METRICS_GRID_SORT_DEFAULTS,
-  } = (await vi.importActual('@kbn/discover-utils/src/data_types/metrics'));
+  } = await vi.importActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
     DiscoverFlyouts: { metricInsights: 'metricInsights' },
@@ -50,7 +50,7 @@ vi.mock('@kbn/discover-utils', async () => {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useIsWithinMinBreakpoint: vi.fn(() => true),
@@ -58,26 +58,26 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../chart', () => {
-      const mocked = {
-      Chart: vi.fn(() => <div data-test-subj="chart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: vi.fn(() => <div data-test-subj="chart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/utils')),
-      createESQLQuery: vi.fn((params) => {
-        const { metricItem, splitAccessors = [] } = params;
-        const splitAccessorsStr =
-          splitAccessors.length > 0
-            ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
-            : '';
-        return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/utils')),
+    createESQLQuery: vi.fn((params) => {
+      const { metricItem, splitAccessors = [] } = params;
+      const splitAccessorsStr =
+        splitAccessors.length > 0
+          ? `, ${splitAccessors.map((field: string) => `\`${field}\``).join(', ')}`
+          : '';
+      return `FROM ${metricItem.indexName} | STATS AVG(${metricItem.metricName}) BY TBUCKET(100)${splitAccessorsStr}`;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MetricsGrid', () => {
   let discoverFetch$: UnifiedHistogramFetch$;
@@ -923,12 +923,12 @@ describe('MetricsGrid', () => {
     });
 
     it('returns focus to the originating grid cell after closing the flyout', () => {
-      vi
-        .spyOn(global, 'requestAnimationFrame')
-        .mockImplementation((cb: FrameRequestCallback): number => {
+      vi.spyOn(global, 'requestAnimationFrame').mockImplementation(
+        (cb: FrameRequestCallback): number => {
           cb(0);
           return 0;
-        });
+        }
+      );
 
       const { getByTestId, getAllByRole } = render(
         <MetricsGridWithRestorableState
@@ -962,12 +962,12 @@ describe('MetricsGrid', () => {
     });
 
     it('returns focus to the live metric position when the grid reordered while the flyout was open', () => {
-      vi
-        .spyOn(global, 'requestAnimationFrame')
-        .mockImplementation((cb: FrameRequestCallback): number => {
+      vi.spyOn(global, 'requestAnimationFrame').mockImplementation(
+        (cb: FrameRequestCallback): number => {
           cb(0);
           return 0;
-        });
+        }
+      );
 
       const { getByTestId, getAllByRole } = render(
         <MetricsGridWithRestorableState

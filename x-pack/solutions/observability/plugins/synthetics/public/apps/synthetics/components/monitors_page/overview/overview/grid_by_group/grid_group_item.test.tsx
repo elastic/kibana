@@ -11,11 +11,11 @@ import { render } from '@testing-library/react';
 import React from 'react';
 
 vi.mock('../../../hooks/use_overview_trends_requests', () => {
-      const mocked = {
-      useOverviewTrendsRequests: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOverviewTrendsRequests: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_requests';
 import { GroupGridItem } from './grid_group_item';

@@ -16,11 +16,11 @@ import { RuleTypeDisabledError } from '../../../../lib/errors/rule_type_disabled
 
 const rulesClient = rulesClientMock.create();
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

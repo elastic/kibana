@@ -150,12 +150,10 @@ describe('deleteWorkflows', () => {
     expect(
       vi.mocked(dataClients.stepExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
     ).toBeLessThan(
-      vi.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock
-        .invocationCallOrder[0]
+      vi.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
     );
     expect(
-      vi.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock
-        .invocationCallOrder[0]
+      vi.mocked(dataClients.workflowExecutionsDataClient.deleteByQuery).mock.invocationCallOrder[0]
     ).toBeLessThan(client.delete.mock.invocationCallOrder[0]);
     expect(dataClients.stepExecutionsDataClient.deleteByQuery).toHaveBeenCalledWith(
       expect.objectContaining({ conflicts: 'abort' })
@@ -443,9 +441,9 @@ describe('deleteWorkflows', () => {
         },
       ]);
       const dataClients = makeExecutionsDataAccess();
-      vi
-        .mocked(dataClients.stepExecutionsDataClient.deleteByQuery)
-        .mockRejectedValueOnce(new Error('purge failed'));
+      vi.mocked(dataClients.stepExecutionsDataClient.deleteByQuery).mockRejectedValueOnce(
+        new Error('purge failed')
+      );
 
       await expect(
         deleteWorkflows({
@@ -592,9 +590,7 @@ describe('deleteWorkflows', () => {
         { _id: 'wf-1', _source: makeWorkflowSource() },
       ]);
       const { workflowExecutionsDataClient, stepExecutionsDataClient } = makeExecutionsDataAccess();
-      const getWorkflowExecutions = vi
-        .fn()
-        .mockRejectedValue(new Error('execution lookup failed'));
+      const getWorkflowExecutions = vi.fn().mockRejectedValue(new Error('execution lookup failed'));
       client.bulk
         .mockResolvedValueOnce({
           items: [{ index: { _id: 'wf-1', status: 200 } }],
@@ -791,12 +787,12 @@ describe('bound workflow deletion OCC', () => {
       calls.push('steps');
       return { deleted: 1 };
     });
-    vi
-      .mocked(params.workflowExecutionsDataClient.deleteByQuery)
-      .mockImplementationOnce(async () => {
+    vi.mocked(params.workflowExecutionsDataClient.deleteByQuery).mockImplementationOnce(
+      async () => {
         calls.push('executions');
         return { deleted: 1 };
-      });
+      }
+    );
     deleteDocument.mockImplementationOnce(async () => {
       calls.push('workflow');
     });

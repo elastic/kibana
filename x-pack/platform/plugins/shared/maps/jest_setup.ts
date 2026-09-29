@@ -8,6 +8,6 @@
 import { vi } from 'vitest';
 
 vi.mock('@kbn/mapbox-gl', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});

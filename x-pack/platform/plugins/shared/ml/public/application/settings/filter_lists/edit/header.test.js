@@ -13,19 +13,19 @@ import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 import { EditFilterListHeader } from './header';
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: vi.fn(),
-            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/filter_lists'),
-          },
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/filter_lists'),
         },
-      }),
-      useNavigateToPath: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    useNavigateToPath: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EditFilterListHeader', () => {
   const updateNewFilterId = vi.fn(() => {});

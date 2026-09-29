@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { setMockValues } from '../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { render, screen, waitFor } from '@testing-library/react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { findOrCreateDataView } from '../utils/find_or_create_data_view';
 

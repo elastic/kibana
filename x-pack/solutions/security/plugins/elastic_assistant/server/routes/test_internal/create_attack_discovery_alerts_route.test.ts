@@ -84,13 +84,10 @@ describe('createAttackDiscoveryAlertsRoute', () => {
     (context.elasticAssistant.rulesClient.runSoon as unknown as Mock).mockResolvedValue('ok');
     (context.elasticAssistant.rulesClient.delete as unknown as Mock).mockResolvedValue({});
     (
-      context.elasticAssistant.frameworkAlerts
-        .getContextInitializationPromise as unknown as Mock
+      context.elasticAssistant.frameworkAlerts.getContextInitializationPromise as unknown as Mock
     ).mockResolvedValue({ result: true });
 
-    (
-      context.core.elasticsearch.client.asCurrentUser.search as unknown as Mock
-    ).mockResolvedValue({
+    (context.core.elasticsearch.client.asCurrentUser.search as unknown as Mock).mockResolvedValue({
       hits: {
         hits: [
           {
@@ -106,12 +103,8 @@ describe('createAttackDiscoveryAlertsRoute', () => {
         ],
       },
     });
-    (
-      context.core.elasticsearch.client.asCurrentUser.bulk as unknown as Mock
-    ).mockResolvedValue({});
-    (
-      context.elasticAssistant.getAttackDiscoveryDataClient as unknown as Mock
-    ).mockResolvedValue({
+    (context.core.elasticsearch.client.asCurrentUser.bulk as unknown as Mock).mockResolvedValue({});
+    (context.elasticAssistant.getAttackDiscoveryDataClient as unknown as Mock).mockResolvedValue({
       findAttackDiscoveryAlerts: vi.fn().mockResolvedValue({ data: [] }),
     });
 

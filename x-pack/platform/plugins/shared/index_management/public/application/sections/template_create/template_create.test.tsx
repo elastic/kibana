@@ -20,30 +20,30 @@ import { saveTemplate } from '../../services/api';
 import { TemplateCreate } from './template_create';
 
 vi.mock('../../services/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../services/api')),
-      saveTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../services/api')),
+    saveTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = vi.fn();
 vi.mock('../../app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../app_context')),
-      useAppContext: () => mockUseAppContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../app_context')),
+    useAppContext: () => mockUseAppContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocation = vi.fn();
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: () => mockUseLocation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: () => mockUseLocation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockTemplateToSave: TemplateDeserialized | null = null;
 const mockTemplateFormPropsSpy = vi.fn();

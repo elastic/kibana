@@ -47,48 +47,48 @@ vi.mock('../../../../common/lib/kibana', () => ({
   })),
 }));
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-alerts-table/hooks/use_bulk_get_maintenance_windows');
 vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
-      const mocked = {
-      loadExecutionLogAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadExecutionLogAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_multiple_spaces', () => {
-      const mocked = {
-      useMultipleSpaces: vi.fn(() => ({
-        onShowAllSpacesChange: vi.fn(),
-        canAccessMultipleSpaces: false,
-        namespaces: undefined,
-        activeSpace: undefined,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMultipleSpaces: vi.fn(() => ({
+      onShowAllSpacesChange: vi.fn(),
+      canAccessMultipleSpaces: false,
+      namespaces: undefined,
+      activeSpace: undefined,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAlertSummaryWidget = vi.fn((_props: Record<string, unknown>) => (
   <div data-test-subj="alertSummaryWidget" />
 ));
 vi.mock('../../alert_summary_widget', () => {
-      const mocked = {
-      AlertSummaryWidget: (props: Record<string, unknown>) => mockAlertSummaryWidget(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertSummaryWidget: (props: Record<string, unknown>) => mockAlertSummaryWidget(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-utils-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-utils-plugin/public')),
-      setStateToKbnUrl: vi.fn(() => '/mocked-path'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-utils-plugin/public')),
+    setStateToKbnUrl: vi.fn(() => '/mocked-path'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAlertsTable = vi.fn(() => {
   return <div data-test-subj="alertsTable" />;
@@ -121,7 +121,9 @@ vi.mock('./rule_alert_search_bar', () => {
   };
 });
 
-const { loadExecutionLogAggregations } = (await vi.importMock('../../../lib/rule_api/load_execution_log_aggregations'));
+const { loadExecutionLogAggregations } = await vi.importMock(
+  '../../../lib/rule_api/load_execution_log_aggregations'
+);
 
 const mocks = coreMock.createSetup();
 
@@ -163,9 +165,7 @@ beforeAll(async () => {
   vi.clearAllMocks();
   ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
   useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-  useKibanaMock().services.chrome.getActiveSolutionNavId$ = vi
-    .fn()
-    .mockReturnValue(solutionNavId$);
+  useKibanaMock().services.chrome.getActiveSolutionNavId$ = vi.fn().mockReturnValue(solutionNavId$);
 
   const services = await mocks.getStartServices();
   capabilities = services[0].application.capabilities;
@@ -620,14 +620,12 @@ describe('disable/enable functionality', () => {
 
 describe('tabbed content', () => {
   it('defaults to alerts tab when no tabId is in the URL', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(
-      (feature: string) => {
-        if (feature === 'rulesDetailLogs') {
-          return true;
-        }
-        return false;
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation((feature: string) => {
+      if (feature === 'rulesDetailLogs') {
+        return true;
       }
-    );
+      return false;
+    });
 
     const rule = mockRule();
     const ruleType = mockRuleType();
@@ -649,14 +647,12 @@ describe('tabbed content', () => {
   });
 
   it('defaults to history tab when tabId=history is in the URL', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(
-      (feature: string) => {
-        if (feature === 'rulesDetailLogs') {
-          return true;
-        }
-        return false;
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation((feature: string) => {
+      if (feature === 'rulesDetailLogs') {
+        return true;
       }
-    );
+      return false;
+    });
 
     const rule = mockRule();
     const ruleType = mockRuleType();
@@ -678,14 +674,12 @@ describe('tabbed content', () => {
   });
 
   it('tabbed content renders when the event log experiment is on', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(
-      (feature: string) => {
-        if (feature === 'rulesDetailLogs') {
-          return true;
-        }
-        return false;
+    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation((feature: string) => {
+      if (feature === 'rulesDetailLogs') {
+        return true;
       }
-    );
+      return false;
+    });
 
     const rule = mockRule();
     const ruleType = mockRuleType();

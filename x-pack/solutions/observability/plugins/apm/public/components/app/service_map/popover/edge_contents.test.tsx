@@ -25,30 +25,30 @@ import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { OpenInDiscover } from '../../../shared/links/discover_links/open_in_discover';
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/links/discover_links/open_in_discover', () => {
-      const mocked = {
-      OpenInDiscover: vi.fn(() => (
-        <button type="button" data-test-subj="apmEdgeContentsOpenInDiscoverButton">
-          Explore traces
-        </button>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OpenInDiscover: vi.fn(() => (
+      <button type="button" data-test-subj="apmEdgeContentsOpenInDiscoverButton">
+        Explore traces
+      </button>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success' },
-      useFetcher: () => ({ data: {}, status: 'success' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FETCH_STATUS: { LOADING: 'loading', SUCCESS: 'success' },
+    useFetcher: () => ({ data: {}, status: 'success' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseAnyOfApmParams = vi.mocked(useAnyOfApmParams);
 const mockedOpenInDiscover = vi.mocked(OpenInDiscover);

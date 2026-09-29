@@ -17,7 +17,7 @@ const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
 
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../../common/lib/kibana');
 
   return {
     ...original,

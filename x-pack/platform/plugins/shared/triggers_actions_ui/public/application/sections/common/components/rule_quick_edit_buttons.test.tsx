@@ -15,15 +15,15 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { RuleTableItem } from '../../../../types';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          notifications: { toast: { addDanger: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        notifications: { toast: { addDanger: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const updateRulesToBulkEdit = vi.fn();
 const onDisable = vi.fn();

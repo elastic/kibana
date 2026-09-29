@@ -20,18 +20,18 @@ const mockRefetchCurrentConversation = vi.fn();
 const mockUpdateConversationUsers = vi.fn();
 
 vi.mock('../use_conversation', () => {
-      const mocked = {
-      useConversation: () => ({ updateConversationUsers: mockUpdateConversationUsers }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: () => ({ updateConversationUsers: mockUpdateConversationUsers }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./share_modal', () => {
-      const mocked = {
-      ShareModal: () => <div data-test-subj="share-modal">{'ShareModal'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ShareModal: () => <div data-test-subj="share-modal">{'ShareModal'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const toastsMock = { addSuccess: vi.fn(), addError: vi.fn() } as unknown as IToasts;
 const defaultProps = {

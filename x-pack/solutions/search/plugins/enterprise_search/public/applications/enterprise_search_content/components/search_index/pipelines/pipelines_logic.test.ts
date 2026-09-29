@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex } from '../../../__mocks__/view_index.mock';
+
+import { vi } from 'vitest';
 
 import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 

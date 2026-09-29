@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { WorkflowSelector } from './workflow_selector';
 
@@ -40,25 +39,25 @@ const mockWorkflows: WorkflowListItemDto[] = [
 ];
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: () => '/app/workflows',
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: () => '/app/workflows',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks', () => {
-      const mocked = {
-      useWorkflows: () => ({ data: { results: mockWorkflows } }),
-      useWorkflowsCapabilities: () => ({ canReadManagedWorkflow: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflows: () => ({ data: { results: mockWorkflows } }),
+    useWorkflowsCapabilities: () => ({ canReadManagedWorkflow: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowSelector', () => {
   it('keeps the search term after selecting an option when the selection is hidden from search', () => {

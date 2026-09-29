@@ -17,7 +17,7 @@ import { mockClusterSettingDeprecation } from '../../__fixtures__/es_deprecation
 import { RemoveClusterSettingsFlyout } from './flyout';
 
 vi.mock('../../../../lib/ui_metric', async () => {
-  const actual = (await vi.importActual('../../../../lib/ui_metric'));
+  const actual = await vi.importActual('../../../../lib/ui_metric');
 
   return {
     ...actual,

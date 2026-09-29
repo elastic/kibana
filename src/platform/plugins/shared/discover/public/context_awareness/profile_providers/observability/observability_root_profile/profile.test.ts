@@ -79,9 +79,9 @@ describe('observabilityRootProfileProvider', () => {
     });
 
     it('should return no default data views', async () => {
-      vi
-        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
-        .mockReturnValueOnce(undefined);
+      vi.spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern').mockReturnValueOnce(
+        undefined
+      );
       const result = await observabilityRootProfileProvider.resolve({
         solutionNavId: SolutionType.Observability,
       });
@@ -114,9 +114,9 @@ describe('observabilityRootProfileProvider', () => {
     });
 
     it('should fall back to the previous profile return value when allLogsIndexPattern is undefined', async () => {
-      vi
-        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
-        .mockReturnValueOnce(undefined);
+      vi.spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern').mockReturnValueOnce(
+        undefined
+      );
       const result = await observabilityRootProfileProvider.resolve({
         solutionNavId: SolutionType.Observability,
       });

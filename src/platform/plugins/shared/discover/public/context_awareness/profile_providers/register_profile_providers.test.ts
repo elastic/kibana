@@ -28,7 +28,7 @@ const levels = ['root', 'data-source', 'document'];
 let mockAllCollectedProfiles: Array<{ level: string; profileId: string }> = [];
 
 vi.mock('./register_enabled_profile_providers', async () => {
-  const real = (await vi.importActual('./register_enabled_profile_providers'));
+  const real = await vi.importActual('./register_enabled_profile_providers');
   return {
     ...real,
     registerEnabledProfileProviders: vi.fn((params) => {

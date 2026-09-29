@@ -190,14 +190,14 @@ describe('generateReportHandler', () => {
     mockContext = xpackMocks.createRequestHandlerContext() as unknown as FleetRequestHandlerContext;
     appContextService.start(createAppContextStartContractMock());
 
-    vi
-      .mocked(appContextService.getReportingStart()?.handleGenerateSystemReportRequest)
-      ?.mockImplementation(async (path, config, handleResponse) => {
-        return handleResponse({
-          report: {} as SavedReport,
-          downloadUrl: 'http://example.com/report.csv',
-        });
+    vi.mocked(
+      appContextService.getReportingStart()?.handleGenerateSystemReportRequest
+    )?.mockImplementation(async (path, config, handleResponse) => {
+      return handleResponse({
+        report: {} as SavedReport,
+        downloadUrl: 'http://example.com/report.csv',
       });
+    });
 
     mockBuildAgentStatusRuntimeField.mockResolvedValue({
       status: {
@@ -503,9 +503,9 @@ describe('generateReportHandler', () => {
   describe('error handling', () => {
     it('should throw FleetError when report generation fails', async () => {
       const errorMessage = 'Report generation failed!';
-      vi
-        .mocked(appContextService.getReportingStart()!.handleGenerateSystemReportRequest)
-        .mockRejectedValue(new Error(errorMessage));
+      vi.mocked(
+        appContextService.getReportingStart()!.handleGenerateSystemReportRequest
+      ).mockRejectedValue(new Error(errorMessage));
 
       await expect(generateReportHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
         new FleetError(`Failed to generate report: ${errorMessage}`)
@@ -518,11 +518,11 @@ describe('generateReportHandler', () => {
 
     it('should handle reporting callback with error', async () => {
       const callbackError = new Error('Callback error');
-      vi
-        .mocked(appContextService.getReportingStart()!.handleGenerateSystemReportRequest)
-        .mockImplementation(async (path, config, handleResponse) => {
-          return handleResponse(null, callbackError);
-        });
+      vi.mocked(
+        appContextService.getReportingStart()!.handleGenerateSystemReportRequest
+      ).mockImplementation(async (path, config, handleResponse) => {
+        return handleResponse(null, callbackError);
+      });
 
       await expect(generateReportHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
         new FleetError(`Failed to generate report: ${callbackError.message}`)
@@ -533,11 +533,11 @@ describe('generateReportHandler', () => {
     });
 
     it('should throw FleetError when reporting callback returns no result', async () => {
-      vi
-        .mocked(appContextService.getReportingStart()!.handleGenerateSystemReportRequest)
-        .mockImplementation(async (path, config, handleResponse) => {
-          return handleResponse(null);
-        });
+      vi.mocked(
+        appContextService.getReportingStart()!.handleGenerateSystemReportRequest
+      ).mockImplementation(async (path, config, handleResponse) => {
+        return handleResponse(null);
+      });
       await expect(generateReportHandler(mockContext, mockRequest, mockResponse)).rejects.toThrow(
         new FleetError('Failed to generate report: Report generation encountered an unknown error')
       );

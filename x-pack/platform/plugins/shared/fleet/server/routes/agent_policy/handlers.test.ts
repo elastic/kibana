@@ -51,11 +51,11 @@ vi.mock('../../services/agent_policy_create', () => {
 });
 
 vi.mock('../../services/fleet_proxies', () => {
-      const mocked = {
-      listFleetProxies: vi.fn().mockResolvedValue({ items: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    listFleetProxies: vi.fn().mockResolvedValue({ items: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const agentPolicyServiceMock = agentPolicyService as Mocked<typeof agentPolicyService>;
 
@@ -601,9 +601,7 @@ describe('Agent policy API handlers', () => {
   });
 
   describe('populateAssignedAgentsCount', () => {
-    const makeAgentClient = (
-      listAgents: Mock
-    ): { agentClient: AgentClient; listAgents: Mock } => ({
+    const makeAgentClient = (listAgents: Mock): { agentClient: AgentClient; listAgents: Mock } => ({
       agentClient: { listAgents } as unknown as AgentClient,
       listAgents,
     });

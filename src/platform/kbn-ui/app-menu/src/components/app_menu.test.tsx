@@ -20,14 +20,14 @@ let mockCurrentBreakpoint: EuiBreakpointSize | undefined = 'xl';
 let mockViewportBreakpoint: EuiBreakpointSize = 'xl';
 
 vi.mock('@kbn/ui-chrome-layout', () => {
-      const mocked = {
-      useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentChromeApplicationBreakpoint: () => mockCurrentBreakpoint,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,

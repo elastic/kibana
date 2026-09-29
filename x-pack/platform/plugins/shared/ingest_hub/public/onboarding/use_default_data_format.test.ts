@@ -11,11 +11,11 @@ import type { Mock } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useDefaultDataFormat } from './use_default_data_format';

@@ -18,7 +18,7 @@ const mockSetCenter = vi.fn();
 const mockSetSearchHighlight = vi.fn();
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
@@ -36,14 +36,14 @@ vi.mock('@xyflow/react', () => {
 });
 
 vi.mock('../../shared/service_map/service_map_search_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../shared/service_map/service_map_search_context')),
-      useServiceMapHighlight: () => ({
-        setSearchHighlight: mockSetSearchHighlight,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../shared/service_map/service_map_search_context')),
+    useServiceMapHighlight: () => ({
+      setSearchHighlight: mockSetSearchHighlight,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function serviceNode(
   id: string,

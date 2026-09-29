@@ -9,7 +9,7 @@ import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     createIndex: vi.fn(),

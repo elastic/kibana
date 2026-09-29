@@ -23,11 +23,11 @@ import type { ViewMode } from '@kbn/presentation-publishing';
 
 // Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const canEditUnifiedSearch = vi.fn().mockReturnValue(true);
 
@@ -56,13 +56,13 @@ const mockedEditPanelAction = {
   isCompatible: vi.fn().mockResolvedValue(true),
 };
 vi.mock('../services/kibana_services', () => {
-      const mocked = {
-      uiActionsService: {
-        getAction: async () => mockedEditPanelAction,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiActionsService: {
+      getAction: async () => mockedEditPanelAction,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('filters notification popover', () => {
   let api: FiltersNotificationActionApi;

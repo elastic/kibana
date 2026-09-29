@@ -18,7 +18,7 @@ const upgradeMessage = 'Please upgrade...';
 const mockActions = <div data-test-subj="mockActions" />;
 
 vi.mock('@kbn/security-solution-navigation', async () => {
-  const original = (await vi.importActual('@kbn/security-solution-navigation'));
+  const original = await vi.importActual('@kbn/security-solution-navigation');
   return {
     ...original,
     useNavigation: () => ({

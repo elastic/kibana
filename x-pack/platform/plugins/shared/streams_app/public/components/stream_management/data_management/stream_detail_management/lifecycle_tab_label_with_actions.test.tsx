@@ -19,7 +19,7 @@ import type { StatefulStreamsAppRouter } from '../../../../hooks/use_streams_app
 import { buildLifecycleTabActions } from './lifecycle_tab_label_with_actions';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     copyToClipboard: vi.fn(() => true),

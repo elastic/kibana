@@ -27,29 +27,29 @@ import { openAssigneeModal } from '../components/assignee_modal';
 vi.mock('./bulk_create_alert_actions');
 vi.mock('../components/assignee_modal');
 vi.mock('../components/actions/edit_episode_assignee_popover_item', () => {
-      const mocked = {
-      EditEpisodeAssigneePopoverItem: ({
-        assigneeUid,
-        episodeCount,
-        onApply,
-      }: {
-        assigneeUid: string | null;
-        episodeCount?: number;
-        onApply: (uid: string | null) => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="mockPopoverItem"
-          data-assignee-uid={String(assigneeUid)}
-          data-episode-count={episodeCount}
-          onClick={() => onApply('uid-picked')}
-        >
-          {'Edit assignee'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditEpisodeAssigneePopoverItem: ({
+      assigneeUid,
+      episodeCount,
+      onApply,
+    }: {
+      assigneeUid: string | null;
+      episodeCount?: number;
+      onApply: (uid: string | null) => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mockPopoverItem"
+        data-assignee-uid={String(assigneeUid)}
+        data-episode-count={episodeCount}
+        onClick={() => onApply('uid-picked')}
+      >
+        {'Edit assignee'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBulkCreate = vi.mocked(bulkAssignEpisodeActions);
 const mockOpenModal = vi.mocked(openAssigneeModal);

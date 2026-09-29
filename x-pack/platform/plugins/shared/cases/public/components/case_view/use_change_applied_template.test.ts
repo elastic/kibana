@@ -15,36 +15,36 @@ import { computeNewExtendedFields, useChangeAppliedTemplate } from './use_change
 
 const mockPatchCase = vi.fn();
 vi.mock('../../containers/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../containers/api')),
-      patchCase: (...args: unknown[]) => mockPatchCase(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../containers/api')),
+    patchCase: (...args: unknown[]) => mockPatchCase(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportTemplateApplied = vi.fn();
 const mockReportTemplateCleared = vi.fn();
 vi.mock('../../analytics/templates/use_template_apply_ebt', () => {
-      const mocked = {
-      useTemplateAppliedEBT: () => mockReportTemplateApplied,
-      useTemplateClearedEBT: () => mockReportTemplateCleared,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTemplateAppliedEBT: () => mockReportTemplateApplied,
+    useTemplateClearedEBT: () => mockReportTemplateCleared,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockShowSuccessToast = vi.fn();
 const mockShowErrorToast = vi.fn();
 const mockShowInfoToast = vi.fn();
 vi.mock('../../common/use_cases_toast', () => {
-      const mocked = {
-      useCasesToast: () => ({
-        showSuccessToast: mockShowSuccessToast,
-        showErrorToast: mockShowErrorToast,
-        showInfoToast: mockShowInfoToast,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesToast: () => ({
+      showSuccessToast: mockShowSuccessToast,
+      showErrorToast: mockShowErrorToast,
+      showInfoToast: mockShowInfoToast,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The hook exposes a "Reload page" action on success; jsdom doesn't implement reload, so stub it.
 const originalLocation = window.location;

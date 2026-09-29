@@ -15,11 +15,11 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { Introduction } from './introduction';
 
 vi.mock('../../../hooks/use_kibana_url', () => {
-      const mocked = {
-      useKibanaUrl: (path: string) => `/base${path}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaUrl: (path: string) => `/base${path}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderIntroduction(guideLink = 'https://example.com/guide') {
   return render(

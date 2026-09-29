@@ -23,11 +23,11 @@ import {
 } from './audit';
 
 vi.mock('@kbn/repo-packages', () => {
-      const mocked = {
-      findPackageForPath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findPackageForPath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FIXTURES_DIR = Path.join(__dirname, '__fixtures__', 'audit');
 const FAKE_REPO_ROOT = Path.join(FIXTURES_DIR, 'fake_repo');

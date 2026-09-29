@@ -48,44 +48,44 @@ const mockConsoleParsedRequestsProvider = vi.fn<
 >();
 
 vi.mock('@kbn/esql-language', () => {
-      const mocked = {
-      suggest: (...args: Parameters<typeof mockSuggest>) => mockSuggest(...args),
-      // esql_lexer_rules.ts reads this eagerly at module-load time to build its keyword list, so
-      // it needs a stub here even though this suite doesn't exercise highlighting.
-      esqlCommandRegistry: { getAllCommandNames: () => [] },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    suggest: (...args: Parameters<typeof mockSuggest>) => mockSuggest(...args),
+    // esql_lexer_rules.ts reads this eagerly at module-load time to build its keyword list, so
+    // it needs a stub here even though this suite doesn't exercise highlighting.
+    esqlCommandRegistry: { getAllCommandNames: () => [] },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../esql/lib/converters/suggestions', () => {
-      const mocked = {
-      wrapAsMonacoSuggestions: (...args: Parameters<typeof mockWrapAsMonacoSuggestions>) =>
-        mockWrapAsMonacoSuggestions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapAsMonacoSuggestions: (...args: Parameters<typeof mockWrapAsMonacoSuggestions>) =>
+      mockWrapAsMonacoSuggestions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils', async () => {
-      const mocked = {
-      // `findRequestLineNumber` owns the backwards request-line scan and its lookback safeguards, which
-      // the lookback tests below exercise for real. Keep the actual implementation.
-      ...(await vi.importActual('./utils')),
-      checkForTripleQuotesAndEsqlQuery: (
-        ...args: Parameters<typeof mockCheckForTripleQuotesAndEsqlQuery>
-      ) => mockCheckForTripleQuotesAndEsqlQuery(...args),
-      unescapeInvalidChars: (...args: Parameters<typeof mockUnescapeInvalidChars>) =>
-        mockUnescapeInvalidChars(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // `findRequestLineNumber` owns the backwards request-line scan and its lookback safeguards, which
+    // the lookback tests below exercise for real. Keep the actual implementation.
+    ...(await vi.importActual('./utils')),
+    checkForTripleQuotesAndEsqlQuery: (
+      ...args: Parameters<typeof mockCheckForTripleQuotesAndEsqlQuery>
+    ) => mockCheckForTripleQuotesAndEsqlQuery(...args),
+    unescapeInvalidChars: (...args: Parameters<typeof mockUnescapeInvalidChars>) =>
+      mockUnescapeInvalidChars(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./console_errors_provider', () => {
-      const mocked = {
-      setupConsoleErrorsProvider: (...args: Parameters<typeof mockSetupConsoleErrorsProvider>) =>
-        mockSetupConsoleErrorsProvider(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setupConsoleErrorsProvider: (...args: Parameters<typeof mockSetupConsoleErrorsProvider>) =>
+      mockSetupConsoleErrorsProvider(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./console_parsed_requests_provider', () => {
   function ConsoleParsedRequestsProvider(

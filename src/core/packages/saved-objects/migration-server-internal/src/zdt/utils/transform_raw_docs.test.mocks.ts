@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const migrateRawDocsSafelyMock = vi.fn();
 
 vi.doMock('../../core/migrate_raw_docs', async () => {
-  const actual = (await vi.importActual('../../core/migrate_raw_docs'));
+  const actual = await vi.importActual('../../core/migrate_raw_docs');
   return {
     ...actual,
     migrateRawDocsSafely: migrateRawDocsSafelyMock,

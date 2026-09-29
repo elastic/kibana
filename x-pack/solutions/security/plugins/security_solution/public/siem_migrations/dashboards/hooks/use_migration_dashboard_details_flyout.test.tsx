@@ -16,13 +16,13 @@ import { SiemMigrationStatus } from '../../../../common/siem_migrations/constant
 import type { DashboardMigrationDashboard } from '../../../../common/siem_migrations/model/dashboard_migration.gen';
 
 vi.mock('../components/dashboard_details_flyout', () => {
-      const mocked = {
-      DashboardMigrationDetailsFlyout: (props: DashboardMigrationDashboardDetailsFlyoutProps) => (
-        <div data-test-subj="dashboard-details-flyout" {...props} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardMigrationDetailsFlyout: (props: DashboardMigrationDashboardDetailsFlyoutProps) => (
+      <div data-test-subj="dashboard-details-flyout" {...props} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const migrationDashboardMock = getDashboardMigrationDashboardMock();
 const getMigrationDashboardData = vi.fn().mockReturnValue({

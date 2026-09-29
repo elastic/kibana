@@ -16,11 +16,11 @@ import { useKibana } from './use_kibana';
 
 vi.mock('./use_kibana');
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseLoadConnectors = useLoadConnectors as Mock;

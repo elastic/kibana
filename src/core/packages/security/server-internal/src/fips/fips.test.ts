@@ -13,15 +13,15 @@ import { CriticalError } from '@kbn/core-base-server-internal';
 
 const mockGetFipsFn = vi.fn();
 vi.mock('crypto', () => {
-      const mocked = {
-      randomBytes: vi.fn(),
-      constants: require('crypto').constants,
-      get getFips() {
-        return mockGetFipsFn;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    randomBytes: vi.fn(),
+    constants: require('crypto').constants,
+    get getFips() {
+      return mockGetFipsFn;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { SecurityServiceConfigType } from '../utils';
 import { isFipsEnabled, checkFipsConfig } from './fips';

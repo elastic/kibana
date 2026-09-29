@@ -18,7 +18,9 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_action_policies: { read: true, all:
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -31,18 +33,18 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('../pages/list_action_policies_page/list_action_policies_page', () => {
-      const mocked = {
-      ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">list</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">list</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/action_policy_form_page/action_policy_form_page', () => {
-      const mocked = {
-      ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderApp = (initialPath: string) =>
   render(

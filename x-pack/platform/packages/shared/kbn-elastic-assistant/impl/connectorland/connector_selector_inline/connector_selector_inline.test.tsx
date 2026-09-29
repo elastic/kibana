@@ -24,41 +24,41 @@ const mockConversation = {
 };
 
 vi.mock('../../assistant/use_conversation', () => {
-      const mocked = {
-      useConversation: () => mockConversation,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: () => mockConversation,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => {
-      const mocked = {
-      loadActionTypes: vi.fn(() => {
-        return Promise.resolve([
-          {
-            id: '.gen-ai',
-            name: 'Gen AI',
-            enabled: true,
-            enabledInConfig: true,
-            enabledInLicense: true,
-            minimumLicenseRequired: 'basic',
-          },
-        ]);
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadActionTypes: vi.fn(() => {
+      return Promise.resolve([
+        {
+          id: '.gen-ai',
+          name: 'Gen AI',
+          enabled: true,
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic',
+        },
+      ]);
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => {
-        return {
-          data: mockConnectors,
-          error: null,
-          isSuccess: true,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => {
+      return {
+        data: mockConnectors,
+        error: null,
+        isSuccess: true,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 (useLoadConnectors as Mock).mockReturnValue({
   data: mockConnectors,

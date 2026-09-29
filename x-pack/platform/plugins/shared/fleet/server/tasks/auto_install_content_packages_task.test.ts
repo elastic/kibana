@@ -34,17 +34,17 @@ import {
 vi.mock('../services');
 vi.mock('../services/epm/registry');
 vi.mock('../services/epm/packages', () => {
-      const mocked = {
-      getInstalledPackages: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstalledPackages: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../services/epm/packages/get_prerelease_setting', () => {
-      const mocked = {
-      getPrereleaseFromSettings: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPrereleaseFromSettings: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockRegistry = vi.mocked(Registry);
 
@@ -135,9 +135,9 @@ describe('AutoInstallContentPackagesTask', () => {
         'logs-system.memory-default',
         'logs-system.test-default',
       ]);
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAutoInstallContentPackages: true } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableAutoInstallContentPackages: true,
+      } as any);
       MockRegistry.fetchList.mockResolvedValue([
         {
           name: 'kubernetes_otel',

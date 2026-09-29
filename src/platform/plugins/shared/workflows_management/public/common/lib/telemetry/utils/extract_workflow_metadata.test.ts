@@ -34,22 +34,22 @@ const metadata = (workflow: Record<string, unknown>) =>
 
 // Mock parseWorkflowYamlForAutocomplete for extractStepInfoFromWorkflowYaml tests
 vi.mock('@kbn/workflows-yaml', () => {
-      const mocked = {
-      parseWorkflowYamlForAutocomplete: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseWorkflowYamlForAutocomplete: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Format-shape coverage of `inputs` is owned by `getInputsFromDefinition` unit
 // tests. We mock the helper here so tests can drive `inputCount` without caring
 // about the workflow's input format.
 vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
-      getInputsFromDefinition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+    getInputsFromDefinition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition

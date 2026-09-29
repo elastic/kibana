@@ -25,11 +25,11 @@ import { mockRun, mockTask } from './test_utils';
 import { TaskTypeDictionary } from '../task_type_dictionary';
 
 vi.mock('../constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TaskPool', () => {
   const costCapacityMock = capacityMock.create();

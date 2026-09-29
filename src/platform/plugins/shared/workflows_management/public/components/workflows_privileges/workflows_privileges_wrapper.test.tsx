@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowsPrivilegesWrapper } from './workflows_privileges_wrapper';
@@ -26,26 +25,26 @@ import { createStartServicesMock } from '../../mocks';
 const mockUseKibanaServices = createStartServicesMock();
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: mockUseKibanaServices }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: mockUseKibanaServices }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
-      const mocked = {
-      useWorkflowsBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities

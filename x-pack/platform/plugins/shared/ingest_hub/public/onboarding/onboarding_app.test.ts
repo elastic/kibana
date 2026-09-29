@@ -11,11 +11,11 @@ import type { Mock } from 'vitest';
 import { getCloudService, shouldClearSession, hydrateOnboardingSession } from './onboarding_app';
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      sendGetCloudOnboardingDeployment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetCloudOnboardingDeployment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
 

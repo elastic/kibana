@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Mocked } from 'vitest';
-
 import { URL } from 'url';
+import type { Mocked } from 'vitest';
 
 import { Type } from '@kbn/config-schema';
 import type {

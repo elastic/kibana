@@ -20,71 +20,71 @@ type MockAgent = AgentEditState & {
 let mockAgent: MockAgent | undefined;
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      // Run the mutationFn directly so the payload passed to the service is observable.
-      useMutation: (options: { mutationFn: (data: unknown) => Promise<unknown> }) => ({
-        mutateAsync: options.mutationFn,
-        isLoading: false,
-      }),
-      useQueryClient: () => ({ invalidateQueries: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Run the mutationFn directly so the payload passed to the service is observable.
+    useMutation: (options: { mutationFn: (data: unknown) => Promise<unknown> }) => ({
+      mutateAsync: options.mutationFn,
+      isLoading: false,
+    }),
+    useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-router', () => {
-      const mocked = {
-      useSearchParams: () => [new URLSearchParams(), vi.fn()],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchParams: () => [new URLSearchParams(), vi.fn()],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        agentService: {
-          create: mockCreate,
-          update: mockUpdate,
-          updateAccessControl: mockUpdateAccessControl,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      agentService: {
+        create: mockCreate,
+        update: mockUpdate,
+        updateAccessControl: mockUpdateAccessControl,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_agent_by_id', () => {
-      const mocked = {
-      useAgentBuilderAgentById: () => ({ agent: mockAgent, isLoading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgentById: () => ({ agent: mockAgent, isLoading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../tools/use_tools', () => {
-      const mocked = {
-      useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../skills/use_skills', () => {
-      const mocked = {
-      useSkillsService: () => ({ skills: [], isLoading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSkillsService: () => ({ skills: [], isLoading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../plugins/use_plugins', () => {
-      const mocked = {
-      usePluginsService: () => ({ plugins: [], isLoading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePluginsService: () => ({ plugins: [], isLoading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_experimental_features', () => {
-      const mocked = {
-      useExperimentalFeatures: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExperimentalFeatures: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseConfiguration: AgentEditState['configuration'] = {
   instructions: '',

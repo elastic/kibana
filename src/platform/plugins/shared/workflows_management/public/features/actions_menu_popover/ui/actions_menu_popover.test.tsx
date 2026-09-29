@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionsMenuPopover } from './actions_menu_popover';
 
 vi.mock('./actions_menu', () => {
-      const mocked = {
-      ActionsMenu: () => <div data-test-subj="mocked-actions-menu">{'Actions Menu Content'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionsMenu: () => <div data-test-subj="mocked-actions-menu">{'Actions Menu Content'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ActionsMenuPopover', () => {
   it('does not show menu content when closed', () => {
@@ -44,11 +43,7 @@ describe('ActionsMenuPopover', () => {
     const closePopover = vi.fn();
     render(
       <I18nProvider>
-        <ActionsMenuPopover
-          isOpen={true}
-          closePopover={closePopover}
-          onActionSelected={vi.fn()}
-        />
+        <ActionsMenuPopover isOpen={true} closePopover={closePopover} onActionSelected={vi.fn()} />
       </I18nProvider>
     );
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });

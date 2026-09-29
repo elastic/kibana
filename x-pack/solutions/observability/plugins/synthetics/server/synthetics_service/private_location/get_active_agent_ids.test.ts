@@ -90,9 +90,9 @@ describe('getRecentlyActiveAgentIds', () => {
   });
 
   it('returns an empty set when the synthetics API key is missing or invalid', async () => {
-    vi
-      .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
-      .mockResolvedValue({ isValid: false } as never);
+    vi.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+      isValid: false,
+    } as never);
 
     const active = await getActive(withServiceConfig(), ['a']);
 
@@ -101,9 +101,9 @@ describe('getRecentlyActiveAgentIds', () => {
   });
 
   it('uses the private-location sharding key when the service key is unavailable', async () => {
-    vi
-      .spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService')
-      .mockResolvedValue({ isValid: false } as never);
+    vi.spyOn(getApiKeyModule, 'getAPIKeyForSyntheticsService').mockResolvedValue({
+      isValid: false,
+    } as never);
     getDecryptedAsInternalUser.mockResolvedValue({
       attributes: { id: 'sharding-key', apiKey: 'secret', name: 'private-location-sharding' },
     });

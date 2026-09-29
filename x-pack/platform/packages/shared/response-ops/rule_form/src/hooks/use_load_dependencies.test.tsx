@@ -18,69 +18,77 @@ import type { RuleTypeRegistryContract } from '../common/types';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 
 vi.mock('../common/hooks/use_load_ui_config', () => {
-      const mocked = {
-      useLoadUiConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadUiConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_health_check', () => {
-      const mocked = {
-      useHealthCheck: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHealthCheck: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_resolve_rule', () => {
-      const mocked = {
-      useResolveRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolveRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
-      const mocked = {
-      useGetRuleTypesPermissions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetRuleTypesPermissions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_load_connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_load_connector_types', () => {
-      const mocked = {
-      useLoadConnectorTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectorTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_load_rule_type_alert_fields', () => {
-      const mocked = {
-      useLoadRuleTypeAlertFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadRuleTypeAlertFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings', () => {
-      const mocked = {
-      useFetchFlappingSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchFlappingSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useLoadUiConfig } = (await vi.importMock('../common/hooks/use_load_ui_config'));
-const { useHealthCheck } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_health_check'));
-const { useResolveRule } = (await vi.importMock('../common/hooks/use_resolve_rule'));
-const { useLoadConnectors } = (await vi.importMock('../common/hooks/use_load_connectors'));
-const { useLoadConnectorTypes } = (await vi.importMock('../common/hooks/use_load_connector_types'));
-const { useLoadRuleTypeAlertFields } = (await vi.importMock('../common/hooks/use_load_rule_type_alert_fields'));
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
-const { useFetchFlappingSettings } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'));
+const { useLoadUiConfig } = await vi.importMock('../common/hooks/use_load_ui_config');
+const { useHealthCheck } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_health_check'
+);
+const { useResolveRule } = await vi.importMock('../common/hooks/use_resolve_rule');
+const { useLoadConnectors } = await vi.importMock('../common/hooks/use_load_connectors');
+const { useLoadConnectorTypes } = await vi.importMock('../common/hooks/use_load_connector_types');
+const { useLoadRuleTypeAlertFields } = await vi.importMock(
+  '../common/hooks/use_load_rule_type_alert_fields'
+);
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
+const { useFetchFlappingSettings } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_flapping_settings'
+);
 
 const uiConfigMock = {
   isUsingSecurity: true,

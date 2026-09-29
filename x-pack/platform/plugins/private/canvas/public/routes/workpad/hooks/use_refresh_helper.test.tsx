@@ -19,19 +19,19 @@ const mockGetState = vi.fn();
 const refreshAction = { type: 'fetchAllRenderables' };
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-      useSelector: (selector: any) => selector(mockGetState()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+    useSelector: (selector: any) => selector(mockGetState()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/actions/elements', () => {
-      const mocked = {
-      fetchAllRenderables: () => refreshAction,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAllRenderables: () => refreshAction,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockedContext = (context: any) =>
   ({

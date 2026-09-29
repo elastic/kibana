@@ -24,35 +24,35 @@ import { useWorkflowSummaries } from '../../hooks/use_workflow_summaries';
 import { AutomationsPanel } from './automations_panel';
 
 vi.mock('../../hooks/use_automations_editor', () => {
-      const mocked = {
-      useAutomationsEditor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAutomationsEditor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_suggest_automation', () => {
-      const mocked = {
-      useSuggestAutomation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSuggestAutomation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflow_summaries', () => {
-      const mocked = {
-      useWorkflowSummaries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowSummaries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: () => ({
-        mgetWorkflows: vi.fn(),
-        createWorkflow: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => ({
+      mgetWorkflows: vi.fn(),
+      createWorkflow: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAutomationsEditor = vi.mocked(useAutomationsEditor);
 const mockUseSuggestAutomation = vi.mocked(useSuggestAutomation);

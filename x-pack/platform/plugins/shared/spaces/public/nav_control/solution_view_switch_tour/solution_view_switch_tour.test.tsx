@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { SolutionViewSwitchTour } from './solution_view_switch_tour';
 
@@ -17,29 +16,29 @@ const mockTourQueueState = { isActive: false };
 const mockOnComplete = vi.fn();
 
 vi.mock('@kbn/tour-queue', () => {
-      const mocked = {
-      TOURS: { SPACES_SOLUTION_VIEW_SWITCH: 'spacesSolutionViewSwitchTour' },
-      useTourQueue: () => ({ isActive: mockTourQueueState.isActive, onComplete: mockOnComplete }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TOURS: { SPACES_SOLUTION_VIEW_SWITCH: 'spacesSolutionViewSwitchTour' },
+    useTourQueue: () => ({ isActive: mockTourQueueState.isActive, onComplete: mockOnComplete }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./solution_view_switch_tour_component', () => {
-      const mocked = {
-      SolutionViewSwitchTourComponent: ({ isOpen, onFinish, onClickSpaceSettings }: any) => (
-        <div>
-          <div data-test-subj="isOpen">{String(isOpen)}</div>
-          <button data-test-subj="dismiss" onClick={onFinish}>
-            dismiss
-          </button>
-          <button data-test-subj="settings" onClick={onClickSpaceSettings}>
-            settings
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SolutionViewSwitchTourComponent: ({ isOpen, onFinish, onClickSpaceSettings }: any) => (
+      <div>
+        <div data-test-subj="isOpen">{String(isOpen)}</div>
+        <button data-test-subj="dismiss" onClick={onFinish}>
+          dismiss
+        </button>
+        <button data-test-subj="settings" onClick={onClickSpaceSettings}>
+          settings
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SolutionViewSwitchTour', () => {
   beforeEach(() => {

@@ -9,17 +9,17 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('../../saved_object/notes', () => {
-      const mocked = {
-      persistNote: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    persistNote: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../utils/common', () => {
-      const mocked = {
-      buildFrameworkRequest: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildFrameworkRequest: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { NOTE_URL } from '../../../../../common/constants';

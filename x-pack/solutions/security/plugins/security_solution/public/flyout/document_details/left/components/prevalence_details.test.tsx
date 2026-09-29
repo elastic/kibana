@@ -75,19 +75,19 @@ vi.mock('../../../../common/lib/kibana', () => {
 vi.mock('../../../../flyout_v2/document/tools/prevalence/hooks/use_prevalence');
 
 vi.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: vi.fn().mockReturnValue({
-        entity: null,
-        entityRecord: null,
-        firstSeen: null,
-        lastSeen: null,
-        isLoading: false,
-        error: null,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: vi.fn().mockReturnValue({
+      entity: null,
+      entityRecord: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {

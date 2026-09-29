@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { act, renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import { z } from '@kbn/zod/v4';
 import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
@@ -18,17 +18,17 @@ import { useMonacoMarkersChangedInterceptor } from './use_monaco_markers_changed
 import { MarkerSeverity } from '../../../widgets/workflow_yaml_editor/lib/utils';
 
 vi.mock('./filter_monaco_yaml_markers', () => {
-      const mocked = {
-      filterMonacoYamlMarkers: vi.fn((markers: any[]) => markers),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterMonacoYamlMarkers: vi.fn((markers: any[]) => markers),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./format_monaco_yaml_marker', () => {
-      const mocked = {
-      formatMonacoYamlMarker: vi.fn((marker: any) => ({ ...marker, formatted: true })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatMonacoYamlMarker: vi.fn((marker: any) => ({ ...marker, formatted: true })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('yaml', () => {
   const actual = require('yaml');

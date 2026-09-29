@@ -14,13 +14,13 @@ export const renameMock = vi.fn();
 export const accessMock = vi.fn();
 
 vi.doMock('fs/promises', () => {
-      const mocked = {
-      readdir: readdirMock,
-      rename: renameMock,
-      access: accessMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readdir: readdirMock,
+    rename: renameMock,
+    access: accessMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const clearAllMocks = () => {
   readdirMock.mockClear();

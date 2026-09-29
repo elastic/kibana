@@ -16,33 +16,33 @@ import { VEGA_LITE_SCHEMA } from './normalize_spec';
 import { createVegaGraph } from './graph';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils/tools/utils/esql', () => {
-      const mocked = {
-      buildTimeRangeParams: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildTimeRangeParams: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/extract_text_from_message', () => {
-      const mocked = {
-      extractTextFromMessage: (message: unknown) => String(message),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractTextFromMessage: (message: unknown) => String(message),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/esql_instructions', () => {
-      const mocked = {
-      buildEsqlAdditionalInstructions: () => 'esql-instructions',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEsqlAdditionalInstructions: () => 'esql-instructions',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGenerateEsql = vi.mocked(generateEsql);
 const mockedExecuteEsql = vi.mocked(executeEsql);

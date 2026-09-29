@@ -33,12 +33,12 @@ const mockApplication = {
 const queryClient = new QueryClient();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -57,25 +57,25 @@ vi.mock('../../utils/kibana_react', () => ({
 }));
 
 vi.mock('../../hooks/use_get_available_rules_with_descriptions', () => {
-      const mocked = {
-      useGetAvailableRulesWithDescriptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetAvailableRulesWithDescriptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public');
 
 vi.mock('@kbn/response-ops-rule-form/src/rule_type_modal', () => {
-      const mocked = {
-      RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (
-        <div data-test-subj="ruleTypeModal">
-          RuleTypeModal
-          <button onClick={() => onSelectRuleType('1')}>Rule type 1</button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleTypeModal: ({ onSelectRuleType }: RuleTypeModalProps) => (
+      <div data-test-subj="ruleTypeModal">
+        RuleTypeModal
+        <button onClick={() => onSelectRuleType('1')}>Rule type 1</button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useLocationMock = useLocation as Mock;
 
@@ -101,7 +101,9 @@ vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
 }));
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks'));
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks'
+);
 
 describe('RulesPage with all capabilities', () => {
   beforeEach(() => {

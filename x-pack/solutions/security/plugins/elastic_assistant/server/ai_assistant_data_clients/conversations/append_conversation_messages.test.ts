@@ -30,18 +30,18 @@ import { transformESToConversations } from './transforms';
 import { getUpdateScript } from './helpers';
 
 vi.mock('./transforms', () => {
-      const mocked = {
-      transformESToConversations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformESToConversations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      getUpdateScript: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUpdateScript: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUser = authenticatedUser;
 

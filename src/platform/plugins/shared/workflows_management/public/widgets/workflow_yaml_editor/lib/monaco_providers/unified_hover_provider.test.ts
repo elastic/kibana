@@ -24,106 +24,106 @@ import type {
 } from '../execution_context/build_execution_context';
 
 vi.mock('../hover/get_intercepted_hover', () => {
-      const mocked = {
-      getInterceptedHover: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInterceptedHover: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockParseTemplateAtPosition = vi.fn().mockReturnValue(null);
 vi.mock('../template_expression/parse_template_at_position', () => {
-      const mocked = {
-      parseTemplateAtPosition: (...args: unknown[]) => mockParseTemplateAtPosition(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseTemplateAtPosition: (...args: unknown[]) => mockParseTemplateAtPosition(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../template_expression/evaluate_expression', () => {
-      const mocked = {
-      evaluateExpression: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    evaluateExpression: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../template_expression/resolve_path_value', () => {
-      const mocked = {
-      formatValueAsJson: vi.fn().mockReturnValue('null'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatValueAsJson: vi.fn().mockReturnValue('null'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetPathAtOffset = vi.fn().mockReturnValue([]);
 const mockGetTriggerNodes = vi.fn().mockReturnValue([]);
 vi.mock('../../../../../common/lib/yaml', () => {
-      const mocked = {
-      getPathAtOffset: (...args: unknown[]) => mockGetPathAtOffset(...args),
-      getTriggerNodes: (...args: unknown[]) => mockGetTriggerNodes(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPathAtOffset: (...args: unknown[]) => mockGetPathAtOffset(...args),
+    getTriggerNodes: (...args: unknown[]) => mockGetTriggerNodes(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPerformComputation = vi.fn().mockReturnValue({ workflowLookup: null });
 vi.mock('../../../../entities/workflows/store/workflow_detail/utils/computation', () => {
-      const mocked = {
-      performComputation: (...args: unknown[]) => mockPerformComputation(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performComputation: (...args: unknown[]) => mockPerformComputation(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-yaml', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-yaml')),
-      isYamlValidationMarkerOwner: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-yaml')),
+    isYamlValidationMarkerOwner: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetTriggerHoverContent = vi.fn().mockReturnValue(null);
 const mockGetTriggerTypeAtPath = vi.fn().mockReturnValue(null);
 vi.mock('../trigger_hover/get_trigger_hover_content', () => {
-      const mocked = {
-      getTriggerHoverContent: (...args: unknown[]) => mockGetTriggerHoverContent(...args),
-      getTriggerTypeAtPath: (...args: unknown[]) => mockGetTriggerTypeAtPath(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTriggerHoverContent: (...args: unknown[]) => mockGetTriggerHoverContent(...args),
+    getTriggerTypeAtPath: (...args: unknown[]) => mockGetTriggerTypeAtPath(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetMonacoConnectorHandler = vi.fn().mockReturnValue(null);
 vi.mock('./provider_registry', () => {
-      const mocked = {
-      getMonacoConnectorHandler: (...args: unknown[]) => mockGetMonacoConnectorHandler(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMonacoConnectorHandler: (...args: unknown[]) => mockGetMonacoConnectorHandler(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      resolveKibanaStepTypeAlias: (type: string) =>
-        type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    resolveKibanaStepTypeAlias: (type: string) =>
+      type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getTriggerDefinition: vi.fn().mockReturnValue(null),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getTriggerDefinition: vi.fn().mockReturnValue(null),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetMonacoRangeFromYamlNode = vi.fn().mockReturnValue(null);
 vi.mock('../utils', () => {
-      const mocked = {
-      getMonacoRangeFromYamlNode: (...args: unknown[]) => mockGetMonacoRangeFromYamlNode(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMonacoRangeFromYamlNode: (...args: unknown[]) => mockGetMonacoRangeFromYamlNode(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { evaluateExpression } = (await vi.importMock('../template_expression/evaluate_expression'));
-const { getInterceptedHover } = (await vi.importMock('../hover/get_intercepted_hover'));
+const { evaluateExpression } = await vi.importMock('../template_expression/evaluate_expression');
+const { getInterceptedHover } = await vi.importMock('../hover/get_intercepted_hover');
 
 const createMockModel = (content: string = '  message: "{{ steps.search.output.hits }}"') =>
   ({

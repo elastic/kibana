@@ -23,39 +23,39 @@ import { parseUrlState } from '@kbn/ml-url-state';
 import type { Job } from '@kbn/ml-common-types/anomaly_detection_jobs/job';
 
 vi.mock('@kbn/ml-url-state', () => {
-      const mocked = {
-      parseUrlState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseUrlState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataViews = {
   get: vi.fn(),
 };
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          http: { basePath: { get: () => '' } },
-          data: { dataViews: mockDataViews },
-        },
-      }),
-      useMlApi: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        http: { basePath: { get: () => '' } },
+        data: { dataViews: mockDataViews },
+      },
+    }),
+    useMlApi: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/toast_notification_service', () => {
-      const mocked = {
-      useToastNotificationService: () => {
-        return {
-          displayErrorToast: vi.fn(),
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToastNotificationService: () => {
+      return {
+        displayErrorToast: vi.fn(),
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_CUSTOM_URLS = {
   dashboard: {

@@ -82,8 +82,7 @@ describe('Perform bulk action route', () => {
   describe('prompts bulk actions failures', () => {
     it('returns partial failure error if update of few prompts fail', async () => {
       (
-        (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter())
-          .bulk as Mock
+        (await clients.elasticAssistant.getAIAssistantPromptsDataClient.getWriter()).bulk as Mock
       ).mockResolvedValue({
         docs_created: [mockPrompt],
         docs_updated: [],

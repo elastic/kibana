@@ -26,11 +26,11 @@ import { AGGS_ACTION_KEYS } from './agg_group_state';
 import type { EditorVisState } from './sidebar/state/reducers';
 
 vi.mock('./agg_params', () => {
-      const mocked = {
-      DefaultEditorAggParams: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultEditorAggParams: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggProps;

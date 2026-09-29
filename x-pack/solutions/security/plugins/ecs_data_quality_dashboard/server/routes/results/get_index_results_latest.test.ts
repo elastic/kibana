@@ -25,19 +25,19 @@ const mockCheckIndicesPrivileges = vi.fn(({ indices }: CheckIndicesPrivilegesPar
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
 );
 vi.mock('./privileges', () => {
-      const mocked = {
-      checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-        mockCheckIndicesPrivileges(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+      mockCheckIndicesPrivileges(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers/get_range_filtered_indices', () => {
-      const mocked = {
-      getRangeFilteredIndices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRangeFilteredIndices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRangeFilteredIndices = getRangeFilteredIndices as Mock;
 

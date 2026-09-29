@@ -31,7 +31,9 @@ import {
 import { getEndpointPolicy } from './read_policy';
 
 vi.mock('../domain/normalize_policy_config', async () => {
-  const actual = (await vi.importActual('../domain/normalize_policy_config')) as typeof import('../domain/normalize_policy_config');
+  const actual = (await vi.importActual(
+    '../domain/normalize_policy_config'
+  )) as typeof import('../domain/normalize_policy_config');
   return {
     ...actual,
     normalize: vi.fn(actual.normalize),
@@ -384,7 +386,11 @@ describe('getEndpointPolicy', () => {
     } finally {
       mockedNormalize.mockReset();
       mockedNormalize.mockImplementation(
-        (await vi.importActual<typeof import('../domain/normalize_policy_config')>('../domain/normalize_policy_config')).normalize
+        (
+          await vi.importActual<typeof import('../domain/normalize_policy_config')>(
+            '../domain/normalize_policy_config'
+          )
+        ).normalize
       );
     }
   });

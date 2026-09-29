@@ -26,12 +26,12 @@ import * as useProcessorEventHook from '../../../hooks/use_processor_event';
 import { fromQuery } from '../links/url_helpers';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface SetupResult {
   setQuerySpy: MockInstance;
@@ -59,9 +59,10 @@ async function setup({
   const setTimeSpy = vi.fn();
   const setRefreshIntervalSpy = vi.fn();
 
-  vi
-    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
-    .mockReturnValue({ dataView: undefined, apmIndices: undefined });
+  vi.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
+    dataView: undefined,
+    apmIndices: undefined,
+  });
   vi.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 
   render(

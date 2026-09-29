@@ -319,9 +319,7 @@ describe('bulk action hooks', () => {
     });
 
     it('should not show the bulk actions when the user does not have write access', async () => {
-      mockCasesService.helpers.canUseCases = vi
-        .fn()
-        .mockReturnValue({ create: false, read: true });
+      mockCasesService.helpers.canUseCases = vi.fn().mockReturnValue({ create: false, read: true });
 
       const { result } = renderHook(
         () =>
@@ -342,9 +340,7 @@ describe('bulk action hooks', () => {
     });
 
     it('should not show the bulk actions when the user does not have read access', async () => {
-      mockCasesService.helpers.canUseCases = vi
-        .fn()
-        .mockReturnValue({ create: true, read: false });
+      mockCasesService.helpers.canUseCases = vi.fn().mockReturnValue({ create: true, read: false });
 
       const { result } = renderHook(
         () =>
@@ -582,9 +578,7 @@ describe('bulk action hooks', () => {
   describe('useBulkActions', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      mockCasesService.helpers.canUseCases = vi
-        .fn()
-        .mockReturnValue({ create: true, read: true });
+      mockCasesService.helpers.canUseCases = vi.fn().mockReturnValue({ create: true, read: true });
     });
 
     it('appends the internal bulk actions correctly for non siem rule types', async () => {

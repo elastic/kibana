@@ -15,35 +15,35 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 const mockYamlEditorProps = vi.fn();
 vi.mock('./field_definition_yaml_editor', () => {
-      const mocked = {
-      FieldDefinitionYamlEditor: ({
-        value,
-        onChange,
-        isEditing,
-      }: {
-        value: string;
-        onChange: (v: string) => void;
-        isEditing?: boolean;
-      }) => {
-        mockYamlEditorProps({ isEditing });
-        return (
-          <textarea
-            data-test-subj="fieldDefinitionYamlInput"
-            value={value}
-            onChange={(e) => onChange(e.target.value)}
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldDefinitionYamlEditor: ({
+      value,
+      onChange,
+      isEditing,
+    }: {
+      value: string;
+      onChange: (v: string) => void;
+      isEditing?: boolean;
+    }) => {
+      mockYamlEditorProps({ isEditing });
+      return (
+        <textarea
+          data-test-subj="fieldDefinitionYamlInput"
+          value={value}
+          onChange={(e) => onChange(e.target.value)}
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./field_definition_preview', () => {
-      const mocked = {
-      FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const VALID_YAML = `name: my_field
 label: "My Field"

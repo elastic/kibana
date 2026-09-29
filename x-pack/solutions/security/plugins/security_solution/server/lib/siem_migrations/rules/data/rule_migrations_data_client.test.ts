@@ -62,9 +62,7 @@ const mockDependencies = {} as unknown as Mocked<SiemMigrationsClientDependencie
 
 describe('RuleMigrationsDataClient', () => {
   beforeEach(() => {
-    (RuleMigrationsDataRulesClient as unknown as Mock).mockImplementation(
-      () => mockedRulesClient
-    );
+    (RuleMigrationsDataRulesClient as unknown as Mock).mockImplementation(() => mockedRulesClient);
     (SiemMigrationsDataResourcesClient as unknown as Mock).mockImplementation(
       () => mockedResourcesClient
     );

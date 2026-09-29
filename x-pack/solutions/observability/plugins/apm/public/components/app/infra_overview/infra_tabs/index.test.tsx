@@ -17,23 +17,23 @@ import { useInfrastructureAttributes } from '../use_infrastructure_attributes';
 import { useTabs } from './use_tabs';
 
 vi.mock('../use_infrastructure_attributes', () => {
-      const mocked = {
-      useInfrastructureAttributes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInfrastructureAttributes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_tabs', () => {
-      const mocked = {
-      InfraTab: {
-        containers: 'containers',
-        pods: 'pods',
-        hosts: 'hosts',
-      },
-      useTabs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InfraTab: {
+      containers: 'containers',
+      pods: 'pods',
+      hosts: 'hosts',
+    },
+    useTabs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInfrastructureAttributes = useInfrastructureAttributes as Mock;
 const mockUseTabs = useTabs as Mock;

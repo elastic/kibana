@@ -38,7 +38,7 @@ const mockUseAssistantContext = {
   assistantFeatures: {},
 };
 vi.mock('../../assistant_context', async () => {
-  const original = (await vi.importActual('../../assistant_context'));
+  const original = await vi.importActual('../../assistant_context');
 
   return {
     ...original,
@@ -47,18 +47,18 @@ vi.mock('../../assistant_context', async () => {
 });
 
 vi.mock('./assistant_settings', async () => {
-      const mocked = {
-      ...(await vi.importActual('./assistant_settings')),
-      // @ts-ignore
-      AssistantSettings: ({ onClose, onSave }) => (
-        <>
-          <button type="button" data-test-subj="on-close" onClick={onClose} />
-          <button type="button" data-test-subj="on-save" onClick={onSave} />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./assistant_settings')),
+    // @ts-ignore
+    AssistantSettings: ({ onClose, onSave }) => (
+      <>
+        <button type="button" data-test-subj="on-close" onClick={onClose} />
+        <button type="button" data-test-subj="on-save" onClick={onSave} />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssistantSettingsModal', () => {
   beforeEach(() => {

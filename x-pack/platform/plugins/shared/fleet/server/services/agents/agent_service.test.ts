@@ -13,14 +13,14 @@ vi.mock('./crud');
 vi.mock('./status');
 vi.mock('./versions');
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getInternalUserSOClientForSpaceId: vi.fn(),
-        getSavedObjects: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getInternalUserSOClientForSpaceId: vi.fn(),
+      getSavedObjects: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import {
@@ -58,9 +58,9 @@ describe('AgentService', () => {
     vi.mocked(appContextService.getSavedObjects).mockReturnValue({
       getScopedClient: vi.fn().mockReturnValue(mockedScopedSoClient),
     } as any);
-    vi
-      .mocked(appContextService.getInternalUserSOClientForSpaceId)
-      .mockReturnValue(mockedScopedSoClient);
+    vi.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(
+      mockedScopedSoClient
+    );
   });
 
   describe('asScoped', () => {

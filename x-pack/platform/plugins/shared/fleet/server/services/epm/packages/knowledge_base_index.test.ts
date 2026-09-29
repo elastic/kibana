@@ -22,18 +22,18 @@ import {
 
 // Mock the app context service
 vi.mock('../../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({
-          error: vi.fn(),
-          warn: vi.fn(),
-          info: vi.fn(),
-          debug: vi.fn(),
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({
+        error: vi.fn(),
+        warn: vi.fn(),
+        info: vi.fn(),
+        debug: vi.fn(),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('knowledge_base_index', () => {
   let mockEsClient: Mocked<ElasticsearchClient>;

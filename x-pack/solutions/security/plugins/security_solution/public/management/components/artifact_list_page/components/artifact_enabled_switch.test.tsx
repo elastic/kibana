@@ -30,12 +30,12 @@ import type { ExceptionsListApiClient } from '../../../services/exceptions_list/
 
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../hooks/use_with_artifact_enable_disable', async () => {
-      const mocked = {
-      ...(await vi.importActual('../hooks/use_with_artifact_enable_disable')),
-      useWithArtifactEnableDisable: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../hooks/use_with_artifact_enable_disable')),
+    useWithArtifactEnableDisable: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useUserPrivilegesMock = _useUserPrivileges as Mock;
 const useWithArtifactEnableDisableMock = _useWithArtifactEnableDisable as MockedFunction<

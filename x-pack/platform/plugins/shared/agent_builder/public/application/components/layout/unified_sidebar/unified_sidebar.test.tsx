@@ -14,71 +14,71 @@ import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from '@kbn/shared-ux-router';
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_navigation', () => {
-      const mocked = {
-      useNavigation: () => ({ navigateToAgentBuilderUrl: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: () => ({ navigateToAgentBuilderUrl: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/agents/use_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => ({ isFetched: true, agents: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => ({ isFetched: true, agents: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/agents/use_validate_agent_id', () => {
-      const mocked = {
-      useValidateAgentId: () => () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useValidateAgentId: () => () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_last_agent_id', () => {
-      const mocked = {
-      useLastAgentId: () => 'test-agent',
-      getLastAgentId: () => 'test-agent',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLastAgentId: () => 'test-agent',
+    getLastAgentId: () => 'test-agent',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/active_space_context', () => {
-      const mocked = {
-      useActiveSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useActiveSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_conversation_list', () => {
-      const mocked = {
-      useConversationList: () => ({ conversations: [], isLoading: false, refresh: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationList: () => ({ conversations: [], isLoading: false, refresh: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_route_access_config', () => {
-      const mocked = {
-      useRouteAccessConfig: () => ({
-        featureFlags: { experimental: false },
-        capabilities: { isUIAMEnabled: false },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteAccessConfig: () => ({
+      featureFlags: { experimental: false },
+      capabilities: { isUIAMEnabled: false },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./shared/sidebar_header', () => {
-      const mocked = {
-      SidebarHeader: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SidebarHeader: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useLocalStorage', () => ({
   __esModule: true,
@@ -86,28 +86,28 @@ vi.mock('react-use/lib/useLocalStorage', () => ({
 }));
 
 vi.mock('../../../context/streaming/streaming_context', () => {
-      const mocked = {
-      useStreamingContext: () => ({
-        activeStreams: new Set(),
-        byConversationId: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamingContext: () => ({
+      activeStreams: new Set(),
+      byConversationId: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_conversation_list_mutations', () => {
-      const mocked = {
-      useConversationListMutations: () => ({
-        deleteConversation: vi.fn(),
-        renameConversation: vi.fn(),
-        markAsRead: vi.fn(),
-        markAsUnread: vi.fn(),
-        markAsPinned: vi.fn(),
-        markAsUnpinned: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationListMutations: () => ({
+      deleteConversation: vi.fn(),
+      renameConversation: vi.fn(),
+      markAsRead: vi.fn(),
+      markAsUnread: vi.fn(),
+      markAsPinned: vi.fn(),
+      markAsUnpinned: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { UnifiedSidebar } from './unified_sidebar';
 

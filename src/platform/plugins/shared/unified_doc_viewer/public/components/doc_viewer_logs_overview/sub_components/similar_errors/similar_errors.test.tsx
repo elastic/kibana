@@ -25,23 +25,23 @@ const mockGenerateDiscoverLink = vi.fn((query) => (query ? 'http://discover/link
 const mockGetESQLQueryColumnsRaw = vi.fn();
 
 vi.mock('../../../../hooks/use_generate_discover_link', () => {
-      const mocked = {
-      useGetGenerateDiscoverLink: () => ({
-        generateDiscoverLink: mockGenerateDiscoverLink,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetGenerateDiscoverLink: () => ({
+      generateDiscoverLink: mockGenerateDiscoverLink,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLQueryColumnsRaw: (...args: unknown[]) => mockGetESQLQueryColumnsRaw(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLQueryColumnsRaw: (...args: unknown[]) => mockGetESQLQueryColumnsRaw(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_esql_query', async () => {
-  const actual = (await vi.importActual('./get_esql_query'));
+  const actual = await vi.importActual('./get_esql_query');
   return {
     getEsqlQuery: vi.fn(actual.getEsqlQuery),
   };
@@ -50,34 +50,34 @@ vi.mock('./get_esql_query', async () => {
 const mockGetEsqlQuery = getEsqlQuery as Mock;
 
 vi.mock('../../../content_framework/lazy_content_framework_section', () => {
-      const mocked = {
-      ContentFrameworkSection: ({ children, title, actions, description, ...rest }: any) => (
-        <div data-test-subj="ContentFrameworkSection" {...rest}>
-          <h2>{title}</h2>
-          {description && <p>{description}</p>}
-          {actions && actions.length > 0 && (
-            <a data-test-subj="docViewerSimilarErrorsOpenInDiscoverButton" href={actions[0].href}>
-              {actions[0].label}
-            </a>
-          )}
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkSection: ({ children, title, actions, description, ...rest }: any) => (
+      <div data-test-subj="ContentFrameworkSection" {...rest}>
+        <h2>{title}</h2>
+        {description && <p>{description}</p>}
+        {actions && actions.length > 0 && (
+          <a data-test-subj="docViewerSimilarErrorsOpenInDiscoverButton" href={actions[0].href}>
+            {actions[0].label}
+          </a>
+        )}
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./similar_errors_occurrences_chart', () => {
-      const mocked = {
-      SimilarErrorsOccurrencesChart: ({ baseEsqlQuery, currentDocumentTimestamp }: any) => (
-        <div
-          data-test-subj="SimilarErrorsOccurrencesChart"
-          data-current-document-timestamp={currentDocumentTimestamp}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SimilarErrorsOccurrencesChart: ({ baseEsqlQuery, currentDocumentTimestamp }: any) => (
+      <div
+        data-test-subj="SimilarErrorsOccurrencesChart"
+        data-current-document-timestamp={currentDocumentTimestamp}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 

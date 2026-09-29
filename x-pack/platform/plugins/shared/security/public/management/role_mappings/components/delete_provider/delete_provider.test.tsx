@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiConfirmModal } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';

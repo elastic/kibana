@@ -26,21 +26,21 @@ import type { AggregateQuery, Query } from '@kbn/es-query';
 
 // mock lazy flyout component
 vi.mock('@kbn/presentation-util', () => {
-      const mocked = {
-      openLazyFlyout: ({
-        loadContent,
+  const mocked = {
+    openLazyFlyout: ({
+      loadContent,
+    }: {
+      loadContent: ({
+        closeFlyout,
       }: {
-        loadContent: ({
-          closeFlyout,
-        }: {
-          closeFlyout: () => void;
-        }) => Promise<JSX.Element | null | void>;
-      }) => {
-        return loadContent({ closeFlyout: vi.fn() });
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        closeFlyout: () => void;
+      }) => Promise<JSX.Element | null | void>;
+    }) => {
+      return loadContent({ closeFlyout: vi.fn() });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleTypeRegistry: Mocked<RuleTypeRegistryContract> = {
   has: vi.fn(),

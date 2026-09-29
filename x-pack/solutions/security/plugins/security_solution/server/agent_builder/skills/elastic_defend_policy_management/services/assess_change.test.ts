@@ -107,10 +107,7 @@ const createCountAccess = async () => {
   const getById = vi.spyOn(access.fleet.packagePolicy, 'get');
   const listByName = vi.spyOn(access.fleet.packagePolicy, 'list');
   const ensureInCurrentSpace = vi.spyOn(access.fleet, 'ensureInCurrentSpace');
-  const getAgentStatusForAgentPolicy = vi.spyOn(
-    access.fleet.agent,
-    'getAgentStatusForAgentPolicy'
-  );
+  const getAgentStatusForAgentPolicy = vi.spyOn(access.fleet.agent, 'getAgentStatusForAgentPolicy');
 
   ensureInCurrentSpace.mockResolvedValue(undefined);
 

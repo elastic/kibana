@@ -30,101 +30,101 @@ import { useHasEntityResolutionLicense } from '../../common/hooks/use_has_entity
 const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 vi.mock('../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addSuccess: mockAddSuccess,
-        addError: mockAddError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addSuccess: mockAddSuccess,
+      addError: mockAddError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchRiskEngineSettings: () => undefined,
-        fetchRiskEngineStatus: () => undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchRiskEngineSettings: () => undefined,
+      fetchRiskEngineStatus: () => undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMissingRiskEnginePrivileges = vi
   .fn()
   .mockReturnValue({ isLoading: false, hasAllRequiredPrivileges: true });
 vi.mock('../hooks/use_missing_risk_engine_privileges', () => {
-      const mocked = {
-      useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMissingRiskEnginePrivileges: () => mockUseMissingRiskEnginePrivileges(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsExperimentalFeatureEnabled = vi.fn().mockReturnValue(false);
 vi.mock('../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
-        mockUseIsExperimentalFeatureEnabled(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+      mockUseIsExperimentalFeatureEnabled(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../api/hooks/use_risk_engine_status', () => {
-      const mocked = {
-      useRiskEngineStatus: () => ({
-        data: {
-          risk_engine_status: 'NOT_INSTALLED',
-        },
-        isFetching: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskEngineStatus: () => ({
+      data: {
+        risk_engine_status: 'NOT_INSTALLED',
+      },
+      isFetching: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              securitySolution: {
-                entityAnalytics: {
-                  assetCriticality: 'https://example.com',
-                },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              entityAnalytics: {
+                assetCriticality: 'https://example.com',
               },
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_has_entity_resolution_license', () => {
-      const mocked = {
-      useHasEntityResolutionLicense: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityResolutionLicense: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/asset_criticality/use_asset_criticality', () => {
-      const mocked = {
-      useAssetCriticalityPrivileges: () => ({
-        isLoading: false,
-        data: {
-          has_write_permissions: true,
-          privileges: { elasticsearch: { index: {} } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetCriticalityPrivileges: () => ({
+      isLoading: false,
+      data: {
+        has_write_permissions: true,
+        privileges: { elasticsearch: { index: {} } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEntityStoreStatus = vi.fn().mockReturnValue({
   data: { status: 'not_installed', engines: [] },
@@ -136,12 +136,12 @@ const mockUseDeleteEntityStoreMutation = vi.fn().mockReturnValue({
   mutateAsync: vi.fn(),
 });
 vi.mock('../components/entity_store/hooks/use_entity_store', () => {
-      const mocked = {
-      useEntityStoreStatus: (...args: unknown[]) => mockUseEntityStoreStatus(...args),
-      useDeleteEntityStoreMutation: (...args: unknown[]) => mockUseDeleteEntityStoreMutation(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreStatus: (...args: unknown[]) => mockUseEntityStoreStatus(...args),
+    useDeleteEntityStoreMutation: (...args: unknown[]) => mockUseDeleteEntityStoreMutation(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const withStopPrivileges = {
   install_privileges: {
@@ -162,59 +162,63 @@ const mockUseEntityEnginePrivileges = vi.fn().mockReturnValue({
   },
 });
 vi.mock('../components/entity_store/hooks/use_entity_engine_privileges', () => {
-      const mocked = {
-      useEntityEnginePrivileges: (...args: unknown[]) => mockUseEntityEnginePrivileges(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityEnginePrivileges: (...args: unknown[]) => mockUseEntityEnginePrivileges(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/entity_store/components/engines_status', () => {
-      const mocked = {
-      EngineStatus: () => <span data-test-subj="mock-engine-status">{'Mocked Engine Status Tab'}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EngineStatus: () => (
+      <span data-test-subj="mock-engine-status">{'Mocked Engine Status Tab'}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/watchlists/watchlists_tab', () => {
-      const mocked = {
-      WatchlistsTab: () => <span data-test-subj="mock-watchlists-tab">{'Mocked Watchlists Tab'}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistsTab: () => (
+      <span data-test-subj="mock-watchlists-tab">{'Mocked Watchlists Tab'}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/entity_store/components/entity_store_missing_privileges_callout', () => {
-      const mocked = {
-      EntityStoreMissingPrivilegesCallout: () => (
-        <span data-test-subj="entity-store-missing-privileges">
-          {'Entity store missing privileges'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityStoreMissingPrivilegesCallout: () => (
+      <span data-test-subj="entity-store-missing-privileges">
+        {'Entity store missing privileges'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../components/entity_store/components/entity_store_missing_stop_privileges_callout',
   () => {
-      const mocked = {
-        EntityStoreMissingStopPrivilegesCallout: () => (
-          <span data-test-subj="entity-store-missing-stop-privileges">
-            {'Entity store missing stop privileges'}
-          </span>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      EntityStoreMissingStopPrivilegesCallout: () => (
+        <span data-test-subj="entity-store-missing-stop-privileges">
+          {'Entity store missing stop privileges'}
+        </span>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../components/entity_store/components/clear_entity_data_button', () => {
-      const mocked = {
-      ClearEntityDataButton: () => (
-        <span data-test-subj="clear-entity-data-button">{'Clear Entity Data'}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ClearEntityDataButton: () => (
+      <span data-test-subj="clear-entity-data-button">{'Clear Entity Data'}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToggleSelectedClosedAlertsSetting = vi.fn();
 const mockToggleScoreRetainment = vi.fn();
@@ -224,72 +228,72 @@ const mockUseConfigurableRiskEngineSettings = vi.fn();
 vi.mock(
   '../components/risk_score_management/hooks/risk_score_configurable_risk_engine_settings_hooks',
   () => {
-      const mocked = {
-        useConfigurableRiskEngineSettings: () => mockUseConfigurableRiskEngineSettings(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useConfigurableRiskEngineSettings: () => mockUseConfigurableRiskEngineSettings(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../components/entity_analytics_toggle', () => {
-      const mocked = {
-      EntityAnalyticsToggle: (props: {
-        hasEnablementPrivileges: boolean;
-        hasStopPrivileges: boolean;
-      }) => (
-        <span
-          data-test-subj="mock-entity-analytics-toggle"
-          data-has-enablement-privileges={String(props.hasEnablementPrivileges)}
-          data-has-stop-privileges={String(props.hasStopPrivileges)}
-        >
-          {'Entity analytics toggle'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityAnalyticsToggle: (props: {
+      hasEnablementPrivileges: boolean;
+      hasStopPrivileges: boolean;
+    }) => (
+      <span
+        data-test-subj="mock-entity-analytics-toggle"
+        data-has-enablement-privileges={String(props.hasEnablementPrivileges)}
+        data-has-stop-privileges={String(props.hasStopPrivileges)}
+      >
+        {'Entity analytics toggle'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/entity_resolution', () => {
-      const mocked = {
-      EntityResolutionTab: () => (
-        <span data-test-subj="mock-entity-resolution-tab">{'Entity resolution tab'}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityResolutionTab: () => (
+      <span data-test-subj="mock-entity-resolution-tab">{'Entity resolution tab'}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../components/risk_score_management/risk_score_useful_links_section', () => {
-      const mocked = {
-      RiskScoreUsefulLinksSection: () => 'Useful links',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreUsefulLinksSection: () => 'Useful links',
+  };
+  return { ...mocked, default: mocked };
+});
 const mockRiskScorePreviewSection = vi
   .fn()
   .mockReturnValue(<p data-test-subj="mock-risk-score-preview">{'Risk score preview'}</p>);
 vi.mock('../components/risk_score_management/risk_score_preview_section', () => {
-      const mocked = {
-      RiskScorePreviewSection: (props: never) => mockRiskScorePreviewSection(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScorePreviewSection: (props: never) => mockRiskScorePreviewSection(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/risk_score_management/alert_filters_kql_bar', () => {
-      const mocked = {
-      AlertFiltersKqlBar: () => 'Alert filters',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertFiltersKqlBar: () => 'Alert filters',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/asset_criticality_file_uploader/asset_criticality_file_uploader', () => {
-      const mocked = {
-      AssetCriticalityFileUploader: () => (
-        <span data-test-subj="mock-asset-criticality-file-uploader">
-          {'Asset criticality file uploader'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssetCriticalityFileUploader: () => (
+      <span data-test-subj="mock-asset-criticality-file-uploader">
+        {'Asset criticality file uploader'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultRiskEngineSettings = {
   includeClosedAlerts: false,

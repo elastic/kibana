@@ -22,23 +22,23 @@ import { getQueryDelaySettings } from '../../lib/rule_api/get_query_delay_settin
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_flapping_settings', () => {
-      const mocked = {
-      fetchFlappingSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchFlappingSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/rule_api/get_query_delay_settings', () => {
-      const mocked = {
-      getQueryDelaySettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getQueryDelaySettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

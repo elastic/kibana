@@ -15,11 +15,11 @@ import { agentlessPolicyToPackagePolicy } from '../../../../../../../../common/s
 import { agentlessPolicyToTableItem } from './agentless_policy_table_adapter';
 
 vi.mock('../../../../../../../../common/services', () => {
-      const mocked = {
-      agentlessPolicyToPackagePolicy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentlessPolicyToPackagePolicy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAgentlessPolicyToPackagePolicy = agentlessPolicyToPackagePolicy as MockedFunction<
   typeof agentlessPolicyToPackagePolicy

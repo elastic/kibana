@@ -18,13 +18,13 @@ import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
 import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
 vi.mock('../../shared/components/flyout_header', () => {
-      const mocked = {
-      FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="flyout-header">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="flyout-header">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTabs: LeftPanelTabType[] = [
   {
@@ -101,11 +101,7 @@ describe('PanelHeader', () => {
     const singleTab = [mockTabs[0]];
     render(
       <TestProviders>
-        <PanelHeader
-          selectedTabId={INSIGHTS_TAB_ID}
-          setSelectedTabId={vi.fn()}
-          tabs={singleTab}
-        />
+        <PanelHeader selectedTabId={INSIGHTS_TAB_ID} setSelectedTabId={vi.fn()} tabs={singleTab} />
       </TestProviders>
     );
 

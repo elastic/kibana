@@ -15,18 +15,18 @@ import { useStepMetrics } from '../hooks/use_step_metrics';
 import { useStepPrevMetrics } from '../hooks/use_step_prev_metrics';
 
 vi.mock('../hooks/use_step_metrics', () => {
-      const mocked = {
-      useStepMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_step_prev_metrics', () => {
-      const mocked = {
-      useStepPrevMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepPrevMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStepMetrics = useStepMetrics as MockedFunction<typeof useStepMetrics>;
 const mockUseStepPrevMetrics = useStepPrevMetrics as MockedFunction<typeof useStepPrevMetrics>;

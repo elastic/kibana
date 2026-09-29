@@ -16,13 +16,13 @@ export const mockCreatePluginSetupContext = vi.fn();
 export const mockCreatePluginStartContext = vi.fn();
 
 vi.mock('./plugin_context', () => {
-      const mocked = {
-      createPluginPrebootSetupContext: mockCreatePluginPrebootSetupContext,
-      createPluginSetupContext: mockCreatePluginSetupContext,
-      createPluginStartContext: mockCreatePluginStartContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPluginPrebootSetupContext: mockCreatePluginPrebootSetupContext,
+    createPluginSetupContext: mockCreatePluginSetupContext,
+    createPluginStartContext: mockCreatePluginStartContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const runtimeResolverMock = createRuntimePluginContractResolverMock();
 

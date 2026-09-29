@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import {
@@ -30,14 +29,14 @@ import { licenseMock } from '../../common/licensing/index.mock';
 import { securityTelemetry } from '../otel/instrumentation';
 
 vi.mock('../otel/instrumentation', () => {
-      const mocked = {
-      securityTelemetry: {
-        recordServiceAccountCreationAttempt: vi.fn(),
-        recordServiceAccountRollbackFailure: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityTelemetry: {
+      recordServiceAccountCreationAttempt: vi.fn(),
+      recordServiceAccountRollbackFailure: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ACCOUNT_PATH = '/_security/service/kibana/nightshift-relay';
 /** Kibana only ever manages user-managed accounts, so the GET asks for that type explicitly. */

@@ -18,12 +18,12 @@ import { DefaultAlertRetrievalStepTypeId } from '../../../common/step_types/defa
 import { getAnonymizedAlerts } from '@kbn/discoveries/impl/attack_discovery/graphs';
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/graphs', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/graphs')),
-      getAnonymizedAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/graphs')),
+    getAnonymizedAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAnonymizedAlerts = getAnonymizedAlerts as Mock;
 

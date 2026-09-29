@@ -19,11 +19,11 @@ import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 
 vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details');
 vi.mock('./take_action_button', () => {
-      const mocked = {
-      TakeActionButton: vi.fn(() => <div data-test-subj="take-action-button-mock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TakeActionButton: vi.fn(() => <div data-test-subj="take-action-button-mock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEventDetails = useEventDetails as Mock;
 const mockTakeActionButton = TakeActionButton as unknown as Mock;

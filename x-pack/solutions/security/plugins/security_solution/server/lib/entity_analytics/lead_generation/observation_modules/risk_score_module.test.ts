@@ -44,9 +44,7 @@ const createRiskScoreDataClientMock = (): Mocked<
 
 describe('RiskScoreModule', () => {
   const logger = loggingSystemMock.createLogger();
-  let riskScoreDataClient: Mocked<
-    Pick<RiskScoreDataClient, 'getDailyAverageRiskScoreNormSeries'>
-  >;
+  let riskScoreDataClient: Mocked<Pick<RiskScoreDataClient, 'getDailyAverageRiskScoreNormSeries'>>;
 
   beforeEach(() => {
     vi.clearAllMocks();

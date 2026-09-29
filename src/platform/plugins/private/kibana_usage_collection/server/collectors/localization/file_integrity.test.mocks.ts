@@ -12,25 +12,25 @@ import { vi } from 'vitest';
 import { Readable } from 'stream';
 
 vi.doMock('fs', () => {
-      const mocked = {
-      createReadStream(filepath: string): Readable {
-        if (filepath === 'ERROR') {
-          throw new Error('MOCK ERROR - Invalid Path');
+  const mocked = {
+    createReadStream(filepath: string): Readable {
+      if (filepath === 'ERROR') {
+        throw new Error('MOCK ERROR - Invalid Path');
+      }
+      const readableStream = new Readable();
+      const streamData = filepath.split('');
+      let cursor = 0;
+
+      readableStream._read = function (size) {
+        const current = streamData[cursor++];
+        if (typeof current === 'undefined') {
+          return this.push(null);
         }
-        const readableStream = new Readable();
-        const streamData = filepath.split('');
-        let cursor = 0;
+        this.push(current);
+      };
 
-        readableStream._read = function (size) {
-          const current = streamData[cursor++];
-          if (typeof current === 'undefined') {
-            return this.push(null);
-          }
-          this.push(current);
-        };
-
-        return readableStream;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return readableStream;
+    },
+  };
+  return { ...mocked, default: mocked };
+});

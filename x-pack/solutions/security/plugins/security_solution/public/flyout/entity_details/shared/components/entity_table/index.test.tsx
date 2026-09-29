@@ -17,11 +17,11 @@ import { FLYOUT_PREVIEW_LINK_TEST_ID } from '../../../../shared/components/test_
 import { mockFlyoutApi } from '../../../../document_details/shared/mocks/mock_flyout_context';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderedFieldValue = 'testValue1';
 

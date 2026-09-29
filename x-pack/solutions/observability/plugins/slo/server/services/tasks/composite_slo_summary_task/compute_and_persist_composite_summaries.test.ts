@@ -26,12 +26,12 @@ import { computeAndPersistCompositeSummaries } from './compute_and_persist_compo
 import { COMPOSITE_SLO_SUMMARY_TASK_SPAN_NAMES } from './constants';
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      addTransactionLabels: vi.fn(),
-      withSpan: vi.fn((_opts: unknown, cb: () => unknown) => cb()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addTransactionLabels: vi.fn(),
+    withSpan: vi.fn((_opts: unknown, cb: () => unknown) => cb()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('elastic-apm-node', () => ({
   default: { setCustomContext: vi.fn() },
@@ -42,9 +42,7 @@ vi.mock('../../summary_client');
 vi.mock('../../burn_rates_client');
 vi.mock('../../composites/compute_composite_summary');
 
-const MockDefaultSummaryClient = DefaultSummaryClient as MockedClass<
-  typeof DefaultSummaryClient
->;
+const MockDefaultSummaryClient = DefaultSummaryClient as MockedClass<typeof DefaultSummaryClient>;
 const mockComputeCompositeSummary = computeCompositeSummary as MockedFunction<
   typeof computeCompositeSummary
 >;
@@ -52,9 +50,7 @@ const mockComputeCompositeSummary = computeCompositeSummary as MockedFunction<
 const addTransactionLabelsMock = addTransactionLabels as MockedFunction<
   typeof addTransactionLabels
 >;
-const setCustomContextMock = apm.setCustomContext as MockedFunction<
-  typeof apm.setCustomContext
->;
+const setCustomContextMock = apm.setCustomContext as MockedFunction<typeof apm.setCustomContext>;
 const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 const COMPOSITE_ID = 'composite-slo-id-12345678';
@@ -184,9 +180,7 @@ describe('computeAndPersistCompositeSummaries', () => {
     setCustomContextMock.mockClear();
     withSpanMock.mockClear();
 
-    mockComputeSummaries = vi
-      .fn()
-      .mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
+    mockComputeSummaries = vi.fn().mockResolvedValue([buildSummaryResult(), buildSummaryResult()]);
     MockDefaultSummaryClient.mockImplementation(
       () =>
         ({
@@ -581,9 +575,7 @@ describe('computeAndPersistCompositeSummaries', () => {
 
     it('rethrows non-abort errors', async () => {
       mockPointInTimeFinder([[buildStoredCompositeSLO()]]);
-      (esClient.bulk as unknown as Mock).mockRejectedValue(
-        new Error('ES cluster unavailable')
-      );
+      (esClient.bulk as unknown as Mock).mockRejectedValue(new Error('ES cluster unavailable'));
 
       await expect(
         computeAndPersistCompositeSummaries({

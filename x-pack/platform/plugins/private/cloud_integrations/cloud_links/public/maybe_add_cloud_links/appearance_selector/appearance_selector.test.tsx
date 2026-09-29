@@ -17,34 +17,34 @@ import { useUpdateUserProfile } from '@kbn/user-profile-components';
 import { AppearanceSelector } from './appearance_selector';
 
 vi.mock('./appearance_modal', () => {
-      const mocked = {
-      AppearanceModal: vi.fn().mockImplementation(({ closeModal, uiSettingsClient }) => {
-        return (
-          <div data-test-subj="appearance-modal">
-            <div data-test-subj="color-mode-group" />
-            <div data-test-subj="contrast-mode-group" />
-            <button data-test-subj="appearanceModalDiscardButton" onClick={closeModal}>
-              Discard
-            </button>
-            <button
-              data-test-subj="appearanceModalSaveButton"
-              onClick={async () => {
-                await uiSettingsClient.set('theme:darkMode', 'dark');
-                await uiSettingsClient.set('theme:contrastMode', 'high');
-                closeModal();
-              }}
-            >
-              Save changes
-            </button>
-          </div>
-        );
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AppearanceModal: vi.fn().mockImplementation(({ closeModal, uiSettingsClient }) => {
+      return (
+        <div data-test-subj="appearance-modal">
+          <div data-test-subj="color-mode-group" />
+          <div data-test-subj="contrast-mode-group" />
+          <button data-test-subj="appearanceModalDiscardButton" onClick={closeModal}>
+            Discard
+          </button>
+          <button
+            data-test-subj="appearanceModalSaveButton"
+            onClick={async () => {
+              await uiSettingsClient.set('theme:darkMode', 'dark');
+              await uiSettingsClient.set('theme:contrastMode', 'high');
+              closeModal();
+            }}
+          >
+            Save changes
+          </button>
+        </div>
+      );
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/user-profile-components', async () => {
-  const original = (await vi.importActual('@kbn/user-profile-components'));
+  const original = await vi.importActual('@kbn/user-profile-components');
   return {
     ...original,
     useUpdateUserProfile: vi.fn().mockImplementation(() => ({

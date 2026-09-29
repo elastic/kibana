@@ -25,7 +25,7 @@ import {
 } from './create_test_tracks';
 
 vi.mock('@kbn/scout-reporting', async () => {
-  const actual = (await vi.importActual('@kbn/scout-reporting'));
+  const actual = await vi.importActual('@kbn/scout-reporting');
   return {
     ...actual,
     testConfigs: {
@@ -37,11 +37,11 @@ vi.mock('@kbn/scout-reporting', async () => {
 });
 
 vi.mock('@kbn/repo-packages', () => {
-      const mocked = {
-      findPackageForPath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findPackageForPath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFindPackageForPath = findPackageForPath as Mock;
 

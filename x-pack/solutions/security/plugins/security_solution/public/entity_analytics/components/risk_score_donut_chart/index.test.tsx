@@ -17,7 +17,7 @@ import { TestProviders } from '../../../common/mock';
 import { DonutChart } from '../../../common/components/charts/donutchart';
 
 vi.mock('../../../common/components/charts/donutchart', async () => {
-  const actual = (await vi.importActual('../../../common/components/charts/donutchart'));
+  const actual = await vi.importActual('../../../common/components/charts/donutchart');
   return {
     ...actual,
     DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),

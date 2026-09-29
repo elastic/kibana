@@ -14,40 +14,40 @@ import { AzureInputVarFields } from './azure_input_var_fields';
 
 // Mock the Fleet plugin components
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LazyPackagePolicyInputVarField: vi.fn(
-        ({ value, onChange, varDef, errors, forceShowErrors }) => (
-          <div data-test-subj="lazy-package-policy-input-var-field">
-            <input
-              data-test-subj={`secret-field-${varDef.name}`}
-              value={value}
-              onChange={(e) => onChange(e.target.value)}
-              placeholder={`Secret field for ${varDef.name}`}
-              aria-invalid={forceShowErrors && errors.length > 0}
-            />
-            {forceShowErrors && errors.length > 0 && (
-              <div data-test-subj="field-error">{errors[0]}</div>
-            )}
-          </div>
-        )
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazyPackagePolicyInputVarField: vi.fn(
+      ({ value, onChange, varDef, errors, forceShowErrors }) => (
+        <div data-test-subj="lazy-package-policy-input-var-field">
+          <input
+            data-test-subj={`secret-field-${varDef.name}`}
+            value={value}
+            onChange={(e) => onChange(e.target.value)}
+            placeholder={`Secret field for ${varDef.name}`}
+            aria-invalid={forceShowErrors && errors.length > 0}
+          />
+          {forceShowErrors && errors.length > 0 && (
+            <div data-test-subj="field-error">{errors[0]}</div>
+          )}
+        </div>
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock utils
 vi.mock('../utils', () => {
-      const mocked = {
-      fieldIsInvalid: vi.fn((value, hasInvalidRequiredVars) => !value && hasInvalidRequiredVars),
-      findVariableDef: vi.fn((packageInfo, fieldId) => ({
-        name: fieldId,
-        type: 'text',
-        title: `Variable ${fieldId}`,
-        description: `Description for ${fieldId}`,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fieldIsInvalid: vi.fn((value, hasInvalidRequiredVars) => !value && hasInvalidRequiredVars),
+    findVariableDef: vi.fn((packageInfo, fieldId) => ({
+      name: fieldId,
+      type: 'text',
+      title: `Variable ${fieldId}`,
+      description: `Description for ${fieldId}`,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AzureInputVarFields', () => {
   const mockPackageInfo = {

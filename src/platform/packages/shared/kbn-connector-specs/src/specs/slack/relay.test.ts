@@ -21,8 +21,7 @@ import {
   slackRelay,
 } from './relay';
 
-const createLogger = () =>
-  ({ debug: vi.fn(), error: vi.fn() } as unknown as Mocked<Logger>);
+const createLogger = () => ({ debug: vi.fn(), error: vi.fn() } as unknown as Mocked<Logger>);
 
 const createContext = (
   secrets: Record<string, unknown>,

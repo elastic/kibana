@@ -17,11 +17,11 @@ import type { HttpStart } from '@kbn/core-http-browser';
 
 // Mocks
 vi.mock('../apis/create_rule_from_template', () => {
-      const mocked = {
-      loadRuleTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRuleTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient({
   logger: {

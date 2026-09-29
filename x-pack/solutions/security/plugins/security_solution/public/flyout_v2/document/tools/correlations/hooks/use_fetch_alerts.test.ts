@@ -38,11 +38,9 @@ describe('useFetchAlerts', () => {
   });
 
   it('fetches alerts and handles loading state', async () => {
-    vi
-      .mocked(createFindAlerts)
-      .mockReturnValue(
-        vi.fn().mockResolvedValue({ hits: { total: 10, hits: ['alert1', 'alert2', 'alert3'] } })
-      );
+    vi.mocked(createFindAlerts).mockReturnValue(
+      vi.fn().mockResolvedValue({ hits: { total: 10, hits: ['alert1', 'alert2', 'alert3'] } })
+    );
 
     const params: UseAlertsQueryParams = {
       alertIds: ['id1', 'id2'],
@@ -81,11 +79,9 @@ describe('useFetchAlerts', () => {
   });
 
   it('clears stale data once alertIds becomes empty (e.g. after narrowing the date range)', async () => {
-    vi
-      .mocked(createFindAlerts)
-      .mockReturnValue(
-        vi.fn().mockResolvedValue({ hits: { total: 3, hits: ['alert1', 'alert2', 'alert3'] } })
-      );
+    vi.mocked(createFindAlerts).mockReturnValue(
+      vi.fn().mockResolvedValue({ hits: { total: 3, hits: ['alert1', 'alert2', 'alert3'] } })
+    );
 
     const { result, rerender } = renderHook(
       (params: UseAlertsQueryParams) => useFetchAlerts(params),
@@ -119,9 +115,9 @@ describe('useFetchAlerts', () => {
     // hide console error due to the line after
     vi.spyOn(console, 'error').mockImplementation(() => {});
 
-    vi
-      .mocked(createFindAlerts)
-      .mockReturnValue(vi.fn().mockRejectedValue(new Error('Fetch failed')));
+    vi.mocked(createFindAlerts).mockReturnValue(
+      vi.fn().mockRejectedValue(new Error('Fetch failed'))
+    );
 
     const params: UseAlertsQueryParams = {
       alertIds: ['id1', 'id2'],

@@ -7,27 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import JSZip from 'jszip';
 import { vi } from 'vitest';
 
-import JSZip from 'jszip';
 import YAML from 'yaml';
 import { parseImportFile } from './parse_import_file';
 import { MAX_AGGREGATE_IMPORT_BYTES } from '../../../../common/lib/import';
 
 vi.mock('@kbn/workflows-yaml', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-yaml')),
-      parseYamlToJSONWithoutValidation: (yamlString: string) => {
-        try {
-          const json = require('yaml').parse(yamlString) as Record<string, unknown>;
-          return { success: true, json, document: {} };
-        } catch {
-          return { success: false, error: new Error('parse failed'), document: {} };
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-yaml')),
+    parseYamlToJSONWithoutValidation: (yamlString: string) => {
+      try {
+        const json = require('yaml').parse(yamlString) as Record<string, unknown>;
+        return { success: true, json, document: {} };
+      } catch {
+        return { success: false, error: new Error('parse failed'), document: {} };
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createFile(content: string | ArrayBuffer, name: string, type = ''): File {
   const blob = content instanceof ArrayBuffer ? new Blob([content]) : new Blob([content]);

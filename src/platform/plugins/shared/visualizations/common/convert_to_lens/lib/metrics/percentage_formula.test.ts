@@ -19,18 +19,18 @@ const mockGetFormulaForAgg = vi.fn();
 const mockCreateFormulaColumn = vi.fn();
 
 vi.mock('./formula', () => {
-      const mocked = {
-      getFormulaForAgg: vi.fn(() => mockGetFormulaForAgg()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormulaForAgg: vi.fn(() => mockGetFormulaForAgg()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../convert', () => {
-      const mocked = {
-      createFormulaColumn: vi.fn((formula) => mockCreateFormulaColumn(formula)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFormulaColumn: vi.fn((formula) => mockCreateFormulaColumn(formula)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getPercentageColumnFormulaColumn', () => {
   const visType = 'heatmap';

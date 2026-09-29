@@ -135,9 +135,9 @@ describe('AgentStatusChangeTask', () => {
     beforeEach(async () => {
       const [{ elasticsearch }] = await mockCore.getStartServices();
       esClient = elasticsearch.client.asInternalUser as ElasticsearchClientMock;
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAgentStatusAlerting: true } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableAgentStatusAlerting: true,
+      } as any);
 
       mockAgentPolicyService.fetchAllAgentPolicies.mockImplementation(
         getMockAgentPolicyFetchAllAgentPolicies([
@@ -533,9 +533,9 @@ describe('AgentStatusChangeTask', () => {
     });
 
     it('should do nothing when feature flag is disabled', async () => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAgentStatusAlerting: false } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableAgentStatusAlerting: false,
+      } as any);
       const agents = [
         {
           id: 'agent-3',

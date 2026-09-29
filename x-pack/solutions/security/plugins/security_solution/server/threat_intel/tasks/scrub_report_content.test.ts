@@ -14,17 +14,17 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 // The task-manager server entry pulls in the whole plugin graph, which this
 // package's jest config cannot resolve (`TaskCost` comes back undefined).
 vi.mock('@kbn/task-manager-plugin/server', () => {
-      const mocked = {
-      TaskCost: { Normal: 2 },
-      throwRetryableError: (err: Error) => {
-        throw err;
-      },
-      throwUnrecoverableError: (err: Error) => {
-        throw err;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TaskCost: { Normal: 2 },
+    throwRetryableError: (err: Error) => {
+      throw err;
+    },
+    throwUnrecoverableError: (err: Error) => {
+      throw err;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   CONTENT_RETENTION_DAYS,

@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('../../../../../utils/create_ml_inference_pipeline', () => {
-      const mocked = {
-      addSubPipelineToIndexSpecificMlPipeline: vi.fn(() => {
-        return Promise.resolve({ addedToParentPipeline: true, id: 'pipeline-id' });
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addSubPipelineToIndexSpecificMlPipeline: vi.fn(() => {
+      return Promise.resolve({ addedToParentPipeline: true, id: 'pipeline-id' });
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 

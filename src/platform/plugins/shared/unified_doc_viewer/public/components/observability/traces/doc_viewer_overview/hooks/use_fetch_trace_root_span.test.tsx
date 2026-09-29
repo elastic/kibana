@@ -17,11 +17,11 @@ import { TraceRootSpanProvider, useFetchTraceRootSpanContext } from './use_fetch
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 vi.mock('../../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchRootSpanByTraceId = vi.fn<Promise<TraceRootSpan | undefined>, any>();
 const mockGetAbsoluteTime = vi.fn(() => ({

@@ -12,25 +12,25 @@ import { render, screen } from '@testing-library/react';
 import { ChatHeader } from './chat_header';
 
 vi.mock('./chat_actions_menu', () => {
-      const mocked = {
-      ChatActionsMenu: () => <div data-test-subj="chat-actions-menu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChatActionsMenu: () => <div data-test-subj="chat-actions-menu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./chat_sharing_menu', () => {
-      const mocked = {
-      ChatSharingMenu: () => <div data-test-subj="chat-sharing-menu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChatSharingMenu: () => <div data-test-subj="chat-sharing-menu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./chat_context_menu', () => {
-      const mocked = {
-      ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChatContextMenu: () => <div data-test-subj="chat-context-menu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ChatHeader', () => {
   const baseProps = {

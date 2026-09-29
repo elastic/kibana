@@ -23,12 +23,12 @@ const mockCheckIndicesPrivileges = vi.fn(({ indices }: CheckIndicesPrivilegesPar
   Promise.resolve(Object.fromEntries(indices.map((index) => [index, true])))
 );
 vi.mock('./privileges', () => {
-      const mocked = {
-      checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-        mockCheckIndicesPrivileges(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+      mockCheckIndicesPrivileges(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const USER_PROFILE_UID = 'mocked_profile_uid';
 

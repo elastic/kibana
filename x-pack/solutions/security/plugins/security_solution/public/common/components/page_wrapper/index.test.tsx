@@ -15,11 +15,11 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { TestProviders } from '../../mock';
 
 vi.mock('../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SecuritySolutionPageWrapper', () => {
   beforeEach(() => {

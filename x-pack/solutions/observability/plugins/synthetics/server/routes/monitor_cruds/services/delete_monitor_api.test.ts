@@ -12,27 +12,27 @@ import type { EncryptedSyntheticsMonitorAttributes } from '../../../../common/ru
 import { DeleteMonitorAPI } from './delete_monitor_api';
 
 vi.mock('../edit_monitor', () => {
-      const mocked = {
-      validatePermissions: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validatePermissions: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../monitor_locations_utils', () => {
-      const mocked = {
-      assertCanPerformMonitorBulkActionInAllSpaces: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanPerformMonitorBulkActionInAllSpaces: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../telemetry/monitor_upgrade_sender', () => {
-      const mocked = {
-      formatTelemetryDeleteEvent: vi.fn().mockReturnValue({}),
-      sendTelemetryEvents: vi.fn(),
-      sendErrorTelemetryEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatTelemetryDeleteEvent: vi.fn().mockReturnValue({}),
+    sendTelemetryEvents: vi.fn(),
+    sendErrorTelemetryEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMonitor = (
   id: string,
@@ -83,15 +83,19 @@ const createMockRouteContext = () => {
 describe('DeleteMonitorAPI', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { validatePermissions } = (await vi.importMock('../edit_monitor'));
-    const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+    const { validatePermissions } = await vi.importMock('../edit_monitor');
+    const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+      '../monitor_locations_utils'
+    );
     validatePermissions.mockResolvedValue(null);
     assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(undefined);
   });
 
   describe('per-space authorization', () => {
     it('asserts delete privileges in all monitor spaces before deleting', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue({
         normalizedMonitor: mockMonitor('mon-1', ['default', 'other-space']),
@@ -110,7 +114,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('authorizes and deletes provided monitors without loading them again', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const { routeContext, mocks } = createMockRouteContext();
       const monitor = mockMonitor('mon-1', ['default', 'other-space']);
 
@@ -128,7 +134,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('checks spaces from the saved object namespaces, not the spaces attribute', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const { routeContext, mocks } = createMockRouteContext();
       // Authoritative namespaces include a space the (drifted) attribute would omit.
       const monitor = mockMonitor('mon-1', ['default', 'shared-via-so-api']);
@@ -147,7 +155,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('handles monitors shared to all spaces', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue({ normalizedMonitor: mockMonitor('mon-1', ['*']) });
 
@@ -164,7 +174,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('returns the forbidden response and does not delete when a space check fails', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const forbidden = { status: 403, body: { message: 'no access' } };
       assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(forbidden);
 
@@ -182,7 +194,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('aborts the whole batch when a later monitor fails the space check', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const forbidden = { status: 403, body: { message: 'no access' } };
       assertCanPerformMonitorBulkActionInAllSpaces
         .mockResolvedValueOnce(undefined)
@@ -202,7 +216,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('delegates the empty-space early return to the authorization helper', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue({ normalizedMonitor: mockMonitor('mon-1') });
 
@@ -219,7 +235,9 @@ describe('DeleteMonitorAPI', () => {
     });
 
     it('dedupes the privilege check across monitors sharing the same type and spaces', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted
         .mockResolvedValueOnce({ normalizedMonitor: mockMonitor('mon-1', ['default', 'space-a']) })
@@ -238,8 +256,10 @@ describe('DeleteMonitorAPI', () => {
 
   describe('location permissions', () => {
     it('returns forbidden when validatePermissions fails, without checking spaces', async () => {
-      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { validatePermissions } = await vi.importMock('../edit_monitor');
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       validatePermissions.mockResolvedValue('Insufficient permissions');
 
       const { routeContext, mocks } = createMockRouteContext();

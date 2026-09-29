@@ -14,21 +14,21 @@ import type { TemplateMetadataPreviewProps } from './template_metadata_preview';
 import { TemplateMetadataPreview } from './template_metadata_preview';
 
 vi.mock('../../severity/config', () => {
-      const mocked = {
-      SeverityHealth: ({ severity }: { severity: string }) => (
-        <span data-test-subj="severity-health">{severity}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SeverityHealth: ({ severity }: { severity: string }) => (
+      <span data-test-subj="severity-health">{severity}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCasesFeatures = vi.fn(() => ({ isSyncAlertsEnabled: true }));
 vi.mock('../../../common/use_cases_features', () => {
-      const mocked = {
-      useCasesFeatures: () => mockUseCasesFeatures(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesFeatures: () => mockUseCasesFeatures(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: TemplateMetadataPreviewProps = {
   parsedTemplate: {

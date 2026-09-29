@@ -16,7 +16,7 @@ import { MockedCodeEditor } from '@kbn/code-editor-mock';
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
 
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: ComponentProps<typeof MockedMonacoEditor>) => (
@@ -28,11 +28,11 @@ vi.mock('@kbn/code-editor', async () => {
 vi.mock('../hooks/use_edit_flyout_state');
 vi.mock('../services');
 vi.mock('./esql_preview_section', () => {
-      const mocked = {
-      EsqlPreviewSection: () => <div data-test-subj="mockEsqlPreviewSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsqlPreviewSection: () => <div data-test-subj="mockEsqlPreviewSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useEditFlyoutState } from '../hooks/use_edit_flyout_state';
 import { getServices } from '../services';
@@ -46,9 +46,9 @@ const mockTelemetry = {
 };
 
 vi.mock('../telemetry', () => {
-      const mocked = { getTelemetry: () => mockTelemetry };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getTelemetry: () => mockTelemetry };
+  return { ...mocked, default: mocked };
+});
 
 const baseFlyoutState = {
   draftEsqlQuery: '',

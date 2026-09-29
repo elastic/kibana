@@ -51,11 +51,11 @@ describe('Collapsed mode', () => {
     mockClientHeight(mockMenuItemHeight);
     // Mock the gap between the primary menu items
     vi.doMock('../utils/get_style_property', () => {
-          const mocked = {
-              getStyleProperty: vi.fn(() => mockCollapsedMenuGap),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getStyleProperty: vi.fn(() => mockCollapsedMenuGap),
+      };
+      return { ...mocked, default: mocked };
+    });
   });
 
   it('should render the side navigation', () => {

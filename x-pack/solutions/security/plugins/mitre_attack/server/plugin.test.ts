@@ -18,18 +18,18 @@ import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 import { registerRoutes } from './routes';
 
 vi.mock('@kbn/security-mitre-attack-server', () => {
-      const mocked = {
-      loadMitreArtifact: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadMitreArtifact: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./routes', () => {
-      const mocked = {
-      registerRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLoadMitreArtifact = vi.mocked(loadMitreArtifact);
 const mockRegisterRoutes = vi.mocked(registerRoutes);

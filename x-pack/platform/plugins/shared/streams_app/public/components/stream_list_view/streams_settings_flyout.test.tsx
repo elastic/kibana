@@ -19,11 +19,11 @@ import { useStreamsPrivileges } from '../../hooks/use_streams_privileges';
 vi.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_streams_privileges');
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useAbortController: () => ({ signal: new AbortController().signal }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAbortController: () => ({ signal: new AbortController().signal }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseStreamsPrivileges = useStreamsPrivileges as MockedFunction<

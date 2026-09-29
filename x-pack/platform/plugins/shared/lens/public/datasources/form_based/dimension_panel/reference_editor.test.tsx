@@ -34,17 +34,17 @@ import { FieldSelect } from './field_select';
 import type { KqlPluginStart } from '@kbn/kql/public';
 
 vi.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => {
-      const mocked = {
-      useExistingFieldsReader: vi.fn(() => {
-        return {
-          hasFieldData: (dataViewId: string, fieldName: string) => {
-            return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
-          },
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExistingFieldsReader: vi.fn(() => {
+      return {
+        hasFieldData: (dataViewId: string, fieldName: string) => {
+          return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+        },
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../operations');
 

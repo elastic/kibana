@@ -22,23 +22,23 @@ vi.mock('../contexts/kibana/use_notifications_context', () => {
   };
 });
 vi.mock('../services/toast_notification_service', () => {
-      const mocked = {
-      useToastNotificationService: () => {
-        return {
-          displayErrorToast: vi.fn(),
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToastNotificationService: () => {
+      return {
+        displayErrorToast: vi.fn(),
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../contexts/kibana/use_create_url', () => {
-      const mocked = {
-      useCreateAndNavigateToMlLink: vi.fn(),
-      useCreateAndNavigateToManagementMlLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateAndNavigateToMlLink: vi.fn(),
+    useCreateAndNavigateToManagementMlLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Settings', () => {
   function runCheckButtonsDisabledTest(

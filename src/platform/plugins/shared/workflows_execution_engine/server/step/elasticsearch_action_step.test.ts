@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { vi } from 'vitest';
 import type { Mock, Mocked, MockedFunction } from 'vitest';
 
-import { errors } from '@elastic/elasticsearch';
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { buildElasticsearchRequest } from '@kbn/workflows';
@@ -25,12 +25,12 @@ import type { IWorkflowEventLogger } from '../workflow_event_logger';
 // Only `buildElasticsearchRequest` is stubbed — `getElasticsearchConnectors` stays real so the
 // output normalization is driven by the actual connector contracts.
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      buildElasticsearchRequest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    buildElasticsearchRequest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedBuildRequest = buildElasticsearchRequest as MockedFunction<
   typeof buildElasticsearchRequest

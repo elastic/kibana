@@ -21,11 +21,11 @@ import {
 import { findRules } from '../../../lib/detection_engine/rule_management/logic/search/find_rules';
 
 vi.mock('../../../lib/detection_engine/rule_management/logic/search/find_rules', () => {
-      const mocked = {
-      findRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFindRules = vi.mocked(findRules);
 

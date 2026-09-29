@@ -33,11 +33,11 @@ import { DashboardGrid } from './dashboard_grid';
 import type { Props as DashboardGridItemProps } from './dashboard_grid_item';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('54321'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('54321'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./dashboard_grid_item', () => {
   return {

@@ -9,18 +9,18 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('node:dns/promises', () => {
-      const mocked = {
-      resolveSrv: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveSrv: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/actions-utils', () => {
-      const mocked = {
-      getNodeSSLOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNodeSSLOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { resolveSrv } from 'node:dns/promises';
 import { getNodeSSLOptions } from '@kbn/actions-utils';

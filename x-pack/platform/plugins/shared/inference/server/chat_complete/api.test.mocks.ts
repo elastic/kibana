@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 export const getInferenceAdapterMock = vi.fn();
 
 vi.doMock('./adapters', async () => {
-  const actual = (await vi.importActual('./adapters'));
+  const actual = await vi.importActual('./adapters');
   return {
     ...actual,
     getInferenceAdapter: getInferenceAdapterMock,
@@ -22,18 +22,18 @@ export const inferenceEndpointAdapterMock = {
 };
 
 vi.doMock('./adapters/inference_endpoint', () => {
-      const mocked = {
-      inferenceEndpointAdapter: inferenceEndpointAdapterMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    inferenceEndpointAdapter: inferenceEndpointAdapterMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getInferenceExecutorMock = vi.fn();
 export const resolveInferenceEndpointMock = vi.fn();
 export const createInferenceEndpointExecutorMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     getInferenceExecutor: getInferenceExecutorMock,

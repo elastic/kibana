@@ -19,23 +19,23 @@ const cases = [
 ];
 
 vi.mock('../hooks/use_case_links', () => {
-      const mocked = {
-      useCaseLinks: vi.fn(() => ({
-        firstCaseLink: '/app/observability/cases/case-1',
-        casesOverviewLink: '/app/observability/cases',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCaseLinks: vi.fn(() => ({
+      firstCaseLink: '/app/observability/cases/case-1',
+      casesOverviewLink: '/app/observability/cases',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_bulk_cases', () => {
-      const mocked = {
-      useFetchBulkCases: vi.fn(() => ({
-        cases,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchBulkCases: vi.fn(() => ({
+      cases,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useFetchBulkCases } from '../../../hooks/use_fetch_bulk_cases';
 

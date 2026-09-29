@@ -14,18 +14,18 @@ import type { Streams } from '@kbn/streams-schema';
 import { partitionStream } from '.';
 
 vi.mock('../../src/cluster_logs/cluster_logs', () => {
-      const mocked = {
-      clusterLogs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    clusterLogs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-prompt-utils', () => {
-      const mocked = {
-      executeAsReasoningAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeAsReasoningAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';

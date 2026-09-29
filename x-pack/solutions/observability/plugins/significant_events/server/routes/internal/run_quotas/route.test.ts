@@ -29,25 +29,25 @@ import {
 import { internalRunQuotaRoutes } from './route';
 
 vi.mock('../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/run_quotas', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../lib/run_quotas')),
-      assertCanManageRunQuotas: vi.fn(),
-      canManageRunQuotas: vi.fn(),
-      consumeRunQuota: vi.fn(),
-      createRunQuotaInternalRepository: vi.fn(),
-      patchRunQuotaSettings: vi.fn(),
-      readRunQuotaLedger: vi.fn(),
-      readRunQuotaSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../lib/run_quotas')),
+    assertCanManageRunQuotas: vi.fn(),
+    canManageRunQuotas: vi.fn(),
+    consumeRunQuota: vi.fn(),
+    createRunQuotaInternalRepository: vi.fn(),
+    patchRunQuotaSettings: vi.fn(),
+    readRunQuotaLedger: vi.fn(),
+    readRunQuotaSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getRoute = internalRunQuotaRoutes['GET /internal/significant_events/run_quotas'];
 const putRoute = internalRunQuotaRoutes['PUT /internal/significant_events/run_quotas'];
@@ -87,8 +87,7 @@ describe('Significant Events run quota routes', () => {
     vi.mocked(assertCanManageRunQuotas).mockReset().mockResolvedValue(undefined);
     vi.mocked(canManageRunQuotas).mockReset().mockResolvedValue(false);
     vi.mocked(consumeRunQuota).mockReset().mockResolvedValue({ allowed: true });
-    vi
-      .mocked(createRunQuotaInternalRepository)
+    vi.mocked(createRunQuotaInternalRepository)
       .mockReset()
       .mockReturnValue(repository as never);
     vi.mocked(patchRunQuotaSettings).mockReset();

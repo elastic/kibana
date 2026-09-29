@@ -1928,9 +1928,7 @@ describe('TableList', () => {
         references: [],
       },
     ];
-    const findItems = vi
-      .fn()
-      .mockResolvedValue({ total: originalHits.length, hits: originalHits });
+    const findItems = vi.fn().mockResolvedValue({ total: originalHits.length, hits: originalHits });
 
     await act(async () => {
       testBed = setup({ findItems });

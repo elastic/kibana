@@ -22,14 +22,14 @@ import { noteFieldsMigrator } from './field_migrator';
 import { pickSavedNote, persistNote, createNote, updateNote } from './saved_object';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v1: vi.fn().mockReturnValue('7ba7a520-03f4-11eb-9d9d-ffba20fabba8'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v1: vi.fn().mockReturnValue('7ba7a520-03f4-11eb-9d9d-ffba20fabba8'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./saved_object', async () => {
-  const originalModule = (await vi.importActual('./saved_object'));
+  const originalModule = await vi.importActual('./saved_object');
   return {
     ...originalModule,
     createNote: vi.fn(originalModule.createNote),
@@ -39,15 +39,15 @@ vi.mock('./saved_object', async () => {
 });
 
 vi.mock('./field_migrator', () => {
-      const mocked = {
-      noteFieldsMigrator: {
-        extractFieldsToReferences: vi.fn(),
-        populateFieldsFromReferences: vi.fn(),
-        populateFieldsFromReferencesForPatch: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    noteFieldsMigrator: {
+      extractFieldsToReferences: vi.fn(),
+      populateFieldsFromReferences: vi.fn(),
+      populateFieldsFromReferencesForPatch: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('saved_object pick', () => {
   const mockDateNow = new Date('2020-04-03T23:00:00.000Z').valueOf();

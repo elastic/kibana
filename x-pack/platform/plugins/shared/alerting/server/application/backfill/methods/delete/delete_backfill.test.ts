@@ -20,11 +20,11 @@ import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 
 vi.mock('../../../../lib/rule_gaps/update/update_gaps', () => {
-      const mocked = {
-      updateGaps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateGaps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const {
   rulesClientParams,

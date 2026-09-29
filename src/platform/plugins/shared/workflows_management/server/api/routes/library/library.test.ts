@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 import type { Mock, MockedClass } from 'vitest';
 
 vi.mock('../../../library', async () => {
-  const actual = (await vi.importActual('../../../library'));
+  const actual = await vi.importActual('../../../library');
   return {
     ...actual,
     LibraryService: vi.fn(),

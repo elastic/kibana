@@ -16,7 +16,7 @@ import * as dbscanModule from './dbscan';
 
 // mock ai-tools heavy functions to keep test deterministic and focused
 vi.mock('@kbn/ai-tools', async () => {
-  const module = (await vi.importActual('@kbn/ai-tools'));
+  const module = await vi.importActual('@kbn/ai-tools');
 
   return {
     formatDocumentAnalysis: module.formatDocumentAnalysis,

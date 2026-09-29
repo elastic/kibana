@@ -20,7 +20,7 @@ import {
 
 // Mock monaco before importing
 vi.mock('@kbn/monaco', async () => {
-  const actualMonaco = (await vi.importActual('@kbn/monaco'));
+  const actualMonaco = await vi.importActual('@kbn/monaco');
   return {
     ...actualMonaco,
     monaco: {

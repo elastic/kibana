@@ -30,51 +30,51 @@ let capturedOnSubmit:
   | undefined;
 
 vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: (props: {
-        onTextLangQuerySubmit: (q: AggregateQuery, a?: AbortController) => Promise<void>;
-      }) => {
-        capturedOnSubmit = props.onTextLangQuerySubmit;
-        return null;
-      },
-      useESQLQueryStats: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLLangEditor: (props: {
+      onTextLangQuerySubmit: (q: AggregateQuery, a?: AbortController) => Promise<void>;
+    }) => {
+      capturedOnSubmit = props.onTextLangQuerySubmit;
+      return null;
+    },
+    useESQLQueryStats: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../app_plugin/shared/edit_on_the_fly/helpers', () => {
-      const mocked = {
-      getSuggestions: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSuggestions: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The initialization hook triggers an initial `runQuery` against real
 // services; irrelevant for these tests, which submit queries explicitly.
 vi.mock('./use_initialize_chart', () => {
-      const mocked = {
-      useInitializeChart: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInitializeChart: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../app_plugin/shared/edit_on_the_fly/use_esql_variables', () => {
-      const mocked = {
-      useESQLVariables: vi.fn().mockReturnValue({
-        onSaveControl: vi.fn(),
-        onCancelControl: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useESQLVariables: vi.fn().mockReturnValue({
+      onSaveControl: vi.fn(),
+      onCancelControl: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/presentation-publishing', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/presentation-publishing')),
-      useFetchContext: vi.fn().mockReturnValue({ esqlVariables: [], isApproximate: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/presentation-publishing')),
+    useFetchContext: vi.fn().mockReturnValue({ esqlVariables: [], isApproximate: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getSuggestionsMock = getSuggestions as MockedFunction<typeof getSuggestions>;
 

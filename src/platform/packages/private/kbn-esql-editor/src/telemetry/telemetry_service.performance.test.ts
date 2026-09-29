@@ -16,14 +16,14 @@ import { ESQLEditorTelemetryService } from './telemetry_service';
 const mockMetricEvent = vi.fn();
 
 vi.mock('@kbn/ebt-tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ebt-tools')),
-      reportPerformanceMetricEvent: (_: AnalyticsServiceStart, args: PerformanceMetricEvent) => {
-        mockMetricEvent(args);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/ebt-tools')),
+    reportPerformanceMetricEvent: (_: AnalyticsServiceStart, args: PerformanceMetricEvent) => {
+      mockMetricEvent(args);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ESQLEditorTelemetryService performance metrics', () => {
   beforeEach(() => {

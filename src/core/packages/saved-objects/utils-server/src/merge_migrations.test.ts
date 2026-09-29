@@ -20,12 +20,10 @@ import { mergeSavedObjectMigrations, mergeSavedObjectMigrationMaps } from './mer
 describe('mergeSavedObjectMigrations', () => {
   test('merges migration parameters with a migration function', () => {
     // @ts-expect-error
-    expect(mergeSavedObjectMigrations({ deferred: true, transform: vi.fn() }, vi.fn())).toEqual(
-      {
-        deferred: false,
-        transform: expect.any(Function),
-      }
-    );
+    expect(mergeSavedObjectMigrations({ deferred: true, transform: vi.fn() }, vi.fn())).toEqual({
+      deferred: false,
+      transform: expect.any(Function),
+    });
   });
 
   test('returns a function on merging two functions', () => {

@@ -25,11 +25,11 @@ import { createPrebuiltRuleAssetsClient } from '../../../../../prebuilt_rules/lo
 import { restoreRuleFromHistory } from '.';
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../machine_learning/authz');
 vi.mock('../../../../../../machine_learning/validation');

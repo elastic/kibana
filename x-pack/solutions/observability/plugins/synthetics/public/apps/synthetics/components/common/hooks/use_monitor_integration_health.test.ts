@@ -14,35 +14,33 @@ import { PrivateLocationHealthStatusValue } from '../../../../../../common/runti
 import { useMonitorIntegrationHealth } from './use_monitor_integration_health';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: vi.fn(),
-      useDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: vi.fn(),
+    useDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: vi.fn().mockReturnValue({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: vi.fn().mockReturnValue({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/monitor_management/api', () => {
-      const mocked = {
-      resetMonitorAPI: vi.fn(),
-      resetMonitorBulkAPI: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resetMonitorAPI: vi.fn(),
+    resetMonitorBulkAPI: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { resetMonitorAPI, resetMonitorBulkAPI } from '../../../state/monitor_management/api';
 
 const mockedResetMonitorAPI = resetMonitorAPI as MockedFunction<typeof resetMonitorAPI>;
-const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as MockedFunction<
-  typeof resetMonitorBulkAPI
->;
+const mockedResetMonitorBulkAPI = resetMonitorBulkAPI as MockedFunction<typeof resetMonitorBulkAPI>;
 
 const healthyMonitor = {
   configId: 'mon-1',

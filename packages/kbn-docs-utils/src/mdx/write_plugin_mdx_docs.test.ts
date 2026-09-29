@@ -23,11 +23,11 @@ import {
 
 vi.mock('fs/promises');
 vi.mock('./write_plugin_split_by_folder', () => {
-      const mocked = {
-      writePluginDocSplitByFolder: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    writePluginDocSplitByFolder: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFsp = Fsp as Mocked<typeof Fsp>;
 

@@ -21,27 +21,27 @@ import * as i18n from '../../translations';
 
 const mockNavigateToCaseView = vi.fn();
 vi.mock('../../../../common/navigation/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/navigation/hooks')),
-      useCaseViewNavigation: () => ({
-        navigateToCaseView: mockNavigateToCaseView,
-        getCaseViewUrl: vi.fn().mockReturnValue('/cases/test-id'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/navigation/hooks')),
+    useCaseViewNavigation: () => ({
+      navigateToCaseView: mockNavigateToCaseView,
+      getCaseViewUrl: vi.fn().mockReturnValue('/cases/test-id'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_actions')),
-      ActionColumnComponent: () => (
-        <button type="button" data-test-subj="mock-action-column">
-          {'...'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_actions')),
+    ActionColumnComponent: () => (
+      <button type="button" data-test-subj="mock-action-column">
+        {'...'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCase = {
   ...basicCase,

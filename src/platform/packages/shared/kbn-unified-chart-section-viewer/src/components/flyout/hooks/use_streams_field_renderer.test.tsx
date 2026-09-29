@@ -16,11 +16,11 @@ import { useExternalServices } from '../../../context/external_services';
 import { useStreamsFieldRenderer } from './use_streams_field_renderer';
 
 vi.mock('../../../context/external_services', () => {
-      const mocked = {
-      useExternalServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExternalServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseExternalServices = useExternalServices as Mock;
 

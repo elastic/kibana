@@ -12,19 +12,19 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { fetchCpuUsageNodeStats } from './fetch_cpu_usage_node_stats';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetchCpuUsageNodeStats', () => {
   const esClient = elasticsearchClientMock.createScopedClusterClient().asCurrentUser;

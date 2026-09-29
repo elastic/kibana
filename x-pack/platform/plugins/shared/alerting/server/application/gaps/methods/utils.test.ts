@@ -18,11 +18,11 @@ import {
 } from './utils';
 
 vi.mock('../../../lib/rule_gaps/build_gaps_filter', () => {
-      const mocked = {
-      buildGapsFilter: vi.fn(() => 'mocked_filter'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildGapsFilter: vi.fn(() => 'mocked_filter'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('utils', () => {
   afterEach(() => {

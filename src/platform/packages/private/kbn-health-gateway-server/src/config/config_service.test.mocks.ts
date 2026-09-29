@@ -19,12 +19,12 @@ export const envCreateDefaultMock = vi.fn().mockImplementation(() => createTestE
 export const configServiceMock = vi.fn().mockImplementation(() => configMock.create());
 export const rawConfigServiceMock = vi.fn().mockImplementation(() => rawMock.create());
 vi.doMock('@kbn/config', () => {
-      const mocked = {
-      Env: {
-        createDefault: envCreateDefaultMock,
-      },
-      ConfigService: configServiceMock,
-      RawConfigService: rawConfigServiceMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Env: {
+      createDefault: envCreateDefaultMock,
+    },
+    ConfigService: configServiceMock,
+    RawConfigService: rawConfigServiceMock,
+  };
+  return { ...mocked, default: mocked };
+});

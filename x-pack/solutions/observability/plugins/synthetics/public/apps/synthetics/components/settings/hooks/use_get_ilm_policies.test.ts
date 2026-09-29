@@ -15,13 +15,13 @@ describe('useGetIlmPolicies', () => {
   beforeAll(() => {
     const { policiesData, indexSize } = getTestData();
 
-    vi
-      .spyOn(hookPolicyAPI, 'getIlmPolicies')
-      .mockReturnValue(new Promise((resolve) => resolve(policiesData)));
+    vi.spyOn(hookPolicyAPI, 'getIlmPolicies').mockReturnValue(
+      new Promise((resolve) => resolve(policiesData))
+    );
 
-    vi
-      .spyOn(hookPolicyAPI, 'getIndicesData')
-      .mockReturnValue(new Promise((resolve) => resolve(indexSize)));
+    vi.spyOn(hookPolicyAPI, 'getIndicesData').mockReturnValue(
+      new Promise((resolve) => resolve(indexSize))
+    );
   });
 
   it('returns the correct data', async () => {

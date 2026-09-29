@@ -13,9 +13,9 @@ export const generateFileHashMock = vi.fn();
 export const getFileCacheKeyMock = vi.fn();
 
 vi.doMock('./utils', () => {
-      const mocked = {
-      generateFileHash: generateFileHashMock,
-      getFileCacheKey: getFileCacheKeyMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateFileHash: generateFileHashMock,
+    getFileCacheKey: getFileCacheKeyMock,
+  };
+  return { ...mocked, default: mocked };
+});

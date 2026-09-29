@@ -35,13 +35,13 @@ vi.mock('./use_fetch_document_details');
 
 // Mock expandable flyout API
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({
-        openPreviewPanel: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({
+      openPreviewPanel: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchDocumentDetails = useFetchDocumentDetails as MockedFunction<
   typeof useFetchDocumentDetails

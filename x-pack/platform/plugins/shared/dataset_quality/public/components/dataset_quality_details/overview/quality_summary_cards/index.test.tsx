@@ -14,32 +14,32 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import QualitySummaryCards from '.';
 
 vi.mock('../../../../hooks/use_overview_summary_panel', () => {
-      const mocked = {
-      useOverviewSummaryPanel: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOverviewSummaryPanel: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_quality_issues_docs_chart', () => {
-      const mocked = {
-      useQualityIssuesDocsChart: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQualityIssuesDocsChart: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_dataset_quality_details_state', () => {
-      const mocked = {
-      useDatasetQualityDetailsState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDatasetQualityDetailsState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_failure_store_modal', () => {
-      const mocked = {
-      useFailureStoreModal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFailureStoreModal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { useQualityIssuesDocsChart } from '../../../../hooks/use_quality_issues_docs_chart';

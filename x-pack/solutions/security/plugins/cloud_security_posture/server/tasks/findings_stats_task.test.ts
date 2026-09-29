@@ -15,11 +15,11 @@ import { createBenchmarkScoreIndex } from '../create_indices/create_indices';
 import { benchmarkScoreMapping } from '../create_indices/benchmark_score_mapping';
 
 vi.mock('../create_indices/create_indices', () => {
-      const mocked = {
-      createBenchmarkScoreIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createBenchmarkScoreIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateBenchmarkScoreIndex = createBenchmarkScoreIndex as MockedFunction<
   typeof createBenchmarkScoreIndex

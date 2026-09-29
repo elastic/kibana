@@ -56,34 +56,34 @@ const defaultUseMetricsViewWithSource: {
 const mockUseMetricsViewWithSource = vi.fn(() => defaultUseMetricsViewWithSource);
 
 vi.mock('../hooks/use_metrics_view_with_source', () => {
-      const mocked = {
-      useMetricsViewWithSource: () => mockUseMetricsViewWithSource(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsViewWithSource: () => mockUseMetricsViewWithSource(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // `Expressions` renders child components (e.g. `UnifiedSearchBar`) that still read
 // `useMetricsDataViewContext`/`useSourceContext` directly from the container.
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      withSourceProvider: () => vi.fn,
-      useSourceContext: () => ({ source: { id: 'default' } }),
-      useMetricsDataViewContext: () => ({ metricsView: mockMetricsView }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSourceProvider: () => vi.fn,
+    useSourceContext: () => ({ source: { id: 'default' } }),
+    useMetricsDataViewContext: () => ({ metricsView: mockMetricsView }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          ...mockCoreMock.createStart(),
-          unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        ...mockCoreMock.createStart(),
+        unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Expression', () => {
   beforeEach(() => {

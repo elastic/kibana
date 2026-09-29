@@ -24,77 +24,77 @@ const mockTrackEsqlQueryFailure = vi.fn();
 // Mock ALL external heavy dependencies with factory functions to avoid loading
 // their transitive dependency trees (e.g., @kbn/data-plugin/public).
 vi.mock('../utils/execute_esql_query', () => {
-      const mocked = {
-      executeEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/parse_metrics_response_with_telemetry', () => {
-      const mocked = {
-      parseMetricsWithTelemetry: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseMetricsWithTelemetry: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/get_esql_query', () => {
-      const mocked = {
-      getEsqlQuery: vi.fn((query: { esql?: string } | undefined) => query?.esql),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsqlQuery: vi.fn((query: { esql?: string } | undefined) => query?.esql),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      buildMetricsInfoQuery: vi.fn((esql: string, dims?: string[], postFilter?: string) => {
-        if (!esql?.trim()) return '';
-        const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
-        const post = postFilter ? ` | WHERE ${postFilter}` : '';
-        return `${esql}${preFilter} | METRICS_INFO${post}`;
-      }),
-      escapeStringValue: vi.fn((val: string) => `"${val}"`),
-      buildJoinedFilter: vi.fn(
-        (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
-          fields?.map(clause).join(separator) ?? ''
-      ),
-      // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
-      // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
-      hasTransformationalCommand: vi.fn(() => false),
-      // Used by buildEsqlQueryFailureEvent for the `query_type` telemetry field.
-      getSourceCommandFromESQLQuery: vi.fn((esql?: string) => {
-        const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
-        return sourceCommand ? sourceCommand[1].toUpperCase() : '';
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildMetricsInfoQuery: vi.fn((esql: string, dims?: string[], postFilter?: string) => {
+      if (!esql?.trim()) return '';
+      const preFilter = dims?.length ? ' | WHERE dim IS NOT NULL' : '';
+      const post = postFilter ? ` | WHERE ${postFilter}` : '';
+      return `${esql}${preFilter} | METRICS_INFO${post}`;
+    }),
+    escapeStringValue: vi.fn((val: string) => `"${val}"`),
+    buildJoinedFilter: vi.fn(
+      (fields: string[] | undefined, clause: (field: string) => string, separator = ' AND ') =>
+        fields?.map(clause).join(separator) ?? ''
+    ),
+    // Still required by getFetchParamsMock (kbn-unified-histogram) which imports it
+    // from @kbn/esql-utils to process breakdown fields. Not used by the hook itself.
+    hasTransformationalCommand: vi.fn(() => false),
+    // Used by buildEsqlQueryFailureEvent for the `query_type` telemetry field.
+    getSourceCommandFromESQLQuery: vi.fn((esql?: string) => {
+      const sourceCommand = esql?.trim().match(/^(TS|FROM)\b/i);
+      return sourceCommand ? sourceCommand[1].toUpperCase() : '';
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/field-utils', () => {
-      const mocked = {
-      getFieldIconType: vi.fn(() => 'number'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFieldIconType: vi.fn(() => 'number'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../context/ebt_telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        trackMetricsInfo: mockTrackMetricsInfo,
-        trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      trackMetricsInfo: mockTrackMetricsInfo,
+      trackEsqlQueryFailure: mockTrackEsqlQueryFailure,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../context/chart_section_inspector', () => {
-      const mocked = {
-      useChartSectionInspector: () => ({
-        trackRequest: mockTrackRequest,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChartSectionInspector: () => ({
+      trackRequest: mockTrackRequest,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockReportError = vi.fn();
 vi.mock('../../../chart/hooks/use_report_chart_section_error', () => {
-      const mocked = {
-      useReportChartSectionError: vi.fn(() => mockReportError),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReportChartSectionError: vi.fn(() => mockReportError),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { renderHook, waitFor, act } from '@testing-library/react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -195,7 +195,7 @@ describe('useFetchMetricsData', () => {
     // Restore mock implementations after clearAllMocks resets them.
     // Without these restorations, getEsqlQuery returns undefined (disabling shouldFetch),
     // trackRequest stops calling fn() (so the fetch never runs), etc.
-    const { getEsqlQuery } = (await vi.importMock('../utils/get_esql_query'));
+    const { getEsqlQuery } = await vi.importMock('../utils/get_esql_query');
     getEsqlQuery.mockImplementation((query: { esql?: string } | undefined) => query?.esql);
 
     const {
@@ -203,7 +203,7 @@ describe('useFetchMetricsData', () => {
       buildJoinedFilter,
       hasTransformationalCommand,
       getSourceCommandFromESQLQuery,
-    } = (await vi.importMock('@kbn/esql-utils'));
+    } = await vi.importMock('@kbn/esql-utils');
     buildMetricsInfoQuery.mockImplementation(
       (esql: string, dims?: string[], postFilter?: string) => {
         if (!esql?.trim()) return '';
@@ -328,7 +328,7 @@ describe('useFetchMetricsData', () => {
     });
 
     it('does not fetch when metricsInfoQuery is empty', async () => {
-      const { buildMetricsInfoQuery } = (await vi.importMock('@kbn/esql-utils'));
+      const { buildMetricsInfoQuery } = await vi.importMock('@kbn/esql-utils');
       buildMetricsInfoQuery.mockReturnValue('');
 
       const params = createDefaultParams();
@@ -798,7 +798,9 @@ describe('useFetchMetricsData', () => {
   });
 
   describe('appliedDimensions vs selectedDimensions (#264957)', async () => {
-    const { buildMetricsInfoQuery: buildMetricsInfoQueryMock } = (await vi.importMock('@kbn/esql-utils')) as { buildMetricsInfoQuery: Mock };
+    const { buildMetricsInfoQuery: buildMetricsInfoQueryMock } = (await vi.importMock(
+      '@kbn/esql-utils'
+    )) as { buildMetricsInfoQuery: Mock };
 
     it('passes no dimensions to the query when none of the selected ones exist on the current data view', async () => {
       const params = createDefaultParams();

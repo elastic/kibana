@@ -119,9 +119,7 @@ describe('wrapSearchSourceClient', () => {
   test('keeps track of number of queries', async () => {
     const abortController = new AbortController();
     const { searchSourceMock, searchSourceClientMock } = createSearchSourceClientMock();
-    searchSourceMock.fetch$ = vi
-      .fn()
-      .mockImplementation(() => of({ rawResponse: { took: 333 } }));
+    searchSourceMock.fetch$ = vi.fn().mockImplementation(() => of({ rawResponse: { took: 333 } }));
 
     const { searchSourceClient, getMetrics } = wrapSearchSourceClient({
       logger,

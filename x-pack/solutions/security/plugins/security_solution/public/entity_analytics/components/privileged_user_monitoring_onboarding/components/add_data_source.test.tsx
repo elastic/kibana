@@ -17,45 +17,42 @@ const mockUseNavigation = vi.fn().mockReturnValue({
 });
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => mockUseNavigation(),
   };
 });
 
-vi.mock(
-  '../../entity_analytics_integrations_cards/hooks/use_entity_analytics_integrations',
-  () => {
-      const mocked = {
-        useEntityAnalyticsIntegrations: vi.fn(() => [
-          {
-            packageInfo: {
-              name: 'Okta',
-              version: '1.0.0',
-              title: 'Okta Integration',
-              description: 'Okta integration description',
-              icon: 'oktaIcon',
-              status: 'not_installed',
-            },
-            hasDataStreams: false,
-          },
-          {
-            packageInfo: {
-              name: 'Active Directory',
-              version: '1.0.0',
-              title: 'Active Directory Integration',
-              description: 'Active Directory integration description',
-              icon: 'adIcon',
-              status: 'not_installed',
-            },
-            hasDataStreams: false,
-          },
-        ]),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../entity_analytics_integrations_cards/hooks/use_entity_analytics_integrations', () => {
+  const mocked = {
+    useEntityAnalyticsIntegrations: vi.fn(() => [
+      {
+        packageInfo: {
+          name: 'Okta',
+          version: '1.0.0',
+          title: 'Okta Integration',
+          description: 'Okta integration description',
+          icon: 'oktaIcon',
+          status: 'not_installed',
+        },
+        hasDataStreams: false,
+      },
+      {
+        packageInfo: {
+          name: 'Active Directory',
+          version: '1.0.0',
+          title: 'Active Directory Integration',
+          description: 'Active Directory integration description',
+          icon: 'adIcon',
+          status: 'not_installed',
+        },
+        hasDataStreams: false,
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AddDataSourcePanel', () => {
   it('renders the panel title and description', () => {

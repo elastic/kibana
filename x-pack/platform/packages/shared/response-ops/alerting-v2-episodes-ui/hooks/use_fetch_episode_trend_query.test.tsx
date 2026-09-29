@@ -17,9 +17,9 @@ import { useFetchEpisodeTrendQuery } from './use_fetch_episode_trend_query';
 
 vi.mock('../utils/run_esql_async_search');
 vi.mock('./use_space_id', () => {
-      const mocked = { useSpaceId: () => 'default' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useSpaceId: () => 'default' };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunEsqlAsyncSearch = vi.mocked(runEsqlAsyncSearch);
 

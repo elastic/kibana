@@ -8,25 +8,25 @@
 import { vi } from 'vitest';
 
 vi.mock('../../components/vector_style_editor', () => {
-      const mocked = {
-      VectorStyleEditor: () => {
-        return <div>mockVectorStyleEditor</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VectorStyleEditor: () => {
+      return <div>mockVectorStyleEditor</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/legend/size', () => {
-      const mocked = {
-      MarkerSizeLegend: () => {
-        return <div>mockMarkerSizeLegend</div>;
-      },
-      OrdinalLegend: () => {
-        return <div>mockMarkerSizeLegend</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MarkerSizeLegend: () => {
+      return <div>mockMarkerSizeLegend</div>;
+    },
+    OrdinalLegend: () => {
+      return <div>mockMarkerSizeLegend</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

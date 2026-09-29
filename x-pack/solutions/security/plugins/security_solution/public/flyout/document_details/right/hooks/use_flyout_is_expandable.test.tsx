@@ -15,11 +15,11 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 
 const getFieldsData = vi.fn();
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
 describe('useFlyoutIsExpandable', () => {

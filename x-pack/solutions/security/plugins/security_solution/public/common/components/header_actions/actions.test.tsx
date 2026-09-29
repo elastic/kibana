@@ -23,15 +23,12 @@ import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 
-vi.mock(
-  '../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
-  () => {
-      const mocked = {
-        AlertContextMenu: vi.fn(() => null),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../detections/components/alerts_table/timeline_actions/alert_context_menu', () => {
+  const mocked = {
+    AlertContextMenu: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_selector');
 vi.mock('../../../detections/hooks/use_is_analyzer_enabled');
 vi.mock('../../hooks/use_is_new_flyout_enabled');

@@ -25,12 +25,12 @@ import { TimelineId } from '../../../../../common/types/timeline';
 vi.mock('../../../../common/lib/kibana');
 
 vi.mock('../../../../common/hooks/use_selector', () => {
-      const mocked = {
-      useShallowEqualSelector: vi.fn(),
-      useDeepEqualSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShallowEqualSelector: vi.fn(),
+    useDeepEqualSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Providers', () => {
   const mount = useMountAppended();

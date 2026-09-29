@@ -12,52 +12,52 @@ import { render, screen } from '@testing-library/react';
 import { InventoryHeaderContent } from './header_content';
 
 vi.mock('./filter_bar', () => {
-      const mocked = {
-      FilterBar: () => <div data-test-subj="inventoryFilterBar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterBar: () => <div data-test-subj="inventoryFilterBar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./toolbars/toolbar', () => {
-      const mocked = {
-      Toolbar: () => <div data-test-subj="inventoryToolbar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Toolbar: () => <div data-test-subj="inventoryToolbar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./saved_views', () => {
-      const mocked = {
-      SavedViews: () => <div data-test-subj="inventorySavedViews" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedViews: () => <div data-test-subj="inventorySavedViews" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./waffle/view_switcher', () => {
-      const mocked = {
-      ViewSwitcher: () => <div data-test-subj="inventoryViewSwitcher" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ViewSwitcher: () => <div data-test-subj="inventoryViewSwitcher" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_waffle_options', () => {
-      const mocked = {
-      useWaffleOptionsContext: () => ({
-        nodeType: 'host',
-        view: 'map',
-        changeView: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWaffleOptionsContext: () => ({
+      nodeType: 'host',
+      view: 'map',
+      changeView: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_waffle_time', () => {
-      const mocked = {
-      useWaffleTimeContext: () => ({
-        currentTime: 0,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWaffleTimeContext: () => ({
+      currentTime: 0,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('InventoryHeaderContent', () => {
   const testSubjectOrder = (container: HTMLElement): string[] =>

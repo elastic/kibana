@@ -66,9 +66,9 @@ describe('classicNavRootProfileProvider', () => {
     });
 
     it('should return no default data views', async () => {
-      vi
-        .spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern')
-        .mockReturnValueOnce(undefined);
+      vi.spyOn(mockServices.logsContextService, 'getAllLogsIndexPattern').mockReturnValueOnce(
+        undefined
+      );
       const result = await classicNavRootProfileProvider.resolve({ solutionNavId: undefined });
       if (!result.isMatch) {
         throw new Error('Expected result to match');

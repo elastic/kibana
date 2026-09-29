@@ -18,11 +18,11 @@ import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 import { fetchAnalyticsCollectionDataViewId } from './fetch_analytics_collection_data_view_id';
 
 vi.mock('./fetch_analytics_collection', () => {
-      const mocked = {
-      fetchAnalyticsCollections: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAnalyticsCollections: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetch analytics collection data view id', () => {
   const mockClient = {

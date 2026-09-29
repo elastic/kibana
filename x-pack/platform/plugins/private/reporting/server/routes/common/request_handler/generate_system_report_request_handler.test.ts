@@ -9,9 +9,9 @@ import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'mock-system-report-id' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'mock-system-report-id' };
+  return { ...mocked, default: mocked };
+});
 
 import {
   kibanaResponseFactory,
@@ -37,13 +37,13 @@ import {
 } from './generate_system_report_request_handler';
 
 vi.mock('@kbn/reporting-server/crypto', () => {
-      const mocked = {
-      cryptoFactory: () => ({
-        encrypt: () => `hello mock system cypher text`,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cryptoFactory: () => ({
+      encrypt: () => `hello mock system cypher text`,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockContext = () =>
   ({

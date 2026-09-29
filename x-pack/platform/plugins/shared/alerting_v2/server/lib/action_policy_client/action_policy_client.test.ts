@@ -2319,25 +2319,23 @@ describe('ActionPolicyClient', () => {
       policies: Array<{ id: string; apiKey: string; createdByUser?: boolean }>
     ) => {
       const esoClient = mockEncryptedSavedObjects.getClient();
-      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as Mock).mockResolvedValueOnce(
-        {
-          async *find() {
-            yield {
-              saved_objects: policies.map(({ id, apiKey, createdByUser = false }) => ({
-                id,
-                type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-                attributes: {
-                  apiKey,
-                  apiKeyCreatedByUser: createdByUser,
-                  apiKeyOwner: 'test-user',
-                },
-                references: [],
-              })),
-            };
-          },
-          close: vi.fn(),
-        }
-      );
+      (esoClient.createPointInTimeFinderDecryptedAsInternalUser as Mock).mockResolvedValueOnce({
+        async *find() {
+          yield {
+            saved_objects: policies.map(({ id, apiKey, createdByUser = false }) => ({
+              id,
+              type: ACTION_POLICY_SAVED_OBJECT_TYPE,
+              attributes: {
+                apiKey,
+                apiKeyCreatedByUser: createdByUser,
+                apiKeyOwner: 'test-user',
+              },
+              references: [],
+            })),
+          };
+        },
+        close: vi.fn(),
+      });
     };
 
     it('invalidates API keys for bulk-deleted policies in a single batched call', async () => {

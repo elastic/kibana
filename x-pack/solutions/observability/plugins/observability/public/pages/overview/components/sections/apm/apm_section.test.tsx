@@ -24,15 +24,15 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => ({
-        pathname: '/observability/overview/',
-        search: '',
-      }),
-      useHistory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => ({
+      pathname: '/observability/overview/',
+      search: '',
+    }),
+    useHistory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { ObservabilityAIAssistantContextualInsight } =
   observabilityAIAssistantPluginMock.createStartContract();

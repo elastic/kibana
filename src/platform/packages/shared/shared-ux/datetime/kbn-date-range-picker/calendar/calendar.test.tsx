@@ -18,20 +18,20 @@ import type { DateRange } from 'react-day-picker';
 import { Calendar } from './calendar';
 
 vi.mock('./calendar_view', () => {
-      const mocked = {
-      CalendarView: ({ year, monthIndex }: { year: number; monthIndex: number }) => {
-        const monthNum = String(monthIndex + 1).padStart(2, '0');
-        const month = new Date(year, monthIndex, 1);
+  const mocked = {
+    CalendarView: ({ year, monthIndex }: { year: number; monthIndex: number }) => {
+      const monthNum = String(monthIndex + 1).padStart(2, '0');
+      const month = new Date(year, monthIndex, 1);
 
-        return (
-          <div data-test-subj="calendar-view" data-month={`${year}-${monthNum}`}>
-            {month.toLocaleString('default', { month: 'long', year: 'numeric' })}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return (
+        <div data-test-subj="calendar-view" data-month={`${year}-${monthNum}`}>
+          {month.toLocaleString('default', { month: 'long', year: 'numeric' })}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_MONTH_HEIGHT = 280;
 const TEST_VIEWPORT_MONTHS = 3;

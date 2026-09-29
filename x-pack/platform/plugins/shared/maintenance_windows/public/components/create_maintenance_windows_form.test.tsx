@@ -19,41 +19,45 @@ import moment from 'moment';
 
 vi.mock('../utils/kibana_react');
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
-      const mocked = {
-      getRuleTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRuleTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/alerts-ui-shared', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared')),
-      AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared')),
+    AlertsSearchBar: () => <div data-test-subj="mockAlertsSearchBar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_create_maintenance_window', () => {
-      const mocked = {
-      useCreateMaintenanceWindow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateMaintenanceWindow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_update_maintenance_window', () => {
-      const mocked = {
-      useUpdateMaintenanceWindow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateMaintenanceWindow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./episode_matcher_input', () => {
-      const mocked = {
-      EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EpisodeMatcherInput: () => <div data-test-subj="mockEpisodeMatcherInput" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
-const { useKibana, useUiSetting } = (await vi.importMock('../utils/kibana_react'));
-const { useCreateMaintenanceWindow } = (await vi.importMock('../hooks/use_create_maintenance_window'));
-const { useUpdateMaintenanceWindow } = (await vi.importMock('../hooks/use_update_maintenance_window'));
+const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const { useKibana, useUiSetting } = await vi.importMock('../utils/kibana_react');
+const { useCreateMaintenanceWindow } = await vi.importMock(
+  '../hooks/use_create_maintenance_window'
+);
+const { useUpdateMaintenanceWindow } = await vi.importMock(
+  '../hooks/use_update_maintenance_window'
+);
 
 const formProps: CreateMaintenanceWindowFormProps = {
   onCancel: vi.fn(),

@@ -22,21 +22,21 @@ import {
 const mockWriteAttackDiscoveryEvent = vi.fn();
 
 vi.mock('../persistence/event_logging', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+    writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/persistence', () => {
-      const mocked = {
-      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('invokeAlertRetrievalWorkflow', () => {
   const mockLogger = {

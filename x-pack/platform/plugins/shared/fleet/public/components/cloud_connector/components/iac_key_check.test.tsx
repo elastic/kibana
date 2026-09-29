@@ -29,18 +29,18 @@ import { IacKeyCheck } from './iac_key_check';
 vi.mock('../hooks/use_verify_iac_key');
 vi.mock('../hooks/use_cloud_connector_template');
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useIacProvisioner: vi.fn(),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIacProvisioner: vi.fn(),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_update_cloud_connector', () => {
-      const mocked = {
-      updateCloudConnector: vi.fn(() => Promise.resolve({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateCloudConnector: vi.fn(() => Promise.resolve({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ---------- typed references ----------
 
@@ -56,7 +56,9 @@ const { useIacProvisioner, useStartServices } = (await vi.importMock('../../../h
   >;
 };
 
-const { updateCloudConnector: mockUpdateCloudConnector } = (await vi.importMock('../hooks/use_update_cloud_connector')) as { updateCloudConnector: MockedFunction<(...args: unknown[]) => Promise<unknown>> };
+const { updateCloudConnector: mockUpdateCloudConnector } = (await vi.importMock(
+  '../hooks/use_update_cloud_connector'
+)) as { updateCloudConnector: MockedFunction<(...args: unknown[]) => Promise<unknown>> };
 
 const mockHttp = { put: vi.fn() };
 

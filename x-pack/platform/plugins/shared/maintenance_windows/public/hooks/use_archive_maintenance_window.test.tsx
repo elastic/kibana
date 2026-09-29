@@ -17,7 +17,7 @@ const mockAddDanger = vi.fn();
 const mockAddSuccess = vi.fn();
 
 vi.mock('../utils/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../utils/kibana_react'));
+  const originalModule = await vi.importActual('../utils/kibana_react');
   return {
     ...originalModule,
     useKibana: () => {
@@ -32,13 +32,13 @@ vi.mock('../utils/kibana_react', async () => {
   };
 });
 vi.mock('../services/archive', () => {
-      const mocked = {
-      archiveMaintenanceWindow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    archiveMaintenanceWindow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { archiveMaintenanceWindow } = (await vi.importMock('../services/archive'));
+const { archiveMaintenanceWindow } = await vi.importMock('../services/archive');
 
 const maintenanceWindow = {
   title: 'archive',

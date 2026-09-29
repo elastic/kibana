@@ -36,11 +36,11 @@ import { DiscoverToolkitTestProvider } from '../../../../../__mocks__/test_provi
 import { TEST_PROFILE_STATE_DEF } from '../../../../../context_awareness/__mocks__/profile_state';
 
 vi.mock('./discover_session_save_dashboard_modal', () => {
-      const mocked = {
-      DiscoverSessionSaveDashboardModal: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverSessionSaveDashboardModal: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockModal = vi.mocked(DiscoverSessionSaveDashboardModal);
 
@@ -129,9 +129,7 @@ const setup = async ({
     persistedDataViews: uniqueDataViews,
   });
 
-  vi
-    .spyOn(services.savedSearch, 'saveDiscoverSession')
-    .mockImplementation(mockSaveDiscoverSession);
+  vi.spyOn(services.savedSearch, 'saveDiscoverSession').mockImplementation(mockSaveDiscoverSession);
 
   await toolkit.initializeTabs({ persistedDiscoverSession: finalPersistedSession });
   await toolkit.initializeSingleTab({ tabId: toolkit.getCurrentTab().id });

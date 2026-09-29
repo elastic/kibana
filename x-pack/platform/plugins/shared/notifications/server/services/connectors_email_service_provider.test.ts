@@ -19,9 +19,7 @@ import { PLUGIN_ID } from '../../common';
 vi.mock('./licensed_email_service');
 vi.mock('./connectors_email_service');
 
-const licensedEmailServiceMock = LicensedEmailService as MockedClass<
-  typeof LicensedEmailService
->;
+const licensedEmailServiceMock = LicensedEmailService as MockedClass<typeof LicensedEmailService>;
 const connectorsEmailServiceMock = ConnectorsEmailService as MockedClass<
   typeof ConnectorsEmailService
 >;

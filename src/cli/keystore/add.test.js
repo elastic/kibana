@@ -15,21 +15,21 @@ const mockKeystoreData =
   'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn().mockImplementation((path) => {
-        if (!path.includes('nonexistent')) {
-          return JSON.stringify(mockKeystoreData);
-        }
+  const mocked = {
+    readFileSync: vi.fn().mockImplementation((path) => {
+      if (!path.includes('nonexistent')) {
+        return JSON.stringify(mockKeystoreData);
+      }
 
-        throw { code: 'ENOENT' };
-      }),
-      existsSync: vi.fn().mockImplementation((path) => {
-        return !path.includes('nonexistent');
-      }),
-      writeFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      throw { code: 'ENOENT' };
+    }),
+    existsSync: vi.fn().mockImplementation((path) => {
+      return !path.includes('nonexistent');
+    }),
+    writeFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import sinon from 'sinon';
 import { PassThrough } from 'stream';

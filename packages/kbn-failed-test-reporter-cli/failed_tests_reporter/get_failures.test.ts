@@ -17,14 +17,14 @@ import { parseTestReport } from './test_report';
 import { FTR_REPORT, JEST_REPORT, MOCHA_REPORT, TRANSFORMED_CYPRESS_REPORT } from './__fixtures__';
 
 vi.mock('@kbn/code-owners', () => {
-      const mocked = {
-      getCodeOwnersEntries: vi.fn(() => []),
-      // Deterministic owner so the fallback (used for Jest/Cypress) is testable
-      // without depending on the real CODEOWNERS file.
-      getOwningTeamsForPath: vi.fn(() => ['elastic/fake-team']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCodeOwnersEntries: vi.fn(() => []),
+    // Deterministic owner so the fallback (used for Jest/Cypress) is testable
+    // without depending on the real CODEOWNERS file.
+    getOwningTeamsForPath: vi.fn(() => ['elastic/fake-team']),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getOwningTeamsForPathMock = getOwningTeamsForPath as MockedFunction<
   typeof getOwningTeamsForPath

@@ -34,11 +34,11 @@ import { gapFillStatus, gapStatus } from '../../../../../common';
 import { getSchedulerContextInternal } from '../../auto_fill_scheduler/methods/utils';
 
 vi.mock('../../auto_fill_scheduler/methods/utils', () => {
-      const mocked = {
-      getSchedulerContextInternal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSchedulerContextInternal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockGetSchedulerContext = getSchedulerContextInternal as MockedFunction<
   typeof getSchedulerContextInternal
 >;

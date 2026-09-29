@@ -14,35 +14,35 @@ import { pipeline } from 'stream/promises';
 import { download } from './download';
 
 vi.mock('@kbn/fs', () => {
-      const mocked = {
-      createWriteStream: vi.fn(() => ({
-        on: vi.fn((event, callback) => {
-          if (event === 'finish') {
-            callback();
-          }
-        }),
-        pipe: vi.fn(),
-      })),
-      getSafePath: vi
-        .fn()
-        .mockReturnValue({ fullPath: 'artifacts/file.zip', alias: 'disk:artifacts/file.zip' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createWriteStream: vi.fn(() => ({
+      on: vi.fn((event, callback) => {
+        if (event === 'finish') {
+          callback();
+        }
+      }),
+      pipe: vi.fn(),
+    })),
+    getSafePath: vi
+      .fn()
+      .mockReturnValue({ fullPath: 'artifacts/file.zip', alias: 'disk:artifacts/file.zip' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      open: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    open: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('stream/promises', () => {
-      const mocked = {
-      pipeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pipeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock Readable.fromWeb to return the mock body directly since pipeline is already mocked
 vi.mock('stream', () => {
@@ -184,7 +184,7 @@ describe('download', () => {
   it('should handle path traversal attempts', async () => {
     const maliciousPaths = ['../../../etc/passwd', 'file/../../../config', './test/../../secret'];
 
-    const realKbnFs = (await vi.importActual<typeof import('@kbn/fs')>('@kbn/fs'));
+    const realKbnFs = await vi.importActual<typeof import('@kbn/fs')>('@kbn/fs');
 
     (createWriteStream as Mock).mockImplementation(realKbnFs.createWriteStream);
 

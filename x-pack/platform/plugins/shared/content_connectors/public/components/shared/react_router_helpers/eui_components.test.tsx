@@ -10,40 +10,40 @@ import { vi } from 'vitest';
 const mockNavigateToUrl = vi.fn();
 
 vi.mock('.', () => {
-      const mocked = {
-      generateReactRouterProps: ({
-        to,
-        navigateToUrl: nav,
-      }: {
-        to: string;
-        navigateToUrl?: (path: string) => void;
-      }) => ({
-        href: `/app/content_connectors${to}`,
-        onClick: (e?: { preventDefault?: () => void }) => {
-          e?.preventDefault?.();
-          nav?.(`/app/content_connectors${to}`);
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateReactRouterProps: ({
+      to,
+      navigateToUrl: nav,
+    }: {
+      to: string;
+      navigateToUrl?: (path: string) => void;
+    }) => ({
+      href: `/app/content_connectors${to}`,
+      onClick: (e?: { preventDefault?: () => void }) => {
+        e?.preventDefault?.();
+        nav?.(`/app/content_connectors${to}`);
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { http: {}, application: { navigateToUrl: mockNavigateToUrl } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { http: {}, application: { navigateToUrl: mockNavigateToUrl } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

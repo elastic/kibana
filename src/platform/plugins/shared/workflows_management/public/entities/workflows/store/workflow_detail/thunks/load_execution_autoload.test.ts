@@ -18,20 +18,20 @@ import { setExecution, setStepExecutionPages, setStepExecutionsTotal } from '../
 const mockGetExecution = vi.fn();
 const mockGetExecutionSteps = vi.fn();
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => ({
-        getExecution: mockGetExecution,
-        getExecutionSteps: mockGetExecutionSteps,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => ({
+      getExecution: mockGetExecution,
+      getExecutionSteps: mockGetExecutionSteps,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/computation', () => {
-      const mocked = {
-      performComputation: vi.fn(() => ({ yamlString: 'test' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performComputation: vi.fn(() => ({ yamlString: 'test' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const execution: WorkflowExecutionDto = {
   id: 'exec-a',

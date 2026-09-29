@@ -26,7 +26,7 @@ vi.mock('../../../../hooks/use_breakpoints');
 vi.mock('./use_instance_details_fetcher');
 
 vi.mock('@kbn/logs-shared-plugin/common', async () => {
-  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
+  const originalModule = await vi.importActual('@kbn/logs-shared-plugin/common');
   return {
     ...originalModule,
     getLogsLocatorFromUrlService: vi

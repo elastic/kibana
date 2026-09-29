@@ -14,32 +14,32 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 import { ArtifactsSection } from './artifacts_section';
 
 vi.mock('./dashboard_artifacts_subsection', () => {
-      const mocked = {
-      DashboardArtifactsSubsection: () => (
-        <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardArtifactsSubsection: () => (
+      <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./action_policies_artifacts_subsection', () => {
-      const mocked = {
-      ActionPoliciesArtifactsSubsection: () => (
-        <div data-test-subj="actionPoliciesArtifactsSubsectionMock">action policies</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPoliciesArtifactsSubsection: () => (
+      <div data-test-subj="actionPoliciesArtifactsSubsectionMock">action policies</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCanRead = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: () => ({ canRead: mockCanRead }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: () => ({ canRead: mockCanRead }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rule: RuleApiResponse = {
   id: 'rule-1',

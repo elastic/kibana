@@ -12,8 +12,8 @@ import { vi } from 'vitest';
 export const registerEbtCountersMock = vi.fn();
 
 vi.doMock('./ebt_counters', () => {
-      const mocked = {
-      registerEbtCounters: registerEbtCountersMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerEbtCounters: registerEbtCountersMock,
+  };
+  return { ...mocked, default: mocked };
+});

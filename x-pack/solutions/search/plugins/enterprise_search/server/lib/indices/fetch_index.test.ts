@@ -16,20 +16,20 @@ import { fetchConnectorByIndexName } from '@kbn/search-connectors';
 import { fetchIndex } from './fetch_index';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      SyncStatus: {
-        CANCELED: 'canceled',
-        CANCELING: 'canceling',
-        COMPLETED: 'completed',
-        ERROR: 'error',
-        IN_PROGRESS: 'in_progress',
-        PENDING: 'pending',
-        SUSPENDED: 'suspended',
-      },
-      fetchConnectorByIndexName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SyncStatus: {
+      CANCELED: 'canceled',
+      CANCELING: 'canceling',
+      COMPLETED: 'completed',
+      ERROR: 'error',
+      IN_PROGRESS: 'in_progress',
+      PENDING: 'pending',
+      SUSPENDED: 'suspended',
+    },
+    fetchConnectorByIndexName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetchIndex lib function', () => {
   const mockClient = {
@@ -105,9 +105,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [], data: 'full index' },
       })
     );
-    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() => Promise.resolve(undefined));
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
@@ -145,9 +143,7 @@ describe('fetchIndex lib function', () => {
 
   it('should throw a 404 error if the index cannot be fonud', async () => {
     mockClient.asCurrentUser.indices.get.mockImplementation(() => Promise.resolve({}));
-    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() => Promise.resolve(undefined));
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve(statsResponse));
 
     await expect(
@@ -160,9 +156,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [] },
       })
     );
-    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() => Promise.resolve(undefined));
     mockClient.asCurrentUser.indices.stats.mockImplementation(() =>
       Promise.resolve({ indices: {} })
     );
@@ -177,9 +171,7 @@ describe('fetchIndex lib function', () => {
         index_name: { aliases: [] },
       })
     );
-    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() =>
-      Promise.resolve(undefined)
-    );
+    (fetchConnectorByIndexName as Mock).mockImplementationOnce(() => Promise.resolve(undefined));
     mockClient.asCurrentUser.indices.stats.mockImplementation(() => Promise.resolve({}));
 
     await expect(

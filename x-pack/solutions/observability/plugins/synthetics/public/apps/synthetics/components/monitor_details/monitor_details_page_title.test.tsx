@@ -14,18 +14,18 @@ import { MonitorDetailsPageTitle } from './monitor_details_page_title';
 import { useSelectedMonitor } from './hooks/use_selected_monitor';
 
 vi.mock('./hooks/use_selected_monitor', () => {
-      const mocked = {
-      useSelectedMonitor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedMonitor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./monitor_selector/monitor_selector', () => {
-      const mocked = {
-      MonitorSelector: () => <div data-test-subj="monitorSelectorStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitorSelector: () => <div data-test-subj="monitorSelectorStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelectedMonitor = useSelectedMonitor as MockedFunction<typeof useSelectedMonitor>;
 

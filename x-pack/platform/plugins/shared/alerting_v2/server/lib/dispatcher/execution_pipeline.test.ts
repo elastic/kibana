@@ -14,11 +14,11 @@ import { EpisodeScan, EpisodeTriage } from './state';
 import type { DispatcherPipelineState } from './types';
 
 vi.mock('./with_dispatcher_span', () => {
-      const mocked = {
-      withDispatcherSpan: (_name: string, cb: () => Promise<unknown>) => cb(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withDispatcherSpan: (_name: string, cb: () => Promise<unknown>) => cb(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DispatcherPipeline', () => {
   describe('execute', () => {

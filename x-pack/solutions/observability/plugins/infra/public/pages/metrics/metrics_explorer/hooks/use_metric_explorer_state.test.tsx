@@ -25,31 +25,31 @@ const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as MockedFunctio
 >;
 
 vi.mock('../../../../hooks/use_kibana_timefilter_time', () => {
-      const mocked = {
-      useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
-      useSyncKibanaTimeFilterTime: () => [() => {}],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaTimefilterTime: (defaults: { from: string; to: string }) => [() => defaults],
+    useSyncKibanaTimeFilterTime: () => [() => {}],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../alerting/use_alert_prefill', () => {
-      const mocked = {
-      useAlertPrefillContext: () => ({
-        metricThresholdPrefill: {
-          setPrefillOptions: vi.fn(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertPrefillContext: () => ({
+      metricThresholdPrefill: {
+        setPrefillOptions: vi.fn(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseMetricsExplorerStateHook = () =>
   renderHook(() => useMetricsExplorerState(), {

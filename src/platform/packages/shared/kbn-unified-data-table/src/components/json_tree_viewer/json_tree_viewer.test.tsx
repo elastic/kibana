@@ -22,12 +22,12 @@ import {
 import { ROOT_ID, getNodeId } from './tree_model';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      copyToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const copyToClipboardMock = vi.mocked(copyToClipboard);
 
 const rowTestId = (path: string) => `jsonTreeViewerRow-${getNodeId(path.split('.'))}`;
@@ -440,10 +440,7 @@ describe('JsonTreeViewer', () => {
 
     it('renders the host actions after the copy button on a leaf row', () => {
       render(
-        <JsonTreeViewer
-          json={{ message: 'hello' }}
-          getLeafActions={twoActions(vi.fn(), vi.fn())}
-        />
+        <JsonTreeViewer json={{ message: 'hello' }} getLeafActions={twoActions(vi.fn(), vi.fn())} />
       );
 
       const actions = within(screen.getByTestId(rowTestId('message')));
@@ -480,10 +477,7 @@ describe('JsonTreeViewer', () => {
 
     it('moves focus across the copy and action buttons with Right/Left arrows, back to the row at the edges', async () => {
       render(
-        <JsonTreeViewer
-          json={{ message: 'hello' }}
-          getLeafActions={twoActions(vi.fn(), vi.fn())}
-        />
+        <JsonTreeViewer json={{ message: 'hello' }} getLeafActions={twoActions(vi.fn(), vi.fn())} />
       );
 
       const row = screen.getByTestId(rowTestId('message'));

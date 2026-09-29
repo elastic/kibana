@@ -26,98 +26,102 @@ import { DOC_VIEWER_FLYOUT_HISTORY_KEY } from '@kbn/unified-doc-viewer';
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
-      const mocked = {
-      useRuleWithFallback: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleWithFallback: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../tools/prevalence/utils/get_columns', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../tools/prevalence/utils/get_columns')),
-      getColumns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../tools/prevalence/utils/get_columns')),
+    getColumns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../tools/correlations', () => {
-      const mocked = {
-      CorrelationsDetails: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CorrelationsDetails: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./correlations_overview', () => {
-      const mocked = {
-      CorrelationsOverview: ({
-        onShowCorrelationsDetails,
-      }: {
-        onShowCorrelationsDetails: () => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="correlationsOverviewMock"
-          onClick={onShowCorrelationsDetails}
-        >
-          {'Show correlations'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CorrelationsOverview: ({
+      onShowCorrelationsDetails,
+    }: {
+      onShowCorrelationsDetails: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="correlationsOverviewMock"
+        onClick={onShowCorrelationsDetails}
+      >
+        {'Show correlations'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./prevalence_overview', () => {
-      const mocked = {
-      PrevalenceOverview: ({ onShowPrevalenceDetails }: { onShowPrevalenceDetails: () => void }) => (
-        <button type="button" data-test-subj="prevalenceOverviewMock" onClick={onShowPrevalenceDetails}>
-          {'Show prevalence'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PrevalenceOverview: ({ onShowPrevalenceDetails }: { onShowPrevalenceDetails: () => void }) => (
+      <button
+        type="button"
+        data-test-subj="prevalenceOverviewMock"
+        onClick={onShowPrevalenceDetails}
+      >
+        {'Show prevalence'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./threat_intelligence_overview', () => {
-      const mocked = {
-      ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ThreatIntelligenceOverview: () => <div data-test-subj="threatIntelligenceOverviewMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./entities_overview', () => {
-      const mocked = {
-      EntitiesOverview: ({ onShowEntitiesDetails }: { onShowEntitiesDetails: () => void }) => (
-        <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
-          {'Show entities'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntitiesOverview: ({ onShowEntitiesDetails }: { onShowEntitiesDetails: () => void }) => (
+      <button type="button" data-test-subj="entitiesOverviewMock" onClick={onShowEntitiesDetails}>
+        {'Show entities'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../tools/entities', () => {
-      const mocked = {
-      EntityDetails: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityDetails: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({
     id: '1',

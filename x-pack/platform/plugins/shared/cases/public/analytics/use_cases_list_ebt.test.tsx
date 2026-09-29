@@ -23,18 +23,18 @@ import type { FilterDimension } from './get_active_filter_dimensions';
 import { useCasesListPageViewEBT, useCasesListViewModeChangedEBT } from './use_cases_list_ebt';
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockServices = (reportEvent: Mock) => ({
   services: {

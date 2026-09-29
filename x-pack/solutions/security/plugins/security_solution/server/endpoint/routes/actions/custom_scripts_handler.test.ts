@@ -18,7 +18,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/se
 import { EndpointAuthorizationError } from '../../errors';
 
 vi.mock('../../services', async () => {
-  const actual = (await vi.importActual('../../services'));
+  const actual = await vi.importActual('../../services');
   return {
     ...actual,
     getResponseActionsClient: vi.fn(),
@@ -66,9 +66,7 @@ describe('custom_scripts_handler', () => {
   });
 
   it('should error if user has no Authz to API', async () => {
-    (
-      (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-    ).mockResolvedValue(
+    ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue(
       getEndpointAuthzInitialStateMock({
         canWriteExecuteOperations: false,
       })

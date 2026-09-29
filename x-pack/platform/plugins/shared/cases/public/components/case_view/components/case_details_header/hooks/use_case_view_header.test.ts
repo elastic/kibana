@@ -30,7 +30,7 @@ vi.mock('../../../use_on_refresh_case_view_page');
 const mockCanExecuteWorkflow = vi.fn(() => false);
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({

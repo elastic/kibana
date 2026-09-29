@@ -15,11 +15,11 @@ import { getFormattedComments } from './ui.helpers';
 import { getCommentsArrayMock } from '@kbn/lists-plugin/common/schemas/types/comment.mock';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Exception helpers', () => {
   beforeEach(() => {

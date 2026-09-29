@@ -42,122 +42,127 @@ vi.mock('react-use/lib/useObservable', () => ({
 }));
 
 vi.mock('../../common/hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: mockNavigateToApp,
-            getUrlForApp: mockGetUrlForApp,
-            navigateToUrl: mockNavigateToUrl,
-          },
-          licensing: {
-            license$: mockLicense$,
-          },
-          telemetry: {
-            reportEvent: mockReportEvent,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: mockGetUrlForApp,
+          navigateToUrl: mockNavigateToUrl,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        licensing: {
+          license$: mockLicense$,
+        },
+        telemetry: {
+          reportEvent: mockReportEvent,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common', () => {
-      const mocked = {
-      useGetIntegrationById: (integrationId: string | undefined) =>
-        mockUseGetIntegrationById(integrationId),
-      useDeleteIntegration: () => ({
-        deleteIntegrationMutation: {
-          mutateAsync: mockDeleteIntegrationMutateAsync,
-          isLoading: false,
+  const mocked = {
+    useGetIntegrationById: (integrationId: string | undefined) =>
+      mockUseGetIntegrationById(integrationId),
+    useDeleteIntegration: () => ({
+      deleteIntegrationMutation: {
+        mutateAsync: mockDeleteIntegrationMutateAsync,
+        isLoading: false,
+      },
+    }),
+    useCreateUpdateIntegration: () => ({
+      createUpdateIntegrationMutation: {
+        mutateAsync: mockCreateUpdateIntegrationMutateAsync,
+        isLoading: false,
+      },
+    }),
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: mockNavigateToApp,
+          getUrlForApp: mockGetUrlForApp,
+          navigateToUrl: mockNavigateToUrl,
         },
-      }),
-      useCreateUpdateIntegration: () => ({
-        createUpdateIntegrationMutation: {
-          mutateAsync: mockCreateUpdateIntegrationMutateAsync,
-          isLoading: false,
+        licensing: {
+          license$: mockLicense$,
         },
-      }),
-      useKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: mockNavigateToApp,
-            getUrlForApp: mockGetUrlForApp,
-            navigateToUrl: mockNavigateToUrl,
-          },
-          licensing: {
-            license$: mockLicense$,
-          },
-          telemetry: {
-            reportEvent: mockReportEvent,
-          },
+        telemetry: {
+          reportEvent: mockReportEvent,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        sessionId: 'test-session-id',
-        reportCancelButtonClicked: mockReportCancelButtonClicked,
-        reportDoneButtonClicked: mockReportDoneButtonClicked,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      sessionId: 'test-session-id',
+      reportCancelButtonClicked: mockReportCancelButtonClicked,
+      reportDoneButtonClicked: mockReportDoneButtonClicked,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./management_contents/management_contents', () => {
-      const mocked = {
-      ManagementContents: () => <div data-test-subj="managementContentsMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ManagementContents: () => <div data-test-subj="managementContentsMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/connector_selector', () => {
-      const mocked = {
-      ConnectorSelector: () => <div data-test-subj="connectorSelectorMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorSelector: () => <div data-test-subj="connectorSelectorMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./forms/integration_form', () => {
-      const mocked = {
-      IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      useIntegrationForm: () => ({ formData: {}, form: {}, submit: mockSubmit, isFormModified: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IntegrationFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    useIntegrationForm: () => ({
+      formData: {},
+      form: {},
+      submit: mockSubmit,
+      isFormModified: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/button_footer', () => {
-      const mocked = {
-      ButtonsFooter: ({
-        onAction,
-        onCancel,
-        isActionDisabled,
-      }: {
-        onAction: () => void;
-        onCancel: () => void;
-        isActionDisabled?: boolean;
-      }) => (
-        <div>
-          <button
-            type="button"
-            data-test-subj="doneButton"
-            onClick={onAction}
-            disabled={Boolean(isActionDisabled)}
-          >
-            {'Done'}
-          </button>
-          <button type="button" data-test-subj="cancelButton" onClick={onCancel}>
-            {'Cancel'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ButtonsFooter: ({
+      onAction,
+      onCancel,
+      isActionDisabled,
+    }: {
+      onAction: () => void;
+      onCancel: () => void;
+      isActionDisabled?: boolean;
+    }) => (
+      <div>
+        <button
+          type="button"
+          data-test-subj="doneButton"
+          onClick={onAction}
+          disabled={Boolean(isActionDisabled)}
+        >
+          {'Done'}
+        </button>
+        <button type="button" data-test-subj="cancelButton" onClick={onCancel}>
+          {'Cancel'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = (path = '/create') =>
   render(

@@ -1017,9 +1017,7 @@ describe('metric visualization', () => {
             "type": "function",
           }
         `);
-        (
-          datasourceLayers.first as Mocked<DatasourcePublicAPI>
-        ).getOperationForColumnId.mockClear();
+        (datasourceLayers.first as Mocked<DatasourcePublicAPI>).getOperationForColumnId.mockClear();
       });
 
       it('builds breakdown by metric without collapse function if metric is not numeric', () => {

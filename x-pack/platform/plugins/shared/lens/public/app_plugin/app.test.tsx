@@ -48,43 +48,43 @@ import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
 import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 vi.mock('lodash', () => {
-      const mocked = {
-      ...require('lodash'),
-      debounce: (fn: unknown) => fn,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('lodash'),
+    debounce: (fn: unknown) => fn,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Force wide breakpoints so the AppHeader app menu renders its items inline
 // instead of collapsing them into the overflow popover (jsdom defaults smaller).
 vi.mock('@kbn/ui-chrome-layout', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ui-chrome-layout')),
-      useCurrentChromeApplicationBreakpoint: () => 'xl',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/ui-chrome-layout')),
+    useCurrentChromeApplicationBreakpoint: () => 'xl',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useCurrentEuiBreakpoint: () => 'xl',
-      useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useCurrentEuiBreakpoint: () => 'xl',
+    useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // AppMenu only registers with chrome and returns null.
 // Render AppHeader inline in unit tests so menu item test subjects remain assertable.
 vi.mock('@kbn/core-chrome-app-menu', () => {
-      const mocked = {
-      AppMenu: async ({ config }: { config?: unknown }) => {
-        const { AppHeader } = (await vi.importActual('@kbn/app-header'));
-        return <AppHeader title="lens" menu={config} />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AppMenu: async ({ config }: { config?: unknown }) => {
+      const { AppHeader } = await vi.importActual('@kbn/app-header');
+      return <AppHeader title="lens" menu={config} />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultSavedObjectId: string = faker.string.uuid();
 
@@ -1032,9 +1032,7 @@ describe('Lens App', () => {
       });
 
       it('handles save failure by showing a warning, but still allows another save', async () => {
-        services.attributeService.saveToLibrary = vi
-          .fn()
-          .mockRejectedValue({ message: 'failed' });
+        services.attributeService.saveToLibrary = vi.fn().mockRejectedValue({ message: 'failed' });
 
         props.incomingState = {
           originatingApp: 'dashboards',
@@ -1264,8 +1262,7 @@ describe('Lens App', () => {
         }),
       });
 
-      const AggregateQuerySearchBar = services.unifiedSearch.ui
-        .AggregateQuerySearchBar as Mock;
+      const AggregateQuerySearchBar = services.unifiedSearch.ui.AggregateQuerySearchBar as Mock;
       const onQuerySubmit = AggregateQuerySearchBar.mock.calls[0][0].onQuerySubmit;
       act(() =>
         onQuerySubmit({
@@ -1320,8 +1317,8 @@ describe('Lens App', () => {
         {}
       );
 
-      const onSaved = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock).mock
-        .calls[0][0].onSaved;
+      const onSaved = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock).mock.calls[0][0]
+        .onSaved;
       act(() => {
         onSaved({
           id: '1',
@@ -1394,9 +1391,8 @@ describe('Lens App', () => {
 
     it('updates the query if saved query is selected', async () => {
       await renderApp();
-      const { onSavedQueryUpdated } = (
-        services.unifiedSearch.ui.AggregateQuerySearchBar as Mock
-      ).mock.calls[0][0];
+      const { onSavedQueryUpdated } = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock)
+        .mock.calls[0][0];
       act(() => {
         onSavedQueryUpdated({
           id: '2',
@@ -1506,8 +1502,8 @@ describe('Lens App', () => {
 
     it('dispatches update to searchSessionId and dateRange when the user hits refresh', async () => {
       const { lensStore } = await renderApp();
-      const { onQuerySubmit } = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock)
-        .mock.calls[0][0];
+      const { onQuerySubmit } = (services.unifiedSearch.ui.AggregateQuerySearchBar as Mock).mock
+        .calls[0][0];
       act(() =>
         onQuerySubmit({
           dateRange: { from: 'now-7d', to: 'now' },

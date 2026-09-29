@@ -44,30 +44,30 @@ const mockedCheckOtlpOutputAllowed = checkOtlpOutputAllowed as MockedFunction<
 >;
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getExperimentalFeatures: vi.fn().mockReturnValue({
-          useSpaceAwareness: false,
-          enableOtlpOutput: true,
-        }),
-        getInternalUserSOClient: vi.fn(),
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-        getLogger: () =>
-          new Proxy(
-            {},
-            {
-              get() {
-                return vi.fn();
-              },
-            }
-          ),
-        getTaskManagerStart: vi.fn(),
-        getCloud: vi.fn().mockReturnValue(null),
-        getConfig: vi.fn().mockReturnValue({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getExperimentalFeatures: vi.fn().mockReturnValue({
+        useSpaceAwareness: false,
+        enableOtlpOutput: true,
+      }),
+      getInternalUserSOClient: vi.fn(),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+      getLogger: () =>
+        new Proxy(
+          {},
+          {
+            get() {
+              return vi.fn();
+            },
+          }
+        ),
+      getTaskManagerStart: vi.fn(),
+      getCloud: vi.fn().mockReturnValue(null),
+      getConfig: vi.fn().mockReturnValue({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const spyAgentPolicyServicBumpAllAgentPoliciesForOutput = vi.spyOn(
   agentPolicy.agentPolicyService,
@@ -82,9 +82,9 @@ describe('Outputs preconfiguration', () => {
     logstashSecretHash = await hashSecret('secretKey');
     otlpKeyPemHash = await hashSecret('secretKeyPem');
     const internalSoClientWithoutSpaceExtension = savedObjectsClientMock.create();
-    vi
-      .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
-      .mockReturnValue(internalSoClientWithoutSpaceExtension);
+    vi.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension).mockReturnValue(
+      internalSoClientWithoutSpaceExtension
+    );
     internalSoClientWithoutSpaceExtension.find.mockResolvedValue({
       saved_objects: [],
       page: 0,

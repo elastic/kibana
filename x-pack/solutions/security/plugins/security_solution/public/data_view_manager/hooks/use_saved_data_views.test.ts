@@ -15,11 +15,11 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../common/constants';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useSavedDataViews', () => {
   beforeEach(() => {

@@ -21,14 +21,12 @@ const mockUseGetCurrentUserProfile = useGetCurrentUserProfile as MockedFunction<
 >;
 
 vi.mock('./migration_name_input', () => {
-      const mocked = {
-      MigrationNameInput: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-let MockMigrationNameInputComp = MigrationNameInput as unknown as Mock<
-  typeof MigrationNameInput
->;
+  const mocked = {
+    MigrationNameInput: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+let MockMigrationNameInputComp = MigrationNameInput as unknown as Mock<typeof MigrationNameInput>;
 
 const mockUser = {
   user: {

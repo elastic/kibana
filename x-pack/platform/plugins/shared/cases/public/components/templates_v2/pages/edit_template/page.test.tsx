@@ -18,60 +18,60 @@ import { CASES_TEMPLATE_UPDATED_EVENT_TYPE } from '../../../../../common/constan
 const mockUseTemplateViewParams = vi.fn();
 const mockNavigateToCasesTemplates = vi.fn();
 vi.mock('../../../../common/navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/navigation')),
-      useTemplateViewParams: () => mockUseTemplateViewParams(),
-      useCasesTemplatesNavigation: () => ({
-        navigateToCasesTemplates: mockNavigateToCasesTemplates,
-        getCasesTemplatesUrl: vi.fn().mockReturnValue('/app/security/cases/configure/templates'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/navigation')),
+    useTemplateViewParams: () => mockUseTemplateViewParams(),
+    useCasesTemplatesNavigation: () => ({
+      navigateToCasesTemplates: mockNavigateToCasesTemplates,
+      getCasesTemplatesUrl: vi.fn().mockReturnValue('/app/security/cases/configure/templates'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMutateAsync = vi.fn();
 const mockUseGetTemplate = vi.fn();
 vi.mock('../../hooks/use_get_template', () => {
-      const mocked = {
-      useGetTemplate: () => mockUseGetTemplate(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplate: () => mockUseGetTemplate(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_update_template', () => {
-      const mocked = {
-      useUpdateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/template_form', () => {
-      const mocked = {
-      TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/template_preview', () => {
-      const mocked = {
-      TemplatePreview: () => <div data-test-subj="template-preview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplatePreview: () => <div data-test-subj="template-preview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/use_cases_local_storage', () => {
-      const mocked = {
-      useCasesLocalStorage: () => ['', vi.fn(), vi.fn()],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesLocalStorage: () => ['', vi.fn(), vi.fn()],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../use_breadcrumbs', () => {
-      const mocked = {
-      useCasesTemplatesBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesTemplatesBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const capturedTemplateFormLayoutProps: {
   onCreate?: (
@@ -82,22 +82,22 @@ const capturedTemplateFormLayoutProps: {
 } = {};
 const mockTemplateFormLayout = vi.fn();
 vi.mock('../../components/template_form_layout', () => {
-      const mocked = {
-      TemplateFormLayout: (props: {
-        title: string;
-        isLoading?: boolean;
-        onCreate: (
-          data: { definition: string },
-          metadata: { name: string; description: string; tags: string[] },
-          isEnabled: boolean
-        ) => Promise<void>;
-      }) => {
-        capturedTemplateFormLayoutProps.onCreate = props.onCreate;
-        return mockTemplateFormLayout(props);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateFormLayout: (props: {
+      title: string;
+      isLoading?: boolean;
+      onCreate: (
+        data: { definition: string },
+        metadata: { name: string; description: string; tags: string[] },
+        isEnabled: boolean
+      ) => Promise<void>;
+    }) => {
+      capturedTemplateFormLayoutProps.onCreate = props.onCreate;
+      return mockTemplateFormLayout(props);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EditTemplatePage', () => {
   let coreStart: CoreStart;

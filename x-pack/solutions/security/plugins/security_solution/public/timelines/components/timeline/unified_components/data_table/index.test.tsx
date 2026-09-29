@@ -32,22 +32,22 @@ import { PageScope } from '../../../../../data_view_manager/constants';
 import { SECURITY_CELL_ACTIONS_DETAILS_FLYOUT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../flyout_v2/use_flyout_api');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(() => ({
-        pathname: '',
-        search: '',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(() => ({
+      pathname: '',
+      search: '',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onFieldEditedMock = vi.fn();
 const refetchMock = vi.fn();
@@ -64,19 +64,19 @@ const updateSampleSizeSpy = vi.spyOn(timelineActions, 'updateSampleSize');
 
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../../../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../flyout_v2/document/main/document_flyout_wrapper', () => {
-      const mocked = {
-      DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentFlyoutWrapper: (props: unknown) => mockDocumentFlyoutWrapper(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../../common/lib/kibana');
 
   return {
     ...original,

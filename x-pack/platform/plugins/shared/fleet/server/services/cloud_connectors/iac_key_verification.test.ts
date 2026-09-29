@@ -38,25 +38,25 @@ import { getIacKeyOutcome, verifyCloudConnectorIacKey } from './iac_key_verifica
 
 vi.mock('../app_context');
 vi.mock('../iac_provisioner', () => {
-      const mocked = { iacProvisionerService: { renderTemplate: vi.fn() } };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { iacProvisionerService: { renderTemplate: vi.fn() } };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../iac_provisioner_integrations', async () => {
-      const mocked = {
-      ...(await vi.importActual('../iac_provisioner_integrations')),
-      buildIacProvisionerIntegrations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../iac_provisioner_integrations')),
+    buildIacProvisionerIntegrations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/iac_provisioner');
 vi.mock('../telemetry/iac_provisioner_telemetry');
 vi.mock('./iac_integrations', async () => {
-      const mocked = {
-      ...(await vi.importActual('./iac_integrations')),
-      getCloudConnectorIntegrationSelections: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./iac_integrations')),
+    getCloudConnectorIntegrationSelections: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedRender = vi.mocked(iacProvisionerService.renderTemplate);
 const mockedSupported = vi.mocked(isIacProvisionerSupportedFor);

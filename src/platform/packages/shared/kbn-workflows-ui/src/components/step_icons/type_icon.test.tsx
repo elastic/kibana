@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type {
   PublicStepDefinition,
@@ -23,11 +22,11 @@ import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 import { useWorkflowsUiServices } from '../../context/workflows_ui_services';
 
 vi.mock('@kbn/connector-specs/icons', () => {
-      const mocked = {
-      ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../context/workflows_ui_services');
 
 const mockUseWorkflowsUiServices = vi.mocked(useWorkflowsUiServices);
@@ -63,9 +62,9 @@ describe('TypeIcon', () => {
 
     it('resolves a custom trigger icon from the workflows extensions registry', () => {
       const services = createMockWorkflowsUiServices();
-      vi
-        .mocked(services.workflowsExtensions.getTriggerDefinition)
-        .mockReturnValue({ icon: 'cloudSunny' } as unknown as PublicTriggerDefinition);
+      vi.mocked(services.workflowsExtensions.getTriggerDefinition).mockReturnValue({
+        icon: 'cloudSunny',
+      } as unknown as PublicTriggerDefinition);
       mockUseWorkflowsUiServices.mockReturnValue(services);
 
       const { container } = render(<TypeIcon type="custom-trigger" kind="trigger" />);

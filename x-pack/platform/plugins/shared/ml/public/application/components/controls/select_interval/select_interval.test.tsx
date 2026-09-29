@@ -19,14 +19,14 @@ import { SelectInterval } from './select_interval';
 const mockUpdateCallback = vi.fn();
 const mockUseState = vi.fn().mockImplementation(useState);
 vi.mock('@kbn/ml-url-state', () => {
-      const mocked = {
-      usePageUrlState: () => {
-        const [interval, setInterval] = mockUseState({ display: 'Auto', val: 'auto' });
-        return [interval, mockUpdateCallback.mockImplementation((d) => setInterval(d))];
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePageUrlState: () => {
+      const [interval, setInterval] = mockUseState({ display: 'Auto', val: 'auto' });
+      return [interval, mockUpdateCallback.mockImplementation((d) => setInterval(d))];
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SelectInterval', () => {
   afterEach(() => {

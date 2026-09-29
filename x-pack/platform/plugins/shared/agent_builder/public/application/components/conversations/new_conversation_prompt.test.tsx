@@ -15,33 +15,33 @@ import { useConversationContext } from '../../context/conversation/conversation_
 import { useKibana } from '../../hooks/use_kibana';
 
 vi.mock('../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./conversation_input/conversation_input', () => {
-      const mocked = {
-      ConversationInput: () => <div data-test-subj="mockConversationInput" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConversationInput: () => <div data-test-subj="mockConversationInput" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_typewriter_loop', () => {
-      const mocked = {
-      useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
-        enabled && messages.length > 0 ? messages[0] : '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTypewriterLoop: ({ messages, enabled }: { messages: readonly string[]; enabled: boolean }) =>
+      enabled && messages.length > 0 ? messages[0] : '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseConversationContext = vi.mocked(useConversationContext);
 const mockedUseKibana = vi.mocked(useKibana);

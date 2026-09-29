@@ -16,7 +16,7 @@ import { getConnectorSpecAsJsonSchema } from './get_connector_spec';
 // All connector specs in kbn-connector-specs have test.enabled = true, so we inject a
 // synthetic non-testable spec to cover the isTestable: false branch.
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorsSpecs: {

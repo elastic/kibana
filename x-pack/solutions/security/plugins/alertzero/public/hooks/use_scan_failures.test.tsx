@@ -15,9 +15,9 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SCAN_FAILURES_POLL_INTERVAL_MS, useScanFailures } from './use_scan_failures';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 

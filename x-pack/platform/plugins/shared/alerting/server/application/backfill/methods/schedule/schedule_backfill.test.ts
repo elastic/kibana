@@ -130,14 +130,12 @@ const mockBulkQueueResult = [
 const mockCreatePointInTimeFinderAsInternalUser = (
   response = { saved_objects: [existingDecryptedRule1, existingDecryptedRule2] }
 ) => {
-  encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi
-    .fn()
-    .mockResolvedValue({
-      close: vi.fn(),
-      find: function* asyncGenerator() {
-        yield response;
-      },
-    });
+  encryptedSavedObjects.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockResolvedValue({
+    close: vi.fn(),
+    find: function* asyncGenerator() {
+      yield response;
+    },
+  });
 };
 
 function getMockData(overwrites: Record<string, unknown> = {}): ScheduleBackfillParam {

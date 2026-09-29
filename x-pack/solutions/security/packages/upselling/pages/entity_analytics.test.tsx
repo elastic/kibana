@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import { EntityAnalyticsUpsellingPage } from './entity_analytics';
 
 vi.mock('@kbn/security-solution-navigation', async () => {
-  const original = (await vi.importActual('@kbn/security-solution-navigation'));
+  const original = await vi.importActual('@kbn/security-solution-navigation');
   return {
     ...original,
     useNavigation: () => ({

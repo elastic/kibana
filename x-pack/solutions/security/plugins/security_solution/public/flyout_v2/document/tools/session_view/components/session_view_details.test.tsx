@@ -22,7 +22,7 @@ import { createFlyoutApiMock } from '../../../../use_flyout_api.mock';
 let lastOnJumpToEvent: ((event: ProcessEvent) => void) | undefined;
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiTabbedContent: ({ tabs }: { tabs: Array<{ content: React.ReactNode }> }) => (
@@ -37,26 +37,26 @@ vi.mock('@elastic/eui', async () => {
 
 vi.mock('../../../../use_flyout_api');
 vi.mock('./process_tab', () => {
-      const mocked = {
-      ProcessTab: () => <div data-test-subj="processTabMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ProcessTab: () => <div data-test-subj="processTabMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./metadata_tab', () => {
-      const mocked = {
-      MetadataTab: () => <div data-test-subj="metadataTabMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetadataTab: () => <div data-test-subj="metadataTabMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./alerts_tab', () => {
-      const mocked = {
-      AlertsTab: (props: { onJumpToEvent: (event: ProcessEvent) => void }) => {
-        lastOnJumpToEvent = props.onJumpToEvent;
-        return <div data-test-subj="alertsTabMock" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTab: (props: { onJumpToEvent: (event: ProcessEvent) => void }) => {
+      lastOnJumpToEvent = props.onJumpToEvent;
+      return <div data-test-subj="alertsTabMock" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SessionViewDetails', () => {
   const mockUseFlyoutApi = vi.mocked(useFlyoutApi);

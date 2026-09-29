@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { TypeRegistry } from '@kbn/alerts-ui-shared/lib';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
@@ -25,14 +24,14 @@ import { TestWrapper } from '../../../shared/test_utils/test_wrapper';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../constants';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflows: vi.fn(),
@@ -41,50 +40,50 @@ vi.mock('@kbn/workflows-ui', async () => {
 });
 
 vi.mock('./use_event_driven_execution_status', () => {
-      const mocked = {
-      useEventDrivenExecutionStatus: () => ({
-        eventDrivenExecutionEnabled: true,
-        isLoading: false,
-        error: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEventDrivenExecutionStatus: () => ({
+      eventDrivenExecutionEnabled: true,
+      isLoading: false,
+      error: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_export_with_references', () => {
-      const mocked = {
-      useExportWithReferences: () => ({
-        exportModalState: null,
-        startExport: vi.fn(),
-        handleIgnore: vi.fn(),
-        handleAddDirect: vi.fn(),
-        handleAddAll: vi.fn(),
-        handleCancel: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportWithReferences: () => ({
+      exportModalState: null,
+      startExport: vi.fn(),
+      handleIgnore: vi.fn(),
+      handleAddDirect: vi.fn(),
+      handleAddAll: vi.fn(),
+      handleCancel: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportWorkflowListViewed: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportWorkflowListViewed: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
-      const mocked = {
-      useWorkflowActions: () => ({
-        deleteWorkflows: { mutate: vi.fn() },
-        runWorkflow: { mutate: vi.fn() },
-        cloneWorkflow: { mutate: vi.fn() },
-        updateWorkflow: { mutate: vi.fn() },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowActions: () => ({
+      deleteWorkflows: { mutate: vi.fn() },
+      runWorkflow: { mutate: vi.fn() },
+      cloneWorkflow: { mutate: vi.fn() },
+      updateWorkflow: { mutate: vi.fn() },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseWorkflows = useWorkflows as MockedFunction<typeof useWorkflows>;

@@ -15,59 +15,59 @@ import { useGetUrlParams } from '../../../hooks';
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => ({ monitorId: 'config-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => ({ monitorId: 'config-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: () => ({ space: { id: 'default' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: () => ({ space: { id: 'default' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0, refreshInterval: 60 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0, refreshInterval: 60 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state', () => {
-      const mocked = {
-      getMonitorAction: { get: vi.fn((payload) => ({ type: 'MONITOR_GET', payload })) },
-      selectEncryptedSyntheticsSavedMonitors: vi.fn(),
-      selectMonitorListState: vi.fn(),
-      selectorMonitorDetailsState: vi.fn(),
-      selectSyntheticsMonitorError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMonitorAction: { get: vi.fn((payload) => ({ type: 'MONITOR_GET', payload })) },
+    selectEncryptedSyntheticsSavedMonitors: vi.fn(),
+    selectMonitorListState: vi.fn(),
+    selectorMonitorDetailsState: vi.fn(),
+    selectSyntheticsMonitorError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_external_monitor', () => {
-      const mocked = {
-      useExternalMonitor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExternalMonitor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useSelector } from 'react-redux-v7';
 import {

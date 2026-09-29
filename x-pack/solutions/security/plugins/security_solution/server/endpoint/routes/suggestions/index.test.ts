@@ -62,18 +62,16 @@ vi.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
 });
 
 vi.mock('../../../../common/endpoint/utils/index_name_utilities', () => {
-      const mocked = {
-      buildIndexNameWithNamespace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildIndexNameWithNamespace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const termsEnumSuggestionsMock = termsEnumSuggestions as MockedFunction<
   typeof termsEnumSuggestions
 >;
-const termsAggSuggestionsMock = termsAggSuggestions as MockedFunction<
-  typeof termsAggSuggestions
->;
+const termsAggSuggestionsMock = termsAggSuggestions as MockedFunction<typeof termsAggSuggestions>;
 const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as MockedFunction<
   typeof buildIndexNameWithNamespace
 >;
@@ -98,15 +96,11 @@ describe('when calling the Suggestions route handler', () => {
 
   beforeEach(() => {
     mockEndpointContext = createMockEndpointAppContext();
-    (mockEndpointContext.service.getEndpointMetadataService as Mock) = vi
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
-      });
+    (mockEndpointContext.service.getEndpointMetadataService as Mock) = vi.fn().mockReturnValue({
+      findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
+    });
     mockScopedEsClient = elasticsearchServiceMock.createScopedClusterClient();
-    (
-      mockScopedEsClient.asInternalUser.cluster.remoteInfo as unknown as Mock
-    ).mockResolvedValue({});
+    (mockScopedEsClient.asInternalUser.cluster.remoteInfo as unknown as Mock).mockResolvedValue({});
     mockSavedObjectClient = savedObjectsClientMock.create();
     mockResponse = httpServerMock.createResponseFactory();
 

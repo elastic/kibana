@@ -22,28 +22,28 @@ import {
 } from '../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('../../../../common/containers/use_search_strategy', () => {
-      const mocked = {
-      useSearchStrategy: vi.fn().mockReturnValue({
-        loading: false,
-        result: {
-          edges: [],
-          pageInfo: {
-            activePage: 0,
-            fakeTotalCount: 0,
-            showMorePagesIndicator: false,
-          },
-          totalCount: -1,
+  const mocked = {
+    useSearchStrategy: vi.fn().mockReturnValue({
+      loading: false,
+      result: {
+        edges: [],
+        pageInfo: {
+          activePage: 0,
+          fakeTotalCount: 0,
+          showMorePagesIndicator: false,
         },
-        search: vi.fn(),
-        refetch: vi.fn(),
-        inspect: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        totalCount: -1,
+      },
+      search: vi.fn(),
+      refetch: vi.fn(),
+      inspect: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -62,22 +62,22 @@ vi.mock('react-router-dom', () => {
   };
 });
 vi.mock('../../containers/details', () => {
-      const mocked = {
-      useNetworkDetails: vi.fn().mockReturnValue([true, { networkDetails: {} }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNetworkDetails: vi.fn().mockReturnValue([true, { networkDetails: {} }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({
-        from: '2020-07-07T08:20:18.966Z',
-        isInitializing: false,
-        to: '2020-07-08T08:20:18.966Z',
-        setQuery: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({
+      from: '2020-07-07T08:20:18.966Z',
+      isInitializing: false,
+      to: '2020-07-08T08:20:18.966Z',
+      setQuery: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useAddToTimeline = () => ({
   beginDrag: vi.fn(),
@@ -89,7 +89,7 @@ const useAddToTimeline = () => ({
 });
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...original,
     useNavigation: () => ({
@@ -109,17 +109,17 @@ vi.mock('../../../../common/lib/kibana', async () => {
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 vi.mock('../../../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/empty_prompt');
 
 const getMockHistory = (ip: string) => ({

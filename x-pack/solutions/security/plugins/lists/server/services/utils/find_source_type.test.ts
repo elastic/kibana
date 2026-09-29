@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import type { Type } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getSearchEsListItemMock } from '../../schemas/elastic_response/search_es_list_item_schema.mock';

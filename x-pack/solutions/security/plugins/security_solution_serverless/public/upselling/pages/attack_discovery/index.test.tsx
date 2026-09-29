@@ -13,19 +13,19 @@ import React from 'react';
 import * as i18n from './translations';
 
 vi.mock('../../../common/services', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          http: {
-            basePath: {
-              get: () => 'some-base-path',
-            },
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        http: {
+          basePath: {
+            get: () => 'some-base-path',
           },
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { AttackDiscoveryUpsellingPageServerless } from '.';
 

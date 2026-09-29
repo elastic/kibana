@@ -13,13 +13,13 @@ import { buildCanonicalQueryString, parseAwsHost, signRequest } from './aws_cred
 import { calculateAWSA4Signature, sha256Hash } from './aws_crypto_helpers';
 
 vi.mock('./aws_crypto_helpers', () => {
-      const mocked = {
-      sha256Hash: vi.fn(),
-      hmacSha256: vi.fn(),
-      calculateAWSA4Signature: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sha256Hash: vi.fn(),
+    hmacSha256: vi.fn(),
+    calculateAWSA4Signature: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSha256Hash = vi.mocked(sha256Hash);
 const mockCalculateAWSA4Signature = vi.mocked(calculateAWSA4Signature);

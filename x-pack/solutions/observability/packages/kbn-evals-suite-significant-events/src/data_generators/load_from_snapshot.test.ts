@@ -17,12 +17,12 @@ const mockCreateGcsRepository = vi.fn(() => ({ mocked: true }));
 const mockRestoreSnapshot = vi.fn();
 
 vi.mock('@kbn/es-snapshot-loader', () => {
-      const mocked = {
-      createGcsRepository: mockCreateGcsRepository,
-      restoreSnapshot: mockRestoreSnapshot,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createGcsRepository: mockCreateGcsRepository,
+    restoreSnapshot: mockRestoreSnapshot,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('load_from_snapshot: loadKIFeaturesFromSnapshot', () => {
   interface EsClientMock {

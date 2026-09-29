@@ -16,31 +16,31 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { useConversationList } from '../../../hooks/use_conversation_list';
 
 vi.mock('../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: vi.fn(() => ({
-        conversationTemplatesService: { getTemplateUIDefinition: vi.fn() },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: vi.fn(() => ({
+      conversationTemplatesService: { getTemplateUIDefinition: vi.fn() },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_conversation_list', () => {
-      const mocked = {
-      useConversationList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // EUI useEuiTheme requires a theme provider; stub it out.
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({ euiTheme: actual.euiTheme ?? {} }),
@@ -48,12 +48,12 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../conversation_list_item_styles', () => {
-      const mocked = {
-      createConversationListItemStyles: () => ({}),
-      createActiveConversationListItemStyles: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createConversationListItemStyles: () => ({}),
+    createActiveConversationListItemStyles: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationContext = vi.mocked(useConversationContext);
 const mockUseConversationList = vi.mocked(useConversationList);

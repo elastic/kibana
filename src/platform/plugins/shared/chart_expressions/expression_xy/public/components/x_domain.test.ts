@@ -18,16 +18,14 @@ import { getXDomain } from './x_domain';
 const ADJUSTED_INTERVAL = 1618; // arbitrary value returned by the getAdjustedInterval mock
 
 vi.mock('@kbn/charts-plugin/public', () => {
-      const mocked = {
-      Endzones: () => null,
-      getAdjustedInterval: vi.fn(() => ADJUSTED_INTERVAL),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Endzones: () => null,
+    getAdjustedInterval: vi.fn(() => ADJUSTED_INTERVAL),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const getAdjustedIntervalMock = getAdjustedInterval as MockedFunction<
-  typeof getAdjustedInterval
->;
+const getAdjustedIntervalMock = getAdjustedInterval as MockedFunction<typeof getAdjustedInterval>;
 
 beforeEach(() => {
   getAdjustedIntervalMock.mockClear();

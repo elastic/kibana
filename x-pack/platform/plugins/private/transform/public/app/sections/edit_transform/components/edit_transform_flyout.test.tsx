@@ -18,70 +18,70 @@ import { getTransformConfigMock } from '../state_management/__mocks__/transform_
 import { EditTransformFlyout } from './edit_transform_flyout';
 
 vi.mock('../state_management/edit_transform_flyout_state', () => {
-      const mocked = {
-      EditTransformFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTransformFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_transform_flyout_form', () => {
-      const mocked = {
-      EditTransformFlyoutForm: ({
-        onOpenProjectScope,
-      }: {
-        onOpenProjectScope: (projects: { originProject: null; linkedProjects: [] }) => void;
-      }) => (
-        <button
-          data-test-subj="openProjectScopeButton"
-          onClick={() => onOpenProjectScope({ originProject: null, linkedProjects: [] })}
-        >
-          Open project scope
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTransformFlyoutForm: ({
+      onOpenProjectScope,
+    }: {
+      onOpenProjectScope: (projects: { originProject: null; linkedProjects: [] }) => void;
+    }) => (
+      <button
+        data-test-subj="openProjectScopeButton"
+        onClick={() => onOpenProjectScope({ originProject: null, linkedProjects: [] })}
+      >
+        Open project scope
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_transform_project_scope_flyout', () => {
-      const mocked = {
-      EditTransformProjectScopeFlyout: () => (
-        <div data-test-subj="transformEditProjectScopeFlyout">Project scope flyout</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTransformProjectScopeFlyout: () => (
+      <div data-test-subj="transformEditProjectScopeFlyout">Project scope flyout</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_transform_api_error_callout', () => {
-      const mocked = {
-      EditTransformApiErrorCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTransformApiErrorCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_transform_flyout_callout', () => {
-      const mocked = {
-      EditTransformFlyoutCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTransformFlyoutCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_transform_update_button', () => {
-      const mocked = {
-      EditTransformUpdateButton: () => (
-        <button data-test-subj="editTransformUpdateButton">Update</button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditTransformUpdateButton: () => (
+      <button data-test-subj="editTransformUpdateButton">Update</button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../transform_management/components/managed_transforms_callout/managed_transforms_callout',
   () => {
-      const mocked = {
-        ManagedTransformsWarningCallout: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      ManagedTransformsWarningCallout: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('EditTransformFlyout', () => {

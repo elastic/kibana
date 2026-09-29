@@ -24,22 +24,22 @@ import {
 } from '../hooks/use_metric_source_kind';
 
 vi.mock('../../../common/utils', () => {
-      const mocked = {
-      getUnitLabel: vi.fn(({ unit }) => {
-        const unitLabels: Record<string, string | undefined> = {
-          ms: 'Milliseconds',
-          bytes: 'Bytes',
-          percent: 'Percent',
-          count: undefined,
-        };
-        return unit ? unitLabels[unit] || unit : undefined;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnitLabel: vi.fn(({ unit }) => {
+      const unitLabels: Record<string, string | undefined> = {
+        ms: 'Milliseconds',
+        bytes: 'Bytes',
+        percent: 'Percent',
+        count: undefined,
+      };
+      return unit ? unitLabels[unit] || unit : undefined;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_metric_source_kind', async () => {
-  const actual = (await vi.importActual('../hooks/use_metric_source_kind'));
+  const actual = await vi.importActual('../hooks/use_metric_source_kind');
   return {
     ...actual,
     useMetricSourceKind: vi.fn(),

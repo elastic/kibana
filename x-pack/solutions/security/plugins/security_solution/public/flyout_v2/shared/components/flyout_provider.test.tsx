@@ -24,32 +24,32 @@ import { InputsModelId } from '../../../common/store/inputs/constants';
 import { flyoutProviders } from './flyout_provider';
 
 vi.mock('../../../common/components/user_privileges/user_privileges_context', () => {
-      const mocked = {
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/discover_in_timeline/provider', () => {
-      const mocked = {
-      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../assistant/provider', () => {
-      const mocked = {
-      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../cases/components/provider/provider', () => {
-      const mocked = {
-      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = {
   uiActions: {

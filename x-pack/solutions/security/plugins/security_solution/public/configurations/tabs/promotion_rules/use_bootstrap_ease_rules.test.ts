@@ -25,20 +25,19 @@ vi.mock(
 
 // useIsMutating is used by useIsBootstrappingEaseRules
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useIsMutating: vi.fn().mockReturnValue(0),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useIsMutating: vi.fn().mockReturnValue(0),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddError = vi.fn();
 const mockMutate = vi.fn();
 
-const useSecuritySolutionInitializationMock =
-  useSecuritySolutionInitialization as MockedFunction<
-    typeof useSecuritySolutionInitialization
-  >;
+const useSecuritySolutionInitializationMock = useSecuritySolutionInitialization as MockedFunction<
+  typeof useSecuritySolutionInitialization
+>;
 const useUserPrivilegesMock = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;
 const useBootstrapEaseRulesMutationMock = useBootstrapEaseRulesMutation as MockedFunction<
   typeof useBootstrapEaseRulesMutation
@@ -151,7 +150,7 @@ describe('useBootstrapEaseRules', () => {
 
 describe('useIsBootstrappingEaseRules', () => {
   it('returns false when no mutation is in flight', async () => {
-    const { useIsMutating } = (await vi.importMock('@kbn/react-query'));
+    const { useIsMutating } = await vi.importMock('@kbn/react-query');
     useIsMutating.mockReturnValue(0);
 
     const { result } = renderHook(() => useIsBootstrappingEaseRules());
@@ -160,7 +159,7 @@ describe('useIsBootstrappingEaseRules', () => {
   });
 
   it('returns true when a mutation is in flight', async () => {
-    const { useIsMutating } = (await vi.importMock('@kbn/react-query'));
+    const { useIsMutating } = await vi.importMock('@kbn/react-query');
     useIsMutating.mockReturnValue(1);
 
     const { result } = renderHook(() => useIsBootstrappingEaseRules());

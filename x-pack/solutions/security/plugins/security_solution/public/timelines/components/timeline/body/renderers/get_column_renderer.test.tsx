@@ -26,7 +26,7 @@ import { defaultUdtHeaders } from '../column_headers/default_headers';
 vi.mock('../../../../../common/lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

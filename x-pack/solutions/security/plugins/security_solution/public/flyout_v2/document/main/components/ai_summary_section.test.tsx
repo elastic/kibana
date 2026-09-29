@@ -21,27 +21,27 @@ const MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID = 'document-summary-section-stu
 const mockDocumentSummarySection = vi.fn();
 
 vi.mock('./document_summary_section', () => {
-      const mocked = {
-      DocumentSummarySection: (props: Record<string, unknown>) => {
-        mockDocumentSummarySection(props);
-        return (
-          <div
-            data-test-subj={
-              (props['data-test-subj'] as string) ?? MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID
-            }
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentSummarySection: (props: Record<string, unknown>) => {
+      mockDocumentSummarySection(props);
+      return (
+        <div
+          data-test-subj={
+            (props['data-test-subj'] as string) ?? MOCK_DOCUMENT_SUMMARY_SECTION_STUB_TEST_ID
+          }
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => {
-      const mocked = {
-      useEventDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEventDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [
   {

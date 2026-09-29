@@ -19,32 +19,32 @@ import { removeLoadFromParameter } from '../../../lib/load_from';
 import { useEditorActionContext } from '../../../contexts';
 
 vi.mock('lz-string', () => {
-      const mocked = {
-      decompressFromEncodedURIComponent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    decompressFromEncodedURIComponent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/load_from', () => {
-      const mocked = {
-      removeLoadFromParameter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    removeLoadFromParameter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_set_initial_value', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_set_initial_value')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_set_initial_value')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useEditorActionContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEditorActionContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEditorActionContext = useEditorActionContext as MockedFunction<
   typeof useEditorActionContext

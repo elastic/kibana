@@ -15,11 +15,11 @@ import { esqlEquals } from '../../utils/esql_expressions';
 import { useGetGenerateDiscoverLink } from '.';
 
 vi.mock('../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DISCOVER_URL = 'http://discover/url';
 

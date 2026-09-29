@@ -14,7 +14,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { KubernetesAssetImage } from './kubernetes_asset_image';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: vi.fn(),

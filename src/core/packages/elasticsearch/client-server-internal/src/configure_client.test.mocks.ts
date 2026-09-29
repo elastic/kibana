@@ -11,19 +11,19 @@ import { vi } from 'vitest';
 
 export const parseClientOptionsMock = vi.fn();
 vi.doMock('./client_config', () => {
-      const mocked = {
-      parseClientOptions: parseClientOptionsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseClientOptions: parseClientOptionsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createTransportMock = vi.fn();
 vi.doMock('./create_transport', () => {
-      const mocked = {
-      createTransport: createTransportMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTransport: createTransportMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const ClientMock = vi.fn();
 vi.doMock('@elastic/elasticsearch', () => {

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
@@ -22,40 +22,40 @@ import {
 } from './step_execution_tree_row';
 
 vi.mock('../../../shared/ui/step_icons/step_icon', () => {
-      const mocked = {
-      StepIcon: ({
-        stepType,
-        color,
-        iconColor,
-      }: {
-        stepType: string;
-        color?: string;
-        iconColor?: string;
-      }) => (
-        <span
-          data-test-subj="mock-step-icon"
-          data-step-type={stepType}
-          data-icon-color={color ?? iconColor ?? ''}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepIcon: ({
+      stepType,
+      color,
+      iconColor,
+    }: {
+      stepType: string;
+      color?: string;
+      iconColor?: string;
+    }) => (
+      <span
+        data-test-subj="mock-step-icon"
+        data-step-type={stepType}
+        data-icon-color={color ?? iconColor ?? ''}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui/token_usage_badge/token_usage_badge', () => {
-      const mocked = {
-      TokenUsageBadge: ({ usage }: { usage: { totalTokens: number } }) => (
-        <span data-test-subj="workflowStepTreeTokenUsage">
-          {usage.totalTokens}
-          {' tokens'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TokenUsageBadge: ({ usage }: { usage: { totalTokens: number } }) => (
+      <span data-test-subj="workflowStepTreeTokenUsage">
+        {usage.totalTokens}
+        {' tokens'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     getStepIconType: vi.fn((type: string) => actual.getStepIconType(type)),

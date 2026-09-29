@@ -12,7 +12,7 @@ import * as useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useRulesListFilterStore } from './use_rules_list_filter_store';
 
 vi.mock('@kbn/kibana-utils-plugin/public');
-const { createKbnUrlStateStorage } = (await vi.importMock('@kbn/kibana-utils-plugin/public'));
+const { createKbnUrlStateStorage } = await vi.importMock('@kbn/kibana-utils-plugin/public');
 
 const useUrlStateStorageGetMock = vi.fn();
 const useUrlStateStorageSetMock = vi.fn();
@@ -27,9 +27,11 @@ describe('useRulesListFilterStore', () => {
   });
 
   beforeEach(() => {
-    vi
-      .spyOn(useLocalStorage, 'default')
-      .mockImplementation(() => [null, setRulesListFilterLocalMock, () => {}]);
+    vi.spyOn(useLocalStorage, 'default').mockImplementation(() => [
+      null,
+      setRulesListFilterLocalMock,
+      () => {},
+    ]);
     useUrlStateStorageGetMock.mockReturnValue(null);
   });
 

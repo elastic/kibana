@@ -17,11 +17,11 @@ import { prepareSearchParams } from './prepare_search_params';
 import { BulkActionsDryRunErrCodeEnum } from '../../../../../../../common/api/detection_engine';
 
 vi.mock('../../../../../../../common/detection_engine/rule_management/rule_filtering', () => {
-      const mocked = {
-      convertRulesFilterToKQL: vi.fn().mockReturnValue('str'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertRulesFilterToKQL: vi.fn().mockReturnValue('str'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConvertRulesFilterToKQL = convertRulesFilterToKQL as Mock;
 

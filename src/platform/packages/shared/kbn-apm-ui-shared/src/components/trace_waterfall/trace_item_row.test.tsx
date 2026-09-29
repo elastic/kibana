@@ -21,49 +21,49 @@ import type { TraceWaterfallItem } from './use_trace_waterfall';
 
 // Mock dependencies
 vi.mock('./bar', () => {
-      const mocked = {
-      Bar: ({ width, left, color, segments }: any) => (
-        <div
-          data-test-subj="bar"
-          data-width={width}
-          data-left={left}
-          data-color={color}
-          data-segments={segments ? JSON.stringify(segments) : undefined}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Bar: ({ width, left, color, segments }: any) => (
+      <div
+        data-test-subj="bar"
+        data-width={width}
+        data-left={left}
+        data-color={color}
+        data-segments={segments ? JSON.stringify(segments) : undefined}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./bar_details', () => {
-      const mocked = {
-      BarDetails: ({ item, left }: any) => (
-        <div data-test-subj="bar-details" data-item={item.id} data-left={left} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BarDetails: ({ item, left }: any) => (
+      <div data-test-subj="bar-details" data-item={item.id} data-left={left} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./toggle_accordion_button', () => {
-      const mocked = {
-      TOGGLE_BUTTON_WIDTH: 10,
-      ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
-        <div
-          data-test-subj="toggle-btn"
-          data-open={isOpen}
-          data-count={childrenCount}
-          onClick={onClick}
-          onKeyDown={onClick}
-          role="button"
-          tabIndex={0}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TOGGLE_BUTTON_WIDTH: 10,
+    ToggleAccordionButton: ({ isOpen, childrenCount, onClick }: any) => (
+      <div
+        data-test-subj="toggle-btn"
+        data-open={isOpen}
+        data-count={childrenCount}
+        onClick={onClick}
+        onKeyDown={onClick}
+        role="button"
+        tabIndex={0}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./trace_waterfall_context');
 
 const MockEuiAccordion = vi.fn();
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: vi.fn(),

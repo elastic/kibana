@@ -207,9 +207,9 @@ describe('endpointSearchStrategyProvider', () => {
     });
 
     it('keeps a query that reads a Fleet-owned index on the internal user', async () => {
-      vi
-        .spyOn(endpointFactory[ResponseActionsQueries.actions], 'buildDsl')
-        .mockReturnValue({ index: ['.fleet-actions-results', '.logs-endpoint.actions-default'] });
+      vi.spyOn(endpointFactory[ResponseActionsQueries.actions], 'buildDsl').mockReturnValue({
+        index: ['.fleet-actions-results', '.logs-endpoint.actions-default'],
+      });
       const { provider, search, scopedSearch } = buildProvider(
         { canAccessEndpointActionsLogManagement: true },
         { cpsActive: true }

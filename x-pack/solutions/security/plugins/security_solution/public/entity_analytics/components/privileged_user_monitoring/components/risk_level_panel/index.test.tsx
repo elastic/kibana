@@ -16,7 +16,7 @@ import { useRiskLevelsPrivilegedUserQuery } from './hooks';
 import { useQueryToggle } from '../../../../../common/containers/query_toggle';
 
 vi.mock('./hooks', async () => {
-  const actual = (await vi.importActual('./hooks'));
+  const actual = await vi.importActual('./hooks');
   return {
     ...actual,
     useRiskLevelsPrivilegedUserQuery: vi.fn(),
@@ -24,11 +24,11 @@ vi.mock('./hooks', async () => {
 });
 
 vi.mock('../../../../../common/containers/query_toggle', () => {
-      const mocked = {
-      useQueryToggle: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryToggle: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RiskLevelsPrivilegedUsersPanel', () => {
   const mockUseRiskLevelsPrivilegedUserQuery = useRiskLevelsPrivilegedUserQuery as Mock;

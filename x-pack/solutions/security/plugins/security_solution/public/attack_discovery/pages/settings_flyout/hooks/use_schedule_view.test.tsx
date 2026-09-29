@@ -21,15 +21,15 @@ import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mo
 import { ATTACK_DISCOVERY_FEATURE_ID } from '../../../../../common/constants';
 
 vi.mock('react-router', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../data_view_manager/hooks/use_data_view');
 vi.mock('../schedule/logic/use_schedule_api');

@@ -18,24 +18,24 @@ import * as ExportJsonFlyout from '../dashboard_app/top_nav/share/export_json/fl
 
 const mockOpenLazyFlyout = vi.fn();
 vi.mock('@kbn/presentation-util', () => {
-      const mocked = {
-      openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const exportJsonFlyoutSpy = vi
   .spyOn(ExportJsonFlyout, 'DashboardPanelExportJsonFlyout')
   .mockImplementation(() => null as any);
 
 vi.mock('../services/kibana_services', () => {
-      const mocked = {
-      coreServices: {
-        http: { post: vi.fn() },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    coreServices: {
+      http: { post: vi.fn() },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Export JSON action', () => {
   let action: ExportJSONAction;

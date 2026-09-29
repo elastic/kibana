@@ -46,11 +46,11 @@ describe('Expanded mode', () => {
     mockClientHeight(mockMenuItemHeight);
     // Mock the gap between the primary menu items
     vi.doMock('../utils/get_style_property', () => {
-          const mocked = {
-              getStyleProperty: vi.fn(() => mockExpandedMenuGap),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getStyleProperty: vi.fn(() => mockExpandedMenuGap),
+      };
+      return { ...mocked, default: mocked };
+    });
   });
 
   beforeEach(() => {

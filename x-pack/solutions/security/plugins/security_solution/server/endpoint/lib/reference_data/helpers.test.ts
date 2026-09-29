@@ -33,7 +33,7 @@ vi.mock('p-retry', () => {
 const pRetryMock = vi.mocked(pRetry);
 
 vi.mock('@kbn/core/server', async () => {
-  const actual = (await vi.importActual('@kbn/core/server'));
+  const actual = await vi.importActual('@kbn/core/server');
   return {
     ...actual,
     SavedObjectsClient: vi.fn().mockImplementation((repo: any) => repo),

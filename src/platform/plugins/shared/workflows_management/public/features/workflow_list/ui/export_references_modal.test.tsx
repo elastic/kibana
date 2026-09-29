@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { ExportReferencesModal } from './export_references_modal';

@@ -19,11 +19,11 @@ import { Gap } from '../../../../lib/rule_gaps/gap';
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('findGapsRoute', () => {
   beforeEach(() => {

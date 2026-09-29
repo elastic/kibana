@@ -22,15 +22,15 @@ import {
 const queryClient = new QueryClient();
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      useTransformCapabilities: () => ({
-        canCreateTransform: true,
-        canPreviewTransform: true,
-        canStartStopTransform: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTransformCapabilities: () => ({
+      canCreateTransform: true,
+      canPreviewTransform: true,
+      canStartStopTransform: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Transform: Transform List <CreateTransformButton />', () => {
   test('Minimal initialization', () => {

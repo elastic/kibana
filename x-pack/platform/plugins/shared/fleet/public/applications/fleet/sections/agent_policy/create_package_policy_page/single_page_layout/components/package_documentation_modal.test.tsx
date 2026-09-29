@@ -22,39 +22,39 @@ const mockGetFilePath = vi.fn((path: string) => `/api/fleet/epm/packages${path}`
 const mockSendGetFileByPath = vi.fn();
 
 vi.mock('../../../../../hooks', () => {
-      const mocked = {
-      useStartServices: vi.fn(() => ({
-        http: { basePath: { prepend: mockBasepathPrepend } },
-        application: { navigateToApp: mockNavigateToApp },
-      })),
-      sendGetFileByPath: (...args: any[]) => mockSendGetFileByPath(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartServices: vi.fn(() => ({
+      http: { basePath: { prepend: mockBasepathPrepend } },
+      application: { navigateToApp: mockNavigateToApp },
+    })),
+    sendGetFileByPath: (...args: any[]) => mockSendGetFileByPath(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      epmRouteService: { getFilePath: (path: string) => mockGetFilePath(path) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    epmRouteService: { getFilePath: (path: string) => mockGetFilePath(path) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../integrations/sections/epm/screens/detail/overview/readme', () => {
-      const mocked = {
-      // Kibana's RTL setup maps getByTestId to data-test-subj
-      Readme: ({ markdown }: { markdown?: string }) => (
-        <div data-test-subj="readme">{markdown ?? 'loading'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Kibana's RTL setup maps getByTestId to data-test-subj
+    Readme: ({ markdown }: { markdown?: string }) => (
+      <div data-test-subj="readme">{markdown ?? 'loading'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../components', () => {
-      const mocked = {
-      PackageIcon: () => <div data-testid="package-icon" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageIcon: () => <div data-testid="package-icon" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const basePackageInfo: PackageInfo = {
   name: 'nginx',

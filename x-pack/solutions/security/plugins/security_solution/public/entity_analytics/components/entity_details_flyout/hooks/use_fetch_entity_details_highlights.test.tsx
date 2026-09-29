@@ -26,30 +26,30 @@ const mockInferenceOutput = vi.fn();
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 vi.mock('../../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchEntityDetailsHighlights: mockFetchEntityDetailsHighlights,
-        saveEntityAiSummary: mockSaveEntityAiSummary,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchEntityDetailsHighlights: mockFetchEntityDetailsHighlights,
+      saveEntityAiSummary: mockSaveEntityAiSummary,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockProps = {
   connectorId: 'test-connector-id',

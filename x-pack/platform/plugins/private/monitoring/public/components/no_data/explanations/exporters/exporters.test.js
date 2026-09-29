@@ -12,17 +12,17 @@ import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ExplainExporters, ExplainExportersCloud } from './exporters';
 
 vi.mock('../../../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          docLinks: {
-            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          },
+  const mocked = {
+    Legacy: {
+      shims: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ExplainExporters', () => {
   test('should explain about xpack.monitoring.exporters setting', () => {

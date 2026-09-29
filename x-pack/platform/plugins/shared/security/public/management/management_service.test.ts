@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { BehaviorSubject } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import { BehaviorSubject } from 'rxjs';
 
 import type { BuildFlavor } from '@kbn/config';
 import { coreMock } from '@kbn/core/public/mocks';

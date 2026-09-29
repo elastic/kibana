@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 
 vi.mock('../components/shared', () => {
-      const mocked = {
-      getProcessorDescriptor: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getProcessorDescriptor: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { applyPendingMoveA11yEffects, buildMoveAnnouncement } from './move_a11y';
 

@@ -23,11 +23,11 @@ import { executeGenerationWorkflow } from '../../../routes/generate/helpers';
 const mockIsWorkflowsEnabledForSpace = vi.fn();
 
 vi.mock('../../is_workflows_enabled_for_space', () => {
-      const mocked = {
-      isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGenerateHash = vi.fn().mockReturnValue('mock-alert-hash');
 const mockTransformToBaseAlertDocument = vi.fn().mockReturnValue({
@@ -43,67 +43,67 @@ const mockGetMarkdownFields = vi.fn().mockReturnValue({
 const mockBackfillAttackIdsBestEffort = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@kbn/attack-discovery-schedules-common', () => {
-      const mocked = {
-      // Faithful inline copy of the pure aggregator (the real implementation is
-      // covered by the package's own unit test). Requiring the actual barrel here
-      // would evaluate schedule params that depend on the mocked
-      // `@kbn/elastic-assistant-common` module below.
-      buildAlertIdToAttackIdsMap: ({
-        attacks,
-      }: {
-        attacks: Array<{ alertIds: string[]; attackId: string }>;
-      }) =>
-        attacks.reduce<Record<string, string[]>>(
-          (acc, { alertIds, attackId }) =>
-            alertIds.reduce(
-              (innerAcc, alertId) => ({
-                ...innerAcc,
-                [alertId]: [...(innerAcc[alertId] ?? []), attackId],
-              }),
-              acc
-            ),
-          {}
-        ),
-      backfillAttackIdsBestEffort: (...args: unknown[]) => mockBackfillAttackIdsBestEffort(...args),
-      generateAttackDiscoveryAlertHash: (...args: unknown[]) => mockGenerateHash(...args),
-      // Faithful inline copy of the shared normalizer (the real implementation is
-      // covered by the package's own unit test); handles snake_case + camelCase keys.
-      normalizeAttackDiscovery: (raw: Record<string, unknown>) => ({
-        alertIds: raw.alertIds ?? raw.alert_ids ?? [],
-        detailsMarkdown: raw.detailsMarkdown ?? raw.details_markdown ?? '',
-        entitySummaryMarkdown: raw.entitySummaryMarkdown ?? raw.entity_summary_markdown,
-        id: raw.id,
-        mitreAttackTactics: raw.mitreAttackTactics ?? raw.mitre_attack_tactics,
-        summaryMarkdown: raw.summaryMarkdown ?? raw.summary_markdown ?? '',
-        timestamp: raw.timestamp ?? '',
-        title: raw.title ?? '',
-      }),
-      transformToBaseAlertDocument: (...args: unknown[]) => mockTransformToBaseAlertDocument(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Faithful inline copy of the pure aggregator (the real implementation is
+    // covered by the package's own unit test). Requiring the actual barrel here
+    // would evaluate schedule params that depend on the mocked
+    // `@kbn/elastic-assistant-common` module below.
+    buildAlertIdToAttackIdsMap: ({
+      attacks,
+    }: {
+      attacks: Array<{ alertIds: string[]; attackId: string }>;
+    }) =>
+      attacks.reduce<Record<string, string[]>>(
+        (acc, { alertIds, attackId }) =>
+          alertIds.reduce(
+            (innerAcc, alertId) => ({
+              ...innerAcc,
+              [alertId]: [...(innerAcc[alertId] ?? []), attackId],
+            }),
+            acc
+          ),
+        {}
+      ),
+    backfillAttackIdsBestEffort: (...args: unknown[]) => mockBackfillAttackIdsBestEffort(...args),
+    generateAttackDiscoveryAlertHash: (...args: unknown[]) => mockGenerateHash(...args),
+    // Faithful inline copy of the shared normalizer (the real implementation is
+    // covered by the package's own unit test); handles snake_case + camelCase keys.
+    normalizeAttackDiscovery: (raw: Record<string, unknown>) => ({
+      alertIds: raw.alertIds ?? raw.alert_ids ?? [],
+      detailsMarkdown: raw.detailsMarkdown ?? raw.details_markdown ?? '',
+      entitySummaryMarkdown: raw.entitySummaryMarkdown ?? raw.entity_summary_markdown,
+      id: raw.id,
+      mitreAttackTactics: raw.mitreAttackTactics ?? raw.mitre_attack_tactics,
+      summaryMarkdown: raw.summaryMarkdown ?? raw.summary_markdown ?? '',
+      timestamp: raw.timestamp ?? '',
+      title: raw.title ?? '',
+    }),
+    transformToBaseAlertDocument: (...args: unknown[]) => mockTransformToBaseAlertDocument(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant-common', () => {
-      const mocked = {
-      getAttackDiscoveryMarkdownFields: (...args: unknown[]) => mockGetMarkdownFields(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAttackDiscoveryMarkdownFields: (...args: unknown[]) => mockGetMarkdownFields(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../routes/generate/helpers', () => {
-      const mocked = {
-      executeGenerationWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeGenerationWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/task-manager-plugin/server', () => {
-      const mocked = {
-      createTaskRunError: vi.fn((error, source) => ({ message: error.message, source })),
-      TaskErrorSource: { USER: 'USER', FRAMEWORK: 'FRAMEWORK' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTaskRunError: vi.fn((error, source) => ({ message: error.message, source })),
+    TaskErrorSource: { USER: 'USER', FRAMEWORK: 'FRAMEWORK' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttackDiscovery = {
   alertIds: ['alert-1', 'alert-2'],

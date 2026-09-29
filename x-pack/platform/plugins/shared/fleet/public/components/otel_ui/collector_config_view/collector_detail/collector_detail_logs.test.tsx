@@ -15,15 +15,15 @@ import { createFleetTestRendererMock } from '../../../../mock';
 import { CollectorDetailLogs } from './collector_detail_logs';
 
 vi.mock('@kbn/saved-search-component', () => {
-      const mocked = {
-      LazySavedSearchComponent: ({ query }: { query: { query: string } }) => (
-        <div data-test-subj="savedSearchComponent" data-query={query.query}>
-          Saved search
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazySavedSearchComponent: ({ query }: { query: { query: string } }) => (
+      <div data-test-subj="savedSearchComponent" data-query={query.query}>
+        Saved search
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useAsync', () =>
   vi.fn(() => ({ value: 'logs-elastic_agent-*', loading: false }))

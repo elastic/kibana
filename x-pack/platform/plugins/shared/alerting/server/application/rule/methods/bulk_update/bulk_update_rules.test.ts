@@ -29,25 +29,25 @@ import {
 import type { RawRule } from '../../../../types';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions', () => {
-      const mocked = {
-      bulkMigrateLegacyActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMigrateLegacyActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const {
   rulesClientParams,

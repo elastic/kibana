@@ -40,9 +40,7 @@ async function getTestProps({
   defaultFetchStatus?: FetchStatus;
   resetTheHook?: boolean;
 }) {
-  const replaceUrlState = vi
-    .spyOn(internalStateActions, 'updateAppStateAndReplaceUrl')
-    .mockClear();
+  const replaceUrlState = vi.spyOn(internalStateActions, 'updateAppStateAndReplaceUrl').mockClear();
 
   const toolkit = getDiscoverInternalStateMock({ persistedDataViews: [dataViewMock] });
   await toolkit.initializeTabs();

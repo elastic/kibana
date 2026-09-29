@@ -21,17 +21,17 @@ import type { TimeRange } from '../../../../../../common/time/time_range';
 // Keep tests focused on the state machine; children have their own tests.
 // Kibana's testing-library setup resolves getByTestId via data-test-subj.
 vi.mock('./anomalies_swimlane_visualisation', () => {
-      const mocked = {
-      AnomaliesSwimlaneVisualisation: () => <div data-test-subj="anomaliesSwimlane" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomaliesSwimlaneVisualisation: () => <div data-test-subj="anomaliesSwimlane" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./table', () => {
-      const mocked = {
-      AnomaliesTable: () => <div data-test-subj="anomaliesTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomaliesTable: () => <div data-test-subj="anomaliesTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const timeRange: TimeRange = {
   startTime: new Date('2026-06-12T14:00:00.000Z').valueOf(),

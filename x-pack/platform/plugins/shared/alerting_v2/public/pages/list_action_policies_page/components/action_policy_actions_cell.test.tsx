@@ -15,11 +15,11 @@ import { ActionPolicyActionsCell } from './action_policy_actions_cell';
 
 let mockIsLicenseValid = true;
 vi.mock('../../../hooks/use_is_action_policies_license_valid', () => {
-      const mocked = {
-      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',

@@ -24,83 +24,83 @@ const mockRefreshEventLogIndex = vi.fn().mockResolvedValue(undefined);
 const mockRunManualOrchestration = vi.fn();
 
 vi.mock('./get_workflow_loading_message', () => {
-      const mocked = {
-      getWorkflowLoadingMessage: () => 'loading...',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowLoadingMessage: () => 'loading...',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../persistence/event_logging', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
-      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
+    writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/persistence', () => {
-      const mocked = {
-      getDurationNanoseconds: () => '1000000',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDurationNanoseconds: () => '1000000',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetSpaceId = vi.fn();
 vi.mock('../../lib/helpers/get_space_id', () => {
-      const mocked = {
-      getSpaceId: (...args: unknown[]) => mockGetSpaceId(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpaceId: (...args: unknown[]) => mockGetSpaceId(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBuildResolveConnector = vi.fn();
 vi.mock('./build_resolve_connector', () => {
-      const mocked = {
-      buildResolveConnector: (...args: unknown[]) => mockBuildResolveConnector(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildResolveConnector: (...args: unknown[]) => mockBuildResolveConnector(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsWorkflowsEnabled = vi.fn();
 vi.mock('../../lib/helpers/is_workflows_enabled', () => {
-      const mocked = {
-      isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isWorkflowsEnabled: (...args: unknown[]) => mockIsWorkflowsEnabled(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./fetch_anonymization_fields', () => {
-      const mocked = {
-      fetchAnonymizationFields: (...args: unknown[]) => mockFetchAnonymizationFields(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAnonymizationFields: (...args: unknown[]) => mockFetchAnonymizationFields(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./refresh_event_log_index', () => {
-      const mocked = {
-      refreshEventLogIndex: (...args: unknown[]) => mockRefreshEventLogIndex(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    refreshEventLogIndex: (...args: unknown[]) => mockRefreshEventLogIndex(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./run_manual_orchestration', async () => {
-      const mocked = {
-      ...(await vi.importActual('./run_manual_orchestration/helpers/pipeline_step_error')),
-      runManualOrchestration: (...args: unknown[]) => mockRunManualOrchestration(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./run_manual_orchestration/helpers/pipeline_step_error')),
+    runManualOrchestration: (...args: unknown[]) => mockRunManualOrchestration(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportWorkflowSuccess = vi.fn();
 const mockReportWorkflowError = vi.fn();
 vi.mock('../../lib/telemetry/report_workflow_telemetry', () => {
-      const mocked = {
-      reportWorkflowError: (...args: unknown[]) => mockReportWorkflowError(...args),
-      reportWorkflowSuccess: (...args: unknown[]) => mockReportWorkflowSuccess(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reportWorkflowError: (...args: unknown[]) => mockReportWorkflowError(...args),
+    reportWorkflowSuccess: (...args: unknown[]) => mockReportWorkflowSuccess(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnonymizationFields = [
   {
@@ -1744,8 +1744,7 @@ describe('executeGenerationWorkflow', () => {
         } as unknown as Parameters<typeof executeGenerationWorkflow>[0]['authz'],
         executionUuid: 'test-execution-uuid',
         getEventLogIndex: async () => '.kibana-event-log-test',
-        getEventLogger: async () =>
-          ({ logEvent: vi.fn() } as unknown as Mocked<IEventLogger>),
+        getEventLogger: async () => ({ logEvent: vi.fn() } as unknown as Mocked<IEventLogger>),
         getStartServices: (async () => ({
           coreStart: coreStartMock,
           pluginsStart: {},

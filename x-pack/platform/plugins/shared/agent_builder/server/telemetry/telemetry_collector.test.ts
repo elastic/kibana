@@ -17,20 +17,20 @@ import { AGENTBUILDER_USAGE_DOMAIN } from './usage_counters';
 
 // Mock the QueryUtils class
 vi.mock('./query_utils', () => {
-      const mocked = {
-      QueryUtils: vi.fn().mockImplementation(() => ({
-        getCustomToolsMetrics: vi.fn(),
-        getCustomAgentsMetrics: vi.fn(),
-        getSkillsMetrics: vi.fn(),
-        getPluginsCount: vi.fn(),
-        getConversationMetrics: vi.fn(),
-        getCountersByPrefix: vi.fn(),
-        getAllRoundMetrics: vi.fn(),
-      })),
-      isIndexNotFoundError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryUtils: vi.fn().mockImplementation(() => ({
+      getCustomToolsMetrics: vi.fn(),
+      getCustomAgentsMetrics: vi.fn(),
+      getSkillsMetrics: vi.fn(),
+      getPluginsCount: vi.fn(),
+      getConversationMetrics: vi.fn(),
+      getCountersByPrefix: vi.fn(),
+      getAllRoundMetrics: vi.fn(),
+    })),
+    isIndexNotFoundError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('telemetry_collector', () => {
   let mockUsageCollection: Mocked<UsageCollectionSetup>;
@@ -201,7 +201,7 @@ describe('telemetry_collector', () => {
 
     beforeEach(async () => {
       // Reset the mock for QueryUtils - using require since jest.mock hoists
-      const { QueryUtils } = (await vi.importMock('./query_utils'));
+      const { QueryUtils } = await vi.importMock('./query_utils');
       mockQueryUtils = {
         getCustomToolsMetrics: vi.fn().mockResolvedValue({
           total: 10,

@@ -15,13 +15,13 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 vi.mock('../../../../lib/retry_if_conflicts', () => {
-      const mocked = {
-      retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
-        return asyncFn();
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
+      return asyncFn();
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const loggerErrorMock = vi.fn();
 const getBulkMock = vi.fn();
@@ -154,9 +154,7 @@ describe('muteAll', () => {
 
   it('throws error when alertsService fails but rule is still updated', async () => {
     const loggerMock = loggingSystemMock.create().get();
-    const muteAllAlertsErrorMock = vi
-      .fn()
-      .mockRejectedValueOnce(new Error('ES connection failed'));
+    const muteAllAlertsErrorMock = vi.fn().mockRejectedValueOnce(new Error('ES connection failed'));
     const contextWithLogger = {
       ...context,
       logger: loggerMock,

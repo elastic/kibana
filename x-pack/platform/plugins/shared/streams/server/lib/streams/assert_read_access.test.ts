@@ -13,7 +13,7 @@ import { SecurityError } from './errors/security_error';
 import { StreamsClient } from './client';
 
 vi.mock('./stream_crud', async () => {
-  const actual = (await vi.importActual('./stream_crud'));
+  const actual = await vi.importActual('./stream_crud');
   return {
     ...actual,
     checkAccess: vi.fn(),

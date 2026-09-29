@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { useAlertTriggerDecorations } from './use_alert_trigger_decorations';
 
 vi.mock('@kbn/monaco', async () => {
-  const actualMonaco = (await vi.importActual('@kbn/monaco'));
+  const actualMonaco = await vi.importActual('@kbn/monaco');
   return {
     ...actualMonaco,
     monaco: {

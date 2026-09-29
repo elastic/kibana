@@ -13,11 +13,11 @@ import type { Logger } from '@kbn/core/server';
 
 // Resolve backoff sleeps instantly so retry/fallback paths run without waiting.
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   bulkCreateWithInferenceFallback,

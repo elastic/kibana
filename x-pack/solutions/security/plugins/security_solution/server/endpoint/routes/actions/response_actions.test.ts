@@ -91,7 +91,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { isActionSupportedByAgentType } from '../../../../common/endpoint/service/response_actions/is_response_action_supported';
 
 vi.mock('../../services', async () => {
-  const realModule = (await vi.importActual('../../services'));
+  const realModule = await vi.importActual('../../services');
 
   return {
     ...realModule,
@@ -154,14 +154,14 @@ describe('Response actions', () => {
       mockClusterClient.asScoped.mockReturnValue(mockScopedClient);
       mockScopedClient.asInternalUser = startContract.esClient as ElasticsearchClientMock;
       mockResponse = httpServerMock.createResponseFactory();
-      (
-        startContract.fleetStartServices.messageSigningService?.sign as Mock
-      ).mockImplementation(() => {
-        return {
-          data: 'thisisthedata',
-          signature: 'thisisasignature',
-        };
-      });
+      (startContract.fleetStartServices.messageSigningService?.sign as Mock).mockImplementation(
+        () => {
+          return {
+            data: 'thisisthedata',
+            signature: 'thisisasignature',
+          };
+        }
+      );
       endpointAppContextService = new EndpointAppContextService();
       const mockSavedObjectClient = savedObjectsClientMock.create();
 
@@ -1125,9 +1125,7 @@ describe('Response actions', () => {
             }),
           };
 
-          (getResponseActionsClientMock as Mock).mockReturnValue(
-            responseActionsClientMockInstance
-          );
+          (getResponseActionsClientMock as Mock).mockReturnValue(responseActionsClientMockInstance);
         });
 
         afterEach(() => {
@@ -1785,9 +1783,7 @@ describe('Response actions', () => {
     });
 
     it('should error if user does not have permissions to perform action', async () => {
-      (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-      ).mockResolvedValue({
+      ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue({
         canExecuteActions: false,
       });
       await callHandler();

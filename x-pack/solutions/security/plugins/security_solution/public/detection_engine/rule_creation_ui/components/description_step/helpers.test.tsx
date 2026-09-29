@@ -12,28 +12,28 @@ import { mount, shallow } from 'enzyme';
 import { EuiLoadingSpinner } from '@elastic/eui';
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ThreatEuiFlexGroup (rendered inside buildThreatDescription results) calls
 // useMitreConfiguration, which requires Kibana context. Mock it to return empty
 // arrays so these unit tests focus on link rendering, not MITRE lookup behavior.
 vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
-      const mocked = {
-      useMitreConfiguration: vi.fn().mockReturnValue({
-        tactics: [],
-        techniques: [],
-        subtechniques: [],
-        frameworkVersion: undefined,
-        isLoading: false,
-        isError: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMitreConfiguration: vi.fn().mockReturnValue({
+      tactics: [],
+      techniques: [],
+      subtechniques: [],
+      frameworkVersion: undefined,
+      isLoading: false,
+      isError: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { FilterManager, UI_SETTINGS } from '@kbn/data-plugin/public';

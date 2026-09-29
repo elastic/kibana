@@ -24,65 +24,65 @@ const mockPersistZeroBaseScore = vi.fn();
 const mockRunResolutionScoringStep = vi.fn();
 
 vi.mock('../risk_engine/utils/saved_object_configuration', () => {
-      const mocked = {
-      getConfiguration: (...args: unknown[]) => mockGetConfiguration(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: (...args: unknown[]) => mockGetConfiguration(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_risk_inputs_index', () => {
-      const mocked = {
-      getRiskInputsIndex: async () => ({ index: '.alerts-security.alerts-default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRiskInputsIndex: async () => ({ index: '.alerts-security.alerts-default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./maintainer/steps/build_alert_filters', () => {
-      const mocked = {
-      buildAlertFilters: () => [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAlertFilters: () => [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./maintainer/lookup/lookup_index', () => {
-      const mocked = {
-      getLookupIndexName: () => '.risk-score-lookup-default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLookupIndexName: () => '.risk-score-lookup-default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./maintainer/utils/fetch_watchlist_configs', () => {
-      const mocked = {
-      fetchWatchlistConfigs: async () => new Map(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchWatchlistConfigs: async () => new Map(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./maintainer/steps/score_base_entities', () => {
-      const mocked = {
-      scoreBaseEntities: (...args: unknown[]) => mockScoreBaseEntities(...args),
-      persistZeroBaseScore: (...args: unknown[]) => mockPersistZeroBaseScore(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scoreBaseEntities: (...args: unknown[]) => mockScoreBaseEntities(...args),
+    persistZeroBaseScore: (...args: unknown[]) => mockPersistZeroBaseScore(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./maintainer/steps/run_resolution_scoring_step', () => {
-      const mocked = {
-      runResolutionScoringStep: (...args: unknown[]) => mockRunResolutionScoringStep(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runResolutionScoringStep: (...args: unknown[]) => mockRunResolutionScoringStep(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        dsl: {
-          getEuidFilterBasedOnDocument: () => ({ term: { 'user.name': 'alice' } }),
-        },
+  const mocked = {
+    euid: {
+      dsl: {
+        getEuidFilterBasedOnDocument: () => ({ term: { 'user.name': 'alice' } }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ENTITY_ID = 'user:alice@okta';
 

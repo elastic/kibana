@@ -69,7 +69,8 @@ expect.addSnapshotSerializer(createReplaceSerializer(/\x1b\[[0-9;]*m/g, ''));
 
 beforeEach(async () => {
   // resolve the mock from the current module registry, which the import failure test resets
-  RspackOptimizerMock = (await vi.importMock<{ RspackOptimizer: Mock }>('@kbn/rspack-optimizer')).RspackOptimizer;
+  RspackOptimizerMock = (await vi.importMock<{ RspackOptimizer: Mock }>('@kbn/rspack-optimizer'))
+    .RspackOptimizer;
   RspackOptimizerMock.mockImplementation(function (this: RspackMockInstance, opts: unknown) {
     this.opts = opts;
     this._phase$ = new Rx.Subject<OptimizerPhase>();

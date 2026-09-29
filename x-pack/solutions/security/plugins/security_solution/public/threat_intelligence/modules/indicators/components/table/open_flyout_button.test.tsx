@@ -22,11 +22,11 @@ import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 const mockOpenFlyout = vi.fn();
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../flyout_v2/use_flyout_api');
 vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');

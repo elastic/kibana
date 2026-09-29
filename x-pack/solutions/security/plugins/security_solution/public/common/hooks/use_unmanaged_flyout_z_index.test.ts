@@ -20,17 +20,17 @@ const mockCloseUnmanagedFlyout = vi.fn();
 const mockGetState = vi.fn(() => ({ currentZIndex: 0 }));
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      getFlyoutManagerStore: vi.fn(() => ({
-        getState: mockGetState,
-        addUnmanagedFlyout: mockAddUnmanagedFlyout,
-        closeUnmanagedFlyout: mockCloseUnmanagedFlyout,
-      })),
-      useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    getFlyoutManagerStore: vi.fn(() => ({
+      getState: mockGetState,
+      addUnmanagedFlyout: mockAddUnmanagedFlyout,
+      closeUnmanagedFlyout: mockCloseUnmanagedFlyout,
+    })),
+    useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_is_new_flyout_enabled');
 

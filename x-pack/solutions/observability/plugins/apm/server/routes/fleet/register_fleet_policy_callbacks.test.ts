@@ -21,35 +21,35 @@ import {
 } from './get_package_policy_decorators';
 
 vi.mock('./merge_package_policy_with_apm', () => {
-      const mocked = {
-      decoratePackagePolicyWithAgentConfigAndSourceMap: vi.fn(({ packagePolicy }) =>
-        Promise.resolve(packagePolicy)
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    decoratePackagePolicyWithAgentConfigAndSourceMap: vi.fn(({ packagePolicy }) =>
+      Promise.resolve(packagePolicy)
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/helpers/get_internal_saved_objects_client', () => {
-      const mocked = {
-      getInternalSavedObjectsClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInternalSavedObjectsClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/helpers/create_es_client/create_internal_es_client', () => {
-      const mocked = {
-      createInternalESClient: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalESClient: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./api_keys/add_api_keys_to_policies_if_missing', async () => {
-      const mocked = {
-      ...(await vi.importActual('./api_keys/add_api_keys_to_policies_if_missing')),
-      addApiKeysToPackagePolicyIfMissing: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./api_keys/add_api_keys_to_policies_if_missing')),
+    addApiKeysToPackagePolicyIfMissing: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { addApiKeysToPackagePolicyIfMissing } from './api_keys/add_api_keys_to_policies_if_missing';
@@ -174,7 +174,9 @@ describe('onPackagePolicyCreate', () => {
 
   it('decorates an apm policy with agent configurations and source maps', async () => {
     const { coreStart, soClient, esClient, fleetPluginStart, getApmIndices } = buildMocks();
-    const { decoratePackagePolicyWithAgentConfigAndSourceMap } = (await vi.importMock('./merge_package_policy_with_apm'));
+    const { decoratePackagePolicyWithAgentConfigAndSourceMap } = await vi.importMock(
+      './merge_package_policy_with_apm'
+    );
     const decorated = { ...newApmPackagePolicy, _decorated: true };
     decoratePackagePolicyWithAgentConfigAndSourceMap.mockResolvedValueOnce(decorated);
 

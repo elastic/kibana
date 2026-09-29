@@ -28,15 +28,15 @@ import {
 
 let mockCloud: unknown;
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          cloud: mockCloud,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        cloud: mockCloud,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeHit = (index: string, flattened: DataTableRecord['flattened'] = {}): DataTableRecord =>
   ({

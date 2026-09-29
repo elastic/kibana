@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
 import { useEventDrivenExecutionStatus } from './use_event_driven_execution_status';

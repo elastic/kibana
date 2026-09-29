@@ -16,11 +16,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 vi.mock('./format_value', () => {
-      const mocked = {
-      formatFieldValueReact: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatFieldValueReact: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getFormattedFields', () => {
   const mockDataView = {

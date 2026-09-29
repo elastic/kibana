@@ -20,11 +20,11 @@ import * as crud from './crud';
 import * as requestDiagnosticsActionRunner from './request_diagnostics_action_runner';
 
 vi.mock('../secrets', () => {
-      const mocked = {
-      isActionSecretStorageEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isActionSecretStorageEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('requestDiagnostics', () => {
   beforeEach(async () => {

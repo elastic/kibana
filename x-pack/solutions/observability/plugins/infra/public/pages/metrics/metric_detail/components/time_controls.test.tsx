@@ -8,20 +8,20 @@
 import { vi } from 'vitest';
 
 vi.mock('../../../../hooks/use_kibana_ui_setting', () => {
-      const mocked = {
-      _esModule: true,
-      useKibanaUiSetting: vi.fn(() => [
-        [
-          {
-            from: 'now/d',
-            to: 'now/d',
-            display: 'Today',
-          },
-        ],
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    _esModule: true,
+    useKibanaUiSetting: vi.fn(() => [
+      [
+        {
+          from: 'now/d',
+          to: 'now/d',
+          display: 'Today',
+        },
+      ],
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';

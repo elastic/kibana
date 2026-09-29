@@ -18,21 +18,21 @@ import { TestProviders } from '../../common/mock';
 
 vi.mock('@kbn/security-solution-navigation/src/context');
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/containers/tags/api');
 vi.mock('../../common/lib/apm/use_track_http_request');
 vi.mock('../../common/components/link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl: vi
-        .fn()
-        .mockReturnValue(vi.fn().mockReturnValue('/app/security/dashboards/create')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl: vi
+      .fn()
+      .mockReturnValue(vi.fn().mockReturnValue('/app/security/dashboards/create')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseCreateSecurityDashboardLink = () =>
   renderHook(() => useCreateSecurityDashboardLink(), {

@@ -25,159 +25,164 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 // ── Mock heavy external deps ──────────────────────────────────────────────────
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({ euiTheme: { size: { m: '16px', s: '8px' } } }),
-      EuiLoadingSpinner: ({ size }: { size: string }) => (
-        <div data-test-subj="loading-spinner" data-size={size} />
-      ),
-      EuiSpacer: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({ euiTheme: { size: { m: '16px', s: '8px' } } }),
+    EuiLoadingSpinner: ({ size }: { size: string }) => (
+      <div data-test-subj="loading-spinner" data-size={size} />
+    ),
+    EuiSpacer: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ui-callout', () => {
-      const mocked = {
-      KbnDangerCallout: ({ title }: { title: string }) => (
-        <div data-test-subj="danger-callout">{title}</div>
-      ),
-      KbnWarningCallout: ({ title }: { title: string }) => (
-        <div data-test-subj="warning-callout">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KbnDangerCallout: ({ title }: { title: string }) => (
+      <div data-test-subj="danger-callout">{title}</div>
+    ),
+    KbnWarningCallout: ({ title }: { title: string }) => (
+      <div data-test-subj="warning-callout">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /** Set by the `ApprovalContent` mock on every render, so a test can invoke an action directly
  *  (e.g. to assert what its promise rejects with) without going through a simulated click. */
 let latestPrimaryAction: ApprovalAction | undefined;
 
 vi.mock('@kbn/proposals-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/proposals-ui')),
-      ApprovalContent: ({
-        children,
-        primaryAction,
-        secondaryActions,
-        tone,
-        comment,
-        decision,
-        isSubmitting,
-        currentActorName,
-      }: {
-        children?: React.ReactNode;
-        tone?: string;
-        comment?: string;
-        decision?: ApprovalDecision;
-        isSubmitting?: 'applying' | 'declining';
-        currentActorName?: string;
-        primaryAction?: {
-          label: string;
-          onClick: () => void | Promise<void>;
-          isDisabled?: boolean;
-          'data-test-subj'?: string;
-        };
-        secondaryActions?: Array<{
-          label: string;
-          onClick: () => void;
-          isDisabled?: boolean;
-          'data-test-subj'?: string;
-        }>;
-      }) => {
-        latestPrimaryAction = primaryAction;
-        return (
-          <div data-test-subj="approval-content" data-tone={tone}>
-            {primaryAction && (
-              <button
-                onClick={primaryAction.onClick}
-                disabled={primaryAction.isDisabled}
-                data-test-subj={primaryAction['data-test-subj']}
-              >
-                {primaryAction.label}
-              </button>
-            )}
-            {secondaryActions?.map((a) => (
-              <button
-                key={a.label}
-                onClick={a.onClick}
-                disabled={a.isDisabled}
-                data-test-subj={a['data-test-subj']}
-              >
-                {a.label}
-              </button>
-            ))}
-            {/* Surfaced so the comment and decision are observable: the real component renders
+  const mocked = {
+    ...(await vi.importActual('@kbn/proposals-ui')),
+    ApprovalContent: ({
+      children,
+      primaryAction,
+      secondaryActions,
+      tone,
+      comment,
+      decision,
+      isSubmitting,
+      currentActorName,
+    }: {
+      children?: React.ReactNode;
+      tone?: string;
+      comment?: string;
+      decision?: ApprovalDecision;
+      isSubmitting?: 'applying' | 'declining';
+      currentActorName?: string;
+      primaryAction?: {
+        label: string;
+        onClick: () => void | Promise<void>;
+        isDisabled?: boolean;
+        'data-test-subj'?: string;
+      };
+      secondaryActions?: Array<{
+        label: string;
+        onClick: () => void;
+        isDisabled?: boolean;
+        'data-test-subj'?: string;
+      }>;
+    }) => {
+      latestPrimaryAction = primaryAction;
+      return (
+        <div data-test-subj="approval-content" data-tone={tone}>
+          {primaryAction && (
+            <button
+              onClick={primaryAction.onClick}
+              disabled={primaryAction.isDisabled}
+              data-test-subj={primaryAction['data-test-subj']}
+            >
+              {primaryAction.label}
+            </button>
+          )}
+          {secondaryActions?.map((a) => (
+            <button
+              key={a.label}
+              onClick={a.onClick}
+              disabled={a.isDisabled}
+              data-test-subj={a['data-test-subj']}
+            >
+              {a.label}
+            </button>
+          ))}
+          {/* Surfaced so the comment and decision are observable: the real component renders
                 them as props rather than as children. */}
-            <div data-test-subj="approval-comment">{comment}</div>
-            {decision && (
-              <div data-test-subj="approval-decision">
-                {decision.status}:{decision.actorName}
-                {decision.reason ? `:${decision.reason}` : ''}
-              </div>
-            )}
-            {currentActorName && <div data-test-subj="approval-current-actor">{currentActorName}</div>}
-            {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
-            {children}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          <div data-test-subj="approval-comment">{comment}</div>
+          {decision && (
+            <div data-test-subj="approval-decision">
+              {decision.status}:{decision.actorName}
+              {decision.reason ? `:${decision.reason}` : ''}
+            </div>
+          )}
+          {currentActorName && (
+            <div data-test-subj="approval-current-actor">{currentActorName}</div>
+          )}
+          {isSubmitting && <div data-test-subj="approval-is-submitting">{isSubmitting}</div>}
+          {children}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-http-browser', () => {
-      const mocked = {
-      isHttpFetchError: (e: unknown) => {
-        return (e as { _isHttpFetchError?: boolean })?._isHttpFetchError === true;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isHttpFetchError: (e: unknown) => {
+      return (e as { _isHttpFetchError?: boolean })?._isHttpFetchError === true;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_proposals_api', () => {
-      const mocked = {
-      useProposal: vi.fn(),
-      useApproveProposal: vi.fn(),
-      useDismissProposal: vi.fn(),
-      useIsApprovingProposal: vi.fn(),
-      useIsDecliningProposal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProposal: vi.fn(),
+    useApproveProposal: vi.fn(),
+    useDismissProposal: vi.fn(),
+    useIsApprovingProposal: vi.fn(),
+    useIsDecliningProposal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_current_user_profile', () => {
-      const mocked = {
-      useCurrentUserProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUserProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/user-profile-components', () => {
-      const mocked = {
-      getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./proposal_dismiss_form', () => {
-      const mocked = {
-      ProposalDismissForm: ({
-        'data-test-subj': testSubj,
-        onRationaleChange,
-      }: {
-        'data-test-subj'?: string;
-        onRationaleChange: (v: string) => void;
-        dismissReason: string;
-        rationale: string;
-        onDismissReasonChange: (r: string) => void;
-      }) => (
-        <div data-test-subj={testSubj ?? 'dismiss-form'}>
-          <input data-test-subj="rationale-input" onChange={(e) => onRationaleChange(e.target.value)} />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ProposalDismissForm: ({
+      'data-test-subj': testSubj,
+      onRationaleChange,
+    }: {
+      'data-test-subj'?: string;
+      onRationaleChange: (v: string) => void;
+      dismissReason: string;
+      rationale: string;
+      onDismissReasonChange: (r: string) => void;
+    }) => (
+      <div data-test-subj={testSubj ?? 'dismiss-form'}>
+        <input
+          data-test-subj="rationale-input"
+          onChange={(e) => onRationaleChange(e.target.value)}
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

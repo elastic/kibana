@@ -16,18 +16,18 @@ import { buildInboundEventsClient } from './client';
 import { createInboundEventsClient } from './factory';
 
 vi.mock('./create_unsecured_inbound_saved_objects_client', () => {
-      const mocked = {
-      createUnsecuredInboundSavedObjectsClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createUnsecuredInboundSavedObjectsClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./client', () => {
-      const mocked = {
-      buildInboundEventsClient: vi.fn((deps) => deps),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildInboundEventsClient: vi.fn((deps) => deps),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createUnsecuredInboundSavedObjectsClientMock =
   createUnsecuredInboundSavedObjectsClient as MockedFunction<

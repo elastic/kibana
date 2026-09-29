@@ -13,11 +13,11 @@ import { mount } from 'enzyme';
 import { useListKeys } from './use_list_keys';
 
 vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-      const mocked = {
-      htmlIdGenerator: () => () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    htmlIdGenerator: () => () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('use_list_keys', () => {
   function ListingComponent({ items }: { items: object[] }) {

@@ -21,7 +21,7 @@ import { TestProviders } from '../../../../common/mock';
 import { ValueListsFlyout } from './flyout';
 
 vi.mock('@kbn/securitysolution-list-hooks', async () => {
-  const actual = (await vi.importActual('@kbn/securitysolution-list-hooks'));
+  const actual = await vi.importActual('@kbn/securitysolution-list-hooks');
 
   return {
     ...actual,
@@ -31,7 +31,7 @@ vi.mock('@kbn/securitysolution-list-hooks', async () => {
 });
 
 vi.mock('@kbn/securitysolution-list-api', async () => {
-  const actual = (await vi.importActual('@kbn/securitysolution-list-api'));
+  const actual = await vi.importActual('@kbn/securitysolution-list-api');
 
   return {
     ...actual,

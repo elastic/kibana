@@ -19,26 +19,26 @@ import { DocViewerObsTracesGenAi } from '.';
 import { useGenAiData } from './use_genai_data';
 
 vi.mock('./use_genai_data', () => {
-      const mocked = {
-      useGenAiData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGenAiData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      GenAiTab: () => <div data-test-subj="mockGenAiTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GenAiTab: () => <div data-test-subj="mockGenAiTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./genai_details_table', () => {
-      const mocked = {
-      GenAiDetailsTable: () => <div data-test-subj="mockGenAiDetailsTable" />,
-      hasGenAiDetailFields: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GenAiDetailsTable: () => <div data-test-subj="mockGenAiDetailsTable" />,
+    hasGenAiDetailFields: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const HINT = 'unifiedDocViewerObsTracesGenAiMetadataHint';
 const INDEX_PATTERN = 'traces-apm*,traces-*.otel-*';

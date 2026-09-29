@@ -11,58 +11,65 @@ import { validateInfluencers } from './validate_influencers';
 
 describe('ML - validateInfluencers', () => {
   it('called without arguments throws an error', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateInfluencers(undefined as unknown as CombinedJob).then(
-            () => done(new Error('Promise should not resolve for this test without job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateInfluencers(undefined as unknown as CombinedJob).then(
+        () => done(new Error('Promise should not resolve for this test without job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #1, missing analysis_config', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateInfluencers({} as unknown as CombinedJob).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateInfluencers({} as unknown as CombinedJob).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #2, missing analysis_config.influencers', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = {
-            analysis_config: {},
-            datafeed_config: { indices: [] },
-            data_description: { time_field: '@timestamp' },
-          };
-          validateInfluencers(job as unknown as CombinedJob).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = {
+        analysis_config: {},
+        datafeed_config: { indices: [] },
+        data_description: { time_field: '@timestamp' },
+      };
+      validateInfluencers(job as unknown as CombinedJob).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #3, missing analysis_config.detectors', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = {
-            analysis_config: { influencers: [] },
-            datafeed_config: { indices: [] },
-            data_description: { time_field: '@timestamp' },
-          };
-          validateInfluencers(job as unknown as CombinedJob).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = {
+        analysis_config: { influencers: [] },
+        datafeed_config: { indices: [] },
+        data_description: { time_field: '@timestamp' },
+      };
+      validateInfluencers(job as unknown as CombinedJob).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   const getJobConfig: (
     influencers?: string[],

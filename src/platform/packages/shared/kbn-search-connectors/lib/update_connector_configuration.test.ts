@@ -18,9 +18,9 @@ import { updateConnectorConfiguration } from './update_connector_configuration';
 import { fetchConnectorById } from './fetch_connectors';
 
 vi.mock('./fetch_connectors', () => {
-      const mocked = { fetchConnectorById: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { fetchConnectorById: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 describe('updateConnectorConfiguration lib function', () => {
   const mockClient = {

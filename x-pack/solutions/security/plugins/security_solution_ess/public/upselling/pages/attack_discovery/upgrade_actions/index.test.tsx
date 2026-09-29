@@ -20,11 +20,11 @@ const mockGetUrlForApp = vi
   .mockReturnValue('http://localhost:5601/app/management/stack/license_management');
 
 vi.mock('../../../../common/services', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UpgradeActions', () => {
   beforeEach(() => {

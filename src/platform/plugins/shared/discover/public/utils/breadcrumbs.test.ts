@@ -57,9 +57,9 @@ describe('Breadcrumbs', () => {
     describe('By Value', () => {
       beforeEach(() => {
         vi.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(true);
-        vi
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
-          .mockReturnValue({ label: 'Mock Label' } as DiscoverSessionTab);
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab').mockReturnValue({
+          label: 'Mock Label',
+        } as DiscoverSessionTab);
       });
 
       afterEach(() => {
@@ -67,9 +67,9 @@ describe('Breadcrumbs', () => {
       });
 
       it('should set the breadcrumbs to reflect Dashboards connection when editting', () => {
-        vi
-          .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
-          .mockReturnValue('mock-embeddable-id');
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId').mockReturnValue(
+          'mock-embeddable-id'
+        );
 
         setBreadcrumbs({
           services: discoverServiceMock,
@@ -89,12 +89,12 @@ describe('Breadcrumbs', () => {
       });
 
       it('should set the breadcrumbs to reflect Discover when creating a new session', () => {
-        vi
-          .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
-          .mockReturnValue(undefined);
-        vi
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
-          .mockReturnValue({ label: 'New Discover session' } as DiscoverSessionTab);
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId').mockReturnValue(
+          undefined
+        );
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab').mockReturnValue({
+          label: 'New Discover session',
+        } as DiscoverSessionTab);
 
         setBreadcrumbs({
           services: discoverServiceMock,
@@ -117,12 +117,10 @@ describe('Breadcrumbs', () => {
     describe('By Reference', () => {
       beforeEach(() => {
         vi.spyOn(discoverServiceMock.embeddableEditor, 'isByValueEditor').mockReturnValue(false);
-        vi
-          .spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab')
-          .mockReturnValue(undefined);
-        vi
-          .spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId')
-          .mockReturnValue('mock-embeddable-id');
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'getByValueTab').mockReturnValue(undefined);
+        vi.spyOn(discoverServiceMock.embeddableEditor, 'getEmbeddableId').mockReturnValue(
+          'mock-embeddable-id'
+        );
       });
 
       it('should set the breadcrumbs to reflect Dashboards connection', () => {

@@ -19,11 +19,11 @@ import {
 
 const mockBulkUpdateLeads = vi.fn();
 vi.mock('../lead_data_client', () => {
-      const mocked = {
-      createLeadDataClient: () => ({ bulkUpdateLeads: mockBulkUpdateLeads }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadDataClient: () => ({ bulkUpdateLeads: mockBulkUpdateLeads }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeEsSecurityException = () => ({
   statusCode: 403,

@@ -17,22 +17,22 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 import { NOT_EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy/security_solution/users/common';
 
 vi.mock('../../../../../common/containers/use_search_strategy', () => {
-      const mocked = {
-      useSearchStrategy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchStrategy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../../common/lib/kibana');
   return { ...actual, useUiSetting: vi.fn(() => false) };
 });
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-      useEntityStoreEuidApi: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+    useEntityStoreEuidApi: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSearchStrategy = useSearchStrategy as Mock;
 const mockUseUiSetting = useUiSetting as Mock;

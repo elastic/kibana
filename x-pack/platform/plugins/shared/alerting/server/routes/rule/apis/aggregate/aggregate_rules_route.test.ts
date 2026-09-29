@@ -22,18 +22,18 @@ const mockUsageCountersSetup = usageCountersServiceMock.createSetupContract();
 const mockUsageCounter = mockUsageCountersSetup.createUsageCounter('test');
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/track_legacy_terminology', () => {
-      const mocked = {
-      trackLegacyTerminology: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trackLegacyTerminology: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

@@ -20,7 +20,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MitreAttackChainPlaceholder } from './mitre_attack_chain_placeholder';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({

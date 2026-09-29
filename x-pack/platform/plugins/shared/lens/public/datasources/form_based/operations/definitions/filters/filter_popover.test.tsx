@@ -25,12 +25,12 @@ import { QueryInput } from '@kbn/visualization-ui-components';
 import type { Query } from '@kbn/es-query';
 
 vi.mock('.', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/visualization-ui-components', async () => {
-  const original = (await vi.importActual('@kbn/visualization-ui-components'));
+  const original = await vi.importActual('@kbn/visualization-ui-components');
 
   return {
     ...original,
@@ -39,11 +39,11 @@ vi.mock('@kbn/visualization-ui-components', async () => {
 });
 
 vi.mock('@kbn/kql/public', () => {
-      const mocked = {
-      QueryStringInput: () => 'QueryStringInput',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryStringInput: () => 'QueryStringInput',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('filter popover', () => {
   let defaultProps: Parameters<typeof FilterPopover>[0];

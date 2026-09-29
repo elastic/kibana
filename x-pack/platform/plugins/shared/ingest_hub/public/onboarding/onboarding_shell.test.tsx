@@ -51,26 +51,26 @@ vi.mock('./use_aws_service_matrix', () => {
 
 // Stub heavy step components — we only care about shell-level stepper and navigation.
 vi.mock('./step_components', () => {
-      const mocked = {
-      ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
-        <button data-test-subj="servicesStep-continue" onClick={onContinue}>
-          Continue
-        </button>
-      ),
-      ServiceSettingsStep: ({ onContinue }: { onContinue: () => void }) => (
-        <button data-test-subj="serviceSettingsStep-continue" onClick={onContinue}>
-          Continue
-        </button>
-      ),
-      AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
-        <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
-          Continue
-        </button>
-      ),
-      DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServicesStep: ({ onContinue }: { onContinue: () => void }) => (
+      <button data-test-subj="servicesStep-continue" onClick={onContinue}>
+        Continue
+      </button>
+    ),
+    ServiceSettingsStep: ({ onContinue }: { onContinue: () => void }) => (
+      <button data-test-subj="serviceSettingsStep-continue" onClick={onContinue}>
+        Continue
+      </button>
+    ),
+    AuthenticateAndDeployStep: ({ onContinue }: { onContinue: () => void }) => (
+      <button data-test-subj="authenticateAndDeployStep-continue" onClick={onContinue}>
+        Continue
+      </button>
+    ),
+    DetectAndReviewStep: () => <div data-test-subj="detectAndReviewStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { OnboardingFlowProvider, useOnboardingFlow } from './onboarding_flow_context';
 import { OnboardingShell } from './onboarding_shell';

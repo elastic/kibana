@@ -17,17 +17,17 @@ const mockLocalStorage = [false, vi.fn()];
 const mockNavigateToApp = vi.fn();
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: mockNavigateToApp,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: mockNavigateToApp,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useOnboardingSuccessCallout', () => {
   beforeEach(() => {

@@ -38,18 +38,19 @@ describe('fleet server hosts handler', () => {
   };
 
   beforeEach(() => {
-    vi
-      .spyOn(appContextService, 'getLogger')
-      .mockReturnValue({ error: vi.fn(), debug: vi.fn() } as any);
+    vi.spyOn(appContextService, 'getLogger').mockReturnValue({
+      error: vi.fn(),
+      debug: vi.fn(),
+    } as any);
     vi.spyOn(fleetServerHostService, 'create').mockResolvedValue({ id: 'host1' } as any);
     vi.spyOn(fleetServerHostService, 'update').mockResolvedValue({ id: 'host1' } as any);
     vi.spyOn(fleetServerHostService, 'get').mockResolvedValue({
       id: SERVERLESS_DEFAULT_FLEET_SERVER_HOST_ID,
       host_urls: ['http://elasticsearch:9200'],
     } as any);
-    vi
-      .spyOn(agentPolicyService, 'bumpAllAgentPoliciesForFleetServerHosts')
-      .mockResolvedValue({} as any);
+    vi.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForFleetServerHosts').mockResolvedValue(
+      {} as any
+    );
   });
 
   it('should return error on post in serverless if host url is different from default', async () => {
@@ -82,9 +83,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should return ok on post in stateful if host url is different from default', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
 
     const res = await postFleetServerHostWithErrorHandler(
       mockContext,
@@ -96,9 +95,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should return error if both ssl.key and secrets.ssl.key are provided', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
 
     const res = await postFleetServerHostWithErrorHandler(
       mockContext,
@@ -120,9 +117,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should return error if both ssl.es_key and secrets.ssl.es_key are provided', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
 
     const res = await postFleetServerHostWithErrorHandler(
       mockContext,
@@ -144,9 +139,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should return error if both ssl.agent_key and secrets.ssl.agent_key are provided', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
 
     const res = await postFleetServerHostWithErrorHandler(
       mockContext,
@@ -209,9 +202,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should return ok on put in stateful if host url is different from default', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
 
     const res = await putFleetServerHostHandlerWithErrorHandler(
       mockContext,
@@ -226,9 +217,7 @@ describe('fleet server hosts handler', () => {
     const PRIVATE_URL = 'https://abc.fleet.private.us-east-1.aws.elastic.cloud';
 
     it('should return ok on put in serverless when host url matches the private endpoint SO', async () => {
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
       vi.spyOn(fleetServerHostService, 'get').mockImplementation((id: string) => {
         if (id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) {
           return Promise.resolve({
@@ -252,9 +241,7 @@ describe('fleet server hosts handler', () => {
     });
 
     it('should return 403 on put in serverless when host url is arbitrary (not default or private)', async () => {
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
       vi.spyOn(fleetServerHostService, 'get').mockImplementation((id: string) => {
         if (id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) {
           return Promise.resolve({
@@ -287,9 +274,7 @@ describe('fleet server hosts handler', () => {
     });
 
     it('should return 403 on put in serverless when private SO is absent and url is not the default', async () => {
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isServerlessEnabled: true } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: true } as any);
       vi.spyOn(fleetServerHostService, 'get').mockImplementation((id: string) => {
         if (id === SERVERLESS_PRIVATE_FLEET_SERVER_HOST_ID) {
           return Promise.reject(
@@ -322,9 +307,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should call bumpAllAgentPoliciesForFleetServerHosts with isDefault flag on put', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
     vi.spyOn(fleetServerHostService, 'update').mockResolvedValue({
       id: 'host1',
       is_default: true,
@@ -344,9 +327,7 @@ describe('fleet server hosts handler', () => {
   });
 
   it('should call bumpAllAgentPoliciesForFleetServerHosts with isDefault flag on post', async () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isServerlessEnabled: false } as any);
     vi.spyOn(fleetServerHostService, 'create').mockResolvedValue({
       id: 'host1',
       is_default: false,

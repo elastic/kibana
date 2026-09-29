@@ -271,11 +271,9 @@ describe('tab_state_data_view actions', () => {
       expect(selectTabRuntimeState(runtimeStateManager, tabId).currentDataView$.getValue()).toBe(
         dataViewMockWithTimeField
       );
-      vi
-        .spyOn(services.dataViews, 'get')
-        .mockImplementationOnce((id) =>
-          id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
-        );
+      vi.spyOn(services.dataViews, 'get').mockImplementationOnce((id) =>
+        id === dataViewAdHoc.id ? Promise.resolve(dataViewAdHoc) : Promise.reject()
+      );
       await internalState.dispatch(
         internalStateActions.onDataViewCreated({
           tabId,
@@ -375,9 +373,9 @@ describe('tab_state_data_view actions', () => {
       const { internalState, tabId, services } = await setup({ dataView: dataViewAdHoc });
 
       const mockExecute = vi.fn();
-      vi
-        .mocked(services.uiActions.getAction)
-        .mockResolvedValue({ execute: mockExecute } as unknown as Action<object, object>);
+      vi.mocked(services.uiActions.getAction).mockResolvedValue({
+        execute: mockExecute,
+      } as unknown as Action<object, object>);
 
       const result = await internalState.dispatch(
         internalStateActions.updateAdHocDataViewId({

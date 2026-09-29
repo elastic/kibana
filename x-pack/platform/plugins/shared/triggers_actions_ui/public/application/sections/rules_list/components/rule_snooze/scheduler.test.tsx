@@ -12,7 +12,7 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { RuleSnoozeScheduler, hiddenCalendarClassName } from './scheduler';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const ReactMock = require('react');
 
   return {
@@ -26,11 +26,11 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: vi.fn(() => 'UTC'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn(() => 'UTC'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RuleSnoozeScheduler', () => {
   test('uses an owned class instead of the legacy Bootstrap hidden class', () => {

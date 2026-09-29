@@ -35,11 +35,11 @@ vi.mock('../../common/store/inputs/actions');
 const mockRouteSpy = vi.fn().mockReturnValue([{ pageName: 'hosts' }]);
 
 vi.mock('../../common/utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: () => mockRouteSpy(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: () => mockRouteSpy(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DummyComponent = ({ children }: { children: React.ReactNode }) => <>{children}</>;
 
@@ -56,7 +56,7 @@ const mockUseInitializeUrlParam = (urlParamKey: string, state: unknown) => {
 const mockUpdateUrlParam = vi.fn();
 
 vi.mock('../../common/utils/global_query_string', async () => {
-  const original = (await vi.importActual('../../common/utils/global_query_string'));
+  const original = await vi.importActual('../../common/utils/global_query_string');
   return {
     ...original,
     useInitializeUrlParam: (...params: unknown[]) => mockedUseInitializeUrlParam(...params),
@@ -66,25 +66,25 @@ vi.mock('../../common/utils/global_query_string', async () => {
 });
 
 vi.mock('../../common/components/drag_and_drop/drag_drop_context_wrapper', () => {
-      const mocked = {
-      DragDropContextWrapper: DummyComponent,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DragDropContextWrapper: DummyComponent,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./template_wrapper', () => {
-      const mocked = {
-      SecuritySolutionTemplateWrapper: DummyComponent,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecuritySolutionTemplateWrapper: DummyComponent,
+  };
+  return { ...mocked, default: mocked };
+});
 const DATE_TIME_NOW = '2020-01-01T00:00:00.000Z';
 vi.mock('../../common/components/super_date_picker', () => {
-      const mocked = {
-      formatDate: (date: string) => DATE_TIME_NOW,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatDate: (date: string) => DATE_TIME_NOW,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
   const original = require('react-router-dom');
@@ -98,21 +98,21 @@ vi.mock('react-router-dom', () => {
 // `useEsDocSearch` calls) is covered by dedicated unit tests in `flyout_v2/shared/url_state`.
 // Mocked here as no-ops so this suite doesn't need a `UnifiedDocViewerServices` registration.
 vi.mock('../../flyout_v2/shared/url_state/use_flyout_v2_restore', () => {
-      const mocked = {
-      useFlyoutV2RestoreFromUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutV2RestoreFromUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../flyout_v2/shared/url_state/use_expandable_flyout_url_interop', () => {
-      const mocked = {
-      useLegacyFlyoutUrlInterop: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLegacyFlyoutUrlInterop: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockQueryTimelineById = vi.fn();
 vi.mock('../../timelines/components/open_timeline/helpers', async () => {
-  const original = (await vi.importActual('../../timelines/components/open_timeline/helpers'));
+  const original = await vi.importActual('../../timelines/components/open_timeline/helpers');
   return {
     ...original,
     useQueryTimelineById: () => mockQueryTimelineById,
@@ -122,13 +122,13 @@ vi.mock('../../timelines/components/open_timeline/helpers', async () => {
 const mockGetTimeline = vi.fn();
 
 vi.mock('../../timelines/store', () => {
-      const mocked = {
-      timelineSelectors: {
-        getTimelineByIdSelector: () => mockGetTimeline,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timelineSelectors: {
+      getTimelineByIdSelector: () => mockGetTimeline,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedFilterManager = new FilterManager(coreMock.createStart().uiSettings);
 const mockGetSavedQuery = vi.fn();
@@ -155,7 +155,7 @@ const dummyFilter: Filter = {
 const mockTopValuesPopoverService = new TopValuesPopoverService();
 
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
   return {
     ...original,
     useKibana: () => ({

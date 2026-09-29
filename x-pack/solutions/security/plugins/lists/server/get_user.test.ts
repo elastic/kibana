@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import { securityServiceMock } from '@kbn/core/server/mocks';
 import type { SecurityRequestHandlerContext } from '@kbn/core-security-server';
 

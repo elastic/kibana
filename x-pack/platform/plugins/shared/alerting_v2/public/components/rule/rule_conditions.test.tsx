@@ -15,22 +15,22 @@ import { getQueryOverflowHeight } from '../../utils/rule_display';
 import { RuleConditions } from './rule_conditions';
 
 vi.mock('@kbn/alerting-plugin/common', () => {
-      const mocked = {
-      formatDuration: (v: string) => v,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatDuration: (v: string) => v,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getIndexPatternFromESQLQuery: (query?: string) => {
-        if (!query) return '';
-        const match = query.match(/FROM\s+([^\s|]+)/i);
-        return match ? match[1] : '';
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIndexPatternFromESQLQuery: (query?: string) => {
+      if (!query) return '';
+      const match = query.match(/FROM\s+([^\s|]+)/i);
+      return match ? match[1] : '';
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

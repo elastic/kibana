@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { TransactionDetailFlyout } from '.';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -25,65 +25,67 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./latency_distribution', () => {
-      const mocked = {
-      TransactionDetailFlyoutLatencyDistribution: () => (
-        <div data-test-subj="transactionDetailFlyoutSection-latencyDistribution">latency</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyoutLatencyDistribution: () => (
+      <div data-test-subj="transactionDetailFlyoutSection-latencyDistribution">latency</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./red_metrics', () => {
-      const mocked = {
-      TransactionDetailFlyoutRedMetrics: () => (
-        <div data-test-subj="transactionDetailFlyoutSection-redMetrics">red metrics</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyoutRedMetrics: () => (
+      <div data-test-subj="transactionDetailFlyoutSection-redMetrics">red metrics</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./trace_sample', () => {
-      const mocked = {
-      TransactionDetailFlyoutTraceSample: async () => {
-        const { useTransactionDetailFlyoutContext } = (await vi.importActual('./transaction_detail_flyout_context'));
-        const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
-        return (
-          <button
-            type="button"
-            data-test-subj="openFullTraceMock"
-            onClick={() => openFullTraceFlyout({ traceId: 'trace-1', contextSpanIds: ['span-1'] })}
-          >
-            open full trace
-          </button>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyoutTraceSample: async () => {
+      const { useTransactionDetailFlyoutContext } = await vi.importActual(
+        './transaction_detail_flyout_context'
+      );
+      const { openFullTraceFlyout } = useTransactionDetailFlyoutContext();
+      return (
+        <button
+          type="button"
+          data-test-subj="openFullTraceMock"
+          onClick={() => openFullTraceFlyout({ traceId: 'trace-1', contextSpanIds: ['span-1'] })}
+        >
+          open full trace
+        </button>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./summary', () => {
-      const mocked = {
-      TransactionDetailFlyoutSummary: () => (
-        <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyoutSummary: () => (
+      <div data-test-subj="transactionDetailFlyoutSummary">summary</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./footer', () => {
-      const mocked = {
-      TransactionDetailFlyoutFooter: () => (
-        <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyoutFooter: () => (
+      <div data-test-subj="transactionDetailFlyoutFooter">footer</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTraceWaterfallFlyout = vi.fn((_props: unknown) => (
   <div data-test-subj="traceWaterfallFlyoutMock" />
 ));
 vi.mock('../../app/transaction_details/waterfall_with_summary/trace_waterfall_flyout', () => {
-      const mocked = {
-      TraceWaterfallFlyout: (props: unknown) => mockTraceWaterfallFlyout(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfallFlyout: (props: unknown) => mockTraceWaterfallFlyout(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DEPS = {
   core: {} as CoreStart,

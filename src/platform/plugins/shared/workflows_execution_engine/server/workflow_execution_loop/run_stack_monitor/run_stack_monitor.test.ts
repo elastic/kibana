@@ -13,24 +13,24 @@ import type { Mock } from 'vitest';
 import { runStackMonitor } from './run_stack_monitor';
 
 vi.mock('./process_node_stack_monitoring', () => {
-      const mocked = {
-      processNodeStackMonitoring: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    processNodeStackMonitoring: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils', () => {
-      const mocked = {
-      abortableTimeout: vi.fn(),
-      TimeoutAbortedError: class TimeoutAbortedError extends Error {
-        constructor() {
-          super('Timeout aborted');
-          this.name = 'TimeoutAbortedError';
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    abortableTimeout: vi.fn(),
+    TimeoutAbortedError: class TimeoutAbortedError extends Error {
+      constructor() {
+        super('Timeout aborted');
+        this.name = 'TimeoutAbortedError';
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { processNodeStackMonitoring } = require('./process_node_stack_monitoring');

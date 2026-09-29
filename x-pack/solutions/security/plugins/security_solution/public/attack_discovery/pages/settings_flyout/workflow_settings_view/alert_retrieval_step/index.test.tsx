@@ -19,17 +19,17 @@ import type { UseFetchDefaultEsqlQueryResult } from '../../workflow_configuratio
 const mockFilterManager = createFilterManagerMock();
 
 vi.mock('./alert_retrieval_content', () => {
-      const mocked = {
-      AlertRetrievalContent: (props: Record<string, unknown>) => (
-        <div
-          data-test-subj="alertRetrievalContent"
-          data-alert-retrieval-has-error={String(props.alertRetrievalHasError)}
-          data-connector-id={String(props.connectorId)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertRetrievalContent: (props: Record<string, unknown>) => (
+      <div
+        data-test-subj="alertRetrievalContent"
+        data-alert-retrieval-has-error={String(props.alertRetrievalHasError)}
+        data-connector-id={String(props.connectorId)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',

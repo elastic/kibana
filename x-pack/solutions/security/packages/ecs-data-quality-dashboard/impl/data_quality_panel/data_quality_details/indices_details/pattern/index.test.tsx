@@ -28,44 +28,44 @@ import { HISTORY_TAB_ID, LATEST_CHECK_TAB_ID } from './constants';
 const pattern = 'auditbeat-*';
 
 vi.mock('./hooks/use_stats', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks/use_stats')),
-      useStats: vi.fn(() => ({
-        stats: {},
-        error: null,
-        loading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks/use_stats')),
+    useStats: vi.fn(() => ({
+      stats: {},
+      error: null,
+      loading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_ilm_explain', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks/use_ilm_explain')),
-      useIlmExplain: vi.fn(() => ({
-        error: null,
-        ilmExplain: {},
-        loading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks/use_ilm_explain')),
+    useIlmExplain: vi.fn(() => ({
+      error: null,
+      ilmExplain: {},
+      loading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_historical_results', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks/use_historical_results')),
-      useHistoricalResults: vi.fn(() => ({
-        historicalResultsState: {
-          results: [],
-          total: 0,
-          isLoading: true,
-          error: null,
-        },
-        fetchHistoricalResults: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks/use_historical_results')),
+    useHistoricalResults: vi.fn(() => ({
+      historicalResultsState: {
+        results: [],
+        total: 0,
+        isLoading: true,
+        error: null,
+      },
+      fetchHistoricalResults: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('pattern', () => {
   beforeEach(() => {

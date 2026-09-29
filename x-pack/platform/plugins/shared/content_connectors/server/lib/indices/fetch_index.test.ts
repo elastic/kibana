@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      fetchConnectorByIndexName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchConnectorByIndexName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { fetchConnectorByIndexName } from '@kbn/search-connectors';

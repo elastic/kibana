@@ -20,18 +20,18 @@ import {
 import { createListItemsBulk } from '.';
 
 vi.mock('./create_list_items_bulk', () => {
-      const mocked = {
-      createListItemsBulk: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createListItemsBulk: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lists/create_list_if_it_does_not_exist', () => {
-      const mocked = {
-      createListIfItDoesNotExist: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createListIfItDoesNotExist: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('write_lines_to_bulk_list_items', () => {
   beforeEach(() => {

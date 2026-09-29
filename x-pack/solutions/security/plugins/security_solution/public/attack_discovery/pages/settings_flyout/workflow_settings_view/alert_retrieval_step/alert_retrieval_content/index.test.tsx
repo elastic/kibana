@@ -21,125 +21,125 @@ const mockFilterManager = createFilterManagerMock();
 const mockUseMatchedAlertsCount = vi.fn().mockReturnValue({ count: 95, loading: false });
 
 vi.mock('../../../alert_selection/hooks/use_matched_alerts_count', () => {
-      const mocked = {
-      useMatchedAlertsCount: (...args: unknown[]) => mockUseMatchedAlertsCount(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMatchedAlertsCount: (...args: unknown[]) => mockUseMatchedAlertsCount(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alert_selection/alert_selection_fields', () => {
-      const mocked = {
-      AlertSelectionFields: ({ showConnectorSelector }: { showConnectorSelector: boolean }) => (
-        <div
-          data-test-subj="alertSelectionFields"
-          data-show-connector-selector={String(showConnectorSelector)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertSelectionFields: ({ showConnectorSelector }: { showConnectorSelector: boolean }) => (
+      <div
+        data-test-subj="alertSelectionFields"
+        data-show-connector-selector={String(showConnectorSelector)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alert_selection/alert_preview_tabs', () => {
-      const mocked = {
-      AlertPreviewTabs: ({
-        alertsCount,
-        esqlQuery,
-        settings,
-      }: {
-        alertsCount?: number | null;
-        esqlQuery?: string;
-        settings: { end: string; start: string };
-      }) => (
-        <div
-          data-test-subj="alertPreviewTabs"
-          data-alerts-count={alertsCount != null ? String(alertsCount) : ''}
-          data-end={settings.end}
-          data-esql-query={esqlQuery ?? ''}
-          data-start={settings.start}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertPreviewTabs: ({
+      alertsCount,
+      esqlQuery,
+      settings,
+    }: {
+      alertsCount?: number | null;
+      esqlQuery?: string;
+      settings: { end: string; start: string };
+    }) => (
+      <div
+        data-test-subj="alertPreviewTabs"
+        data-alerts-count={alertsCount != null ? String(alertsCount) : ''}
+        data-end={settings.end}
+        data-esql-query={esqlQuery ?? ''}
+        data-start={settings.start}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOnModeChange = vi.fn();
 
 vi.mock('../../../workflow_configuration', () => {
-      const mocked = {
-      DefaultAlertRetrievalAccordion: ({
-        children,
-        isEnabled,
-        onToggle,
-      }: {
-        children: React.ReactNode;
-        isEnabled: boolean;
-        onToggle: (enabled: boolean) => void;
-      }) => (
-        <div data-test-subj="defaultAlertRetrievalAccordion" data-is-enabled={String(isEnabled)}>
-          <button
-            data-test-subj="defaultAlertRetrievalToggle"
-            onClick={() => onToggle(!isEnabled)}
-            type="button"
-          />
-          {isEnabled && children}
-        </div>
-      ),
-      QueryModeSelector: ({
-        mode,
-        onModeChange,
-      }: {
-        mode: string;
-        onModeChange: (mode: string) => void;
-      }) => {
-        mockOnModeChange.mockImplementation(onModeChange);
-        return <div data-test-subj="queryModeSelector" data-mode={mode} />;
-      },
-      WorkflowConfigurationPanel: () => <div data-test-subj="workflowConfigurationPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
-
-vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: ({
-        dataErrorsControl,
-        query,
-      }: {
-        dataErrorsControl?: { enabled: boolean; onChange: (enabled: boolean) => void };
-        query: { esql: string };
-      }) => (
-        <div
-          data-test-subj="esqlLangEditor"
-          data-data-errors-enabled={
-            dataErrorsControl != null ? String(dataErrorsControl.enabled) : undefined
-          }
-          data-has-data-errors-control={String(dataErrorsControl != null)}
-          data-query={query.esql}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
-
-vi.mock('../../../workflow_configuration/edit_with_ai', () => {
-      const mocked = {
-      EditWithAi: ({
-        esqlQuery,
-        onEsqlQueryChange,
-      }: {
-        esqlQuery: string;
-        onEsqlQueryChange: (query: string) => void;
-      }) => (
+  const mocked = {
+    DefaultAlertRetrievalAccordion: ({
+      children,
+      isEnabled,
+      onToggle,
+    }: {
+      children: React.ReactNode;
+      isEnabled: boolean;
+      onToggle: (enabled: boolean) => void;
+    }) => (
+      <div data-test-subj="defaultAlertRetrievalAccordion" data-is-enabled={String(isEnabled)}>
         <button
-          data-test-subj="editWithAi"
-          data-esql-query={esqlQuery}
-          onClick={() => onEsqlQueryChange('AI_UPDATED_QUERY')}
+          data-test-subj="defaultAlertRetrievalToggle"
+          onClick={() => onToggle(!isEnabled)}
           type="button"
         />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+        {isEnabled && children}
+      </div>
+    ),
+    QueryModeSelector: ({
+      mode,
+      onModeChange,
+    }: {
+      mode: string;
+      onModeChange: (mode: string) => void;
+    }) => {
+      mockOnModeChange.mockImplementation(onModeChange);
+      return <div data-test-subj="queryModeSelector" data-mode={mode} />;
+    },
+    WorkflowConfigurationPanel: () => <div data-test-subj="workflowConfigurationPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
+
+vi.mock('@kbn/esql/public', () => {
+  const mocked = {
+    ESQLLangEditor: ({
+      dataErrorsControl,
+      query,
+    }: {
+      dataErrorsControl?: { enabled: boolean; onChange: (enabled: boolean) => void };
+      query: { esql: string };
+    }) => (
+      <div
+        data-test-subj="esqlLangEditor"
+        data-data-errors-enabled={
+          dataErrorsControl != null ? String(dataErrorsControl.enabled) : undefined
+        }
+        data-has-data-errors-control={String(dataErrorsControl != null)}
+        data-query={query.esql}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
+
+vi.mock('../../../workflow_configuration/edit_with_ai', () => {
+  const mocked = {
+    EditWithAi: ({
+      esqlQuery,
+      onEsqlQueryChange,
+    }: {
+      esqlQuery: string;
+      onEsqlQueryChange: (query: string) => void;
+    }) => (
+      <button
+        data-test-subj="editWithAi"
+        data-esql-query={esqlQuery}
+        onClick={() => onEsqlQueryChange('AI_UPDATED_QUERY')}
+        type="button"
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',

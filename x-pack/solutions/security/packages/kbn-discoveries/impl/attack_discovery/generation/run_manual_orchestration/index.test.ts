@@ -22,46 +22,46 @@ const mockInvokeSkillReportWorkflow = vi.fn();
 const mockHandleNoAlerts = vi.fn();
 
 vi.mock('./steps/retrieval_step', () => {
-      const mocked = {
-      runRetrievalStep: (...args: unknown[]) => mockRunRetrievalStep(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runRetrievalStep: (...args: unknown[]) => mockRunRetrievalStep(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../run_gate_phase', () => {
-      const mocked = {
-      runGatePhase: (...args: unknown[]) => mockRunGatePhase(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runGatePhase: (...args: unknown[]) => mockRunGatePhase(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./steps/generation_step', () => {
-      const mocked = {
-      runGenerationStep: (...args: unknown[]) => mockRunGenerationStep(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runGenerationStep: (...args: unknown[]) => mockRunGenerationStep(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./steps/validation_step', () => {
-      const mocked = {
-      runValidationStep: (...args: unknown[]) => mockRunValidationStep(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runValidationStep: (...args: unknown[]) => mockRunValidationStep(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../invoke_skill_report_workflow', () => {
-      const mocked = {
-      invokeSkillReportWorkflow: (...args: unknown[]) => mockInvokeSkillReportWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invokeSkillReportWorkflow: (...args: unknown[]) => mockInvokeSkillReportWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/handle_no_alerts', () => {
-      const mocked = {
-      handleNoAlerts: (...args: unknown[]) => mockHandleNoAlerts(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handleNoAlerts: (...args: unknown[]) => mockHandleNoAlerts(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnonymizationFields: AnonymizationFieldResponse[] = [
   {

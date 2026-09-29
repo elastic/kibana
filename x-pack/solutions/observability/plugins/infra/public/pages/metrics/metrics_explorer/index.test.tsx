@@ -18,11 +18,11 @@ import { MetricsExplorerPage } from '.';
 import { metricsExplorerTitle } from '../../../translations';
 
 vi.mock('@kbn/core/public', () => {
-      const mocked = {
-      APP_WRAPPER_CLASS: 'kbnAppWrapper',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    APP_WRAPPER_CLASS: 'kbnAppWrapper',
+  };
+  return { ...mocked, default: mocked };
+});
 
 type MockFetchStatus = 'loading' | 'success' | 'failure' | 'not_initiated' | 'pending';
 
@@ -32,170 +32,171 @@ const mockFetcherState: { hasData: boolean; status: MockFetchStatus } = {
 };
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useTrackPageview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTrackPageview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({ onPageReady: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({ onPageReady: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_metrics_breadcrumbs', () => {
-      const mocked = {
-      useMetricsBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-        PENDING: 'pending',
-      },
-      isPending: (status: string) =>
-        status === 'loading' || status === 'not_initiated' || status === 'pending',
-      isSuccess: (status: string) => status === 'success',
-      useFetcher: () => ({
-        data: mockFetcherState.status === 'failure' ? undefined : { hasData: mockFetcherState.hasData },
-        status: mockFetcherState.status,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+      PENDING: 'pending',
+    },
+    isPending: (status: string) =>
+      status === 'loading' || status === 'not_initiated' || status === 'pending',
+    isSuccess: (status: string) => status === 'success',
+    useFetcher: () => ({
+      data:
+        mockFetcherState.status === 'failure' ? undefined : { hasData: mockFetcherState.hasData },
+      status: mockFetcherState.status,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding' }),
-              },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: () => '/app/observabilityOnboarding' }),
             },
           },
-          docLinks: { links: { observability: { guide: 'https://docs.elastic.co' } } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        docLinks: { links: { observability: { guide: 'https://docs.elastic.co' } } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-page-no-data', () => {
-      const mocked = {
-      NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoDataPage: () => <div data-test-subj="kbnNoDataPage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let lastInfraPageTemplateProps: { hasDataOverride?: boolean } = {};
 
 vi.mock('../../../components/shared/templates/infra_page_template', () => {
-      const mocked = {
-      InfraPageTemplate: ({
-        children,
-        hasDataOverride,
-        header,
-      }: {
-        children: React.ReactNode;
-        hasDataOverride?: boolean;
-        header?: React.ReactNode;
-      }) => {
-        lastInfraPageTemplateProps = { hasDataOverride };
-        return (
-          <div data-test-subj="infraPageTemplate">
-            {header}
-            {children}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InfraPageTemplate: ({
+      children,
+      hasDataOverride,
+      header,
+    }: {
+      children: React.ReactNode;
+      hasDataOverride?: boolean;
+      header?: React.ReactNode;
+    }) => {
+      lastInfraPageTemplateProps = { hasDataOverride };
+      return (
+        <div data-test-subj="infraPageTemplate">
+          {header}
+          {children}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/metrics_explorer/with_metrics_explorer_options_url_state', () => {
-      const mocked = {
-      WithMetricsExplorerOptionsUrlState: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WithMetricsExplorerOptionsUrlState: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_metrics_explorer_views', () => {
-      const mocked = {
-      useMetricsExplorerViews: () => ({ currentView: { id: '0' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsExplorerViews: () => ({ currentView: { id: '0' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_metrics_explorer_options', () => {
-      const mocked = {
-      MetricsExplorerOptionsContainer: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsExplorerOptionsContainer: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_metric_explorer_state', () => {
-      const mocked = {
-      useMetricsExplorerState: () => ({
-        isLoading: false,
-        error: null,
-        data: undefined,
-        timeRange: { from: 'now-1h', to: 'now', interval: '>=10s' },
-        options: { aggregation: 'avg', metrics: [] },
-        chartOptions: {},
-        setChartOptions: vi.fn(),
-        handleAggregationChange: vi.fn(),
-        handleMetricsChange: vi.fn(),
-        handleFilterQuerySubmit: vi.fn(),
-        handleGroupByChange: vi.fn(),
-        handleTimeChange: vi.fn(),
-        handleLoadMore: vi.fn(),
-        onViewStateChange: vi.fn(),
-        refresh: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsExplorerState: () => ({
+      isLoading: false,
+      error: null,
+      data: undefined,
+      timeRange: { from: 'now-1h', to: 'now', interval: '>=10s' },
+      options: { aggregation: 'avg', metrics: [] },
+      chartOptions: {},
+      setChartOptions: vi.fn(),
+      handleAggregationChange: vi.fn(),
+      handleMetricsChange: vi.fn(),
+      handleFilterQuerySubmit: vi.fn(),
+      handleGroupByChange: vi.fn(),
+      handleTimeChange: vi.fn(),
+      handleLoadMore: vi.fn(),
+      onViewStateChange: vi.fn(),
+      refresh: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/toolbar', () => {
-      const mocked = {
-      MetricsExplorerToolbar: () => <div data-test-subj="metricsExplorerToolbar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsExplorerToolbar: () => <div data-test-subj="metricsExplorerToolbar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/charts', () => {
-      const mocked = {
-      MetricsExplorerCharts: () => <div data-test-subj="metricsExplorerCharts" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsExplorerCharts: () => <div data-test-subj="metricsExplorerCharts" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/metrics_in_discover_callout', () => {
-      const mocked = {
-      MetricsInDiscoverCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsInDiscoverCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../header/use_metrics_app_header_menu', () => {
-      const mocked = {
-      useMetricsAppHeaderMenu: () => ({
-        menu: { items: [] },
-        flyouts: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsAppHeaderMenu: () => ({
+      menu: { items: [] },
+      flyouts: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const trackedPageviews = () =>
   Array.from(

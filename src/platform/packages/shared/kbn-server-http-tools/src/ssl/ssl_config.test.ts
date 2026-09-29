@@ -37,7 +37,7 @@ describe('#SslConfig', () => {
     beforeEach(async () => {
       const realFs = require('fs');
       mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-      const utils = (await vi.importActual('@kbn/crypto'));
+      const utils = await vi.importActual('@kbn/crypto');
       mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
         utils.readPkcs12Keystore(path, password)
       );

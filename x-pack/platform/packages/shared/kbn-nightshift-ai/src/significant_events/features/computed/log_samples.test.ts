@@ -13,11 +13,11 @@ import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { logSamplesGenerator } from './log_samples';
 
 vi.mock('@kbn/ai-tools', () => {
-      const mocked = {
-      getSampleDocumentsEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSampleDocumentsEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getSampleDocumentsEsqlMock = vi.mocked(getSampleDocumentsEsql);
 

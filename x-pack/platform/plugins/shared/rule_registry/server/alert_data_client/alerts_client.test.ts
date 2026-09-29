@@ -264,15 +264,16 @@ describe('AlertsClient', () => {
   describe('getAlertFields', () => {
     beforeEach(async () => {
       vi.spyOn({ getRuleList: getRuleListMock }, 'getRuleList').mockReturnValue(new Map([]));
-      vi
-        .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
-        .mockResolvedValue(new Map([]));
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValue(
+        new Map([])
+      );
 
-      vi
-        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
-        .mockImplementation((ruleTypeIds: string[]) => {
-          return [];
-        });
+      vi.spyOn(
+        { getAlertIndicesAlias: getAlertIndicesAliasMock },
+        'getAlertIndicesAlias'
+      ).mockImplementation((ruleTypeIds: string[]) => {
+        return [];
+      });
 
       IndexPatternsFetcher.prototype.getFieldsForWildcard = vi.fn().mockResolvedValue({
         fields: [],
@@ -326,15 +327,16 @@ describe('AlertsClient', () => {
         ])
       );
 
-      vi
-        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
-        .mockImplementation((ruleTypeIds: string[]) => {
-          if (ruleTypeIds.includes('siem.esqlRule')) {
-            return ['.alerts-security.alerts-default'];
-          } else {
-            return ['.alerts-stack.alerts-default', '.alerts-observability.logs.alerts-default'];
-          }
-        });
+      vi.spyOn(
+        { getAlertIndicesAlias: getAlertIndicesAliasMock },
+        'getAlertIndicesAlias'
+      ).mockImplementation((ruleTypeIds: string[]) => {
+        if (ruleTypeIds.includes('siem.esqlRule')) {
+          return ['.alerts-security.alerts-default'];
+        } else {
+          return ['.alerts-stack.alerts-default', '.alerts-observability.logs.alerts-default'];
+        }
+      });
 
       IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
         .fn()
@@ -385,19 +387,20 @@ describe('AlertsClient', () => {
 
     test('returns only SIEM fields when no other rule types are authorized', async () => {
       // Mock authorization to return only SIEM rule types
-      vi
-        .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
-        .mockResolvedValueOnce(new Map([['siem.esqlRule', { authorizedConsumers: {} }]]));
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+        new Map([['siem.esqlRule', { authorizedConsumers: {} }]])
+      );
 
-      vi
-        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
-        .mockImplementation((ruleTypeIds: string[]) => {
-          if (ruleTypeIds.includes('siem.esqlRule')) {
-            return ['.alerts-security.alerts-default'];
-          } else {
-            return [];
-          }
-        });
+      vi.spyOn(
+        { getAlertIndicesAlias: getAlertIndicesAliasMock },
+        'getAlertIndicesAlias'
+      ).mockImplementation((ruleTypeIds: string[]) => {
+        if (ruleTypeIds.includes('siem.esqlRule')) {
+          return ['.alerts-security.alerts-default'];
+        } else {
+          return [];
+        }
+      });
 
       IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
         .fn()
@@ -455,15 +458,16 @@ describe('AlertsClient', () => {
         ])
       );
 
-      vi
-        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
-        .mockImplementation((ruleTypeIds: string[]) => {
-          if (ruleTypeIds.includes('siem.esqlRule')) {
-            return ['.alerts-security.alerts-default'];
-          } else {
-            return ['.alerts-stack.alerts-default'];
-          }
-        });
+      vi.spyOn(
+        { getAlertIndicesAlias: getAlertIndicesAliasMock },
+        'getAlertIndicesAlias'
+      ).mockImplementation((ruleTypeIds: string[]) => {
+        if (ruleTypeIds.includes('siem.esqlRule')) {
+          return ['.alerts-security.alerts-default'];
+        } else {
+          return ['.alerts-stack.alerts-default'];
+        }
+      });
 
       IndexPatternsFetcher.prototype.getFieldsForWildcard = vi
         .fn()
@@ -493,9 +497,9 @@ describe('AlertsClient', () => {
     });
 
     test('returns empty fields when no rule types are authorized', async () => {
-      vi
-        .spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation')
-        .mockResolvedValueOnce(new Map());
+      vi.spyOn(alertingAuthMock, 'getAllAuthorizedRuleTypesFindOperation').mockResolvedValueOnce(
+        new Map()
+      );
       const response = await alertsClient.getAlertFields(['siem.esqlRule']);
       expect(response.fields).toHaveLength(0);
     });
@@ -506,9 +510,10 @@ describe('AlertsClient', () => {
         new Map([['siem.esqlRule', {}]])
       );
 
-      vi
-        .spyOn({ getAlertIndicesAlias: getAlertIndicesAliasMock }, 'getAlertIndicesAlias')
-        .mockImplementation(() => []);
+      vi.spyOn(
+        { getAlertIndicesAlias: getAlertIndicesAliasMock },
+        'getAlertIndicesAlias'
+      ).mockImplementation(() => []);
 
       const response = await alertsClient.getAlertFields(['siem.esqlRule']);
 

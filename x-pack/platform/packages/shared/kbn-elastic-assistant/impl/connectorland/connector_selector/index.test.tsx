@@ -30,22 +30,22 @@ const connectorTwo = mockConnectors[1];
 const mockRefetchConnectors = vi.fn();
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_load_action_types', () => {
-      const mocked = {
-      useLoadActionTypes: vi.fn(() => {
-        return {
-          data: mockActionTypes,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadActionTypes: vi.fn(() => {
+      return {
+        data: mockActionTypes,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 
@@ -68,20 +68,20 @@ afterAll(() => {
 });
 
 vi.mock('../add_connector_modal', () => {
-      const mocked = {
-      // @ts-ignore
-      AddConnectorModal: ({ onSaveConnector }) => (
-        <>
-          <button
-            type="button"
-            data-test-subj="modal-mock"
-            onClick={() => onSaveConnector(newConnector)}
-          />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    AddConnectorModal: ({ onSaveConnector }) => (
+      <>
+        <button
+          type="button"
+          data-test-subj="modal-mock"
+          onClick={() => onSaveConnector(newConnector)}
+        />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Connector selector', () => {
   beforeEach(() => {

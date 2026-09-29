@@ -16,12 +16,12 @@ import { createEmbeddableStartMock } from '@kbn/embeddable-plugin/server/mocks';
 import { scheduleDashboardTelemetry, TASK_ID } from './usage/dashboard_telemetry_collection_task';
 
 vi.mock('./usage/dashboard_telemetry_collection_task', () => {
-      const mocked = {
-      scheduleDashboardTelemetry: vi.fn().mockResolvedValue('ok'),
-      TASK_ID: 'mockTaskID',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scheduleDashboardTelemetry: vi.fn().mockResolvedValue('ok'),
+    TASK_ID: 'mockTaskID',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEmbeddable = createEmbeddableStartMock();
 

@@ -16,7 +16,7 @@ import { GcpServiceAccountAuth } from './gcp_service_account';
 import { parseServiceAccountKey, getGcpAccessToken } from './gcp_jwt_helpers';
 
 vi.mock('./gcp_jwt_helpers', async () => {
-  const actual = (await vi.importActual('./gcp_jwt_helpers'));
+  const actual = await vi.importActual('./gcp_jwt_helpers');
   return {
     ...actual,
     getGcpAccessToken: vi.fn(),

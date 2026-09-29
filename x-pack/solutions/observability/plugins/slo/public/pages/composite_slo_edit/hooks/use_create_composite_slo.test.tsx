@@ -19,9 +19,9 @@ import type { CreateCompositeSLOForm } from '../types';
 
 vi.mock('../../../hooks/use_kibana');
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = { toMountPoint: (node: unknown) => node };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { toMountPoint: (node: unknown) => node };
+  return { ...mocked, default: mocked };
+});
 
 const mockPost = vi.fn();
 const mockAddSuccess = vi.fn();

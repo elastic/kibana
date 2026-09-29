@@ -17,28 +17,28 @@ import { LocalFileSystem } from './file_system/local_file_system';
 import { getPullRequestNumber, isCiEnvironment, resolveCurrentCommitSha } from './utils';
 
 vi.mock('globby', () => {
-      const mocked = { globby: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { globby: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils', () => {
-      const mocked = {
-      getPullRequestNumber: vi.fn(),
-      isCiEnvironment: vi.fn(),
-      resolveCurrentCommitSha: vi.fn(),
-      withGcsAuth: vi.fn((_, action: () => Promise<unknown>) => action()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPullRequestNumber: vi.fn(),
+    isCiEnvironment: vi.fn(),
+    resolveCurrentCommitSha: vi.fn(),
+    withGcsAuth: vi.fn((_, action: () => Promise<unknown>) => action()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./file_system/gcs_file_system', () => {
-      const mocked = {
-      GcsFileSystem: vi.fn().mockImplementation(() => ({
-        updateArchive: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GcsFileSystem: vi.fn().mockImplementation(() => ({
+      updateArchive: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGlobby = globby as MockedFunction<typeof globby>;
 const mockedGetPullRequestNumber = getPullRequestNumber as MockedFunction<

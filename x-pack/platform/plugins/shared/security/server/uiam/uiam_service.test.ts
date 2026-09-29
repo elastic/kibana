@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock, MockInstance } from 'vitest';
-
 import fs from 'fs';
 import undici from 'undici';
+import { vi } from 'vitest';
+import type { Mock, MockInstance } from 'vitest';
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -33,13 +32,13 @@ import { ConfigSchema } from '../config';
 import { securityTelemetry } from '../otel/instrumentation';
 
 vi.mock('../otel/instrumentation', () => {
-      const mocked = {
-      securityTelemetry: {
-        recordOAuthTokenExchangeAttempt: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityTelemetry: {
+      recordOAuthTokenExchangeAttempt: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const AGENT_MOCK = { name: "I'm the danger. I'm the one who knocks." };
 

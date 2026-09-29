@@ -47,32 +47,32 @@ import { useGetTemplate } from '../../../templates_v2/hooks/use_get_template';
 import { useGetFieldDefinitions } from '../../../field_library/hooks/use_get_field_definitions';
 
 vi.mock('../template_fields', () => {
-      const mocked = {
-      TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateFields: () => <div data-test-subj="case-view-template-fields" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../global_case_fields', () => {
-      const mocked = {
-      GlobalCaseFields: () => <div data-test-subj="case-view-global-case-fields" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GlobalCaseFields: () => <div data-test-subj="case-view-global-case-fields" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../templates_v2/hooks/use_get_template', () => {
-      const mocked = {
-      useGetTemplate: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplate: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../containers/configure/use_get_supported_action_connectors');
 vi.mock('../../../../common/navigation/hooks');
@@ -310,11 +310,9 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('should call useReplaceCustomField correctly', async () => {
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
     localStorage.setItem(
       'securitySolution.cases.caseView.sidebarAccordions',
@@ -370,11 +368,9 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('does not render legacy custom fields accordion when the show-legacy switch is off', async () => {
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'false');
     (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
@@ -415,11 +411,9 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('renders legacy custom fields accordion closed by default when the switch is on', async () => {
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
     (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
@@ -441,11 +435,9 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('shows settings and custom fields links in the deprecation callout when the user has settings permission', async () => {
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
     (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
@@ -470,11 +462,9 @@ describe('CaseViewSidebar (redesign)', () => {
   });
 
   it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
     (useGetCaseConfiguration as Mock).mockReturnValue({
       data: {
@@ -566,11 +556,9 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('renders TemplateFields when templates v2 is enabled and a template is applied', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
       useGetTemplateMock.mockReturnValue({ data: { name: 'SLA breach response' } });
 
       const caseDataWithTemplate: CaseUI = {
@@ -594,11 +582,9 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('shows the no-template subtitle when no template is applied', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
 
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />);
 
@@ -613,11 +599,9 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('shows an empty state when no template is applied and no global fields exist', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
       useGetFieldDefinitionsMock.mockReturnValue({
         data: { fieldDefinitions: [] },
         isLoading: false,
@@ -631,11 +615,9 @@ describe('CaseViewSidebar (redesign)', () => {
     });
 
     it('does not render the template settings popover for users without update permissions', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
 
       renderWithTestingProviders(<CaseViewSidebar caseData={caseData} />, {
         wrapperProps: { permissions: noUpdateCasesPermissions() },

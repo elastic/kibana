@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 // Note: this import must be before other relative imports for the mocks to work as intended.
 import {
   mockAuthorizationModeFactory,
@@ -19,6 +17,7 @@ import {
 
 import type { Client } from '@elastic/elasticsearch';
 import { Subject } from 'rxjs';
+import { vi } from 'vitest';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
@@ -222,9 +221,7 @@ it('#stop unsubscribes from license and ES updates.', async () => {
     kibanaIndexName,
     packageVersion: 'some-version',
     features: featuresPluginMock.createSetup(),
-    getSpacesService: vi
-      .fn()
-      .mockReturnValue({ getSpaceId: vi.fn(), namespaceToSpaceId: vi.fn() }),
+    getSpacesService: vi.fn().mockReturnValue({ getSpaceId: vi.fn(), namespaceToSpaceId: vi.fn() }),
     getCurrentUser: vi.fn(),
     customBranding: mockCoreSetup.customBranding,
   });

@@ -27,13 +27,13 @@ vi.mock('@kbn/index-adapter');
 // This mock is required to have a way to await the index pattern name promise
 let mockIndexNameProviders: RuleMigrationIndexNameProviders;
 vi.mock('./rule_migrations_data_client', () => {
-      const mocked = {
-      RuleMigrationsDataClient: vi.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
-        mockIndexNameProviders = indexNameProviders;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleMigrationsDataClient: vi.fn((indexNameProviders: RuleMigrationIndexNameProviders) => {
+      mockIndexNameProviders = indexNameProviders;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const INDEX_PATTERN = '.kibana-siem-rule-migrations';
 

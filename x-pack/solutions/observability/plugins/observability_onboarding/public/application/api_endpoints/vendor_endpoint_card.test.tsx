@@ -16,11 +16,11 @@ import { ApiEndpointId } from '../../../common/api_endpoints';
 import { VendorEndpointCard } from './vendor_endpoint_card';
 
 vi.mock('../shared/logo_icon', () => {
-      const mocked = {
-      LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const vercelVendor = {
   id: ApiEndpointId.Vercel,

@@ -29,7 +29,7 @@ import {
 import { estimateGuardedEnvelopeTokens, fitsGuardedEnvelope } from './trim_policy_result';
 
 vi.mock('./create_policy_tool', async () => {
-  const actual = (await vi.importActual('./create_policy_tool'));
+  const actual = await vi.importActual('./create_policy_tool');
   return {
     ...actual,
     createPolicyTool: vi.fn((options) => actual.createPolicyTool(options)),
@@ -39,11 +39,11 @@ vi.mock('./create_policy_tool', async () => {
 const mockedCreatePolicyTool = vi.mocked(createPolicyTool);
 
 vi.mock('../services/assess_change', () => {
-      const mocked = {
-      assessChange: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assessChange: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SPACE_ID = 'space-marketing';
 const getStartServices = vi.fn(async () => [

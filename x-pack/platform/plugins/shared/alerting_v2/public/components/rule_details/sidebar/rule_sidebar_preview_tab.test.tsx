@@ -16,43 +16,43 @@ import { RuleSidebarPreviewTab } from './rule_sidebar_preview_tab';
 let capturedProps: Record<string, unknown> = {};
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      QuerySandbox: (props: Record<string, unknown>) => {
-        capturedProps = props;
-        return <div data-test-subj="mockQuerySandbox" />;
-      },
-      RuleFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QuerySandbox: (props: Record<string, unknown>) => {
+      capturedProps = props;
+      return <div data-test-subj="mockQuerySandbox" />;
+    },
+    RuleFormProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      QueryClient: vi.fn().mockImplementation(() => ({})),
-      QueryClientProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryClient: vi.fn().mockImplementation(() => ({})),
+    QueryClientProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: (token: unknown) => {
-        if (token === 'http') return { basePath: { prepend: (p: string) => p } };
-        if (token === 'notifications') return { toasts: { addSuccess: vi.fn() } };
-        if (token === 'application') return { navigateToUrl: vi.fn() };
-        return {};
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: (token: unknown) => {
+      if (token === 'http') return { basePath: { prepend: (p: string) => p } };
+      if (token === 'notifications') return { toasts: { addSuccess: vi.fn() } };
+      if (token === 'application') return { navigateToUrl: vi.fn() };
+      return {};
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di', () => {
-      const mocked = {
-      PluginStart: (key: string) => `plugin:${key}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginStart: (key: string) => `plugin:${key}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

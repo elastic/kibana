@@ -10,9 +10,7 @@ import type { MockedFunction } from 'vitest';
 
 import type { getDescriptorNamespace } from './get_descriptor_namespace';
 
-export const mockGetDescriptorNamespace = vi.fn() as MockedFunction<
-  typeof getDescriptorNamespace
->;
+export const mockGetDescriptorNamespace = vi.fn() as MockedFunction<typeof getDescriptorNamespace>;
 
 vi.mock('./get_descriptor_namespace', () => {
   return {

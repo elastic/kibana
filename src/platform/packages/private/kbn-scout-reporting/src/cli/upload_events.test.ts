@@ -21,31 +21,31 @@ import type { ScoutReportDataStream } from '../reporting';
 vi.mock('node:fs');
 
 vi.mock('@kbn/scout-info', () => {
-      const mocked = {
-      SCOUT_REPORT_OUTPUT_ROOT: 'scout/reports/directory',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SCOUT_REPORT_OUTPUT_ROOT: 'scout/reports/directory',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/elasticsearch', () => {
-      const mocked = {
-      getValidatedESClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getValidatedESClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddEventsFromFile = vi.fn();
 
 vi.mock('../reporting/report/events', () => {
-      const mocked = {
-      ScoutReportDataStream: vi.fn().mockImplementation(() => {
-        return {
-          addEventsFromFile: mockAddEventsFromFile,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScoutReportDataStream: vi.fn().mockImplementation(() => {
+      return {
+        addEventsFromFile: mockAddEventsFromFile,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('uploadAllEventsFromPath', () => {
   let log: Mocked<ToolingLog>;
@@ -238,7 +238,9 @@ describe('uploadAllEventsFromPath', () => {
 
   it('addEventsFromFile should concatenate lines from multiple files in order and pass a single datasource to bulk helper', async () => {
     // Use the real implementation of ScoutReportDataStream for this test
-    const { ScoutReportDataStream: RealScoutReportDataStream } = (await vi.importActual('../reporting/report/events')) as { ScoutReportDataStream: typeof ScoutReportDataStream };
+    const { ScoutReportDataStream: RealScoutReportDataStream } = (await vi.importActual(
+      '../reporting/report/events'
+    )) as { ScoutReportDataStream: typeof ScoutReportDataStream };
 
     // Mock file contents for two .ndjson files
     const fileContents: Record<string, string> = {
@@ -246,18 +248,16 @@ describe('uploadAllEventsFromPath', () => {
       'file2.ndjson': 'b1\n',
     };
 
-    const createReadStreamMock = vi
-      .spyOn(fs, 'createReadStream')
-      .mockImplementation((filePath) => {
-        const filePathStr = String(filePath);
-        const key = filePathStr.endsWith('file1.ndjson')
-          ? 'file1.ndjson'
-          : filePathStr.endsWith('file2.ndjson')
-          ? 'file2.ndjson'
-          : '';
-        const content = fileContents[key] ?? '';
-        return Readable.from([content]) as fs.ReadStream;
-      });
+    const createReadStreamMock = vi.spyOn(fs, 'createReadStream').mockImplementation((filePath) => {
+      const filePathStr = String(filePath);
+      const key = filePathStr.endsWith('file1.ndjson')
+        ? 'file1.ndjson'
+        : filePathStr.endsWith('file2.ndjson')
+        ? 'file2.ndjson'
+        : '';
+      const content = fileContents[key] ?? '';
+      return Readable.from([content]) as fs.ReadStream;
+    });
 
     // Mock ES client bulk helper and assert datasource yields concatenated lines in order
     const bulkMock = vi.fn(async (opts: any) => {
@@ -285,10 +285,10 @@ describe('uploadAllEventsFromPath', () => {
     expect(bulkMock).toHaveBeenCalledTimes(1);
 
     await expect(bulkMock.mock.results[0].value).resolves.toEqual({
-            total: 3,
-            time: 1000,
-            failed: 0,
-          });
+      total: 3,
+      time: 1000,
+      failed: 0,
+    });
 
     createReadStreamMock.mockRestore();
   });

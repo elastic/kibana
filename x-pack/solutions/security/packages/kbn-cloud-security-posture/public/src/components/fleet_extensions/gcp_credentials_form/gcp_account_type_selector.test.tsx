@@ -26,31 +26,31 @@ import type { UpdatePolicy } from '../types';
 // Mock the cloud setup context
 const mockUseCloudSetup = vi.fn();
 vi.mock('../hooks/use_cloud_setup_context', () => {
-      const mocked = {
-      useCloudSetup: () => mockUseCloudSetup(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudSetup: () => mockUseCloudSetup(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the utility functions
 vi.mock('../utils', () => {
-      const mocked = {
-      updatePolicyWithInputs: vi.fn(),
-      gcpField: {
-        fields: {
-          'gcp.organization_id': { value: '' },
-        },
+  const mocked = {
+    updatePolicyWithInputs: vi.fn(),
+    gcpField: {
+      fields: {
+        'gcp.organization_id': { value: '' },
       },
-      getGcpInputVarsFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+    getGcpInputVarsFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Get mocked functions from jest modules
 const {
   updatePolicyWithInputs: mockUpdatePolicyWithInputs,
   getGcpInputVarsFields: mockGetGcpInputVarsFields,
-} = (await vi.importMock('../utils'));
+} = await vi.importMock('../utils');
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);

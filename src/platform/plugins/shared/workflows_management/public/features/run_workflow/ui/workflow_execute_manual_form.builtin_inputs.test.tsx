@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { monaco as mockMonaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KIBANA_WORKFLOW_INPUT_DEFINITION_REF_PREFIX } from '@kbn/workflows';
@@ -28,60 +28,60 @@ const BUILTIN_INPUTS: JsonModelSchemaType = {
 };
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({
-        value,
-        onChange,
-        editorDidMount,
-        dataTestSubj,
-      }: {
-        value: string;
-        onChange?: (value: string) => void;
-        editorDidMount?: (editor: { getModel: () => { uri: { toString: () => string } } }) => void;
-        dataTestSubj?: string;
-      }) => {
-        editorDidMount?.({
-          getModel: () => ({ uri: { toString: () => 'inmemory://test/manual-input.json' } }),
-        });
+  const mocked = {
+    CodeEditor: ({
+      value,
+      onChange,
+      editorDidMount,
+      dataTestSubj,
+    }: {
+      value: string;
+      onChange?: (value: string) => void;
+      editorDidMount?: (editor: { getModel: () => { uri: { toString: () => string } } }) => void;
+      dataTestSubj?: string;
+    }) => {
+      editorDidMount?.({
+        getModel: () => ({ uri: { toString: () => 'inmemory://test/manual-input.json' } }),
+      });
 
-        return (
-          <textarea
-            data-test-subj={dataTestSubj || 'code-editor'}
-            value={value}
-            onChange={(event) => onChange?.(event.target.value)}
-          />
-        );
-      },
-      monaco: {
-        languages: {
-          json: {
-            jsonDefaults: {
-              setDiagnosticsOptions: vi.fn(),
-            },
+      return (
+        <textarea
+          data-test-subj={dataTestSubj || 'code-editor'}
+          value={value}
+          onChange={(event) => onChange?.(event.target.value)}
+        />
+      );
+    },
+    monaco: {
+      languages: {
+        json: {
+          jsonDefaults: {
+            setDiagnosticsOptions: vi.fn(),
           },
         },
-        editor: {},
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      editor: {},
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./input_validation_callout', () => {
-      const mocked = {
-      InputValidationCallout: ({ errors }: { errors: string }) => (
-        <div data-test-subj="workflow-input-validation-callout">{errors}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InputValidationCallout: ({ errors }: { errors: string }) => (
+      <div data-test-subj="workflow-input-validation-callout">{errors}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderForm = (value: string) => {
   const setValue = vi.fn();

@@ -19,7 +19,7 @@ import { DraggableLegendItem } from './draggable_legend_item';
 vi.mock('../../lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -30,12 +30,12 @@ const MockSecurityCellActions = vi.fn(({ children }: { children: React.ReactNode
   <div data-test-subj="mockSecurityCellActions">{children}</div>
 ));
 vi.mock('../cell_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../cell_actions')),
-      SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../cell_actions')),
+    SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DraggableLegendItem', () => {
   const legendItem: LegendItem = {

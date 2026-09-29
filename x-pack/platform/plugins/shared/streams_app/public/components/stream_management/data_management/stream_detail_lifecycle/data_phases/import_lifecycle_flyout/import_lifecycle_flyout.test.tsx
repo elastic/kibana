@@ -16,11 +16,11 @@ import { ImportLifecycleFlyout } from './import_lifecycle_flyout';
 import type { ImportLifecycleOption } from './types';
 
 vi.mock('../../../../../../hooks/use_streams_privileges', () => {
-      const mocked = {
-      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const options: ImportLifecycleOption[] = [
   {

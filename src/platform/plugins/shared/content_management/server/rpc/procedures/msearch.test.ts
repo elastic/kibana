@@ -27,7 +27,7 @@ const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');
 
 vi.mock('@kbn/object-versioning', async () => {
-  const original = (await vi.importActual('@kbn/object-versioning'));
+  const original = await vi.importActual('@kbn/object-versioning');
   return {
     ...original,
     getContentManagementServicesTransforms: (...args: any[]) => {

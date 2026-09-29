@@ -13,9 +13,9 @@ import type { Mock } from 'vitest';
 import type { ContextValue } from '../../contexts';
 
 vi.mock('./send_request', () => {
-      const mocked = { sendRequest: vi.fn(() => Promise.resolve()) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { sendRequest: vi.fn(() => Promise.resolve()) };
+  return { ...mocked, default: mocked };
+});
 
 import { sendRequest } from './send_request';
 import { serviceContextMock } from '../../contexts/services_context.mock';

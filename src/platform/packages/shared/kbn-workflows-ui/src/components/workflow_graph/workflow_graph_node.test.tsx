@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   type WorkflowGraphActions,
@@ -25,13 +24,13 @@ import {
 // Stub @xyflow/react's Handle — it requires an internal React Flow context that
 // isn't available in unit tests, and we're not testing connection logic here.
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      ...require('@xyflow/react'),
-      Handle: () => null,
-      Position: { Top: 'top', Bottom: 'bottom' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('@xyflow/react'),
+    Handle: () => null,
+    Position: { Top: 'top', Bottom: 'bottom' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Minimal NodeProps-shaped object for `WorkflowGraphNode`.
 const makeNodeProps = (

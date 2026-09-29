@@ -24,16 +24,14 @@ import {
 } from '../../common/lib/workflow_change_history/constants';
 
 vi.mock('@kbn/change-history', async () => {
-  const actual = (await vi.importActual('@kbn/change-history'));
+  const actual = await vi.importActual('@kbn/change-history');
   return {
     ...actual,
     ChangeHistoryClient: vi.fn(),
   };
 });
 
-const MockedChangeHistoryClient = ChangeHistoryClient as MockedClass<
-  typeof ChangeHistoryClient
->;
+const MockedChangeHistoryClient = ChangeHistoryClient as MockedClass<typeof ChangeHistoryClient>;
 
 describe('WorkflowChangeHistoryService', () => {
   const logger = loggerMock.create();

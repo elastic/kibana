@@ -48,23 +48,20 @@ vi.mock('execa', () => {
 });
 
 vi.mock('fs', () => {
-      const mocked = {
-      promises: {
-        writeFile: vi.fn(),
-        mkdtemp: vi.fn().mockImplementation(() => '/foo'),
-        readFile: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    promises: {
+      writeFile: vi.fn(),
+      mkdtemp: vi.fn().mockImplementation(() => '/foo'),
+      readFile: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Create a properly typed mock instance of fs/promises
 const mockFs = vi.mocked(fs);
 
-type ExecaMock = Overwrite<
-  typeof execa,
-  { command: MockedFunction<(typeof execa)['command']> }
->;
+type ExecaMock = Overwrite<typeof execa, { command: MockedFunction<(typeof execa)['command']> }>;
 
 const mockedExeca = execa as unknown as ExecaMock;
 

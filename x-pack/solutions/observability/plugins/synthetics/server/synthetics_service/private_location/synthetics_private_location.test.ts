@@ -981,12 +981,10 @@ describe('SyntheticsPrivateLocation', () => {
           },
         },
       } as unknown as SyntheticsServerSetup);
-      const bulkCreate = vi
-        .spyOn(PackagePolicyService.prototype, 'bulkCreate')
-        .mockResolvedValue({
-          created: [],
-          failed: [],
-        });
+      const bulkCreate = vi.spyOn(PackagePolicyService.prototype, 'bulkCreate').mockResolvedValue({
+        created: [],
+        failed: [],
+      });
 
       await syntheticsPrivateLocation.createPackagePolicies(
         [{ config: { ...testConfig, locations: [conditionLocation] }, globalParams: {} }],
@@ -1185,9 +1183,7 @@ describe('SyntheticsPrivateLocation', () => {
         pluginsStart: {
           taskManager: { get: vi.fn().mockResolvedValue({ state: {} }) },
           licensing: {
-            getLicense: vi
-              .fn()
-              .mockResolvedValue(licenseMock.createLicense({ license: { type } })),
+            getLicense: vi.fn().mockResolvedValue(licenseMock.createLicense({ license: { type } })),
           },
         },
       } as unknown as SyntheticsServerSetup);

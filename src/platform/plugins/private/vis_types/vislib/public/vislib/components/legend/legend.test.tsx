@@ -22,7 +22,7 @@ import { legendColors } from './models';
 import { act } from '@testing-library/react';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -31,13 +31,13 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../services', () => {
-      const mocked = {
-      getDataActions: () => ({
-        createFiltersFromValueClickAction: vi.fn().mockResolvedValue(['yes']),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataActions: () => ({
+      createFiltersFromValueClickAction: vi.fn().mockResolvedValue(['yes']),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fireEvent = vi.fn();
 const hasCompatibleActions = vi.fn().mockReturnValue(true);

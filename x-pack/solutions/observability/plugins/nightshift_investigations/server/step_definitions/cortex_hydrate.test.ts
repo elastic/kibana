@@ -14,11 +14,11 @@ import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { cortexHydrateStepDefinition } from './cortex_hydrate';
 
 vi.mock('../cortex/register_cortex', () => {
-      const mocked = {
-      hydrateCortexWorkspace: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hydrateCortexWorkspace: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('cortexHydrateStepDefinition', () => {
   const esClient = { search: vi.fn() };

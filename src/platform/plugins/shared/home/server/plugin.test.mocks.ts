@@ -15,9 +15,9 @@ import { sampleDataRegistryMock } from './services/sample_data/sample_data_regis
 export const registryForTutorialsMock = tutorialsRegistryMock.create();
 export const registryForSampleDataMock = sampleDataRegistryMock.create();
 vi.doMock('./services', () => {
-      const mocked = {
-      TutorialsRegistry: vi.fn(() => registryForTutorialsMock),
-      SampleDataRegistry: vi.fn(() => registryForSampleDataMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TutorialsRegistry: vi.fn(() => registryForTutorialsMock),
+    SampleDataRegistry: vi.fn(() => registryForSampleDataMock),
+  };
+  return { ...mocked, default: mocked };
+});

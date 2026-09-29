@@ -44,7 +44,7 @@ const validateRuleResponseActionsMock = _validateRuleResponseActions as Mock;
 const duplicateExceptionsMock = _duplicateExceptions as Mock;
 
 vi.mock('../../../../../../endpoint/services', async () => {
-  const actualModule = (await vi.importActual('../../../../../../endpoint/services'));
+  const actualModule = await vi.importActual('../../../../../../endpoint/services');
   return {
     ...actualModule,
     validateRuleResponseActions: vi.fn(actualModule.validateRuleResponseActions),

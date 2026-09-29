@@ -22,13 +22,13 @@ import type { ImportJsonFlyoutServices } from './types';
 
 const mockCaptureError = vi.fn();
 vi.mock('@elastic/apm-rum', () => {
-      const mocked = {
-      apm: {
-        captureError: (...args: unknown[]) => mockCaptureError(...args),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apm: {
+      captureError: (...args: unknown[]) => mockCaptureError(...args),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const VALID_STATE = { title: 'My Object', panels: [] };
 const VALID_FILE = new File([JSON.stringify(VALID_STATE)], 'object.json', {

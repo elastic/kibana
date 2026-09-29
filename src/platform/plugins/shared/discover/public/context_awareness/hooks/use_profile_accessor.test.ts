@@ -21,14 +21,14 @@ import { DataGridDensity } from '@kbn/unified-data-table';
 let mockProfiles: AppliedProfile[] = [];
 
 vi.mock('./use_profiles', () => {
-      const mocked = {
-      useProfiles: vi.fn(() => mockProfiles),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfiles: vi.fn(() => mockProfiles),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../composable_profile', async () => {
-  const originalModule = (await vi.importActual('../composable_profile'));
+  const originalModule = await vi.importActual('../composable_profile');
   return {
     ...originalModule,
     getMergedAccessor: vi.fn(originalModule.getMergedAccessor),

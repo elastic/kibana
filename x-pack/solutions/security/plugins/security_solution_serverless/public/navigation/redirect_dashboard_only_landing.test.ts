@@ -20,13 +20,13 @@ import {
 } from './redirect_dashboard_only_landing';
 
 vi.mock('@kbn/security-solution-plugin/common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-solution-plugin/common')),
-      isSecuritySolutionAccessible: ({ siemV5 }: { siemV5?: { show?: boolean } }) =>
-        Boolean(siemV5?.show),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-solution-plugin/common')),
+    isSecuritySolutionAccessible: ({ siemV5 }: { siemV5?: { show?: boolean } }) =>
+      Boolean(siemV5?.show),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setCapabilities = (overrides: {
   navLinks?: Record<string, boolean>;

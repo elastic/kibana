@@ -106,9 +106,7 @@ describe('ActionsPopover', () => {
   });
 
   it('contains link to edit page', async () => {
-    vi
-      .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
-      .mockReturnValue('/a/test/edit/url');
+    vi.spyOn(editMonitorLocatorModule, 'useEditMonitorLocator').mockReturnValue('/a/test/edit/url');
     const { getByTestId } = render(
       <ActionsPopover
         position="relative"
@@ -123,9 +121,7 @@ describe('ActionsPopover', () => {
   });
 
   it('contains link to clone monitor', async () => {
-    vi
-      .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
-      .mockReturnValue('/a/test/edit/url');
+    vi.spyOn(editMonitorLocatorModule, 'useEditMonitorLocator').mockReturnValue('/a/test/edit/url');
     const { getByTestId } = render(
       <ActionsPopover
         position="relative"
@@ -142,9 +138,9 @@ describe('ActionsPopover', () => {
   });
 
   it('contains link to detail page', async () => {
-    vi
-      .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
-      .mockReturnValue('/a/test/detail/url');
+    vi.spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator').mockReturnValue(
+      '/a/test/detail/url'
+    );
     const { getByTestId } = render(
       <ActionsPopover
         position="relative"
@@ -219,9 +215,9 @@ describe('ActionsPopover', () => {
       // `?remoteName=<alias>` is in the URL — so it is *not* part of the
       // 3-state remote-redirect set (Edit / Clone / Enable-Disable).
       it('keeps Go to monitor as in-app navigation (local detailUrl with remoteName)', () => {
-        vi
-          .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
-          .mockReturnValue('/a/test/detail/url?remoteName=cluster-1');
+        vi.spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator').mockReturnValue(
+          '/a/test/detail/url?remoteName=cluster-1'
+        );
 
         const { getByTestId } = render(
           <ActionsPopover
@@ -374,9 +370,9 @@ describe('ActionsPopover', () => {
       // `kibanaUrl` (no destination URL handler today), so it isn't covered
       // by this scenario.
       it('disables Edit / Clone but keeps Go to monitor enabled', () => {
-        vi
-          .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
-          .mockReturnValue('/a/test/detail/url?remoteName=cluster-1');
+        vi.spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator').mockReturnValue(
+          '/a/test/detail/url?remoteName=cluster-1'
+        );
 
         const { getByTestId } = render(
           <ActionsPopover
@@ -456,9 +452,9 @@ describe('ActionsPopover', () => {
     // action is read-only — unlike remote monitors there is no origin cluster
     // to deep-link to either.
     it('disables Edit and Clone with no href', () => {
-      vi
-        .spyOn(editMonitorLocatorModule, 'useEditMonitorLocator')
-        .mockReturnValue('/a/test/edit/url');
+      vi.spyOn(editMonitorLocatorModule, 'useEditMonitorLocator').mockReturnValue(
+        '/a/test/edit/url'
+      );
 
       const { getByTestId } = render(
         <ActionsPopover
@@ -496,9 +492,9 @@ describe('ActionsPopover', () => {
     // The read-only detail page isn't available yet (coming in a follow-up),
     // so "Go to monitor" is omitted for heartbeat monitors.
     it('omits Go to monitor', () => {
-      vi
-        .spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator')
-        .mockReturnValue('/a/test/detail/url');
+      vi.spyOn(monitorDetailLocatorModule, 'useMonitorDetailLocator').mockReturnValue(
+        '/a/test/detail/url'
+      );
 
       const { queryByTestId } = render(
         <ActionsPopover

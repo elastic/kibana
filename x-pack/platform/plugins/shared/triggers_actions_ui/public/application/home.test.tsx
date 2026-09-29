@@ -30,35 +30,37 @@ vi.mock('./sections/rules_list/components/rules_list', () => {
 });
 
 vi.mock('./components/health_check', () => {
-      const mocked = {
-      HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./context/health_context', () => {
-      const mocked = {
-      HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
-      const mocked = {
-      useGetRuleTypesPermissions: vi.fn().mockReturnValue({
-        authorizedToReadAnyRules: true,
-        authorizedToCreateAnyRules: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetRuleTypesPermissions: vi.fn().mockReturnValue({
+      authorizedToReadAnyRules: true,
+      authorizedToCreateAnyRules: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 

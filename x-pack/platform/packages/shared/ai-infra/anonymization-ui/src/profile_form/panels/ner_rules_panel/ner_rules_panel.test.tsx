@@ -15,11 +15,11 @@ import { useProfileFormContext } from '../../profile_form_context';
 import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
 vi.mock('../../profile_form_context', () => {
-      const mocked = {
-      useProfileFormContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfileFormContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setContext = (overrides: Parameters<typeof buildProfileFormContextValue>[0] = {}) => {
   const onNerRulesChange = vi.fn();

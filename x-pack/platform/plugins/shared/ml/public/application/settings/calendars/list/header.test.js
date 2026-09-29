@@ -14,56 +14,56 @@ import { renderWithI18n } from '../../../test_utils/render_with_ml_context';
 import { CalendarsListHeader } from './header';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      withKibana: (comp) => {
-        return comp;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withKibana: (comp) => {
+      return comp;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../contexts/kibana/kibana_context', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              ml: { calendars: 'calendars link' },
-            },
-          },
-          application: {
-            navigateToApp: vi.fn(),
-            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            ml: { calendars: 'calendars link' },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              ml: { calendars: 'calendars link' },
-            },
-          },
-          application: {
-            navigateToApp: vi.fn(),
-            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            ml: { calendars: 'calendars link' },
           },
         },
-      }),
-      useNavigateToPath: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
+        },
+      },
+    }),
+    useNavigateToPath: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CalendarListsHeader', () => {
   const refreshCalendars = vi.fn(() => {});

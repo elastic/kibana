@@ -42,11 +42,12 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
 

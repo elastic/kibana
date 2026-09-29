@@ -36,13 +36,13 @@ const mockSpan: Span = {
 };
 
 vi.mock('./with_active_inference_span', () => {
-      const mocked = {
-      withActiveInferenceSpan: vi.fn((_name: string, _opts: unknown, cb: (span: Span) => unknown) =>
-        cb(mockSpan)
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withActiveInferenceSpan: vi.fn((_name: string, _opts: unknown, cb: (span: Span) => unknown) =>
+      cb(mockSpan)
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('withExecuteToolSpan', () => {
   beforeEach(() => {

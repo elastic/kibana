@@ -53,16 +53,16 @@ vi.mock('../../hooks/use_fetch_graph_data', () => {
 const actionMocks: Record<string, Mock> = {};
 
 vi.mock('@storybook/addon-actions', () => {
-      const mocked = {
-      action: vi.fn((name) => {
-        if (!actionMocks[name]) {
-          actionMocks[name] = vi.fn(); // Create a new mock if not already present
-        }
-        return actionMocks[name]; // Return the mock for the given action name
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    action: vi.fn((name) => {
+      if (!actionMocks[name]) {
+        actionMocks[name] = vi.fn(); // Create a new mock if not already present
+      }
+      return actionMocks[name]; // Return the mock for the given action name
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderStory = (args: Partial<GraphInvestigationProps> = {}) => {
   return render(
@@ -100,12 +100,12 @@ const renderGroupedTargetStory = (args: Partial<GraphInvestigationProps> = {}) =
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 vi.mock('../constants', async () => {
-      const mocked = {
-      ...(await vi.importActual('../constants')),
-      ONLY_RENDER_VISIBLE_ELEMENTS: false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../constants')),
+    ONLY_RENDER_VISIBLE_ELEMENTS: false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // By default we toggle the search bar visibility
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn().mockReturnValue([true, vi.fn()]));
@@ -389,10 +389,7 @@ describe('GraphInvestigation Component', () => {
       const setSearchBarToggled = vi.fn((value: boolean) => {
         searchBarToggled = value;
       });
-      (useSessionStorage as Mock).mockImplementation(() => [
-        searchBarToggled,
-        setSearchBarToggled,
-      ]);
+      (useSessionStorage as Mock).mockImplementation(() => [searchBarToggled, setSearchBarToggled]);
       const { getByTestId, container } = renderStory({
         showToggleSearch: true,
       });
@@ -411,10 +408,7 @@ describe('GraphInvestigation Component', () => {
       const setSearchBarToggled = vi.fn((value: boolean) => {
         searchBarToggled = value;
       });
-      (useSessionStorage as Mock).mockImplementation(() => [
-        searchBarToggled,
-        setSearchBarToggled,
-      ]);
+      (useSessionStorage as Mock).mockImplementation(() => [searchBarToggled, setSearchBarToggled]);
       const { getByTestId, container } = renderStory({
         showToggleSearch: true,
       });

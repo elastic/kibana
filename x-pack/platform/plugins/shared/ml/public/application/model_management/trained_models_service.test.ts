@@ -24,8 +24,7 @@ import type { DeploymentParamsUI } from './deployment_setup';
 import type { DeploymentParamsMapper } from './deployment_params_mapper';
 
 // Helper that resolves on the next microtask tick
-const flushPromises = () =>
-  new Promise((resolve) => require('timers').setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => require('timers').setImmediate(resolve));
 
 describe('TrainedModelsService', () => {
   let mockTrainedModelsApiService: Mocked<TrainedModelsApiService>;

@@ -14,23 +14,23 @@ import type { RuleApiResponse } from '../../../services/rules_api';
 import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
 
 vi.mock('../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => {
-      const mocked = {
-      ActionPoliciesArtifactsSubsection: ({
-        flyoutSession,
-        showTitle,
-      }: {
-        flyoutSession?: string;
-        showTitle?: boolean;
-      }) => (
-        <div
-          data-test-subj="mockActionPoliciesArtifacts"
-          data-session={flyoutSession}
-          data-show-title={String(showTitle)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPoliciesArtifactsSubsection: ({
+      flyoutSession,
+      showTitle,
+    }: {
+      flyoutSession?: string;
+      showTitle?: boolean;
+    }) => (
+      <div
+        data-test-subj="mockActionPoliciesArtifacts"
+        data-session={flyoutSession}
+        data-show-title={String(showTitle)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rule = { id: 'rule-1' } as RuleApiResponse;
 

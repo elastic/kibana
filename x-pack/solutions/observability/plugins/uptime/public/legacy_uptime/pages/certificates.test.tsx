@@ -12,11 +12,11 @@ import { CertificatesPage } from './certificates';
 import { render } from '../lib/helper/rtl_helpers';
 
 vi.mock('../components/certificates/use_cert_search', () => {
-      const mocked = {
-      useCertSearch: () => ({ certs: [], total: 0, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCertSearch: () => ({ certs: [], total: 0, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CertificatesPage', () => {
   it('renders expected elements for valid props', async () => {

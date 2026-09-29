@@ -12,40 +12,40 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 vi.mock('../utils/resolve_connector_id', () => {
-      const mocked = {
-      resolveConnectorId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./build_prompts', () => {
-      const mocked = {
-      buildSystemPart: vi.fn(),
-      buildDataPart: vi.fn(),
-      buildRequirementsPart: vi.fn(),
-      buildInstructionsPart: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildSystemPart: vi.fn(),
+    buildDataPart: vi.fn(),
+    buildRequirementsPart: vi.fn(),
+    buildInstructionsPart: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/steps/ai', () => {
-      const mocked = {
-      AiSummarizeStepCommonDefinition: {
-        id: 'ai.summarize',
-        inputSchema: {},
-        outputSchema: {},
-        configSchema: {},
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AiSummarizeStepCommonDefinition: {
+      id: 'ai.summarize',
+      inputSchema: {},
+      outputSchema: {},
+      configSchema: {},
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-extensions/server', () => {
-      const mocked = {
-      createServerStepDefinition: vi.fn((definition) => definition),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createServerStepDefinition: vi.fn((definition) => definition),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   buildDataPart,

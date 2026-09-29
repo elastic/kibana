@@ -31,33 +31,33 @@ vi.mock('react-use/lib/useObservable', () => ({
 }));
 
 vi.mock('./use_snapshot_repositories', () => {
-      const mocked = {
-      useSnapshotRepositories: (...args: unknown[]) => mockUseSnapshotRepositories(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSnapshotRepositories: (...args: unknown[]) => mockUseSnapshotRepositories(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          application: {
-            getUrlForApp: mockGetUrlForApp,
-            capabilities: {
-              management: { stack: { license_management: mockLicenseManagementCapable } },
-            },
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+          capabilities: {
+            management: { stack: { license_management: mockLicenseManagementCapable } },
           },
         },
-        dependencies: {
-          start: {
-            licensing: { license$: {} },
-            cloud: mockCloud,
-          },
+      },
+      dependencies: {
+        start: {
+          licensing: { license$: {} },
+          cloud: mockCloud,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDefinition = (canCreateSnapshotRepository: boolean): Streams.ingest.all.GetResponse =>
   ({

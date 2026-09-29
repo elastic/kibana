@@ -80,33 +80,33 @@ const testProps = {
 };
 vi.mock('../../assistant_context');
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => {
-        return {
-          data: [],
-          error: null,
-          isSuccess: true,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => {
+      return {
+        data: [],
+        error: null,
+        isSuccess: true,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_settings_updater/use_conversations_updater', async () => {
-  const original = (await vi.importActual('./use_settings_updater/use_conversations_updater'));
+  const original = await vi.importActual('./use_settings_updater/use_conversations_updater');
   return {
     ...original,
     useConversationsUpdater: vi.fn().mockImplementation(() => mockConversationsUpdater),
   };
 });
 vi.mock('./use_settings_updater/use_system_prompt_updater', async () => {
-  const original = (await vi.importActual('./use_settings_updater/use_system_prompt_updater'));
+  const original = await vi.importActual('./use_settings_updater/use_system_prompt_updater');
   return {
     ...original,
     useSystemPromptUpdater: vi.fn().mockImplementation(() => mockSystemUpdater),
   };
 });
 vi.mock('./use_settings_updater/use_quick_prompt_updater', async () => {
-  const original = (await vi.importActual('./use_settings_updater/use_quick_prompt_updater'));
+  const original = await vi.importActual('./use_settings_updater/use_quick_prompt_updater');
   return {
     ...original,
     useQuickPromptUpdater: vi.fn().mockImplementation(() => mockQuickUpdater),

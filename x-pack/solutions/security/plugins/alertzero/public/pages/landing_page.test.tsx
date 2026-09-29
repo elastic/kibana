@@ -25,29 +25,29 @@ vi.mock('../hooks/use_investigations_api');
 
 // ConversationsPage has complex deps; stub it to keep the test focused on routing logic.
 vi.mock('./conversations', () => {
-      const mocked = {
-      ConversationsPage: () => <div data-test-subj="conversations-page" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConversationsPage: () => <div data-test-subj="conversations-page" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // OnboardingPage has router/kibana deps; keep it real but stub its layout deps.
 vi.mock('../components/layout/alertzero_page_section', () => {
-      const mocked = {
-      AlertZeroPageSection: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertZeroPageSection: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../components/scan_failure_callout/scan_failure_callout', () => {
-      const mocked = {
-      ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_alertzero_doc_title', () => {
-      const mocked = { useAlertZeroDocTitle: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAlertZeroDocTitle: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkers = useWorkers as Mock;
 const mockUseInvestigationsCount = useInvestigationsCount as Mock;

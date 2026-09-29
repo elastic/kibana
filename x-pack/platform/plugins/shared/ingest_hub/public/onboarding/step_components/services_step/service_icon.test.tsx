@@ -13,33 +13,33 @@ import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      useGetPackageInfoByKeyQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetPackageInfoByKeyQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/common', () => {
-      const mocked = {
-      epmRouteService: {
-        getFilePath: (path: string) => `/api/fleet/epm${path.replace('/package', '/packages')}`,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    epmRouteService: {
+      getFilePath: (path: string) => `/api/fleet/epm${path.replace('/package', '/packages')}`,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            basePath: { prepend: (path: string) => path },
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          basePath: { prepend: (path: string) => path },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useGetPackageInfoByKeyQuery } from '@kbn/fleet-plugin/public';
 import { ServiceIcon } from './service_icon';

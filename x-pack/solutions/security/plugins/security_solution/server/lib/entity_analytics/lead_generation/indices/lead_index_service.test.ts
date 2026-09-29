@@ -16,11 +16,11 @@ import {
 
 const mockCreateOrUpdateIndex = vi.fn();
 vi.mock('../../utils/create_or_update_index', () => {
-      const mocked = {
-      createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('LeadIndexService', () => {
   const esClient = elasticsearchServiceMock.createElasticsearchClient();

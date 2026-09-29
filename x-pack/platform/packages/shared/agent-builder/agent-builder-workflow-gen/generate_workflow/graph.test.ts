@@ -36,9 +36,7 @@ steps:
     request: {} as any,
     spaceId: 'default',
     workflowsApi: {
-      getAvailableConnectors: vi
-        .fn()
-        .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+      getAvailableConnectors: vi.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
       validateWorkflow: vi.fn().mockResolvedValue({
         valid: true,
         diagnostics: [],

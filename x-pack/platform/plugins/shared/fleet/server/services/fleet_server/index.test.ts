@@ -34,9 +34,7 @@ vi.mock('../agents');
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
-const mockedGetAgentStatusById = getAgentStatusById as MockedFunction<
-  typeof getAgentStatusById
->;
+const mockedGetAgentStatusById = getAgentStatusById as MockedFunction<typeof getAgentStatusById>;
 
 describe('checkFleetServerVersionsForSecretsStorage', () => {
   let mockContext: MockedFleetAppContext;
@@ -58,8 +56,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   it('should return true if all fleet server versions are at least the specified version and there are no managed policies', async () => {
     const version = '1.0.0';
 
-    vi
-      .spyOn(mockedPackagePolicyService, 'list')
+    vi.spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
           {
@@ -134,8 +131,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   it('should return true if there are no fleet servers', async () => {
     const version = '1.0.0';
 
-    vi
-      .spyOn(mockedPackagePolicyService, 'list')
+    vi.spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
           {
@@ -172,8 +168,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
   it('should query versioned policy_id variants when Fleet Server agent is reassigned', async () => {
     const version = '1.0.0';
 
-    vi
-      .spyOn(mockedPackagePolicyService, 'list')
+    vi.spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
           {
@@ -219,8 +214,7 @@ describe('checkFleetServerVersionsForSecretsStorage', () => {
     // The comparison must strip the version suffix before matching.
     const version = '10.0.0';
 
-    vi
-      .spyOn(mockedPackagePolicyService, 'list')
+    vi.spyOn(mockedPackagePolicyService, 'list')
       .mockResolvedValueOnce({
         items: [
           {

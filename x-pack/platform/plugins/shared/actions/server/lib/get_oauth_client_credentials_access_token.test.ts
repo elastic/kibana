@@ -16,11 +16,11 @@ import { getOAuthClientCredentialsAccessToken } from './get_oauth_client_credent
 import { requestOAuthClientCredentialsToken } from './request_oauth_client_credentials_token';
 
 vi.mock('./request_oauth_client_credentials_token', () => {
-      const mocked = {
-      requestOAuthClientCredentialsToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestOAuthClientCredentialsToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();

@@ -24,11 +24,11 @@ import { KiListPanel } from './ki_list_panel';
 const mockUseKiList = vi.fn();
 
 vi.mock('../../hooks/use_ki_list', () => {
-      const mocked = {
-      useKiList: (...args: unknown[]) => mockUseKiList(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKiList: (...args: unknown[]) => mockUseKiList(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const aiIndex: GetAiIndexResponse = {
   id: 'sample-ki',

@@ -14,29 +14,29 @@ const mockFetchEntitiesListV2 = vi.fn();
 const mockGetEuidFilterBasedOnDocument = vi.fn();
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      useEntityStoreEuidApi: () => ({
-        euid: {
-          dsl: {
-            getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
-          },
+  const mocked = {
+    useEntityStoreEuidApi: () => ({
+      euid: {
+        dsl: {
+          getEuidFilterBasedOnDocument: mockGetEuidFilterBasedOnDocument,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../entity_analytics/api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchEntitiesListV2: mockFetchEntitiesListV2,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchEntitiesListV2: mockFetchEntitiesListV2,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // QueryClientProvider wrapper required by useQuery.
-const { QueryClient, QueryClientProvider } = (await vi.importActual('@kbn/react-query'));
+const { QueryClient, QueryClientProvider } = await vi.importActual('@kbn/react-query');
 const React = require('react');
 
 function createWrapper() {

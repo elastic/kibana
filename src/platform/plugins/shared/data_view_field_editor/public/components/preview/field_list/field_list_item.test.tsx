@@ -18,12 +18,12 @@ import type { PreviewController } from '../preview_controller';
 import { BehaviorSubject } from 'rxjs';
 
 vi.mock('../field_preview_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../field_preview_context')),
-      useFieldPreviewContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../field_preview_context')),
+    useFieldPreviewContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseFieldPreviewContext = vi.mocked(useFieldPreviewContext);
 
 const previewController = {

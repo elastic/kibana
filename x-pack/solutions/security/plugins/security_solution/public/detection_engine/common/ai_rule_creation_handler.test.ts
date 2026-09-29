@@ -14,18 +14,18 @@ import { createAiRuleCreationHandler } from './ai_rule_creation_handler';
 import type { AiRuleCreationService } from './ai_rule_creation_store';
 
 vi.mock('../rule_management/api/api', () => {
-      const mocked = {
-      createRule: vi.fn(),
-      updateRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRule: vi.fn(),
+    updateRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./transforms', () => {
-      const mocked = {
-      transformOutput: vi.fn((r) => r),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformOutput: vi.fn((r) => r),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { createRule, updateRule } from '../rule_management/api/api';
 

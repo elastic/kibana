@@ -15,12 +15,12 @@ import { useKibana } from '../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../common/lib/telemetry/events/siem_readiness/types';
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      useBasePath: vi.fn(() => '/test/base/path'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    useBasePath: vi.fn(() => '/test/base/path'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportEvent = vi.fn();
 

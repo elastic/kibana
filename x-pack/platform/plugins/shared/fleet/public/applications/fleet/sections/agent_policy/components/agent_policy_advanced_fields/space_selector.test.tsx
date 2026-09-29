@@ -19,12 +19,12 @@ import { SpaceSelectorComponent as SpaceSelector, type SpaceSelectorProps } from
 
 vi.mock('../../../../../../hooks/use_request/spaces');
 vi.mock('../../../../../../hooks/use_core', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks/use_core')),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks/use_core')),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Space Selector', () => {
   beforeEach(() => {

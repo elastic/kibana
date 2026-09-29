@@ -25,11 +25,11 @@ import { buildRoundInterruptedEvent } from './build_round_interrupted_event';
 import { getPendingTurn } from './conversation_turn';
 
 vi.mock('../../../../tracing', () => {
-      const mocked = {
-      getCurrentTraceId: () => 'trace-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentTraceId: () => 'trace-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('buildRoundInterruptedEvent', () => {
   const startTime = new Date('2026-01-01T00:00:00.000Z');

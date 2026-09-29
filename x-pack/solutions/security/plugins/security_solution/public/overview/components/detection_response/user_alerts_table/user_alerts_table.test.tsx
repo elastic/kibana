@@ -19,7 +19,7 @@ import { UserAlertsTable } from './user_alerts_table';
 const userName = 'crffn20qcs';
 const mockGetAppUrl = vi.fn();
 vi.mock('../../../../common/lib/kibana/hooks', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana/hooks'));
+  const original = await vi.importActual('../../../../common/lib/kibana/hooks');
   return {
     ...original,
     useNavigation: () => ({
@@ -58,11 +58,11 @@ const mockUseUserAlertsItemsReturn = (overrides: Partial<UseUserAlertsItemsRetur
 };
 
 vi.mock('./use_user_alerts_items', () => {
-      const mocked = {
-      useUserAlertsItems: () => mockUseUserAlertsItems(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserAlertsItems: () => mockUseUserAlertsItems(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = () =>
   render(

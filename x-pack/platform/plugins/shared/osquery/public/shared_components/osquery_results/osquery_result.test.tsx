@@ -71,9 +71,9 @@ const renderWithContext = (Element: React.ReactElement) =>
 describe('Osquery result', () => {
   beforeAll(() => {
     mockKibana();
-    vi
-      .spyOn(useLiveQueryDetails, 'useLiveQueryDetails')
-      .mockImplementation(() => defaultLiveQueryDetails);
+    vi.spyOn(useLiveQueryDetails, 'useLiveQueryDetails').mockImplementation(
+      () => defaultLiveQueryDetails
+    );
   });
 
   it('return results table', async () => {

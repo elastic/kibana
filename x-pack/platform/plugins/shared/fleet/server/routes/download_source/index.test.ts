@@ -30,29 +30,29 @@ import {
 } from './handler';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
-      },
-      agentPolicyService: {
-        bumpAllAgentPoliciesForDownloadSource: vi.fn().mockResolvedValue({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+    },
+    agentPolicyService: {
+      bumpAllAgentPoliciesForDownloadSource: vi.fn().mockResolvedValue({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/download_source', () => {
-      const mocked = {
-      downloadSourceService: {
-        list: vi.fn(),
-        get: vi.fn(),
-        create: vi.fn(),
-        update: vi.fn().mockResolvedValue({}),
-        delete: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadSourceService: {
+      list: vi.fn(),
+      get: vi.fn(),
+      create: vi.fn(),
+      update: vi.fn().mockResolvedValue({}),
+      delete: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

@@ -13,11 +13,11 @@ import { cleanupPrivateLocationRoute } from './cleanup_private_locations';
 import { resetSyncPrivateCleanUpState } from '../../../tasks/sync_private_locations_monitors_task';
 
 vi.mock('../../../tasks/sync_private_locations_monitors_task', () => {
-      const mocked = {
-      resetSyncPrivateCleanUpState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resetSyncPrivateCleanUpState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const resetSyncPrivateCleanUpStateMock = resetSyncPrivateCleanUpState as MockedFunction<
   typeof resetSyncPrivateCleanUpState

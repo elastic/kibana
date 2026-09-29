@@ -15,7 +15,7 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 let capturedOnChange: ((options: any[]) => void) | undefined;
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiSelectable: (props: any) => {

@@ -24,11 +24,11 @@ import { Sidebar } from './sidebar';
 // Mock only SidebarBody — its Emotion styles access euiTheme tokens that require EuiProvider.
 // Everything else (SidebarPanel, PanelResizeHandle, hooks, service) runs real.
 vi.mock('./sidebar_panel_body', () => {
-      const mocked = {
-      SidebarBody: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SidebarBody: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_APP_ID: SidebarAppId = 'sidebarExampleTest';
 const STATEFUL_APP_ID: SidebarAppId = 'sidebarExampleStateful';

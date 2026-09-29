@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock, MockedFunction } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { Mock, MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -23,26 +22,26 @@ import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_wo
 import { TestWrapper } from '../../shared/test_utils/test_wrapper';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 // Force the app menu to render at the xl breakpoint so the primary action button
 // (create) renders inline instead of collapsing into the overflow popover.
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useIsWithinBreakpoints: (breakpoints: string[]) => breakpoints.includes('xl'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useShowManagedWorkflowsSetting: vi.fn(),
@@ -51,43 +50,47 @@ vi.mock('@kbn/workflows-ui', async () => {
 });
 
 vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
-      const mocked = {
-      useWorkflowsBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entities/workflows/model/use_workflow_stats', () => {
-      const mocked = {
-      useWorkflowFiltersOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowFiltersOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../features/workflow_list', () => {
-      const mocked = {
-      WorkflowList: () => <div data-test-subj="mockWorkflowListForAuthzTest" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowList: () => <div data-test-subj="mockWorkflowListForAuthzTest" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../widgets/workflow_search_field/ui/workflow_search_field', () => {
-      const mocked = {
-      WorkflowSearchField: ({ onSearch }: { onSearch: (query: string) => void }) => (
-        <button type="button" data-test-subj="workflowSearchField" onClick={() => onSearch('security')}>
-          {'Search workflows'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowSearchField: ({ onSearch }: { onSearch: (query: string) => void }) => (
+      <button
+        type="button"
+        data-test-subj="workflowSearchField"
+        onClick={() => onSearch('security')}
+      >
+        {'Search workflows'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../features/workflow_executions_stats/ui', () => {
-      const mocked = {
-      WorkflowExecutionStatsBar: () => <div data-test-subj="mockWorkflowExecutionStatsBar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionStatsBar: () => <div data-test-subj="mockWorkflowExecutionStatsBar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflows = useWorkflows as MockedFunction<typeof useWorkflows>;
 const mockUseShowManagedWorkflowsSetting = useShowManagedWorkflowsSetting as MockedFunction<

@@ -26,11 +26,11 @@ import { IntegrationSyncFlyout } from './integration_sync_flyout';
 
 vi.mock('../../../../hooks');
 vi.mock('../../../../../../components', () => {
-      const mocked = {
-      PackageIcon: () => <div data-test-subj="packageIcon" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageIcon: () => <div data-test-subj="packageIcon" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendGetPackageInfoByKeyForRq = sendGetPackageInfoByKeyForRq as Mock;
 const mockUseStartServices = useStartServices as Mock;

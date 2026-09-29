@@ -20,19 +20,19 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 
 vi.mock('../../../common/components/link_to');
 vi.mock('../overview_host', () => {
-      const mocked = {
-      OverviewHost: vi.fn(() => <div data-test-subj="overview-host-mock">{'OverviewHost'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewHost: vi.fn(() => <div data-test-subj="overview-host-mock">{'OverviewHost'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../overview_network', () => {
-      const mocked = {
-      OverviewNetwork: vi.fn(() => (
-        <div data-test-subj="overview-network-mock">{'OverviewNetwork'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewNetwork: vi.fn(() => (
+      <div data-test-subj="overview-network-mock">{'OverviewNetwork'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const OverviewHostMocked = OverviewHost as MockedFunction<typeof OverviewHost>;
 const OverviewNetworkMocked = OverviewNetwork as MockedFunction<typeof OverviewNetwork>;

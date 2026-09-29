@@ -16,17 +16,17 @@ import { getTranslationPaths } from './get_translation_paths';
 const mockGetTranslationPaths = getTranslationPaths as Mock;
 
 vi.mock('./get_translation_paths', () => {
-      const mocked = {
-      getTranslationPaths: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTranslationPaths: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      fromRoot: vi.fn().mockImplementation((path: string) => path),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fromRoot: vi.fn().mockImplementation((path: string) => path),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/repo-packages', () => {
   return {
     getPackages: vi.fn().mockReturnValue([]),
@@ -35,7 +35,7 @@ vi.mock('@kbn/repo-packages', () => {
 });
 
 const locale = 'en';
-const { getPackages, getPluginPackagesFilter } = (await vi.importMock('@kbn/repo-packages'));
+const { getPackages, getPluginPackagesFilter } = await vi.importMock('@kbn/repo-packages');
 
 describe('getKibanaTranslationPaths', () => {
   beforeEach(() => {

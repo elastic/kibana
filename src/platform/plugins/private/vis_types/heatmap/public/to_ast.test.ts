@@ -18,17 +18,17 @@ import { toExpressionAst } from './to_ast';
 import type { HeatmapVisParams } from './types';
 
 vi.mock('@kbn/expressions-plugin/public', async () => {
-      const mocked = {
-      ...((await vi.importActual('@kbn/expressions-plugin/public')) as any),
-      buildExpression: vi.fn().mockImplementation(() => ({
-        toAst: () => ({
-          type: 'expression',
-          chain: [],
-        }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...((await vi.importActual('@kbn/expressions-plugin/public')) as any),
+    buildExpression: vi.fn().mockImplementation(() => ({
+      toAst: () => ({
+        type: 'expression',
+        chain: [],
+      }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('heatmap vis toExpressionAst function', () => {
   let vis: Vis<HeatmapVisParams>;

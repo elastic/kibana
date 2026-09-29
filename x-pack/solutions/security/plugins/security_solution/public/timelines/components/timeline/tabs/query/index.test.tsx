@@ -84,24 +84,24 @@ vi.mock('../../../../../common/components/user_privileges');
 vi.mock('../../../../containers/details');
 
 vi.mock('../../../fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_experimental_features');
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(() => ({
-        pathname: '',
-        search: '',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(() => ({
+      pathname: '',
+      search: '',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { mockTimelineSearchSubscription } = getMockTimelineSearchSubscription();
 

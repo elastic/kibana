@@ -209,32 +209,32 @@ test('attaches appenders to appenders that declare refs', async () => {
 
 test('throws if a circular appender reference is detected', async () => {
   await expect(async () => {
-        await system.upgrade(
-          config.schema.validate({
-            appenders: {
-              console: { type: 'console', layout: { type: 'pattern' } },
-              a: {
-                type: 'rewrite',
-                appenders: ['b'],
-                policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
-              },
-              b: {
-                type: 'rewrite',
-                appenders: ['c'],
-                policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
-              },
-              c: {
-                type: 'rewrite',
-                appenders: ['console', 'a'],
-                policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
-              },
-            },
-            loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
-          })
-        );
-      }).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Circular appender reference detected: [b -> c -> a -> b]"`
-      );
+    await system.upgrade(
+      config.schema.validate({
+        appenders: {
+          console: { type: 'console', layout: { type: 'pattern' } },
+          a: {
+            type: 'rewrite',
+            appenders: ['b'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          b: {
+            type: 'rewrite',
+            appenders: ['c'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+          c: {
+            type: 'rewrite',
+            appenders: ['console', 'a'],
+            policy: { type: 'meta', mode: 'remove', properties: [{ path: 'b' }] },
+          },
+        },
+        loggers: [{ name: 'tests', level: 'warn', appenders: ['a'] }],
+      })
+    );
+  }).rejects.toThrowErrorMatchingInlineSnapshot(
+    `"Circular appender reference detected: [b -> c -> a -> b]"`
+  );
 
   expect(mockConsoleLog).toHaveBeenCalledTimes(0);
 });

@@ -43,13 +43,13 @@ vi.mock('../../services/setup', async () => {
 
 vi.mock('../../services/fleet_server');
 vi.mock('../../services/secrets', () => {
-      const mocked = {
-      isSecretStorageEnabled: vi.fn().mockResolvedValue(true),
-      isSSLSecretStorageEnabled: vi.fn().mockResolvedValue(true),
-      isActionSecretStorageEnabled: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSecretStorageEnabled: vi.fn().mockResolvedValue(true),
+    isSSLSecretStorageEnabled: vi.fn().mockResolvedValue(true),
+    isActionSecretStorageEnabled: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetupFleet = setupFleet as MockedFunction<typeof setupFleet>;
 
@@ -198,9 +198,9 @@ describe('FleetStatusHandler', () => {
   });
 
   it('POST /status w/200 and body without missing requirements', async () => {
-    vi
-      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
-      .mockResolvedValue(true);
+    vi.mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled).mockResolvedValue(
+      true
+    );
     vi.mocked(hasFleetServers).mockResolvedValue(true);
     await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
@@ -222,9 +222,9 @@ describe('FleetStatusHandler', () => {
   });
 
   it('POST /status w/200 and body with missing requirements', async () => {
-    vi
-      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
-      .mockResolvedValue(false);
+    vi.mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled).mockResolvedValue(
+      false
+    );
     vi.mocked(hasFleetServers).mockResolvedValue(false);
     await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
@@ -256,9 +256,9 @@ describe('FleetStatusHandler', () => {
         },
       } as any)
     );
-    vi
-      .mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled)
-      .mockResolvedValue(true);
+    vi.mocked(appContextService.getSecurity().authc.apiKeys.areAPIKeysEnabled).mockResolvedValue(
+      true
+    );
     await getFleetStatusWithErrorHandler(
       coreMock.createCustomRequestHandlerContext(context),
       request,

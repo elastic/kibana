@@ -37,16 +37,16 @@ import { useRefetchByScope } from '../../../../flyout_v2/document/main/hooks/use
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../flyout_v2/document/main/hooks/use_refetch_by_scope');
 vi.mock('../../../../flyout_v2/document/main/components/status', () => {
-      const mocked = {
-      Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
-        <>
-          <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>
-          <button data-test-subj="rule-status-badge" onClick={onAlertUpdated} type="button" />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Status: ({ onAlertUpdated }: { onAlertUpdated?: () => void }) => (
+      <>
+        <div data-test-subj="securitySolutionFlyoutHeaderStatusTitle">{'Status'}</div>
+        <button data-test-subj="rule-status-badge" onClick={onAlertUpdated} type="button" />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');

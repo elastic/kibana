@@ -15,11 +15,11 @@ import { useFetchLog } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 vi.mock('../../../../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchLogDocumentById = vi.fn<
   Promise<

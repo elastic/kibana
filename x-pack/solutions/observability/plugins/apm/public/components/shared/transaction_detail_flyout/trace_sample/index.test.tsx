@@ -19,33 +19,33 @@ import { useTransactionDetailFlyoutTraceSamplesFetcher } from './use_transaction
 vi.mock('../transaction_detail_flyout_context');
 vi.mock('./use_transaction_detail_flyout_trace_samples_fetcher');
 vi.mock('../../../app/transaction_details/use_unified_waterfall_fetcher', () => {
-      const mocked = {
-      useUnifiedWaterfallFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedWaterfallFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../app/transaction_details/waterfall_with_summary/maybe_view_trace_link', () => {
-      const mocked = {
-      MaybeViewTraceLink: () => <div data-test-subj="transactionDetailFlyoutViewFullTraceLink" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MaybeViewTraceLink: () => <div data-test-subj="transactionDetailFlyoutViewFullTraceLink" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../summary/transaction_summary', () => {
-      const mocked = {
-      TransactionSummary: () => <div data-test-subj="transactionDetailFlyoutTraceSampleSummary" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionSummary: () => <div data-test-subj="transactionDetailFlyoutTraceSampleSummary" />,
+  };
+  return { ...mocked, default: mocked };
+});
 const mockTimeline = vi.fn((_props: { onNodeClick?: () => void }) => (
   <div data-test-subj="transactionDetailFlyoutTraceSampleTimeline" />
 ));
 vi.mock('./trace_sample_timeline', () => {
-      const mocked = {
-      TransactionDetailFlyoutTraceSampleTimeline: (props: { onNodeClick?: () => void }) =>
-        mockTimeline(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyoutTraceSampleTimeline: (props: { onNodeClick?: () => void }) =>
+      mockTimeline(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as Mock;
 const mockedUseTransactionDetailFlyoutTraceSamplesFetcher =

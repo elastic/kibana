@@ -20,12 +20,12 @@ import { applyCriticalityModifier } from './asset_criticality';
 import * as helpers from '../../asset_criticality/helpers';
 
 vi.mock('../../asset_criticality/helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../asset_criticality/helpers')),
-      getCriticalityModifier: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../asset_criticality/helpers')),
+    getCriticalityModifier: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetCriticalityModifier = helpers.getCriticalityModifier as MockedFunction<
   typeof helpers.getCriticalityModifier

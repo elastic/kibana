@@ -17,17 +17,17 @@ import type { SignificantEventsPluginSetupDependencies } from './types';
 import { SignificantEventsPlugin } from './plugin';
 
 vi.mock('./lib/run_quotas', () => {
-      const mocked = {
-      consumeRunQuota: vi.fn(),
-      createRunQuotaInternalRepository: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    consumeRunQuota: vi.fn(),
+    createRunQuotaInternalRepository: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./routes', () => {
-      const mocked = { significantEventsRouteRepository: {} };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { significantEventsRouteRepository: {} };
+  return { ...mocked, default: mocked };
+});
 
 const consumeRunQuotaMock = vi.mocked(consumeRunQuota);
 const createRunQuotaInternalRepositoryMock = vi.mocked(createRunQuotaInternalRepository);

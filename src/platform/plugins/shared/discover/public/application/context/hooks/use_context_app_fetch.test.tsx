@@ -35,7 +35,7 @@ let mockOverrideInterceptedWarnings = false;
 const mockFetchSurroundingDocs = vi.fn();
 
 vi.mock('../services/context', async () => {
-  const originalModule = (await vi.importActual('../services/context'));
+  const originalModule = await vi.importActual('../services/context');
   return {
     ...originalModule,
 
@@ -44,19 +44,19 @@ vi.mock('../services/context', async () => {
 });
 
 vi.mock('../services/anchor', () => {
-      const mocked = {
-      fetchAnchor: (anchorId: string, dataView: DataView) => {
-        if (!dataView.id || !anchorId) {
-          throw new Error();
-        }
-        return {
-          anchorRow: mockAnchorHit,
-          interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAnchor: (anchorId: string, dataView: DataView) => {
+      if (!dataView.id || !anchorId) {
+        throw new Error();
+      }
+      return {
+        anchorRow: mockAnchorHit,
+        interceptedWarnings: mockOverrideInterceptedWarnings ? [mockInterceptedWarning] : undefined,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const initDefaults = (
   tieBreakerFields: string[],

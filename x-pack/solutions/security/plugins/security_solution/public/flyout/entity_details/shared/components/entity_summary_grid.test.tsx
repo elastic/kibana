@@ -15,16 +15,16 @@ import { mockEntityRecord } from '../../mocks';
 import type { Entity } from '../../../../../common/api/entity_analytics';
 
 vi.mock('../../../../entity_analytics/api/hooks/use_get_watchlists', () => {
-      const mocked = {
-      useGetWatchlists: vi.fn().mockReturnValue({
-        data: [
-          { id: 'watchlist-1', name: 'First Watchlist' },
-          { id: 'watchlist-2', name: 'Second Watchlist' },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetWatchlists: vi.fn().mockReturnValue({
+      data: [
+        { id: 'watchlist-1', name: 'First Watchlist' },
+        { id: 'watchlist-2', name: 'Second Watchlist' },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const entityWithSource: Entity = {
   ...mockEntityRecord,

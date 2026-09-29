@@ -14,33 +14,33 @@ import { useErrorFailedStep } from './use_error_failed_step';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => ({ monitorId: 'monitor-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => ({ monitorId: 'monitor-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 

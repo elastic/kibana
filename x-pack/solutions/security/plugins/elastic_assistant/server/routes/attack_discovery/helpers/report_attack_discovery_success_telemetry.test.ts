@@ -18,38 +18,38 @@ import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/
 import { reportAttackDiscoveryGenerationSuccess } from './telemetry';
 
 vi.mock('lodash/fp', () => {
-      const mocked = {
-      uniq: vi.fn((arr) => Array.from(new Set(arr))),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uniq: vi.fn((arr) => Array.from(new Set(arr))),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/securitysolution-es-utils', () => {
-      const mocked = {
-      transformError: vi.fn((err) => err),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformError: vi.fn((err) => err),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/langchain/server', () => {
-      const mocked = {
-      ActionsClientLlm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionsClientLlm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../evaluate/utils', () => {
-      const mocked = {
-      getLangSmithTracer: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLangSmithTracer: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../utils', () => {
-      const mocked = {
-      getLlmType: vi.fn().mockReturnValue('llm-type'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLlmType: vi.fn().mockReturnValue('llm-type'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./telemetry', async () => {
-  const actual = (await vi.importActual('./telemetry'));
+  const actual = await vi.importActual('./telemetry');
   return {
     ...actual,
     reportAttackDiscoveryGenerationSuccess: vi.fn(actual.reportAttackDiscoveryGenerationSuccess),

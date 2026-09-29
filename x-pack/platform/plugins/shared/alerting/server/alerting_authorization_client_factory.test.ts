@@ -22,14 +22,13 @@ describe('AlertingAuthorizationClientFactory', () => {
   const features = featuresPluginMock.createStart();
   const securityPluginStart = securityMock.createStart();
   const logger = loggingSystemMock.create().get();
-  const alertingAuthorizationClientFactoryParams: Mocked<AlertingAuthorizationClientFactoryOpts> =
-    {
-      ruleTypeRegistry: ruleTypeRegistryMock.create(),
-      getSpace: vi.fn(),
-      getSpaceId: vi.fn(),
-      features,
-      logger,
-    };
+  const alertingAuthorizationClientFactoryParams: Mocked<AlertingAuthorizationClientFactoryOpts> = {
+    ruleTypeRegistry: ruleTypeRegistryMock.create(),
+    getSpace: vi.fn(),
+    getSpaceId: vi.fn(),
+    features,
+    logger,
+  };
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -47,7 +46,7 @@ describe('AlertingAuthorizationClientFactory', () => {
 
     await factory.create(request);
 
-    const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
+    const { AlertingAuthorization } = await vi.importMock('./authorization/alerting_authorization');
     expect(AlertingAuthorization.create).toHaveBeenCalledWith({
       request,
       authorization: securityPluginStart.authz,
@@ -65,7 +64,7 @@ describe('AlertingAuthorizationClientFactory', () => {
 
     await factory.create(request);
 
-    const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
+    const { AlertingAuthorization } = await vi.importMock('./authorization/alerting_authorization');
     expect(AlertingAuthorization.create).toHaveBeenCalledWith({
       request,
       ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
@@ -113,7 +112,9 @@ describe('AlertingAuthorizationClientFactory', () => {
       );
 
       // Should have called create() via AlertingAuthorization.create with request-derived space functions
-      const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
+      const { AlertingAuthorization } = await vi.importMock(
+        './authorization/alerting_authorization'
+      );
       expect(AlertingAuthorization.create).toHaveBeenCalledWith({
         request,
         ruleTypeRegistry: alertingAuthorizationClientFactoryParams.ruleTypeRegistry,
@@ -124,9 +125,7 @@ describe('AlertingAuthorizationClientFactory', () => {
     });
 
     it('creates an alerting authorization client scoped to the provided spaceId when getSpaceById is available', async () => {
-      const getSpaceById = vi
-        .fn()
-        .mockResolvedValue({ id: 'custom-space', name: 'Custom Space' });
+      const getSpaceById = vi.fn().mockResolvedValue({ id: 'custom-space', name: 'Custom Space' });
       const factory = new AlertingAuthorizationClientFactory();
       factory.initialize({
         ...alertingAuthorizationClientFactoryParams,
@@ -137,7 +136,9 @@ describe('AlertingAuthorizationClientFactory', () => {
       const request = mockRouter.createKibanaRequest();
       await factory.createForSpace(request, asSpaceId('custom-space'));
 
-      const { AlertingAuthorization } = (await vi.importMock('./authorization/alerting_authorization'));
+      const { AlertingAuthorization } = await vi.importMock(
+        './authorization/alerting_authorization'
+      );
       expect(AlertingAuthorization.create).toHaveBeenCalledWith({
         request,
         authorization: securityPluginStart.authz,

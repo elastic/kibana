@@ -8,20 +8,20 @@
 import { vi } from 'vitest';
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      getEMSSettings() {
-        return {
-          isEMSUrlSet() {
-            return false;
-          },
-        };
-      },
-      getMapsCapabilities() {
-        return { save: true };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { TooltipState } from '../../common/descriptor_types';
 import { openOnClickTooltip } from './tooltip_actions';

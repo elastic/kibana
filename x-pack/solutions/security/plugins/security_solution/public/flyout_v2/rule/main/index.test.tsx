@@ -20,14 +20,14 @@ import { FLYOUT_ERROR_TEST_ID } from '../../shared/components/test_ids';
 
 const mockFooter = vi.fn();
 vi.mock('./footer', () => {
-      const mocked = {
-      Footer: (props: Record<string, unknown>) => {
-        mockFooter(props);
-        return <div data-test-subj="ruleDetailsFooter" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Footer: (props: Record<string, unknown>) => {
+      mockFooter(props);
+      return <div data-test-subj="ruleDetailsFooter" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRuleDetails = useRuleDetails as Mock;
 vi.mock('./hooks/use_rule_details');

@@ -16,11 +16,11 @@ import type { PackagePolicy } from '../../../common/types/models';
 import { getPolicyThroughput } from './throughput';
 
 vi.mock('../epm/elasticsearch/retry', () => {
-      const mocked = {
-      retryTransientEsErrors: (fn: () => Promise<unknown>) => fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retryTransientEsErrors: (fn: () => Promise<unknown>) => fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makePolicy = (
   streams: Array<{ enabled: boolean; type?: string; dataset: string }>

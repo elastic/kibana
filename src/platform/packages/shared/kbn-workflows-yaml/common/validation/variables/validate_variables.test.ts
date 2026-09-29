@@ -49,10 +49,9 @@ const mockExtendWithPathSpecificContext = extendWithPathSpecificContext as Mocke
 const mockGetWorkflowContextSchema = getWorkflowContextSchema as MockedFunction<
   typeof getWorkflowContextSchema
 >;
-const mockGetContextSchemaWithTemplateLocals =
-  getContextSchemaWithTemplateLocals as MockedFunction<
-    typeof getContextSchemaWithTemplateLocals
-  >;
+const mockGetContextSchemaWithTemplateLocals = getContextSchemaWithTemplateLocals as MockedFunction<
+  typeof getContextSchemaWithTemplateLocals
+>;
 const mockValidateVariable = validateVariable as MockedFunction<typeof validateVariable>;
 
 describe('validateVariables', () => {
@@ -441,10 +440,14 @@ describe('validateVariables', () => {
       ],
     } as any);
     // Use real implementations so template locals are applied
-    const { getContextSchemaForStep: realGetContextSchemaForStep } = (await vi.importActual<typeof import('../context/get_context_for_path')>('../context/get_context_for_path'));
+    const { getContextSchemaForStep: realGetContextSchemaForStep } = await vi.importActual<
+      typeof import('../context/get_context_for_path')
+    >('../context/get_context_for_path');
     mockGetContextSchemaForStep.mockImplementation(realGetContextSchemaForStep);
     const { getContextSchemaWithTemplateLocals: realGetContextSchemaWithTemplateLocals } =
-      (await vi.importActual<typeof import('../context/extend_context_with_template_locals')>('../context/extend_context_with_template_locals'));
+      await vi.importActual<typeof import('../context/extend_context_with_template_locals')>(
+        '../context/extend_context_with_template_locals'
+      );
     mockGetContextSchemaWithTemplateLocals.mockImplementation(
       realGetContextSchemaWithTemplateLocals
     );

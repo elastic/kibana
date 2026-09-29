@@ -21,20 +21,20 @@ import { createMockMonacoModel } from '../../../shared/test_utils/mock_monaco';
  * The mock need to be inlined to work here.
  */
 vi.mock('@kbn/monaco', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/monaco')),
-      monaco: {
-        ...(await vi.importActual<typeof import('@kbn/monaco')>('@kbn/monaco')).monaco,
-        Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
-          startLineNumber: startLine,
-          startColumn: startCol,
-          endLineNumber: endLine,
-          endColumn: endCol,
-        })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/monaco')),
+    monaco: {
+      ...(await vi.importActual<typeof import('@kbn/monaco')>('@kbn/monaco')).monaco,
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+        startLineNumber: startLine,
+        startColumn: startCol,
+        endLineNumber: endLine,
+        endColumn: endCol,
+      })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getMonacoRangeFromYamlNode', () => {
   const mockModel = createMockMonacoModel('0123456789\n0123456789\n');

@@ -39,9 +39,7 @@ describe('syncNamespaceTemplatesTask', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     (appContextService.getLogger as Mock).mockReturnValue(logger);
-    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(
-      mockSoClient
-    );
+    (appContextService.getInternalUserSOClientForSpaceId as Mock).mockReturnValue(mockSoClient);
     (appContextService.getInternalUserESClient as Mock).mockReturnValue(mockEsClient);
     mockedSyncNamespaceTemplates.mockResolvedValue({
       packageName: 'nginx',

@@ -45,9 +45,9 @@ describe('validatePolicyNamespaceForSpace', () => {
   }
 
   beforeEach(() => {
-    vi
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: true } as any);
+    vi.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+      useSpaceAwareness: true,
+    } as any);
   });
 
   it('should retrieve settings based on given spaceId', async () => {
@@ -116,9 +116,9 @@ describe('validatePolicyNamespaceForSpace', () => {
   });
 
   it('should not validate if feature flag is off', async () => {
-    vi
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ useSpaceAwareness: false } as any);
+    vi.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+      useSpaceAwareness: false,
+    } as any);
     createSavedsClientMock({ allowed_namespace_prefixes: ['tata', 'test', 'toto'] });
 
     await validatePolicyNamespaceForSpace({
@@ -182,9 +182,9 @@ vi.mock(
 
 describe('validatePackagePoliciesUniqueNameAcrossSpaces', () => {
   const soClient = savedObjectsClientMock.create();
-  vi
-    .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
-    .mockReturnValue(soClient);
+  vi.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension).mockReturnValue(
+    soClient
+  );
 
   it('should not validate if package policies are empty', async () => {
     await expect(validatePackagePoliciesUniqueNameAcrossSpaces([], ['space1']));

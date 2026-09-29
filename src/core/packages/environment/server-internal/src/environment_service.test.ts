@@ -25,25 +25,25 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 
 vi.mock('./resolve_uuid', () => {
-      const mocked = {
-      resolveInstanceUuid: vi.fn().mockResolvedValue('SOME_UUID'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveInstanceUuid: vi.fn().mockResolvedValue('SOME_UUID'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./create_data_folder', () => {
-      const mocked = {
-      createDataFolder: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createDataFolder: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./write_pid_file', () => {
-      const mocked = {
-      writePidFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    writePidFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const pathConfig = {
   data: 'data-folder',

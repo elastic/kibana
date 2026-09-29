@@ -32,7 +32,7 @@ import { useEntityFromStore } from '../../../entity_details/shared/hooks/use_ent
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const actual = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...actual,
     useUiSetting: vi.fn(),
@@ -40,8 +40,8 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 });
 
 vi.mock('@kbn/entity-store/public', async () => {
-  const actual = (await vi.importActual('@kbn/entity-store/public'));
-  const { euid } = (await vi.importActual('@kbn/entity-store/common/euid_helpers'));
+  const actual = await vi.importActual('@kbn/entity-store/public');
+  const { euid } = await vi.importActual('@kbn/entity-store/common/euid_helpers');
   return {
     ...actual,
     useEntityStoreEuidApi: vi.fn(() => ({ euid })),
@@ -51,11 +51,11 @@ vi.mock('@kbn/entity-store/public', async () => {
 vi.mock('../../../entity_details/shared/hooks/use_entity_from_store');
 
 vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields');
 vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('../../../../flyout_v2/rule/main/hooks/use_rule_details');
@@ -63,14 +63,14 @@ vi.mock('../../../../flyout_v2/document/main/hooks/use_highlighted_fields_privil
 vi.mock('../../shared/hooks/use_basic_data_from_details_data');
 vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 vi.mock('../../shared/hooks/use_navigate_to_left_panel', () => {
-      const mocked = {
-      useNavigateToLeftPanel: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToLeftPanel: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useUiSetting: vi.fn().mockReturnValue(false),
@@ -79,13 +79,13 @@ vi.mock('../../../../common/lib/kibana', async () => {
 
 const mockAddSuccess = vi.fn();
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addSuccess: mockAddSuccess,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addSuccess: mockAddSuccess,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const panelContextValue = {
   ...mockContextValue,

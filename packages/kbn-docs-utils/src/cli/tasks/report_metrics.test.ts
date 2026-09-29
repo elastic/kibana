@@ -16,15 +16,15 @@ import type { CliOptions, SetupProjectResult, BuildApiMapResult, AllPluginStats 
 
 // Mock dependencies
 vi.mock('@kbn/ci-stats-reporter', () => {
-      const mocked = {
-      CiStatsReporter: {
-        fromEnv: vi.fn(() => ({
-          metrics: vi.fn(),
-        })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CiStatsReporter: {
+      fromEnv: vi.fn(() => ({
+        metrics: vi.fn(),
+      })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 

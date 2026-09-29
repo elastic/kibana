@@ -10,7 +10,7 @@
 import { vi } from 'vitest';
 
 vi.mock('./v1', async () => {
-  const actual = (await vi.importActual('./v1'));
+  const actual = await vi.importActual('./v1');
   return {
     ...actual,
     gatherV1CgroupMetrics: vi.fn(actual.gatherV1CgroupMetrics),
@@ -18,7 +18,7 @@ vi.mock('./v1', async () => {
 });
 
 vi.mock('./v2', async () => {
-  const actual = (await vi.importActual('./v2'));
+  const actual = await vi.importActual('./v2');
   return {
     ...actual,
     gatherV2CgroupMetrics: vi.fn(actual.gatherV2CgroupMetrics),

@@ -18,20 +18,20 @@ import { SaveDashboardModal } from './save_dashboard_modal';
 const mockCallApmApi = vi.fn();
 
 vi.mock('../../../../plugin', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../plugin')),
-      getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../plugin')),
+    getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseDashboardFetcher = vi.fn();
 vi.mock('../../../../hooks/use_dashboards_fetcher', () => {
-      const mocked = {
-      useDashboardFetcher: () => mockUseDashboardFetcher(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDashboardFetcher: () => mockUseDashboardFetcher(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DASHBOARD_TITLE = 'My dashboard';
 

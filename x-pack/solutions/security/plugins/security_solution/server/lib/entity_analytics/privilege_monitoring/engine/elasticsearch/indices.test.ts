@@ -23,11 +23,11 @@ import { PRIVMON_EVENT_INGEST_PIPELINE_ID, eventIngestPipeline } from './pipelin
 
 const mockCreateOrUpdateIndex = vi.fn();
 vi.mock('../../../utils/create_or_update_index', () => {
-      const mocked = {
-      createOrUpdateIndex: () => mockCreateOrUpdateIndex(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateIndex: () => mockCreateOrUpdateIndex(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Privileged User Monitoring: Indices Service', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();

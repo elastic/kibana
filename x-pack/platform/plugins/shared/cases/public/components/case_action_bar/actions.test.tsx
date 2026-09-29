@@ -25,22 +25,22 @@ import type { CasesPermissions } from '../../../common';
 
 vi.mock('../../containers/api');
 vi.mock('./apply_template_modal', () => {
-      const mocked = {
-      ApplyTemplateModal: () => <div data-test-subj="apply-template-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApplyTemplateModal: () => <div data-test-subj="apply-template-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../workflows/run_case_workflow_modal', () => {
-      const mocked = {
-      RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCanExecuteWorkflow = vi.fn(() => false);
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({

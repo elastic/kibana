@@ -18,11 +18,11 @@ import { useGenAiData } from './use_genai_data';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 vi.mock('../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const INPUT_MESSAGES_FIELD = 'attributes.gen_ai.input.messages';
 const mockSearch = vi.fn();

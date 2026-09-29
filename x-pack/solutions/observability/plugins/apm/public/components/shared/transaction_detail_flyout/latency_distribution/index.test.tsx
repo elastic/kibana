@@ -18,19 +18,19 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 vi.mock('../transaction_detail_flyout_context');
 vi.mock('./use_transaction_detail_flyout_distribution_chart_data');
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      DurationDistributionChart: ({
-        'data-test-subj': testSubj,
-        loading,
-        hasError,
-      }: {
-        'data-test-subj'?: string;
-        loading: boolean;
-        hasError: boolean;
-      }) => <div data-test-subj={testSubj} data-loading={loading} data-has-error={hasError} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DurationDistributionChart: ({
+      'data-test-subj': testSubj,
+      loading,
+      hasError,
+    }: {
+      'data-test-subj'?: string;
+      loading: boolean;
+      hasError: boolean;
+    }) => <div data-test-subj={testSubj} data-loading={loading} data-has-error={hasError} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as Mock;
 const mockedUseTransactionDetailFlyoutDistributionChartData =

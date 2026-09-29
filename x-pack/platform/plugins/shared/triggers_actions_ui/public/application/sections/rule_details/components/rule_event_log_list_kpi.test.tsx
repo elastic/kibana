@@ -20,37 +20,37 @@ import type { IToasts } from '@kbn/core/public';
 
 const addDangerMock = vi.fn();
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          notifications: { toast: { addDanger: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        notifications: { toast: { addDanger: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 vi.mock('../../../lib/rule_api/load_execution_kpi_aggregations', () => {
-      const mocked = {
-      loadExecutionKPIAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadExecutionKPIAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/rule_api/load_global_execution_kpi_aggregations', () => {
-      const mocked = {
-      loadGlobalExecutionKPIAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadGlobalExecutionKPIAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKpiResponse = {
   success: 4,

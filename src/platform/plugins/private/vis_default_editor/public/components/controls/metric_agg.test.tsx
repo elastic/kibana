@@ -16,19 +16,19 @@ import type { IAggConfig } from '@kbn/data-plugin/public';
 import { DEFAULT_OPTIONS, aggFilter, MetricAggParamEditor } from './metric_agg';
 
 vi.mock('./utils', () => {
-      const mocked = {
-      useAvailableOptions: vi.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
-        ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
-          text: type.name,
-          value: id,
-        })),
-        ...defaultOptions,
-      ]),
-      useFallbackMetric: vi.fn(),
-      useValidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAvailableOptions: vi.fn((aggFilterArray, filteredMetrics, defaultOptions) => [
+      ...filteredMetrics.map(({ id, type }: { id: string; type: { name: string } }) => ({
+        text: type.name,
+        value: id,
+      })),
+      ...defaultOptions,
+    ]),
+    useFallbackMetric: vi.fn(),
+    useValidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useAvailableOptions, useFallbackMetric, useValidation } from './utils';
 import type { AggParamEditorProps } from '../agg_param_props';

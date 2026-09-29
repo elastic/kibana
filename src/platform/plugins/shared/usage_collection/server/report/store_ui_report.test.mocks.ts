@@ -11,8 +11,8 @@ import { vi } from 'vitest';
 
 export const storeApplicationUsageMock = vi.fn();
 vi.doMock('./store_application_usage', () => {
-      const mocked = {
-      storeApplicationUsage: storeApplicationUsageMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    storeApplicationUsage: storeApplicationUsageMock,
+  };
+  return { ...mocked, default: mocked };
+});

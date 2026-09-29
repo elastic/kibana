@@ -15,12 +15,12 @@ const mockSetSearchParams = vi.fn();
 let mockSearchParams: URLSearchParams;
 
 vi.mock('@kbn/shared-ux-router', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/shared-ux-router')),
-      useSearchParams: vi.fn(() => [mockSearchParams, mockSetSearchParams]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/shared-ux-router')),
+    useSearchParams: vi.fn(() => [mockSearchParams, mockSetSearchParams]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useIdsFromUrl', () => {
   beforeEach(() => {

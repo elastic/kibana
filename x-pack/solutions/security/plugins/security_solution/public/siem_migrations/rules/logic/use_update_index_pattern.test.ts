@@ -15,14 +15,14 @@ import { createReactQueryWrapper } from '../../../common/mock/create_react_query
 
 vi.mock('../api');
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addSuccess: vi.fn(),
-        addError: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUpdateIndexPattern', () => {
   it('updates index pattern successfully', async () => {

@@ -30,21 +30,21 @@ import {
 // must match to the import in rules/related_integrations/use_integrations.tsx
 vi.mock('../../../fleet_integrations/api');
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          docLinks: {
-            links: {
-              securitySolution: {
-                createDetectionRules: 'http://link-to-docs',
-              },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        docLinks: {
+          links: {
+            securitySolution: {
+              createDetectionRules: 'http://link-to-docs',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const RELATED_INTEGRATION_ROW = 'relatedIntegrationRow';
 const COMBO_BOX_TOGGLE_BUTTON_TEST_ID = 'comboBoxToggleListButton';

@@ -31,7 +31,7 @@ const mockSuperDatePicker = vi.fn(
 );
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiSuperDatePicker: (props: { 'data-test-subj'?: string }) => mockSuperDatePicker(props),
@@ -39,14 +39,14 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/date-range-picker', () => {
-      const mocked = {
-      DateRangePicker: (props: DateRangePickerProps) => {
-        lastPickerProps = props;
-        return <div data-test-subj={props['data-test-subj'] ?? 'mockDateRangePicker'} />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DateRangePicker: (props: DateRangePickerProps) => {
+      lastPickerProps = props;
+      return <div data-test-subj={props['data-test-subj'] ?? 'mockDateRangePicker'} />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseDateRangePickerPresets = vi.fn((_options?: unknown) => ({
   presets: [{ start: 'now-15m', end: 'now', label: 'Last 15 minutes' }],
@@ -55,11 +55,11 @@ const mockUseDateRangePickerPresets = vi.fn((_options?: unknown) => ({
 }));
 
 vi.mock('@kbn/date-range-picker-presets', () => {
-      const mocked = {
-      useDateRangePickerPresets: (options: unknown) => mockUseDateRangePickerPresets(options),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateRangePickerPresets: (options: unknown) => mockUseDateRangePickerPresets(options),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const data = dataPluginMock.createStartContract();
 const core = coreMock.createStart();

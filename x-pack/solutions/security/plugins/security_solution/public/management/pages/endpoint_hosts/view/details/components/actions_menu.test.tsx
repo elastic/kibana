@@ -23,7 +23,7 @@ import type { HostInfo } from '../../../../../../../common/endpoint/types';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 vi.mock('../../../../../../common/lib/kibana/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../../../../../../common/lib/kibana/kibana_react'));
+  const originalModule = await vi.importActual('../../../../../../common/lib/kibana/kibana_react');
   return {
     ...originalModule,
     useKibana: vi.fn().mockReturnValue({

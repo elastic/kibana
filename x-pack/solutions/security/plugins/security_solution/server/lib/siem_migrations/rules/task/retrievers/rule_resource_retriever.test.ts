@@ -42,9 +42,7 @@ describe('RuleResourceRetriever', () => {
       fromOriginal: vi.fn().mockReturnValue([]),
       fromResources: vi.fn().mockReturnValue([]),
     }));
-    mockResourceIdentifier = new MockResourceIdentifier(
-      'splunk'
-    ) as Mocked<RuleResourceIdentifier>;
+    mockResourceIdentifier = new MockResourceIdentifier('splunk') as Mocked<RuleResourceIdentifier>;
   });
 
   it('throws an error if initialize is not called before getResources', async () => {

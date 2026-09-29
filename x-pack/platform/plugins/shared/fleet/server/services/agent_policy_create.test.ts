@@ -88,14 +88,13 @@ describe('createAgentPolicyWithPackages', () => {
     );
     vi.mocked(mockedBulkInstallPackages).mockReset();
     vi.mocked(mockedPackagePolicyService.create).mockReset();
-    vi
-      .mocked(mockedPackagePolicyService.create)
-      .mockImplementation((soClient, esClient, newPolicy) =>
+    vi.mocked(mockedPackagePolicyService.create).mockImplementation(
+      (soClient, esClient, newPolicy) =>
         Promise.resolve({
           ...newPolicy,
           id: 'mock-package-policy-id',
         } as PackagePolicy)
-      );
+    );
   });
 
   afterEach(() => {
@@ -103,8 +102,7 @@ describe('createAgentPolicyWithPackages', () => {
   });
 
   it('should retry via the lock when create throws PackagePolicyNameExistsError', async () => {
-    vi
-      .mocked(mockedPackagePolicyService.create)
+    vi.mocked(mockedPackagePolicyService.create)
       .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
       .mockRejectedValueOnce(new PackagePolicyNameExistsError('name exists'))
       .mockResolvedValue({ id: 'mock-package-policy-id' } as PackagePolicy);

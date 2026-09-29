@@ -12,7 +12,7 @@ import type { CoreSetup } from '@kbn/core/public';
 import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 
 vi.mock('@kbn/react-kibana-mount', async () => {
-  const original = (await vi.importActual('@kbn/react-kibana-mount'));
+  const original = await vi.importActual('@kbn/react-kibana-mount');
 
   return {
     ...original,

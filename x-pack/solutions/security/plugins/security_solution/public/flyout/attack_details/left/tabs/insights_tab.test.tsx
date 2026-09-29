@@ -15,69 +15,69 @@ import { AttackDetailsProvider } from '../../context';
 import { useExpandableFlyoutState } from '@kbn/expandable-flyout';
 
 vi.mock('../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_attack_details', () => {
-      const mocked = {
-      useAttackDetails: vi.fn().mockReturnValue({
-        loading: false,
-        attack: {
-          id: 'test-alert-1',
-          alertIds: ['alert-1'],
-          detectionEngineRuleId: 'rule-1',
-          ruleStatus: 'enabled',
-          ruleVersion: 1,
-          timestamp: '2024-01-01T00:00:00Z',
-          entities: { users: [], hosts: [] },
-          summaryMarkdown: '# Test Alert Summary',
-          mitreTactics: [],
-          mitreTechniques: [],
-        },
-        browserFields: {},
-        dataFormattedForFieldBrowser: [],
-        searchHit: { _index: 'test', _id: 'test-id' },
-        getFieldsData: vi.fn(),
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDetails: vi.fn().mockReturnValue({
+      loading: false,
+      attack: {
+        id: 'test-alert-1',
+        alertIds: ['alert-1'],
+        detectionEngineRuleId: 'rule-1',
+        ruleStatus: 'enabled',
+        ruleVersion: 1,
+        timestamp: '2024-01-01T00:00:00Z',
+        entities: { users: [], hosts: [] },
+        summaryMarkdown: '# Test Alert Summary',
+        mitreTactics: [],
+        mitreTechniques: [],
+      },
+      browserFields: {},
+      dataFormattedForFieldBrowser: [],
+      searchHit: { _index: 'test', _id: 'test-id' },
+      getFieldsData: vi.fn(),
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({
-        openLeftPanel: vi.fn(),
-      }),
-      useExpandableFlyoutState: vi.fn(() => ({
-        left: { path: { tab: 'insights', subTab: 'entity' } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({
+      openLeftPanel: vi.fn(),
+    }),
+    useExpandableFlyoutState: vi.fn(() => ({
+      left: { path: { tab: 'insights', subTab: 'entity' } },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/attack_entities_details', () => {
-      const mocked = {
-      AttackEntitiesDetails: () => (
-        <div data-test-subj="attack-entities-details">{'Attack entities details'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackEntitiesDetails: () => (
+      <div data-test-subj="attack-entities-details">{'Attack entities details'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/attack_related_alerts_details', () => {
-      const mocked = {
-      AttackRelatedAlertsDetails: () => (
-        <div data-test-subj="attack-details-flyout-left-insights-correlation-table">
-          {'Correlation content'}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackRelatedAlertsDetails: () => (
+      <div data-test-subj="attack-details-flyout-left-insights-correlation-table">
+        {'Correlation content'}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultFlyoutState = { left: { path: { tab: 'insights', subTab: 'entity' } } };
 
@@ -86,9 +86,9 @@ const renderInsightsTab = (overrides?: { subTab?: string }) => {
     overrides?.subTab !== undefined
       ? { left: { path: { tab: 'insights', subTab: overrides.subTab } } }
       : defaultFlyoutState;
-  vi
-    .mocked(useExpandableFlyoutState)
-    .mockReturnValue(state as ReturnType<typeof useExpandableFlyoutState>);
+  vi.mocked(useExpandableFlyoutState).mockReturnValue(
+    state as ReturnType<typeof useExpandableFlyoutState>
+  );
   return render(
     <TestProviders>
       <AttackDetailsProvider attackId="test-id" indexName=".alerts-security.alerts-default">

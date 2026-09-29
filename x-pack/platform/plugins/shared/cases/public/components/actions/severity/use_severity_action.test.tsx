@@ -21,14 +21,16 @@ import { coreMock } from '@kbn/core/public/mocks';
 vi.mock('../../../containers/api');
 // Wrap the real hook so individual tests can swap in a synchronous `mutate`; the toaster tests below still exercise the real mutation lifecycle.
 vi.mock('../../../containers/use_bulk_update_case', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../containers/use_bulk_update_case')),
-      useUpdateCases: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../containers/use_bulk_update_case')),
+    useUpdateCases: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useUpdateCases: realUseUpdateCases } = (await vi.importActual('../../../containers/use_bulk_update_case'));
+const { useUpdateCases: realUseUpdateCases } = await vi.importActual(
+  '../../../containers/use_bulk_update_case'
+);
 
 describe('useSeverityAction', () => {
   const onAction = vi.fn();

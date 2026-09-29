@@ -11,11 +11,11 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('@octokit/rest', () => {
-      const mocked = {
-      Octokit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Octokit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { Octokit } from '@octokit/rest';
 import {

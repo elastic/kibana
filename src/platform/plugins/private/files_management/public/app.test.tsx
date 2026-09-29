@@ -22,18 +22,18 @@ import { FilesManagementAppContextProvider } from './context';
 import { i18nTexts } from './i18n_texts';
 
 vi.mock('@kbn/content-management-table-list-view-table', () => {
-      const mocked = {
-      TableListViewTable: () => <div data-test-subj="filesManagementTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableListViewTable: () => <div data-test-subj="filesManagementTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/diagnostics_flyout', () => {
-      const mocked = {
-      DiagnosticsFlyout: () => <div data-test-subj="diagnosticsFlyout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiagnosticsFlyout: () => <div data-test-subj="diagnosticsFlyout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderApp = () =>
   render(

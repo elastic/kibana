@@ -18,19 +18,19 @@ import * as constants from '../common/navigation/constants';
 import type { QueryClientProviderProps } from '@kbn/react-query';
 
 vi.mock('../pages/policies', () => {
-      const mocked = {
-      Policies: () => <div data-test-subj="Policies">Policies</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Policies: () => <div data-test-subj="Policies">Policies</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@tanstack/react-query', () => {
-      const mocked = {
-      QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
-      QueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
+    QueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CloudDefendRouter', () => {
   const originalCloudDefendPages = { ...constants.cloudDefendPages };

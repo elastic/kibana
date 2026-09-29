@@ -18,17 +18,17 @@ import { toExpressionAst } from './to_ast';
 import { sampleAreaVis } from '@kbn/vis-type-xy-plugin/public/sample_vis.test.mocks';
 
 vi.mock('@kbn/expressions-plugin/public', async () => {
-      const mocked = {
-      ...((await vi.importActual('@kbn/expressions-plugin/public')) as any),
-      buildExpression: vi.fn().mockImplementation(() => ({
-        toAst: () => ({
-          type: 'expression',
-          chain: [],
-        }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...((await vi.importActual('@kbn/expressions-plugin/public')) as any),
+    buildExpression: vi.fn().mockImplementation(() => ({
+      toAst: () => ({
+        type: 'expression',
+        chain: [],
+      }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('vislib vis toExpressionAst function', () => {
   let vis: Vis<BasicVislibParams>;

@@ -18,11 +18,11 @@ import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experime
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRule: RuleTableItem = {
   id: '1',

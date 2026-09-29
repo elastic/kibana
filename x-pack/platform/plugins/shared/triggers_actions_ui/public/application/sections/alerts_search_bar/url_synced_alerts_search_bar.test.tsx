@@ -32,12 +32,12 @@ vi.mock('@kbn/alerts-ui-shared/src/alert_filter_controls');
 vi.mock('./alerts_search_bar');
 vi.mock('../../../common/lib/kibana');
 vi.mock('./use_alert_search_bar_state_container', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_alert_search_bar_state_container')),
-      useAlertSearchBarStateContainer: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_alert_search_bar_state_container')),
+    useAlertSearchBarStateContainer: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mocked(useKibana).mockReturnValue({
   services: {

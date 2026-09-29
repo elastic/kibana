@@ -25,11 +25,9 @@ describe('GET /internal/spaces/_initial_solution_setup', () => {
       createSpacesClient: vi.fn().mockReturnValue(spacesClient),
     });
     const initialSolutionSetup = new InitialSolutionSetupService(true);
-    vi
-      .spyOn(initialSolutionSetup, 'isRequired')
-      .mockImplementation(() =>
-        isRequired instanceof Error ? Promise.reject(isRequired) : Promise.resolve(isRequired)
-      );
+    vi.spyOn(initialSolutionSetup, 'isRequired').mockImplementation(() =>
+      isRequired instanceof Error ? Promise.reject(isRequired) : Promise.resolve(isRequired)
+    );
 
     initGetInitialSolutionSetupApi({
       router,

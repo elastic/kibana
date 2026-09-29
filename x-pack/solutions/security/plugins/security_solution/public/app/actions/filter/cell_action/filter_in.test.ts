@@ -34,13 +34,13 @@ const mockState = {
 };
 
 vi.mock('@kbn/ui-actions-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ui-actions-plugin/public')),
-      addFilterIn: () => {},
-      addFilterOut: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/ui-actions-plugin/public')),
+    addFilterIn: () => {},
+    addFilterOut: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStore = createMockStore(mockState);
 

@@ -36,7 +36,9 @@ import { InferenceEndpointIdCache } from '../util/inference_endpoint_id_cache';
 
 vi.mock('../chat_complete/callback_api');
 vi.mock('../../common/prompt/prompt_to_message_options', async () => {
-  const actual = (await vi.importActual<typeof import('../../common/prompt/prompt_to_message_options')>('../../common/prompt/prompt_to_message_options'));
+  const actual = await vi.importActual<
+    typeof import('../../common/prompt/prompt_to_message_options')
+  >('../../common/prompt/prompt_to_message_options');
   return {
     __esModule: true,
     ...actual,

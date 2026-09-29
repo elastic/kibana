@@ -37,17 +37,17 @@ vi.mock('react-redux-v7', () => {
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/hooks/use_experimental_features');
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../data_view_manager/hooks/use_select_data_view', () => {
-      const mocked = {
-      useSelectDataView: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectDataView: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const store = createMockStore(mockGlobalState);
 

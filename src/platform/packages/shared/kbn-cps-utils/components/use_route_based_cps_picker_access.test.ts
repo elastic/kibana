@@ -16,11 +16,11 @@ import { ProjectRoutingAccess } from '../types';
 import { useRouteBasedCpsPickerAccess } from './use_route_based_cps_picker_access';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseHistory = vi.mocked(useHistory);
 const mockCurrentAppId$ = new BehaviorSubject<string | undefined>('app-id');

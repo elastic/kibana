@@ -16,18 +16,20 @@ import { installPackage } from '@kbn/fleet-plugin/server/services/epm/packages';
 import { pkgToPkgKey } from '@kbn/fleet-plugin/server/services/epm/registry';
 
 vi.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
-      const mocked = {
-      installPackage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installPackage: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/server/services/epm/registry', () => {
-      const mocked = {
-      pkgToPkgKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pkgToPkgKey: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('upgradeIntegration', () => {
   const logger = loggingSystemMock.createLogger();

@@ -21,11 +21,11 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 vi.mock('../../../../../common/components/user_privileges');
 vi.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline');
 vi.mock('../../../../components/alerts_table/actions', () => {
-      const mocked = {
-      buildAlertsKqlFilter: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAlertsKqlFilter: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/lib/kibana');
 
 const mockUseUserPrivileges = useUserPrivileges as MockedFunction<typeof useUserPrivileges>;

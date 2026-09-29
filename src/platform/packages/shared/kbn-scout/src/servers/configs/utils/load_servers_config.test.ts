@@ -22,39 +22,39 @@ import { configureHTTP2 } from './configure_http2';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
 vi.mock('./get_config_file', () => {
-      const mocked = {
-      getConfigFilePath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigFilePath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../loader', () => {
-      const mocked = {
-      loadRawServerConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRawServerConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../config', () => {
-      const mocked = {
-      Config: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Config: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./save_scout_test_config', () => {
-      const mocked = {
-      saveScoutTestConfigOnDisk: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    saveScoutTestConfigOnDisk: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configure_http2', () => {
-      const mocked = {
-      configureHTTP2: vi.fn((config: ScoutServerConfig) => config),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    configureHTTP2: vi.fn((config: ScoutServerConfig) => config),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs', () => {
   const actualFs = require('fs');

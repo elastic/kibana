@@ -24,7 +24,7 @@ import { Provider } from 'react-redux';
 import type { UrlTemplate } from '../../types';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

@@ -21,11 +21,11 @@ import { ADD_TO_CASE_TEST_ID } from '../../../../../common/cases/attachments/ent
 
 vi.mock('../../../api/hooks/use_anomaly_table_row_actions');
 vi.mock('../../../../cases/attachments/entity/hooks/use_entity_case_take_action_items', () => {
-      const mocked = {
-      useEntityCaseTakeActionItems: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityCaseTakeActionItems: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useAnomalyTableRowActionsMock = useAnomalyTableRowActions as MockedFunction<
   typeof useAnomalyTableRowActions

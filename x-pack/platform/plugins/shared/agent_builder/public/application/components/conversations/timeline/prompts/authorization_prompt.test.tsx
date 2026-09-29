@@ -14,30 +14,30 @@ import { render, screen } from '@testing-library/react';
 import { AuthorizationPrompt } from './authorization_prompt';
 
 vi.mock('@kbn/response-ops-oauth-hooks', () => {
-      const mocked = {
-      useConnectorOAuthConnect: vi.fn(() => ({
-        connect: vi.fn(),
-        cancelConnect: vi.fn(),
-        isConnecting: false,
-      })),
-      OAuthRedirectMode: { NewTab: 'new_tab' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConnectorOAuthConnect: vi.fn(() => ({
+      connect: vi.fn(),
+      cancelConnect: vi.fn(),
+      isConnecting: false,
+    })),
+    OAuthRedirectMode: { NewTab: 'new_tab' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_toasts', () => {
-      const mocked = {
-      useToasts: () => ({ addErrorToast: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: () => ({ addErrorToast: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../connectors/connector_type_icon', () => {
-      const mocked = {
-      ConnectorTypeIcon: () => <span />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorTypeIcon: () => <span />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(

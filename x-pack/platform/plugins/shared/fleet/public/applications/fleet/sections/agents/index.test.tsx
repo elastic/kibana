@@ -19,12 +19,12 @@ import { useGetSpaceSettings } from '../../hooks';
 import { AgentsApp } from '.';
 
 vi.mock('../../../../hooks/use_fleet_status', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks/use_fleet_status')),
-      useFleetStatus: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks/use_fleet_status')),
+    useFleetStatus: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_request/settings');
 vi.mock('../../../../hooks/use_authz');
 vi.mock('./agent_requirements_page', () => {

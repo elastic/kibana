@@ -20,17 +20,17 @@ import { ERROR_RETRIEVING_SCHEDULE_EXECUTION_LOGS } from './translations';
 const mockAddError = vi.fn();
 
 vi.mock('../../../../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttp: HttpSetup = {
   get: vi.fn(),

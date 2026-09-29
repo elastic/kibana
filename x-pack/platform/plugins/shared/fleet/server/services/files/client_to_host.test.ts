@@ -205,8 +205,9 @@ describe('FleetToHostFilesClient', () => {
     });
 
     it('should upload a file and use transform to create hash', async () => {
-      const hashTransform = (await vi.importActual('@kbn/files-plugin/server'))
-        .createFileHashTransform();
+      const hashTransform = (
+        await vi.importActual('@kbn/files-plugin/server')
+      ).createFileHashTransform();
 
       createFileHashTransformMock.mockReturnValue(hashTransform);
       await getFleetFilesInstance().create(fileReadable, ['123']);

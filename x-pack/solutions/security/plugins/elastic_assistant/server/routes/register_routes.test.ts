@@ -99,8 +99,7 @@ vi.mock('./attack_discovery/schedules/public/get/find');
 const findAttackDiscoverySchedulesRouteMock = findAttackDiscoverySchedulesRoute as Mock;
 
 vi.mock('./attack_discovery/privileges/get_missing_privileges');
-const getMissingIndexPrivilegesInternalRouteMock =
-  getMissingIndexPrivilegesInternalRoute as Mock;
+const getMissingIndexPrivilegesInternalRouteMock = getMissingIndexPrivilegesInternalRoute as Mock;
 
 vi.mock('./attack_discovery/schedules/public/put/update');
 const updateAttackDiscoverySchedulesRouteMock = updateAttackDiscoverySchedulesRoute as Mock;
@@ -114,14 +113,12 @@ const disableAttackDiscoverySchedulesRouteMock = disableAttackDiscoverySchedules
 vi.mock('./attack_discovery/schedules/public/post/enable');
 const enableAttackDiscoverySchedulesRouteMock = enableAttackDiscoverySchedulesRoute as Mock;
 vi.mock('./attack_discovery/schedules/public/post/bulk_delete');
-const bulkDeleteAttackDiscoverySchedulesRouteMock =
-  bulkDeleteAttackDiscoverySchedulesRoute as Mock;
+const bulkDeleteAttackDiscoverySchedulesRouteMock = bulkDeleteAttackDiscoverySchedulesRoute as Mock;
 vi.mock('./attack_discovery/schedules/public/post/bulk_disable');
 const bulkDisableAttackDiscoverySchedulesRouteMock =
   bulkDisableAttackDiscoverySchedulesRoute as Mock;
 vi.mock('./attack_discovery/schedules/public/post/bulk_enable');
-const bulkEnableAttackDiscoverySchedulesRouteMock =
-  bulkEnableAttackDiscoverySchedulesRoute as Mock;
+const bulkEnableAttackDiscoverySchedulesRouteMock = bulkEnableAttackDiscoverySchedulesRoute as Mock;
 vi.mock('./users/suggest');
 const suggestUsersRouteMock = suggestUsersRoute as Mock;
 vi.mock('./test_internal/create_attack_discovery_alerts_route');

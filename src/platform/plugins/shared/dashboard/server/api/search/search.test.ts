@@ -16,25 +16,25 @@ import type { RequestHandlerContext } from '@kbn/core/server';
 import { search } from './search';
 
 vi.mock('@kbn/as-code-utils', () => {
-      const mocked = {
-      findWithTagFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findWithTagFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../transforms', () => {
-      const mocked = {
-      transformDashboardOut: vi.fn().mockReturnValue({
-        dashboardState: {
-          title: 'Test',
-          description: undefined,
-          tags: undefined,
-          time_range: undefined,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformDashboardOut: vi.fn().mockReturnValue({
+      dashboardState: {
+        title: 'Test',
+        description: undefined,
+        tags: undefined,
+        time_range: undefined,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const findWithTagFilterMock = findWithTagFilter as MockedFunction<typeof findWithTagFilter>;
 

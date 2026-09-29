@@ -40,32 +40,32 @@ const mockUseAlertCountByRuleByStatusReturn = (
 };
 
 vi.mock('./use_alert_count_by_rule_by_status', () => {
-      const mocked = {
-      useAlertCountByRuleByStatus: (props: UseAlertCountByRuleByStatusProps) =>
-        mockUseAlertCountByRuleByStatus(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertCountByRuleByStatus: (props: UseAlertCountByRuleByStatusProps) =>
+      mockUseAlertCountByRuleByStatus(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-      useEntityStoreEuidApi: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+    useEntityStoreEuidApi: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/kibana/kibana_react', async () => {
-  const actual = (await vi.importActual('../../lib/kibana/kibana_react'));
+  const actual = await vi.importActual('../../lib/kibana/kibana_react');
   return { ...actual, useUiSetting: vi.fn(() => false) };
 });
 
 vi.mock('../../hooks/timeline/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: vi.fn(() => ({ investigateInTimeline: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: vi.fn(() => ({ investigateInTimeline: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const entityFilter = { field: 'host.hostname', value: 'some_host_name' };
 

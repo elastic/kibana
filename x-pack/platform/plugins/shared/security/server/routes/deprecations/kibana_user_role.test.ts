@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mocked } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
+import { vi } from 'vitest';
+import type { Mocked } from 'vitest';
 
 import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';

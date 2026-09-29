@@ -22,37 +22,37 @@ import { SignalsPanel } from './signals_panel';
 import { buildSignal } from './signal_test_fixtures';
 
 vi.mock('../../hooks/use_feedback_loop_enabled', () => {
-      const mocked = { useFeedbackLoopEnabled: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useFeedbackLoopEnabled: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_signal_groups', () => {
-      const mocked = { useSignalGroups: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useSignalGroups: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_signals', () => {
-      const mocked = { useSignals: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useSignals: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_agent_builder_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => ({ agents: [], isLoading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => ({ agents: [], isLoading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_update_feedback_agent', () => {
-      const mocked = {
-      useUpdateFeedbackAgent: () => ({ mutate: vi.fn(), isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateFeedbackAgent: () => ({ mutate: vi.fn(), isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/llm-trace-waterfall', () => {
-      const mocked = {
-      TraceWaterfall: () => <div />,
-      createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
-      useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: () => <div />,
+    createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
+    useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFeedbackLoopEnabled = vi.mocked(useFeedbackLoopEnabled);
 const mockUseSignalGroups = vi.mocked(useSignalGroups);

@@ -34,50 +34,50 @@ vi.mock('../../../utils/kibana_react');
 vi.mock('../../../hooks/use_fetch_rule');
 vi.mock('../hooks/use_alert_snooze_state');
 vi.mock('../../../hooks/use_investigate_alert', () => {
-      const mocked = {
-      useInvestigateAlert: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateAlert: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => {
-      const mocked = {
-      useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-alert-snooze', () => {
-      const mocked = {
-      useAlertSnooze: vi.fn(),
-      AlertSnoozePanelInline: vi.fn(({ onApply, onBack }) => (
-        <div data-test-subj="alertSnoozePanelInlineMock">
-          <button
-            type="button"
-            data-test-subj="applySnoozeMock"
-            onClick={() => onApply({ expiresAt: '2021-10-10T00:00:00.000Z' })}
-          >
-            apply
-          </button>
-          <button type="button" data-test-subj="backSnoozeMock" onClick={onBack}>
-            back
-          </button>
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertSnooze: vi.fn(),
+    AlertSnoozePanelInline: vi.fn(({ onApply, onBack }) => (
+      <div data-test-subj="alertSnoozePanelInlineMock">
+        <button
+          type="button"
+          data-test-subj="applySnoozeMock"
+          onClick={() => onApply({ expiresAt: '2021-10-10T00:00:00.000Z' })}
+        >
+          apply
+        </button>
+        <button type="button" data-test-subj="backSnoozeMock" onClick={onBack}>
+          back
+        </button>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: (): boolean => true,
 }));
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
-      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+    useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useFetchRuleMock = useFetchRule as Mock;
@@ -99,11 +99,11 @@ const mockNavigateToApp = {
 };
 
 vi.mock('@kbn/response-ops-rule-form/flyout', () => {
-      const mocked = {
-      RuleFormFlyout: vi.fn(() => <div data-test-subj="edit-rule-flyout">mocked component</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleFormFlyout: vi.fn(() => <div data-test-subj="edit-rule-flyout">mocked component</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKibana = () => {
   mockCases.helpers.canUseCases = vi.fn().mockReturnValue(allCasesPermissions());

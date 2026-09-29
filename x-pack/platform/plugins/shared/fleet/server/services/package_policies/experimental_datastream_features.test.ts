@@ -53,21 +53,21 @@ function mockGetInstalledPackageWithAssets(installation: any) {
 }
 
 vi.mock('../epm/packages/get', () => {
-      const mocked = {
-      getInstalledPackageWithAssets: vi.fn().mockResolvedValue({
-        packageInfo: {
-          name: 'test',
-          data_streams: [
-            {
-              dataset: 'test',
-              type: 'metrics',
-            },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstalledPackageWithAssets: vi.fn().mockResolvedValue({
+      packageInfo: {
+        name: 'test',
+        data_streams: [
+          {
+            dataset: 'test',
+            type: 'metrics',
+          },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../app_context');
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
@@ -76,15 +76,15 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 vi.mock('../epm/elasticsearch/template/template', () => {
-      const mocked = {
-      updateCurrentWriteIndices: vi.fn(),
-      isTotalFieldsLimitError: (err: any): boolean => {
-        const reason: string = err?.body?.error?.reason ?? '';
-        return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateCurrentWriteIndices: vi.fn(),
+    isTotalFieldsLimitError: (err: any): boolean => {
+      const reason: string = err?.body?.error?.reason ?? '';
+      return reason.includes('Limit of total fields') && reason.includes('has been exceeded');
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../epm/elasticsearch/template/install', () => {
   return {
     prepareDataStreamTemplates: vi.fn().mockResolvedValue([

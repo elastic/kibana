@@ -51,11 +51,11 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { initializeDrilldownsManager } from '@kbn/embeddable-plugin/public/drilldowns/drilldowns_manager';
 
 vi.mock('./utils/serialization_utils', () => {
-      const mocked = {
-      deserializeState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deserializeState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('saved search embeddable', () => {
   setStubKibanaServices();
@@ -587,50 +587,54 @@ describe('saved search embeddable', () => {
 
     describe('anyStateChange$', () => {
       let embeddableApi: SearchEmbeddableApi;
-      beforeEach(() =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      beforeEach(
+        () =>
+          new Promise<void>((resolve, reject) => {
+            const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+              fail: reject,
+            });
 
-              const { search } = createSearchFnMock(1);
-              runtimeState = getInitialRuntimeState({
-                searchMock: search,
-                partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
-              });
-              factory
-                .buildEmbeddable({
-                  initializeDrilldownsManager,
-                  initialState: { ref_id: 'id', overrides: {} },
-                  finalizeApi: finalizeApiMock,
-                  uuid,
-                  parentApi: mockedDashboardApi,
-                })
-                .then(({ api }) => {
-                  embeddableApi = api;
-                  done();
-                })
-                .catch(done);
-            
-      }));
+            const { search } = createSearchFnMock(1);
+            runtimeState = getInitialRuntimeState({
+              searchMock: search,
+              partialState: { viewMode: VIEW_MODE.DOCUMENT_LEVEL },
+            });
+            factory
+              .buildEmbeddable({
+                initializeDrilldownsManager,
+                initialState: { ref_id: 'id', overrides: {} },
+                finalizeApi: finalizeApiMock,
+                uuid,
+                parentApi: mockedDashboardApi,
+              })
+              .then(({ api }) => {
+                embeddableApi = api;
+                done();
+              })
+              .catch(done);
+          })
+      );
 
       test('should not emit on subscribe and emit when any state changes', () =>
-          new Promise<void>((resolve, reject) => {
-          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-                  embeddableApi.anyStateChange$.subscribe(() => {
-                    try {
-                      const title = embeddableApi.title$.value;
-                      expect(title).toBe('cute puppies');
-                    } catch (error) {
-                      // title assertion fails when
-                      // anyStateChange$ emits on subscribe
-                      done(error);
-                      return;
-                    }
-                    done();
-                  });
-                  embeddableApi.setTitle('cute puppies');
-                
-          }));
+          embeddableApi.anyStateChange$.subscribe(() => {
+            try {
+              const title = embeddableApi.title$.value;
+              expect(title).toBe('cute puppies');
+            } catch (error) {
+              // title assertion fails when
+              // anyStateChange$ emits on subscribe
+              done(error);
+              return;
+            }
+            done();
+          });
+          embeddableApi.setTitle('cute puppies');
+        }));
     });
   });
 
@@ -737,9 +741,9 @@ describe('saved search embeddable', () => {
 
   describe('context awareness', () => {
     beforeAll(() => {
-      vi
-        .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-        .mockReturnValue(new BehaviorSubject(SolutionType.Search));
+      vi.spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$').mockReturnValue(
+        new BehaviorSubject(SolutionType.Search)
+      );
     });
 
     afterAll(() => {
@@ -801,9 +805,10 @@ describe('saved search embeddable', () => {
         scopedProfilesManager,
         'resolveDataSourceProfile'
       );
-      vi
-        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
-        .mockReturnValueOnce(scopedProfilesManager);
+      vi.spyOn(
+        discoverServiceMock.profilesManager,
+        'createScopedProfilesManager'
+      ).mockReturnValueOnce(scopedProfilesManager);
       runtimeState = getInitialRuntimeState();
       const { api } = await factory.buildEmbeddable({
         initializeDrilldownsManager: mockInitializeDrilldownsManager,
@@ -873,12 +878,13 @@ describe('saved search embeddable', () => {
         discoverServiceMock.profileStateRegistry.registerDefinition(TEST_PROFILE_STATE_DEF);
       }
 
-      vi
-        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
-        .mockImplementationOnce((args) => {
-          capturedToolkit = args.toolkit;
-          return originalCreateScopedProfilesManager(args);
-        });
+      vi.spyOn(
+        discoverServiceMock.profilesManager,
+        'createScopedProfilesManager'
+      ).mockImplementationOnce((args) => {
+        capturedToolkit = args.toolkit;
+        return originalCreateScopedProfilesManager(args);
+      });
 
       runtimeState = getInitialRuntimeState();
 
@@ -916,12 +922,13 @@ describe('saved search embeddable', () => {
 
       discoverServiceMock.profileStateRegistry = createProfileStateRegistry();
 
-      vi
-        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
-        .mockImplementationOnce((args) => {
-          capturedToolkit = args.toolkit;
-          return originalCreateScopedProfilesManager(args);
-        });
+      vi.spyOn(
+        discoverServiceMock.profilesManager,
+        'createScopedProfilesManager'
+      ).mockImplementationOnce((args) => {
+        capturedToolkit = args.toolkit;
+        return originalCreateScopedProfilesManager(args);
+      });
 
       runtimeState = getInitialRuntimeState({
         partialState: {
@@ -967,12 +974,13 @@ describe('saved search embeddable', () => {
           discoverServiceMock.profilesManager
         );
 
-      vi
-        .spyOn(discoverServiceMock.profilesManager, 'createScopedProfilesManager')
-        .mockImplementationOnce((args) => {
-          capturedToolkit = args.toolkit;
-          return originalCreateScopedProfilesManager(args);
-        });
+      vi.spyOn(
+        discoverServiceMock.profilesManager,
+        'createScopedProfilesManager'
+      ).mockImplementationOnce((args) => {
+        capturedToolkit = args.toolkit;
+        return originalCreateScopedProfilesManager(args);
+      });
 
       runtimeState = getInitialRuntimeState({
         partialState: {

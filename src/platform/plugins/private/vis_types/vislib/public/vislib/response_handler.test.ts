@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 import { setFormatService } from '../services';
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      buildPointSeriesData: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildPointSeriesData: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './response_handler';

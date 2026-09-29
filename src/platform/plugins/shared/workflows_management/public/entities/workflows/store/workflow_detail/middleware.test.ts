@@ -22,13 +22,13 @@ import type { MockStore } from '../__mocks__/store.mock';
 
 // Mock the computation utility
 vi.mock('./utils/computation', () => {
-      const mocked = {
-      performComputation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performComputation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { performComputation } = (await vi.importMock('./utils/computation'));
+const { performComputation } = await vi.importMock('./utils/computation');
 
 describe('workflowComputationMiddleware', () => {
   let store: MockStore;

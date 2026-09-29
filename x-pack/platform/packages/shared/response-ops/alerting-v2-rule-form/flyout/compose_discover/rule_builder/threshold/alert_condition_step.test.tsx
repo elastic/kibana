@@ -32,46 +32,46 @@ import type { ComposeDiscoverState } from '../../types';
 import { createInitialState } from '../../use_compose_discover_state';
 
 vi.mock('../../../../form/hooks/use_index_sources', () => {
-      const mocked = {
-      useIndexSources: vi.fn(() => ({
-        data: [{ label: 'logs-*' }],
-        isLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIndexSources: vi.fn(() => ({
+      data: [{ label: 'logs-*' }],
+      isLoading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../form/hooks/use_data_fields', () => {
-      const mocked = {
-      useDataFields: vi.fn(() => ({
-        data: {
-          '@timestamp': { name: '@timestamp', type: 'date' },
-          'service.name': { name: 'service.name', type: 'keyword' },
-        },
-        isError: false,
-        isLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataFields: vi.fn(() => ({
+      data: {
+        '@timestamp': { name: '@timestamp', type: 'date' },
+        'service.name': { name: 'service.name', type: 'keyword' },
+      },
+      isError: false,
+      isLoading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getDatasets: vi.fn(() => Promise.resolve({ datasets: [] })),
-      getESQLTimeFieldFromQuery: vi.fn(() => Promise.resolve(undefined)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDatasets: vi.fn(() => Promise.resolve({ datasets: [] })),
+    getESQLTimeFieldFromQuery: vi.fn(() => Promise.resolve(undefined)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../use_resolve_time_field', () => {
-      const mocked = {
-      useResolveTimeField: vi.fn(() => ({
-        timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-        isTimeFieldResolved: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolveTimeField: vi.fn(() => ({
+      timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+      isTimeFieldResolved: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeBuilderState = (overrides: Partial<ThresholdFormValues> = {}): ThresholdFormValues => ({
   ...DEFAULT_THRESHOLD_FORM_VALUES,

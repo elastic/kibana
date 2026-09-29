@@ -26,9 +26,7 @@ vi.mock('./use_hosts_view');
 const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;
-const mockUseHostsViewContext = useHostsViewContext as MockedFunction<
-  typeof useHostsViewContext
->;
+const mockUseHostsViewContext = useHostsViewContext as MockedFunction<typeof useHostsViewContext>;
 
 const HOST_NAME = 'host-0';
 const DATE_RANGE = { from: 'now-15m', to: 'now' };

@@ -19,12 +19,12 @@ beforeEach(() => {
 });
 
 vi.mock('../../../../lib', () => {
-      const mocked = {
-      getESClusterUuid: () => 'clusterA',
-      getKibanaStats: () => ({ name: 'myKibana' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESClusterUuid: () => 'clusterA',
+    getKibanaStats: () => ({ name: 'myKibana' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('dynamic route', () => {
   const kibanaStatsConfig = {

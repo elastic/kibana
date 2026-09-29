@@ -13,11 +13,11 @@ import type { SignificantEventsServer } from '../../types';
 import { resolveTokenTrackingCoverage } from './token_tracking_coverage';
 
 vi.mock('@kbn/core-http-server-utils', () => {
-      const mocked = {
-      kibanaRequestFactory: vi.fn((rawRequest) => rawRequest),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaRequestFactory: vi.fn((rawRequest) => rawRequest),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const request = { headers: { authorization: 'test' } } as unknown as KibanaRequest;
 const logger = loggerMock.create();

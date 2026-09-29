@@ -50,14 +50,11 @@ vi.mock('../../../common/store/inputs/actions');
 vi.mock('../../../common/utils/normalize_time_range');
 vi.mock('../../store/actions');
 vi.mock('../../../common/store/app/actions');
-vi.mock(
-  '../../../common/components/discover_in_timeline/use_discover_in_timeline_context',
-  () => {
-    return {
-      useDiscoverInTimelineContext: vi.fn().mockReturnValue({ resetDiscoverAppState: vi.fn() }),
-    };
-  }
-);
+vi.mock('../../../common/components/discover_in_timeline/use_discover_in_timeline_context', () => {
+  return {
+    useDiscoverInTimelineContext: vi.fn().mockReturnValue({ resetDiscoverAppState: vi.fn() }),
+  };
+});
 vi.mock('uuid', () => {
   return {
     v1: vi.fn(() => 'uuidv1()'),
@@ -67,7 +64,7 @@ vi.mock('uuid', () => {
 
 const mockUpdateTimeline = vi.fn();
 vi.mock('./use_update_timeline', async () => {
-  const actual = (await vi.importActual('./use_update_timeline'));
+  const actual = await vi.importActual('./use_update_timeline');
   return {
     ...actual,
     useUpdateTimeline: () => mockUpdateTimeline,
@@ -75,7 +72,7 @@ vi.mock('./use_update_timeline', async () => {
 });
 
 vi.mock('../../../common/utils/default_date_settings', async () => {
-  const actual = (await vi.importActual('../../../common/utils/default_date_settings'));
+  const actual = await vi.importActual('../../../common/utils/default_date_settings');
   return {
     ...actual,
     DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),

@@ -20,26 +20,26 @@ vi.mock('../../lib/kibana');
 // ─── Managed-source hook (from mitre_attack plugin) ───────────────────────────
 const mockUseFetchMitreEntitiesQuery = vi.fn();
 vi.mock('@kbn/mitre-attack-plugin/public', () => {
-      const mocked = {
-      useFetchMitreEntitiesQuery: (...args: unknown[]) => mockUseFetchMitreEntitiesQuery(...args),
-      FETCH_MITRE_ENTITIES_QUERY_KEY: ['GET', '/internal/mitre/entities'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchMitreEntitiesQuery: (...args: unknown[]) => mockUseFetchMitreEntitiesQuery(...args),
+    FETCH_MITRE_ENTITIES_QUERY_KEY: ['GET', '/internal/mitre/entities'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ─── Legacy-source hook ────────────────────────────────────────────────────────
 const mockUseFetchLegacyMitreQuery = vi.fn();
 vi.mock('./use_fetch_bundled_mitre_query', () => {
-      const mocked = {
-      useFetchLegacyMitreQuery: (...args: unknown[]) => mockUseFetchLegacyMitreQuery(...args),
-      LEGACY_BUNDLED_MITRE_QUERY_KEY: (types?: string[]) => [
-        'LAZY_BLOB',
-        'mitre_tactics_techniques',
-        types?.join(',') ?? null,
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchLegacyMitreQuery: (...args: unknown[]) => mockUseFetchLegacyMitreQuery(...args),
+    LEGACY_BUNDLED_MITRE_QUERY_KEY: (types?: string[]) => [
+      'LAZY_BLOB',
+      'mitre_tactics_techniques',
+      types?.join(',') ?? null,
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 

@@ -32,13 +32,13 @@ const mockCreateVegaFn = vi.fn();
 const mockGetVegaVisRenderer = vi.fn();
 
 vi.mock('./async_module', () => {
-      const mocked = {
-      createVegaFn: mockCreateVegaFn,
-      getVegaVisRenderer: mockGetVegaVisRenderer,
-      vegaVisType: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createVegaFn: mockCreateVegaFn,
+    getVegaVisRenderer: mockGetVegaVisRenderer,
+    vegaVisType: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('VegaPlugin', () => {
   const setup = () => {

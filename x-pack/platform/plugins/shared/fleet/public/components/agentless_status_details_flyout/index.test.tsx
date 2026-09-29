@@ -15,22 +15,24 @@ import { createIntegrationsTestRendererMock } from '../../mock';
 import { AgentlessStatusDetailsFlyout } from '.';
 
 vi.mock('../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        docLinks: { links: { fleet: { troubleshooting: 'https://elastic.co/docs/troubleshoot' } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      docLinks: { links: { fleet: { troubleshooting: 'https://elastic.co/docs/troubleshoot' } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Stub out AgentDetailsIntegration — its internal hooks are not relevant here
 vi.mock(
   '../../applications/fleet/sections/agents/agent_details_page/components/agent_details/agent_details_integration',
   () => {
-      const mocked = { AgentDetailsIntegration: () => <div data-test-subj="agentDetailsIntegration" /> };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AgentDetailsIntegration: () => <div data-test-subj="agentDetailsIntegration" />,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const onClose = vi.fn();

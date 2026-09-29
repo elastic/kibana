@@ -17,21 +17,21 @@ import type { Cache } from '../cache/types';
 import { swcTransform } from './swc';
 
 vi.mock('@swc/core', () => {
-      const mocked = {
-      transformSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/swc-config/node_register', () => {
-      const mocked = {
-      getNodeRegisterSwcConfig: vi.fn((path: string, options = {}) => ({
-        filename: path,
-        sourceMaps: options.inlineSourceMaps ? 'inline' : true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNodeRegisterSwcConfig: vi.fn((path: string, options = {}) => ({
+      filename: path,
+      sourceMaps: options.inlineSourceMaps ? 'inline' : true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const transformSyncMock = transformSync as Mock;
 const getNodeRegisterSwcConfigMock = getNodeRegisterSwcConfig as Mock;

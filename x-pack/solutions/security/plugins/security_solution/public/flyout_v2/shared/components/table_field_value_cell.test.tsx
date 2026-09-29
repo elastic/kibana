@@ -22,16 +22,16 @@ import { createTelemetryServiceMock } from '../../../common/lib/telemetry/teleme
 import type { OpenFlyoutLinkRenderer } from './open_flyout_link';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: () => ({

@@ -18,11 +18,11 @@ const mockGetFieldDefinitions = vi.fn();
 const mockReorderGlobalFieldDefinitions = vi.fn();
 
 vi.mock('../hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: () => mockGetFieldDefinitions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: () => mockGetFieldDefinitions(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Keep the production mutation hooks connected to their reporter dependencies. The API mock
 // prevents a page test from making a request if it starts a mutation.
@@ -31,51 +31,51 @@ vi.mock('../api/api');
 const mockReorderState = { isLoading: false, isError: false };
 
 vi.mock('../hooks/use_reorder_global_field_definitions', () => {
-      const mocked = {
-      useReorderGlobalFieldDefinitions: () => ({
-        mutate: mockReorderGlobalFieldDefinitions,
-        ...mockReorderState,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReorderGlobalFieldDefinitions: () => ({
+      mutate: mockReorderGlobalFieldDefinitions,
+      ...mockReorderState,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/navigation', () => {
-      const mocked = {
-      useCasesTemplatesNavigation: () => ({
-        getCasesTemplatesUrl: () => '/templates',
-        navigateToCasesTemplates: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesTemplatesNavigation: () => ({
+      getCasesTemplatesUrl: () => '/templates',
+      navigateToCasesTemplates: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The create flyout embeds the Monaco-based YAML editor, which cannot mount in jsdom.
 vi.mock('../components/field_definition_yaml_editor', () => {
-      const mocked = {
-      FieldDefinitionYamlEditor: () => <textarea data-test-subj="fieldDefinitionYamlInput" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldDefinitionYamlEditor: () => <textarea data-test-subj="fieldDefinitionYamlInput" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/field_definition_preview', () => {
-      const mocked = {
-      FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldDefinitionPreview: () => <div data-test-subj="fieldDefinitionPreview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportCreated = vi.fn();
 const mockReportUpdated = vi.fn();
 const mockReportDeleted = vi.fn();
 vi.mock('../../../analytics/field_library', () => {
-      const mocked = {
-      useFieldDefinitionCreatedEBT: () => mockReportCreated,
-      useFieldDefinitionUpdatedEBT: () => mockReportUpdated,
-      useFieldDefinitionDeletedEBT: () => mockReportDeleted,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldDefinitionCreatedEBT: () => mockReportCreated,
+    useFieldDefinitionUpdatedEBT: () => mockReportUpdated,
+    useFieldDefinitionDeletedEBT: () => mockReportDeleted,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildFieldDefinition = (overrides: Partial<FieldDefinition>): FieldDefinition => ({
   fieldDefinitionId: 'id-1',

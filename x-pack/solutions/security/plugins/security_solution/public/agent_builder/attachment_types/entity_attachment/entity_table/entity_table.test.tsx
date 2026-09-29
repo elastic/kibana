@@ -24,14 +24,14 @@ import { EntityAnalyticsAgentNavigationProvider } from '../../entity_analytics_a
 import { EntityTable } from './entity_table';
 
 vi.mock('../use_entity_for_attachment', () => {
-      const mocked = {
-      useEntityForAttachment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityForAttachment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_explore_navigation', async () => {
-  const actual = (await vi.importActual('../../entity_explore_navigation'));
+  const actual = await vi.importActual('../../entity_explore_navigation');
   return {
     ...actual,
     navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),

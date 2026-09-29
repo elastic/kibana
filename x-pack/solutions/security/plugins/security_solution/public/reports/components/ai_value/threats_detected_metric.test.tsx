@@ -19,37 +19,37 @@ import * as i18n from './translations';
 
 // Mock dependencies
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
-      const mocked = {
-      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/threats_detected_metric',
   () => {
-      const mocked = {
-        getThreatsDetectedMetricLensAttributes: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getThreatsDetectedMetricLensAttributes: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sample_metric', () => {
-      const mocked = {
-      SampleMetric: vi.fn(({ title }: { title: string }) => (
-        <div data-test-subj="mock-sample-metric">{title}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SampleMetric: vi.fn(({ title }: { title: string }) => (
+      <div data-test-subj="mock-sample-metric">{title}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetThreatsDetectedMetricLensAttributes =
   getThreatsDetectedMetricLensAttributes as MockedFunction<
@@ -196,9 +196,7 @@ describe('ThreatsDetectedMetric', () => {
     const { rerender } = render(<ThreatsDetectedMetric {...defaultProps} />);
     const initialCallCount = (VisualizationEmbeddable as unknown as Mock).mock.calls.length;
     rerender(<ThreatsDetectedMetric {...defaultProps} />);
-    expect((VisualizationEmbeddable as unknown as Mock).mock.calls.length).toBe(
-      initialCallCount
-    );
+    expect((VisualizationEmbeddable as unknown as Mock).mock.calls.length).toBe(initialCallCount);
     rerender(
       <ThreatsDetectedMetric
         isSample={false}

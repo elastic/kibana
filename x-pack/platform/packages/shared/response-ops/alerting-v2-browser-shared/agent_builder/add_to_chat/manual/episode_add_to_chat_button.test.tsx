@@ -15,11 +15,11 @@ import { AddToChatButton } from './add_to_chat_button';
 import type { ManualAddToChatServices } from './use_manual_add_to_chat';
 
 vi.mock('./add_to_chat_button', () => {
-      const mocked = {
-      AddToChatButton: vi.fn(() => <div data-test-subj="addToChatButtonStub" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToChatButton: vi.fn(() => <div data-test-subj="addToChatButtonStub" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddToChatButton = vi.mocked(AddToChatButton);
 

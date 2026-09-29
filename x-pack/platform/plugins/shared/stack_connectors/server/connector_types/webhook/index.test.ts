@@ -28,13 +28,13 @@ import { getConnectorType } from '.';
 import { TaskErrorSource, createTaskRunError } from '@kbn/task-manager-plugin/server';
 
 vi.mock('axios', () => {
-      const mocked = {
-      create: vi.fn(),
-      AxiosHeaders: require('axios').AxiosHeaders,
-      AxiosError: require('axios').AxiosError,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    create: vi.fn(),
+    AxiosHeaders: require('axios').AxiosHeaders,
+    AxiosError: require('axios').AxiosError,
+  };
+  return { ...mocked, default: mocked };
+});
 import axios from 'axios';
 import { CRT_FILE, KEY_FILE, PFX_FILE } from '@kbn/connector-schemas/common/auth/mocks';
 import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/common/auth';
@@ -51,7 +51,7 @@ const axiosInstanceMock = {
 };
 
 vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
-  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
+  const originalUtils = await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: vi.fn(),
@@ -60,11 +60,11 @@ vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
 });
 
 vi.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => {
-      const mocked = {
-      getOAuthClientCredentialsAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthClientCredentialsAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const requestMock = utils.request as Mock;
 
@@ -1255,9 +1255,7 @@ describe('execute()', () => {
 
     it('should log an error if refreshing access token fails', async () => {
       const errorMessage = 'Invalid client or Invalid client credentials';
-      (getOAuthClientCredentialsAccessToken as Mock).mockRejectedValueOnce(
-        new Error(errorMessage)
-      );
+      (getOAuthClientCredentialsAccessToken as Mock).mockRejectedValueOnce(new Error(errorMessage));
       createAxiosInstanceMock.mockReturnValue(axiosInstanceMock);
 
       const execOptions: WebhookConnectorTypeExecutorOptions = {

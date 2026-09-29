@@ -18,33 +18,30 @@ import * as useAfterLoadedStateHooks from '../../../hooks/use_after_loaded_state
 import { useReloadRequestTimeContext } from '../../../../../../hooks/use_reload_request_time';
 
 vi.mock('../../../hooks/use_hosts_view', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../hooks/use_hosts_view')),
-      useHostsViewContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../hooks/use_hosts_view')),
+    useHostsViewContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_unified_search');
 vi.mock('../../../hooks/use_hosts_table');
 vi.mock('../../../hooks/use_after_loaded_state');
 vi.mock('../../../../../../hooks/use_reload_request_time');
 vi.mock('../../../../../../components/lens', () => {
-      const mocked = {
-      LensChart: () => <div data-test-subj="lensChart">LensChart</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensChart: () => <div data-test-subj="lensChart">LensChart</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Import after mocking
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
 
-const mockUseHostsViewContext = useHostsViewContext as MockedFunction<
-  typeof useHostsViewContext
+const mockUseHostsViewContext = useHostsViewContext as MockedFunction<typeof useHostsViewContext>;
+const mockUseUnifiedSearchContext = useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
+  typeof useUnifiedSearchHooks.useUnifiedSearchContext
 >;
-const mockUseUnifiedSearchContext =
-  useUnifiedSearchHooks.useUnifiedSearchContext as MockedFunction<
-    typeof useUnifiedSearchHooks.useUnifiedSearchContext
-  >;
 const mockUseHostsTableContext = useHostsTableHooks.useHostsTableContext as MockedFunction<
   typeof useHostsTableHooks.useHostsTableContext
 >;

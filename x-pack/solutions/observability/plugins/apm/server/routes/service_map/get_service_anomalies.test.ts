@@ -17,7 +17,7 @@ import type { MlClient } from '../../lib/helpers/get_ml_client';
 import { getServiceAnomalies } from './get_service_anomalies';
 
 vi.mock('../../lib/anomaly_detection/anomaly_search', async () => {
-  const actual = (await vi.importActual('../../lib/anomaly_detection/anomaly_search'));
+  const actual = await vi.importActual('../../lib/anomaly_detection/anomaly_search');
   return {
     ...actual,
     anomalySearch: vi.fn(),
@@ -25,11 +25,11 @@ vi.mock('../../lib/anomaly_detection/anomaly_search', async () => {
 });
 
 vi.mock('../../lib/anomaly_detection/get_ml_jobs_with_apm_group', () => {
-      const mocked = {
-      getMlJobsWithAPMGroup: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMlJobsWithAPMGroup: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const anomalySearchMock = anomalySearch as MockedFunction<typeof anomalySearch>;
 const getMlJobsWithAPMGroupMock = getMlJobsWithAPMGroup as MockedFunction<

@@ -19,26 +19,26 @@ const mockAddSuccess = vi.fn();
 const mockOpenConfirm = vi.fn();
 
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          application: { navigateToApp: mockNavigateToApp },
-          notifications: { toasts: { addSuccess: mockAddSuccess } },
-          overlays: { openConfirm: mockOpenConfirm },
-        },
-        dependencies: {
-          start: {
-            streams: {
-              streamsRepositoryClient: {
-                fetch: mockFetch,
-              },
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        application: { navigateToApp: mockNavigateToApp },
+        notifications: { toasts: { addSuccess: mockAddSuccess } },
+        overlays: { openConfirm: mockOpenConfirm },
+      },
+      dependencies: {
+        start: {
+          streams: {
+            streamsRepositoryClient: {
+              fetch: mockFetch,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MissingDataStreamCallout', () => {
   beforeEach(() => {

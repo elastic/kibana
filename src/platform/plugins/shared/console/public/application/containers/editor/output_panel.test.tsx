@@ -17,32 +17,32 @@ import { OutputPanel } from './output_panel';
 import { useRequestReadContext } from '../../contexts';
 
 vi.mock('../../contexts', () => {
-      const mocked = {
-      useRequestReadContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRequestReadContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./monaco_editor_output', () => {
-      const mocked = {
-      MonacoEditorOutput: () => <div data-test-subj="mockMonacoEditorOutput" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonacoEditorOutput: () => <div data-test-subj="mockMonacoEditorOutput" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/editor_content_spinner', () => {
-      const mocked = {
-      EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/output_panel_empty_state', () => {
-      const mocked = {
-      OutputPanelEmptyState: () => <div data-test-subj="mockOutputPanelEmptyState" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OutputPanelEmptyState: () => <div data-test-subj="mockOutputPanelEmptyState" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRequestReadContext = useRequestReadContext as MockedFunction<
   typeof useRequestReadContext

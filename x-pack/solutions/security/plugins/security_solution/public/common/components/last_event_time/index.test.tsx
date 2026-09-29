@@ -21,11 +21,11 @@ import { TestProviders } from '../../mock';
 import { LastEventTime } from '.';
 
 vi.mock('../../containers/events/last_event_time', () => {
-      const mocked = {
-      useTimelineLastEventTime: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineLastEventTime: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Last Event Time Stat', () => {
   beforeEach(() => {

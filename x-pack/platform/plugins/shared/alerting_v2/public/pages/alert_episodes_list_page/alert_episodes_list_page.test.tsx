@@ -37,7 +37,9 @@ const READ_ONLY_CAPABILITIES = { alerting_v2_alerts: { read: true, all: false } 
 let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITIES;
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -50,23 +52,23 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('@kbn/unified-data-table', () => {
-      const mocked = {
-      DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-      ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
-      // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
-      // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
-      // controls end up in the DOM and stay reactive to the page's filter state.
-      UnifiedDataTable: vi.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
-        props.renderCustomToolbar ? props.renderCustomToolbar() : null
-      ),
-      getRenderCustomToolbarWithElements: vi.fn(
-        ({ leftSide }: { leftSide: React.ReactNode }) =>
-          () =>
-            leftSide
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+    ROWS_HEIGHT_OPTIONS: { auto: -1, single: 1, default: 3 },
+    // The page injects the episode count + reset-filters controls via the toolbar's leftSide.
+    // Render the custom toolbar (and have the toolbar builder render its leftSide) so those
+    // controls end up in the DOM and stay reactive to the page's filter state.
+    UnifiedDataTable: vi.fn((props: { renderCustomToolbar?: () => React.ReactNode }) =>
+      props.renderCustomToolbar ? props.renderCustomToolbar() : null
+    ),
+    getRenderCustomToolbarWithElements: vi.fn(
+      ({ leftSide }: { leftSide: React.ReactNode }) =>
+        () =>
+          leftSide
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_alerting_episodes');
 vi.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes');
@@ -77,89 +79,89 @@ vi.mock('@kbn/alerting-v2-episodes-ui/classic_alerts/apis/fetch_classic_episodes
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_episodes_data_view');
 
 vi.mock('@kbn/alerting-v2-episodes-ui/actions', () => {
-      const mocked = {
-      createEpisodeActions: vi.fn(() => []),
-      READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEpisodeActions: vi.fn(() => []),
+    READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/details_flyout', () => {
-      const mocked = {
-      AlertEpisodeDetailsFlyout: vi.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeDetailsFlyout: vi.fn(() => <div data-test-subj="alertEpisodeFlyoutStub" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_compose_discover_flyout', () => {
-      const mocked = {
-      useComposeDiscoverFlyout: () => ({
-        flyout: null,
-        confirmationModal: null,
-        openCreateFlyout: vi.fn(),
-        openEditFlyout: vi.fn(),
-        openCloneFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useComposeDiscoverFlyout: () => ({
+      flyout: null,
+      confirmationModal: null,
+      openCreateFlyout: vi.fn(),
+      openEditFlyout: vi.fn(),
+      openCloneFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The stub echoes the props the page passes so tests can assert on them from the DOM, which keeps
 // the mock factory free of module scope references it cannot reach while jest hoists it.
 vi.mock('../../components/rule/flyouts/rule_summary/rule_summary_flyout_container', () => {
-      const mocked = {
-      RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
-        <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`}>
-          <button data-test-subj="mockRuleSummaryFlyoutClose" onClick={onClose} type="button">
-            close
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryFlyoutContainer: ({ ruleId, onClose }: { ruleId: string; onClose: () => void }) => (
+      <div data-test-subj={`mockRuleSummaryFlyout-${ruleId}`}>
+        <button data-test-subj="mockRuleSummaryFlyoutClose" onClick={onClose} type="button">
+          close
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_breadcrumbs', () => {
-      const mocked = { useBreadcrumbs: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useBreadcrumbs: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/episodes_kpis', () => {
-      const mocked = {
-      EpisodesKpis: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EpisodesKpis: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Capture filter-bar props so tests can drive refresh + filter changes from outside the component.
 // onRefresh is typed as returning unknown so tests can await the result (invalidateEpisodeQueries returns a Promise).
 let capturedFilterBarOnRefresh: (() => unknown) | undefined;
 let capturedFilterBarOnFilterChange: ((update: any) => void) | undefined;
 vi.mock('./components/episodes_filter_bar', () => {
-      const mocked = {
-      EpisodesFilterBar: vi.fn(
-        ({
-          onRefresh,
-          onFilterChange,
-        }: {
-          onRefresh?: () => unknown;
-          onFilterChange?: (update: any) => void;
-        }) => {
-          capturedFilterBarOnRefresh = onRefresh;
-          capturedFilterBarOnFilterChange = onFilterChange;
-          return null;
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EpisodesFilterBar: vi.fn(
+      ({
+        onRefresh,
+        onFilterChange,
+      }: {
+        onRefresh?: () => unknown;
+        onFilterChange?: (update: any) => void;
+      }) => {
+        capturedFilterBarOnRefresh = onRefresh;
+        capturedFilterBarOnFilterChange = onFilterChange;
+        return null;
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/episodes_histogram', () => {
-      const mocked = {
-      EpisodesHistogram: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EpisodesHistogram: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useObservable', () =>
   vi.fn().mockReturnValue({ from: 'now-24h', to: 'now' })
@@ -206,11 +208,11 @@ const mockServices = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockImplementation(() => ({ services: mockServices })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockImplementation(() => ({ services: mockServices })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUnifiedDataTable = vi.mocked(UnifiedDataTable);
 
@@ -752,9 +754,9 @@ describe('AlertEpisodesListPage fetch errors', () => {
   });
 
   it('toasts when classic alerts return 500', async () => {
-    vi
-      .mocked(fetchClassicAlertsAsEpisodes)
-      .mockRejectedValue(httpError(500, 'classic alerts failed'));
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockRejectedValue(
+      httpError(500, 'classic alerts failed')
+    );
 
     renderPage();
 
@@ -772,9 +774,9 @@ describe('AlertEpisodesListPage fetch errors', () => {
   });
 
   it.each([403, 503])('does not toast when classic alerts return %s', async (status) => {
-    vi
-      .mocked(fetchClassicAlertsAsEpisodes)
-      .mockRejectedValue(httpError(status, `classic ${status}`));
+    vi.mocked(fetchClassicAlertsAsEpisodes).mockRejectedValue(
+      httpError(status, `classic ${status}`)
+    );
 
     renderPage();
 

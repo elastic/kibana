@@ -16,12 +16,12 @@ import type { RouteDependencies } from '../types';
 import { internalApiPath } from '../../../common/constants';
 
 vi.mock('@kbn/agent-builder-server', () => {
-      const mocked = {
-      listAgentConnectors: vi.fn(),
-      getAgentConnectorDetail: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    listAgentConnectors: vi.fn(),
+    getAgentConnectorDetail: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockListAgentConnectors = listAgentConnectors as Mock;
 const mockGetAgentConnectorDetail = getAgentConnectorDetail as Mock;

@@ -35,11 +35,11 @@ const testImageDataResult = {
   },
 };
 vi.mock('../monitor_test_result/use_retrieve_step_image', () => {
-      const mocked = {
-      useRetrieveStepImage: () => testImageDataResult,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRetrieveStepImage: () => testImageDataResult,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('JourneyScreenshotDialog', () => {
   const onCloseMock = vi.fn();

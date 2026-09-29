@@ -15,18 +15,18 @@ import { INSIGHTS_TAB_TEST_ID } from '../constants/test_ids';
 import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
 vi.mock('./tabs/insights_tab', () => {
-      const mocked = {
-      InsightsTab: () => <div data-test-subj="insights-tab-content">{'Insights tab'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InsightsTab: () => <div data-test-subj="insights-tab-content">{'Insights tab'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tabs/notes_tab', () => {
-      const mocked = {
-      NotesTab: () => <div data-test-subj="notes-tab-content">{'Notes tab'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesTab: () => <div data-test-subj="notes-tab-content">{'Notes tab'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('tabs', () => {
   describe('insightsTab', () => {

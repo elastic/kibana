@@ -35,7 +35,7 @@ vi.mock('../../../rule_management/api/hooks/use_infinite_change_history');
 
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
 
   return {
     ...original,

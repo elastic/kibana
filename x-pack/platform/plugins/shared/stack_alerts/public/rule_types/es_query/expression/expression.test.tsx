@@ -28,7 +28,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { indexPatternEditorPluginMock as dataViewEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor

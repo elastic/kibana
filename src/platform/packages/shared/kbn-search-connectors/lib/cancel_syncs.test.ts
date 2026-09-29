@@ -18,11 +18,11 @@ import { cancelSyncs } from './cancel_syncs';
 import { fetchSyncJobs } from './fetch_sync_jobs';
 
 vi.mock('./fetch_sync_jobs', () => {
-      const mocked = {
-      fetchSyncJobs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchSyncJobs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('cancelSync lib function', () => {
   const mockClient = {

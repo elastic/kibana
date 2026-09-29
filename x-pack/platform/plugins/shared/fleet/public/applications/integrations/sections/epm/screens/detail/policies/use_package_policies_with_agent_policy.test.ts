@@ -14,17 +14,17 @@ import { useConditionalRequest } from '../../../../../hooks';
 import { usePackagePoliciesWithAgentPolicy } from './use_package_policies_with_agent_policy';
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useConditionalRequest: vi.fn().mockReturnValue({
-        data: null,
-        error: null,
-        isLoading: false,
-        sendRequest: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useConditionalRequest: vi.fn().mockReturnValue({
+      data: null,
+      error: null,
+      isLoading: false,
+      sendRequest: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePackagePoliciesWithAgentPolicy', () => {
   beforeEach(() => {

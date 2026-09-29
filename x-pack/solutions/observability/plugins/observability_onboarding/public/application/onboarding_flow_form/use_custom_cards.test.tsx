@@ -19,22 +19,21 @@ import { useManagedOtlpServiceAvailability } from '../shared/use_managed_otlp_se
 import { useCustomCards } from './use_custom_cards';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../quickstart_flows/shared/use_pricing_feature');
 vi.mock('../shared/use_managed_otlp_service_availability');
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUsePricingFeature = usePricingFeature as MockedFunction<typeof usePricingFeature>;
-const mockUseManagedOtlpServiceAvailability =
-  useManagedOtlpServiceAvailability as MockedFunction<
-    typeof useManagedOtlpServiceAvailability
-  >;
+const mockUseManagedOtlpServiceAvailability = useManagedOtlpServiceAvailability as MockedFunction<
+  typeof useManagedOtlpServiceAvailability
+>;
 
 const CardsProbe: React.FC = () => {
   const cards = useCustomCards(vi.fn());

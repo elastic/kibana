@@ -16,12 +16,13 @@ import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kiban
 const mockUseKibana = vi.fn();
 
 vi.mock('../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const setupKibana = (appName: string = SECURITY_APP_NAME) => {
   mockUseKibana.mockReturnValue({

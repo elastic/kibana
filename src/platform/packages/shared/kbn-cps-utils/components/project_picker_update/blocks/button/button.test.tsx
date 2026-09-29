@@ -21,11 +21,11 @@ import { strings } from '../../../strings';
 const MockProjectPickerContext = createContext<{ state: unknown } | null>(null);
 
 vi.mock('../../state', () => {
-      const mocked = {
-      createProjectPickerContext: () => MockProjectPickerContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createProjectPickerContext: () => MockProjectPickerContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createState = (
   filteredProjectsCount: number,

@@ -16,32 +16,32 @@ import { noopCellActionRenderer } from '../../../shared/components/cell_actions'
 import { GRAPH_TOOLS_TEST_ID, GraphDetails } from '.';
 
 vi.mock('./components/graph_visualization', () => {
-      const mocked = {
-      GraphVisualization: vi.fn(({ mode, scopeId, eventIds, timestamp, isAlert }) => (
-        <div
-          data-test-subj="mockGraphVisualization"
-          data-mode={mode}
-          data-scope-id={scopeId}
-          data-event-ids={eventIds?.join(',')}
-          data-timestamp={timestamp}
-          data-is-alert={String(isAlert)}
-        />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GraphVisualization: vi.fn(({ mode, scopeId, eventIds, timestamp, isAlert }) => (
+      <div
+        data-test-subj="mockGraphVisualization"
+        data-mode={mode}
+        data-scope-id={scopeId}
+        data-event-ids={eventIds?.join(',')}
+        data-timestamp={timestamp}
+        data-is-alert={String(isAlert)}
+      />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../main/hooks/use_graph_preview', () => {
-      const mocked = {
-      useGraphPreview: vi.fn().mockReturnValue({
-        timestamp: '2024-01-15T10:00:00.000Z',
-        eventIds: ['event-1'],
-        shouldShowGraph: true,
-        hasGraphData: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGraphPreview: vi.fn().mockReturnValue({
+      timestamp: '2024-01-15T10:00:00.000Z',
+      eventIds: ['event-1'],
+      shouldShowGraph: true,
+      hasGraphData: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOnAlertUpdated = vi.fn();
 
@@ -122,7 +122,7 @@ describe('<GraphDetails />', () => {
   });
 
   it('returns null when timestamp is missing', async () => {
-    const { useGraphPreview } = (await vi.importMock('../../main/hooks/use_graph_preview'));
+    const { useGraphPreview } = await vi.importMock('../../main/hooks/use_graph_preview');
     useGraphPreview.mockReturnValueOnce({
       timestamp: null,
       eventIds: ['event-1'],

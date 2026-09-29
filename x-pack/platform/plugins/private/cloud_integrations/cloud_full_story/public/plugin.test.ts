@@ -34,9 +34,9 @@ describe('Cloud Plugin', () => {
         const plugin = new CloudFullStoryPlugin(initContext);
 
         const coreSetup = coreMock.createSetup();
-        vi
-          .spyOn(coreSetup.http.staticAssets, 'getPluginAssetHref')
-          .mockReturnValue('/cloudFullStory/assets/fs.js');
+        vi.spyOn(coreSetup.http.staticAssets, 'getPluginAssetHref').mockReturnValue(
+          '/cloudFullStory/assets/fs.js'
+        );
 
         const cloud = { ...cloudMock.createSetup(), isCloudEnabled, isElasticStaffOwned };
 

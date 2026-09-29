@@ -16,11 +16,11 @@ import { getUnifiedDocViewerServices } from '../../../../../plugin';
 import type { EuiThemeComputed } from '@elastic/eui';
 
 vi.mock('../../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttpPost = vi.fn();
 const mockAddDanger = vi.fn();
@@ -60,7 +60,7 @@ const mockTheme: EuiThemeComputed = {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const originalModule = (await vi.importActual('@elastic/eui'));
+  const originalModule = await vi.importActual('@elastic/eui');
   return {
     ...originalModule,
     useEuiTheme: () => ({ euiTheme: mockTheme }),

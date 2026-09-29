@@ -20,38 +20,38 @@ const REMOTE_CALLOUT_TEXT =
   'This event originates from a remote cluster. Some features may not be available.';
 
 vi.mock('../shared/context', () => {
-      const mocked = {
-      useDocumentDetailsContext: vi.fn().mockImplementation(async () => {
-        const { mockSearchHit } = (await vi.importActual('../shared/mocks/mock_search_hit'));
+  const mocked = {
+    useDocumentDetailsContext: vi.fn().mockImplementation(async () => {
+      const { mockSearchHit } = await vi.importActual('../shared/mocks/mock_search_hit');
 
-        return {
-          dataFormattedForFieldBrowser: [],
-          searchHit: mockSearchHit,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      return {
+        dataFormattedForFieldBrowser: [],
+        searchHit: mockSearchHit,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../shared/hooks/use_basic_data_from_details_data', () => {
-      const mocked = {
-      useBasicDataFromDetailsData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBasicDataFromDetailsData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/alert_header_title', () => {
-      const mocked = {
-      AlertHeaderTitle: vi.fn(() => <div data-test-subj="alert-header" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertHeaderTitle: vi.fn(() => <div data-test-subj="alert-header" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/event_header_title', () => {
-      const mocked = {
-      EventHeaderTitle: vi.fn(() => <div data-test-subj="event-header" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventHeaderTitle: vi.fn(() => <div data-test-subj="event-header" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseBasicDataFromDetailsData = useBasicDataFromDetailsData as Mock;
 const mockUseDocumentDetailsContext = useDocumentDetailsContext as Mock;
@@ -97,7 +97,7 @@ describe('PanelHeader', () => {
 
   it('should render the remote document callout for a remote document', async () => {
     mockUseBasicDataFromDetailsData.mockReturnValue({ isAlert: false });
-    const { mockSearchHit } = (await vi.importActual('../shared/mocks/mock_search_hit'));
+    const { mockSearchHit } = await vi.importActual('../shared/mocks/mock_search_hit');
     mockUseDocumentDetailsContext.mockReturnValueOnce({
       dataFormattedForFieldBrowser: [],
       searchHit: { ...mockSearchHit, _index: 'remote-cluster:.alerts-security.alerts-default' },

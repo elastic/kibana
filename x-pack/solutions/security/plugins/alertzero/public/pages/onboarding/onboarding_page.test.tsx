@@ -18,11 +18,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { OnboardingPage } from './onboarding_page';
 
 vi.mock('../../components/scan_failure_callout/scan_failure_callout', () => {
-      const mocked = {
-      ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderPage = ({ canWrite = false }: { canWrite?: boolean } = {}) => {
   const core = coreMock.createStart();

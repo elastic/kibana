@@ -82,12 +82,14 @@ const SUPPRESSED_ALERTS_TITLE_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_
 const NO_DATA_MESSAGE = 'No correlations data available.';
 
 const mockAllShowHooksTrue = () => {
-  vi
-    .mocked(useShowRelatedAlertsByAncestry)
-    .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
-  vi
-    .mocked(useShowRelatedAlertsBySameSourceEvent)
-    .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
+  vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+    show: true,
+    ancestryDocumentId: 'event-id',
+  });
+  vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+    show: true,
+    originalEventId: 'originalEventId',
+  });
   vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: 'entityId' });
   vi.mocked(useShowRelatedAttacks).mockReturnValue({ show: true, attackIds: ['attack-id'] });
   vi.mocked(useShowRelatedCases).mockReturnValue(true);
@@ -95,12 +97,14 @@ const mockAllShowHooksTrue = () => {
 };
 
 const mockAllShowHooksFalse = () => {
-  vi
-    .mocked(useShowRelatedAlertsByAncestry)
-    .mockReturnValue({ show: false, ancestryDocumentId: 'event-id' });
-  vi
-    .mocked(useShowRelatedAlertsBySameSourceEvent)
-    .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
+  vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+    show: false,
+    ancestryDocumentId: 'event-id',
+  });
+  vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+    show: false,
+    originalEventId: 'originalEventId',
+  });
   vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false, entityId: 'entityId' });
   vi.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
   vi.mocked(useShowRelatedCases).mockReturnValue(false);
@@ -183,9 +187,10 @@ describe('CorrelationsDetailsView', () => {
 
   it('renders only the ancestry section when only that flag is true', () => {
     mockAllShowHooksFalse();
-    vi
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
+    vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+      show: true,
+      ancestryDocumentId: 'event-id',
+    });
     (useFetchRelatedAlertsByAncestry as Mock).mockReturnValue({
       loading: false,
       error: false,

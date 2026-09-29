@@ -20,11 +20,11 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { RspackOptimizer } from './optimizer';
 
 vi.mock('child_process', () => {
-      const mocked = {
-      fork: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fork: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFork = fork as MockedFunction<typeof fork>;
 

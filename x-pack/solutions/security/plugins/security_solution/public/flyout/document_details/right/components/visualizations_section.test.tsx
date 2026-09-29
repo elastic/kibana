@@ -41,20 +41,17 @@ import { useSelectedPatterns } from '../../../../data_view_manager/hooks/use_sel
 import { useNavigateToSessionView } from '../../shared/hooks/use_navigate_to_session_view';
 
 vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock(
-  '../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree',
-  () => {
-      const mocked = {
-        useAlertPrevalenceFromProcessTree: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../../../flyout_v2/document/main/hooks/use_alert_prevalence_from_process_tree', () => {
+  const mocked = {
+    useAlertPrevalenceFromProcessTree: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as Mock;
 
 vi.mock('../../../../common/hooks/use_experimental_features');
@@ -82,22 +79,22 @@ const mockUseGraphPreview = useGraphPreview as Mock;
 const mockUseUpsellingComponent = useUpsellingComponent as Mock;
 
 vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
-      const mocked = {
-      useFetchGraphData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGraphData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchGraphData = useFetchGraphData as Mock;
 
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: {
-        trackUiMetric: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: {
+      trackUiMetric: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const uiMetricServiceMock = uiMetricService as Mocked<typeof uiMetricService>;
 

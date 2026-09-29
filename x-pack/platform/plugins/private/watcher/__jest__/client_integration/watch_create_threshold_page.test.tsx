@@ -53,21 +53,21 @@ const WATCH_VISUALIZE_DATA = {
 
 // Since watchID's are dynamically created, we have to mock the function that generates them.
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        return require('./helpers/jest_constants').WATCH_ID;
-      },
-      v1: () => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        return require('./helpers/jest_constants').WATCH_ID;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('./helpers/jest_constants').WATCH_ID;
+    },
+    v1: () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      return require('./helpers/jest_constants').WATCH_ID;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   const isRecord = (v: unknown): v is Record<string, unknown> =>
     typeof v === 'object' && v !== null;

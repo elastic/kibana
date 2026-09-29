@@ -29,8 +29,7 @@ const getMockWorker = async () => {
 
 const ID = 'painless';
 
-const flushPromises = () =>
-  new Promise((resolve) => require('timers').setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => require('timers').setImmediate(resolve));
 
 describe('DiagnosticAdapter', () => {
   let diagnosticAdapter: DiagnosticsAdapter;

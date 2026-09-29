@@ -17,31 +17,31 @@ import {
 } from './get_connector_id_suggestions_items';
 
 vi.mock('../../../../../../shared/lib/action_type_utils', () => {
-      const mocked = {
-      getActionTypeIdFromStepType: vi.fn((stepType: string) => `.${stepType.split('.')[0]}`),
-      getActionTypeDisplayNameFromStepType: vi.fn((stepType: string) => {
-        const name = stepType.split('.')[0];
-        return name.charAt(0).toUpperCase() + name.slice(1);
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getActionTypeIdFromStepType: vi.fn((stepType: string) => `.${stepType.split('.')[0]}`),
+    getActionTypeDisplayNameFromStepType: vi.fn((stepType: string) => {
+      const name = stepType.split('.')[0];
+      return name.charAt(0).toUpperCase() + name.slice(1);
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../shared/lib/connectors_utils', () => {
-      const mocked = {
-      getConnectorTypesFromStepType: vi.fn((stepType: string) => [stepType]),
-      getCustomStepConnectorIdSelectionHandler: vi.fn().mockReturnValue(undefined),
-      getInferenceConnectorTaskTypeFromSubAction: vi.fn().mockReturnValue(undefined),
-      isCreateConnectorEnabledForStepType: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorTypesFromStepType: vi.fn((stepType: string) => [stepType]),
+    getCustomStepConnectorIdSelectionHandler: vi.fn().mockReturnValue(undefined),
+    getInferenceConnectorTaskTypeFromSubAction: vi.fn().mockReturnValue(undefined),
+    isCreateConnectorEnabledForStepType: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const {
   isCreateConnectorEnabledForStepType,
   getCustomStepConnectorIdSelectionHandler,
   getInferenceConnectorTaskTypeFromSubAction,
-} = (await vi.importMock('../../../../../../shared/lib/connectors_utils'));
+} = await vi.importMock('../../../../../../shared/lib/connectors_utils');
 
 const createMockRange = (): monaco.IRange => ({
   startLineNumber: 3,

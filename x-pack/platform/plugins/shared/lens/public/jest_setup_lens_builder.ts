@@ -8,7 +8,7 @@
 import { vi } from 'vitest';
 
 beforeAll(async () => {
-  const { getLensFeatureFlags } = (await vi.importActual('./get_feature_flags'));
+  const { getLensFeatureFlags } = await vi.importActual('./get_feature_flags');
   const { apiFormat } = getLensFeatureFlags();
 
   if (!apiFormat) {
@@ -16,6 +16,6 @@ beforeAll(async () => {
   }
 
   // Keep lazy_builder mockable in tests by loading actual module at runtime.
-  const { setLensBuilder } = (await vi.importActual('./lazy_builder'));
+  const { setLensBuilder } = await vi.importActual('./lazy_builder');
   await setLensBuilder(apiFormat);
 });

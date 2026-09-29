@@ -16,11 +16,11 @@ import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_cont
 import { EditFilterList } from './edit_filter_list';
 
 vi.mock('../../../components/help_menu', () => {
-      const mocked = {
-      HelpMenu: () => <div id="mockHelpMenu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HelpMenu: () => <div id="mockHelpMenu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the call for loading the list of filters.
 // The mock is hoisted to the top, so need to prefix the filter variable
@@ -69,12 +69,12 @@ vi.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => mockKibanaContext,
-      useNavigateToPath: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: () => mockKibanaContext,
+    useNavigateToPath: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const props = {
   canCreateFilter: true,

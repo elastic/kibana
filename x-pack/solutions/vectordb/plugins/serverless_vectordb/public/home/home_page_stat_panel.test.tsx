@@ -24,17 +24,17 @@ import {
 } from './home_page_stat_panel';
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useIsWithinMinBreakpoint: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useIsWithinMinBreakpoint: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockIsWithinMinBreakpoint = useIsWithinMinBreakpoint as Mock;

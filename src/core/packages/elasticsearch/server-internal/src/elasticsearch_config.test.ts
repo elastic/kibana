@@ -351,7 +351,7 @@ describe('throws when config is invalid', () => {
   beforeAll(async () => {
     const realFs = require('fs');
     mockReadFileSync.mockImplementation((path: string) => realFs.readFileSync(path));
-    const crypto = (await vi.importActual('@kbn/crypto'));
+    const crypto = await vi.importActual('@kbn/crypto');
     mockReadPkcs12Keystore.mockImplementation((path: string, password?: string) =>
       crypto.readPkcs12Keystore(path, password)
     );

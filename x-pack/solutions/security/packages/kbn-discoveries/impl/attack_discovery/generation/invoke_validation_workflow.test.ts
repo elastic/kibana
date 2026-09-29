@@ -29,31 +29,31 @@ import { invokeValidationWorkflow } from './invoke_validation_workflow';
 const mockDeduplicateScheduledDiscoveries = vi.fn();
 
 vi.mock('./deduplicate_scheduled_discoveries', () => {
-      const mocked = {
-      deduplicateScheduledDiscoveries: (...args: unknown[]) =>
-        mockDeduplicateScheduledDiscoveries(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deduplicateScheduledDiscoveries: (...args: unknown[]) =>
+      mockDeduplicateScheduledDiscoveries(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWriteAttackDiscoveryEvent = vi.fn();
 
 vi.mock('../persistence/event_logging', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
-      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
+    writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/persistence', () => {
-      const mocked = {
-      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('invokeValidationWorkflow', () => {
   const mockLogger = {

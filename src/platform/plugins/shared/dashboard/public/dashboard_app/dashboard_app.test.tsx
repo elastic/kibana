@@ -47,16 +47,14 @@ describe('Dashboard App', () => {
      * and hitting errors that aren't relevant
      */
     (DashboardTopNav as Mock).mockImplementation(() => <>Top nav</>);
-    (DashboardRenderer as Mock).mockImplementation(
-      ({ onApiAvailable }: DashboardRendererProps) => {
-        // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
-        useEffect(() => {
-          onApiAvailable?.(dashboardApi, dashboardInternalApi);
-        }, [onApiAvailable]);
+    (DashboardRenderer as Mock).mockImplementation(({ onApiAvailable }: DashboardRendererProps) => {
+      // we need overwrite the onApiAvailable prop to get access to the dashboard API in this test
+      useEffect(() => {
+        onApiAvailable?.(dashboardApi, dashboardInternalApi);
+      }, [onApiAvailable]);
 
-        return <div>Test renderer</div>;
-      }
-    );
+      return <div>Test renderer</div>;
+    });
   });
 
   beforeEach(() => {
@@ -125,9 +123,7 @@ describe('Dashboard App', () => {
     const transferSubject$ = new Subject<unknown>();
 
     beforeAll(() => {
-      (stateTransferMock.onTransferEmbeddablePackage$ as Mock).mockReturnValue(
-        transferSubject$
-      );
+      (stateTransferMock.onTransferEmbeddablePackage$ as Mock).mockReturnValue(transferSubject$);
       (embeddableService.getStateTransfer as Mock).mockReturnValue(stateTransferMock);
     });
 

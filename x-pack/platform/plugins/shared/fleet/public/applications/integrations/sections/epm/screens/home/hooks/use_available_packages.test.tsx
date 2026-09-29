@@ -23,134 +23,134 @@ const mockUseBuildIntegrationsUrl = vi.fn();
 vi.mock(
   '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
   () => {
-      const mocked = {
-        useAgentless: () => mockUseAgentless(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAgentless: () => mockUseAgentless(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../../hooks', () => {
-      const mocked = {
-      useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
-      useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
-      useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
-      useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
-      useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
-      useStartServices: () => ({
-        featureFlags: { useBooleanValue: vi.fn().mockReturnValue(false) },
-        application: {
-          navigateToApp: vi.fn(),
-          getUrlForApp: vi.fn().mockReturnValue('/app/onboarding/aws'),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetPackagesQuery: (params: any) => mockUseGetPackagesQuery(params),
+    useGetCategoriesQuery: (params: any) => mockUseGetCategoriesQuery(params),
+    useGetAppendCustomIntegrationsQuery: () => mockUseGetAppendCustomIntegrationsQuery(),
+    useGetReplacementCustomIntegrationsQuery: () => mockUseGetReplacementCustomIntegrationsQuery(),
+    useGetPackageVerificationKeyId: () => mockUseGetPackageVerificationKeyId(),
+    useStartServices: () => ({
+      featureFlags: { useBooleanValue: vi.fn().mockReturnValue(false) },
+      application: {
+        navigateToApp: vi.fn(),
+        getUrlForApp: vi.fn().mockReturnValue('/app/onboarding/aws'),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_merge_epr_with_replacements', () => {
-      const mocked = {
-      useMergeEprPackagesWithReplacements: (epr: any, custom: any) =>
-        mockUseMergeEprPackagesWithReplacements(epr, custom),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMergeEprPackagesWithReplacements: (epr: any, custom: any) =>
+      mockUseMergeEprPackagesWithReplacements(epr, custom),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_build_integrations_url', () => {
-      const mocked = {
-      useBuildIntegrationsUrl: () => mockUseBuildIntegrationsUrl(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBuildIntegrationsUrl: () => mockUseBuildIntegrationsUrl(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./apply_grouping', () => {
-      const mocked = {
-      applyGrouping: (params: any) => mockApplyGrouping(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyGrouping: (params: any) => mockApplyGrouping(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExperimentalFeaturesServiceGet = vi.fn();
 const mockApplyGrouping = vi.fn();
 
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      doesPackageHaveIntegrations: (pkg: any) => {
-        return pkg.policy_templates && pkg.policy_templates.length > 0;
-      },
-      ExperimentalFeaturesService: {
-        get: () => mockExperimentalFeaturesServiceGet(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    doesPackageHaveIntegrations: (pkg: any) => {
+      return pkg.policy_templates && pkg.policy_templates.length > 0;
+    },
+    ExperimentalFeaturesService: {
+      get: () => mockExperimentalFeaturesServiceGet(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../../common/services', () => {
-      const mocked = {
-      isInputOnlyPolicyTemplate: (template: any) => template.type === 'input',
-      isIntegrationPolicyTemplate: (template: any) => template.type === 'integration',
-      filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
-        if (integrations.length > 0) {
-          return integrations;
-        }
-        return [topPackage];
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInputOnlyPolicyTemplate: (template: any) => template.type === 'input',
+    isIntegrationPolicyTemplate: (template: any) => template.type === 'integration',
+    filterPolicyTemplatesTiles: (_behavior: any, topPackage: any, integrations: any[]) => {
+      if (integrations.length > 0) {
+        return integrations;
+      }
+      return [topPackage];
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../../common/services/agentless_policy_helper', () => {
-      const mocked = {
-      isOnlyAgentlessPolicyTemplate: (template: any) =>
-        template.deployment_modes?.agentless?.enabled === true &&
-        template.deployment_modes?.default?.enabled !== true,
-      isOnlyAgentlessIntegration: (pkg: any) => {
-        const templates = pkg.policy_templates || [];
-        return (
-          templates.length > 0 &&
-          templates.every(
-            (t: any) =>
-              t.deployment_modes?.agentless?.enabled === true &&
-              t.deployment_modes?.default?.enabled !== true
-          )
-        );
-      },
-      isAgentlessIntegration: (pkg: any, integration?: string) => {
-        if (!integration) return false;
-        const template = pkg.policy_templates?.find((t: any) => t.name === integration);
-        return template?.deployment_modes?.agentless?.enabled === true;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isOnlyAgentlessPolicyTemplate: (template: any) =>
+      template.deployment_modes?.agentless?.enabled === true &&
+      template.deployment_modes?.default?.enabled !== true,
+    isOnlyAgentlessIntegration: (pkg: any) => {
+      const templates = pkg.policy_templates || [];
+      return (
+        templates.length > 0 &&
+        templates.every(
+          (t: any) =>
+            t.deployment_modes?.agentless?.enabled === true &&
+            t.deployment_modes?.default?.enabled !== true
+        )
+      );
+    },
+    isAgentlessIntegration: (pkg: any, integration?: string) => {
+      if (!integration) return false;
+      const template = pkg.policy_templates?.find((t: any) => t.name === integration);
+      return template?.deployment_modes?.agentless?.enabled === true;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../category_facets', () => {
-      const mocked = {
-      ALL_CATEGORY: { id: '', title: 'All', count: 0 },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ALL_CATEGORY: { id: '', title: 'All', count: 0 },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../util', () => {
-      const mocked = {
-      mergeCategoriesAndCount: vi.fn((categories, cards) => categories),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mergeCategoriesAndCount: vi.fn((categories, cards) => categories),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('..', () => {
-      const mocked = {
-      mapToCard: ({ item }: any) => ({
-        id: item.id,
-        title: item.title || item.name,
-        description: item.description || '',
-        categories: item.categories || [],
-        url: `/detail/${item.name}`,
-        supportsAgentless: item.supportsAgentless,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mapToCard: ({ item }: any) => ({
+      id: item.id,
+      title: item.title || item.name,
+      description: item.description || '',
+      categories: item.categories || [],
+      url: `/detail/${item.name}`,
+      supportsAgentless: item.supportsAgentless,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Import after mocks are set up
 import { useAvailablePackages } from './use_available_packages';
@@ -758,18 +758,18 @@ describe('useAvailablePackages', () => {
 
       // mapToCard mock preserves supportsAgentless from the item
       vi.doMock('..', () => {
-            const mocked = {
-                  mapToCard: ({ item }: any) => ({
-                    id: item.id,
-                    title: item.title || item.name,
-                    description: item.description || '',
-                    categories: item.categories || [],
-                    url: `/detail/${item.name}`,
-                    supportsAgentless: item.supportsAgentless,
-                  }),
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          mapToCard: ({ item }: any) => ({
+            id: item.id,
+            title: item.title || item.name,
+            description: item.description || '',
+            categories: item.categories || [],
+            url: `/detail/${item.name}`,
+            supportsAgentless: item.supportsAgentless,
+          }),
+        };
+        return { ...mocked, default: mocked };
+      });
 
       const { result } = renderHook(() =>
         useAvailablePackages({ prereleaseIntegrationsEnabled: false })

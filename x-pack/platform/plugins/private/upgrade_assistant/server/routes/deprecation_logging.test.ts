@@ -15,11 +15,11 @@ import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
-      const mocked = {
-      versionCheckHandlerWrapper: () => (a: any) => a,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    versionCheckHandlerWrapper: () => (a: any) => a,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 
@@ -49,8 +49,7 @@ describe('deprecation logging API', () => {
   describe('GET /api/upgrade_assistant/deprecation_logging', () => {
     it('returns that indexing and writing logs is enabled', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockResolvedValue({
         defaults: {
           cluster: { deprecation_indexing: { enabled: 'true' } },
@@ -71,8 +70,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -86,8 +84,7 @@ describe('deprecation logging API', () => {
   describe('PUT /api/upgrade_assistant/deprecation_logging', () => {
     it('returns that indexing and writing logs is enabled', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .putSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.putSettings as Mock
       ).mockResolvedValue({
         defaults: {
           logger: { deprecation: 'WARN' },
@@ -108,8 +105,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .putSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.putSettings as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -178,8 +174,7 @@ describe('deprecation logging API', () => {
   describe('DELETE /api/upgrade_assistant/deprecation_logging/cache', () => {
     it('returns ok if if the cache was deleted', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockResolvedValue('ok');
 
       const resp = await routeDependencies.router.getHandler({
@@ -199,8 +194,7 @@ describe('deprecation logging API', () => {
 
     it('returns an error if it throws', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({

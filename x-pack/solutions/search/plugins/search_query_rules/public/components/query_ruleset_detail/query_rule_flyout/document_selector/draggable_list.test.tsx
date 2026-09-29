@@ -25,16 +25,16 @@ const Wrapper = ({ children }: { children?: React.ReactNode }) => (
 );
 
 vi.mock('../../../../hooks/use_fetch_document', () => {
-      const mocked = {
-      useFetchDocument: vi.fn().mockReturnValue({
-        isLoading: false,
-        isError: false,
-        data: null,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchDocument: vi.fn().mockReturnValue({
+      isLoading: false,
+      isError: false,
+      data: null,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_IDS = {
   DraggableItemDocs: (

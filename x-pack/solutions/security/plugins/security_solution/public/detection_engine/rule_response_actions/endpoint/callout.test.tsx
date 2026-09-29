@@ -17,11 +17,7 @@ vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib');
 const useFormDataMock = useFormData as MockedFunction<typeof useFormData>;
 
 const mockFormData = (data: Record<string, string>) => {
-  (useFormDataMock as MockedFunction<typeof useFormData>).mockReturnValue([
-    data,
-    vi.fn(),
-    false,
-  ]);
+  (useFormDataMock as MockedFunction<typeof useFormData>).mockReturnValue([data, vi.fn(), false]);
 };
 
 describe('EndpointActionCallout', () => {

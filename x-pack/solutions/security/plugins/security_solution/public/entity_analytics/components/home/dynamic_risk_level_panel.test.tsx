@@ -21,18 +21,18 @@ import { RiskScoreDonutChart } from '../risk_score_donut_chart';
 vi.mock('../watchlists/components/hooks/use_risk_levels_esql_query');
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn(() => 'default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn(() => 'default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../risk_score_donut_chart', () => {
-      const mocked = {
-      RiskScoreDonutChart: vi.fn(() => <div data-test-subj="mock-risk-score-donut-chart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreDonutChart: vi.fn(() => <div data-test-subj="mock-risk-score-donut-chart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRiskLevelsEsqlQuery = useRiskLevelsEsqlQuery as Mock;
 const mockUseKibana = useKibana as Mock;

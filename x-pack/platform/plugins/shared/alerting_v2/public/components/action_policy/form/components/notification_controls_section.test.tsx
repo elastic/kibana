@@ -20,11 +20,11 @@ import type { ActionPolicyFormState } from '../types';
 const mockUseFetchRuleEventFields = vi.fn();
 
 vi.mock('../../../../hooks/use_fetch_rule_event_fields', () => {
-      const mocked = {
-      useFetchRuleEventFields: (matcher?: string) => mockUseFetchRuleEventFields(matcher),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleEventFields: (matcher?: string) => mockUseFetchRuleEventFields(matcher),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderSection = (defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE) => {
   const TestComponent = () => {

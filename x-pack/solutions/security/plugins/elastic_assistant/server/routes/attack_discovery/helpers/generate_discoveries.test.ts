@@ -20,12 +20,12 @@ import { mockAnonymizedAlerts } from '../../../lib/attack_discovery/evaluation/_
 import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries';
 
 vi.mock('../public/post/helpers/invoke_attack_discovery_graph', async () => {
-      const mocked = {
-      ...(await vi.importActual('../public/post/helpers/invoke_attack_discovery_graph')),
-      invokeAttackDiscoveryGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../public/post/helpers/invoke_attack_discovery_graph')),
+    invokeAttackDiscoveryGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockActionsClient = actionsClientMock.create();
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();

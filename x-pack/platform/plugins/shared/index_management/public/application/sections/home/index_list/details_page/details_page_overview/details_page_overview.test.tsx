@@ -29,42 +29,44 @@ vi.mock('@kbn/code-editor');
 
 const mockUseCloudConnectStatus = vi.fn();
 vi.mock('@kbn/search-api-panels', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/search-api-panels')),
-      useCloudConnectStatus: (...args: unknown[]) => mockUseCloudConnectStatus(...args),
-      EisCloudConnectPromoCallout: (props: { promoId: string }) => (
-        <div data-test-subj={`${props.promoId}-cloud-connect-callout`}>Cloud Connect Promo</div>
-      ),
-      EisUpdateCallout: (props: { promoId: string; handleOnClick: () => void }) => (
-        <div data-test-subj={`${props.promoId}-eis-update-callout`}>
-          EIS Update Callout
-          <button data-test-subj="eisUpdateCalloutCtaBtn" onClick={props.handleOnClick}>
-            Update
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/search-api-panels')),
+    useCloudConnectStatus: (...args: unknown[]) => mockUseCloudConnectStatus(...args),
+    EisCloudConnectPromoCallout: (props: { promoId: string }) => (
+      <div data-test-subj={`${props.promoId}-cloud-connect-callout`}>Cloud Connect Promo</div>
+    ),
+    EisUpdateCallout: (props: { promoId: string; handleOnClick: () => void }) => (
+      <div data-test-subj={`${props.promoId}-eis-update-callout`}>
+        EIS Update Callout
+        <button data-test-subj="eisUpdateCalloutCtaBtn" onClick={props.handleOnClick}>
+          Update
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHasElserOnMlNodeSemanticTextField = vi.fn();
 vi.mock('../../../../../components/mappings_editor/lib/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../components/mappings_editor/lib/utils')),
-      hasElserOnMlNodeSemanticTextField: (...args: unknown[]) =>
-        mockHasElserOnMlNodeSemanticTextField(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../components/mappings_editor/lib/utils')),
+    hasElserOnMlNodeSemanticTextField: (...args: unknown[]) =>
+      mockHasElserOnMlNodeSemanticTextField(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../update_elser_mappings/update_elser_mappings_modal', () => {
-      const mocked = {
-      UpdateElserMappingsModal: (props: { indexName: string }) => (
-        <div data-test-subj="updateElserMappingsModal">Update ELSER Mappings for {props.indexName}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UpdateElserMappingsModal: (props: { indexName: string }) => (
+      <div data-test-subj="updateElserMappingsModal">
+        Update ELSER Mappings for {props.indexName}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DetailsPageOverview', () => {
   let httpSetup: ReturnType<typeof setupEnvironment>['httpSetup'];

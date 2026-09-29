@@ -192,9 +192,7 @@ describe('installPrepackagedTimelines', () => {
       mockFileName
     );
 
-    expect((importTimelines as Mock).mock.calls[0][1]).toEqual(
-      config.maxTimelineImportExportSize
-    );
+    expect((importTimelines as Mock).mock.calls[0][1]).toEqual(config.maxTimelineImportExportSize);
   });
 
   test('should call importTimelines with frameworkRequest', async () => {

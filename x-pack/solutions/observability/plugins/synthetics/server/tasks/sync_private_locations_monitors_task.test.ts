@@ -207,9 +207,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      vi
-        .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
-        .mockResolvedValue(undefined);
+      vi.spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws').mockResolvedValue(
+        undefined
+      );
 
       const result = await task.runTask({ taskInstance });
 
@@ -365,9 +365,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      vi
-        .spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws')
-        .mockResolvedValue(undefined);
+      vi.spyOn(task.deployPackagePolicies, 'syncPackagePoliciesForMws').mockResolvedValue(
+        undefined
+      );
       mockSyntheticsMonitorClient.syntheticsService.getMaintenanceWindows = vi
         .fn()
         .mockResolvedValue([]);
@@ -430,9 +430,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
           agentPolicyId: 'policy-1',
         },
       ]);
-      vi
-        .spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies')
-        .mockRejectedValue(new Error('create failed'));
+      vi.spyOn(task.deployPackagePolicies, 'syncAllPackagePolicies').mockRejectedValue(
+        new Error('create failed')
+      );
 
       const result = await task.runTask({ taskInstance });
 
@@ -622,9 +622,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
 
   describe('hasAnyDataChanged', () => {
     it('should return true if maintenance windows changed', async () => {
-      vi
-        .spyOn(task, 'hasMWsChanged')
-        .mockResolvedValue({ hasMWsChanged: true, totalMWs: 2 } as any);
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: true,
+        totalMWs: 2,
+      } as any);
 
       const res = await task.hasMWsChanged({
         taskState: { lastTotalMWs: 1 } as any,
@@ -637,9 +638,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     });
 
     it('should return false if nothing changed', async () => {
-      vi
-        .spyOn(task, 'hasMWsChanged')
-        .mockResolvedValue({ hasMWsChanged: false, totalMWs: 1 } as any);
+      vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({
+        hasMWsChanged: false,
+        totalMWs: 1,
+      } as any);
 
       const taskState = { lastTotalParams: 1, lastTotalMWs: 1 };
 
@@ -754,9 +756,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
         maintenanceWindows: [],
       } as any);
 
-      vi
-        .spyOn(task, 'parseLocations')
-        .mockReturnValue({ privateLocations: ['pl-1'], publicLocations: [] } as any);
+      vi.spyOn(task, 'parseLocations').mockReturnValue({
+        privateLocations: ['pl-1'],
+        publicLocations: [],
+      } as any);
 
       await task.deployPackagePolicies.syncAllPackagePolicies({
         allPrivateLocations: mockAllPrivateLocations as any,
@@ -785,9 +788,10 @@ describe('SyncPrivateLocationMonitorsTask', () => {
       } as any);
 
       // This monitor has no private locations
-      vi
-        .spyOn(task, 'parseLocations')
-        .mockReturnValue({ privateLocations: [], publicLocations: [] } as any);
+      vi.spyOn(task, 'parseLocations').mockReturnValue({
+        privateLocations: [],
+        publicLocations: [],
+      } as any);
 
       await task.deployPackagePolicies.syncAllPackagePolicies({
         allPrivateLocations: [],
@@ -1033,9 +1037,9 @@ describe('SyncPrivateLocationMonitorsTask', () => {
     beforeEach(() => {
       vi.spyOn(task, 'hasMWsChanged').mockResolvedValue({ hasMWsChanged: false } as any);
       vi.spyOn(task, 'fetchMonitorMwsIds').mockResolvedValue(['mw-1']);
-      vi
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue(mockPrivateLocations as any);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue(
+        mockPrivateLocations as any
+      );
     });
 
     it('uses the task schedule interval when present', async () => {

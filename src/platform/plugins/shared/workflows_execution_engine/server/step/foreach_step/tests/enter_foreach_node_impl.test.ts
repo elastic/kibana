@@ -159,9 +159,9 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should parse value returned by expression if it is a string', async () => {
-        (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
-        ).mockReturnValue('["item1", "item2", "item3"]');
+        (stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock).mockReturnValue(
+          '["item1", "item2", "item3"]'
+        );
         await underTest.run();
 
         expect(stepExecutionRuntime.setCurrentStepState).toHaveBeenCalledTimes(1);
@@ -172,9 +172,9 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should throw an error if expression evaluated to null', async () => {
-        (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
-        ).mockReturnValue(null);
+        (stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock).mockReturnValue(
+          null
+        );
         await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array. Expression "{{steps.testStep.array}}" resolved to object (null).'
         );
@@ -187,9 +187,7 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should throw an error if the expression evaluated to an object', async () => {
-        (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
-        ).mockReturnValue({
+        (stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock).mockReturnValue({
           key: 'value',
         });
         await expect(underTest.run()).rejects.toThrow(
@@ -198,9 +196,9 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should throw an error if expression evaluates to string that could not be parsed', async () => {
-        (
-          stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock
-        ).mockReturnValue('{"key": value }');
+        (stepExecutionRuntime.contextManager.evaluateExpressionInContext as Mock).mockReturnValue(
+          '{"key": value }'
+        );
         await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );
@@ -234,18 +232,18 @@ describe('EnterForeachNodeImpl', () => {
       });
 
       it('should throw an error if rendering reurned not an array', async () => {
-        (
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
-        ).mockReturnValue(JSON.stringify({ foo: 'bar' }));
+        (stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock).mockReturnValue(
+          JSON.stringify({ foo: 'bar' })
+        );
         await expect(underTest.run()).rejects.toThrow(
           'Foreach expression must evaluate to an array.'
         );
       });
 
       it('should throw an error if expression evaluates to string that could not be parsed', async () => {
-        (
-          stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock
-        ).mockReturnValue('{"key": value }');
+        (stepExecutionRuntime.contextManager.renderValueAccordingToContext as Mock).mockReturnValue(
+          '{"key": value }'
+        );
         await expect(underTest.run()).rejects.toThrow(
           'Unable to parse rendered value: {"key": value }'
         );

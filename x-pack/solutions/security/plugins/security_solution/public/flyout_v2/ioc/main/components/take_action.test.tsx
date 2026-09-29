@@ -27,11 +27,11 @@ import { extractTimelineCapabilities } from '../../../../common/utils/timeline_c
 
 vi.mock('../../../../common/hooks/is_in_security_app');
 vi.mock('../../../../threat_intelligence/hooks/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/utils/timeline_capabilities');
 
 describe('TakeAction', () => {

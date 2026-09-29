@@ -39,18 +39,18 @@ import {
 } from './test_helpers';
 
 vi.mock('../../evaluators/trace_readiness', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../evaluators/trace_readiness')),
-      awaitTraceReady: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../evaluators/trace_readiness')),
+    awaitTraceReady: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../evaluators/evaluator_tracing_context', () => {
-      const mocked = {
-      withEvaluatorNameBaggage: vi.fn((_: string, fn: () => unknown) => fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withEvaluatorNameBaggage: vi.fn((_: string, fn: () => unknown) => fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 const awaitTraceReadyMock = awaitTraceReady as MockedFunction<typeof awaitTraceReady>;
 const withEvaluatorNameBaggageMock = withEvaluatorNameBaggage as MockedFunction<
   typeof withEvaluatorNameBaggage
@@ -424,7 +424,9 @@ describe('POST /internal/evals/_evaluate', () => {
   });
 
   it('normalizes claude-code evidence through the real readiness path', async () => {
-    const actualTraceReadiness = (await vi.importActual('../../evaluators/trace_readiness')) as typeof import('../../evaluators/trace_readiness');
+    const actualTraceReadiness = (await vi.importActual(
+      '../../evaluators/trace_readiness'
+    )) as typeof import('../../evaluators/trace_readiness');
     awaitTraceReadyMock.mockImplementation((traceAccessor, request, log) =>
       actualTraceReadiness.awaitTraceReady(traceAccessor, request, log, {
         retries: 2,

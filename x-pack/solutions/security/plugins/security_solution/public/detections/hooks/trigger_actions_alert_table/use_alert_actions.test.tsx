@@ -18,46 +18,46 @@ import type { BulkActionsConfig } from '@kbn/response-ops-alerts-table/types';
 
 vi.mock('../../../common/hooks/use_app_toasts');
 vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => {
-      const mocked = {
-      useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/apm/use_start_transaction', () => {
-      const mocked = {
-      useStartTransaction: vi.fn().mockReturnValue({ startTransaction: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartTransaction: vi.fn().mockReturnValue({ startTransaction: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../use_alert_close_info_modal', () => {
-      const mocked = {
-      useAlertCloseInfoModal: vi
-        .fn()
-        .mockReturnValue({ promptAlertCloseConfirmation: vi.fn().mockResolvedValue(true) }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertCloseInfoModal: vi
+      .fn()
+      .mockReturnValue({ promptAlertCloseConfirmation: vi.fn().mockResolvedValue(true) }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-detections-close-reason', () => {
-      const mocked = {
-      useBulkClosingReasonItems: vi
-        .fn()
-        .mockReturnValue({ item: { key: 'close-alert-with-reason', label: 'Close' }, panels: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkClosingReasonItems: vi
+      .fn()
+      .mockReturnValue({ item: { key: 'close-alert-with-reason', label: 'Close' }, panels: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
 vi.mock('../../components/alerts_table/helpers', () => {
-      const mocked = {
-      buildTimeRangeFilter: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildTimeRangeFilter: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 (useAppToasts as Mock).mockReturnValue({
   addSuccess: vi.fn(),

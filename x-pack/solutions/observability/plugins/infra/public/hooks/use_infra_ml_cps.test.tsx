@@ -28,11 +28,11 @@ const LOADING_MESSAGE = 'Loading Machine Learning configuration...';
 const mockUseKibanaContextForPlugin = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = ({
   cps,

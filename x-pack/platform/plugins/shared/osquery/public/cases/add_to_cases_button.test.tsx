@@ -27,12 +27,13 @@ const mockCanUseCases = vi.fn();
 const mockUseKibana = vi.fn();
 
 vi.mock('../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const setupKibana = (
   permissions: { read: boolean; update: boolean; push: boolean } = {

@@ -17,8 +17,8 @@ export const cloudDetailsMock = mock.getCloudDetails;
 export const detectCloudServiceMock = mock.detectCloudService;
 
 vi.doMock('./detector', () => {
-      const mocked = {
-      CloudDetector: vi.fn().mockImplementation(() => mock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CloudDetector: vi.fn().mockImplementation(() => mock),
+  };
+  return { ...mocked, default: mocked };
+});

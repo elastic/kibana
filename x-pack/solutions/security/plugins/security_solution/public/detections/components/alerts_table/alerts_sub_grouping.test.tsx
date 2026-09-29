@@ -32,12 +32,12 @@ vi.mock('../../containers/detection_engine/alerts/use_query');
 vi.mock('../../../data_view_manager/hooks/use_data_view');
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../containers/detection_engine/alerts/api', () => {
-      const mocked = {
-      fetchQueryAlerts: vi.fn(),
-      fetchQueryUnifiedAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchQueryAlerts: vi.fn(),
+    fetchQueryUnifiedAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockedTelemetry = createTelemetryServiceMock();
 (useKibana as Mock).mockReturnValue({
   services: {

@@ -18,39 +18,39 @@ import { FLYOUT_ORIGIN } from '../../common/lib/telemetry';
 import { useFlyoutApi } from '../../flyout_v2/use_flyout_api';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout/shared/hooks/use_on_expandable_flyout_close', () => {
-      const mocked = {
-      useOnExpandableFlyoutClose: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnExpandableFlyoutClose: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDynamicEntityFlyout', () => {
   let openFlyoutMock: Mock;

@@ -113,11 +113,7 @@ const renderChooser = ({
       <KibanaContextProvider services={coreMock.createStart()}>
         <MemoryRouter initialEntries={['/']}>
           <FleetCardsProvider>
-            <CollectionChooser
-              collection={collection}
-              searchTerm={searchTerm}
-              onClose={vi.fn()}
-            />
+            <CollectionChooser collection={collection} searchTerm={searchTerm} onClose={vi.fn()} />
             <div data-test-subj="probeMounted" />
           </FleetCardsProvider>
         </MemoryRouter>

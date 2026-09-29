@@ -17,35 +17,35 @@ import { reindexIntegrationKnowledgeForInstalledPackages } from './reindex_integ
 vi.mock('../services');
 vi.mock('../services/epm/packages');
 vi.mock('../services/epm/registry', () => {
-      const mocked = {
-      getPackage: vi.fn().mockResolvedValue({
-        archiveIterator: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackage: vi.fn().mockResolvedValue({
+      archiveIterator: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../services/epm/packages/install_state_machine/steps', () => {
-      const mocked = {
-      indexKnowledgeBase: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    indexKnowledgeBase: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../services/epm/packages/bundled_packages', () => {
-      const mocked = {
-      getBundledPackageForInstallation: vi.fn().mockResolvedValue({
-        getBuffer: vi.fn().mockResolvedValue(Buffer.from('')),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBundledPackageForInstallation: vi.fn().mockResolvedValue({
+      getBuffer: vi.fn().mockResolvedValue(Buffer.from('')),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../services/epm/archive', () => {
-      const mocked = {
-      unpackBufferToAssetsMap: vi.fn().mockResolvedValue({
-        archiveIterator: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    unpackBufferToAssetsMap: vi.fn().mockResolvedValue({
+      archiveIterator: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ReindexIntegrationKnowledgeTask', () => {
   const { signal } = new AbortController();

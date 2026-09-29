@@ -19,11 +19,11 @@ import { getLensBuilder } from '../../lazy_builder';
 import { initializeIntegrations } from './initialize_integrations';
 
 vi.mock('../../lazy_builder', () => {
-      const mocked = {
-      getLensBuilder: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLensBuilder: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function setupIntegrationsApi(stateOverrides?: Partial<LensRuntimeState>): LensApi {
   const runtimeState = getLensRuntimeStateMock(stateOverrides);

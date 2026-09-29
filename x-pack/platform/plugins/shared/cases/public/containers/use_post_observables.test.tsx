@@ -81,9 +81,7 @@ describe('usePostObservables', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    vi
-      .spyOn(api, 'postObservable')
-      .mockRejectedValue(new Error('usePostObservables: Test error'));
+    vi.spyOn(api, 'postObservable').mockRejectedValue(new Error('usePostObservables: Test error'));
 
     const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: TestProviders,

@@ -24,15 +24,15 @@ import type { AutoAttachServices } from './use_auto_attach';
 import { useEpisodeAutoAttach } from './use_episode_auto_attach';
 
 vi.mock('@kbn/alerting-v2-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-v2-utils')),
-      alertEpisodeToEpisodeAttachment: (episode: unknown) => ({
-        ...(episode as Record<string, unknown>),
-        __mapped: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-v2-utils')),
+    alertEpisodeToEpisodeAttachment: (episode: unknown) => ({
+      ...(episode as Record<string, unknown>),
+      __mapped: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const episode: AlertEpisode = {
   '@timestamp': '2026-01-01T00:00:00.000Z',

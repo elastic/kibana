@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { createHash } from 'node:crypto';
 import { vi } from 'vitest';
 
-import { createHash } from 'node:crypto';
 import type { KibanaRequest } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -40,22 +40,22 @@ import type { WorkflowProperties } from '../storage/workflow_storage';
 let mockManagedWorkflowDefinitions: ManagedWorkflowDefinition[] = [];
 
 vi.mock('@kbn/workflows/managed', () => {
-      const mocked = {
-      getManagedWorkflowDefinition: (id: string) =>
-        mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
-      getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
-      getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
-      getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
-      getManagedWorkflowVisibilityContexts: (visibility?: {
-        selectors?: string[];
-        solutions?: string[];
-      }) => [
-        ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
-        ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getManagedWorkflowDefinition: (id: string) =>
+      mockManagedWorkflowDefinitions.find((definition) => definition.id === id),
+    getManagedWorkflowDefinitions: () => [...mockManagedWorkflowDefinitions],
+    getManagedWorkflowSelectorVisibilityContext: (selector: string) => `selector:${selector}`,
+    getManagedWorkflowSolutionVisibilityContext: (solution: string) => `solution:${solution}`,
+    getManagedWorkflowVisibilityContexts: (visibility?: {
+      selectors?: string[];
+      solutions?: string[];
+    }) => [
+      ...(visibility?.selectors ?? []).map((selector) => `selector:${selector}`),
+      ...(visibility?.solutions ?? []).map((solution) => `solution:${solution}`),
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const PLUGIN_ID = 'testPlugin';
 const WORKFLOW_ID = 'system-test-workflow' as ManagedWorkflowId;
@@ -225,9 +225,7 @@ const createCrudServiceMock = () => {
     getWorkflowDocumentSource: vi.fn(),
     getManagedWorkflowDocumentsAllSpaces: vi.fn().mockResolvedValue([]),
     indexWorkflowDocument: vi.fn().mockResolvedValue({ seqNo: 1, primaryTerm: 1 }),
-    createWorkflowDocument: vi.fn(
-      async (_id, _spaceId, document: WorkflowProperties) => document
-    ),
+    createWorkflowDocument: vi.fn(async (_id, _spaceId, document: WorkflowProperties) => document),
     writeWorkflowDocumentWithOcc: vi.fn(
       async (_id, _spaceId, params: WriteWorkflowDocumentWithOccParams) => params.document
     ),

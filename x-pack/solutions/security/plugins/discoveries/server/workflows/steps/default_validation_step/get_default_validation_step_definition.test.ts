@@ -20,32 +20,32 @@ import {
 import { transformDiscoveriesToOutputFormat } from './helpers/transform_discoveries_to_output_format';
 
 vi.mock('../../helpers/resolve_connector_details', () => {
-      const mocked = {
-      resolveConnectorDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/authenticate_and_get_space', () => {
-      const mocked = {
-      authenticateAndGetSpace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    authenticateAndGetSpace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/filter_and_validate_discoveries', () => {
-      const mocked = {
-      filterAndValidateDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterAndValidateDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/transform_discoveries_to_output_format', () => {
-      const mocked = {
-      transformDiscoveriesToOutputFormat: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformDiscoveriesToOutputFormat: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResolveConnectorDetails = resolveConnectorDetails as MockedFunction<
   typeof resolveConnectorDetails
@@ -56,10 +56,9 @@ const mockAuthenticateAndGetSpace = authenticateAndGetSpace as MockedFunction<
 const mockFilterAndValidateDiscoveries = filterAndValidateDiscoveries as MockedFunction<
   typeof filterAndValidateDiscoveries
 >;
-const mockTransformDiscoveriesToOutputFormat =
-  transformDiscoveriesToOutputFormat as MockedFunction<
-    typeof transformDiscoveriesToOutputFormat
-  >;
+const mockTransformDiscoveriesToOutputFormat = transformDiscoveriesToOutputFormat as MockedFunction<
+  typeof transformDiscoveriesToOutputFormat
+>;
 
 describe('getDefaultValidationStepDefinition', () => {
   const mockLogger = {

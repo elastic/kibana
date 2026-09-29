@@ -19,13 +19,13 @@ import { huntBehavior } from '../../services/watches/hunt/tier2/hunt_behavior';
 import type { HuntBehaviorResult } from '../../services/watches/hunt/tier2/types';
 
 vi.mock('./lib/scoped_model', () => {
-      const mocked = { resolveScopedModel: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { resolveScopedModel: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../services/watches/hunt/tier2/hunt_behavior', () => {
-      const mocked = { huntBehavior: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { huntBehavior: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const resolveScopedModelMock = resolveScopedModel as MockedFunction<typeof resolveScopedModel>;
 const huntBehaviorMock = huntBehavior as MockedFunction<typeof huntBehavior>;

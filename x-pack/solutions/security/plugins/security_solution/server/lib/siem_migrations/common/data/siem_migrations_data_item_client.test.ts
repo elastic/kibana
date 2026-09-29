@@ -33,9 +33,7 @@ describe('SiemMigrationsDataItemClient', () => {
     elasticsearchServiceMock.createCustomClusterClient() as unknown as IScopedClusterClient;
 
   const logger = loggingSystemMock.createLogger();
-  const indexNameProvider = vi
-    .fn()
-    .mockResolvedValue('.kibana-siem-rule-migrations-rules-default');
+  const indexNameProvider = vi.fn().mockResolvedValue('.kibana-siem-rule-migrations-rules-default');
   const currentUser = {
     userName: 'testUser',
     profile_uid: 'testProfileUid',

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import type { MlModel } from '../../../../../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';

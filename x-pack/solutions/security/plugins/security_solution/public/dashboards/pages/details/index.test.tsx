@@ -24,7 +24,7 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../common/lib/kibana');
   return {
     ...actual,
     useCapabilities: vi.fn().mockReturnValue({ show: true, showWriteControls: true }),
@@ -32,15 +32,15 @@ vi.mock('../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../components/dashboard_renderer', () => {
-      const mocked = {
-      DashboardRenderer: vi
-        .fn()
-        .mockImplementation((props) => (
-          <div data-test-subj={`dashboard-view-${props.savedObjectId}`} />
-        )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardRenderer: vi
+      .fn()
+      .mockImplementation((props) => (
+        <div data-test-subj={`dashboard-view-${props.savedObjectId}`} />
+      )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type Action = 'PUSH' | 'POP' | 'REPLACE';
 const pop: Action = 'POP';

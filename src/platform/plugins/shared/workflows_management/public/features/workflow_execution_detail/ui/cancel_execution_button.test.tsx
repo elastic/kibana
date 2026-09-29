@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { default as React } from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { TestWrapper } from '../../../shared/test_utils';
@@ -18,33 +17,33 @@ import { TestWrapper } from '../../../shared/test_utils';
 const mockCancelExecution = vi.fn();
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: () => ({
-        cancelExecution: mockCancelExecution,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => ({
+      cancelExecution: mockCancelExecution,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportWorkflowRunCancelled = vi.fn();
 
 vi.mock('../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: vi.fn(() => ({
-        reportWorkflowRunCancelled: mockReportWorkflowRunCancelled,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: vi.fn(() => ({
+      reportWorkflowRunCancelled: mockReportWorkflowRunCancelled,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useKibana } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
+const { useKibana } = await vi.importMock('@kbn/kibana-react-plugin/public');
 
 describe('CancelExecutionButton', () => {
   const mockAddSuccess = vi.fn();

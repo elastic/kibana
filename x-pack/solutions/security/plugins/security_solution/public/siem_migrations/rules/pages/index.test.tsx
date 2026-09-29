@@ -60,10 +60,7 @@ const useGetMigrationMissingPrivilegesSpy = vi.spyOn(
   'useGetMigrationMissingPrivileges'
 );
 const useCalloutStorageSpy = vi.spyOn(useCallOutStorageModule, 'useCallOutStorage');
-const useGetMissingResourcesSpy = vi.spyOn(
-  useGetMissingResourcesModule,
-  'useGetMissingResources'
-);
+const useGetMissingResourcesSpy = vi.spyOn(useGetMissingResourcesModule, 'useGetMissingResources');
 const useGetMigrationTranslationStatsSpy = vi.spyOn(
   useGetMigrationTranslationStatsModule,
   'useGetMigrationTranslationStats'

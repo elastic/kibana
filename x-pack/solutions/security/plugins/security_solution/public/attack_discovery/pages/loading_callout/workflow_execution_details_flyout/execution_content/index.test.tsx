@@ -17,13 +17,13 @@ import { WorkflowPipelineMonitor } from '../../workflow_pipeline_monitor';
 import { ExecutionContent } from '.';
 
 vi.mock('../../workflow_pipeline_monitor', () => {
-      const mocked = {
-      WorkflowPipelineMonitor: vi.fn(() => (
-        <div data-test-subj="workflowPipelineMonitor">{'Mock WorkflowPipelineMonitor'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowPipelineMonitor: vi.fn(() => (
+      <div data-test-subj="workflowPipelineMonitor">{'Mock WorkflowPipelineMonitor'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStepExecutions: StepExecutionWithLink[] = [
   {

@@ -22,17 +22,19 @@ vi.mock('./sync/index_sync');
 vi.mock('../entities/utils');
 vi.mock('./bulk/soft_delete');
 vi.mock('@kbn/security-plugin/server/authentication/api_keys/fake_kibana_request', () => {
-      const mocked = {
-      getFakeKibanaRequest: vi.fn().mockReturnValue({ fakeRequest: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFakeKibanaRequest: vi.fn().mockReturnValue({ fakeRequest: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { mockListEntitySources } = (await vi.importMock('./infra/entity_source_client')) as {
   mockListEntitySources: Mock;
 };
 
-const { mockWatchlistGet, mockGetEntitySourceIds, mockWatchlistList } = (await vi.importMock('../management/watchlist_config')) as {
+const { mockWatchlistGet, mockGetEntitySourceIds, mockWatchlistList } = (await vi.importMock(
+  '../management/watchlist_config'
+)) as {
   mockWatchlistGet: Mock;
   mockGetEntitySourceIds: Mock;
   mockWatchlistList: Mock;
@@ -42,7 +44,9 @@ const { mockListEntityStoreEntities } = (await vi.importMock('../entities/servic
   mockListEntityStoreEntities: Mock;
 };
 
-const { mockPlainIndexSync, mockCreateIndexSyncService } = (await vi.importMock('./sync/index_sync')) as {
+const { mockPlainIndexSync, mockCreateIndexSyncService } = (await vi.importMock(
+  './sync/index_sync'
+)) as {
   mockPlainIndexSync: Mock;
   mockCreateIndexSyncService: Mock;
 };
@@ -51,7 +55,9 @@ const { mockGetIndexForWatchlist } = (await vi.importMock('../entities/utils')) 
   mockGetIndexForWatchlist: Mock;
 };
 
-const { applyBulkRemoveSource: mockApplyBulkRemoveSource } = (await vi.importMock('./bulk/soft_delete')) as {
+const { applyBulkRemoveSource: mockApplyBulkRemoveSource } = (await vi.importMock(
+  './bulk/soft_delete'
+)) as {
   applyBulkRemoveSource: Mock;
 };
 

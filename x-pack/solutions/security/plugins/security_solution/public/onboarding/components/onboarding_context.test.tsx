@@ -16,72 +16,72 @@ import { hasCapabilities } from '../../common/lib/capabilities';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 vi.mock('../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({ services: { application: { capabilities: {} } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({ services: { application: { capabilities: {} } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/lib/capabilities', () => {
-      const mocked = { hasCapabilities: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { hasCapabilities: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 const mockHasCapabilities = hasCapabilities as Mock;
 
 vi.mock('../../common/hooks/use_license', () => {
-      const mocked = { useLicense: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useLicense: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 const mockUseLicense = useLicense as Mock;
 
 vi.mock('../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: { get: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: { get: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as Mock;
 
 vi.mock('../config', () => {
-      const mocked = {
-      onboardingConfig: [
-        {
-          id: 'default',
-          body: [
-            {
-              id: 'defaultGroup1',
-              cards: [{ id: 'defaultCard1' }],
-            },
-          ],
-        },
-        {
-          id: 'topic1',
-          experimentalFlagRequired: 'flag1',
-          licenseTypeRequired: 'gold',
-          capabilitiesRequired: ['capability1'],
-          body: [
-            {
-              id: 'topic1Group1',
-              cards: [{ id: 'topic1Card1' }],
-            },
-          ],
-        },
-        {
-          id: 'topic2',
-          body: [
-            {
-              id: 'topic2Group1',
-              cards: [
-                { id: 'topic2Card1', experimentalFlagRequired: 'flag1' },
-                { id: 'topic2Card2', licenseTypeRequired: 'gold' },
-                { id: 'topic2Card3', capabilitiesRequired: ['capability1'] },
-              ],
-            },
-          ],
-        },
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    onboardingConfig: [
+      {
+        id: 'default',
+        body: [
+          {
+            id: 'defaultGroup1',
+            cards: [{ id: 'defaultCard1' }],
+          },
+        ],
+      },
+      {
+        id: 'topic1',
+        experimentalFlagRequired: 'flag1',
+        licenseTypeRequired: 'gold',
+        capabilitiesRequired: ['capability1'],
+        body: [
+          {
+            id: 'topic1Group1',
+            cards: [{ id: 'topic1Card1' }],
+          },
+        ],
+      },
+      {
+        id: 'topic2',
+        body: [
+          {
+            id: 'topic2Group1',
+            cards: [
+              { id: 'topic2Card1', experimentalFlagRequired: 'flag1' },
+              { id: 'topic2Card2', licenseTypeRequired: 'gold' },
+              { id: 'topic2Card3', capabilitiesRequired: ['capability1'] },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const wrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => (
   <OnboardingContextProvider spaceId="space1">{children}</OnboardingContextProvider>

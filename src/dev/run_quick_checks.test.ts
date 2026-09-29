@@ -13,11 +13,11 @@ import { vi } from 'vitest';
 // Mock it out so importing the module for unit tests does not execute the CLI
 // against Jest's own argv (which fails with "Unknown flag(s)").
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { buildPipelineAnnotation } from './run_quick_checks';

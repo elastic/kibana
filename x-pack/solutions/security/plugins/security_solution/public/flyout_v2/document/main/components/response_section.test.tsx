@@ -22,39 +22,39 @@ import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app'
 import { documentFlyoutHistoryKey } from '../../../shared/constants/flyout_history';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./response_section_content', () => {
-      const mocked = {
-      ResponseSectionContent: vi.fn(
-        ({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
-          <button
-            type="button"
-            data-test-subj="responseSectionContentMock"
-            onClick={onShowResponseDetails}
-          >
-            {'show'}
-          </button>
-        )
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponseSectionContent: vi.fn(
+      ({ onShowResponseDetails }: { onShowResponseDetails: () => void }) => (
+        <button
+          type="button"
+          data-test-subj="responseSectionContentMock"
+          onClick={onShowResponseDetails}
+        >
+          {'show'}
+        </button>
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenSystemFlyout = vi.fn();
 const store = createStore(() => ({}));

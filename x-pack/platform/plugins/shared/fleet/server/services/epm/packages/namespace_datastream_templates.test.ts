@@ -30,7 +30,7 @@ import {
 
 vi.mock('./get');
 vi.mock('../elasticsearch/template/template', async () => {
-  const actual = (await vi.importActual('../elasticsearch/template/template'));
+  const actual = await vi.importActual('../elasticsearch/template/template');
   return {
     ...actual,
     updateCurrentWriteIndices: vi.fn(),

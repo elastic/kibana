@@ -39,7 +39,7 @@ import type { ICPSManager } from '@kbn/cps-utils';
 import moment from 'moment';
 
 vi.mock('./create_request_hash', async () => {
-  const originalModule = (await vi.importActual('./create_request_hash'));
+  const originalModule = await vi.importActual('./create_request_hash');
   return {
     ...originalModule,
     createRequestHash: vi.fn().mockImplementation((input) => {
@@ -50,17 +50,16 @@ vi.mock('./create_request_hash', async () => {
 });
 
 vi.mock('./search_session_incomplete_warning', () => {
-      const mocked = {
-      SearchSessionIncompleteWarning: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchSessionIncompleteWarning: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const SearchSessionIncompleteWarningMock = vi.mocked(SearchSessionIncompleteWarning);
 
 let searchInterceptor: SearchInterceptor;
 
-const flushPromises = () =>
-  new Promise((resolve) => require('timers').setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => require('timers').setImmediate(resolve));
 
 vi.useFakeTimers({ legacyFakeTimers: true });
 
@@ -1091,9 +1090,9 @@ describe('SearchInterceptor', () => {
           })
         );
 
-        expect(
-          (sessionService as Mocked<ISessionService>).getSearchOptions
-        ).toHaveBeenCalledWith(sessionId);
+        expect((sessionService as Mocked<ISessionService>).getSearchOptions).toHaveBeenCalledWith(
+          sessionId
+        );
       });
 
       test("doesn't forward sessionId if search options return null", async () => {
@@ -1110,9 +1109,9 @@ describe('SearchInterceptor', () => {
           })
         );
 
-        expect(
-          (sessionService as Mocked<ISessionService>).getSearchOptions
-        ).toHaveBeenCalledWith(sessionId);
+        expect((sessionService as Mocked<ISessionService>).getSearchOptions).toHaveBeenCalledWith(
+          sessionId
+        );
       });
 
       test('should not show warning if a search is available during restore', async () => {

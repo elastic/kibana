@@ -15,42 +15,42 @@ import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { AlertEpisodeOverviewList } from './overview_list';
 
 vi.mock('../assignee_cell', () => {
-      const mocked = {
-      AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
-        <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeAssigneeCell: ({ assigneeUid }: { assigneeUid: string | null | undefined }) => (
+      <div data-test-subj="mockAssigneeCell">{assigneeUid ?? 'no-assignee'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../user_profile_display', () => {
-      const mocked = {
-      UserProfileDisplay: ({
-        userProfileUid,
-        emptyState = '—',
-      }: {
-        userProfileUid: string | null | undefined;
-        emptyState?: React.ReactNode;
-      }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserProfileDisplay: ({
+      userProfileUid,
+      emptyState = '—',
+    }: {
+      userProfileUid: string | null | undefined;
+      emptyState?: React.ReactNode;
+    }) => <div data-test-subj="mockUserProfileDisplay">{userProfileUid ?? emptyState}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../grouping/alerting_episode_grouping_tags', () => {
-      const mocked = {
-      AlertingEpisodeGroupingTags: ({
-        fields,
-        data,
-      }: {
-        fields: readonly string[];
-        data: Record<string, unknown>;
-      }) => (
-        <div data-test-subj="mockGroupingTags">
-          {fields.map((field) => `${field}=${String(data[field] ?? '')}`).join(',')}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingEpisodeGroupingTags: ({
+      fields,
+      data,
+    }: {
+      fields: readonly string[];
+      data: Record<string, unknown>;
+    }) => (
+      <div data-test-subj="mockGroupingTags">
+        {fields.map((field) => `${field}=${String(data[field] ?? '')}`).join(',')}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUserProfile = userProfileServiceMock.createStart();
 

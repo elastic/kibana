@@ -15,7 +15,7 @@ import { CASE_EXTENDED_FIELDS } from '../../../../../common/constants';
 import { Textarea } from './textarea';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiMarkdownEditor: ({

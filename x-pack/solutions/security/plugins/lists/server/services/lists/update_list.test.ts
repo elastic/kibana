@@ -7,7 +7,6 @@
 
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
@@ -18,19 +17,19 @@ import { getList } from './get_list';
 import { getUpdateListOptionsMock } from './update_list.mock';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      checkVersionConflict: vi.fn(),
-      waitUntilDocumentIndexed: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkVersionConflict: vi.fn(),
+    waitUntilDocumentIndexed: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_list', () => {
-      const mocked = {
-      getList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('update_list', () => {
   beforeEach(() => {

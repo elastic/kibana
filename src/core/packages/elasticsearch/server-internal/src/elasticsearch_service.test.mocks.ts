@@ -19,26 +19,26 @@ export const MockAgentManager: MockedClass<typeof AgentManager> = vi.fn().mockRe
 });
 
 vi.mock('@kbn/core-elasticsearch-client-server-internal', () => {
-      const mocked = {
-      ClusterClient: MockClusterClient,
-      AgentManager: MockAgentManager,
-      getRequestHandlerFactory: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ClusterClient: MockClusterClient,
+    AgentManager: MockAgentManager,
+    getRequestHandlerFactory: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const isScriptingEnabledMock = vi.fn();
 vi.doMock('./is_scripting_enabled', () => {
-      const mocked = {
-      isInlineScriptingEnabled: isScriptingEnabledMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInlineScriptingEnabled: isScriptingEnabledMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getClusterInfoMock = vi.fn();
 vi.doMock('./get_cluster_info', () => {
-      const mocked = {
-      getClusterInfo$: getClusterInfoMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getClusterInfo$: getClusterInfoMock,
+  };
+  return { ...mocked, default: mocked };
+});

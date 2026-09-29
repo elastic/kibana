@@ -19,7 +19,7 @@ import { createAppContextStartContractMock as fleetCreateAppContextStartContract
 import { httpServerMock } from '@kbn/core/server/mocks';
 
 vi.mock('../../../actions/pending_actions_summary', async () => {
-  const realModule = (await vi.importActual('../../../actions/pending_actions_summary'));
+  const realModule = await vi.importActual('../../../actions/pending_actions_summary');
   return {
     ...realModule,
     getPendingActionsSummary: vi.fn(realModule.getPendingActionsSummary),

@@ -23,44 +23,41 @@ import { useReportAddToChat } from '../../../../../../../agent_builder/hooks/use
 import { Table } from './table';
 
 vi.mock('@kbn/response-ops-alerts-table', () => {
-      const mocked = {
-      AlertsTable: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTable: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../../agent_builder/hooks/use_report_add_to_chat');
 vi.mock('../../../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(() => ({
-        isAgentBuilderEnabled: true,
-        hasAgentBuilderPrivilege: true,
-        isAgentChatExperienceEnabled: true,
-        hasValidAgentBuilderLicense: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../../agent_builder/helpers', () => {
-      const mocked = {
-      alertsToAttachmentGroup: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    alertsToAttachmentGroup: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock(
-  '../../../../../../../detections/hooks/alert_summary/use_additional_bulk_actions',
-  () => {
-      const mocked = {
-        useAdditionalBulkActions: vi.fn(() => []),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+  const mocked = {
+    useBrowserFields: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../../../../../../detections/hooks/alert_summary/use_additional_bulk_actions', () => {
+  const mocked = {
+    useAdditionalBulkActions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeItem = (id: string): TimelineItem =>
   ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as TimelineItem);

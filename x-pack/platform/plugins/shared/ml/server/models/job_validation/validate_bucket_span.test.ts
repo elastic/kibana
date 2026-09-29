@@ -36,78 +36,89 @@ const mlClusterClientFactory = (mockSearchResponse: any) => {
 
 describe('ML - validateBucketSpan', () => {
   it('called without arguments', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse)).then(
-            () => done(new Error('Promise should not resolve for this test without job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse)).then(
+        () => done(new Error('Promise should not resolve for this test without job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #1, missing datafeed_config', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), {}).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), {}).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #2, missing datafeed_config.indices', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), {
-            datafeed_config: {},
-          }).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), {
+        datafeed_config: {},
+      }).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #3, missing data_description', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = { datafeed_config: { indices: [] } };
-          validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), job).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = { datafeed_config: { indices: [] } };
+      validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), job).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #4, missing data_description.time_field', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = { datafeed_config: { indices: [] }, data_description: {} };
-          validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), job).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = { datafeed_config: { indices: [] }, data_description: {} };
+      validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), job).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #5, missing analysis_config.influencers', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = {
-            datafeed_config: { indices: [] },
-            data_description: { time_field: '@timestamp' },
-          };
-          validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), job).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = {
+        datafeed_config: { indices: [] },
+        data_description: { time_field: '@timestamp' },
+      };
+      validateBucketSpan(mlClusterClientFactory(mockFareQuoteSearchResponse), job).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called without duration argument', () => {
     const job = {

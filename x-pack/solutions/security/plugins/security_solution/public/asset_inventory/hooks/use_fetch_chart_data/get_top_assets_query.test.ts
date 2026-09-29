@@ -12,21 +12,21 @@ import { ASSET_FIELDS } from '../../constants';
 import { addEmptyDataFilterQuery } from '../../utils/add_empty_data_filter';
 
 vi.mock('../fetch_utils', () => {
-      const mocked = {
-      getMultiFieldsSort: vi.fn().mockReturnValue([{ field: 'mocked_sort' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMultiFieldsSort: vi.fn().mockReturnValue([{ field: 'mocked_sort' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/add_empty_data_filter', () => {
-      const mocked = {
-      addEmptyDataFilterQuery: vi.fn((queryBoolFilter) => [
-        ...queryBoolFilter,
-        { match_phrase: { 'entity.id': '' } },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addEmptyDataFilterQuery: vi.fn((queryBoolFilter) => [
+      ...queryBoolFilter,
+      { match_phrase: { 'entity.id': '' } },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getTopAssetsQuery', () => {
   const query = {

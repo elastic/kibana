@@ -143,8 +143,7 @@ describe('ConfigurationService', () => {
         composite_page_size: 2000,
       };
 
-      vi
-        .spyOn(artifactService, 'getArtifact')
+      vi.spyOn(artifactService, 'getArtifact')
         .mockResolvedValueOnce({ data: defaultConfiguration, modified: false })
         .mockResolvedValueOnce({ data: firstUpdate, modified: true })
         .mockResolvedValueOnce({ data: secondUpdate, modified: true });
@@ -226,8 +225,7 @@ describe('ConfigurationService', () => {
           max_elements_per_event: 3000,
         };
 
-        vi
-          .spyOn(artifactService, 'getArtifact')
+        vi.spyOn(artifactService, 'getArtifact')
           .mockResolvedValueOnce({ data: artifactConfig, modified: true })
           .mockRejectedValue(createError());
 

@@ -16,21 +16,21 @@ import { useFetchMaintenanceWindows } from '../../../hooks';
 import { selectDynamicSettings } from '../../../state/settings/selectors';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../hooks')),
-      useFetchMaintenanceWindows: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../hooks')),
+    useFetchMaintenanceWindows: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelector = redux.useSelector as MockedFunction<typeof redux.useSelector>;
 const mockDispatch = vi.fn();

@@ -55,30 +55,30 @@ describe('xyVis', () => {
     const { data, args } = sampleArgs();
     const { layers, ...rest } = args;
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...{ ...sampleLayer, markSizeAccessor: 'b' },
-                markSizeRatio: 0,
-                referenceLines: [],
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
+          markSizeRatio: 0,
+          referenceLines: [],
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...{ ...sampleLayer, markSizeAccessor: 'b' },
-                markSizeRatio: 101,
-                referenceLines: [],
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...{ ...sampleLayer, markSizeAccessor: 'b' },
+          markSizeRatio: 101,
+          referenceLines: [],
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if minTimeBarInterval is invalid', async () => {
@@ -86,17 +86,17 @@ describe('xyVis', () => {
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                minTimeBarInterval: '1q',
-                referenceLines: [],
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          minTimeBarInterval: '1q',
+          referenceLines: [],
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if minTimeBarInterval applied for not time bar chart', async () => {
@@ -104,17 +104,17 @@ describe('xyVis', () => {
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                minTimeBarInterval: '1h',
-                referenceLines: [],
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          minTimeBarInterval: '1h',
+          referenceLines: [],
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if addTimeMarker applied for not time chart', async () => {
@@ -122,18 +122,18 @@ describe('xyVis', () => {
     const { layers, ...rest } = args;
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                xScaleType: 'ordinal',
-                addTimeMarker: true,
-                referenceLines: [],
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          xScaleType: 'ordinal',
+          addTimeMarker: true,
+          referenceLines: [],
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if splitRowAccessor is pointing to the absent column', async () => {
@@ -143,18 +143,18 @@ describe('xyVis', () => {
     const splitRowAccessor = 'absent-accessor';
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                splitRowAccessor,
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          splitRowAccessor,
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if splitColumnAccessor is pointing to the absent column', async () => {
@@ -164,18 +164,18 @@ describe('xyVis', () => {
     const splitColumnAccessor = 'absent-accessor';
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                splitColumnAccessor,
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          splitColumnAccessor,
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if markSizeRatio is specified while markSizeAccessor is not', async () => {
@@ -184,18 +184,18 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                markSizeRatio: 5,
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          markSizeRatio: 5,
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if showLines is provided to the not line/area chart', async () => {
@@ -206,19 +206,19 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                seriesType: 'bar',
-                showLines: true,
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          seriesType: 'bar',
+          showLines: true,
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if the x axis extent is enabled for a date histogram', async () => {
@@ -229,23 +229,23 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                isHistogram: true,
-                xScaleType: 'time',
-                xAxisConfig: {
-                  type: 'xAxisConfig',
-                  extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
-                },
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          isHistogram: true,
+          xScaleType: 'time',
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
+          },
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if the x axis extent is enabled with the full mode', async () => {
@@ -256,26 +256,26 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                xAxisConfig: {
-                  type: 'xAxisConfig',
-                  extent: {
-                    type: 'axisExtentConfig',
-                    mode: 'full',
-                    lowerBound: undefined,
-                    upperBound: undefined,
-                  },
-                },
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: {
+              type: 'axisExtentConfig',
+              mode: 'full',
+              lowerBound: undefined,
+              upperBound: undefined,
+            },
+          },
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if the x axis extent is enabled without a histogram defined', async () => {
@@ -286,21 +286,21 @@ describe('xyVis', () => {
     const { layerId, layerType, table, type, ...restLayerArgs } = sampleLayer;
 
     await expect(
-            xyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                ...restLayerArgs,
-                referenceLines: [],
+      xyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          ...restLayerArgs,
+          referenceLines: [],
 
-                xAxisConfig: {
-                  type: 'xAxisConfig',
-                  extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
-                },
-              },
-              getExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+          xAxisConfig: {
+            type: 'xAxisConfig',
+            extent: { type: 'axisExtentConfig', mode: 'dataBounds' },
+          },
+        },
+        getExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it renders with custom x-axis extent for a numeric histogram', async () => {

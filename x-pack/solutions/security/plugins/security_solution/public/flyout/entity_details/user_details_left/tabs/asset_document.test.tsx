@@ -23,11 +23,11 @@ vi.mock('@kbn/unified-doc-viewer-plugin/public');
 // Aliased with a `mock` prefix so the hoisted `jest.mock` factory below may reference it.
 const mockTableTabContentTestId = TABLE_TAB_CONTENT_TEST_ID;
 vi.mock('../../../../flyout_v2/document/main/tabs/table_tab', () => {
-      const mocked = {
-      TableTab: () => <div data-test-subj={mockTableTabContentTestId} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableTab: () => <div data-test-subj={mockTableTabContentTestId} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssetDocumentTab', () => {
   it('renders', () => {

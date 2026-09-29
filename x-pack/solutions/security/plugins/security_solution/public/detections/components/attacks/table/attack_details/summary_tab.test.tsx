@@ -29,64 +29,61 @@ import { buildAlertsKqlFilter } from '../../../alerts_table/actions';
 import { AttackAiAssistantButton } from './attack_ai_assistant_button';
 
 vi.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => {
-      const mocked = {
-      InvestigateInTimelineButton: vi.fn(({ children, 'data-test-subj': dataTestSubj }) => (
-        <div data-test-subj={dataTestSubj}>{children}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InvestigateInTimelineButton: vi.fn(({ children, 'data-test-subj': dataTestSubj }) => (
+      <div data-test-subj={dataTestSubj}>{children}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attack_ai_assistant_button', () => {
-      const mocked = {
-      AttackAiAssistantButton: vi.fn(() => (
-        <div data-test-subj="mock-attack-ai-assistant-button">{'AttackAiAssistantButton'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackAiAssistantButton: vi.fn(() => (
+      <div data-test-subj="mock-attack-ai-assistant-button">{'AttackAiAssistantButton'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alerts_table/actions', () => {
-      const mocked = {
-      buildAlertsKqlFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAlertsKqlFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../attack_discovery/helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../attack_discovery/helpers')),
-      getTacticMetadata: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../attack_discovery/helpers')),
+    getTacticMetadata: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain',
   () => {
-      const mocked = {
-        AttackChain: vi.fn(() => <div data-test-subj="mock-attack-chain">{'AttackChain'}</div>),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AttackChain: vi.fn(() => <div data-test-subj="mock-attack-chain">{'AttackChain'}</div>),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
-vi.mock(
-  '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => {
-      const mocked = {
-        AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown, alertIds }) => (
-          <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
-            {markdown}
-          </div>
-        )),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
+  const mocked = {
+    AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown, alertIds }) => (
+      <div data-test-subj="mock-markdown-formatter" data-alert-ids={JSON.stringify(alertIds)}>
+        {markdown}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant-common', async () => {
-  const originalModule = (await vi.importActual('@kbn/elastic-assistant-common'));
+  const originalModule = await vi.importActual('@kbn/elastic-assistant-common');
   return {
     ...originalModule,
     replaceAnonymizedValuesWithOriginalValues: vi.fn(

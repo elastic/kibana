@@ -20,39 +20,43 @@ import { ROLE_CAPABILITIES } from '../../../__test_helpers__/create_mock_kibana_
 const mockPush = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: mockPush }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: mockPush }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockCopyMutateAsync = vi.fn().mockResolvedValue(undefined);
 const mockDeleteMutateAsync = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('../../../saved_queries/use_copy_saved_query', () => {
-      const mocked = {
-      useCopySavedQuery: () => ({ mutateAsync: mockCopyMutateAsync, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCopySavedQuery: () => ({ mutateAsync: mockCopyMutateAsync, isLoading: false }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_queries/use_delete_saved_query', () => {
-      const mocked = {
-      useDeleteSavedQuery: () => ({ mutateAsync: mockDeleteMutateAsync, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteSavedQuery: () => ({ mutateAsync: mockDeleteMutateAsync, isLoading: false }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const setupKibana = (capabilities: Partial<OsqueryCapabilities> = {}) => {
   mockUseKibana.mockReturnValue({

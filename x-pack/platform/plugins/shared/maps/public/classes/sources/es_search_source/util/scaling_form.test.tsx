@@ -8,18 +8,18 @@
 import { vi } from 'vitest';
 
 vi.mock('../../../../kibana_services', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./load_index_settings', () => {
-      const mocked = {
-      loadIndexSettings: async () => {
-        return { maxInnerResultWindow: 100, maxResultWindow: 10000 };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadIndexSettings: async () => {
+      return { maxInnerResultWindow: 100, maxResultWindow: 10000 };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

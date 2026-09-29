@@ -22,25 +22,25 @@ vi.mock('./use_on_refresh_case_view_page');
 vi.mock('../use_breadcrumbs');
 
 vi.mock('./components/case_details_header', () => {
-      const mocked = {
-      CaseDetailsAppHeader: () => <div data-test-subj="case-details-app-header" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseDetailsAppHeader: () => <div data-test-subj="case-details-app-header" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./metrics', () => {
-      const mocked = {
-      CaseViewMetrics: () => <div data-test-subj="case-view-metrics" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewMetrics: () => <div data-test-subj="case-view-metrics" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/case_view_tab_content', () => {
-      const mocked = {
-      CaseViewTabContent: () => <div data-test-subj="case-view-tab-content" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewTabContent: () => <div data-test-subj="case-view-tab-content" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 (useOnUpdateField as Mock).mockReturnValue({
   isLoading: false,

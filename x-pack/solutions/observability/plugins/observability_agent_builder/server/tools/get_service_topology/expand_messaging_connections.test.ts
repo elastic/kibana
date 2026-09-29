@@ -17,11 +17,11 @@ import type { ConnectionWithKey } from './types';
 import { makeExternalConnection } from './test_helpers';
 
 vi.mock('./get_trace_ids_from_exit_spans', () => {
-      const mocked = {
-      getTraceIdsFromExitSpansTargetingDependency: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTraceIdsFromExitSpansTargetingDependency: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getTraceIdsFromExitSpansTargetingDependency } from './get_trace_ids_from_exit_spans';
 

@@ -9,9 +9,9 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'mock-report-id' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'mock-report-id' };
+  return { ...mocked, default: mocked };
+});
 
 import rison from '@kbn/rison';
 
@@ -684,9 +684,9 @@ describe('Handle request to schedule', () => {
     });
 
     test('handles invalid email address', () => {
-      vi
-        .spyOn(reportingCore, 'validateNotificationEmails')
-        .mockReturnValueOnce('not valid emails: foo');
+      vi.spyOn(reportingCore, 'validateNotificationEmails').mockReturnValueOnce(
+        'not valid emails: foo'
+      );
       let error: { statusCode: number; body: string } | undefined;
       try {
         // @ts-ignore body is a read-only property

@@ -54,7 +54,7 @@ let mockQueryState = {
 mockData.query.getState = () => mockQueryState;
 
 vi.mock('../../../../hooks/use_discover_services', async () => {
-  const originalModule = (await vi.importActual('../../../../hooks/use_discover_services'));
+  const originalModule = await vi.importActual('../../../../hooks/use_discover_services');
   return {
     ...originalModule,
     useDiscoverServices: () => ({ data: mockData }),
@@ -62,7 +62,7 @@ vi.mock('../../../../hooks/use_discover_services', async () => {
 });
 
 vi.mock('../../hooks/use_saved_search_messages', async () => {
-  const originalModule = (await vi.importActual('../../hooks/use_saved_search_messages'));
+  const originalModule = await vi.importActual('../../hooks/use_saved_search_messages');
   return {
     ...originalModule,
     checkHitCount: vi.fn(originalModule.checkHitCount),
@@ -70,12 +70,12 @@ vi.mock('../../hooks/use_saved_search_messages', async () => {
   };
 });
 vi.mock('../../../../customizations', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../customizations')),
-      useDiscoverCustomization: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../customizations')),
+    useDiscoverCustomization: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockUseCustomizations = false;
 

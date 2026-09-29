@@ -15,11 +15,11 @@ import { ServiceFlyoutApmCharts } from './apm_charts';
 
 const mockUseServiceFlyoutContext = vi.fn();
 vi.mock('../service_flyout_context', () => {
-      const mocked = {
-      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLatencyChart = vi.fn();
 const mockThroughputChart = vi.fn();
@@ -44,26 +44,26 @@ vi.mock('../../../alerting/ui_components/alert_details_app_section/latency_chart
 });
 
 vi.mock('../../../alerting/ui_components/alert_details_app_section/throughput_chart', () => {
-      const mocked = {
-      ThroughputChart: (props: unknown) => {
-        mockThroughputChart(props as never);
-        return <div data-test-subj="throughputChartMock" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ThroughputChart: (props: unknown) => {
+      mockThroughputChart(props as never);
+      return <div data-test-subj="throughputChartMock" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../alerting/ui_components/alert_details_app_section/failed_transaction_chart',
   () => {
-      const mocked = {
-        FailedTransactionChart: (props: unknown) => {
-          mockFailedTransactionChart(props as never);
-          return <div data-test-subj="failedTransactionChartMock" />;
-        },
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      FailedTransactionChart: (props: unknown) => {
+        mockFailedTransactionChart(props as never);
+        return <div data-test-subj="failedTransactionChartMock" />;
+      },
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const setRange = vi.fn();

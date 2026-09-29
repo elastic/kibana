@@ -24,14 +24,14 @@ const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../use_conversation', () => {
-      const mocked = {
-      useConversation: () => ({
-        copyConversationUrl: mockCopyConversationUrl,
-        updateConversationUsers: mockUpdateConversationUsers,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: () => ({
+      copyConversationUrl: mockCopyConversationUrl,
+      updateConversationUsers: mockUpdateConversationUsers,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const toastsMock = { addSuccess: mockAddSuccess, addError: mockAddError } as unknown as IToasts;
 

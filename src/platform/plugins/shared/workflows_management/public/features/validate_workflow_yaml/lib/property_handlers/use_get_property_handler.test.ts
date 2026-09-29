@@ -7,33 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { useGetPropertyHandler } from './use_get_property_handler';
 import { getPropertyHandler } from '../../../../../common/schema';
 import type { InternalStepsEditorHandlers } from '../../../../common/context/internal_steps/editor_handlers/editor_handlers';
 import { useWorkflowsContext } from '../../../../common/context/workflows_context';
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      getPropertyHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPropertyHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/context/workflows_context', () => {
-      const mocked = {
-      useWorkflowsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetPropertyHandler = getPropertyHandler as MockedFunction<typeof getPropertyHandler>;
-const mockUseWorkflowsContext = useWorkflowsContext as MockedFunction<
-  typeof useWorkflowsContext
->;
+const mockUseWorkflowsContext = useWorkflowsContext as MockedFunction<typeof useWorkflowsContext>;
 
 describe('useGetPropertyHandler', () => {
   const contractHandler = {

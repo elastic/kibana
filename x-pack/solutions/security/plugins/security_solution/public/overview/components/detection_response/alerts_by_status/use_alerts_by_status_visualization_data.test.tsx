@@ -11,14 +11,22 @@ import { renderHook } from '@testing-library/react';
 
 import { useAlertsByStatusVisualizationData } from './use_alerts_by_status_visualization_data';
 
-vi.mock('../../../../common/components/visualization_actions/use_visualization_response', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response')),
-      useVisualizationResponse: (await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response.mock'))
-        .useVisualizationResponseMock.create(),
+vi.mock(
+  '../../../../common/components/visualization_actions/use_visualization_response',
+  async () => {
+    const mocked = {
+      ...(await vi.importActual(
+        '../../../../common/components/visualization_actions/use_visualization_response'
+      )),
+      useVisualizationResponse: (
+        await vi.importActual(
+          '../../../../common/components/visualization_actions/use_visualization_response.mock'
+        )
+      ).useVisualizationResponseMock.create(),
     };
-      return { ...mocked, default: mocked };
-    });
+    return { ...mocked, default: mocked };
+  }
+);
 
 describe('useAlertsByStatusVisualizationData', () => {
   it('should return visualization alerts count', () => {

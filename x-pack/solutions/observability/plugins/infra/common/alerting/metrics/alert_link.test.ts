@@ -46,9 +46,7 @@ const mockAssetDetailsLocator = {
 } as unknown as Mocked<AssetDetailsLocator>;
 
 const mockMetricsExplorerLocator = {
-  getRedirectUrl: vi
-    .fn()
-    .mockImplementation(({}: MetricsExplorerLocatorParams) => `/metrics-mock`),
+  getRedirectUrl: vi.fn().mockImplementation(({}: MetricsExplorerLocatorParams) => `/metrics-mock`),
 } as unknown as Mocked<MetricsExplorerLocator>;
 
 describe('Inventory Threshold Rule', () => {

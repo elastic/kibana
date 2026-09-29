@@ -37,9 +37,7 @@ const agentBuilderWithSkill = (present: boolean): AgentBuilderPluginStart =>
   ({
     skills: {
       getRegistry: vi.fn(async () => ({
-        has: vi.fn(
-          async (skillId: string) => present && skillId === 'endpoint-forensic-analysis'
-        ),
+        has: vi.fn(async (skillId: string) => present && skillId === 'endpoint-forensic-analysis'),
       })),
     },
   } as unknown as AgentBuilderPluginStart);

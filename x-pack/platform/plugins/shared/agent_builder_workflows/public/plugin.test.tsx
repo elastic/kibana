@@ -14,16 +14,14 @@ import { AgentBuilderWorkflowsPlugin } from './plugin';
 import type { PluginSetupDependencies, PluginStartDependencies } from './types';
 
 vi.mock('./attachment_types', () => {
-      const mocked = {
-      registerWorkflowAttachmentRenderers: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerWorkflowAttachmentRenderers: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const registerWorkflowAttachmentRenderersMock =
-  registerWorkflowAttachmentRenderers as MockedFunction<
-    typeof registerWorkflowAttachmentRenderers
-  >;
+  registerWorkflowAttachmentRenderers as MockedFunction<typeof registerWorkflowAttachmentRenderers>;
 
 const flushPromises = () => new Promise(process.nextTick);
 

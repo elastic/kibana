@@ -17,19 +17,19 @@ import type { Repository } from '../../../../../../common/types';
 import { RepositoryTable } from './repository_table';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      reactRouterNavigate: (_history: unknown, path: string, onClick?: () => void) => ({
-        href: path,
-        onClick: (event: any) => {
-          if (typeof event?.preventDefault === 'function') {
-            event.preventDefault();
-          }
-          onClick?.();
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reactRouterNavigate: (_history: unknown, path: string, onClick?: () => void) => ({
+      href: path,
+      onClick: (event: any) => {
+        if (typeof event?.preventDefault === 'function') {
+          event.preventDefault();
+        }
+        onClick?.();
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToastNotifications = {
   addSuccess: vi.fn(),
@@ -37,8 +37,9 @@ const mockToastNotifications = {
 };
 
 vi.mock('../../../../app_context', async () => {
-  const actual =
-    (await vi.importActual<typeof import('../../../../app_context')>('../../../../app_context'));
+  const actual = await vi.importActual<typeof import('../../../../app_context')>(
+    '../../../../app_context'
+  );
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createMemoryHistory: createHistory } = require('history');
   const history = createHistory();

@@ -14,46 +14,46 @@ import type { ActionPolicyDestination } from '@kbn/alerting-v2-schemas';
 import { DestinationCard } from './destination_card';
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return {
-            getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-          };
-        }
-        if (token === 'http') {
-          return {
-            basePath: { prepend: (path: string) => `/base${path}` },
-          };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        };
+      }
+      if (token === 'http') {
+        return {
+          basePath: { prepend: (path: string) => `/base${path}` },
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowData: Record<string, object> = {};
 
 vi.mock('../../../hooks/use_fetch_workflow', () => {
-      const mocked = {
-      useFetchWorkflow: (id: string) => ({
-        data: {
-          id,
-          name: `Workflow ${id}`,
-          definition: {
-            steps: [
-              { type: '.email', name: 'send email' },
-              { type: '.slack', name: 'send slack' },
-            ],
-          },
-          ...mockWorkflowData[id],
+  const mocked = {
+    useFetchWorkflow: (id: string) => ({
+      data: {
+        id,
+        name: `Workflow ${id}`,
+        definition: {
+          steps: [
+            { type: '.email', name: 'send email' },
+            { type: '.slack', name: 'send slack' },
+          ],
         },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        ...mockWorkflowData[id],
+      },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderCard = (destination: ActionPolicyDestination) =>
   render(

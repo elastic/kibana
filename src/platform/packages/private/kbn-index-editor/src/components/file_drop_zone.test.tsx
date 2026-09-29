@@ -30,11 +30,11 @@ import { IndexEditorErrors } from '../types';
 
 // Mock child components
 vi.mock('./empty_prompt', () => {
-      const mocked = {
-      EmptyPrompt: () => <div>EmptyPrompt</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmptyPrompt: () => <div>EmptyPrompt</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock hooks and modules
 vi.mock('@kbn/file-upload');

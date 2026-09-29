@@ -20,7 +20,7 @@ import { visualizeAppStateStub } from '../stubs';
 import { createVisualizeServicesMock } from '../mocks';
 
 vi.mock('../../../utils/saved_visualize_utils', async () => {
-  const stubs = (await vi.importActual('../stubs'));
+  const stubs = await vi.importActual('../stubs');
   return { convertFromSerializedVis: () => ({ visState: stubs.visualizeAppStateStub.vis }) };
 });
 

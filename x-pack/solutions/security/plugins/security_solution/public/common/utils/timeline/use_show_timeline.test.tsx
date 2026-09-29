@@ -25,18 +25,18 @@ import {
 
 vi.mock('../../components/user_privileges');
 vi.mock('../../../helpers_access', () => {
-      const mocked = { hasAccessToSecuritySolution: vi.fn(() => true) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { hasAccessToSecuritySolution: vi.fn(() => true) };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseNormalizedAppLinks = vi.fn((): LinkInfo[] => []);
 vi.mock('../../links/links_hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../links/links_hooks')),
-      useNormalizedAppLinks: () => mockUseNormalizedAppLinks(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../links/links_hooks')),
+    useNormalizedAppLinks: () => mockUseNormalizedAppLinks(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocation = vi.fn().mockReturnValue({ pathname: '/overview' });
 vi.mock('react-router-dom', () => {

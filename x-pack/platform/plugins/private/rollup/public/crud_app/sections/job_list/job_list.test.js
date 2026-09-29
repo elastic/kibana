@@ -14,7 +14,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { JobListUi } from './job_list';
 
 vi.mock('../../services', async () => {
-  const services = (await vi.importActual('../../services'));
+  const services = await vi.importActual('../../services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
@@ -22,7 +22,7 @@ vi.mock('../../services', async () => {
 });
 
 vi.mock('../../services/documentation_links', async () => {
-  const coreMocks = (await vi.importActual('@kbn/core/public/mocks'));
+  const coreMocks = await vi.importActual('@kbn/core/public/mocks');
 
   return {
     init: vi.fn(),
@@ -31,18 +31,18 @@ vi.mock('../../services/documentation_links', async () => {
 });
 
 vi.mock('./job_table', () => {
-      const mocked = {
-      JobTable: () => <div data-test-subj="jobTableStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JobTable: () => <div data-test-subj="jobTableStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./detail_panel', () => {
-      const mocked = {
-      DetailPanel: () => <div data-test-subj="detailPanelStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DetailPanel: () => <div data-test-subj="detailPanelStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const startMock = coreMock.createStart();
 

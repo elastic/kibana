@@ -14,14 +14,14 @@ import { useKeyboardShortcut } from './use_keyboard_shortcut';
 
 let mockIsMac = true;
 vi.mock('./platform', () => {
-      const mocked = {
-      get isMac() {
-        return mockIsMac;
-      },
-      getPlatform: () => (mockIsMac ? 'mac' : 'windows'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    get isMac() {
+      return mockIsMac;
+    },
+    getPlatform: () => (mockIsMac ? 'mac' : 'windows'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dispatch = (opts: KeyboardEventInit) => {
   const event = new KeyboardEvent('keydown', { bubbles: true, cancelable: true, ...opts });

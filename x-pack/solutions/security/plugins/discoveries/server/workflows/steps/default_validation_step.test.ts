@@ -15,27 +15,27 @@ import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 import { filterHallucinatedAlerts } from '@kbn/discoveries/impl/attack_discovery/hallucination_detection';
 
 vi.mock('@kbn/discoveries/impl/lib/helpers/get_space_id', () => {
-      const mocked = {
-      getSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpaceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/hallucination_detection', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection')),
-      filterHallucinatedAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection')),
+    filterHallucinatedAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUuid = 'mock-generated-uuid';
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => mockUuid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => mockUuid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getDefaultValidationStepDefinition', () => {
   let mockLogger: ReturnType<typeof loggerMock.create>;

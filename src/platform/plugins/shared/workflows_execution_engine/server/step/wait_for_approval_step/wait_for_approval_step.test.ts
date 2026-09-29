@@ -26,37 +26,41 @@ import {
 } from '../hitl_notifications/send_wait_for_approval_notifications';
 
 vi.mock('../wait_for_input_step/hitl_external_resume_helpers', () => {
-      const mocked = {
-      invalidateHitlExternalResumeTokenIfPresent: vi.fn(),
-      mintHitlExternalResumeToken: vi.fn().mockReturnValue({
-        token: 'resume-token',
-        tokenHash: 'resume-token-hash',
-        expiresAt: '2999-01-01T00:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invalidateHitlExternalResumeTokenIfPresent: vi.fn(),
+    mintHitlExternalResumeToken: vi.fn().mockReturnValue({
+      token: 'resume-token',
+      tokenHash: 'resume-token-hash',
+      expiresAt: '2999-01-01T00:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockMintHitlExternalResumeToken = (await vi.importMock('../wait_for_input_step/hitl_external_resume_helpers')).mintHitlExternalResumeToken as Mock;
-const mockInvalidateHitlExternalResumeTokenIfPresent = (await vi.importMock('../wait_for_input_step/hitl_external_resume_helpers')).invalidateHitlExternalResumeTokenIfPresent as Mock;
+const mockMintHitlExternalResumeToken = (
+  await vi.importMock('../wait_for_input_step/hitl_external_resume_helpers')
+).mintHitlExternalResumeToken as Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = (
+  await vi.importMock('../wait_for_input_step/hitl_external_resume_helpers')
+).invalidateHitlExternalResumeTokenIfPresent as Mock;
 
 vi.mock('../hitl_notifications/has_external_hitl_channels', () => {
-      const mocked = {
-      hasExternalHitlChannels: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasExternalHitlChannels: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hitl_notifications/send_wait_for_approval_notifications', () => {
-      const mocked = {
-      buildWaitForApprovalResumeLinks: vi.fn().mockReturnValue({
-        approveUrl: 'https://kibana/approve',
-        rejectUrl: 'https://kibana/reject',
-      }),
-      sendWaitForApprovalNotifications: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildWaitForApprovalResumeLinks: vi.fn().mockReturnValue({
+      approveUrl: 'https://kibana/approve',
+      rejectUrl: 'https://kibana/reject',
+    }),
+    sendWaitForApprovalNotifications: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHasExternalHitlChannels = vi.mocked(hasExternalHitlChannels);
 const mockBuildWaitForApprovalResumeLinks = buildWaitForApprovalResumeLinks as Mock;

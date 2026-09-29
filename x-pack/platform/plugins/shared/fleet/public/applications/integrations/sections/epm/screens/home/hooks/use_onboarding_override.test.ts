@@ -16,17 +16,17 @@ const mockGetUrlForApp = vi.fn().mockReturnValue('/app/onboarding/aws');
 const mockNavigateToApp = vi.fn();
 
 vi.mock('../../../../../hooks', () => {
-      const mocked = {
-      useStartServices: () => ({
-        featureFlags: { useBooleanValue: mockGetBooleanValue },
-        application: {
-          navigateToApp: mockNavigateToApp,
-          getUrlForApp: mockGetUrlForApp,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartServices: () => ({
+      featureFlags: { useBooleanValue: mockGetBooleanValue },
+      application: {
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingOverride } from './use_onboarding_override';
 

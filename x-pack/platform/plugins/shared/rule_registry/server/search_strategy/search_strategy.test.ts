@@ -295,9 +295,7 @@ describe('ruleRegistrySearchStrategyProvider()', () => {
 
     expect(data.search.searchAsInternalUser.search).toHaveBeenCalled();
     expect(searchStrategySearch).not.toHaveBeenCalled();
-    expect((data.search.searchAsInternalUser.search as Mock).mock.calls[0][1]).toEqual(
-      options
-    );
+    expect((data.search.searchAsInternalUser.search as Mock).mock.calls[0][1]).toEqual(options);
   });
 
   it('should use scoped user when requesting siem alerts as RBAC is not applied', async () => {

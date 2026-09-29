@@ -29,12 +29,12 @@ vi.mock('./fetch_entity_relationships_graph');
 vi.mock('./parse_records');
 vi.mock('./fetch_entity_enrichment');
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      resolveEntitiesIndexName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    resolveEntitiesIndexName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedFetchEvents = fetchEvents as MockedFunction<typeof fetchEvents>;
 const mockedFetchEntityRelationships = fetchEntityRelationships as MockedFunction<
@@ -45,9 +45,7 @@ const mockedFetchEntityEnrichment = fetchEntityEnrichment as MockedFunction<
   typeof fetchEntityEnrichment
 >;
 const mockedRegroupEvents = regroupEvents as MockedFunction<typeof regroupEvents>;
-const mockedEnrichEventDocData = enrichEventDocData as MockedFunction<
-  typeof enrichEventDocData
->;
+const mockedEnrichEventDocData = enrichEventDocData as MockedFunction<typeof enrichEventDocData>;
 const mockedRegroupRelationships = regroupRelationships as MockedFunction<
   typeof regroupRelationships
 >;
@@ -220,9 +218,7 @@ describe('fetchGraph', () => {
       { id: 'entity-2', isOrigin: false },
     ];
 
-    (resolveEntitiesIndexName as Mock).mockResolvedValueOnce(
-      '.entities.v2.latest.default-00001'
-    );
+    (resolveEntitiesIndexName as Mock).mockResolvedValueOnce('.entities.v2.latest.default-00001');
 
     await fetchGraph({ ...baseParams, entityIds });
 

@@ -712,11 +712,7 @@ describe('proposals.settleIncompleteProposal step', () => {
     vi.clearAllMocks();
   });
 
-  const settleDefinition = (service: {
-    getLatestRevision: Mock;
-    get: Mock;
-    update: Mock;
-  }) =>
+  const settleDefinition = (service: { getLatestRevision: Mock; get: Mock; update: Mock }) =>
     getSettleIncompleteProposalStepDefinition({
       getProposalsService: () => service as unknown as ProposalsService,
     });

@@ -16,15 +16,15 @@ import { CellActions } from './cell_actions';
 const MockedSecurityCellActions = vi.fn(({ children }) => <>{children}</>);
 
 vi.mock('../../../common/components/cell_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/components/cell_actions')),
-      SecurityCellActions: (props: { children?: React.ReactNode } & Record<string, unknown>) => {
-        MockedSecurityCellActions(props);
-        return <>{props.children}</>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/components/cell_actions')),
+    SecurityCellActions: (props: { children?: React.ReactNode } & Record<string, unknown>) => {
+      MockedSecurityCellActions(props);
+      return <>{props.children}</>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CellActions (attack details flyout)', () => {
   beforeEach(() => {

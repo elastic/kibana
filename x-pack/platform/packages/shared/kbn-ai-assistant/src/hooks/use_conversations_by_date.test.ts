@@ -14,12 +14,12 @@ import { getAbsoluteTime, isValidDateMath } from '../utils/date';
 import type { Conversation } from '@kbn/observability-ai-assistant-plugin/common';
 
 vi.mock('../utils/date', () => {
-      const mocked = {
-      getAbsoluteTime: vi.fn(),
-      isValidDateMath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAbsoluteTime: vi.fn(),
+    isValidDateMath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.unmock('./use_conversations_by_date');
 

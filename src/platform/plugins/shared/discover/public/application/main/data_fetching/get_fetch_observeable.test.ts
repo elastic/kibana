@@ -55,27 +55,28 @@ describe('getFetchObservable', () => {
   });
 
   test('refetch$.next should trigger fetch$.next', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const searchSessionManagerMock = createSearchSessionMock();
+      const searchSessionManagerMock = createSearchSessionMock();
 
-          const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
-          const refetch$: DataRefetch$ = new Subject();
-          const fetch$ = getFetch$({
-            setAutoRefreshDone: vi.fn(),
-            main$,
-            refetch$,
-            data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
-            searchSessionManager: searchSessionManagerMock.searchSessionManager,
-          });
+      const main$ = new BehaviorSubject({ fetchStatus: FetchStatus.UNINITIALIZED });
+      const refetch$: DataRefetch$ = new Subject();
+      const fetch$ = getFetch$({
+        setAutoRefreshDone: vi.fn(),
+        main$,
+        refetch$,
+        data: createDataMock(new Subject(), new Subject(), new Subject(), new Subject()),
+        searchSessionManager: searchSessionManagerMock.searchSessionManager,
+      });
 
-          fetch$.subscribe(() => {
-            done();
-          });
-          refetch$.next(undefined);
-        
-      }));
+      fetch$.subscribe(() => {
+        done();
+      });
+      refetch$.next(undefined);
+    }));
 
   test(
     'getAutoRefreshFetch$ should trigger fetch$.next',

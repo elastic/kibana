@@ -18,51 +18,51 @@ import { useApmRouter } from '../../../hooks/use_apm_router';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_route_path', () => {
-      const mocked = {
-      useApmRoutePath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRoutePath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({ start: '2024-01-01', end: '2024-01-02' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({ start: '2024-01-01', end: '2024-01-02' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/apm_service/use_apm_service_context', () => {
-      const mocked = {
-      useApmServiceContext: () => ({
-        transactionType: 'request',
-        fallbackToTransactions: false,
-        serverlessType: undefined,
-        serviceName: 'test-service',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmServiceContext: () => ({
+      transactionType: 'request',
+      fallbackToTransactions: false,
+      serverlessType: undefined,
+      serviceName: 'test-service',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/breadcrumbs/use_breadcrumb', () => {
-      const mocked = {
-      useBreadcrumb: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumb: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHistory = {
   replace: vi.fn(),
@@ -71,42 +71,42 @@ const mockHistory = {
 };
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => mockHistory,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => mockHistory,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/charts/transaction_charts', () => {
-      const mocked = {
-      TransactionCharts: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionCharts: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./transaction_details_tabs', () => {
-      const mocked = {
-      TransactionDetailsTabs: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailsTabs: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/chart_pointer_event/chart_pointer_event_context', () => {
-      const mocked = {
-      ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAnyOfApmParams = useAnyOfApmParams as Mock;
 const mockUseApmRoutePath = useApmRoutePath as Mock;
@@ -127,12 +127,10 @@ const baseQuery = {
 };
 
 describe('TransactionDetails', () => {
-  const mockLink = vi.fn(
-    (path: string, opts: { path: { serviceName: string }; query: object }) => {
-      const qs = new URLSearchParams(opts.query as Record<string, string>).toString();
-      return `/app/apm${path.replace('{serviceName}', opts.path.serviceName)}${qs ? `?${qs}` : ''}`;
-    }
-  );
+  const mockLink = vi.fn((path: string, opts: { path: { serviceName: string }; query: object }) => {
+    const qs = new URLSearchParams(opts.query as Record<string, string>).toString();
+    return `/app/apm${path.replace('{serviceName}', opts.path.serviceName)}${qs ? `?${qs}` : ''}`;
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

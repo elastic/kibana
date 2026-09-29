@@ -11,11 +11,11 @@ import type { MockedFunction } from 'vitest';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { executeEsql } from '@kbn/agent-builder-genai-utils';
 import { evaluateRequirement, runWithConcurrency } from './pci_compliance_evaluator';

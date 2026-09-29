@@ -18,14 +18,14 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../lib/action_connector_api')),
-      checkConnectorIdAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../lib/action_connector_api')),
+    checkConnectorIdAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { checkConnectorIdAvailability } = (await vi.importMock('../../lib/action_connector_api'));
+const { checkConnectorIdAvailability } = await vi.importMock('../../lib/action_connector_api');
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('ConnectorFormFieldsGlobal', () => {

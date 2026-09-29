@@ -18,9 +18,7 @@ import { useTabs } from '../../flyout_v2/shared/hooks/use_tabs';
 import { useNavigateToAttackDetailsLeftPanel } from './hooks/use_navigate_to_attack_details_left_panel';
 import { useKibana } from '../../common/lib/kibana';
 
-const mockFlyoutNavigation = vi.fn((_props?: unknown) => (
-  <div data-test-subj="flyoutNavigation" />
-));
+const mockFlyoutNavigation = vi.fn((_props?: unknown) => <div data-test-subj="flyoutNavigation" />);
 
 vi.mock('@kbn/expandable-flyout');
 vi.mock('./context');
@@ -28,43 +26,43 @@ vi.mock('../../flyout_v2/shared/hooks/use_tabs');
 vi.mock('./hooks/use_navigate_to_attack_details_left_panel');
 vi.mock('../../common/lib/kibana');
 vi.mock('./content', () => {
-      const mocked = { PanelContent: () => <div data-test-subj="panelContent" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { PanelContent: () => <div data-test-subj="panelContent" /> };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./footer', () => {
-      const mocked = { PanelFooter: () => <div data-test-subj="panelFooter" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { PanelFooter: () => <div data-test-subj="panelFooter" /> };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../shared/components/flyout_navigation', () => {
-      const mocked = {
-      FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutNavigation: (props: unknown) => mockFlyoutNavigation(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/header_actions', () => {
-      const mocked = {
-      AttackHeaderActions: () => <span data-test-subj="attackHeaderActionsMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackHeaderActions: () => <span data-test-subj="attackHeaderActionsMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./header', () => {
-      const mocked = {
-      PanelHeader: ({
-        setSelectedTabId,
-      }: {
-        setSelectedTabId: (tab: 'overview' | 'table' | 'json') => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="switchTabButton"
-          onClick={() => setSelectedTabId('table')}
-        >
-          {'switch tab'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PanelHeader: ({
+      setSelectedTabId,
+    }: {
+      setSelectedTabId: (tab: 'overview' | 'table' | 'json') => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="switchTabButton"
+        onClick={() => setSelectedTabId('table')}
+      >
+        {'switch tab'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttackDetailsPanel', () => {
   const openRightPanel = vi.fn();

@@ -23,7 +23,7 @@ let mockFetchMappings = vi.fn(
 );
 
 vi.mock('./fetch_mappings', async () => {
-  const original = (await vi.importActual('./fetch_mappings'));
+  const original = await vi.importActual('./fetch_mappings');
   return {
     ...original,
     fetchMappings: ({
@@ -49,7 +49,7 @@ const mockFetchUnallowedValues = vi.fn(
 );
 
 vi.mock('./fetch_unallowed_values', async () => {
-  const original = (await vi.importActual('./fetch_unallowed_values'));
+  const original = await vi.importActual('./fetch_unallowed_values');
 
   return {
     ...original,
@@ -129,9 +129,7 @@ describe('checkIndex', () => {
     const onError = vi.fn(() => orderOfCalls.push('onError'));
     const onLoadMappingsStart = vi.fn(() => orderOfCalls.push('onLoadMappingsStart'));
     const onLoadMappingsSuccess = vi.fn(() => orderOfCalls.push('onLoadMappingsSuccess'));
-    const onLoadUnallowedValuesStart = vi.fn(() =>
-      orderOfCalls.push('onLoadUnallowedValuesStart')
-    );
+    const onLoadUnallowedValuesStart = vi.fn(() => orderOfCalls.push('onLoadUnallowedValuesStart'));
     const onLoadUnallowedValuesSuccess = vi.fn(() =>
       orderOfCalls.push('onLoadUnallowedValuesSuccess')
     );

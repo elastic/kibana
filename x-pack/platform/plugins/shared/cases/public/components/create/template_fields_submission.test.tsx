@@ -119,11 +119,9 @@ describe('create form submission with legacy-visible linked fields (unmocked for
     user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime });
     localStorage.clear();
     localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
     getFieldDefinitionsMock.mockResolvedValue({
       fieldDefinitions: [linkedFieldDefinition],
       total: 1,

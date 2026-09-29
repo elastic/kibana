@@ -138,9 +138,9 @@ describe('MessageSigningService', () => {
     it('throws `getCurrentKeyPairObj` error if any on rotate', async () => {
       mockCreatePointInTimeFinderAsInternalUserOnce([keyPairObj]);
       // mock delete to throw
-      vi
-        .spyOn(messageSigningService, 'getCurrentKeyPairObj' as any)
-        .mockRejectedValue(Error('foo'));
+      vi.spyOn(messageSigningService, 'getCurrentKeyPairObj' as any).mockRejectedValue(
+        Error('foo')
+      );
 
       const response = messageSigningService.rotateKeyPair();
       await expect(response).rejects.toThrow(

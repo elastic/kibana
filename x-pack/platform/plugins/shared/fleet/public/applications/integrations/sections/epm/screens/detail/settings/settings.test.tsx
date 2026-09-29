@@ -63,37 +63,37 @@ vi.mock('../../../../../hooks', async () => {
 });
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useChangelog: vi.fn().mockReturnValue({
-        changelog: [],
-        breakingChanges: null,
-        isLoading: false,
-        error: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangelog: vi.fn().mockReturnValue({
+      changelog: [],
+      breakingChanges: null,
+      isLoading: false,
+      error: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: vi.fn().mockReturnValue({ enablePackageRollback: true }),
-      },
-      isAgentlessPoliciesUIEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: vi.fn().mockReturnValue({ enablePackageRollback: true }),
+    },
+    isAgentlessPoliciesUIEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../installed_integrations/hooks/use_installed_integrations_actions', () => {
-      const mocked = {
-      useInstalledIntegrationsActions: vi.fn().mockReturnValue({
-        actions: {
-          bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInstalledIntegrationsActions: vi.fn().mockReturnValue({
+      actions: {
+        bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Simplified stand-in that exposes onSave via test buttons without requiring EUI combo box
 // interactions. The rendered text/IDs preserve the assertions in existing tests.
@@ -308,9 +308,10 @@ describe('SettingsPage', () => {
 
     afterEach(() => {
       vi.mocked(useGetPackagePoliciesQuery).mockReturnValue({ data: { items: [] } } as any);
-      vi
-        .mocked(useBulkGetAgentPoliciesQuery)
-        .mockReturnValue({ data: { items: [] }, isLoading: false } as any);
+      vi.mocked(useBulkGetAgentPoliciesQuery).mockReturnValue({
+        data: { items: [] },
+        isLoading: false,
+      } as any);
       vi.mocked(isAgentlessPoliciesUIEnabled).mockReturnValue(true);
     });
 

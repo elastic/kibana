@@ -15,12 +15,12 @@ import { useInfraHasData } from './use_infra_has_data';
 const mockUseFetcher = vi.fn();
 
 vi.mock('./use_fetcher', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_fetcher')),
-      useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_fetcher')),
+    useFetcher: (...args: unknown[]) => mockUseFetcher(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInfraHasData', () => {
   beforeEach(() => {

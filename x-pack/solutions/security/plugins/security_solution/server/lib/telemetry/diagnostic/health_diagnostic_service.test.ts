@@ -540,9 +540,7 @@ enabled: true`,
 
       test('should return empty array when both artifacts fail', async () => {
         await startService();
-        (artifactService.getArtifact as Mock).mockRejectedValue(
-          new Error('Artifact not found')
-        );
+        (artifactService.getArtifact as Mock).mockRejectedValue(new Error('Artifact not found'));
 
         const result = await service.runHealthDiagnosticQueries({});
 

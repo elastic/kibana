@@ -16,17 +16,17 @@ import { EntitySummaryGridMini } from './entity_summary_grid';
 const mockFetch = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            fetch: (...args: unknown[]) => mockFetch(...args),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          fetch: (...args: unknown[]) => mockFetch(...args),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeClient = () =>
   new QueryClient({

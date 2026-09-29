@@ -31,54 +31,54 @@ const mockAddError = vi.fn();
 const mockUploadMutateAsync = vi.fn();
 
 vi.mock('../../../../common', () => {
-      const mocked = {
-      useFetchIndices: vi.fn(),
-      useValidateIndex: vi.fn(),
-      useGetIntegrationById: vi.fn(),
-      useCreateUpdateIntegration: vi.fn(),
-      useUploadSamples: vi.fn(() => ({
-        uploadSamplesMutation: {
-          mutateAsync: mockUploadMutateAsync,
-          isLoading: false,
-        },
+  const mocked = {
+    useFetchIndices: vi.fn(),
+    useValidateIndex: vi.fn(),
+    useGetIntegrationById: vi.fn(),
+    useCreateUpdateIntegration: vi.fn(),
+    useUploadSamples: vi.fn(() => ({
+      uploadSamplesMutation: {
+        mutateAsync: mockUploadMutateAsync,
         isLoading: false,
-      })),
-      generateId: vi.fn(() => 'mock-id'),
-      normalizeTitleName: vi.fn((v: string) => v.toLowerCase().replace(/\s+/g, '_')),
-      isValidNameFormat: vi.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
-      startsWithLetter: vi.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
-      useKibana: vi.fn(() => ({
-        services: {
-          http: {},
-          notifications: { toasts: { addError: mockAddError, addWarning: mockAddWarning } },
-          application: { navigateToApp: vi.fn() },
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      isLoading: false,
+    })),
+    generateId: vi.fn(() => 'mock-id'),
+    normalizeTitleName: vi.fn((v: string) => v.toLowerCase().replace(/\s+/g, '_')),
+    isValidNameFormat: vi.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+    startsWithLetter: vi.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
+    useKibana: vi.fn(() => ({
+      services: {
+        http: {},
+        notifications: { toasts: { addError: mockAddError, addWarning: mockAddWarning } },
+        application: { navigateToApp: vi.fn() },
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockGetInstalledPackages = vi.fn(
   (): Promise<{ items: Array<{ id: string; type: string }> }> => Promise.resolve({ items: [] })
 );
 const mockGetAllIntegrations = vi.fn((): Promise<unknown[]> => Promise.resolve([]));
 vi.mock('../../../../common/lib/api', () => {
-      const mocked = {
-      getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
-      getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
-      getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...(args as [])),
+    getAllIntegrations: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
+    getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrations(...(args as [])),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportAnalyzeLogsTriggered = vi.fn();
 vi.mock('../../../telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportAnalyzeLogsTriggered: mockReportAnalyzeLogsTriggered,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportAnalyzeLogsTriggered: mockReportAnalyzeLogsTriggered,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchIndices = useFetchIndices as Mock;
 const mockUseValidateIndex = useValidateIndex as Mock;

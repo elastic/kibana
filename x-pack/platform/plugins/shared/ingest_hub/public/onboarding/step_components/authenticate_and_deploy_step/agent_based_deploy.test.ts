@@ -12,16 +12,16 @@ import type { RegistryVarsEntry } from '@kbn/fleet-plugin/common';
 
 // Bare factory (not requireActual) — the Fleet barrel is heavy and we only need these senders.
 vi.mock('@kbn/fleet-plugin/public', async () => {
-      const mocked = {
-      sendCreateAgentPolicyWithPackagePolicies: vi.fn(),
-      sendCreatePackagePolicy: vi.fn(),
-      sendGetPackageInfoByKeyForRq: vi.fn(),
-      sendGetAgentPolicies: vi.fn(),
-      // Use the real implementation so buildAgentPolicyName gets consistent naming.
-      incrementPolicyName: (await vi.importActual('@kbn/fleet-plugin/public')).incrementPolicyName,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendCreateAgentPolicyWithPackagePolicies: vi.fn(),
+    sendCreatePackagePolicy: vi.fn(),
+    sendGetPackageInfoByKeyForRq: vi.fn(),
+    sendGetAgentPolicies: vi.fn(),
+    // Use the real implementation so buildAgentPolicyName gets consistent naming.
+    incrementPolicyName: (await vi.importActual('@kbn/fleet-plugin/public')).incrementPolicyName,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   sendCreateAgentPolicyWithPackagePolicies,

@@ -14,25 +14,25 @@ import { getQueryRuleParams, getMlRuleParams } from '../../rule_schema/mocks';
 import { runExecutionValidation } from './run_execution_validation';
 
 vi.mock('@kbn/data-views-plugin/server', () => {
-      const mocked = {
-      IndexPatternsFetcher: vi.fn().mockImplementation(() => ({
-        getIndexPatternMatches: vi.fn().mockResolvedValue({
-          matchedIndexPatterns: ['auditbeat-*'],
-          matchedIndices: ['auditbeat-1'],
-        }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IndexPatternsFetcher: vi.fn().mockImplementation(() => ({
+      getIndexPatternMatches: vi.fn().mockResolvedValue({
+        matchedIndexPatterns: ['auditbeat-*'],
+        matchedIndices: ['auditbeat-1'],
+      }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils/utils')),
-      hasTimestampFields: vi.fn().mockResolvedValue({ warningMessage: undefined }),
-      checkForFrozenIndices: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils/utils')),
+    hasTimestampFields: vi.fn().mockResolvedValue({ warningMessage: undefined }),
+    checkForFrozenIndices: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('runExecutionValidation', () => {
   let scopedClusterClient: ReturnType<typeof elasticsearchServiceMock.createScopedClusterClient>;

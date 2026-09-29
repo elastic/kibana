@@ -15,11 +15,11 @@ import { createToolHandlerContext, createToolTestMocks } from '../__mocks__/test
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('attackDiscoverySearchTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();

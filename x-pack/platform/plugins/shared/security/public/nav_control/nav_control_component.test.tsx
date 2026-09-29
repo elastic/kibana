@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { BehaviorSubject } from 'rxjs';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -19,7 +18,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { SecurityNavControl } from './nav_control_component';
 
 vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
-  const actual = (await vi.importActual('@kbn/core-user-profile-browser-hooks'));
+  const actual = await vi.importActual('@kbn/core-user-profile-browser-hooks');
   return { ...actual, useCurrentUser: vi.fn() };
 });
 vi.mock('react-use/lib/useObservable');

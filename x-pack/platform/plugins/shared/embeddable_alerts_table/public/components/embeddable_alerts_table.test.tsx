@@ -41,12 +41,12 @@ core.http.get.mockResolvedValue([
 const services = core as unknown as AlertsTableProps['services'];
 
 vi.mock('@kbn/response-ops-alerts-table', () => {
-      const mocked = {
-      AlertsTable: vi.fn(() => <div data-test-subj="alertsTable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { AlertsTable: mockAlertsTable } = (await vi.importMock('@kbn/response-ops-alerts-table'));
+  const mocked = {
+    AlertsTable: vi.fn(() => <div data-test-subj="alertsTable" />),
+  };
+  return { ...mocked, default: mocked };
+});
+const { AlertsTable: mockAlertsTable } = await vi.importMock('@kbn/response-ops-alerts-table');
 
 const TABLE_ID = `${PERSISTED_TABLE_CONFIG_KEY_PREFIX}-uuid`;
 

@@ -14,11 +14,11 @@ import { TestProvidersComponent } from '../../../../mocks/test_providers';
 import { IndicatorsFieldBrowser } from './field_browser';
 
 vi.mock('@kbn/response-ops-alerts-fields-browser', () => {
-      const mocked = {
-      FieldBrowser: vi.fn(() => <div data-test-subj="fieldBrowser" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldBrowser: vi.fn(() => <div data-test-subj="fieldBrowser" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const stub = vi.fn();
 

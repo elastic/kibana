@@ -10,19 +10,19 @@ import { vi } from 'vitest';
 import { getIndicesUnassignedShardStats } from './get_indices_unassigned_shard_stats';
 
 vi.mock('../../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getIndicesUnassignedShardStats', () => {
   it('should return the unassigned shard stats for indices', async () => {

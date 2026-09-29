@@ -28,113 +28,113 @@ window.IntersectionObserver = mockIntersectionObserver;
 
 // Mock useDebounceFn to execute immediately without debouncing
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebounceFn: (fn: any) => {
-        // Return the function itself as 'run' - it's already stable
-        return {
-          run: fn,
-          cancel: () => {},
-          flush: () => {},
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebounceFn: (fn: any) => {
+      // Return the function itself as 'run' - it's already stable
+      return {
+        run: fn,
+        cancel: () => {},
+        flush: () => {},
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_types_query', () => {
-      const mocked = {
-      useGetRuleTypesQuery: vi.fn().mockImplementation(() => ({
-        data: [
-          {
-            id: 'ruleType1',
-            name: 'ruleType1',
-            description: 'The first test rule type',
-            enabledInLicense: true,
-            actionVariables: { context: [], state: [], params: [] },
-            authorizedConsumers: {},
-            defaultActionGroupId: 'default',
-            actionGroups: [],
-            producer: 'alerts',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            isExportable: true,
-            ruleTaskTimeout: '5m',
-            category: 'test-category',
-          },
-          {
-            id: 'ruleType2',
-            name: 'ruleType2',
-            description: 'The second test rule type',
-            enabledInLicense: true,
-            actionVariables: { context: [], state: [], params: [] },
-            authorizedConsumers: {},
-            defaultActionGroupId: 'default',
-            actionGroups: [],
-            producer: 'alerts',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            isExportable: true,
-            ruleTaskTimeout: '5m',
-            category: 'test-category',
-          },
-          {
-            id: 'ruleType3',
-            name: 'ruleType3',
-            description: 'The third test rule type',
-            enabledInLicense: true,
-            actionVariables: { context: [], state: [], params: [] },
-            authorizedConsumers: {},
-            defaultActionGroupId: 'default',
-            actionGroups: [],
-            producer: 'alerts',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            isExportable: true,
-            ruleTaskTimeout: '5m',
-            category: 'test-category',
-          },
-          {
-            id: 'ruleType4',
-            name: 'ruleType4',
-            description: 'The fourth test rule type',
-            enabledInLicense: true,
-            actionVariables: { context: [], state: [], params: [] },
-            authorizedConsumers: {},
-            defaultActionGroupId: 'default',
-            actionGroups: [],
-            producer: 'alerts',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            isExportable: true,
-            ruleTaskTimeout: '5m',
-            category: 'test-category',
-          },
-          {
-            id: 'ruleType5',
-            name: 'ruleType5',
-            description: 'The fifth test rule type',
-            enabledInLicense: true,
-            actionVariables: { context: [], state: [], params: [] },
-            authorizedConsumers: {},
-            defaultActionGroupId: 'default',
-            actionGroups: [],
-            producer: 'alerts',
-            minimumLicenseRequired: 'basic',
-            recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
-            isExportable: true,
-            ruleTaskTimeout: '5m',
-            category: 'test-category',
-          },
-        ],
-        isLoading: false,
-        isSuccess: true,
-        isFetching: false,
-        isInitialLoading: false,
-        error: null,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetRuleTypesQuery: vi.fn().mockImplementation(() => ({
+      data: [
+        {
+          id: 'ruleType1',
+          name: 'ruleType1',
+          description: 'The first test rule type',
+          enabledInLicense: true,
+          actionVariables: { context: [], state: [], params: [] },
+          authorizedConsumers: {},
+          defaultActionGroupId: 'default',
+          actionGroups: [],
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          isExportable: true,
+          ruleTaskTimeout: '5m',
+          category: 'test-category',
+        },
+        {
+          id: 'ruleType2',
+          name: 'ruleType2',
+          description: 'The second test rule type',
+          enabledInLicense: true,
+          actionVariables: { context: [], state: [], params: [] },
+          authorizedConsumers: {},
+          defaultActionGroupId: 'default',
+          actionGroups: [],
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          isExportable: true,
+          ruleTaskTimeout: '5m',
+          category: 'test-category',
+        },
+        {
+          id: 'ruleType3',
+          name: 'ruleType3',
+          description: 'The third test rule type',
+          enabledInLicense: true,
+          actionVariables: { context: [], state: [], params: [] },
+          authorizedConsumers: {},
+          defaultActionGroupId: 'default',
+          actionGroups: [],
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          isExportable: true,
+          ruleTaskTimeout: '5m',
+          category: 'test-category',
+        },
+        {
+          id: 'ruleType4',
+          name: 'ruleType4',
+          description: 'The fourth test rule type',
+          enabledInLicense: true,
+          actionVariables: { context: [], state: [], params: [] },
+          authorizedConsumers: {},
+          defaultActionGroupId: 'default',
+          actionGroups: [],
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          isExportable: true,
+          ruleTaskTimeout: '5m',
+          category: 'test-category',
+        },
+        {
+          id: 'ruleType5',
+          name: 'ruleType5',
+          description: 'The fifth test rule type',
+          enabledInLicense: true,
+          actionVariables: { context: [], state: [], params: [] },
+          authorizedConsumers: {},
+          defaultActionGroupId: 'default',
+          actionGroups: [],
+          producer: 'alerts',
+          minimumLicenseRequired: 'basic',
+          recoveryActionGroup: { id: 'recovered', name: 'Recovered' },
+          isExportable: true,
+          ruleTaskTimeout: '5m',
+          category: 'test-category',
+        },
+      ],
+      isLoading: false,
+      isSuccess: true,
+      isFetching: false,
+      isInitialLoading: false,
+      error: null,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function render(ui: React.ReactElement) {
   const queryClient = new QueryClient(testQueryClientConfig);

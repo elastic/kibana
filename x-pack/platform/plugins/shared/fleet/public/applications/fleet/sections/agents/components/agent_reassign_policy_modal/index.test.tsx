@@ -27,29 +27,29 @@ const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      sendPostAgentReassign: vi.fn(),
-      sendPostBulkAgentReassign: vi.fn(),
-      useGetAgentPolicies: vi.fn(),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: vi.fn(),
-            addError: vi.fn(),
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    sendPostAgentReassign: vi.fn(),
+    sendPostBulkAgentReassign: vi.fn(),
+    useGetAgentPolicies: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components', () => {
-      const mocked = {
-      AgentPolicyPackageBadges: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentPolicyPackageBadges: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendPostAgentReassign = sendPostAgentReassign as Mock;
 const mockSendPostBulkAgentReassign = sendPostBulkAgentReassign as Mock;

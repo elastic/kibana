@@ -54,10 +54,7 @@ const createMockLogger = (): Logger =>
     warn: vi.fn(),
   } as unknown as Logger);
 
-const createEsClient = (overrides: {
-  search?: Mock;
-  fieldCaps?: Mock;
-}): IScopedClusterClient =>
+const createEsClient = (overrides: { search?: Mock; fieldCaps?: Mock }): IScopedClusterClient =>
   ({
     asCurrentUser: {
       search: overrides.search ?? vi.fn(),

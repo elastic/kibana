@@ -14,28 +14,28 @@ import { SOURCE_INFO_ROUTE } from '@kbn/esql-types';
 import { registerGetSourceInfoRoute } from './get_source_info';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getNamedParams: vi.fn().mockReturnValue([]),
-      fixESQLQueryWithVariables: vi.fn((query: string) => query),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNamedParams: vi.fn().mockReturnValue([]),
+    fixESQLQueryWithVariables: vi.fn((query: string) => query),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/es-query', () => {
-      const mocked = {
-      buildEsQuery: vi.fn(),
-      getTimeZoneFromSettings: vi.fn().mockReturnValue('UTC'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEsQuery: vi.fn(),
+    getTimeZoneFromSettings: vi.fn().mockReturnValue('UTC'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/data-plugin/common', () => {
-      const mocked = {
-      getTime: vi.fn(),
-      getEsQueryConfig: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTime: vi.fn(),
+    getEsQueryConfig: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function buildMocks() {
   const handler = vi.fn();

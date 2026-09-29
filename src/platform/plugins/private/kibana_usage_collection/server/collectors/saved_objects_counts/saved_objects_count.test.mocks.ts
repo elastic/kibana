@@ -12,8 +12,8 @@ import { vi } from 'vitest';
 export const getSavedObjectsCountsMock = vi.fn();
 
 vi.doMock('./get_saved_object_counts', () => {
-      const mocked = {
-      getSavedObjectsCounts: getSavedObjectsCountsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSavedObjectsCounts: getSavedObjectsCountsMock,
+  };
+  return { ...mocked, default: mocked };
+});

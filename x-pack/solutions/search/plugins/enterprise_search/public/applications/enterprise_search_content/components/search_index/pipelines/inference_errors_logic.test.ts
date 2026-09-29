@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import { Status } from '../../../../../../common/types/api';
 import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';

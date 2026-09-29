@@ -15,29 +15,29 @@ import { convertDatatableToRawColorMappings } from './datatable';
 import { convertTagcloudToRawColorMappings } from './tagcloud';
 
 vi.mock('./xy', () => {
-      const mocked = {
-      convertXYToRawColorMappings: vi.fn().mockReturnValue('new xyVisState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertXYToRawColorMappings: vi.fn().mockReturnValue('new xyVisState'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./partition', () => {
-      const mocked = {
-      convertPieToRawColorMappings: vi.fn().mockReturnValue('new partitionVisState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertPieToRawColorMappings: vi.fn().mockReturnValue('new partitionVisState'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./datatable', () => {
-      const mocked = {
-      convertDatatableToRawColorMappings: vi.fn().mockReturnValue('new datatableVisState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertDatatableToRawColorMappings: vi.fn().mockReturnValue('new datatableVisState'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tagcloud', () => {
-      const mocked = {
-      convertTagcloudToRawColorMappings: vi.fn().mockReturnValue('new tagcloudVisState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertTagcloudToRawColorMappings: vi.fn().mockReturnValue('new tagcloudVisState'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Legend stat transforms', () => {
   beforeEach(() => {

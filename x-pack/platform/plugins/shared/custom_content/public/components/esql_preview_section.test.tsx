@@ -13,25 +13,25 @@ import { render, screen, act } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLLangEditor: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLTimeField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLTimeField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services', () => {
-      const mocked = {
-      getServices: () => ({ core: { http: {} } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({ core: { http: {} } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getESQLTimeField } from '@kbn/esql-utils';
 import { EsqlPreviewSection } from './esql_preview_section';

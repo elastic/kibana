@@ -20,11 +20,11 @@ import { LENS_VIS_API_PATH, LENS_API_VERSION } from '../../../../common/constant
 // We mock getLensResponseItem to avoid setting up a complex LensConfigBuilder
 // just to test the pagination logic for now, which doesn't rely on the actual data formatting.
 vi.mock('./utils', () => {
-      const mocked = {
-      getLensResponseItem: vi.fn().mockImplementation((builder, item) => item),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLensResponseItem: vi.fn().mockImplementation((builder, item) => item),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Lens API - Visualizations Search Route', () => {
   it('maps API per_page to internal perPage/limit and vice versa', async () => {

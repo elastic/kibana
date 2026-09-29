@@ -46,11 +46,11 @@ const mockUseHostAlertsItemsReturn = (overrides: Partial<UseHostAlertsItemsRetur
 };
 
 vi.mock('./use_host_alerts_items', () => {
-      const mocked = {
-      useHostAlertsItems: () => mockUseHostAlertsItems(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHostAlertsItems: () => mockUseHostAlertsItems(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = () =>
   render(

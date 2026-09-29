@@ -99,16 +99,17 @@ const expectNoExpectedBoundsOption = (component: ReturnType<typeof render>) => {
 
 describe('TimeComparison component', () => {
   const mockMLJobs = () => {
-    vi
-      .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
-      .mockReturnValue(
-        // @ts-ignore mocking only partial data
-        {
-          anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-          anomalyDetectionJobsData: ML_AD_JOBS,
-          anomalyDetectionSetupState: AnomalyDetectionSetupState.UpToDate,
-        }
-      );
+    vi.spyOn(
+      useAnomalyDetectionJobsContextModule,
+      'useAnomalyDetectionJobsContext'
+    ).mockReturnValue(
+      // @ts-ignore mocking only partial data
+      {
+        anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+        anomalyDetectionJobsData: ML_AD_JOBS,
+        anomalyDetectionSetupState: AnomalyDetectionSetupState.UpToDate,
+      }
+    );
 
     vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValue({
       preferredEnvironment: 'prod',
@@ -170,16 +171,17 @@ describe('TimeComparison component', () => {
     });
 
     it('preserves expected bounds deeplink while anomaly detection setup is loading', () => {
-      vi
-        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
-        .mockReturnValue(
-          // @ts-ignore mocking only partial data
-          {
-            anomalyDetectionJobsStatus: FETCH_STATUS.LOADING,
-            anomalyDetectionJobsData: undefined,
-            anomalyDetectionSetupState: AnomalyDetectionSetupState.Loading,
-          }
-        );
+      vi.spyOn(
+        useAnomalyDetectionJobsContextModule,
+        'useAnomalyDetectionJobsContext'
+      ).mockReturnValue(
+        // @ts-ignore mocking only partial data
+        {
+          anomalyDetectionJobsStatus: FETCH_STATUS.LOADING,
+          anomalyDetectionJobsData: undefined,
+          anomalyDetectionSetupState: AnomalyDetectionSetupState.Loading,
+        }
+      );
 
       vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
         preferredEnvironment: 'prod',
@@ -208,16 +210,17 @@ describe('TimeComparison component', () => {
       // never initiates, so the deeplink must fall through to the replace guard rather
       // than being treated as pending (which would hide the selector forever).
       vi.spyOn(useShouldShowAnomalyUiModule, 'useShouldShowAnomalyUi').mockReturnValue(false);
-      vi
-        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
-        .mockReturnValue(
-          // @ts-ignore mocking only partial data
-          {
-            anomalyDetectionJobsStatus: FETCH_STATUS.NOT_INITIATED,
-            anomalyDetectionJobsData: undefined,
-            anomalyDetectionSetupState: AnomalyDetectionSetupState.Unknown,
-          }
-        );
+      vi.spyOn(
+        useAnomalyDetectionJobsContextModule,
+        'useAnomalyDetectionJobsContext'
+      ).mockReturnValue(
+        // @ts-ignore mocking only partial data
+        {
+          anomalyDetectionJobsStatus: FETCH_STATUS.NOT_INITIATED,
+          anomalyDetectionJobsData: undefined,
+          anomalyDetectionSetupState: AnomalyDetectionSetupState.Unknown,
+        }
+      );
 
       vi.spyOn(useEnvironmentContextModule, 'useEnvironmentsContext').mockReturnValueOnce({
         preferredEnvironment: 'prod',
@@ -287,15 +290,16 @@ describe('TimeComparison component', () => {
     });
 
     it('shows disabled option for expected bounds when no ML jobs match the current environment', () => {
-      vi
-        .spyOn(useAnomalyDetectionJobsContextModule, 'useAnomalyDetectionJobsContext')
-        .mockReturnValue(
-          // @ts-ignore mocking only partial data
-          {
-            anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
-            anomalyDetectionJobsData: NO_ML_AD_JOBS,
-          }
-        );
+      vi.spyOn(
+        useAnomalyDetectionJobsContextModule,
+        'useAnomalyDetectionJobsContext'
+      ).mockReturnValue(
+        // @ts-ignore mocking only partial data
+        {
+          anomalyDetectionJobsStatus: FETCH_STATUS.SUCCESS,
+          anomalyDetectionJobsData: NO_ML_AD_JOBS,
+        }
+      );
 
       const Wrapper = getWrapper({
         url: '/services/frontend/transactions',

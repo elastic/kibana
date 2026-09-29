@@ -19,11 +19,11 @@ import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 vi.mock('../lib', () => {
-      const mocked = {
-      getUnallowedFieldValues: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnallowedFieldValues: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getUnallowedFieldValuesRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;

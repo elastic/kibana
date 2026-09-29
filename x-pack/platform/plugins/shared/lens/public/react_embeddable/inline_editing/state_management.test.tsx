@@ -12,11 +12,11 @@ import { getStateManagementForInlineEditing } from './state_management';
 import { mergeToNewDoc } from '../../state_management/shared_logic';
 
 vi.mock('../../state_management/shared_logic', () => {
-      const mocked = {
-      mergeToNewDoc: vi.fn(() => ({ state: {} })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mergeToNewDoc: vi.fn(() => ({ state: {} })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getStateManagementForInlineEditing', () => {
   const attributes = {

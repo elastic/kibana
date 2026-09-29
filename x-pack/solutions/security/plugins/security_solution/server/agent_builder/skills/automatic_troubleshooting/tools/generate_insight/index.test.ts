@@ -379,8 +379,7 @@ describe('automaticTroubleshootingGenerateInsightTool', () => {
       );
 
       const ensureOrder = mockEnsureInCurrentSpace.mock.invocationCallOrder[0];
-      const modelOrder = (mockModelProvider.getDefaultModel as Mock).mock
-        .invocationCallOrder[0];
+      const modelOrder = (mockModelProvider.getDefaultModel as Mock).mock.invocationCallOrder[0];
       const graphOrder = mockCreateGenerateInsightGraph.mock.invocationCallOrder[0];
 
       expect(ensureOrder).toBeLessThan(modelOrder);

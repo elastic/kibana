@@ -11,11 +11,11 @@ import { ConfigKey, FormMonitorType } from '../types';
 import { FORM_CONFIG } from './form_config';
 
 vi.mock('../../../../../utils/kibana_service', () => {
-      const mocked = {
-      kibanaService: { coreStart: { docLinks: { links: {} } } },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaService: { coreStart: { docLinks: { links: {} } } },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const paramsFields = (fields: Array<{ fieldKey: string }> | undefined) =>
   (fields ?? []).filter((field) => field.fieldKey === ConfigKey.PARAMS);

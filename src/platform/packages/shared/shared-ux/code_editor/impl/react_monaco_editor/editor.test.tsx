@@ -157,12 +157,10 @@ describe('react monaco editor', () => {
   it('uses defaultValue when value is undefined (uncontrolled mode)', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
     let firstArg: unknown;
-    const createModelSpy = vi
-      .spyOn(monaco.editor, 'createModel')
-      .mockImplementation((...args) => {
-        firstArg = args[0];
-        return originalCreateModel(...args);
-      });
+    const createModelSpy = vi.spyOn(monaco.editor, 'createModel').mockImplementation((...args) => {
+      firstArg = args[0];
+      return originalCreateModel(...args);
+    });
 
     render(<MonacoEditor {...defaultProps} value={undefined} defaultValue="fallback" />);
 
@@ -224,13 +222,11 @@ describe('react monaco editor onChange performance', () => {
   it('does not normalize or push edits when a controlled rerender matches the shadow value', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
     let pushEditOperationsSpy: MockInstance | undefined;
-    const createModelSpy = vi
-      .spyOn(monaco.editor, 'createModel')
-      .mockImplementation((...args) => {
-        const model = originalCreateModel(...args);
-        pushEditOperationsSpy = vi.spyOn(model, 'pushEditOperations');
-        return model;
-      });
+    const createModelSpy = vi.spyOn(monaco.editor, 'createModel').mockImplementation((...args) => {
+      const model = originalCreateModel(...args);
+      pushEditOperationsSpy = vi.spyOn(model, 'pushEditOperations');
+      return model;
+    });
 
     const editorPushUndoStop = vi.fn();
     const { cleanup } = setupMonacoEditorHarness({
@@ -350,13 +346,11 @@ describe('react monaco editor onChange performance', () => {
   it('pushes a full replace when controlled value changes externally', async () => {
     const originalCreateModel = monaco.editor.createModel.bind(monaco.editor);
     let pushEditOperationsSpy: MockInstance | undefined;
-    const createModelSpy = vi
-      .spyOn(monaco.editor, 'createModel')
-      .mockImplementation((...args) => {
-        const model = originalCreateModel(...args);
-        pushEditOperationsSpy = vi.spyOn(model, 'pushEditOperations');
-        return model;
-      });
+    const createModelSpy = vi.spyOn(monaco.editor, 'createModel').mockImplementation((...args) => {
+      const model = originalCreateModel(...args);
+      pushEditOperationsSpy = vi.spyOn(model, 'pushEditOperations');
+      return model;
+    });
 
     const editorPushUndoStop = vi.fn();
     const { cleanup } = setupMonacoEditorHarness({

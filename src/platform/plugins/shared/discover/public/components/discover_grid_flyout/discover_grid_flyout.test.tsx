@@ -30,7 +30,7 @@ import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../context_awareness';
 let mockRenderCustomHeader: UnifiedDocViewerFlyoutProps['renderCustomHeader'] | undefined;
 
 vi.mock('@kbn/unified-doc-viewer-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/unified-doc-viewer-plugin/public'));
+  const actual = await vi.importActual('@kbn/unified-doc-viewer-plugin/public');
   const OriginalFlyout = actual.UnifiedDocViewerFlyout;
   return {
     ...actual,

@@ -27,12 +27,12 @@ const mockLocators = createMockLocators();
 let mockCanWriteRules = true;
 
 vi.mock('@kbn/alerting-v2-browser-shared', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
-      useRuleAutoAttach: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
+    useRuleAutoAttach: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
   return {
@@ -56,71 +56,71 @@ vi.mock('@kbn/core-di-browser', () => {
 
 const mockUseBreadcrumbs = vi.fn();
 vi.mock('../../hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: (...args: unknown[]) => mockUseBreadcrumbs(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteRule = vi.fn();
 vi.mock('../../hooks/use_delete_rule', () => {
-      const mocked = {
-      useDeleteRule: () => ({ mutate: mockDeleteRule, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteRule: () => ({ mutate: mockDeleteRule, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToggleRuleEnabled = vi.fn();
 let mockIsToggling = false;
 vi.mock('../../hooks/use_toggle_rule_enabled', () => {
-      const mocked = {
-      useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToggleRuleEnabled: () => ({ mutate: mockToggleRuleEnabled, isLoading: mockIsToggling }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpdateRuleApiKey = vi.fn();
 vi.mock('../../hooks/use_bulk_update_rule_api_key', () => {
-      const mocked = {
-      useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateRuleApiKey, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunRule = vi.fn();
 vi.mock('../../hooks/use_run_rule', () => {
-      const mocked = {
-      useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunRule: () => ({ mutate: mockRunRule, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenEditFlyout = vi.fn();
 const mockOpenCloneFlyout = vi.fn();
 vi.mock('../../hooks/use_compose_discover_flyout', () => {
-      const mocked = {
-      useComposeDiscoverFlyout: () => ({
-        flyout: null,
-        confirmationModal: null,
-        openCreateFlyout: vi.fn(),
-        openEditFlyout: mockOpenEditFlyout,
-        openCloneFlyout: mockOpenCloneFlyout,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useComposeDiscoverFlyout: () => ({
+      flyout: null,
+      confirmationModal: null,
+      openCreateFlyout: vi.fn(),
+      openEditFlyout: mockOpenEditFlyout,
+      openCloneFlyout: mockOpenCloneFlyout,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRuleAuditMetadata = vi.fn();
 vi.mock('../../hooks/use_rule_audit_metadata', () => {
-      const mocked = {
-      useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleAuditMetadata: () => mockUseRuleAuditMetadata(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAppHeaderRender = vi.fn();
 vi.mock('@kbn/app-header', async () => {
-  const actual = (await vi.importActual('@kbn/app-header'));
+  const actual = await vi.importActual('@kbn/app-header');
   return {
     ...actual,
     AppHeader: (props: React.ComponentProps<typeof actual.AppHeader>) => {
@@ -132,7 +132,7 @@ vi.mock('@kbn/app-header', async () => {
 
 const mockRuleKindBadgeRender = vi.fn();
 vi.mock('./rule_summary_header', async () => {
-  const actual = (await vi.importActual('./rule_summary_header'));
+  const actual = await vi.importActual('./rule_summary_header');
   return {
     ...actual,
     RuleKindBadge: (props: { kind: string }) => {
@@ -143,22 +143,22 @@ vi.mock('./rule_summary_header', async () => {
 });
 
 vi.mock('./sidebar/rule_sidebar', () => {
-      const mocked = {
-      RuleSidebar: () => (
-        <div>
-          <div data-test-subj="ruleConditionsSection">conditions</div>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSidebar: () => (
+      <div>
+        <div data-test-subj="ruleConditionsSection">conditions</div>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./overview', () => {
-      const mocked = {
-      RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleOverviewSection: () => <div data-test-subj="ruleOverviewSectionMock">overview</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

@@ -17,7 +17,7 @@ import { getAnonymizedAlerts } from '.';
 import { mockOpenAndAcknowledgedAlertsQueryResults } from '../../../../mock/mock_open_and_acknowledged_alerts_query_results';
 
 vi.mock('@kbn/elastic-assistant-common', async () => {
-  const original = (await vi.importActual('@kbn/elastic-assistant-common'));
+  const original = await vi.importActual('@kbn/elastic-assistant-common');
 
   return {
     ...original,

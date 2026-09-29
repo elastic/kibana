@@ -13,10 +13,10 @@ export const mockReactDomRender = vi.fn();
 export const mockReactDomUnmount = vi.fn();
 export const mockReactDomCreatePortal = vi.fn().mockImplementation((component) => component);
 vi.doMock('react-dom', () => {
-      const mocked = {
-      render: mockReactDomRender,
-      createPortal: mockReactDomCreatePortal,
-      unmountComponentAtNode: mockReactDomUnmount,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    render: mockReactDomRender,
+    createPortal: mockReactDomCreatePortal,
+    unmountComponentAtNode: mockReactDomUnmount,
+  };
+  return { ...mocked, default: mocked };
+});

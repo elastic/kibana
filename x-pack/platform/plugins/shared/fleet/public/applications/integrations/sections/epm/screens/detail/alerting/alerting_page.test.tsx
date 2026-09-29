@@ -26,54 +26,54 @@ const mockGetRuleLibraryRedirectUrl = vi.fn(
 );
 
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: (...args: any[]) => mockExperimentalFeaturesGet(...args),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: (...args: any[]) => mockExperimentalFeaturesGet(...args),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-utils', () => {
-      const mocked = {
-      isAlertingV2Enabled: (...args: any[]) => mockIsAlertingV2Enabled(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAlertingV2Enabled: (...args: any[]) => mockIsAlertingV2Enabled(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/side_bar_column', () => {
-      const mocked = {
-      SideBarColumn: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SideBarColumn: ({ children }: { children?: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useGetPackageInstallStatus: vi.fn().mockReturnValue(() => ({
-        status: 'installed',
-        version: '1.0.0',
-      })),
-      useLink: vi.fn().mockReturnValue({ getPath: vi.fn().mockReturnValue('/mock') }),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: { addInfo: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
-        },
-        http: {
-          basePath: { prepend: (path: string) => `/mock${path}` },
-        },
-      }),
-      useFleetStatus: vi.fn().mockReturnValue({ spaceId: 'default' }),
-      useAuthz: (...args: any[]) => mockUseAuthz(...args),
-      sendRequestInstallRuleAssets: vi.fn(),
-      useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
-      useAlertingV2RuleLibraryLocator: () => ({
-        getRedirectUrl: mockGetRuleLibraryRedirectUrl,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useGetPackageInstallStatus: vi.fn().mockReturnValue(() => ({
+      status: 'installed',
+      version: '1.0.0',
+    })),
+    useLink: vi.fn().mockReturnValue({ getPath: vi.fn().mockReturnValue('/mock') }),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: { addInfo: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
+      },
+      http: {
+        basePath: { prepend: (path: string) => `/mock${path}` },
+      },
+    }),
+    useFleetStatus: vi.fn().mockReturnValue({ spaceId: 'default' }),
+    useAuthz: (...args: any[]) => mockUseAuthz(...args),
+    sendRequestInstallRuleAssets: vi.fn(),
+    useAlertingAssets: (...args: any[]) => mockUseAlertingAssets(...args),
+    useAlertingV2RuleLibraryLocator: () => ({
+      getRedirectUrl: mockGetRuleLibraryRedirectUrl,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useGetPackageInstallStatus } from '../../../../../hooks';
 

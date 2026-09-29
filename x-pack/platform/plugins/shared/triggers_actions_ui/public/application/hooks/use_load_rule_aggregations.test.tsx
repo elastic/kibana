@@ -18,15 +18,17 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../lib/rule_api/aggregate_kuery_filter', () => {
-      const mocked = {
-      loadRuleAggregationsWithKueryFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRuleAggregationsWithKueryFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-const { loadRuleAggregationsWithKueryFilter } = (await vi.importMock('../lib/rule_api/aggregate_kuery_filter'));
+const { loadRuleAggregationsWithKueryFilter } = await vi.importMock(
+  '../lib/rule_api/aggregate_kuery_filter'
+);
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -20,7 +20,7 @@ import type { DashboardListingEmptyPromptProps } from './dashboard_listing_empty
 import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 
 vi.mock('./confirm_overlays', async () => {
-  const originalModule = (await vi.importActual('./confirm_overlays'));
+  const originalModule = await vi.importActual('./confirm_overlays');
   return {
     __esModule: true,
     ...originalModule,

@@ -22,20 +22,20 @@ const mockAddError = vi.fn();
 const useQueryClientMock = useQueryClient as unknown as MockedFunction<typeof useQueryClient>;
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      }),
-      get mockAddError() {
-        return mockAddError;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    }),
+    get mockAddError() {
+      return mockAddError;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttp: HttpSetup = {
   fetch: vi.fn(),

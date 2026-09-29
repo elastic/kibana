@@ -16,7 +16,7 @@ import { MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 const MOCK_DOCS_LINK = 'https://www.elastic.co/docs/apm/service-maps#service-maps-legend';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
@@ -24,22 +24,22 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          docLinks: {
-            links: {
-              apm: {
-                supportedServiceMaps: MOCK_DOCS_LINK,
-                supportedServiceMapsLegend: MOCK_DOCS_LINK,
-              },
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        docLinks: {
+          links: {
+            apm: {
+              supportedServiceMaps: MOCK_DOCS_LINK,
+              supportedServiceMapsLegend: MOCK_DOCS_LINK,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const controlIconCss = css`
   min-inline-size: 32px;

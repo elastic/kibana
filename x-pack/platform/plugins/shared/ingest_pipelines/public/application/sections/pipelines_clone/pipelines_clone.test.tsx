@@ -24,27 +24,27 @@ import { createMemoryHistory } from 'history';
 const mockUseKibana = vi.fn();
 
 vi.mock('../../../shared_imports', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../shared_imports')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../shared_imports')),
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pipelines_create', async () => {
-      const mocked = {
-      ...(await vi.importActual('../pipelines_create')),
-      PipelinesCreate: (props: ComponentProps<typeof PipelinesCreate>) => (
-        <div data-test-subj="pipelinesCreate">
-          <h1>PIPELINES_CREATE</h1>
-          <div data-test-subj="sourcePipelineName">
-            {props.sourcePipeline ? props.sourcePipeline.name : 'no-source'}
-          </div>
+  const mocked = {
+    ...(await vi.importActual('../pipelines_create')),
+    PipelinesCreate: (props: ComponentProps<typeof PipelinesCreate>) => (
+      <div data-test-subj="pipelinesCreate">
+        <h1>PIPELINES_CREATE</h1>
+        <div data-test-subj="sourcePipelineName">
+          {props.sourcePipeline ? props.sourcePipeline.name : 'no-source'}
         </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type MockServices = ReturnType<typeof useKibana>['services'];
 type DeepPartialMockServices = DeepPartial<MockServices>;

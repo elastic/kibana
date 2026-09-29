@@ -19,11 +19,11 @@ import {
 import { createConnectorSetupAttachmentType } from './connector_setup';
 
 vi.mock('@kbn/connector-specs', () => {
-      const mocked = {
-      getConnectorSpec: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorSpec: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 

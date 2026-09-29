@@ -14,11 +14,11 @@ import type { ScopedHistory } from '@kbn/core/public';
 import { EvalsApp } from './application';
 
 vi.mock('./pages/online_evals_list', () => {
-      const mocked = {
-      OnlineEvalsListPage: () => <div>Online evals list</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OnlineEvalsListPage: () => <div>Online evals list</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EvalsApp', () => {
   it('keeps the online evaluations route available without showing a navigation tab', () => {

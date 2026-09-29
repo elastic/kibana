@@ -121,13 +121,13 @@ describe('useExportResults', () => {
 
     // Intercept document.createElement only for <a> tags; pass through all others
     const originalCreateElement = document.createElement.bind(document);
-    vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag: string, options?: ElementCreationOptions) => {
+    vi.spyOn(document, 'createElement').mockImplementation(
+      (tag: string, options?: ElementCreationOptions) => {
         if (tag === 'a') return mockAnchorElement as HTMLAnchorElement;
 
         return originalCreateElement(tag, options);
-      });
+      }
+    );
 
     mockAppendChild = vi.spyOn(document.body, 'appendChild').mockImplementation((node) => node);
     mockRemoveChild = vi.spyOn(document.body, 'removeChild').mockImplementation((node) => node);

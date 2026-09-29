@@ -16,11 +16,11 @@ import { SemanticTextBanner } from '../../../public/application/sections/home/in
 const mockNavigate = vi.fn();
 const mockUseAppContext = vi.fn();
 vi.mock('../../../public/application/app_context', () => {
-      const mocked = {
-      useAppContext: () => mockUseAppContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: () => mockUseAppContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);

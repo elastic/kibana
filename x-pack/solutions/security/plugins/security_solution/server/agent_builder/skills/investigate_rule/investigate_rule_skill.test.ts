@@ -176,9 +176,7 @@ describe('investigateRuleSkill', () => {
     it('returns an error result when resolution throws', async () => {
       const ctx = makeCtx();
       (ctx.attachments.get as Mock).mockReturnValueOnce(undefined);
-      (ctx.attachments.add as Mock).mockRejectedValueOnce(
-        new Error('Rules service unavailable')
-      );
+      (ctx.attachments.add as Mock).mockRejectedValueOnce(new Error('Rules service unavailable'));
 
       const result = (await tool.handler({ rule_id: 'rule-1' }, ctx)) as ToolHandlerStandardReturn;
 

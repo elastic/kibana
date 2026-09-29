@@ -14,14 +14,14 @@ import { transformDashboardIn } from './transform_dashboard_in';
 import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 
 vi.mock('../../../kibana_services', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../kibana_services')),
-      embeddableService: {
-        getTransforms: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../kibana_services')),
+    embeddableService: {
+      getTransforms: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {

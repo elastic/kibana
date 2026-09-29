@@ -19,11 +19,11 @@ vi.mock('../../common/lib/kibana');
 // toMountPoint is a DOM utility — return the element as-is so tests can assert
 // on the text field without a full rendering environment.
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: (node: unknown) => node,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: (node: unknown) => node,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunCaseWorkflow = vi.spyOn(api, 'runCaseWorkflow');
 
@@ -31,7 +31,7 @@ describe('useRunWorkflowOnCases', async () => {
   const mockHttp = {} as HttpStart;
   const mockToasts = notificationServiceMock.createStartContract().toasts;
 
-  const { useHttp, useToasts, useKibana } = (await vi.importMock('../../common/lib/kibana'));
+  const { useHttp, useToasts, useKibana } = await vi.importMock('../../common/lib/kibana');
 
   beforeEach(() => {
     vi.clearAllMocks();
@@ -105,7 +105,7 @@ describe('useRunWorkflowOnCases', async () => {
     const mockGetAppUrl = vi
       .fn()
       .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
-    const { useAppUrl } = (await vi.importMock('../../common/lib/kibana'));
+    const { useAppUrl } = await vi.importMock('../../common/lib/kibana');
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
 
     mockRunCaseWorkflow.mockResolvedValueOnce({
@@ -132,7 +132,7 @@ describe('useRunWorkflowOnCases', async () => {
     const mockGetAppUrl = vi
       .fn()
       .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
-    const { useAppUrl } = (await vi.importMock('../../common/lib/kibana'));
+    const { useAppUrl } = await vi.importMock('../../common/lib/kibana');
     useAppUrl.mockReturnValue({ getAppUrl: mockGetAppUrl });
 
     mockRunCaseWorkflow.mockResolvedValueOnce({

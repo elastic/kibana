@@ -34,9 +34,7 @@ const mockGetDataStreamDetails = getDataStreamDetails as MockedFunction<
   typeof getDataStreamDetails
 >;
 const mockGetDataStreamDefaultRetentionPeriod =
-  getDataStreamDefaultRetentionPeriod as MockedFunction<
-    typeof getDataStreamDefaultRetentionPeriod
-  >;
+  getDataStreamDefaultRetentionPeriod as MockedFunction<typeof getDataStreamDefaultRetentionPeriod>;
 const mockUpdateFailureStore = updateFailureStore as MockedFunction<typeof updateFailureStore>;
 
 describe('dataStreamDetailsRoute', () => {

@@ -46,7 +46,7 @@ describe('useDeleteRuleset hook', () => {
   };
 
   it('should delete the ruleset', async () => {
-    const { useDeleteRuleset } = (await vi.importActual('./use_delete_query_rules_ruleset'));
+    const { useDeleteRuleset } = await vi.importActual('./use_delete_query_rules_ruleset');
 
     const { result } = renderHook(() => useDeleteRuleset(), { wrapper });
 
@@ -61,7 +61,7 @@ describe('useDeleteRuleset hook', () => {
       body: { message: 'An error occurred' },
     };
     mockDelete.mockRejectedValue(error);
-    const { useDeleteRuleset } = (await vi.importActual('./use_delete_query_rules_ruleset'));
+    const { useDeleteRuleset } = await vi.importActual('./use_delete_query_rules_ruleset');
 
     const { result } = renderHook(() => useDeleteRuleset(), { wrapper });
 

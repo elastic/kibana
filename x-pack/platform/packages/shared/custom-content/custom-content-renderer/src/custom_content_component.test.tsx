@@ -15,9 +15,9 @@ import { CustomContentComponent } from './custom_content_component';
 import type { CustomContentRendererServices } from './types';
 
 vi.mock('./use_custom_content_html', () => {
-      const mocked = { useCustomContentHtml: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useCustomContentHtml: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCustomContentHtml = useCustomContentHtml as MockedFunction<
   typeof useCustomContentHtml

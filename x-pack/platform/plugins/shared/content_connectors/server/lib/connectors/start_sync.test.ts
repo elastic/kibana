@@ -18,7 +18,7 @@ import { ErrorCode } from '../../../common/types/error_codes';
 import { startSync } from './start_sync';
 
 vi.mock('@kbn/search-connectors', async () => {
-  const originalModule = (await vi.importActual('@kbn/search-connectors'));
+  const originalModule = await vi.importActual('@kbn/search-connectors');
   return {
     ...originalModule,
     fetchConnectorById: vi.fn(),

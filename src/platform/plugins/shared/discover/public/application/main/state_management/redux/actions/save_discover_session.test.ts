@@ -29,9 +29,9 @@ import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: vi.fn(() => 'test-uuid') };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: vi.fn(() => 'test-uuid') };
+  return { ...mocked, default: mocked };
+});
 
 const getSaveDiscoverSessionParams = (
   overrides: Partial<SaveDiscoverSessionThunkParams> = {}
@@ -159,9 +159,9 @@ describe('saveDiscoverSession', () => {
     );
     const setDataViewSpy = vi.spyOn(tabStateDataViewActions, 'setDataView');
 
-    vi
-      .spyOn(services.data.search.searchSource, 'create')
-      .mockResolvedValue(createSearchSourceMock({ index: dataViewMockWithTimeField }));
+    vi.spyOn(services.data.search.searchSource, 'create').mockResolvedValue(
+      createSearchSourceMock({ index: dataViewMockWithTimeField })
+    );
 
     await toolkit.internalState.dispatch(
       internalStateActions.saveDiscoverSession(getSaveDiscoverSessionParams())

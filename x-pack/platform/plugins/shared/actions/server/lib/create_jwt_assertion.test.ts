@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
 vi.mock('jsonwebtoken', () => {
-      const mocked = {
-      sign: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sign: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import jwt from 'jsonwebtoken';
 import type { Logger } from '@kbn/core/server';

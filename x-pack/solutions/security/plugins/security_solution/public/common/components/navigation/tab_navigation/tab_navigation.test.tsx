@@ -29,11 +29,11 @@ mockGetUrlForApp.mockImplementation(
 
 const mockUseRouteSpy = vi.fn();
 vi.mock('../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: () => mockUseRouteSpy(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: () => mockUseRouteSpy(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SEARCH_QUERY = '?search=test';
 

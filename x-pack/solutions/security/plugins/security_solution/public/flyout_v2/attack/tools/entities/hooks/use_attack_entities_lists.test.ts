@@ -12,8 +12,8 @@ import { useAttackEntitiesLists } from './use_attack_entities_lists';
 import { useQueryAlerts } from '../../../../../detections/containers/detection_engine/alerts/use_query';
 
 vi.mock('@kbn/entity-store/public', async () => {
-  const actual = (await vi.importActual('@kbn/entity-store/public'));
-  const { euid } = (await vi.importActual('@kbn/entity-store/common/euid_helpers'));
+  const actual = await vi.importActual('@kbn/entity-store/public');
+  const { euid } = await vi.importActual('@kbn/entity-store/common/euid_helpers');
   return {
     ...actual,
     useEntityStoreEuidApi: vi.fn(() => ({ euid })),
@@ -21,11 +21,11 @@ vi.mock('@kbn/entity-store/public', async () => {
 });
 
 vi.mock('../../../../../detections/containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAttackEntitiesLists', () => {
   const mockUseQueryAlerts = vi.mocked(useQueryAlerts);

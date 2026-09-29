@@ -29,31 +29,31 @@ import type {
 import { PackagePolicyInputStreamConfig } from './package_policy_input_stream';
 
 vi.mock('../../../../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../../../hooks')),
-      useStartServices: () => ({
-        docLinks: {
-          links: {
-            fleet: {
-              datastreamsNamingScheme: 'https://docs.elastic.co',
-            },
+  const mocked = {
+    ...(await vi.importActual('../../../../../../../../hooks')),
+    useStartServices: () => ({
+      docLinks: {
+        links: {
+          fleet: {
+            datastreamsNamingScheme: 'https://docs.elastic.co',
           },
         },
-      }),
-      sendGetDataStreams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    sendGetDataStreams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../datastream_hooks', () => {
-      const mocked = {
-      useIndexTemplateExists: () => ({
-        exists: true,
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIndexTemplateExists: () => ({
+      exists: true,
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../single_page_layout/hooks/setup_technology', () => {
   return {
     useAgentless: vi.fn(),
@@ -61,14 +61,14 @@ vi.mock('../../../single_page_layout/hooks/setup_technology', () => {
 });
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useRouteMatch: () => ({
-        params: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useRouteMatch: () => ({
+      params: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useAgentlessMock = useAgentless as MockedFunction<typeof useAgentless>;
 

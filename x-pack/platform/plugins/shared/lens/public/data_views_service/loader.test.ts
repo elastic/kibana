@@ -23,11 +23,11 @@ import { sampleIndexPatterns, mockDataViewsService } from './mocks';
 import { documentField } from '../datasources/form_based/document_field';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLTimeField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLTimeField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLTimeField = getESQLTimeField as MockedFunction<typeof getESQLTimeField>;
 

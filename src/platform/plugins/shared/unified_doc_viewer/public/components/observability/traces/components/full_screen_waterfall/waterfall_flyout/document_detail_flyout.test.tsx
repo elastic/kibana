@@ -42,70 +42,70 @@ const mockLogHit = buildDataTableRecord(
 const mockUseDocumentFlyoutData = vi.fn();
 
 vi.mock('./use_document_flyout_data', () => {
-      const mocked = {
-      useDocumentFlyoutData: (params: any) => mockUseDocumentFlyoutData(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocumentFlyoutData: (params: any) => mockUseDocumentFlyoutData(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./span_flyout', () => {
-      const mocked = {
-      SpanFlyoutContent: ({ hit, dataView, activeSection }: any) => (
-        <div
-          data-test-subj="spanFlyoutContent"
-          data-hit-id={hit?.id}
-          data-active-section={activeSection}
-        >
-          Span Flyout Content
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpanFlyoutContent: ({ hit, dataView, activeSection }: any) => (
+      <div
+        data-test-subj="spanFlyoutContent"
+        data-hit-id={hit?.id}
+        data-active-section={activeSection}
+      >
+        Span Flyout Content
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./logs_flyout', () => {
-      const mocked = {
-      LogFlyoutContent: ({ hit, logDataView }: any) => (
-        <div data-test-subj="logFlyoutContent" data-hit-id={hit?.id}>
-          Log Flyout Content
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LogFlyoutContent: ({ hit, logDataView }: any) => (
+      <div data-test-subj="logFlyoutContent" data-hit-id={hit?.id}>
+        Log Flyout Content
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('.', () => {
-      const mocked = {
-      WaterfallFlyout: ({
-        onCloseFlyout,
-        dataView,
-        hit,
-        loading,
-        title,
-        children,
-        dataTestSubj,
-        historyKey,
-      }: any) => (
-        <div
-          data-test-subj="waterfallFlyout"
-          data-loading={loading}
-          data-title={title}
-          data-has-hit={!!hit}
-          data-flyout-test-subj={dataTestSubj}
-          data-history-key={historyKey?.toString()}
-        >
-          {loading ? (
-            <div data-test-subj="loadingSkeleton">Loading...</div>
-          ) : hit ? (
-            children
-          ) : (
-            <div data-test-subj="loadingSkeleton">No hit</div>
-          )}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WaterfallFlyout: ({
+      onCloseFlyout,
+      dataView,
+      hit,
+      loading,
+      title,
+      children,
+      dataTestSubj,
+      historyKey,
+    }: any) => (
+      <div
+        data-test-subj="waterfallFlyout"
+        data-loading={loading}
+        data-title={title}
+        data-has-hit={!!hit}
+        data-flyout-test-subj={dataTestSubj}
+        data-history-key={historyKey?.toString()}
+      >
+        {loading ? (
+          <div data-test-subj="loadingSkeleton">Loading...</div>
+        ) : hit ? (
+          children
+        ) : (
+          <div data-test-subj="loadingSkeleton">No hit</div>
+        )}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DocumentDetailFlyout', () => {
   const defaultSpanProps: DocumentDetailFlyoutProps = {

@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 

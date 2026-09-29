@@ -18,11 +18,11 @@ import { getOAuthAuthorizationCodeAccessToken } from './get_oauth_authorization_
 import { requestOAuthRefreshToken } from './request_oauth_refresh_token';
 
 vi.mock('./request_oauth_refresh_token', () => {
-      const mocked = {
-      requestOAuthRefreshToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestOAuthRefreshToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const NOW = new Date('2024-01-15T12:00:00.000Z');
 

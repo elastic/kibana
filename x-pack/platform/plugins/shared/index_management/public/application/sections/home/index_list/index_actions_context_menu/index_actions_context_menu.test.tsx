@@ -26,33 +26,35 @@ import { type DocCountResult, RequestResultType } from '../index_table/get_doc_c
 const user = userEvent.setup({ pointerEventsCheck: 0, delay: null });
 
 vi.mock('../../../../services/routing', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../services/routing')),
-      getIndexDetailsLink: vi.fn(() => '/indices/some/stats'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../services/routing')),
+    getIndexDetailsLink: vi.fn(() => '/indices/some/stats'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container',
   async () => {
-      const mocked = {
-        ...(await vi.importActual('../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container')),
-        ConvertToLookupIndexModalContainer: ({
-          onCloseModal,
-          onSuccess,
-        }: {
-          onCloseModal: () => void;
-          onSuccess: (lookupIndexName: string) => void;
-        }) => (
-          <div data-test-subj="mockConvertToLookup">
-            <button data-test-subj="convert-success" onClick={() => onSuccess('lookup-my-index')} />
-            <button data-test-subj="convert-close" onClick={onCloseModal} />
-          </div>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      ...(await vi.importActual(
+        '../details_page/convert_to_lookup_index_modal/convert_to_lookup_index_modal_container'
+      )),
+      ConvertToLookupIndexModalContainer: ({
+        onCloseModal,
+        onSuccess,
+      }: {
+        onCloseModal: () => void;
+        onSuccess: (lookupIndexName: string) => void;
+      }) => (
+        <div data-test-subj="mockConvertToLookup">
+          <button data-test-subj="convert-success" onClick={() => onSuccess('lookup-my-index')} />
+          <button data-test-subj="convert-close" onClick={onCloseModal} />
+        </div>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const getIndexManagementCtx = (overrides: Partial<AppDependencies> = {}): AppDependencies => {

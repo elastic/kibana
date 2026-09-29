@@ -19,11 +19,11 @@ vi.mock('../../../kibana_services', () => {
 });
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLQueryColumnsRaw: () => mockGetESQLQueryColumnsRaw(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLQueryColumnsRaw = vi.fn();
 

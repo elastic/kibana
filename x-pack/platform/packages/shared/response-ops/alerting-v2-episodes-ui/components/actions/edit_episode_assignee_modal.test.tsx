@@ -16,16 +16,16 @@ const mockOnApply = vi.fn();
 const mockOnClose = vi.fn();
 
 vi.mock('./episode_assignee_panel', () => {
-      const mocked = {
-      EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
-      EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
-        <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
-          {'Apply'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EPISODE_ASSIGNEE_PANEL_WIDTH: 400,
+    EpisodeAssigneePanel: ({ onApply }: { onApply: (uid: string | null) => void }) => (
+      <button type="button" data-test-subj="mockApply" onClick={() => onApply('uid-joana')}>
+        {'Apply'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderModal = (episodeCount?: number) =>
   render(

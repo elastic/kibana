@@ -21,11 +21,11 @@ import { testChannels } from '@kbn/scout-info';
 vi.mock('node:fs');
 vi.mock('fast-glob');
 vi.mock('../helpers/read_manifest', () => {
-      const mocked = {
-      readKibanaModuleManifest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readKibanaModuleManifest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dummyManifestProps = {
   exists: false,
@@ -331,9 +331,9 @@ describe('test_config module', () => {
     ];
 
     it('are lazy loaded', () => {
-      vi
-        .spyOn(fg, 'globSync')
-        .mockReturnValue(expectedConfigs.map((config) => path.join(REPO_ROOT, config.path)));
+      vi.spyOn(fg, 'globSync').mockReturnValue(
+        expectedConfigs.map((config) => path.join(REPO_ROOT, config.path))
+      );
       vi.spyOn(fs, 'existsSync').mockReturnValue(false);
       const loadSpy = vi.spyOn(testConfigs, '_load');
 
@@ -371,9 +371,9 @@ describe('test_config module', () => {
     const moduleRoot = 'src/platform/plugins/shared/mixy_mc_mixface';
 
     const mockGlobPaths = (relativePaths: string[]) => {
-      vi
-        .spyOn(fg, 'globSync')
-        .mockReturnValue(relativePaths.map((relativePath) => path.join(REPO_ROOT, relativePath)));
+      vi.spyOn(fg, 'globSync').mockReturnValue(
+        relativePaths.map((relativePath) => path.join(REPO_ROOT, relativePath))
+      );
       vi.spyOn(fs, 'existsSync').mockReturnValue(false);
     };
 

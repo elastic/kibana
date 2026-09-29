@@ -9,12 +9,12 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('../../../telemetry/insights', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../telemetry/insights')),
-      getSessionIDfromKibanaRequest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../telemetry/insights')),
+    getSessionIDfromKibanaRequest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { AuthenticatedUser } from '@kbn/core/server';

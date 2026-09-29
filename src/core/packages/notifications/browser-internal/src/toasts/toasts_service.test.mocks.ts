@@ -12,9 +12,9 @@ import { vi } from 'vitest';
 export const mockReactDomRender = vi.fn();
 export const mockReactDomUnmount = vi.fn();
 vi.mock('react-dom', () => {
-      const mocked = {
-      render: mockReactDomRender,
-      unmountComponentAtNode: mockReactDomUnmount,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    render: mockReactDomRender,
+    unmountComponentAtNode: mockReactDomUnmount,
+  };
+  return { ...mocked, default: mocked };
+});

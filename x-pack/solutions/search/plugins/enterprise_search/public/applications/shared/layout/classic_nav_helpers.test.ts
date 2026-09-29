@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import type { ChromeNavLink } from '@kbn/core-chrome-browser';
 import type { ClassicNavItem } from '@kbn/search-navigation/public';
@@ -15,11 +15,11 @@ import type { ClassicNavItem } from '@kbn/search-navigation/public';
 import '../../__mocks__/react_router';
 
 vi.mock('../react_router_helpers/link_events', () => {
-      const mocked = {
-      letBrowserHandleEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    letBrowserHandleEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { generateSideNavItems } from './classic_nav_helpers';
 

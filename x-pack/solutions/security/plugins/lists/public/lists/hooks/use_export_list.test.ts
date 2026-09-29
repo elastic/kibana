@@ -7,7 +7,6 @@
 
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { useExportList } from '@kbn/securitysolution-list-hooks';
 import * as Api from '@kbn/securitysolution-list-api';

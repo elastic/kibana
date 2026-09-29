@@ -22,13 +22,13 @@ import { registerInternalExecutionRoutes } from './executions';
 
 const mockObservableIntoEventSourceStream = vi.fn();
 vi.mock('@kbn/sse-utils-server', () => {
-      const mocked = {
-      observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
-        mockObservableIntoEventSourceStream(observable, options),
-      cloudProxyBufferSize: 4096,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+      mockObservableIntoEventSourceStream(observable, options),
+    cloudProxyBufferSize: 4096,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const reattachPath = `${internalApiPath}/executions/{executionId}/reattach`;
 

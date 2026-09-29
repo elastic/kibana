@@ -14,36 +14,36 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { MemoryRouter } from 'react-router-dom';
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_services_step', () => {
-      const mocked = {
-      useServicesStep: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServicesStep: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./data_format_select', () => {
-      const mocked = {
-      DataFormatSelect: ({ disabled }: { disabled: boolean }) => (
-        <div data-test-subj="mock-data-format-select" data-disabled={String(disabled)} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataFormatSelect: ({ disabled }: { disabled: boolean }) => (
+      <div data-test-subj="mock-data-format-select" data-disabled={String(disabled)} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./service_row', () => {
-      const mocked = { ServiceRow: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ServiceRow: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../service_search_filter', () => {
-      const mocked = { ServiceSearchFilter: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ServiceSearchFilter: () => null };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';

@@ -21,135 +21,135 @@ const queryClient = new QueryClient({
 });
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInvestigationState = vi.fn<UseInvestigationStateResult, [unknown]>();
 
 vi.mock('@kbn/investigation-output', () => {
-      const mocked = {
-      // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
-      useInvestigationState: (args: unknown) => mockUseInvestigationState(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Avoid requireActual — it pulls a deep Kibana React graph that is brittle in unit tests.
+    useInvestigationState: (args: unknown) => mockUseInvestigationState(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_investigation_statuses', () => {
-      const mocked = {
-      useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchInvestigationStatuses: () => ({ data: mockInvestigationRunStatuses }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockInvestigationRunStatuses: Record<string, InvestigationRunStatus> | undefined;
 
 vi.mock('../hooks/use_fetch_stream_features', () => {
-      const mocked = {
-      useFetchStreamFeatures: () => ({
-        features: [],
-        failedStreamNames: [],
-        isInitialLoading: false,
-        isFetching: false,
-        isError: false,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchStreamFeatures: () => ({
+      features: [],
+      failedStreamNames: [],
+      isInitialLoading: false,
+      isFetching: false,
+      isError: false,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../detection/change_point_lens_chart', () => {
-      const mocked = {
-      ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangePointLensChart: () => <div data-test-subj="nightshiftDetectionLensChart" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_detection_occurrences', () => {
-      const mocked = {
-      useFetchDetectionOccurrences: () => ({
-        data: new Map([
+  const mocked = {
+    useFetchDetectionOccurrences: () => ({
+      data: new Map([
+        [
+          'rule-uuid-001',
           [
-            'rule-uuid-001',
-            [
-              { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
-              { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
-            ],
+            { x: new Date('2026-07-10T11:55:00.000Z').getTime(), y: 2 },
+            { x: new Date('2026-07-10T12:00:00.000Z').getTime(), y: 8 },
           ],
-        ]),
-        isLoading: false,
-        isError: false,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        ],
+      ]),
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_event_lifecycle', () => {
-      const mocked = {
-      useFetchEventLifecycle: () => ({
-        data: {
-          detections: [
-            {
-              detection_id: 'det-1',
-              rule_name: 'latency-p95-spike',
-              rule_uuid: 'rule-uuid-001',
-              stream_name: 'logs.web-frontend',
-              change_point_type: 'spike',
-              '@timestamp': '2026-07-10T12:00:00Z',
-            },
-          ],
-          events: [],
-        },
-        isLoading: false,
-        isError: false,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEventLifecycle: () => ({
+      data: {
+        detections: [
+          {
+            detection_id: 'det-1',
+            rule_name: 'latency-p95-spike',
+            rule_uuid: 'rule-uuid-001',
+            stream_name: 'logs.web-frontend',
+            change_point_type: 'spike',
+            '@timestamp': '2026-07-10T12:00:00Z',
+          },
+        ],
+        events: [],
+      },
+      isLoading: false,
+      isError: false,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenChat = vi.fn();
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { basePath: { prepend: (path: string) => path } },
-          agentBuilder: { openChat: mockOpenChat },
-          notifications: {
-            toasts: {
-              addSuccess: vi.fn(),
-            },
-          },
-          charts: {
-            theme: {
-              useChartsBaseTheme: () => ({}),
-              useSparklineOverrides: () => ({}),
-            },
-          },
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
-              },
-            },
-          },
-          application: {
-            capabilities: {
-              nightshift: {
-                show: true,
-              },
-            },
-            getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { basePath: { prepend: (path: string) => path } },
+        agentBuilder: { openChat: mockOpenChat },
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => ({}),
+            useSparklineOverrides: () => ({}),
+          },
+        },
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: () => '/app/discover#redirect' }),
+            },
+          },
+        },
+        application: {
+          capabilities: {
+            nightshift: {
+              show: true,
+            },
+          },
+          getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEvent: SignificantEvent = {
   '@timestamp': '2026-07-10T12:00:00Z',

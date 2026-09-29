@@ -26,12 +26,12 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../../common/components/cell_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/components/cell_actions')),
-      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/components/cell_actions')),
+    SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertsSummaryChartsPanel', () => {
   beforeEach(() => {
@@ -75,13 +75,13 @@ describe('AlertsSummaryChartsPanel', () => {
   describe('Query', () => {
     test('it render with a illegal KQL', () => {
       vi.doMock('@kbn/es-query', () => {
-            const mocked = {
-                  buildEsQuery: vi.fn().mockImplementation(() => {
-                    throw new Error('Something went wrong');
-                  }),
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          buildEsQuery: vi.fn().mockImplementation(() => {
+            throw new Error('Something went wrong');
+          }),
+        };
+        return { ...mocked, default: mocked };
+      });
       const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
       const { getByTestId } = render(
         <TestProviders>

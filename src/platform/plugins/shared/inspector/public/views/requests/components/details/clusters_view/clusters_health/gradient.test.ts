@@ -12,19 +12,19 @@ import { vi } from 'vitest';
 import { useHeathBarLinearGradient, useHealthHexCodes } from './gradient';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: () => ({
-        euiTheme: {
-          colors: {
-            backgroundFilledSuccess: 'green',
-            backgroundLightWarning: 'yellow',
-            backgroundFilledDanger: 'red',
-          },
+  const mocked = {
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: {
+          backgroundFilledSuccess: 'green',
+          backgroundLightWarning: 'yellow',
+          backgroundFilledDanger: 'red',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useHeathBarLinearGradient', () => {
   const healthHexCodes = useHealthHexCodes();

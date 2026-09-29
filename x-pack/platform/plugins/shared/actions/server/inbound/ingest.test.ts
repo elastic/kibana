@@ -35,13 +35,11 @@ import type {
 } from './types';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     getConnectorSpec: vi.fn(),
-    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
-      actual.connectorTypeIsDual(actionTypeId)
-    ),
+    connectorTypeIsDual: vi.fn((actionTypeId: string) => actual.connectorTypeIsDual(actionTypeId)),
   };
 });
 

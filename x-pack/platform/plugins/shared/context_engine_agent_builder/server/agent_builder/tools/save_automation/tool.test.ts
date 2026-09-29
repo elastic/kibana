@@ -17,13 +17,13 @@ import { createSaveAutomationTool, normalizeSaveAutomationParams } from './tool'
 import { aiIndexToolsAvailability } from '../ai_index_tools_availability';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
-      const mocked = {
-      hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { hasWorkflowReadPrivilege } = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
+const { hasWorkflowReadPrivilege } = await vi.importMock('@kbn/agent-builder-tools-base/workflows');
 
 describe('save_automation tool', () => {
   const getWorkflowMock = vi.fn();

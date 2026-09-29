@@ -47,7 +47,7 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
 };
 
 vi.mock('../../../../common', async () => {
-  const original = (await vi.importActual('../../../../common'));
+  const original = await vi.importActual('../../../../common');
   return {
     ...original,
     getEsqlQueryHits: vi.fn(),

@@ -19,11 +19,11 @@ import type { SupportedRoles } from './session_manager';
 import { SamlSessionManager } from './session_manager';
 
 vi.mock('./fetch_kibana_version', () => {
-      const mocked = {
-      fetchKibanaVersionHeaderString: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchKibanaVersionHeaderString: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedFetchKibanaVersionHeaderString = fetchKibanaVersionHeaderString as MockedFunction<
   typeof fetchKibanaVersionHeaderString

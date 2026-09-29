@@ -12,11 +12,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useAlertZeroDocumentationLink } from './use_alertzero_documentation_link';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.mocked(useKibana);
 

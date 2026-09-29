@@ -90,15 +90,15 @@ describe('CorrelationsDetails', () => {
   });
 
   it('renders all sections when all show flags are true', () => {
-    vi
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
-    vi
-      .mocked(useShowRelatedAlertsBySameSourceEvent)
-      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
-    vi
-      .mocked(useShowRelatedAlertsBySession)
-      .mockReturnValue({ show: true, entityId: 'entityId' });
+    vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+      show: true,
+      ancestryDocumentId: 'event-id',
+    });
+    vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+      show: true,
+      originalEventId: 'originalEventId',
+    });
+    vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: 'entityId' });
     vi.mocked(useShowRelatedAttacks).mockReturnValue({ show: true, attackIds: ['attack-id'] });
     vi.mocked(useShowRelatedCases).mockReturnValue(true);
     vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
@@ -142,15 +142,15 @@ describe('CorrelationsDetails', () => {
   });
 
   it('renders no sections and shows no-data message when all show flags are false', () => {
-    vi
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, ancestryDocumentId: 'event-id' });
-    vi
-      .mocked(useShowRelatedAlertsBySameSourceEvent)
-      .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
-    vi
-      .mocked(useShowRelatedAlertsBySession)
-      .mockReturnValue({ show: false, entityId: 'entityId' });
+    vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+      show: false,
+      ancestryDocumentId: 'event-id',
+    });
+    vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+      show: false,
+      originalEventId: 'originalEventId',
+    });
+    vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false, entityId: 'entityId' });
     vi.mocked(useShowRelatedAttacks).mockReturnValue({ show: false, attackIds: [] });
     vi.mocked(useShowRelatedCases).mockReturnValue(false);
     vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });

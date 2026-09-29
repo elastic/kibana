@@ -12,43 +12,43 @@ import React from 'react';
 
 // Mock the Kibana context
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      withKibana: (Component) => {
-        const MockedComponent = (props) => {
-          const kibana = {
-            services: {
-              docLinks: {
-                links: {
-                  ml: {
-                    customRules:
-                      'https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html',
-                  },
+  const mocked = {
+    withKibana: (Component) => {
+      const MockedComponent = (props) => {
+        const kibana = {
+          services: {
+            docLinks: {
+              links: {
+                ml: {
+                  customRules:
+                    'https://www.elastic.co/guide/en/machine-learning/current/ml-rules.html',
                 },
               },
             },
-          };
-          return <Component {...props} kibana={kibana} />;
+          },
         };
-        return MockedComponent;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        return <Component {...props} kibana={kibana} />;
+      };
+      return MockedComponent;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: vi.fn(),
-            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
-          },
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/'),
         },
-      }),
-      useNavigateToPath: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    useNavigateToPath: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { FilterListsHeader } from './header';
 

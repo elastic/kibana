@@ -31,19 +31,19 @@ import type { VegaByValueState } from '../../server';
 import { vegaEmbeddableFactory } from './vega_embeddable';
 
 vi.mock('@kbn/presentation-util', () => {
-      const mocked = { openLazyFlyout: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { openLazyFlyout: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/vega_render_telemetry', () => {
-      const mocked = { reportVegaRender: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { reportVegaRender: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/extract_index_pattern', () => {
-      const mocked = {
-      extractIndexPatternsFromSpec: vi.fn(async (): Promise<never[]> => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractIndexPatternsFromSpec: vi.fn(async (): Promise<never[]> => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface MockVegaVisComponentProps {
   fireEvent: VegaEventHandler;
@@ -60,15 +60,15 @@ const mockCreateVegaRequestHandler = vi.fn(
 let mockVegaVisComponentProps: MockVegaVisComponentProps | undefined;
 
 vi.mock('../async_services', () => {
-      const mocked = {
-      createVegaRequestHandler: mockCreateVegaRequestHandler,
-      VegaVisComponent: (props: MockVegaVisComponentProps): null => {
-        mockVegaVisComponentProps = props;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createVegaRequestHandler: mockCreateVegaRequestHandler,
+    VegaVisComponent: (props: MockVegaVisComponentProps): null => {
+      mockVegaVisComponentProps = props;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenLazyFlyout = vi.mocked(openLazyFlyout);
 const mockReportVegaRender = vi.mocked(reportVegaRender);

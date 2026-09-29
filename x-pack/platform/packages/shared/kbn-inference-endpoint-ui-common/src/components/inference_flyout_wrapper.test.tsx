@@ -28,22 +28,22 @@ const notificationsMock = notificationServiceMock.createStartContract();
 let mockClonedProviders: InferenceProvider[];
 
 vi.mock('../hooks/use_providers', () => {
-      const mocked = {
-      useProviders: vi.fn(() => ({
-        data: mockClonedProviders,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProviders: vi.fn(() => ({
+      data: mockClonedProviders,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_inference_endpoint_mutation', () => {
-      const mocked = {
-      useInferenceEndpointMutation: vi.fn(() => ({
-        mutate: mockMutationFn,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInferenceEndpointMutation: vi.fn(() => ({
+      mutate: mockMutationFn,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('InferenceFlyout', () => {
   const Wrapper = ({ children }: { children: React.ReactElement }) => {

@@ -42,11 +42,11 @@ import {
 } from './test_fixtures';
 
 vi.mock('../inject_action_params', () => {
-      const mocked = {
-      injectActionParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    injectActionParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const injectActionParamsMock = injectActionParams as Mock;
 
@@ -90,10 +90,9 @@ const DATE_1970 = new Date('1970-01-01T00:00:00.000Z');
 describe('Action Scheduler', () => {
   beforeEach(async () => {
     vi.resetAllMocks();
-    (await vi.importMock('../inject_action_params'))
-      .injectActionParams.mockImplementation(
-        ({ actionParams }: InjectActionParamsOpts) => actionParams
-      );
+    (await vi.importMock('../inject_action_params')).injectActionParams.mockImplementation(
+      ({ actionParams }: InjectActionParamsOpts) => actionParams
+    );
     mockActionsPlugin.isActionTypeEnabled.mockReturnValue(true);
     mockActionsPlugin.isActionExecutable.mockReturnValue(true);
     mockActionsPlugin.getActionsClientWithRequest.mockResolvedValue(actionsClient);
@@ -165,7 +164,9 @@ describe('Action Scheduler', () => {
       alertGroup: 'default',
     });
 
-    expect((await vi.importMock('../inject_action_params')).injectActionParams).toHaveBeenCalledWith({
+    expect(
+      (await vi.importMock('../inject_action_params')).injectActionParams
+    ).toHaveBeenCalledWith({
       actionTypeId: 'test',
       actionParams: {
         alertVal: 'My 1 name-of-alert test1 tag-A,tag-B 1 goes here',

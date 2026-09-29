@@ -22,11 +22,11 @@ const mockCreatePool = vi.fn<MockPool, [unknown?]>(() => ({
 }));
 
 vi.mock('mysql2/promise', () => {
-      const mocked = {
-      createPool: (opts: unknown) => mockCreatePool(opts),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPool: (opts: unknown) => mockCreatePool(opts),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeCredential = (username: string, password: string): BuildContext['credential'] => ({
   getAuthHeaders: vi.fn().mockResolvedValue({

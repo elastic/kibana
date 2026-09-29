@@ -21,31 +21,31 @@ import {
 } from '../translations';
 
 vi.mock('../preview_tab', () => {
-      const mocked = {
-      PreviewTab: ({
-        dataTestSubj,
-        end,
-        esqlQuery,
-        start,
-        tableStackBy0,
-      }: {
-        dataTestSubj?: string;
-        end: string;
-        esqlQuery?: string;
-        start: string;
-        tableStackBy0: string;
-      }) => (
-        <div
-          data-test-subj={dataTestSubj ?? 'previewTab'}
-          data-end={end}
-          data-esql-query={esqlQuery ?? ''}
-          data-start={start}
-          data-table-stack-by0={tableStackBy0}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PreviewTab: ({
+      dataTestSubj,
+      end,
+      esqlQuery,
+      start,
+      tableStackBy0,
+    }: {
+      dataTestSubj?: string;
+      end: string;
+      esqlQuery?: string;
+      start: string;
+      tableStackBy0: string;
+    }) => (
+      <div
+        data-test-subj={dataTestSubj ?? 'previewTab'}
+        data-end={end}
+        data-esql-query={esqlQuery ?? ''}
+        data-start={start}
+        data-table-stack-by0={tableStackBy0}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   alertsPreviewStackBy0: 'kibana.alert.rule.name',

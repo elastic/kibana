@@ -22,25 +22,25 @@ import {
 import { AlertReason } from './alert_reason';
 
 vi.mock('../../../../timelines/components/timeline/body/renderers/get_row_renderer', () => {
-      const mocked = {
-      getRowRenderer: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRowRenderer: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../timelines/components/timeline/body/renderers', () => {
-      const mocked = {
-      defaultRowRenderers: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    defaultRowRenderers: [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout/document_details/shared/hooks/use_event_details', () => {
-      const mocked = {
-      useEventDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEventDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

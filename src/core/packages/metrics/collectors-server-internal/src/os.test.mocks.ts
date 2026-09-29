@@ -12,8 +12,8 @@ import { vi } from 'vitest';
 import { metricsCollectorMock } from './mocks_internal';
 export const cgroupCollectorMock = metricsCollectorMock.create();
 vi.doMock('./cgroup', () => {
-      const mocked = {
-      OsCgroupMetricsCollector: vi.fn(() => cgroupCollectorMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OsCgroupMetricsCollector: vi.fn(() => cgroupCollectorMock),
+  };
+  return { ...mocked, default: mocked };
+});

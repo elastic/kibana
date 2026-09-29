@@ -43,19 +43,19 @@ const mockKibanaContext = {
 
 const mockReact = React;
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      withKibana: (type) => {
-        const EnhancedType = (props) => {
-          return mockReact.createElement(type, {
-            ...props,
-            kibana: mockKibanaContext,
-          });
-        };
-        return EnhancedType;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withKibana: (type) => {
+      const EnhancedType = (props) => {
+        return mockReact.createElement(type, {
+          ...props,
+          kibana: mockKibanaContext,
+        });
+      };
+      return EnhancedType;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const job = {
   job_id: 'job2',

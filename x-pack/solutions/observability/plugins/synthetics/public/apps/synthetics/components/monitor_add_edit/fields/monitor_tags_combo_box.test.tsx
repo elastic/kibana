@@ -15,12 +15,12 @@ import { render } from '../../../utils/testing/rtl_helpers';
 import { MonitorTagsComboBox } from './monitor_tags_combo_box';
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useFetcherMock = useFetcher as Mock;
 

@@ -22,47 +22,47 @@ import { endpointAlertDataMock } from '../../../../mock/endpoint';
 const mockAddSuccess = vi.fn();
 
 vi.mock('../../../../hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addSuccess: mockAddSuccess }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addSuccess: mockAddSuccess }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../..', () => {
-      const mocked = {
-      useWithCaseDetailsRefresh: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWithCaseDetailsRefresh: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/endpoint/use_alert_response_actions_support', () => {
-      const mocked = {
-      useAlertResponseActionsSupport: () => ({ details: { agentType: 'endpoint' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertResponseActionsSupport: () => ({ details: { agentType: 'endpoint' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./host_isolation_panel', () => {
-      const mocked = {
-      HostIsolationPanel: ({
-        cancelCallback,
-        successCallback,
-      }: {
-        cancelCallback: () => void;
-        successCallback: () => void;
-      }) => (
-        <>
-          <button type="button" data-test-subj="hostIsolationCancel" onClick={cancelCallback}>
-            {'cancel'}
-          </button>
-          <button type="button" data-test-subj="hostIsolationSuccess" onClick={successCallback}>
-            {'succeed'}
-          </button>
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostIsolationPanel: ({
+      cancelCallback,
+      successCallback,
+    }: {
+      cancelCallback: () => void;
+      successCallback: () => void;
+    }) => (
+      <>
+        <button type="button" data-test-subj="hostIsolationCancel" onClick={cancelCallback}>
+          {'cancel'}
+        </button>
+        <button type="button" data-test-subj="hostIsolationSuccess" onClick={successCallback}>
+          {'succeed'}
+        </button>
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const hit: DataTableRecord = {
   id: 'alert-1',

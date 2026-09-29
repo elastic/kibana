@@ -74,9 +74,9 @@ describe('FetchAggregatedIndicatorsService', () => {
   describe('aggregatedIndicatorsQuery()', () => {
     describe('when query is successful', () => {
       beforeEach(() => {
-        vi
-          .mocked(mockedSearchService.search)
-          .mockReturnValue(new BehaviorSubject(aggregationResponse));
+        vi.mocked(mockedSearchService.search).mockReturnValue(
+          new BehaviorSubject(aggregationResponse)
+        );
       });
 
       it('should pass the query down to searchService', async () => {
@@ -119,9 +119,9 @@ describe('FetchAggregatedIndicatorsService', () => {
 
     describe('when query fails', () => {
       beforeEach(() => {
-        vi
-          .mocked(mockedSearchService.search)
-          .mockReturnValue(throwError(() => new Error('some random exception')));
+        vi.mocked(mockedSearchService.search).mockReturnValue(
+          throwError(() => new Error('some random exception'))
+        );
       });
 
       it('should throw an error', async () => {

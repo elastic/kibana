@@ -20,26 +20,26 @@ import * as useIndicesCheck from './hooks/use_indices_check';
 import { DataQualityPanel } from '.';
 
 vi.mock('./data_quality_details/indices_details/pattern/hooks/use_stats', () => {
-      const mocked = {
-      useStats: vi.fn(() => ({
-        stats: {},
-        error: null,
-        loading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStats: vi.fn(() => ({
+      stats: {},
+      error: null,
+      loading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./data_quality_details/indices_details/pattern/hooks/use_ilm_explain', () => {
-      const mocked = {
-      useIlmExplain: vi.fn(() => ({
-        error: null,
-        ilmExplain: {},
-        loading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmExplain: vi.fn(() => ({
+      error: null,
+      ilmExplain: {},
+      loading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.spyOn(useResultsRollup, 'useResultsRollup').mockImplementation(() => mockUseResultsRollup);
 

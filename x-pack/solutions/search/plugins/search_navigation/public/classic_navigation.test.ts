@@ -14,11 +14,11 @@ import { classicNavigationFactory } from './classic_navigation';
 import type { ClassicNavItem } from './types';
 
 vi.mock('./solution_navigation_footer', () => {
-      const mocked = {
-      getSolutionNavFooter: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSolutionNavFooter: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('classicNavigationFactory', function () {
   const mockedNavLinks: Array<Partial<ChromeNavLink>> = [

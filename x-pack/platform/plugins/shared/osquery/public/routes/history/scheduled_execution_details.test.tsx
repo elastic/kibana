@@ -22,59 +22,66 @@ const mockQueryDetailsHeader = vi.fn();
 const mockResultTabs = vi.fn();
 
 vi.mock('../../actions/use_scheduled_execution_details', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../actions/use_scheduled_execution_details')),
-      useScheduledExecutionDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../actions/use_scheduled_execution_details')),
+    useScheduledExecutionDetails: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../live_queries/details/query_details_header', () => {
-      const mocked = {
-      QueryDetailsHeader: (props: Record<string, unknown>) => {
-        mockQueryDetailsHeader(props);
+  const mocked = {
+    QueryDetailsHeader: (props: Record<string, unknown>) => {
+      mockQueryDetailsHeader(props);
 
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return null;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../saved_queries/edit/tabs', () => {
-      const mocked = {
-      ResultTabs: (props: Record<string, unknown>) => {
-        mockResultTabs(props);
+  const mocked = {
+    ResultTabs: (props: Record<string, unknown>) => {
+      mockResultTabs(props);
 
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return null;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../results/export_filters_context', () => {
-      const mocked = {
-      ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/lib/kibana')),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/lib/kibana')),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ scheduleId: 'schedule-1', executionCount: '1152' }),
-      Redirect: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ scheduleId: 'schedule-1', executionCount: '1152' }),
+    Redirect: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseScheduledExecutionDetails = useScheduledExecutionDetails as MockedFunction<
   typeof useScheduledExecutionDetails

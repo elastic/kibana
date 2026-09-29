@@ -32,12 +32,12 @@ import { omit } from 'lodash';
 
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('../../../../../common/utils/global_query_string/helpers', () => {
-      const mocked = {
-      useReplaceUrlParams: vi.fn(),
-      encodeRisonUrlState: vi.fn().mockImplementation((value) => value),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReplaceUrlParams: vi.fn(),
+    encodeRisonUrlState: vi.fn().mockImplementation((value) => value),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./rules_table_context');
 
 describe('useSyncRulesTableSavedState', () => {

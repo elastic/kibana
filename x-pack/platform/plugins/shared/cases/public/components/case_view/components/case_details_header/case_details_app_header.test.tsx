@@ -32,18 +32,18 @@ vi.mock('../../../../agent_builder/use_add_case_to_chat');
 vi.mock('../../use_on_refresh_case_view_page');
 
 vi.mock('../../../confirm_delete_case', () => {
-      const mocked = {
-      ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConfirmDeleteCaseModal: () => <div data-test-subj="confirm-delete-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./case_settings_popover', () => {
-      const mocked = {
-      CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseSettingsPopover: () => <div data-test-subj="case-settings-popover" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 (useGetCaseConnectors as Mock).mockReturnValue({ data: {} });
 (useDeleteCases as Mock).mockReturnValue({ mutate: vi.fn() });

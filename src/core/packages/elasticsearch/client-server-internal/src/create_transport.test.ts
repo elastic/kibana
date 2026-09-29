@@ -850,14 +850,12 @@ describe('createTransport', () => {
     });
 
     it('allows onRequest to mutate options (e.g., add querystring params)', async () => {
-      const onRequest: MockedFunction<OnRequestHandler> = vi.fn(
-        (ctx, params, options, logger) => {
-          options!.querystring = {
-            ...options!.querystring,
-            some_field: 'some_value',
-          };
-        }
-      );
+      const onRequest: MockedFunction<OnRequestHandler> = vi.fn((ctx, params, options, logger) => {
+        options!.querystring = {
+          ...options!.querystring,
+          some_field: 'some_value',
+        };
+      });
 
       const transportClass = createTransport({
         scoped: true,

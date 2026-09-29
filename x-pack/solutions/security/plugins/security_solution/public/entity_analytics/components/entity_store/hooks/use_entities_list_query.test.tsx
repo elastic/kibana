@@ -17,11 +17,11 @@ import React from 'react';
 
 vi.mock('../../../api/api');
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: { http: {} } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { http: {} } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useEntitiesListQuery', () => {
   const fetchEntitiesListV2Mock = vi.fn();

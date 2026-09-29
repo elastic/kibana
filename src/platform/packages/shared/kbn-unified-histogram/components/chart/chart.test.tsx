@@ -30,11 +30,11 @@ import { lensSaveModalComponentMock, unifiedHistogramServicesMock } from '../../
 import userEvent from '@testing-library/user-event';
 
 vi.mock('./hooks/use_edit_visualization', () => {
-      const mocked = {
-      useEditVisualization: () => mockUseEditVisualization,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEditVisualization: () => mockUseEditVisualization,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockUseEditVisualization: Mock | undefined = vi.fn();
 const mockedSearchSourceInstanceMockFetch$ = vi.mocked(searchSourceInstanceMock.fetch$);

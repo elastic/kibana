@@ -26,8 +26,7 @@ import { fetchSpaceIdsWithMaybePendingActions as _fetchSpaceIdsWithMaybePendingA
 
 vi.mock('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions');
 
-const fetchSpaceIdsWithMaybePendingActionsMock =
-  _fetchSpaceIdsWithMaybePendingActionsMock as Mock;
+const fetchSpaceIdsWithMaybePendingActionsMock = _fetchSpaceIdsWithMaybePendingActionsMock as Mock;
 
 describe('CompleteExternalTaskRunner class', () => {
   let endpointContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;
@@ -50,11 +49,9 @@ describe('CompleteExternalTaskRunner class', () => {
     (endpointContextServicesMock.getInternalResponseActionsClient as Mock).mockImplementation(
       () => {
         const clientMock = responseActionsClientMock.create();
-        (clientMock.processPendingActions as Mock).mockImplementation(
-          async ({ addToQueue }) => {
-            addToQueue(actionGenerator.generateResponse());
-          }
-        );
+        (clientMock.processPendingActions as Mock).mockImplementation(async ({ addToQueue }) => {
+          addToQueue(actionGenerator.generateResponse());
+        });
         return clientMock;
       }
     );
@@ -63,8 +60,11 @@ describe('CompleteExternalTaskRunner class', () => {
   afterEach(async () => {
     fetchSpaceIdsWithMaybePendingActionsMock.mockRestore();
     fetchSpaceIdsWithMaybePendingActionsMock.mockImplementation(
-      (await vi.importActual('../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions'))
-        .fetchSpaceIdsWithMaybePendingActions
+      (
+        await vi.importActual(
+          '../../services/actions/utils/fetch_space_ids_with_maybe_pending_actions'
+        )
+      ).fetchSpaceIdsWithMaybePendingActions
     );
   });
 
@@ -204,18 +204,16 @@ describe('CompleteExternalTaskRunner class', () => {
     (endpointContextServicesMock.getInternalResponseActionsClient as Mock).mockImplementation(
       () => {
         const clientMock = responseActionsClientMock.create();
-        (clientMock.processPendingActions as Mock).mockImplementation(
-          async ({ abortSignal }) => {
-            return new Promise((resolve) => {
-              if (!resolveProcessPendingActionsPromise) {
-                resolveProcessPendingActionsPromise = resolve;
-                processPendingActionsAbortSignal = abortSignal;
-              } else {
-                resolve(null);
-              }
-            });
-          }
-        );
+        (clientMock.processPendingActions as Mock).mockImplementation(async ({ abortSignal }) => {
+          return new Promise((resolve) => {
+            if (!resolveProcessPendingActionsPromise) {
+              resolveProcessPendingActionsPromise = resolve;
+              processPendingActionsAbortSignal = abortSignal;
+            } else {
+              resolve(null);
+            }
+          });
+        });
         return clientMock;
       }
     );

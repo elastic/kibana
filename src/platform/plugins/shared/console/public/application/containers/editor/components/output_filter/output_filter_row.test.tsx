@@ -21,19 +21,19 @@ import {
 } from '../../../../contexts/output_filter_context';
 
 vi.mock('../../../../contexts/output_filter_context', () => {
-      const mocked = {
-      useOutputFilterReadContext: vi.fn(),
-      useOutputFilterActionContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOutputFilterReadContext: vi.fn(),
+    useOutputFilterActionContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./filter_help_modal', () => {
-      const mocked = {
-      FilterHelpModal: () => <div data-test-subj="filterHelpModal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterHelpModal: () => <div data-test-subj="filterHelpModal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseOutputFilterReadContext = useOutputFilterReadContext as MockedFunction<
   typeof useOutputFilterReadContext

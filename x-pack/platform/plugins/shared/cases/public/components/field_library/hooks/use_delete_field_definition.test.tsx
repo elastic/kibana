@@ -22,11 +22,11 @@ vi.mock('../../../common/use_cases_toast');
 
 const mockReportFieldDefinitionDeleted = vi.fn();
 vi.mock('../../../analytics/field_library', () => {
-      const mocked = {
-      useFieldDefinitionDeletedEBT: () => mockReportFieldDefinitionDeleted,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldDefinitionDeletedEBT: () => mockReportFieldDefinitionDeleted,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDeleteFieldDefinition', () => {
   const showErrorToast = vi.fn();

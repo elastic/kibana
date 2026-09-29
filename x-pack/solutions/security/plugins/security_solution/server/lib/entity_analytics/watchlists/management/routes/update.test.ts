@@ -22,13 +22,13 @@ import type { ITelemetryEventsSender } from '../../../../telemetry/sender';
 const mockWatchlistUpdate = vi.fn();
 
 vi.mock('../watchlist_config', () => {
-      const mocked = {
-      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
-        update: mockWatchlistUpdate,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+      update: mockWatchlistUpdate,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { updateWatchlistRoute } from './update';
 

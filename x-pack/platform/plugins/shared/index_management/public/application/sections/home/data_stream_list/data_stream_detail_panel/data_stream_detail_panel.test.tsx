@@ -35,11 +35,11 @@ vi.mock('../../../../app_context');
 vi.mock('../../../../services/use_ilm_locator');
 vi.mock('../../../../services/use_request');
 vi.mock('./streams_promotion', () => {
-      const mocked = {
-      StreamsPromotion: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StreamsPromotion: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLoadDataStream = vi.mocked(useLoadDataStream);
 const mockLoadSnapshotRepositories = vi.mocked(loadSnapshotRepositories);

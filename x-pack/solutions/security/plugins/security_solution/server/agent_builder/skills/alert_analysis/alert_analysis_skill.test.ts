@@ -21,7 +21,9 @@ import { RELATED_ALERTS_INLINE_MAX_RESULTS } from '../../../lib/alert_analysis/s
 
 vi.mock('../../../lib/alert_analysis/services/find_related_alerts');
 
-const { findRelatedAlerts } = (await vi.importMock('../../../lib/alert_analysis/services/find_related_alerts')) as { findRelatedAlerts: MockedFunction<() => Promise<FindRelatedAlertsResult>> };
+const { findRelatedAlerts } = (await vi.importMock(
+  '../../../lib/alert_analysis/services/find_related_alerts'
+)) as { findRelatedAlerts: MockedFunction<() => Promise<FindRelatedAlertsResult>> };
 
 interface ResultData {
   message?: string;

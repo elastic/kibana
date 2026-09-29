@@ -18,34 +18,34 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 const RealDate = Date;
 
 vi.mock('../lib/alerts/fetch_nodes_from_cluster_stats', () => {
-      const mocked = {
-      fetchNodesFromClusterStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchNodesFromClusterStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/alerts/fetch_clusters', () => {
-      const mocked = {
-      fetchClusters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: () => ({ debug: vi.fn() }),
-          config: {
-            ui: {
-              ccs: { enabled: true },
-              container: { elasticsearch: { enabled: false } },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: () => ({ debug: vi.fn() }),
+        config: {
+          ui: {
+            ccs: { enabled: true },
+            container: { elasticsearch: { enabled: false } },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('NodesChangedAlert', () => {
   it('should have defaults', () => {

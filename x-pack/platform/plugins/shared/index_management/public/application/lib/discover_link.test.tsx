@@ -14,11 +14,11 @@ import { useAppContext } from '../app_context';
 import type { AppDependencies } from '../app_context';
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseAppContext = vi.mocked(useAppContext);
 

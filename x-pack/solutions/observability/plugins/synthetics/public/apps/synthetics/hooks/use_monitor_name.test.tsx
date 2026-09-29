@@ -13,20 +13,20 @@ import { fetchMonitorManagementList } from '../state';
 import { useMonitorName } from './use_monitor_name';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn().mockReturnValue({ monitorId: '12345' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn().mockReturnValue({ monitorId: '12345' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../state')),
-      fetchMonitorManagementList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../state')),
+    fetchMonitorManagementList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMonitorName', () => {
   const testMonitors = [

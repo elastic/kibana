@@ -84,8 +84,7 @@ describe('Utils', () => {
   describe('getRequestWithStreamOption', () => {
     const mockOpenAiGetRequestWithStreamOption = openAiGetRequestWithStreamOption as Mock;
     const mockAzureAiGetRequestWithStreamOption = azureAiGetRequestWithStreamOption as Mock;
-    const mockOtherOpenAiGetRequestWithStreamOption =
-      otherOpenAiGetRequestWithStreamOption as Mock;
+    const mockOtherOpenAiGetRequestWithStreamOption = otherOpenAiGetRequestWithStreamOption as Mock;
     beforeEach(() => {
       vi.clearAllMocks();
     });

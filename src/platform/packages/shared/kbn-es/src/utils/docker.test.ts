@@ -61,15 +61,15 @@ import * as mockIdpPluginUtil from '@kbn/mock-idp-utils';
 process.env.KBN_ES_SNAPSHOT_USE_CACHED = 'false';
 
 vi.mock('execa');
-const execa = (await vi.importMock('execa'));
+const execa = await vi.importMock('execa');
 execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
 
 vi.mock('./read_string_secrets', () => {
-      const mocked = {
-      readStringSecrets: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readStringSecrets: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const readStringSecretsMock = (
   (await vi.importMock('./read_string_secrets')) as {
@@ -84,26 +84,24 @@ vi.mock('@elastic/elasticsearch', () => {
 });
 
 vi.mock('./wait_until_cluster_ready', () => {
-      const mocked = {
-      waitUntilClusterReady: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    waitUntilClusterReady: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./wait_for_security_index', () => {
-      const mocked = {
-      waitForSecurityIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    waitForSecurityIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./docker_uiam', async () => {
-  const originalModule = (await vi.importActual('./docker_uiam'));
+  const originalModule = await vi.importActual('./docker_uiam');
   return {
     ...originalModule,
-    runUiamContainer: vi
-      .fn()
-      .mockImplementation((_, container) => Promise.resolve(container.name)),
+    runUiamContainer: vi.fn().mockImplementation((_, container) => Promise.resolve(container.name)),
     initializeUiamContainers: vi.fn(),
   };
 });

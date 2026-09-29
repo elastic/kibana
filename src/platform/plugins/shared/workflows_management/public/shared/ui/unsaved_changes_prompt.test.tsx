@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockInstance } from 'vitest';
-
 import { render } from '@testing-library/react';
 import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
+import type { MockInstance } from 'vitest';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { UnsavedChangesPrompt } from './unsaved_changes_prompt';
 
@@ -21,17 +20,23 @@ let mockPromptMessage: ((location: any) => string | boolean) | null = null;
 let mockLocation = { pathname: '/workflow-123' };
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      Prompt: ({ when, message }: { when: boolean; message: (location: any) => string | boolean }) => {
-        // Store the message function for testing
-        mockPromptMessage = message;
-        return when ? <div data-test-subj="unsaved-changes-prompt" /> : null;
-      },
-      useLocation: () => mockLocation,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    Prompt: ({
+      when,
+      message,
+    }: {
+      when: boolean;
+      message: (location: any) => string | boolean;
+    }) => {
+      // Store the message function for testing
+      mockPromptMessage = message;
+      return when ? <div data-test-subj="unsaved-changes-prompt" /> : null;
+    },
+    useLocation: () => mockLocation,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (component: React.ReactElement, initialPath = '/workflow-123') => {
   return render(

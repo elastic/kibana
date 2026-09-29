@@ -17,9 +17,7 @@ import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from './hooks';
 import { useFetchMetricsData } from './hooks/use_fetch_metrics_data';
 
-const useFetchMetricsDataMock = useFetchMetricsData as MockedFunction<
-  typeof useFetchMetricsData
->;
+const useFetchMetricsDataMock = useFetchMetricsData as MockedFunction<typeof useFetchMetricsData>;
 import type {
   UnifiedHistogramFetch$,
   UnifiedHistogramFetchParams,
@@ -47,40 +45,40 @@ import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_cont
 
 vi.mock('./context/metrics_experience_state_provider');
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      usePerformanceContext: () => ({
-        onPageReady: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    usePerformanceContext: () => ({
+      onPageReady: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks')),
-      useMetricsGridFullScreen: vi.fn(),
-      useMetricFieldsFilter: vi.fn(),
-      useDiscoverFieldForBreakdown: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks')),
+    useMetricsGridFullScreen: vi.fn(),
+    useMetricFieldsFilter: vi.fn(),
+    useDiscoverFieldForBreakdown: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_fetch_metrics_data', () => {
-      const mocked = {
-      useFetchMetricsData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchMetricsData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./metrics_experience_grid_content', () => {
-      const mocked = {
-      MetricsExperienceGridContent: vi.fn(() => (
-        <div data-test-subj="metricsExperienceGridContent" />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsExperienceGridContent: vi.fn(() => (
+      <div data-test-subj="metricsExperienceGridContent" />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout', async () => {
-  const actual = (await vi.importActual('../../flyout'));
+  const actual = await vi.importActual('../../flyout');
   return {
     ...actual,
     GridSettingsFlyout: ({
@@ -104,7 +102,7 @@ vi.mock('../../flyout', async () => {
 // Simplified ToolbarSelector so dimension options are clickable in JSDOM without
 // needing EUI portals or keyboard simulation.
 vi.mock('@kbn/shared-ux-toolbar-selector', async () => {
-  const actual = (await vi.importActual('@kbn/shared-ux-toolbar-selector'));
+  const actual = await vi.importActual('@kbn/shared-ux-toolbar-selector');
   return {
     ...actual,
     ToolbarSelector: ({
@@ -188,7 +186,7 @@ vi.mock('lodash', () => {
  * flashing loading states. In tests, this just slows things down.
  */
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiDelayRender: ({ children }: { children: React.ReactNode }) => <>{children}</>,

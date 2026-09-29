@@ -16,40 +16,40 @@ import { SiemMigrationTaskRunner } from '../../common/task/siem_migrations_task_
 import type { SiemMigrationsClientDependencies } from '../../common/types';
 
 vi.mock('../../common/task/siem_migrations_task_runner', () => {
-      const mocked = {
-      SiemMigrationTaskRunner: vi.fn().mockReturnValue({
-        prepareTaskInvoke: vi.fn(),
-        setup: vi.fn(),
-        run: vi.fn(),
-        abortController: new AbortController(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemMigrationTaskRunner: vi.fn().mockReturnValue({
+      prepareTaskInvoke: vi.fn(),
+      setup: vi.fn(),
+      run: vi.fn(),
+      abortController: new AbortController(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock dependencies
 vi.mock('langsmith/evaluation', () => {
-      const mocked = {
-      evaluate: vi.fn(() => Promise.resolve()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    evaluate: vi.fn(() => Promise.resolve()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/langchain/server/tracers/langsmith', () => {
-      const mocked = {
-      isLangSmithEnabled: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isLangSmithEnabled: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('langsmith', () => {
-      const mocked = {
-      Client: vi.fn().mockImplementation(() => ({
-        listExamples: vi.fn(() => [{ id: 'example-1' }, { id: 'example-2' }]),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Client: vi.fn().mockImplementation(() => ({
+      listExamples: vi.fn(() => [{ id: 'example-1' }, { id: 'example-2' }]),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RuleMigrationTaskEvaluator', () => {
   let taskEvaluator: RuleMigrationTaskEvaluator;

@@ -26,7 +26,7 @@ import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 const mockbrowsersSupportsSystemTheme = vi.fn();
 
 vi.mock('@kbn/core-theme-browser-internal', async () => {
-  const original = (await vi.importActual('@kbn/core-theme-browser-internal'));
+  const original = await vi.importActual('@kbn/core-theme-browser-internal');
 
   return {
     ...original,

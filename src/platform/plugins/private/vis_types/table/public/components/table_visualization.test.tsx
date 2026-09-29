@@ -10,21 +10,21 @@
 import { vi } from 'vitest';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      useUiState: vi.fn(() => ({
-        columnsWidth: [
-          { colIndex: 0, width: 77 },
-          { colIndex: 1, width: 22 },
-        ],
-        sort: {
-          columnIndex: null,
-          direction: null,
-        },
-      })),
-      usePagination: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiState: vi.fn(() => ({
+      columnsWidth: [
+        { colIndex: 0, width: 77 },
+        { colIndex: 1, width: 22 },
+      ],
+      sort: {
+        columnIndex: null,
+        direction: null,
+      },
+    })),
+    usePagination: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

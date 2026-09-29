@@ -15,25 +15,25 @@ import { RuleProvider } from '../rule_context';
 import { RuleSidebar } from './rule_sidebar';
 
 vi.mock('./rule_sidebar_conditions_tab', () => {
-      const mocked = {
-      RuleSidebarConditionsTab: () => <div data-test-subj="mockConditionsTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSidebarConditionsTab: () => <div data-test-subj="mockConditionsTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_sidebar_preview_tab', () => {
-      const mocked = {
-      RuleSidebarPreviewTab: () => <div data-test-subj="mockPreviewTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSidebarPreviewTab: () => <div data-test-subj="mockPreviewTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_sidebar_runbook_tab', () => {
-      const mocked = {
-      RuleSidebarRunbookTab: () => <div data-test-subj="mockRunbookTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSidebarRunbookTab: () => <div data-test-subj="mockRunbookTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

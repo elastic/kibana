@@ -17,11 +17,11 @@ import { EventLogListStatusFilter } from './event_log_list_status_filter';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
 
 vi.mock('../../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);

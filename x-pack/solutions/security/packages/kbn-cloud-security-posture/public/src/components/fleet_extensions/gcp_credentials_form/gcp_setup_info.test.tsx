@@ -17,11 +17,11 @@ import { I18nProvider } from '@kbn/i18n-react';
 const mockUseCloudSetup = vi.fn();
 
 vi.mock('../hooks/use_cloud_setup_context', () => {
-      const mocked = {
-      useCloudSetup: () => mockUseCloudSetup(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudSetup: () => mockUseCloudSetup(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (component: React.ReactElement) => {
   return render(<I18nProvider>{component}</I18nProvider>);

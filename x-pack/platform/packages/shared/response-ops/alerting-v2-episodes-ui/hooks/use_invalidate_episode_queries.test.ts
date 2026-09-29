@@ -14,11 +14,11 @@ import { queryKeys } from '../query_keys';
 const mockInvalidateQueries = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInvalidateEpisodeQueries', () => {
   beforeEach(() => {

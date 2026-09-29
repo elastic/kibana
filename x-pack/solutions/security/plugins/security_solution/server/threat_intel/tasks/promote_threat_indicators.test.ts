@@ -41,17 +41,17 @@ import type { RunContext, TaskManagerSetupContract } from '@kbn/task-manager-plu
 // when a run throws an unrecoverable error, so which helper a branch reaches is
 // the whole guarantee, and a test that cannot tell them apart proves nothing.
 vi.mock('@kbn/task-manager-plugin/server', () => {
-      const mocked = {
-      TaskCost: { Normal: 2 },
-      throwRetryableError: (err: Error, runAt: Date) => {
-        throw Object.assign(err, { __taskOutcome: 'retryable', __runAt: runAt });
-      },
-      throwUnrecoverableError: (err: Error) => {
-        throw Object.assign(err, { __taskOutcome: 'unrecoverable' });
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TaskCost: { Normal: 2 },
+    throwRetryableError: (err: Error, runAt: Date) => {
+      throw Object.assign(err, { __taskOutcome: 'retryable', __runAt: runAt });
+    },
+    throwUnrecoverableError: (err: Error) => {
+      throw Object.assign(err, { __taskOutcome: 'unrecoverable' });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
 import {

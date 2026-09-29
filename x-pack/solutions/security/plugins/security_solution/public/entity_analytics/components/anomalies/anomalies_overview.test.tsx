@@ -24,21 +24,21 @@ import {
 import { ANOMALIES_RECENT_TABLE_TEST_ID } from './test_ids';
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: (appId: string, options?: { path?: string }) =>
-              `/base-path/app/${appId}${options?.path ?? ''}`,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: (appId: string, options?: { path?: string }) =>
+            `/base-path/app/${appId}${options?.path ?? ''}`,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -52,81 +52,85 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./mitre/components/mitre_attack_chain', () => {
-      const mocked = {
-      MitreAttackChain: ({
-        triggeredTactics,
-        anomalyCountByTactic,
-      }: {
-        triggeredTactics: string[];
-        anomalyCountByTactic: Record<string, number>;
-      }) => (
-        <div
-          data-test-subj="mock-mitre-attack-chain"
-          data-triggered-tactics={JSON.stringify(triggeredTactics)}
-          data-tactic-counts={JSON.stringify(anomalyCountByTactic)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MitreAttackChain: ({
+      triggeredTactics,
+      anomalyCountByTactic,
+    }: {
+      triggeredTactics: string[];
+      anomalyCountByTactic: Record<string, number>;
+    }) => (
+      <div
+        data-test-subj="mock-mitre-attack-chain"
+        data-triggered-tactics={JSON.stringify(triggeredTactics)}
+        data-tactic-counts={JSON.stringify(anomalyCountByTactic)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./mitre/components/mitre_attack_chain_placeholder', () => {
-      const mocked = {
-      MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
-        <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MitreAttackChainPlaceholder: ({ children }: { children?: React.ReactNode }) => (
+      <div data-test-subj="mock-mitre-attack-chain-placeholder">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_job_name', () => {
-      const mocked = {
-      AnomalyJobName: ({
-        jobId,
-        jobName,
-        timeRange,
-      }: {
-        jobId: string;
-        jobName: string;
-        timeRange: { from: string; to: string };
-      }) => (
-        <span
-          data-test-subj="mock-anomaly-job-name"
-          data-job-id={jobId}
-          data-job-name={jobName}
-          data-time-range={JSON.stringify(timeRange)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyJobName: ({
+      jobId,
+      jobName,
+      timeRange,
+    }: {
+      jobId: string;
+      jobName: string;
+      timeRange: { from: string; to: string };
+    }) => (
+      <span
+        data-test-subj="mock-anomaly-job-name"
+        data-job-id={jobId}
+        data-job-name={jobName}
+        data-time-range={JSON.stringify(timeRange)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_timestamp', () => {
-      const mocked = {
-      AnomalyTimestamp: ({ timestamp }: { timestamp: string }) => (
-        <span data-test-subj="mock-anomaly-timestamp" data-timestamp={timestamp} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyTimestamp: ({ timestamp }: { timestamp: string }) => (
+      <span data-test-subj="mock-anomaly-timestamp" data-timestamp={timestamp} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/shared/components/expandable_panel', () => {
-      const mocked = {
-      ExpandablePanel: ({
-        children,
-        header,
-      }: {
-        children: React.ReactNode;
-        header: { link: { callback: () => void } };
-      }) => (
-        <div>
-          <button type="button" data-test-subj="expandable-panel-link" onClick={header.link.callback} />
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpandablePanel: ({
+      children,
+      header,
+    }: {
+      children: React.ReactNode;
+      header: { link: { callback: () => void } };
+    }) => (
+      <div>
+        <button
+          type="button"
+          data-test-subj="expandable-panel-link"
+          onClick={header.link.callback}
+        />
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeHit = (overrides: Partial<AnomalyOverviewHit> = {}): AnomalyOverviewHit => ({
   jobId: 'security-job-1',

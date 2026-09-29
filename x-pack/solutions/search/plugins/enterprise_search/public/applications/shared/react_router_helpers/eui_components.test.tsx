@@ -8,14 +8,14 @@
 import { vi } from 'vitest';
 
 vi.mock('.', () => {
-      const mocked = {
-      generateReactRouterProps: ({ to }: { to: string }) => ({
-        href: `/app/enterprise_search${to}`,
-        onClick: () => {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateReactRouterProps: ({ to }: { to: string }) => ({
+      href: `/app/enterprise_search${to}`,
+      onClick: () => {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

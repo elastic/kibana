@@ -21,12 +21,12 @@ import type { FpTpSeededIds } from './workflow_task';
 import { readAnalysisOutput, runFpTpAnalysisWorkflow, toOutcome } from './workflow_task';
 
 vi.mock('@kbn/security-evals-workflow-traces', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-evals-workflow-traces')),
-      readAgentToolCallsFromTraces: vi.fn().mockResolvedValue({ toolCallIds: [], unavailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-evals-workflow-traces')),
+    readAgentToolCallsFromTraces: vi.fn().mockResolvedValue({ toolCallIds: [], unavailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const output = {
   attack_discovery_id: 'ad-1',

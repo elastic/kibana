@@ -26,38 +26,38 @@ import { mockDataAsNestedObject } from '../document_details/shared/mocks/mock_da
 import { mockSearchHit } from '../document_details/shared/mocks/mock_search_hit';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn().mockReturnValue({ closeLeftPanel: vi.fn() }),
-      useExpandableFlyoutHistory: vi.fn(),
-      useExpandableFlyoutState: vi.fn().mockReturnValue({ left: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn().mockReturnValue({ closeLeftPanel: vi.fn() }),
+    useExpandableFlyoutHistory: vi.fn(),
+    useExpandableFlyoutState: vi.fn().mockReturnValue({ left: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_ai_connectors', () => {
-      const mocked = {
-      useAIConnectors: vi.fn().mockReturnValue({
-        aiConnectors: [
-          {
-            id: 'test-connector-id',
-            name: 'Test Connector',
-            actionTypeId: '.gen-ai',
-          },
-        ],
-        isLoading: false,
-        error: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAIConnectors: vi.fn().mockReturnValue({
+      aiConnectors: [
+        {
+          id: 'test-connector-id',
+          name: 'Test Connector',
+          actionTypeId: '.gen-ai',
+        },
+      ],
+      isLoading: false,
+      error: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./context');
 vi.mock('./components/attack_discovery_widget', () => {
-      const mocked = {
-      AttackDiscoveryWidget: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryWidget: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseKibana = {
   ...mockUseKibana(),

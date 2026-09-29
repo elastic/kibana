@@ -15,32 +15,35 @@ import { NL_TO_ESQL_ROUTE } from '@kbn/esql-types';
 import type { EsqlServerPluginStart } from '../types';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-      generateEsqlCompletion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+    generateEsqlCompletion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/data-plugin/server', () => {
-      const mocked = {
-      getRequestAbortedSignal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRequestAbortedSignal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      resolveConnectorId: vi.fn(),
-      createScopedModel: vi.fn(),
-      resolveIncludeDatasets: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorId: vi.fn(),
+    createScopedModel: vi.fn(),
+    resolveIncludeDatasets: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { generateEsql, generateEsqlCompletion } = (await vi.importMock('@kbn/agent-builder-genai-utils'));
-const { resolveConnectorId, createScopedModel, resolveIncludeDatasets } =
-  (await vi.importMock('./helpers'));
+const { generateEsql, generateEsqlCompletion } = await vi.importMock(
+  '@kbn/agent-builder-genai-utils'
+);
+const { resolveConnectorId, createScopedModel, resolveIncludeDatasets } = await vi.importMock(
+  './helpers'
+);
 
 function buildMocks() {
   const handler = vi.fn();

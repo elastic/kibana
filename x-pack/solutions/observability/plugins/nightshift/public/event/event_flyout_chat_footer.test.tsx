@@ -18,16 +18,16 @@ import { EventFlyoutChatFooter } from './event_flyout_chat_footer';
 const mockOpenChat = vi.fn();
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { basePath: { prepend: (path: string) => path } },
-          agentBuilder: { openChat: mockOpenChat },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { basePath: { prepend: (path: string) => path } },
+        agentBuilder: { openChat: mockOpenChat },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',

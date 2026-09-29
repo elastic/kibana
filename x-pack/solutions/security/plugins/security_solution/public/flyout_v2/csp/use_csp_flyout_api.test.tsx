@@ -15,61 +15,61 @@ import { useCspFlyoutApi } from './use_csp_flyout_api';
 import { documentFlyoutHistoryKey } from '../shared/constants/flyout_history';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = { useStore: () => ({}) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useStore: () => ({}) };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = { useHistory: () => ({}) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useHistory: () => ({}) };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/is_in_security_app');
 
 vi.mock('../shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: unknown }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: unknown }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/utils/build_flyout_nav_title', () => {
-      const mocked = {
-      buildFlyoutNavTitle: (title: string) => title,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildFlyoutNavTitle: (title: string) => title,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/hooks/use_default_flyout_properties', () => {
-      const mocked = {
-      useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultDocumentFlyoutProperties: () => ({ size: 's' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./misconfiguration/main', () => {
-      const mocked = { Misconfiguration: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Misconfiguration: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./vulnerability/main', () => {
-      const mocked = { Vulnerability: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Vulnerability: () => null };
+  return { ...mocked, default: mocked };
+});
 
 const mockFlyoutRef = { close: vi.fn(), onClose: Promise.resolve() };
 const mockOpenSystemFlyout = vi.fn().mockReturnValue(mockFlyoutRef);
 const mockReportEvent = vi.fn();
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          overlays: { openSystemFlyout: mockOpenSystemFlyout },
-          storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
-          telemetry: { reportEvent: mockReportEvent },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+        storage: { get: vi.fn(), set: vi.fn(), remove: vi.fn() },
+        telemetry: { reportEvent: mockReportEvent },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useIsInSecurityAppMock = useIsInSecurityApp as Mock;
 

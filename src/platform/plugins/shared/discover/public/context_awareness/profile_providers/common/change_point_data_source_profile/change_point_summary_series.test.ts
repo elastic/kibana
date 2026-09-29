@@ -26,7 +26,7 @@ import {
 } from './change_point_summary_series';
 
 vi.mock('@kbn/data-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/data-plugin/public'));
+  const actual = await vi.importActual('@kbn/data-plugin/public');
   return {
     ...actual,
     getTime: vi.fn(() => undefined),

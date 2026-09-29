@@ -15,13 +15,13 @@ import { DeleteSynonymRuleModal } from './delete_synonym_rule_modal';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
 vi.mock('../../hooks/use_delete_synonym_rule', () => {
-      const mocked = {
-      useDeleteSynonymRule: vi.fn(() => ({
-        mutate: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteSynonymRule: vi.fn(() => ({
+      mutate: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DeleteSynonymRuleModal', () => {
   const queryClient = new QueryClient();

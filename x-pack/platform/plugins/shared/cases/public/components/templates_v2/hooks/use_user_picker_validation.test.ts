@@ -16,30 +16,30 @@ import { useUserPickerValidation, collectUserPickerDefaults } from './use_user_p
 import * as api from '../../../containers/user_profiles/api';
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        editor: {
-          setModelMarkers: vi.fn(),
-          MarkerSeverity: {
-            Error: 8,
-            Warning: 4,
-          },
-        },
+  const mocked = {
+    monaco: {
+      editor: {
+        setModelMarkers: vi.fn(),
         MarkerSeverity: {
           Error: 8,
           Warning: 4,
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      MarkerSeverity: {
+        Error: 8,
+        Warning: 4,
+      },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/user_profiles/api', () => {
-      const mocked = {
-      bulkGetUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkGetUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetModelMarkers = monaco.editor.setModelMarkers as Mock;
 const mockBulkGetUserProfiles = api.bulkGetUserProfiles as Mock;

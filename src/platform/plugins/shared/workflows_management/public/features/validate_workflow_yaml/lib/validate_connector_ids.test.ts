@@ -16,12 +16,12 @@ import { getCachedInferenceConnectorInstances } from '../../../../common/schema'
 import { stepSchemas } from '../../../../common/step_schemas';
 
 vi.mock('../../../../common/schema', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/schema')),
-      getCachedInferenceConnectorInstances: vi.fn(() => new Map()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/schema')),
+    getCachedInferenceConnectorInstances: vi.fn(() => new Map()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetCachedInferenceConnectorInstances = vi.mocked(getCachedInferenceConnectorInstances);
 

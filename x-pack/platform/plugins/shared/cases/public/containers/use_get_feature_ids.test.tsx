@@ -59,9 +59,7 @@ describe('useGetFeaturesIds', () => {
   it('shows a toast error when the api return an error', async () => {
     (useToasts as Mock).mockReturnValue({ addError });
 
-    const spy = vi
-      .spyOn(api, 'getFeatureIds')
-      .mockRejectedValue(new Error('Something went wrong'));
+    const spy = vi.spyOn(api, 'getFeatureIds').mockRejectedValue(new Error('Something went wrong'));
 
     renderHook(() => useGetFeatureIds(['alert-id-1'], true), {
       wrapper: TestProviders,

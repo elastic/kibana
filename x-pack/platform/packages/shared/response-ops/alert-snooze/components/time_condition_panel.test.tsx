@@ -17,27 +17,27 @@ import {
 } from './time_condition_panel';
 
 vi.mock('./snooze_duration_picker', () => {
-      const mocked = {
-      SnoozeDurationPicker: ({
-        onChange,
-        isDurationInvalid,
-        isDateTimeInvalid,
-      }: {
-        onChange: (update: Partial<TimeConditionState>) => void;
-        isDurationInvalid: boolean;
-        isDateTimeInvalid: boolean;
-      }) => (
-        <div data-test-subj="mockSnoozeDurationPicker">
-          <button onClick={() => onChange({ value: 3, unit: 'd' })} data-test-subj="mockPickerUpdate">
-            update
-          </button>
-          {isDurationInvalid ? <span>duration invalid</span> : null}
-          {isDateTimeInvalid ? <span>datetime invalid</span> : null}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SnoozeDurationPicker: ({
+      onChange,
+      isDurationInvalid,
+      isDateTimeInvalid,
+    }: {
+      onChange: (update: Partial<TimeConditionState>) => void;
+      isDurationInvalid: boolean;
+      isDateTimeInvalid: boolean;
+    }) => (
+      <div data-test-subj="mockSnoozeDurationPicker">
+        <button onClick={() => onChange({ value: 3, unit: 'd' })} data-test-subj="mockPickerUpdate">
+          update
+        </button>
+        {isDurationInvalid ? <span>duration invalid</span> : null}
+        {isDateTimeInvalid ? <span>datetime invalid</span> : null}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>

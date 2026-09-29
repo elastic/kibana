@@ -30,46 +30,45 @@ import {
 } from './resolve_validation_run_context';
 
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: (message: string) => new Error(message),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: (message: string) => new Error(message),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-utils', () => {
-      const mocked = {
-      countCommitsBetweenRefs: vi.fn(),
-      hasStagedChanges: vi.fn(),
-      isShallowRepository: vi.fn(),
-      parseAndResolveValidationContract: vi.fn(),
-      VALIDATION_PROFILE_DEFAULTS: {
-        branch: {
-          scope: 'branch',
-          testMode: 'affected',
-          downstream: 'none',
-        },
+  const mocked = {
+    countCommitsBetweenRefs: vi.fn(),
+    hasStagedChanges: vi.fn(),
+    isShallowRepository: vi.fn(),
+    parseAndResolveValidationContract: vi.fn(),
+    VALIDATION_PROFILE_DEFAULTS: {
+      branch: {
+        scope: 'branch',
+        testMode: 'affected',
+        downstream: 'none',
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/moon', () => {
-      const mocked = {
-      getAffectedMoonProjectsFromChangedFiles: vi.fn(),
-      getMoonChangedFiles: vi.fn(),
-      resolveMoonAffectedBase: vi.fn(),
-      summarizeAffectedMoonProjects: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAffectedMoonProjectsFromChangedFiles: vi.fn(),
+    getMoonChangedFiles: vi.fn(),
+    resolveMoonAffectedBase: vi.fn(),
+    summarizeAffectedMoonProjects: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockParseAndResolveValidationContract = parseAndResolveValidationContract as Mock;
 const mockHasStagedChanges = hasStagedChanges as Mock;
 const mockIsShallowRepository = isShallowRepository as Mock;
 const mockResolveMoonAffectedBase = resolveMoonAffectedBase as Mock;
 const mockCountCommitsBetweenRefs = countCommitsBetweenRefs as Mock;
-const mockGetAffectedMoonProjectsFromChangedFiles =
-  getAffectedMoonProjectsFromChangedFiles as Mock;
+const mockGetAffectedMoonProjectsFromChangedFiles = getAffectedMoonProjectsFromChangedFiles as Mock;
 const mockSummarizeAffectedMoonProjects = summarizeAffectedMoonProjects as Mock;
 const mockGetMoonChangedFiles = getMoonChangedFiles as Mock;
 

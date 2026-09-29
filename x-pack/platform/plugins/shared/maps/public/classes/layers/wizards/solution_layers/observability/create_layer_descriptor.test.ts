@@ -29,11 +29,11 @@ vi.mock('../../../../../kibana_services', () => {
 });
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { createLayerDescriptor } from './create_layer_descriptor';
 import { OBSERVABILITY_LAYER_TYPE } from './layer_select';

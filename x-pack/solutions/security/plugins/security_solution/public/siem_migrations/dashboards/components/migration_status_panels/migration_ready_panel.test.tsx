@@ -56,10 +56,7 @@ const mockEmptyMissingResources: SiemMigrationResourceBase[] = [];
 const mockGetMissingResources = vi.fn();
 const mockStartMigration = vi.fn();
 
-const mockUseGetMissingResources = vi.spyOn(
-  useGetMissingResourcesModule,
-  'useGetMissingResources'
-);
+const mockUseGetMissingResources = vi.spyOn(useGetMissingResourcesModule, 'useGetMissingResources');
 mockUseGetMissingResources.mockImplementation(() => {
   return {
     getMissingResources: mockGetMissingResources,

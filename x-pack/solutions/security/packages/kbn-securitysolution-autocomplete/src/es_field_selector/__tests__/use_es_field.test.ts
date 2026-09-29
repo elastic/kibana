@@ -15,11 +15,11 @@ import { fields } from '../../fields/index.mock';
 import { useEsField } from '../use_es_field';
 
 vi.mock('../../translations', () => {
-      const mocked = {
-      BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BINARY_TYPE_NOT_SUPPORTED: 'Binary fields are currently unsupported',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const indexPattern = { fields, title: 'title' };
 const onChangeMock = vi.fn();

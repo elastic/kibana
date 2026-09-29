@@ -40,7 +40,7 @@ import {
 import { timelineChangedTypes } from './timeline_changed';
 
 vi.mock('../actions', async () => {
-  const actual = (await vi.importActual('../actions'));
+  const actual = await vi.importActual('../actions');
   return {
     ...actual,
     setChanged: vi.fn().mockImplementation((...args) => actual.setChanged(...args)),

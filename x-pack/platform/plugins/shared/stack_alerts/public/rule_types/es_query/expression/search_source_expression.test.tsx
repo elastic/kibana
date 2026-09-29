@@ -29,7 +29,7 @@ import type { DataPlugin } from '@kbn/data-plugin/public';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     __esModule: true,
     ...original,

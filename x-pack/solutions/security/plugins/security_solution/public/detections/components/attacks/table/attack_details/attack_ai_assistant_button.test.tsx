@@ -24,36 +24,36 @@ import { NewAgentBuilderAttachment } from '../../../../../agent_builder/componen
 import type { AgentBuilderAddToChatTelemetry } from '../../../../../agent_builder/hooks/use_report_add_to_chat';
 
 vi.mock('../../../../../agent_builder/components/new_agent_builder_attachment', () => {
-      const mocked = {
-      NewAgentBuilderAttachment: vi.fn(() => (
-        <div data-test-subj="newAgentBuilderAttachment">{'NewAgentBuilderAttachment'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewAgentBuilderAttachment: vi.fn(() => (
+      <div data-test-subj="newAgentBuilderAttachment">{'NewAgentBuilderAttachment'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../attack_discovery/pages/results/use_attack_discovery_attachment', () => {
-      const mocked = {
-      useAttackDiscoveryAttachment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryAttachment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../../attack_discovery/pages/results/attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant',
   () => {
-      const mocked = {
-        useViewInAiAssistant: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useViewInAiAssistant: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('AttackAiAssistantButton', () => {

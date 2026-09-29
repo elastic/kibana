@@ -25,9 +25,9 @@ vi.mock('../create_visualize_app_state');
 vi.mock('@kbn/data-plugin/public');
 
 describe('useVisualizeAppState', async () => {
-  const { visStateToEditorState } = (await vi.importMock('../utils'));
-  const { createVisualizeAppState } = (await vi.importMock('../create_visualize_app_state'));
-  const { connectToQueryState } = (await vi.importMock('@kbn/data-plugin/public'));
+  const { visStateToEditorState } = await vi.importMock('../utils');
+  const { createVisualizeAppState } = await vi.importMock('../create_visualize_app_state');
+  const { connectToQueryState } = await vi.importMock('@kbn/data-plugin/public');
   const stopStateSyncMock = vi.fn();
   const stateContainerGetStateMock = vi.fn(() => visualizeAppStateStub);
   const stopSyncingAppFiltersMock = vi.fn();

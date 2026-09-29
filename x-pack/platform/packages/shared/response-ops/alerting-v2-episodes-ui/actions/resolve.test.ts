@@ -66,9 +66,10 @@ describe('createResolveAction', () => {
 
   it('execute: POSTs per-episode DEACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    vi
-      .spyOn(bulk, 'bulkDeactivateEpisodeActions')
-      .mockResolvedValue({ affected_count: 2, errors: [] });
+    vi.spyOn(bulk, 'bulkDeactivateEpisodeActions').mockResolvedValue({
+      affected_count: 2,
+      errors: [],
+    });
     const onSuccess = vi.fn();
     await createResolveAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
@@ -84,9 +85,10 @@ describe('createResolveAction', () => {
 
   it('execute: on a mixed selection only POSTs items for the non-INACTIVE episodes', async () => {
     const deps = makeDeps();
-    vi
-      .spyOn(bulk, 'bulkDeactivateEpisodeActions')
-      .mockResolvedValue({ affected_count: 1, errors: [] });
+    vi.spyOn(bulk, 'bulkDeactivateEpisodeActions').mockResolvedValue({
+      affected_count: 1,
+      errors: [],
+    });
     const onSuccess = vi.fn();
     await createResolveAction(deps).execute({
       episodes: [

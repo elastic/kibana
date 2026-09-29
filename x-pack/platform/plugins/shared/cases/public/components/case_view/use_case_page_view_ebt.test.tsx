@@ -16,18 +16,18 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 
 // Mocks
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockServices = (reportEvent: Mock) => ({
   services: {

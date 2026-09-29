@@ -17,13 +17,13 @@ import { useUpdateTags } from '../hooks';
 import { TagOptions } from './tag_options';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useUpdateTags: vi.fn().mockReturnValue({
-        bulkUpdateTags: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateTags: vi.fn().mockReturnValue({
+      bulkUpdateTags: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TagOptions', () => {
   const mockBulkUpdateTags = useUpdateTags().bulkUpdateTags as Mock;

@@ -21,13 +21,13 @@ import { ExploreDataContextMenuAction } from './explore_data_context_menu_action
 const i18nTranslateSpy = i18n.translate as unknown as MockInstance;
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: vi.fn((key, options) => options.defaultMessage),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: vi.fn((key, options) => options.defaultMessage),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 afterEach(() => {
   i18nTranslateSpy.mockClear();

@@ -27,7 +27,7 @@ const repositoryTypes: RepositoryType[] = ['fs', 'url', 'source', 'azure', 'gcs'
 const mockUseLoadRepositoryTypes = vi.fn();
 
 vi.mock('../../services/http', async () => {
-  const actual = (await vi.importActual<typeof import('../../services/http')>('../../services/http'));
+  const actual = await vi.importActual<typeof import('../../services/http')>('../../services/http');
   return {
     ...actual,
     useLoadRepositoryTypes: (...args: unknown[]) => mockUseLoadRepositoryTypes(...args),
@@ -35,7 +35,7 @@ vi.mock('../../services/http', async () => {
 });
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual<typeof import('../../app_context')>('../../app_context'));
+  const actual = await vi.importActual<typeof import('../../app_context')>('../../app_context');
 
   return {
     ...actual,

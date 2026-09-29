@@ -11,104 +11,104 @@ import { vi } from 'vitest';
 import type { Mock, MockInstance } from 'vitest';
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: (message: string) => new Error(message),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: (message: string) => new Error(message),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-validation-runner', () => {
-      const mocked = {
-      readValidationRunFlags: vi.fn(),
-      resolveValidationBaseContext: vi.fn(),
-      resolveValidationAffectedProjects: vi.fn(),
-      VALIDATION_RUN_HELP: [],
-      VALIDATION_RUN_STRING_FLAGS: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readValidationRunFlags: vi.fn(),
+    resolveValidationBaseContext: vi.fn(),
+    resolveValidationAffectedProjects: vi.fn(),
+    VALIDATION_RUN_HELP: [],
+    VALIDATION_RUN_STRING_FLAGS: [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./type_check_validation_loader', () => {
-      const mocked = {
-      executeTypeCheckValidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeTypeCheckValidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./eslint/run_eslint_contract', () => {
-      const mocked = {
-      executeEslintValidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEslintValidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./oxlint/run_oxlint_contract', () => {
-      const mocked = {
-      executeOxlintValidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeOxlintValidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-proc-runner', () => {
-      const mocked = {
-      ProcRunner: vi.fn().mockImplementation(() => ({
-        teardown: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ProcRunner: vi.fn().mockImplementation(() => ({
+      teardown: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/tooling-log', () => {
-      const mocked = {
-      ToolingLog: vi.fn().mockImplementation(() => ({
-        writers: [] as Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>,
-        setWriters: vi.fn(function (this: { writers: unknown[] }, writers: unknown[]) {
-          this.writers = writers;
-        }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolingLog: vi.fn().mockImplementation(() => ({
+      writers: [] as Array<{ write: (msg: { args: unknown[]; type: string }) => boolean }>,
+      setWriters: vi.fn(function (this: { writers: unknown[] }, writers: unknown[]) {
+        this.writers = writers;
+      }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunJestViaMoon = vi.fn();
 
 vi.mock('@kbn/test', () => {
-      const mocked = {
-      runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
-      JEST_CONFIG_NAMES: [
-        'jest.config.dev.js',
-        'jest.config.js',
-        'jest.config.cjs',
-        'jest.config.mjs',
-        'jest.config.ts',
-        'jest.config.json',
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runJestViaMoon: (...args: unknown[]) => mockRunJestViaMoon(...args),
+    JEST_CONFIG_NAMES: [
+      'jest.config.dev.js',
+      'jest.config.js',
+      'jest.config.cjs',
+      'jest.config.mjs',
+      'jest.config.ts',
+      'jest.config.json',
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs', () => {
-      const mocked = {
-      ...require('fs'),
-      existsSync: vi.fn(),
-      readdirSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('fs'),
+    existsSync: vi.fn(),
+    readdirSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecaFn = vi.fn();
 vi.mock('execa', () => ({ __esModule: true, default: mockExecaFn }));

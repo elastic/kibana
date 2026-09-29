@@ -19,28 +19,28 @@ import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 
 // jest.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_elasticsearch_url', () => {
-      const mocked = {
-      useElasticsearchUrl: vi.fn().mockReturnValue('https://local_dev.es.fake.elstc.co:443'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useElasticsearchUrl: vi.fn().mockReturnValue('https://local_dev.es.fake.elstc.co:443'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/search-api-keys-components', () => {
-      const mocked = {
-      // Assume you have permissions as default
-      useSearchApiKey: vi.fn().mockReturnValue({ status: 'showHiddenKey' }),
-      Status: {
-        showHiddenKey: 'showHiddenKey',
-        showUserPrivilegesError: 'showUserPrivilegesError',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Assume you have permissions as default
+    useSearchApiKey: vi.fn().mockReturnValue({ status: 'showHiddenKey' }),
+    Status: {
+      showHiddenKey: 'showHiddenKey',
+      showUserPrivilegesError: 'showUserPrivilegesError',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud/connection_details', () => {
-      const mocked = {
-      openWiredConnectionDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openWiredConnectionDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient();
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (

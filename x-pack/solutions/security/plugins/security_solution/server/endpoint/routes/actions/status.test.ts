@@ -321,11 +321,9 @@ describe('Endpoint Pending Action Summary API', () => {
         }),
       ]
     );
-    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
-      });
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi.fn().mockReturnValue({
+      findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
+    });
     const response = await getPendingStatus({
       query: {
         agent_ids: [mockAgentID],
@@ -368,11 +366,9 @@ describe('Endpoint Pending Action Summary API', () => {
         }),
       ]
     );
-    (endpointAppContextService.getEndpointMetadataService as Mock) = vi
-      .fn()
-      .mockReturnValue({
-        findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
-      });
+    (endpointAppContextService.getEndpointMetadataService as Mock) = vi.fn().mockReturnValue({
+      findHostMetadataForFleetAgents: vi.fn().mockResolvedValue([]),
+    });
     const response = await getPendingStatus({
       query: {
         agent_ids: [agentOne, agentTwo, agentThree],
@@ -401,9 +397,9 @@ describe('Endpoint Pending Action Summary API', () => {
   });
 
   it('should return 404 when spaces is enabled and agent id is not accessible in space', async () => {
-    (
-      endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock
-    ).mockRejectedValue(new AgentNotFoundError('agent not found'));
+    (endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock).mockRejectedValue(
+      new AgentNotFoundError('agent not found')
+    );
     const response = await getPendingStatus({
       query: { agent_ids: ['123'] },
     });

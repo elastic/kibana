@@ -20,7 +20,7 @@ import { APP_UI_ID } from '../../../../common';
 const mockCurrentAppId$ = of(APP_UI_ID);
 
 vi.mock('../../utils/default_date_settings', async () => {
-  const original = (await vi.importActual('../../utils/default_date_settings'));
+  const original = await vi.importActual('../../utils/default_date_settings');
   return {
     ...original,
     getTimeRangeSettings: () => ({ to: '', from: '' }),
@@ -28,7 +28,7 @@ vi.mock('../../utils/default_date_settings', async () => {
 });
 
 vi.mock('../../utils/normalize_time_range', async () => {
-  const original = (await vi.importActual('../../utils/normalize_time_range'));
+  const original = await vi.importActual('../../utils/normalize_time_range');
   return {
     ...original,
     normalizeTimeRange: () => ({ to: '', from: '' }),
@@ -36,7 +36,7 @@ vi.mock('../../utils/normalize_time_range', async () => {
 });
 
 vi.mock('../../lib/kibana/kibana_react', async () => {
-  const original = (await vi.importActual('../../lib/kibana/kibana_react'));
+  const original = await vi.importActual('../../lib/kibana/kibana_react');
   return {
     useKibana: () => ({
       ...original,
@@ -61,14 +61,14 @@ vi.mock('../../lib/kibana/kibana_react', async () => {
 });
 
 vi.mock('../../hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpselling = new UpsellingService();
 

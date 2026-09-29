@@ -16,14 +16,14 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { RuleDetails } from './rule_details';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
 const render = (toRender: React.ReactElement) =>
   rtlRender(toRender, {

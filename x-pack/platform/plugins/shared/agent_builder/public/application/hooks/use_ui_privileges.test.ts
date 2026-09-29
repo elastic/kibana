@@ -12,11 +12,11 @@ import { useUiPrivileges } from './use_ui_privileges';
 
 const mockUseKibana = vi.fn();
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUiPrivileges', () => {
   beforeEach(() => {

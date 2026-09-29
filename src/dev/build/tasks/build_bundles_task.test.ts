@@ -22,17 +22,17 @@ import { Build, write } from '../lib';
 import { getMockConfig } from '../lib/__mocks__/get_config';
 
 vi.mock('@kbn/rspack-optimizer', () => {
-      const mocked = {
-      runBuild: vi.fn(),
-      reportOptimizerTimings: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runBuild: vi.fn(),
+    reportOptimizerTimings: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('globby', () => {
-      const mocked = { globby: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { globby: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockReadFile = vi.fn();
 const mockWriteFile = vi.fn();
@@ -50,7 +50,7 @@ vi.mock('fs/promises', () => ({
 }));
 
 vi.mock('../lib', async () => {
-  const actual = (await vi.importActual('../lib'));
+  const actual = await vi.importActual('../lib');
   return {
     ...actual,
     write: vi.fn().mockResolvedValue(undefined),
@@ -73,9 +73,9 @@ describe('BuildBundles', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     tmpDir = Fs.mkdtempSync(Path.join(Os.tmpdir(), 'rspack-bundles-task-test-'));
-    vi
-      .spyOn(build, 'resolvePath')
-      .mockImplementation((...segments: string[]) => Path.resolve(tmpDir, ...segments));
+    vi.spyOn(build, 'resolvePath').mockImplementation((...segments: string[]) =>
+      Path.resolve(tmpDir, ...segments)
+    );
   });
 
   afterEach(() => {

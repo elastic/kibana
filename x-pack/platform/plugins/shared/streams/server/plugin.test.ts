@@ -18,35 +18,35 @@ import type { StreamsConfig } from '../common/config';
 import type { StreamsPluginSetupDependencies } from './types';
 
 vi.mock('./agent_builder/register', () => {
-      const mocked = {
-      registerStreamsAgentBuilder: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerStreamsAgentBuilder: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/saved_objects/register_saved_objects', () => {
-      const mocked = {
-      registerStreamsSavedObjects: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerStreamsSavedObjects: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./register_fields_metadata_extractors', () => {
-      const mocked = {
-      registerFieldsMetadataExtractors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerFieldsMetadataExtractors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./register_suggestions_inference_features', () => {
-      const mocked = {
-      registerSuggestionsInferenceFeatures: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerSuggestionsInferenceFeatures: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./feature_flags', () => {
-      const mocked = { registerFeatureFlags: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerFeatureFlags: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
-const { registerStreamsAgentBuilder } = (await vi.importMock('./agent_builder/register'));
+const { registerStreamsAgentBuilder } = await vi.importMock('./agent_builder/register');
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

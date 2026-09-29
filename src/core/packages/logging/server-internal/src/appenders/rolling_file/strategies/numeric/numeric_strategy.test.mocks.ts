@@ -15,14 +15,14 @@ export const rollCurrentFileMock = vi.fn();
 export const shouldSkipRolloutMock = vi.fn();
 
 vi.doMock('./rolling_tasks', () => {
-      const mocked = {
-      getOrderedRolledFiles: getOrderedRolledFilesMock,
-      rollPreviousFilesInOrder: rollPreviousFilesInOrderMock,
-      rollCurrentFile: rollCurrentFileMock,
-      shouldSkipRollout: shouldSkipRolloutMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOrderedRolledFiles: getOrderedRolledFilesMock,
+    rollPreviousFilesInOrder: rollPreviousFilesInOrderMock,
+    rollCurrentFile: rollCurrentFileMock,
+    shouldSkipRollout: shouldSkipRolloutMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const resetAllMock = () => {
   shouldSkipRolloutMock.mockReset();

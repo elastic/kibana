@@ -32,7 +32,6 @@ import { PluginsSystem } from './plugins_system';
 import type { PluginsConfigType } from './plugins_config';
 import { config } from './plugins_config';
 import { take } from 'rxjs';
-import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
 
@@ -58,12 +57,16 @@ expect.addSnapshotSerializer(createAbsolutePathSerializer());
 
 ['path-1', 'path-2', 'path-3', 'path-4', 'path-5', 'path-6', 'path-7', 'path-8'].forEach((path) => {
   [PluginType.preboot, PluginType.standard].forEach((type) => {
-    vi.doMock(join(`${path}-${type}`, 'server'), () => {
-          const mocked = {};
-          return { ...mocked, default: mocked };
-        }, {
-      virtual: true,
-    });
+    vi.doMock(
+      join(`${path}-${type}`, 'server'),
+      () => {
+        const mocked = {};
+        return { ...mocked, default: mocked };
+      },
+      {
+        virtual: true,
+      }
+    );
   });
 });
 
@@ -71,12 +74,16 @@ const OSS_PLUGIN_PATH = '/kibana/src/plugins/ossPlugin';
 const XPACK_PLUGIN_PATH = '/kibana/x-pack/plugins/xPackPlugin';
 const EXTERNAL_PLUGIN_PATH = '/kibana/plugins/externalPlugin';
 [OSS_PLUGIN_PATH, XPACK_PLUGIN_PATH, EXTERNAL_PLUGIN_PATH].forEach((path) => {
-  vi.doMock(join(path, 'server'), () => {
-        const mocked = {};
-        return { ...mocked, default: mocked };
-      }, {
-    virtual: true,
-  });
+  vi.doMock(
+    join(path, 'server'),
+    () => {
+      const mocked = {};
+      return { ...mocked, default: mocked };
+    },
+    {
+      virtual: true,
+    }
+  );
 });
 
 const createPlugin = (
@@ -360,9 +367,9 @@ describe('PluginsService', () => {
     });
 
     it('properly detects plugins that should be disabled.', async () => {
-      vi
-        .spyOn(configService, 'isEnabledAtPath')
-        .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
+      vi.spyOn(configService, 'isEnabledAtPath').mockImplementation((path) =>
+        Promise.resolve(!path.includes('disabled'))
+      );
 
       prebootMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
       standardMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
@@ -491,9 +498,9 @@ describe('PluginsService', () => {
     describe('forceEnableAllPlugins', () => {
       it('enables all plugins when "true"', async () => {
         (pluginsConfig as any).forceEnableAllPlugins = true;
-        vi
-          .spyOn(configService, 'isEnabledAtPath')
-          .mockImplementation((path) => Promise.resolve(!path.includes('disabled')));
+        vi.spyOn(configService, 'isEnabledAtPath').mockImplementation((path) =>
+          Promise.resolve(!path.includes('disabled'))
+        );
         prebootMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
         standardMockPluginSystem.setupPlugins.mockResolvedValue(new Map());
         await pluginsService.setup(setupDeps);
@@ -782,17 +789,17 @@ describe('PluginsService', () => {
       vi.doMock(
         join('path-with-schema-preboot', 'server'),
         () => {
-            const mocked = { config: { schema: configSchema } };
-            return { ...mocked, default: mocked };
-          },
+          const mocked = { config: { schema: configSchema } };
+          return { ...mocked, default: mocked };
+        },
         { virtual: true }
       );
       vi.doMock(
         join('path-with-schema-standard', 'server'),
         () => {
-            const mocked = { config: { schema: configSchema } };
-            return { ...mocked, default: mocked };
-          },
+          const mocked = { config: { schema: configSchema } };
+          return { ...mocked, default: mocked };
+        },
         { virtual: true }
       );
 
@@ -824,9 +831,11 @@ describe('PluginsService', () => {
       vi.doMock(
         join('path-with-provider-preboot', 'server'),
         () => {
-            const mocked = { config: { schema: configSchema, deprecations: prebootDeprecationProvider } };
-            return { ...mocked, default: mocked };
-          },
+          const mocked = {
+            config: { schema: configSchema, deprecations: prebootDeprecationProvider },
+          };
+          return { ...mocked, default: mocked };
+        },
         { virtual: true }
       );
 
@@ -834,9 +843,11 @@ describe('PluginsService', () => {
       vi.doMock(
         join('path-with-provider-standard', 'server'),
         () => {
-            const mocked = { config: { schema: configSchema, deprecations: standardDeprecationProvider } };
-            return { ...mocked, default: mocked };
-          },
+          const mocked = {
+            config: { schema: configSchema, deprecations: standardDeprecationProvider },
+          };
+          return { ...mocked, default: mocked };
+        },
         { virtual: true }
       );
 
@@ -920,14 +931,14 @@ describe('PluginsService', () => {
         vi.doMock(
           join(plugin.path, 'server'),
           () => {
-              const mocked = {
-                        config: {
-                          exposeToUsage: { test: true, nested: { prop: true } },
-                          schema: schema.maybe(schema.any()),
-                        },
-                      };
-              return { ...mocked, default: mocked };
-            },
+            const mocked = {
+              config: {
+                exposeToUsage: { test: true, nested: { prop: true } },
+                schema: schema.maybe(schema.any()),
+              },
+            };
+            return { ...mocked, default: mocked };
+          },
           { virtual: true }
         );
       }
@@ -949,14 +960,14 @@ describe('PluginsService', () => {
         vi.doMock(
           join(plugin.path, 'server'),
           () => {
-              const mocked = {
-                        config: {
-                          exposeToUsage: { test: true },
-                          schema: schema.maybe(schema.any()),
-                        },
-                      };
-              return { ...mocked, default: mocked };
-            },
+            const mocked = {
+              config: {
+                exposeToUsage: { test: true },
+                schema: schema.maybe(schema.any()),
+              },
+            };
+            return { ...mocked, default: mocked };
+          },
           { virtual: true }
         );
       }
@@ -976,13 +987,13 @@ describe('PluginsService', () => {
         vi.doMock(
           join(plugin.path, 'server'),
           () => {
-              const mocked = {
-                        config: {
-                          schema: schema.maybe(schema.any()),
-                        },
-                      };
-              return { ...mocked, default: mocked };
-            },
+            const mocked = {
+              config: {
+                schema: schema.maybe(schema.any()),
+              },
+            };
+            return { ...mocked, default: mocked };
+          },
           { virtual: true }
         );
       }
@@ -1048,23 +1059,23 @@ describe('PluginsService', () => {
         vi.doMock(
           join(plugin.path, 'server'),
           () => {
-              const mocked = {
-                        config: {
-                          exposeToBrowser: {
-                            sharedProp: true,
-                          },
-                          schema: schema.object({
-                            serverProp: schema.string({
-                              defaultValue: `serverProp default value ${plugin.name}`,
-                            }),
-                            sharedProp: schema.string({
-                              defaultValue: `sharedProp default value ${plugin.name}`,
-                            }),
-                          }),
-                        },
-                      };
-              return { ...mocked, default: mocked };
-            },
+            const mocked = {
+              config: {
+                exposeToBrowser: {
+                  sharedProp: true,
+                },
+                schema: schema.object({
+                  serverProp: schema.string({
+                    defaultValue: `serverProp default value ${plugin.name}`,
+                  }),
+                  sharedProp: schema.string({
+                    defaultValue: `sharedProp default value ${plugin.name}`,
+                  }),
+                }),
+              },
+            };
+            return { ...mocked, default: mocked };
+          },
           { virtual: true }
         );
       }
@@ -1114,15 +1125,15 @@ describe('PluginsService', () => {
         vi.doMock(
           join(plugin.path, 'server'),
           () => {
-              const mocked = {
-                        config: {
-                          schema: schema.object({
-                            serverProp: schema.string({ defaultValue: 'serverProp default value' }),
-                          }),
-                        },
-                      };
-              return { ...mocked, default: mocked };
-            },
+            const mocked = {
+              config: {
+                schema: schema.object({
+                  serverProp: schema.string({ defaultValue: 'serverProp default value' }),
+                }),
+              },
+            };
+            return { ...mocked, default: mocked };
+          },
           { virtual: true }
         );
       }
@@ -1163,36 +1174,36 @@ describe('PluginsService', () => {
     vi.doMock(
       join(pluginA.path, 'server'),
       () => {
-          const mocked = {
-                config: {
-                  schema: schema.object({
-                    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-                  }),
-                },
-              };
-          return { ...mocked, default: mocked };
-        },
+        const mocked = {
+          config: {
+            schema: schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+            }),
+          },
+        };
+        return { ...mocked, default: mocked };
+      },
       { virtual: true }
     );
 
     vi.doMock(
       join(pluginB.path, 'server'),
       () => {
-          const mocked = {
-                config: {
-                  schema: schema.object({
-                    enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-                    renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
-                  }),
-                  deprecations: ({ renameFromRoot }) => [
-                    renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
-                      level: 'critical',
-                    }),
-                  ],
-                },
-              };
-          return { ...mocked, default: mocked };
-        },
+        const mocked = {
+          config: {
+            schema: schema.object({
+              enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+              renamed: schema.string(), // Mandatory string to make sure that the field is actually renamed by deprecations
+            }),
+            deprecations: ({ renameFromRoot }) => [
+              renameFromRoot('plugin-1-deprecations.toBeRenamed', 'plugin-2-deprecations.renamed', {
+                level: 'critical',
+              }),
+            ],
+          },
+        };
+        return { ...mocked, default: mocked };
+      },
       { virtual: true }
     );
 
@@ -1246,15 +1257,15 @@ describe('PluginsService', () => {
         vi.doMock(
           join(plugin.path, 'server'),
           () => {
-              const mocked = {
-                        config: {
-                          schema: schema.object({
-                            enabled: schema.maybe(schema.boolean({ defaultValue: true })),
-                          }),
-                        },
-                      };
-              return { ...mocked, default: mocked };
-            },
+            const mocked = {
+              config: {
+                schema: schema.object({
+                  enabled: schema.maybe(schema.boolean({ defaultValue: true })),
+                }),
+              },
+            };
+            return { ...mocked, default: mocked };
+          },
           { virtual: true }
         );
       }

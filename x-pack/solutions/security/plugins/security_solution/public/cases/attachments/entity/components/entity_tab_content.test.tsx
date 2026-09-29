@@ -27,34 +27,32 @@ import { useMissingRiskEnginePrivileges } from '../../../../entity_analytics/hoo
 import { useEntityLastSeen } from '../hooks/use_entity_last_seen';
 
 vi.mock('../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
 vi.mock('../../../../entity_analytics/components/home/use_entity_store_data_view');
-vi.mock(
-  '../../../../entity_analytics/components/entity_store/hooks/use_entity_engine_privileges'
-);
+vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_engine_privileges');
 vi.mock('../../../../entity_analytics/hooks/use_missing_risk_engine_privileges');
 vi.mock('../hooks/use_entity_last_seen');
 
 vi.mock('../hooks/use_entity_local_table_state', () => {
-      const mocked = {
-      useEntityLocalTableState: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityLocalTableState: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../entity_analytics/components/home/entities_table', () => {
-      const mocked = {
-      DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
-      EntitiesTableSection: () => <div data-test-subj="mockEntitiesTableSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataViewContext: { Provider: ({ children }: { children: React.ReactNode }) => <>{children}</> },
+    EntitiesTableSection: () => <div data-test-subj="mockEntitiesTableSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useEntityStoreStatusMock = useEntityStoreStatus as Mock;
 const useEntityStoreDataViewMock = useEntityStoreDataView as Mock;

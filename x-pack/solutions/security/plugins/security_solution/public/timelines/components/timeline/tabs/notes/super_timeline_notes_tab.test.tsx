@@ -19,11 +19,11 @@ import { useNotesTabData } from './use_notes_tab_data';
 vi.mock('./use_notes_tab_data');
 
 vi.mock('../../../super_timeline/super_timeline_notes', () => {
-      const mocked = {
-      SuperTimelineNotes: () => <div data-test-subj="mock-super-timeline-notes" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SuperTimelineNotes: () => <div data-test-subj="mock-super-timeline-notes" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseNotesTabData = useNotesTabData as MockedFunction<typeof useNotesTabData>;
 

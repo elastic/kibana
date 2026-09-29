@@ -19,25 +19,25 @@ const mockUseExecuteTool = vi.fn();
 const mockUseAgentBuilderServices = vi.fn();
 
 vi.mock('../../../hooks/tools/use_tools', () => {
-      const mocked = {
-      useTool: () => mockUseTool(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTool: () => mockUseTool(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/tools/use_execute_tools', () => {
-      const mocked = {
-      useExecuteTool: () => mockUseExecuteTool(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExecuteTool: () => mockUseExecuteTool(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => mockUseAgentBuilderServices(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => mockUseAgentBuilderServices(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToolDefinition: ToolDefinitionWithSchema = {
   id: 'test-tool',

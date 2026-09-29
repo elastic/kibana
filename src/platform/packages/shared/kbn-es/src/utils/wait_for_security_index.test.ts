@@ -28,8 +28,9 @@ const invalidateApiKey = vi.fn();
 
 beforeEach(async () => {
   vi.resetAllMocks();
-  (await vi.importMock('@elastic/elasticsearch'))
-    .Client.mockImplementation(() => ({ security: { createApiKey, invalidateApiKey } }));
+  (await vi.importMock('@elastic/elasticsearch')).Client.mockImplementation(() => ({
+    security: { createApiKey, invalidateApiKey },
+  }));
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
   createApiKey.mockResolvedValue({ id: 'test-id' });

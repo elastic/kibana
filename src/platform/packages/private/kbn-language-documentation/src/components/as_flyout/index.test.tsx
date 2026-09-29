@@ -14,7 +14,7 @@ import { screen, render, fireEvent, waitFor } from '@testing-library/react';
 import { LanguageDocumentationFlyout } from '.';
 
 vi.mock('../../sections', async () => {
-  const module = (await vi.importActual('../../sections'));
+  const module = await vi.importActual('../../sections');
   return {
     ...module,
     getESQLDocsSections: () => ({

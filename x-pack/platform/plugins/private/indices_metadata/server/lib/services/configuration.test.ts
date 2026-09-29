@@ -124,8 +124,7 @@ describe('ConfigurationService', () => {
         indices_threshold: 300,
       };
 
-      vi
-        .spyOn(artifactService, 'getArtifact')
+      vi.spyOn(artifactService, 'getArtifact')
         .mockResolvedValueOnce({
           data: defaultConfiguration,
           modified: false,
@@ -218,8 +217,7 @@ describe('ConfigurationService', () => {
         async ({ createError }) => {
           const error = createError();
 
-          vi
-            .spyOn(artifactService, 'getArtifact')
+          vi.spyOn(artifactService, 'getArtifact')
             .mockResolvedValueOnce({
               data: defaultConfiguration,
               modified: true,

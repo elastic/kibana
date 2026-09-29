@@ -61,9 +61,10 @@ describe('getAttackDiscoveryGenerationsRoute', () => {
       query: { start: '2025-06-26T21:00:00.000Z', end: '2025-06-26T22:00:00.000Z', size: 10 },
     };
     mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(helpers, 'performChecks')
-      .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
+    vi.spyOn(helpers, 'performChecks').mockResolvedValue({
+      isSuccess: true,
+      currentUser: mockAuthenticatedUser,
+    });
 
     addVersionMock = vi.fn();
     (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });

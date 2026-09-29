@@ -14,7 +14,7 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { generateEsqlTool } from './generate_esql';
 
 vi.mock('@kbn/agent-builder-genai-utils', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-genai-utils'));
+  const actual = await vi.importActual('@kbn/agent-builder-genai-utils');
   return {
     ...actual,
     generateEsql: vi.fn(),

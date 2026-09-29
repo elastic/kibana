@@ -19,22 +19,22 @@ import {
 } from '../../../common/constants';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: vi.fn(),
-          config: {
-            ui: {
-              ccs: { enabled: true },
-              metricbeat: { index: 'metricbeat-*' },
-              container: { elasticsearch: { enabled: false } },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: vi.fn(),
+        config: {
+          ui: {
+            ccs: { enabled: true },
+            metricbeat: { index: 'metricbeat-*' },
+            container: { elasticsearch: { enabled: false } },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetchStatus', () => {
   const alertType = RULE_CPU_USAGE;

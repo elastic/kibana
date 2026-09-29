@@ -14,7 +14,7 @@ import { setMockValues, setMockActions } from '../../../../../__mocks__/kea_logi
 let capturedSteps: any[] | undefined;
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiStepsHorizontal: (props: any) => {
@@ -25,32 +25,32 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./configure_pipeline', () => {
-      const mocked = {
-      ConfigurePipeline: () => <div data-test-subj="configurePipeline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConfigurePipeline: () => <div data-test-subj="configurePipeline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configure_fields', () => {
-      const mocked = {
-      ConfigureFields: () => <div data-test-subj="configureFields" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConfigureFields: () => <div data-test-subj="configureFields" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./test_pipeline', () => {
-      const mocked = {
-      TestPipeline: () => <div data-test-subj="testPipeline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TestPipeline: () => <div data-test-subj="testPipeline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./review_pipeline', () => {
-      const mocked = {
-      ReviewPipeline: () => <div data-test-subj="reviewPipeline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReviewPipeline: () => <div data-test-subj="reviewPipeline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

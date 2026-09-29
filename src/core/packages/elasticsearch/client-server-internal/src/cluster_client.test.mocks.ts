@@ -11,24 +11,24 @@ import { vi } from 'vitest';
 
 export const configureClientMock = vi.fn();
 vi.doMock('./configure_client', () => {
-      const mocked = {
-      configureClient: configureClientMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    configureClient: configureClientMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createTransportMock = vi.fn();
 vi.doMock('./create_transport', () => {
-      const mocked = {
-      createTransport: createTransportMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTransport: createTransportMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createInternalErrorHandlerMock = vi.fn();
 vi.doMock('./retry_unauthorized', () => {
-      const mocked = {
-      createInternalErrorHandler: createInternalErrorHandlerMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalErrorHandler: createInternalErrorHandlerMock,
+  };
+  return { ...mocked, default: mocked };
+});

@@ -34,12 +34,12 @@ vi.mock('./dashboards/siem_dashboard_migration_service');
 
 const mockReplaySubject$ = { next: vi.fn(), complete: vi.fn() };
 vi.mock('rxjs', () => {
-      const mocked = {
-      ...require('rxjs'),
-      ReplaySubject: vi.fn().mockImplementation(() => mockReplaySubject$),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('rxjs'),
+    ReplaySubject: vi.fn().mockImplementation(() => mockReplaySubject$),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleMigrationDependencies = {} as SiemMigrationsClientDependencies;
 

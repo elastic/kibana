@@ -34,11 +34,11 @@ import {
 import { NightshiftInvestigationsClient } from './investigations_client';
 
 vi.mock('../lib/install_investigation_agent', () => {
-      const mocked = {
-      installInvestigationAgent: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installInvestigationAgent: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const installInvestigationAgentMock = installInvestigationAgent as MockedFunction<
   typeof installInvestigationAgent

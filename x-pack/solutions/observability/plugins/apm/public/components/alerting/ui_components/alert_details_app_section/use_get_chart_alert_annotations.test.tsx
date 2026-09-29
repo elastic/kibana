@@ -13,16 +13,16 @@ import { ALERT_END, ALERT_EVALUATION_THRESHOLD, ALERT_RULE_TYPE_ID } from '@kbn/
 import type { TopAlert } from '@kbn/observability-plugin/public';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({
-        euiTheme: {
-          colors: { danger: '#BD271E' },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: { danger: '#BD271E' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockAlert = (overrides: Partial<Record<string, unknown>> = {}): TopAlert =>
   ({

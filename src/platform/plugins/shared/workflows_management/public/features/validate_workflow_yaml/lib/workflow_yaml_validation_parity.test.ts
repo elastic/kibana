@@ -22,11 +22,11 @@ import { performComputation } from '../../../entities/workflows/store/workflow_d
 const emptyRegistry = createMockWorkflowContextRegistry();
 
 vi.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
-      const mocked = {
-      validateEsqlSteps: vi.fn(async () => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlSteps: vi.fn(async () => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /** Broken YAML shared by editor and change-history preview validation paths. */
 export const WORKFLOW_YAML_VALIDATION_PARITY_FIXTURE = [

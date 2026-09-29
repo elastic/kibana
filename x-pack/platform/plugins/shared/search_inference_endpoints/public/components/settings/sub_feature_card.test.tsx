@@ -25,21 +25,21 @@ import { EisModelStatus, type EndpointDeprecationInfo } from '../../types';
 vi.mock('../../hooks/use_connectors');
 vi.mock('../../hooks/use_registered_features');
 vi.mock('./add_model_popover', () => {
-      const mocked = {
-      AddModelPopover: ({
-        existingEndpointIds,
-        onAdd,
-      }: {
-        existingEndpointIds: string[];
-        onAdd: (id: string) => void;
-      }) => (
-        <button data-test-subj="add-model-button" onClick={() => onAdd('ep-2')} type="button">
-          Add
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddModelPopover: ({
+      existingEndpointIds,
+      onAdd,
+    }: {
+      existingEndpointIds: string[];
+      onAdd: (id: string) => void;
+    }) => (
+      <button data-test-subj="add-model-button" onClick={() => onAdd('ep-2')} type="button">
+        Add
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConnectors = useConnectors as Mock;
 const mockUseRegisteredFeatures = useRegisteredFeatures as Mock;

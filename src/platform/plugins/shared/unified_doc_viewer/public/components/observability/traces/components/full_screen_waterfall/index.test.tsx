@@ -28,30 +28,30 @@ const renderWithHistoryKey = (ui: React.ReactElement) =>
 let capturedDocFlyoutHasAnimation: boolean | undefined;
 
 vi.mock('./waterfall_flyout/document_detail_flyout', () => {
-      const mocked = {
-      DocumentDetailFlyout: ({
-        type,
-        docId,
-        traceId,
-        activeSection,
-        dataTestSubj,
-        hasAnimation,
-      }: any) => {
-        capturedDocFlyoutHasAnimation = hasAnimation;
-        return (
-          <div
-            data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
-            data-trace-id={traceId}
-            data-span-id={docId}
-            data-id={docId}
-            data-active-section={activeSection}
-            data-flyout-test-subj={dataTestSubj}
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentDetailFlyout: ({
+      type,
+      docId,
+      traceId,
+      activeSection,
+      dataTestSubj,
+      hasAnimation,
+    }: any) => {
+      capturedDocFlyoutHasAnimation = hasAnimation;
+      return (
+        <div
+          data-test-subj={type === 'span' ? 'spanFlyout' : 'logsFlyout'}
+          data-trace-id={traceId}
+          data-span-id={docId}
+          data-id={docId}
+          data-active-section={activeSection}
+          data-flyout-test-subj={dataTestSubj}
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedWaterfallProps: {
   contextSpanIds?: string[];

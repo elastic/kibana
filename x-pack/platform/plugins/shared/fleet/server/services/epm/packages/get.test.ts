@@ -1524,7 +1524,7 @@ owner: elastic`,
         });
 
         // Use the real groupPathsByService function instead of mocking it
-        const realRegistry = (await vi.importActual('../registry'));
+        const realRegistry = await vi.importActual('../registry');
         MockRegistry.groupPathsByService.mockImplementation(realRegistry.groupPathsByService);
 
         const result = await getPackageInfo({
@@ -1591,7 +1591,7 @@ owner: elastic`,
         });
 
         // Use the real groupPathsByService function instead of mocking it
-        const realRegistry = (await vi.importActual('../registry'));
+        const realRegistry = await vi.importActual('../registry');
         MockRegistry.groupPathsByService.mockImplementation(realRegistry.groupPathsByService);
 
         const result = await getPackageInfo({
@@ -2016,7 +2016,7 @@ owner: elastic`,
     });
 
     it('falls back to bundled archive when EPR returns 404 for a package not in the registry', async () => {
-      const { RegistryResponseError } = (await vi.importActual('../../../errors'));
+      const { RegistryResponseError } = await vi.importActual('../../../errors');
       MockRegistry.getPackage.mockRejectedValue(new RegistryResponseError('not found', 404));
       MockRegistry.getBundledArchive.mockResolvedValue(bundledResult);
 

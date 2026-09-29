@@ -23,23 +23,23 @@ import { HelpPopover } from './help_popover';
 import { getESQLAdHocDataview, getEditorExtensions } from '@kbn/esql-utils';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLAdHocDataview: vi.fn(),
-      getEditorExtensions: vi
-        .fn()
-        .mockResolvedValue({ recommendedQueries: [], recommendedFields: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLAdHocDataview: vi.fn(),
+    getEditorExtensions: vi
+      .fn()
+      .mockResolvedValue({ recommendedQueries: [], recommendedFields: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/language-documentation', () => {
-      const mocked = {
-      LanguageDocumentationFlyout: ({ isHelpMenuOpen }: { isHelpMenuOpen: boolean }) =>
-        isHelpMenuOpen ? <div data-test-subj="esqlInlineDocumentationFlyout" /> : null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LanguageDocumentationFlyout: ({ isHelpMenuOpen }: { isHelpMenuOpen: boolean }) =>
+      isHelpMenuOpen ? <div data-test-subj="esqlInlineDocumentationFlyout" /> : null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToggleLanguageComponent = vi.fn();
 const mockEditorActions = {
@@ -50,11 +50,11 @@ const mockEditorActions = {
 };
 
 vi.mock('../editor_actions_context', () => {
-      const mocked = {
-      useEsqlEditorActions: () => mockEditorActions,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlEditorActions: () => mockEditorActions,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const startMock = coreMock.createStart();
 const notificationsMock = notificationServiceMock.createStartContract();

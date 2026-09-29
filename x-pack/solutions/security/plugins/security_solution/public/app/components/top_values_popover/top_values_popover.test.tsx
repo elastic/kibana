@@ -35,7 +35,7 @@ const mockUseObservable = vi.fn();
 vi.mock('react-use/lib/useObservable', () => () => mockUseObservable());
 
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
   return {
     ...original,
     useKibana: () => ({

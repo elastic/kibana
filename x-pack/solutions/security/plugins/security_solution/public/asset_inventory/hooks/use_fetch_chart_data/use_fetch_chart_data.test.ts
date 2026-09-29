@@ -20,11 +20,11 @@ import { useDataViewContext } from '../data_view_context';
 vi.mock('../../../common/lib/kibana');
 vi.mock('../data_view_context');
 vi.mock('@kbn/cloud-security-posture', () => {
-      const mocked = {
-      showErrorToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    showErrorToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSearch = vi.fn();
 

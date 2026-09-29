@@ -15,7 +15,7 @@ export const setMetaDocMigrationCompleteMock = vi.fn();
 export const setMetaDocMigrationStartedMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     setMetaDocMigrationStarted: setMetaDocMigrationStartedMock,
@@ -24,7 +24,7 @@ vi.doMock('./utils', async () => {
   };
 });
 
-const realActions = (await vi.importActual('./actions'));
+const realActions = await vi.importActual('./actions');
 
 export const ActionMocks = Object.keys(realActions).reduce((mocks, key) => {
   mocks[key] = vi.fn().mockImplementation((state: unknown) => state);

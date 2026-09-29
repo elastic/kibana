@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter, mockFlashMessageHelpers } from '../../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
@@ -19,11 +19,11 @@ import type { AddConnectorValues } from './add_connector_logic';
 import { AddConnectorLogic } from './add_connector_logic';
 
 vi.mock('../../../../shared/kibana', () => {
-      const mocked = {
-      KibanaLogic: { values: { navigateToUrl: vi.fn() } },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaLogic: { values: { navigateToUrl: vi.fn() } },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DEFAULT_VALUES: AddConnectorValues = {
   isModalVisible: false,

@@ -21,34 +21,32 @@ import type { ContextValue } from '../../../../contexts/services_context';
 import { copyTextToClipboard } from '../../../../lib/copy_text_to_clipboard';
 
 vi.mock('./language_selector_modal', () => {
-      const mocked = {
-      LanguageSelectorModal: () => <div>Language Selector Modal</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LanguageSelectorModal: () => <div>Language Selector Modal</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      convertRequestToLanguage: vi.fn(() =>
-        Promise.resolve({ data: 'mocked request code', error: null })
-      ),
-      StorageKeys: {
-        DEFAULT_LANGUAGE: 'default_language',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertRequestToLanguage: vi.fn(() =>
+      Promise.resolve({ data: 'mocked request code', error: null })
+    ),
+    StorageKeys: {
+      DEFAULT_LANGUAGE: 'default_language',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/copy_text_to_clipboard', () => {
-      const mocked = {
-      copyTextToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    copyTextToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockCopyTextToClipboard = copyTextToClipboard as MockedFunction<
-  typeof copyTextToClipboard
->;
+const mockCopyTextToClipboard = copyTextToClipboard as MockedFunction<typeof copyTextToClipboard>;
 
 const mockNotifications: Pick<NotificationsStart, 'toasts'> = {
   toasts: {

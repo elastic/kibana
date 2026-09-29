@@ -20,19 +20,19 @@ let mockAgentBuilderSkillsRequirements = {
 };
 
 vi.mock('../../hooks/use_are_agent_builder_skills_available', () => {
-      const mocked = {
-      useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-      useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+    useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_alerting_v2_experimental_features', () => {
-      const mocked = {
-      useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertingV2ExperimentalFeatures: () => mockAlertingV2ExperimentalFeaturesEnabled,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onCreateEsqlRule = vi.fn();
 const onCreateWithAgent = vi.fn();

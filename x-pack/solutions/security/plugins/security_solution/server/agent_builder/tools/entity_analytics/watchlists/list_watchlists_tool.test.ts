@@ -23,11 +23,11 @@ import { getWatchlistToolAvailability } from './watchlist_availability';
 import { listWatchlistsTool, SECURITY_LIST_WATCHLISTS_TOOL_ID } from './list_watchlists_tool';
 
 vi.mock('./watchlist_availability', () => {
-      const mocked = {
-      getWatchlistToolAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWatchlistToolAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetWatchlistToolAvailability = getWatchlistToolAvailability as Mock;
 
@@ -37,7 +37,9 @@ const mockExperimentalFeatures = {
 
 const mockListFn = vi.fn();
 vi.mock('../../../../lib/entity_analytics/watchlists/management/watchlist_config', async () => {
-  const actual = (await vi.importActual('../../../../lib/entity_analytics/watchlists/management/watchlist_config'));
+  const actual = await vi.importActual(
+    '../../../../lib/entity_analytics/watchlists/management/watchlist_config'
+  );
   return {
     ...actual,
     WatchlistConfigClient: vi.fn().mockImplementation(() => ({
@@ -50,11 +52,11 @@ const mockGetUserWatchlistPrivileges = vi.fn();
 vi.mock(
   '../../../../lib/entity_analytics/watchlists/management/get_user_watchlist_privileges',
   () => {
-      const mocked = {
-        getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getUserWatchlistPrivileges: (...args: unknown[]) => mockGetUserWatchlistPrivileges(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const buildWatchlist = (overrides: Partial<Record<string, unknown>> = {}) => ({

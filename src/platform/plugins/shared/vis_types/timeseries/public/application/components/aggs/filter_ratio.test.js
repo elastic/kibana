@@ -18,11 +18,11 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { setDataStart } from '../../../services';
 
 vi.mock('../query_bar_wrapper', () => {
-      const mocked = {
-      QueryBarWrapper: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBarWrapper: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TSVB Filter Ratio', () => {
   beforeAll(() => setDataStart(dataPluginMock.createStartContract()));

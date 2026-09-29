@@ -22,7 +22,7 @@ import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
 vi.mock('@kbn/elastic-assistant');
 vi.mock('@kbn/elastic-assistant-common', async () => {
-  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
+  const actual = await vi.importActual('@kbn/elastic-assistant-common');
 
   return {
     ...actual,
@@ -45,9 +45,7 @@ const mockUseReportAddToChat = useReportAddToChat as MockedFunction<typeof useRe
 const mockUseAssistantAvailability = useAssistantAvailability as MockedFunction<
   typeof useAssistantAvailability
 >;
-const mockUseAssistantContext = useAssistantContext as MockedFunction<
-  typeof useAssistantContext
->;
+const mockUseAssistantContext = useAssistantContext as MockedFunction<typeof useAssistantContext>;
 const mockGetAttackDiscoveryMarkdown = getAttackDiscoveryMarkdown as MockedFunction<
   typeof getAttackDiscoveryMarkdown
 >;

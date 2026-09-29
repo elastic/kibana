@@ -24,7 +24,9 @@ const MOCK_ACTION_POLICIES_DOCS_URL = 'https://docs.test/action-policies';
 let mockCanWriteActionPolicies = true;
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {

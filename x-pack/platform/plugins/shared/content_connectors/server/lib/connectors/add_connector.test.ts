@@ -24,17 +24,17 @@ import { textAnalysisSettings } from '../indices/text_analysis';
 import { addConnector } from './add_connector';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      createConnector: vi.fn(),
-      deleteConnectorById: vi.fn(),
-      fetchConnectorByIndexName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createConnector: vi.fn(),
+    deleteConnectorById: vi.fn(),
+    fetchConnectorByIndexName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../indices/generate_api_key', () => {
-      const mocked = { generateApiKey: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { generateApiKey: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 describe('addConnector lib function', () => {
   const mockClient = {

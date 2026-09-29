@@ -16,11 +16,11 @@ import { esqlQueryValidatorFactory } from './esql_query_validator_factory';
 import { ESQL_ERROR_CODES } from './error_codes';
 
 vi.mock('../../../logic/esql_query_columns', () => {
-      const mocked = {
-      fetchEsqlQueryColumns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsqlQueryColumns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetchEsqlQueryColumnsMock = fetchEsqlQueryColumns as Mock;
 

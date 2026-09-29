@@ -573,9 +573,7 @@ describe('getContextSchemaForStep', () => {
       }
       return undefined;
     });
-    const getAllPredecessorsSpy = vi
-      .spyOn(workflowGraph, 'getAllPredecessors')
-      .mockReturnValue([]);
+    const getAllPredecessorsSpy = vi.spyOn(workflowGraph, 'getAllPredecessors').mockReturnValue([]);
 
     expect(() =>
       getContextSchemaForStep(emptyRegistry, baseSchema, workflowGraph, 'step-a')

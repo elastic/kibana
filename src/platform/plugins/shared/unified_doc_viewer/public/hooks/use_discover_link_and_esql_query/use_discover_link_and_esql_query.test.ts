@@ -16,11 +16,11 @@ import { useDiscoverLinkAndEsqlQuery } from '.';
 import { useGetGenerateDiscoverLink } from '../use_generate_discover_link';
 
 vi.mock('../use_generate_discover_link', () => {
-      const mocked = {
-      useGetGenerateDiscoverLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetGenerateDiscoverLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDiscoverLinkAndEsqlQuery', () => {
   const mockUseGetGenerateDiscoverLink = vi.mocked(useGetGenerateDiscoverLink);

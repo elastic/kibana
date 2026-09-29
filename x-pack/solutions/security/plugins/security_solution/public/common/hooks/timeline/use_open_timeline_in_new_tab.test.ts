@@ -18,9 +18,7 @@ import { useOpenTimelineInNewTab } from './use_open_timeline_in_new_tab';
 
 vi.mock('../../lib/kibana');
 
-const getUrlForApp = vi.fn(
-  (_appId: string, { path }: { path: string }) => `/app/security/${path}`
-);
+const getUrlForApp = vi.fn((_appId: string, { path }: { path: string }) => `/app/security/${path}`);
 
 const buildDataProvider = (field: string, value: string): DataProvider => ({
   and: [],

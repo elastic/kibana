@@ -27,32 +27,33 @@ const mockResolveArtifactId = vi.fn(
 );
 
 vi.mock('@kbn/alerting-v2-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-v2-utils')),
-      resolveArtifactId: (type: string, existingId?: string) => mockResolveArtifactId(type, existingId),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-v2-utils')),
+    resolveArtifactId: (type: string, existingId?: string) =>
+      mockResolveArtifactId(type, existingId),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      getDashboardId: (artifact: { data: Record<string, unknown> }) =>
-        typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
-      resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
-      searchRelatedDashboard: (...args: unknown[]) => mockSearchRelatedDashboard(...args),
-      mapArtifacts: (artifacts: unknown) =>
-        mockMapArtifacts(
-          artifacts as Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined
-        ),
-      partitionArtifactsByDashboardType: (
-        artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }>
-      ) => ({
-        dashboardArtifacts: artifacts.filter((artifact) => artifact.type === 'dashboard'),
-        otherArtifacts: artifacts.filter((artifact) => artifact.type !== 'dashboard'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDashboardId: (artifact: { data: Record<string, unknown> }) =>
+      typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
+    resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
+    searchRelatedDashboard: (...args: unknown[]) => mockSearchRelatedDashboard(...args),
+    mapArtifacts: (artifacts: unknown) =>
+      mockMapArtifacts(
+        artifacts as Array<{ id: string; type: string; data: Record<string, unknown> }> | undefined
+      ),
+    partitionArtifactsByDashboardType: (
+      artifacts: Array<{ id: string; type: string; data: Record<string, unknown> }>
+    ) => ({
+      dashboardArtifacts: artifacts.filter((artifact) => artifact.type === 'dashboard'),
+      otherArtifacts: artifacts.filter((artifact) => artifact.type !== 'dashboard'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpdateRule = vi.fn();
 const mockUseUpdateRule = vi.fn(() => ({
@@ -60,11 +61,11 @@ const mockUseUpdateRule = vi.fn(() => ({
   isLoading: false,
 }));
 vi.mock('../../../../hooks/use_update_rule', () => {
-      const mocked = {
-      useUpdateRule: () => mockUseUpdateRule(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateRule: () => mockUseUpdateRule(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDashboardService = { findDashboardsService: vi.fn() };
 const mockShareService = {
@@ -87,41 +88,41 @@ let mockDashboardServiceOverride: typeof mockDashboardService | undefined = mock
 let mockCanWriteRules = true;
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown, options?: { optional?: boolean }) => {
-        if (token === 'http') {
-          return mockHttpService;
+  const mocked = {
+    useService: (token: unknown, options?: { optional?: boolean }) => {
+      if (token === 'http') {
+        return mockHttpService;
+      }
+      if (token === 'share') {
+        return mockShareService;
+      }
+      if (token === 'dashboard') {
+        if (mockDashboardServiceOverride === undefined && !options?.optional) {
+          throw new Error('Required service "dashboard" is not bound');
         }
-        if (token === 'share') {
-          return mockShareService;
-        }
-        if (token === 'dashboard') {
-          if (mockDashboardServiceOverride === undefined && !options?.optional) {
-            throw new Error('Required service "dashboard" is not bound');
-          }
-          return mockDashboardServiceOverride;
-        }
-        if (typeof token === 'function') {
-          // UserCapabilities service token
-          return {
-            canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
-            canRead: () => true,
-            can: () => mockCanWriteRules,
-          };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+        return mockDashboardServiceOverride;
+      }
+      if (typeof token === 'function') {
+        // UserCapabilities service token
+        return {
+          canWrite: (feature: string) => (feature === 'rules' ? mockCanWriteRules : true),
+          canRead: () => true,
+          can: () => mockCanWriteRules,
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di', () => {
-      const mocked = {
-      PluginStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

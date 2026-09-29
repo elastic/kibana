@@ -3681,9 +3681,7 @@ describe('CasesService', () => {
         // The SO mock doesn't include `search` by default, so wire it up here.
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         (unsecuredSavedObjectsClient as any).search = searchMock;
-        vi
-          .spyOn(attachmentService.getter, 'getCaseAttatchmentStats')
-          .mockResolvedValue(new Map());
+        vi.spyOn(attachmentService.getter, 'getCaseAttatchmentStats').mockResolvedValue(new Map());
         return searchMock;
       };
 

@@ -28,11 +28,11 @@ import {
 
 const mockToggle = vi.fn();
 vi.mock('../hooks/use_toggle_entity_analytics', () => {
-      const mocked = {
-      useToggleEntityAnalytics: () => mockUseToggleReturn,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToggleEntityAnalytics: () => mockUseToggleReturn,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockUseToggleReturn: {
   status: EntityAnalyticsStatus;

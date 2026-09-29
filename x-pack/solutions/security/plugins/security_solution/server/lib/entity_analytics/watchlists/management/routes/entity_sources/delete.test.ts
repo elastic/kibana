@@ -18,17 +18,19 @@ import {
 
 const mockRemoveEntitySourceReference = vi.fn();
 vi.mock('../../watchlist_config', () => {
-      const mocked = {
-      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
-        removeEntitySourceReference: mockRemoveEntitySourceReference,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+      removeEntitySourceReference: mockRemoveEntitySourceReference,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entity_sources/infra/entity_source_client');
 
-const { mockGetEntitySource, mockDeleteEntitySource } = (await vi.importMock('../../../entity_sources/infra/entity_source_client')) as {
+const { mockGetEntitySource, mockDeleteEntitySource } = (await vi.importMock(
+  '../../../entity_sources/infra/entity_source_client'
+)) as {
   mockGetEntitySource: Mock;
   mockDeleteEntitySource: Mock;
 };

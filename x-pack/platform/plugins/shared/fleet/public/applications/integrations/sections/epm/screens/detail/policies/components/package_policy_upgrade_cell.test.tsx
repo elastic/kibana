@@ -17,21 +17,21 @@ import { allowedExperimentalValues } from '../../../../../../../../../common/exp
 import { PackagePolicyUpgradeCell } from './package_policy_upgrade_cell';
 
 vi.mock('../../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks')),
-      useLink: vi.fn().mockReturnValue({ getHref: vi.fn().mockReturnValue('/mock/upgrade') }),
-      useAuthz: vi.fn().mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: { addSuccess: vi.fn(), addWarning: vi.fn(), addError: vi.fn() },
-        },
-      }),
-      // Stubbed so opening the confirm modal never risks a real request; the actual upgrade call +
-      // refresh are covered end-to-end by the shared hook via `package_policy_actions_menu.test.tsx`.
-      sendBulkUpgradeAgentlessPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks')),
+    useLink: vi.fn().mockReturnValue({ getHref: vi.fn().mockReturnValue('/mock/upgrade') }),
+    useAuthz: vi.fn().mockReturnValue({ integrations: { writeIntegrationPolicies: true } }),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: { addSuccess: vi.fn(), addWarning: vi.fn(), addError: vi.fn() },
+      },
+    }),
+    // Stubbed so opening the confirm modal never risks a real request; the actual upgrade call +
+    // refresh are covered end-to-end by the shared hook via `package_policy_actions_menu.test.tsx`.
+    sendBulkUpgradeAgentlessPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const agentPolicies = [
   { id: 'agentless-1', name: 'Agentless', supports_agentless: true },

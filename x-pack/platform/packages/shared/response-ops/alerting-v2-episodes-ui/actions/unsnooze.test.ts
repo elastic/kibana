@@ -67,9 +67,10 @@ describe('createUnsnoozeAction', () => {
 
   it('execute: POSTs unique-by-group UNSNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    vi
-      .spyOn(bulk, 'bulkUnsnoozeSeriesActions')
-      .mockResolvedValue({ affected_count: 2, errors: [] });
+    vi.spyOn(bulk, 'bulkUnsnoozeSeriesActions').mockResolvedValue({
+      affected_count: 2,
+      errors: [],
+    });
     const onSuccess = vi.fn();
     await createUnsnoozeAction(deps).execute({
       episodes: [

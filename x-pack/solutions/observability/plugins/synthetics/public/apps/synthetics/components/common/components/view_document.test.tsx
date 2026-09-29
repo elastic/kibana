@@ -15,46 +15,46 @@ import type { Ping } from '../../../../../../common/runtime_types';
 
 const mockUseEsDocSearch = vi.fn().mockReturnValue([0, null, vi.fn()]);
 vi.mock('@kbn/unified-doc-viewer-plugin/public', () => {
-      const mocked = {
-      useEsDocSearch: (args: unknown) => mockUseEsDocSearch(args),
-      UnifiedDocViewer: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsDocSearch: (args: unknown) => mockUseEsDocSearch(args),
+    UnifiedDocViewer: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLocalDataView = { id: 'local-dv', getIndexPattern: () => SYNTHETICS_INDEX_PATTERN };
 vi.mock('../../../contexts/synthetics_data_view_context', () => {
-      const mocked = {
-      useSyntheticsDataView: () => mockLocalDataView,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsDataView: () => mockLocalDataView,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_date_format', () => {
-      const mocked = {
-      useDateFormat: () => (s: string) => `formatted:${s}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateFormat: () => (s: string) => `formatted:${s}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../monitors_page/overview/overview/monitor_detail_flyout', () => {
-      const mocked = {
-      LoadingState: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadingState: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataViewsCreate = vi.fn();
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          dataViews: { create: mockDataViewsCreate },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        dataViews: { create: mockDataViewsCreate },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // useFetcher runs the producer once on mount in this minimal stub. Tests that
 // need the error path mutate mockFetcherReturn before rendering.
@@ -65,14 +65,14 @@ let mockFetcherReturn: { data?: unknown; loading: boolean; error?: Error | undef
   error: undefined,
 };
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useFetcher: (producer: () => Promise<unknown>) => {
-        mockFetcherProducers.push(producer);
-        return mockFetcherReturn;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: (producer: () => Promise<unknown>) => {
+      mockFetcherProducers.push(producer);
+      return mockFetcherReturn;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const basePing: Ping = {
   docId: 'doc-1',

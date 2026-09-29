@@ -48,11 +48,11 @@ const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
   () => {
-      const mocked = {
-        useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
@@ -62,48 +62,45 @@ const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
   () => {
-      const mocked = {
-        useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../detections/components/user_info', () => {
-      const mocked = {
-      useUserData: vi.fn().mockReturnValue([{ hasIndexWrite: true }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserData: vi.fn().mockReturnValue([{ hasIndexWrite: true }]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana');
 
-vi.mock(
-  '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
-  () => {
-      const mocked = {
-        useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
+  const mocked = {
+    useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true, hasIndexWrite: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../cases/components/use_insert_timeline');
 
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_license', () => {
-      const mocked = {
-      useLicense: vi.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: vi.fn().mockReturnValue({ isPlatinumPlus: () => true, isEnterprise: () => false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_status',

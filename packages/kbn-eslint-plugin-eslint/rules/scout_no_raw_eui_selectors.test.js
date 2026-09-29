@@ -12,21 +12,21 @@ import { vi } from 'vitest';
 // Shape of the real package: one `Eui<Component>Selectors` object per Component
 // Object, `*_SELECTOR` entries are CSS classes, `*_TEST_SUBJ` entries are not.
 vi.mock('@elastic/eui-test-helpers', () => {
-      const mocked = {
-      EuiComboBoxObject: class {},
-      EuiComboBoxSelectors: {
-        ROOT_SELECTOR: '.euiComboBox',
-        PILL_SELECTOR: '.euiComboBoxPill',
-        SEARCH_INPUT_TEST_SUBJ: 'comboBoxSearchInput',
-        optionFor: (testSubj) => `[data-test-subj~="${testSubj}-optionsList"] [role="option"]`,
-      },
-      EuiDataGridSelectors: {
-        ROW_SELECTOR: '.euiDataGridRow',
-        FULL_SCREEN_BUTTON_TEST_SUBJ: 'dataGridFullScreenButton',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EuiComboBoxObject: class {},
+    EuiComboBoxSelectors: {
+      ROOT_SELECTOR: '.euiComboBox',
+      PILL_SELECTOR: '.euiComboBoxPill',
+      SEARCH_INPUT_TEST_SUBJ: 'comboBoxSearchInput',
+      optionFor: (testSubj) => `[data-test-subj~="${testSubj}-optionsList"] [role="option"]`,
+    },
+    EuiDataGridSelectors: {
+      ROW_SELECTOR: '.euiDataGridRow',
+      FULL_SCREEN_BUTTON_TEST_SUBJ: 'dataGridFullScreenButton',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { RuleTester } = require('eslint');
 const rule = require('./scout_no_raw_eui_selectors');

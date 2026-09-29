@@ -18,23 +18,23 @@ const mockUseHostCountContext = vi.fn();
 const mockUseUnifiedSearchContext = vi.fn();
 
 vi.mock('../../hooks/use_hosts_kpis_esql', () => {
-      const mocked = {
-      useHostsKpisEsql: () => mockUseHostsKpis(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHostsKpisEsql: () => mockUseHostsKpis(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_host_count', () => {
-      const mocked = {
-      useHostCountContext: () => mockUseHostCountContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHostCountContext: () => mockUseHostCountContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_unified_search', () => {
-      const mocked = {
-      useUnifiedSearchContext: () => mockUseUnifiedSearchContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedSearchContext: () => mockUseUnifiedSearchContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Must be a stable singleton: `KpiCharts` passes `inventoryModel.metrics` into
 // a `useAsync` dep array, so a fresh object per call would loop re-renders.
@@ -56,46 +56,46 @@ const mockInventoryModel = {
   },
 };
 vi.mock('@kbn/metrics-data-access-plugin/common', () => {
-      const mocked = {
-      findInventoryModel: () => mockInventoryModel,
-      CPU_USAGE_LABEL: 'CPU Usage',
-      MEMORY_USAGE_LABEL: 'Memory Usage',
-      NORMALIZED_LOAD_LABEL: 'Normalized Load',
-      DISK_USAGE_LABEL: 'Disk Usage',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findInventoryModel: () => mockInventoryModel,
+    CPU_USAGE_LABEL: 'CPU Usage',
+    MEMORY_USAGE_LABEL: 'Memory Usage',
+    NORMALIZED_LOAD_LABEL: 'Normalized Load',
+    DISK_USAGE_LABEL: 'Disk Usage',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../components/lens', () => {
-      const mocked = {
-      TooltipContent: () => <div data-test-subj="tooltip" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TooltipContent: () => <div data-test-subj="tooltip" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../chart/metric_chart_wrapper', () => {
-      const mocked = {
-      MetricChartWrapper: ({
-        id,
-        value,
-        valueFormatter,
-        subtitle,
-      }: {
-        id: string;
-        value: number | null;
-        valueFormatter?: (value: number) => string;
-        subtitle: string;
-      }) => (
-        <div
-          data-test-subj={id}
-          data-value={String(value)}
-          data-formatted={value == null ? '' : valueFormatter?.(value)}
-          data-subtitle={subtitle}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricChartWrapper: ({
+      id,
+      value,
+      valueFormatter,
+      subtitle,
+    }: {
+      id: string;
+      value: number | null;
+      valueFormatter?: (value: number) => string;
+      subtitle: string;
+    }) => (
+      <div
+        data-test-subj={id}
+        data-value={String(value)}
+        data-formatted={value == null ? '' : valueFormatter?.(value)}
+        data-subtitle={subtitle}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const KPIS: HostsKpis = {
   cpuUsage: 0.4567,

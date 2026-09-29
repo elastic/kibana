@@ -19,63 +19,63 @@ import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryMonacoPreview } from './workflow_change_history_monaco_preview';
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useDefineWorkflowsMonacoTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useDefineWorkflowsMonacoTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockValidationResults: YamlValidationResult[] = [];
 let mockIsValidationLoading = false;
 const mockHandleValidationErrorClick = vi.fn();
 
 vi.mock('./use_workflow_change_history_preview_validation', () => {
-      const mocked = {
-      useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
-        validationResults: mockValidationResults,
-        isValidationLoading: mockIsValidationLoading,
-        validationError: null,
-        handleValidationErrorClick: mockHandleValidationErrorClick,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
+      validationResults: mockValidationResults,
+      isValidationLoading: mockIsValidationLoading,
+      validationError: null,
+      handleValidationErrorClick: mockHandleValidationErrorClick,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => {
-      const mocked = {
-      WorkflowYamlValidationAccordion: ({
-        extraAction,
-        validationErrors,
-        isLoading,
-        onErrorClick,
-      }: {
-        extraAction?: React.ReactNode;
-        validationErrors?: YamlValidationResult[] | null;
-        isLoading?: boolean;
-        onErrorClick?: (error: YamlValidationResult) => void;
-      }) => (
-        <div data-test-subj="workflowYamlEditorValidationErrorsList">
-          {isLoading
-            ? 'Initializing validation...'
-            : (validationErrors ?? []).length === 0
-            ? 'No validation errors'
-            : (validationErrors ?? []).map((error) => (
-                <button
-                  key={error.id}
-                  type="button"
-                  data-test-subj={`workflowYamlValidationError-${error.id}`}
-                  onClick={() => onErrorClick?.(error)}
-                >
-                  {error.message}
-                </button>
-              ))}
-          {extraAction}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYamlValidationAccordion: ({
+      extraAction,
+      validationErrors,
+      isLoading,
+      onErrorClick,
+    }: {
+      extraAction?: React.ReactNode;
+      validationErrors?: YamlValidationResult[] | null;
+      isLoading?: boolean;
+      onErrorClick?: (error: YamlValidationResult) => void;
+    }) => (
+      <div data-test-subj="workflowYamlEditorValidationErrorsList">
+        {isLoading
+          ? 'Initializing validation...'
+          : (validationErrors ?? []).length === 0
+          ? 'No validation errors'
+          : (validationErrors ?? []).map((error) => (
+              <button
+                key={error.id}
+                type="button"
+                data-test-subj={`workflowYamlValidationError-${error.id}`}
+                onClick={() => onErrorClick?.(error)}
+              >
+                {error.message}
+              </button>
+            ))}
+        {extraAction}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockYamlModel = {
   getLineLength: vi.fn(() => 10),
@@ -106,46 +106,46 @@ let mockLineChanges: Array<{
 ];
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        MarkerSeverity: { Error: 8 },
-        editor: {
-          createModel: vi.fn((value: string) => ({ value, dispose: vi.fn() })),
-          create: vi.fn(() => ({
-            dispose: vi.fn(),
-            layout: vi.fn(),
+  const mocked = {
+    monaco: {
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        createModel: vi.fn((value: string) => ({ value, dispose: vi.fn() })),
+        create: vi.fn(() => ({
+          dispose: vi.fn(),
+          layout: vi.fn(),
+          getModel: vi.fn(() => mockYamlModel),
+          updateOptions: vi.fn(),
+          createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+        })),
+        createDiffEditor: vi.fn(() => ({
+          setModel: vi.fn(),
+          dispose: vi.fn(),
+          layout: vi.fn(),
+          updateOptions: mockDiffUpdateOptions,
+          getLineChanges: vi.fn(() => mockLineChanges),
+          onDidUpdateDiff: vi.fn((listener: () => void) => {
+            onDidUpdateDiffCallbacks.push(listener);
+            return { dispose: vi.fn() };
+          }),
+          setPosition: mockSetPosition,
+          revealLineInCenter: mockRevealLineInCenter,
+          revealLinesInCenter: mockRevealLinesInCenter,
+          getOriginalEditor: vi.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
+          getModifiedEditor: vi.fn(() => ({
+            updateOptions: mockModifiedUpdateOptions,
+            revealLineInCenter: vi.fn(),
             getModel: vi.fn(() => mockYamlModel),
-            updateOptions: vi.fn(),
             createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
           })),
-          createDiffEditor: vi.fn(() => ({
-            setModel: vi.fn(),
-            dispose: vi.fn(),
-            layout: vi.fn(),
-            updateOptions: mockDiffUpdateOptions,
-            getLineChanges: vi.fn(() => mockLineChanges),
-            onDidUpdateDiff: vi.fn((listener: () => void) => {
-              onDidUpdateDiffCallbacks.push(listener);
-              return { dispose: vi.fn() };
-            }),
-            setPosition: mockSetPosition,
-            revealLineInCenter: mockRevealLineInCenter,
-            revealLinesInCenter: mockRevealLinesInCenter,
-            getOriginalEditor: vi.fn(() => ({ updateOptions: mockOriginalUpdateOptions })),
-            getModifiedEditor: vi.fn(() => ({
-              updateOptions: mockModifiedUpdateOptions,
-              revealLineInCenter: vi.fn(),
-              getModel: vi.fn(() => mockYamlModel),
-              createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
-            })),
-          })),
-          setModelMarkers: vi.fn(),
-          onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
-        },
+        })),
+        setModelMarkers: vi.fn(),
+        onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateEditor = monaco.editor.create as Mock;
 const mockCreateDiffEditor = monaco.editor.createDiffEditor as Mock;

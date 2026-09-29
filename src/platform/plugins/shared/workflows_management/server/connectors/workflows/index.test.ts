@@ -78,9 +78,7 @@ describe('Workflows Connector', () => {
           steps: [],
         },
       });
-      vi
-        .mocked(mockWorkflowsManagementApi.scheduleWorkflow)
-        .mockResolvedValue('workflow-run-123');
+      vi.mocked(mockWorkflowsManagementApi.scheduleWorkflow).mockResolvedValue('workflow-run-123');
 
       const execOptions = {
         actionId: 'test-action-id',

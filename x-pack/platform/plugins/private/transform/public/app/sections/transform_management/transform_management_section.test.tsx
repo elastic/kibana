@@ -27,32 +27,32 @@ const mockUseGetTransformNodes = vi.fn();
 const mockUseGetTransforms = vi.fn();
 
 vi.mock('../../hooks', () => {
-      const mocked = {
-      useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
-      useTransformCapabilities: () => mockUseTransformCapabilities(),
-      useGetTransformNodes: () => mockUseGetTransformNodes(),
-      useGetTransforms: () => mockUseGetTransforms(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocumentationLinks: () => ({ esTransform: 'https://example.test' }),
+    useTransformCapabilities: () => mockUseTransformCapabilities(),
+    useGetTransformNodes: () => mockUseGetTransformNodes(),
+    useGetTransforms: () => mockUseGetTransforms(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_get_transform_stats', () => {
-      const mocked = {
-      useGetTransformsStats: () => ({
-        isLoading: false,
-        error: null,
-        data: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTransformsStats: () => ({
+      isLoading: false,
+      error: null,
+      data: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../serverless_context', () => {
-      const mocked = {
-      useEnabledFeatures: () => ({ showNodeInfo: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnabledFeatures: () => ({ showNodeInfo: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alerting/transform_alerting_flyout', () => {
   return {
@@ -65,34 +65,34 @@ vi.mock('../../../alerting/transform_alerting_flyout', () => {
 });
 
 vi.mock('./components/transform_list/transforms_stats_bar', () => {
-      const mocked = {
-      TransformStatsBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransformStatsBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/dangling_task_warning/dangling_task_warning', () => {
-      const mocked = {
-      DanglingTasksWarning: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DanglingTasksWarning: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/transform_list', () => {
-      const mocked = {
-      TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
-        transforms.length === 0 ? (
-          <div data-test-subj="transformNoTransformsFound">
-            <button type="button" data-test-subj="transformButtonCreate">
-              Create your first transform
-            </button>
-          </div>
-        ) : (
-          <div data-test-subj="mockedTransformList" />
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransformList: ({ transforms }: { transforms: Array<{ id: string }> }) =>
+      transforms.length === 0 ? (
+        <div data-test-subj="transformNoTransformsFound">
+          <button type="button" data-test-subj="transformButtonCreate">
+            Create your first transform
+          </button>
+        </div>
+      ) : (
+        <div data-test-subj="mockedTransformList" />
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderSection = () => {
   const history = createMemoryHistory();

@@ -15,12 +15,12 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import { EditDownloadSourceFlyout } from '.';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useGeneratedHtmlId: () => 'mocked-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useGeneratedHtmlId: () => 'mocked-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderFlyout(downloadSource?: DownloadSource) {
   const renderer = createFleetTestRendererMock();

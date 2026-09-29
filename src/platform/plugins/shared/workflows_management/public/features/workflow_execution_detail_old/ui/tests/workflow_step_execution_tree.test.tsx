@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { TestWrapper } from '../../../../shared/test_utils/test_wrapper';
@@ -20,7 +19,7 @@ import { WorkflowStepExecutionTree } from '../workflow_step_execution_tree';
 
 // Mock the workflows module functions
 vi.mock('@kbn/workflows', async () => {
-  const actual = (await vi.importActual('@kbn/workflows'));
+  const actual = await vi.importActual('@kbn/workflows');
   return {
     ...actual,
     isTerminalStatus: vi.fn(),
@@ -31,97 +30,101 @@ vi.mock('@kbn/workflows', async () => {
 
 // Mock buildStepExecutionsTree function
 vi.mock('../../../workflow_execution_detail/ui/build_step_executions_tree', () => {
-      const mocked = {
-      buildStepExecutionsTree: vi.fn(),
-      injectChildWorkflowSteps: vi.fn((tree) => ({ tree, childStepExecutions: [] })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildStepExecutionsTree: vi.fn(),
+    injectChildWorkflowSteps: vi.fn((tree) => ({ tree, childStepExecutions: [] })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('../step_execution_tree_item_label', () => {
-      const mocked = {
-      StepExecutionTreeItemLabel: ({
-        stepId,
-        stepType,
-        selected,
-        status,
-        executionIndex,
-        executionTimeMs,
-        onClick,
-      }: {
-        stepId: string;
-        stepType: string;
-        selected: boolean;
-        status?: ExecutionStatus;
-        executionIndex: number;
-        executionTimeMs: number | null;
-        onClick?: React.MouseEventHandler;
-      }) => (
-        <span
-          data-test-subj="step-execution-tree-item-label"
-          data-step-id={stepId}
-          data-step-type={stepType}
-          data-selected={selected}
-          data-status={status}
-          data-execution-index={executionIndex}
-          data-execution-time-ms={executionTimeMs}
-          onClick={onClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              onClick?.(e as unknown as React.MouseEvent);
-            }
-          }}
-        >
-          {stepId}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepExecutionTreeItemLabel: ({
+      stepId,
+      stepType,
+      selected,
+      status,
+      executionIndex,
+      executionTimeMs,
+      onClick,
+    }: {
+      stepId: string;
+      stepType: string;
+      selected: boolean;
+      status?: ExecutionStatus;
+      executionIndex: number;
+      executionTimeMs: number | null;
+      onClick?: React.MouseEventHandler;
+    }) => (
+      <span
+        data-test-subj="step-execution-tree-item-label"
+        data-step-id={stepId}
+        data-step-type={stepType}
+        data-selected={selected}
+        data-status={status}
+        data-execution-index={executionIndex}
+        data-execution-time-ms={executionTimeMs}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onClick?.(e as unknown as React.MouseEvent);
+          }
+        }}
+      >
+        {stepId}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/step_icon', () => {
-      const mocked = {
-      StepIcon: ({
-        stepType,
-        executionStatus,
-        onClick,
-      }: {
-        stepType: string;
-        executionStatus: ExecutionStatus | null;
-        onClick?: React.MouseEventHandler;
-      }) => (
-        <span
-          data-test-subj="step-icon"
-          data-step-type={stepType}
-          data-execution-status={executionStatus}
-          onClick={onClick}
-          role="button"
-          tabIndex={0}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              onClick?.(e as unknown as React.MouseEvent);
-            }
-          }}
-        >
-          {'Icon'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepIcon: ({
+      stepType,
+      executionStatus,
+      onClick,
+    }: {
+      stepType: string;
+      executionStatus: ExecutionStatus | null;
+      onClick?: React.MouseEventHandler;
+    }) => (
+      <span
+        data-test-subj="step-icon"
+        data-step-type={stepType}
+        data-execution-status={executionStatus}
+        onClick={onClick}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            onClick?.(e as unknown as React.MouseEvent);
+          }
+        }}
+      >
+        {'Icon'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowStepExecutionTree', async () => {
   // Import the mocked functions
-  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (await vi.importMock('@kbn/workflows')) as {
+  const { isTerminalStatus, isInProgressStatus, isDangerousStatus } = (await vi.importMock(
+    '@kbn/workflows'
+  )) as {
     isTerminalStatus: Mock;
     isInProgressStatus: Mock;
     isDangerousStatus: Mock;
   };
 
-  const { buildStepExecutionsTree } = (await vi.importMock('../../../workflow_execution_detail/ui/build_step_executions_tree')) as {
+  const { buildStepExecutionsTree } = (await vi.importMock(
+    '../../../workflow_execution_detail/ui/build_step_executions_tree'
+  )) as {
     buildStepExecutionsTree: Mock;
   };
 

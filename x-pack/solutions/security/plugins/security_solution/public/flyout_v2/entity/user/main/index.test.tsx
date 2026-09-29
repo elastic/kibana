@@ -30,38 +30,38 @@ vi.mock('../../../../common/components/visualization_actions/visualization_embed
 
 const mockedUserRiskScore = vi.fn().mockReturnValue(mockUserRiskScoreState);
 vi.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
-      const mocked = {
-      useRiskScore: () => mockedUserRiskScore(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: () => mockedUserRiskScore(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../entity_analytics/api/hooks/use_entity_risk_score_recalculation', () => {
-      const mocked = {
-      useEntityRiskScoreRecalculation: () => ({
-        entityRiskScores: mockUserEntityRiskScores,
-        recalculatingScore: false,
-        calculateEntityRiskScore: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityRiskScoreRecalculation: () => ({
+      entityRiskScores: mockUserEntityRiskScores,
+      recalculatingScore: false,
+      calculateEntityRiskScore: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseObservedUser = vi.fn().mockReturnValue(mockObservedUser);
 vi.mock('./hooks/use_observed_user', () => {
-      const mocked = {
-      useObservedUser: () => mockedUseObservedUser(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useObservedUser: () => mockedUseObservedUser(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseManagedUser = vi.fn().mockReturnValue(mockManagedUserData);
 vi.mock('../../../../flyout/entity_details/shared/hooks/use_managed_user', () => {
-      const mocked = {
-      useManagedUser: () => mockedUseManagedUser(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedUser: () => mockedUseManagedUser(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<User />', () => {
   beforeEach(() => {

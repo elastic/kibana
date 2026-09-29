@@ -12,13 +12,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useGetQueryDelaySettings } from './use_get_query_delay_settings';
 
 vi.mock('../lib/rule_api/get_query_delay_settings', () => {
-      const mocked = {
-      getQueryDelaySettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getQueryDelaySettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getQueryDelaySettings } = (await vi.importMock('../lib/rule_api/get_query_delay_settings'));
+const { getQueryDelaySettings } = await vi.importMock('../lib/rule_api/get_query_delay_settings');
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

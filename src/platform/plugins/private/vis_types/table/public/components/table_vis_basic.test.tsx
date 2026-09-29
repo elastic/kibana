@@ -20,17 +20,17 @@ import { createGridColumns } from './table_vis_columns';
 import type { EuiDataGridProps } from '@elastic/eui';
 
 vi.mock('./table_vis_columns', () => {
-      const mocked = {
-      createGridColumns: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createGridColumns: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./table_vis_cell', () => {
-      const mocked = {
-      createTableVisCell: vi.fn(() => () => {}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTableVisCell: vi.fn(() => () => {}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TableVisBasic', () => {
   const props = {

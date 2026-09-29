@@ -11,81 +11,81 @@ import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('child_process', () => {
-      const mocked = {
-      execSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    execSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs', () => {
-      const mocked = {
-      writeFileSync: vi.fn(),
-      mkdirSync: vi.fn(),
-      rmSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    writeFileSync: vi.fn(),
+    mkdirSync: vi.fn(),
+    rmSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/diff/run_oasdiff', () => {
-      const mocked = {
-      runOasdiff: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runOasdiff: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/diff/run_oasdiff_structural', () => {
-      const mocked = {
-      runOasdiffStructural: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runOasdiffStructural: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/diff/parse_oasdiff', () => {
-      const mocked = {
-      parseOasdiff: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseOasdiff: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/input/load_oas', () => {
-      const mocked = {
-      loadOas: vi.fn().mockResolvedValue({
-        openapi: '3.0.0',
-        info: { title: 't', version: '1' },
-        paths: {},
-        components: { schemas: {} },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadOas: vi.fn().mockResolvedValue({
+      openapi: '3.0.0',
+      info: { title: 't', version: '1' },
+      paths: {},
+      components: { schemas: {} },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/allowlist/load_allowlist', () => {
-      const mocked = {
-      loadAllowlist: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadAllowlist: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/diff/breaking_rules', () => {
-      const mocked = {
-      applyAllowlist: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyAllowlist: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/report/format_failure', () => {
-      const mocked = {
-      formatFailure: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatFailure: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { execSync } from 'child_process';
 import { writeFileSync, rmSync } from 'fs';

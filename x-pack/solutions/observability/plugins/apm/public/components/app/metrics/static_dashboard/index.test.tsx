@@ -30,14 +30,14 @@ import * as helper from './helper';
 let capturedGetCreationOptions: (() => Promise<DashboardCreationOptions>) | undefined;
 
 vi.mock('@kbn/dashboard-plugin/public', () => {
-      const mocked = {
-      DashboardRenderer: (props: { getCreationOptions: () => Promise<DashboardCreationOptions> }) => {
-        capturedGetCreationOptions = props.getCreationOptions;
-        return <div data-test-subj="dashboardRenderer" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardRenderer: (props: { getCreationOptions: () => Promise<DashboardCreationOptions> }) => {
+      capturedGetCreationOptions = props.getCreationOptions;
+      return <div data-test-subj="dashboardRenderer" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const KibanaReactContext = createKibanaReactContext({
   settings: { client: { get: () => {} } },

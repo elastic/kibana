@@ -17,11 +17,11 @@ import { useEntityForAttachment } from './use_entity_for_attachment';
 const mockFetch = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({ services: { http: { fetch: mockFetch } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { http: { fetch: mockFetch } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const client = new QueryClient({

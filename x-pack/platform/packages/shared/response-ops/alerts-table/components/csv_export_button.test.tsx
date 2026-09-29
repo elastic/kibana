@@ -21,39 +21,39 @@ import { CsvExportButton } from './csv_export_button';
 import { testQueryClientConfig } from '../utils/test';
 
 vi.mock('../contexts/alerts_table_context', async () => {
-  const actual = (await vi.importActual('../contexts/alerts_table_context'));
+  const actual = await vi.importActual('../contexts/alerts_table_context');
   return {
     ...actual,
     useAlertsTableContext: vi.fn(),
   };
 });
 
-const { useAlertsTableContext } = (await vi.importMock('../contexts/alerts_table_context'));
+const { useAlertsTableContext } = await vi.importMock('../contexts/alerts_table_context');
 
 vi.mock('@kbn/alerts-ui-shared', () => {
-      const mocked = {
-      useFetchAlertsIndexNamesQuery: vi.fn().mockReturnValue({
-        data: ['.alerts-security.alerts-default'],
-        isLoading: false,
-        isError: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchAlertsIndexNamesQuery: vi.fn().mockReturnValue({
+      data: ['.alerts-security.alerts-default'],
+      isLoading: false,
+      isError: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn((node) => node),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn((node) => node),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/rison', () => {
-      const mocked = {
-      encode: vi.fn((val) => JSON.stringify(val)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    encode: vi.fn((val) => JSON.stringify(val)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient(testQueryClientConfig);
 
@@ -142,7 +142,7 @@ describe('CsvExportButton', () => {
   });
 
   it('fetches alert index names via the query hook', async () => {
-    const { useFetchAlertsIndexNamesQuery } = (await vi.importMock('@kbn/alerts-ui-shared'));
+    const { useFetchAlertsIndexNamesQuery } = await vi.importMock('@kbn/alerts-ui-shared');
     render(<CsvExportButton />, { wrapper });
 
     expect(useFetchAlertsIndexNamesQuery).toHaveBeenCalledWith({

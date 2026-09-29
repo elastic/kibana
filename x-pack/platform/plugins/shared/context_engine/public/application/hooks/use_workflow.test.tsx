@@ -15,11 +15,11 @@ import { isWorkflowNotFoundError, useWorkflow } from './use_workflow';
 const mockGetWorkflow = vi.fn();
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: () => ({ getWorkflow: mockGetWorkflow }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => ({ getWorkflow: mockGetWorkflow }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createNotFoundError = () =>
   Object.assign(new Error('Not Found'), {

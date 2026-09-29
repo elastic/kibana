@@ -19,14 +19,14 @@ interface MockCpsManager {
 const mockCpsManager$ = new BehaviorSubject<MockCpsManager | undefined>(undefined);
 
 vi.mock('../../../../plugin', () => {
-      const mocked = {
-      get apmCpsManager$() {
-        return mockCpsManager$;
-      },
-      getApmCpsManager: () => mockCpsManager$.getValue(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    get apmCpsManager$() {
+      return mockCpsManager$;
+    },
+    getApmCpsManager: () => mockCpsManager$.getValue(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createCpsManager(projectRouting$: BehaviorSubject<string | undefined>): MockCpsManager {
   return {

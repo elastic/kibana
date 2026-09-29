@@ -26,12 +26,12 @@ import {
 } from './use_row_header_components';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      copyToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = createDiscoverServicesMock();
 

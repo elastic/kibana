@@ -22,11 +22,11 @@ import { mockAuthenticatedUser } from '../../../__mocks__/mock_authenticated_use
 import { requestContextMock } from '../../../__mocks__/request_context';
 
 vi.mock('./get_missing_workflows_privileges', () => {
-      const mocked = {
-      getMissingWorkflowsPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMissingWorkflowsPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetMissingWorkflowsPrivileges = getMissingWorkflowsPrivileges as MockedFunction<
   typeof getMissingWorkflowsPrivileges
@@ -65,9 +65,10 @@ describe('getMissingIndexPrivilegesInternalRoute', () => {
     );
     mockRequest = {};
     mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(helpers, 'performChecks')
-      .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
+    vi.spyOn(helpers, 'performChecks').mockResolvedValue({
+      isSuccess: true,
+      currentUser: mockAuthenticatedUser,
+    });
 
     mockEsClient = {
       security: {

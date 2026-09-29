@@ -15,11 +15,11 @@ import { SaveTimelineModal } from './save_timeline_modal';
 import * as i18n from './translations';
 
 vi.mock('../../../hooks/use_create_timeline', () => {
-      const mocked = {
-      useCreateTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetState = vi.fn();
 vi.mock('react-redux-v7', () => {

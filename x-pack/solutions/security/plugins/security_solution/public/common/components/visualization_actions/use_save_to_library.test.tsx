@@ -15,35 +15,35 @@ import { useKibana } from '../../lib/kibana';
 import { kpiHostMetricLensAttributes } from './lens_attributes/hosts/kpi_host_metric';
 
 vi.mock('../../lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_redirect_to_dashboard_from_lens', () => {
-      const mocked = {
-      useRedirectToDashboardFromLens: vi.fn().mockReturnValue({
-        redirectTo: vi.fn(),
-        getEditOrCreateDashboardPath: vi.fn().mockReturnValue('mockDashboardPath'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRedirectToDashboardFromLens: vi.fn().mockReturnValue({
+      redirectTo: vi.fn(),
+      getEditOrCreateDashboardPath: vi.fn().mockReturnValue('mockDashboardPath'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 

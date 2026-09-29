@@ -20,39 +20,39 @@ import type { HistoryLocationState } from '../build_services';
 
 // Mock the component dependencies
 vi.mock('./context', () => {
-      const mocked = {
-      ContextAppRoute: () => <div data-test-subj="context-app-route" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContextAppRoute: () => <div data-test-subj="context-app-route" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./doc', () => {
-      const mocked = {
-      SingleDocRoute: () => <div data-test-subj="single-doc-route" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SingleDocRoute: () => <div data-test-subj="single-doc-route" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./main', () => {
-      const mocked = {
-      DiscoverMainRoute: () => <div data-test-subj="discover-main-route" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverMainRoute: () => <div data-test-subj="discover-main-route" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./view_alert', () => {
-      const mocked = {
-      ViewAlertRoute: () => <div data-test-subj="view-alert-route" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ViewAlertRoute: () => <div data-test-subj="view-alert-route" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./not_found', () => {
-      const mocked = {
-      NotFoundRoute: () => <div data-test-subj="not-found-route" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotFoundRoute: () => <div data-test-subj="not-found-route" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = createDiscoverServicesMock();
 

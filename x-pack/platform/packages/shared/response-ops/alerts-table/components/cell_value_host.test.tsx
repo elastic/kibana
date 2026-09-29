@@ -16,7 +16,7 @@ import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS, ALERT_STATUS } from '@kbn
 import { DefaultCellValue } from './default_cell_value';
 
 vi.mock('./system_cell', async () => {
-  const original = (await vi.importActual('./system_cell'));
+  const original = await vi.importActual('./system_cell');
   return {
     ...original,
     SystemCell: vi.fn(() => <div data-test-subj="systemCell" />),

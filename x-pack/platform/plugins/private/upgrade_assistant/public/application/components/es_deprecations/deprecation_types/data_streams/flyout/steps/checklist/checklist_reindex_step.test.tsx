@@ -18,7 +18,7 @@ import type { MigrationState } from '../../../use_migration_state';
 import { ChecklistFlyoutStep } from './checklist_reindex_step';
 
 vi.mock('../../../../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../../../../app_context'));
+  const actual = await vi.importActual('../../../../../../../app_context');
 
   return {
     ...actual,
@@ -33,28 +33,28 @@ vi.mock('../../../../../../../app_context', async () => {
 });
 
 vi.mock('../../../../../common/nodes_low_disk_space', () => {
-      const mocked = {
-      NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowSpaceCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowSpaceCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./callouts', () => {
-      const mocked = {
-      FetchFailedCallout: ({ hasFetchFailed }: { hasFetchFailed: boolean }) => (
-        <div data-test-subj="fetchFailedCallout">{String(hasFetchFailed)}</div>
-      ),
-      NoPrivilegesCallout: () => <div data-test-subj="noPrivilegesCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FetchFailedCallout: ({ hasFetchFailed }: { hasFetchFailed: boolean }) => (
+      <div data-test-subj="fetchFailedCallout">{String(hasFetchFailed)}</div>
+    ),
+    NoPrivilegesCallout: () => <div data-test-subj="noPrivilegesCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./progress', () => {
-      const mocked = {
-      MigrationProgress: () => <div data-test-subj="migrationProgress" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationProgress: () => <div data-test-subj="migrationProgress" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMigrationState = (overrides: Partial<MigrationState>): MigrationState => ({
   loadingState: LoadingState.Success,

@@ -34,9 +34,7 @@ vi.mock(
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
 );
-vi.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
-);
+vi.mock('../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 
 describe('TakeActionButton', () => {
   it('should render the take action button', () => {

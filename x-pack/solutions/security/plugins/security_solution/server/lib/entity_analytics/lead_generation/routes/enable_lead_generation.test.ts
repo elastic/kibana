@@ -21,19 +21,19 @@ import {
 
 const mockCreateIndices = vi.fn();
 vi.mock('../indices/lead_index_service', () => {
-      const mocked = {
-      createLeadIndexService: () => ({ createIndex: mockCreateIndices }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadIndexService: () => ({ createIndex: mockCreateIndices }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStartTask = vi.fn();
 vi.mock('../tasks', () => {
-      const mocked = {
-      startLeadGenerationTask: (...args: unknown[]) => mockStartTask(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    startLeadGenerationTask: (...args: unknown[]) => mockStartTask(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('enableLeadGenerationRoute', () => {
   let server: ReturnType<typeof serverMock.create>;

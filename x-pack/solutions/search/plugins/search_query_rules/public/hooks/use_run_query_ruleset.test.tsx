@@ -17,27 +17,27 @@ import { TryInConsoleButton } from '@kbn/try-in-console';
 
 // Mock dependencies
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_fetch_query_ruleset', () => {
-      const mocked = {
-      useFetchQueryRuleset: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchQueryRuleset: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/try-in-console', () => {
-      const mocked = {
-      TryInConsoleButton: vi.fn(() => (
-        <div data-test-subj="tryInConsoleButton">Try in Console Button</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TryInConsoleButton: vi.fn(() => (
+      <div data-test-subj="tryInConsoleButton">Try in Console Button</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UseRunQueryRuleset', () => {
   const mockApplication = { navigateToUrl: vi.fn() };

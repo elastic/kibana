@@ -23,26 +23,26 @@ import {
 } from './utils';
 
 vi.mock('./utils', () => {
-      const mocked = {
-      buildCandidateShaList: vi.fn(),
-      cleanTypeCheckArtifacts: vi.fn(),
-      getPullRequestNumber: vi.fn(),
-      isCiEnvironment: vi.fn(),
-      readRecentCommitShas: vi.fn(),
-      resolveCurrentCommitSha: vi.fn(),
-      withGcsAuth: vi.fn((_, action: () => Promise<unknown>) => action()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildCandidateShaList: vi.fn(),
+    cleanTypeCheckArtifacts: vi.fn(),
+    getPullRequestNumber: vi.fn(),
+    isCiEnvironment: vi.fn(),
+    readRecentCommitShas: vi.fn(),
+    resolveCurrentCommitSha: vi.fn(),
+    withGcsAuth: vi.fn((_, action: () => Promise<unknown>) => action()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./file_system/gcs_file_system', () => {
-      const mocked = {
-      GcsFileSystem: vi.fn().mockImplementation(() => ({
-        restoreArchive: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GcsFileSystem: vi.fn().mockImplementation(() => ({
+      restoreArchive: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedBuildCandidateShaList = buildCandidateShaList as MockedFunction<
   typeof buildCandidateShaList
@@ -80,9 +80,7 @@ describe('restoreTSBuildArtifacts', () => {
     mockedResolveCurrentCommitSha.mockResolvedValue('');
     mockedReadRecentCommitShas.mockResolvedValue([]);
     mockedBuildCandidateShaList.mockReturnValue([]);
-    restoreSpy = vi
-      .spyOn(LocalFileSystem.prototype, 'restoreArchive')
-      .mockResolvedValue(undefined);
+    restoreSpy = vi.spyOn(LocalFileSystem.prototype, 'restoreArchive').mockResolvedValue(undefined);
   });
 
   afterEach(() => {

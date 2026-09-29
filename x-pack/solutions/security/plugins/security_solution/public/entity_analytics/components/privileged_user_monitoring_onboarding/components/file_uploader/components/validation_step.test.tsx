@@ -19,17 +19,17 @@ import { downloadBlob } from '../../../../../../common/utils/download_blob';
 vi.mock('../../../../../../common/utils/download_blob');
 
 vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          telemetry: {
-            reportEvent: vi.fn(),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        telemetry: {
+          reportEvent: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PrivilegedUserMonitoringValidationStep', () => {
   const mockOnConfirm = vi.fn();

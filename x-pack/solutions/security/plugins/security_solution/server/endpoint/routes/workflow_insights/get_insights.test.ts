@@ -17,13 +17,13 @@ import type { EndpointAppContext } from '../../types';
 import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      securityWorkflowInsightsService: {
-        fetch: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityWorkflowInsightsService: {
+      fetch: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetchMock = (await vi.importMock('../../services')).securityWorkflowInsightsService
   .fetch as Mock;
@@ -58,9 +58,7 @@ describe('Get Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: vi
-                .fn()
-                .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
+              getCurrentUser: vi.fn().mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
           },
         },

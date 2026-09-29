@@ -13,25 +13,25 @@ import { MAX_MONITOR_FANOUT_SIZE, MAX_ROUTE_ID_LENGTH } from '../../zod_query';
 import { updateSyntheticsMonitorBulkRoute } from './update_monitor_bulk';
 
 vi.mock('../services/update_monitor_api', () => {
-      const mocked = {
-      UpdateMonitorAPI: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UpdateMonitorAPI: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_monitor_bulk', () => {
-      const mocked = {
-      syncEditedMonitorBulk: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    syncEditedMonitorBulk: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../synthetics_service/get_private_locations', () => {
-      const mocked = {
-      getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResponse = () => {
   const ok = vi.fn((opts: any) => ({ status: 200, ...opts }));
@@ -58,14 +58,14 @@ const mockRouteContext = (response = mockResponse()) =>
   } as any);
 
 const installPreprocessResult = async (preprocess: any) => {
-  const { UpdateMonitorAPI } = (await vi.importMock('../services/update_monitor_api'));
+  const { UpdateMonitorAPI } = await vi.importMock('../services/update_monitor_api');
   const execute = vi.fn().mockResolvedValue(preprocess);
   UpdateMonitorAPI.mockImplementation(() => ({ execute, result: preprocess }));
   return { execute };
 };
 
 const installSyncResult = async (syncResult: unknown) => {
-  const { syncEditedMonitorBulk } = (await vi.importMock('./edit_monitor_bulk'));
+  const { syncEditedMonitorBulk } = await vi.importMock('./edit_monitor_bulk');
   syncEditedMonitorBulk.mockReset();
   if (syncResult instanceof Error) {
     syncEditedMonitorBulk.mockRejectedValue(syncResult);
@@ -80,7 +80,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+    const { getPrivateLocationsForNamespaces } = await vi.importMock(
+      '../../../synthetics_service/get_private_locations'
+    );
     getPrivateLocationsForNamespaces.mockResolvedValue([]);
   });
 
@@ -409,7 +411,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
 
   describe('private location lookup', () => {
     it('passes the union of request space and survivor spaces to getPrivateLocationsForNamespaces', async () => {
-      const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+      const { getPrivateLocationsForNamespaces } = await vi.importMock(
+        '../../../synthetics_service/get_private_locations'
+      );
       const survivor = (id: string, spaces: string[]) => ({
         normalizedMonitor: { id, locations: [], spaces },
         monitorWithRevision: { id },
@@ -432,7 +436,9 @@ describe('updateSyntheticsMonitorBulkRoute', () => {
     });
 
     it('does not call getPrivateLocationsForNamespaces when every id pre-failed', async () => {
-      const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+      const { getPrivateLocationsForNamespaces } = await vi.importMock(
+        '../../../synthetics_service/get_private_locations'
+      );
       installPreprocessResult({
         survivors: [],
         perIdErrors: { 'mon-1': { code: 'not_found', message: 'gone' } },

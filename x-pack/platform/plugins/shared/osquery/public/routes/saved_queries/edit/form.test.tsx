@@ -16,28 +16,29 @@ import { EuiProvider } from '@elastic/eui';
 import { EditSavedQueryForm } from './form';
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              osquery: {
-                writeSavedQueries: true,
-                readSavedQueries: true,
-                writeLiveQueries: true,
-                runSavedQueries: true,
-              },
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: {
+            osquery: {
+              writeSavedQueries: true,
+              readSavedQueries: true,
+              writeLiveQueries: true,
+              runSavedQueries: true,
             },
           },
-          notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
-          http: { get: vi.fn(), post: vi.fn() },
         },
-      }),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: { toasts: { addSuccess: vi.fn(), addError: vi.fn() } },
+        http: { get: vi.fn(), post: vi.fn() },
+      },
+    }),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockIdSet = new Set<string>();
 const mockSerializer = vi.fn((data: unknown) => data);
@@ -53,46 +54,48 @@ const mockHandleSubmit = vi.fn((callback: (data: unknown) => void) => (e?: any) 
 const mockFormState = { isSubmitting: false, isDirty: false };
 
 vi.mock('../../../saved_queries/form/use_saved_query_form', () => {
-      const mocked = {
-      useSavedQueryForm: vi.fn(() => ({
-        serializer: mockSerializer,
-        idSet: mockIdSet,
-        handleSubmit: mockHandleSubmit,
-        formState: mockFormState,
-        register: vi.fn(),
-        unregister: vi.fn(),
-        watch: vi.fn(),
-        setValue: vi.fn(),
-        getValues: vi.fn(),
-        getFieldState: vi.fn(),
-        setError: vi.fn(),
-        clearErrors: vi.fn(),
-        resetField: vi.fn(),
-        reset: vi.fn(),
-        trigger: vi.fn(),
-        control: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSavedQueryForm: vi.fn(() => ({
+      serializer: mockSerializer,
+      idSet: mockIdSet,
+      handleSubmit: mockHandleSubmit,
+      formState: mockFormState,
+      register: vi.fn(),
+      unregister: vi.fn(),
+      watch: vi.fn(),
+      setValue: vi.fn(),
+      getValues: vi.fn(),
+      getFieldState: vi.fn(),
+      setError: vi.fn(),
+      clearErrors: vi.fn(),
+      resetField: vi.fn(),
+      reset: vi.fn(),
+      trigger: vi.fn(),
+      control: {},
+    })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_queries/form', () => {
-      const mocked = {
-      SavedQueryForm: ({
-        viewMode,
-        hasPlayground,
-      }: {
-        viewMode?: boolean;
-        hasPlayground?: boolean;
-      }) => (
-        <div data-test-subj="saved-query-form">
-          <span data-test-subj="view-mode">{String(!!viewMode)}</span>
-          <span data-test-subj="has-playground">{String(!!hasPlayground)}</span>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedQueryForm: ({
+      viewMode,
+      hasPlayground,
+    }: {
+      viewMode?: boolean;
+      hasPlayground?: boolean;
+    }) => (
+      <div data-test-subj="saved-query-form">
+        <span data-test-subj="view-mode">{String(!!viewMode)}</span>
+        <span data-test-subj="has-playground">{String(!!hasPlayground)}</span>
+      </div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });

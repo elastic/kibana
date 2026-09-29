@@ -16,18 +16,18 @@ import React from 'react';
 import { BarDetails } from './bar_details';
 
 vi.mock('../../utils', () => {
-      const mocked = {
-      asDuration: (value: number) => `${value} ms`,
-      asInteger: (value: number) => value.toLocaleString('en-US'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    asDuration: (value: number) => `${value} ms`,
+    asInteger: (value: number) => value.toLocaleString('en-US'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./trace_waterfall_context', () => {
-      const mocked = {
-      useTraceWaterfallContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTraceWaterfallContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useTraceWaterfallContext } from './trace_waterfall_context';
 import type { TraceWaterfallItem } from './use_trace_waterfall';

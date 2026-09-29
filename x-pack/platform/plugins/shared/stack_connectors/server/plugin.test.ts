@@ -297,9 +297,9 @@ describe('Stack Connectors Plugin', () => {
       const plugin = new StackConnectorsPlugin(context);
 
       const actionsSetup = actionsMock.createSetup();
-      (
-        actionsSetup.getActionsConfigurationUtilities().getWebhookSettings as Mock
-      ).mockReturnValue({ ssl: { pfx: { enabled: true } } });
+      (actionsSetup.getActionsConfigurationUtilities().getWebhookSettings as Mock).mockReturnValue({
+        ssl: { pfx: { enabled: true } },
+      });
 
       plugin.setup(coreMock.createSetup(), { actions: actionsSetup, cloud });
       return plugin;

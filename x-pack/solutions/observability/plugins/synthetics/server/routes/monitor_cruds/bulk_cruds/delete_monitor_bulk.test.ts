@@ -11,14 +11,14 @@ import type { z } from '@kbn/zod';
 import { deleteSyntheticsMonitorBulkRoute } from './delete_monitor_bulk';
 
 vi.mock('../services/delete_monitor_api', () => {
-      const mocked = {
-      DeleteMonitorAPI: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeleteMonitorAPI: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const installExecuteResult = async (executeResult: any) => {
-  const { DeleteMonitorAPI } = (await vi.importMock('../services/delete_monitor_api'));
+  const { DeleteMonitorAPI } = await vi.importMock('../services/delete_monitor_api');
   const execute = vi.fn().mockResolvedValue(executeResult);
   DeleteMonitorAPI.mockImplementation(() => ({ execute }));
   return { execute };

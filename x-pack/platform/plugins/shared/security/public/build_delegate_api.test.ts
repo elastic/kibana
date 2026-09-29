@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import { of } from 'rxjs';
 
 import type { Capabilities } from '@kbn/core/public';
 import type { CoreSecurityDelegateContract, ServiceAccount } from '@kbn/core-security-browser';

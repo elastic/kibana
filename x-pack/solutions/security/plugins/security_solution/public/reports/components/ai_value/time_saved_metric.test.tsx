@@ -19,40 +19,41 @@ import { PageScope } from '../../../data_view_manager/constants';
 import * as i18n from './translations';
 
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
-      const mocked = {
-      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric',
   () => {
-      const mocked = {
-        getTimeSavedMetricLensAttributes: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getTimeSavedMetricLensAttributes: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../hooks/use_signal_index_with_default', () => {
-      const mocked = {
-      useSignalIndexWithDefault: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndexWithDefault: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sample_metric', () => {
-      const mocked = {
-      SampleMetric: vi.fn(({ title }: { title: string }) => (
-        <div data-test-subj="mock-sample-metric">{title}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SampleMetric: vi.fn(({ title }: { title: string }) => (
+      <div data-test-subj="mock-sample-metric">{title}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockGetTimeSavedMetricLensAttributes =
-  getTimeSavedMetricLensAttributes as MockedFunction<typeof getTimeSavedMetricLensAttributes>;
+const mockGetTimeSavedMetricLensAttributes = getTimeSavedMetricLensAttributes as MockedFunction<
+  typeof getTimeSavedMetricLensAttributes
+>;
 const mockUseSignalIndexWithDefault = useSignalIndexWithDefault as MockedFunction<
   typeof useSignalIndexWithDefault
 >;

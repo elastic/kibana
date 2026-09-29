@@ -17,15 +17,15 @@ import { useHostKpiCharts } from '../../hooks/use_host_metrics_charts';
 
 vi.mock('../../hooks/use_host_metrics_charts');
 vi.mock('./kpi', () => {
-      const mocked = {
-      // Kibana config sets Testing Library's testIdAttribute to `data-test-subj`,
-      // so `screen.getByTestId()` queries that attribute (not `data-testid`).
-      Kpi: ({ id, valueOverride }: { id: string; valueOverride?: number }) => (
-        <div data-test-subj={`kpi-${id}`} data-value-override={String(valueOverride)} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Kibana config sets Testing Library's testIdAttribute to `data-test-subj`,
+    // so `screen.getByTestId()` queries that attribute (not `data-testid`).
+    Kpi: ({ id, valueOverride }: { id: string; valueOverride?: number }) => (
+      <div data-test-subj={`kpi-${id}`} data-value-override={String(valueOverride)} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useHostKpiChartsMock = useHostKpiCharts as MockedFunction<typeof useHostKpiCharts>;
 

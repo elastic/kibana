@@ -19,8 +19,7 @@ import {
 (global as unknown as { createImageBitmap: Mock }).createImageBitmap = vi
   .fn()
   .mockResolvedValue({ close: vi.fn() });
-const mockCreateImageBitmap = (global as unknown as { createImageBitmap: Mock })
-  .createImageBitmap;
+const mockCreateImageBitmap = (global as unknown as { createImageBitmap: Mock }).createImageBitmap;
 
 describe('getUniqueName', () => {
   it('returns the original name when no collision', () => {

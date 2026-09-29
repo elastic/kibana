@@ -24,15 +24,15 @@ const mockApplication = {
 };
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: mockApplication,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: mockApplication,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useIsOnManagementLlmConnectorsPage', () => {
   beforeEach(() => {

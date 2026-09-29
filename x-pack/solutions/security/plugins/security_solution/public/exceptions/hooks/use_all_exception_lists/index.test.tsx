@@ -17,11 +17,11 @@ import { findRuleExceptionReferences } from '../../../detection_engine/rule_mana
 import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 vi.mock('../../../detection_engine/rule_management/api/api', () => {
-      const mocked = {
-      findRuleExceptionReferences: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findRuleExceptionReferences: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/user_privileges');
 
 const findRuleExceptionReferencesMock = findRuleExceptionReferences as Mock;

@@ -49,11 +49,11 @@ import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
  */
 
 vi.mock('../../../../containers', () => {
-      const mocked = {
-      useTimelineEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/user_privileges');
 
@@ -65,7 +65,7 @@ vi.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: vi.fn(),
@@ -78,29 +78,29 @@ type ControlColumnCellRender = (
 ) => React.JSX.Element;
 
 vi.mock('../../body/unified_timeline_body', () => {
-      const mocked = {
-      UnifiedTimelineBody: ({
-        leadingControlColumns,
-      }: {
-        leadingControlColumns: EuiDataGridControlColumn[];
-      }) => {
-        const RowCellRender = leadingControlColumns[0].rowCellRender as ControlColumnCellRender;
+  const mocked = {
+    UnifiedTimelineBody: ({
+      leadingControlColumns,
+    }: {
+      leadingControlColumns: EuiDataGridControlColumn[];
+    }) => {
+      const RowCellRender = leadingControlColumns[0].rowCellRender as ControlColumnCellRender;
 
-        return (
-          <RowCellRender
-            colIndex={0}
-            columnId="default-timeline-control-column"
-            isDetails={false}
-            isExpandable={false}
-            isExpanded={false}
-            rowIndex={0}
-            setCellProps={() => {}}
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return (
+        <RowCellRender
+          colIndex={0}
+          columnId="default-timeline-control-column"
+          isDetails={false}
+          isExpandable={false}
+          isExpanded={false}
+          rowIndex={0}
+          setCellProps={() => {}}
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const kibanaMockResult = {
   services: createStartServicesMock(),

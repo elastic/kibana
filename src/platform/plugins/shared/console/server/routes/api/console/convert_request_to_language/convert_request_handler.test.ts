@@ -21,20 +21,20 @@ import type { RouteDependencies } from '../../..';
 import { registerConvertRequestRoute } from '.';
 
 vi.mock('@elastic/request-converter', () => {
-      const mocked = {
-      convertRequests: (request: string, language: string, options: any) => {
-        return Promise.resolve({
-          converted: true,
-          meta: {
-            request,
-            language,
-            options,
-          },
-        });
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertRequests: (request: string, language: string, options: any) => {
+      return Promise.resolve({
+        converted: true,
+        meta: {
+          request,
+          language,
+          options,
+        },
+      });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Console convert request to language route', () => {
   let mockRouter: MockRouter;

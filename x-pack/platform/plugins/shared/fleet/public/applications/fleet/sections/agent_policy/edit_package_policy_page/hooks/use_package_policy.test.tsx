@@ -143,198 +143,198 @@ function mockPackageInfoItem(name: string, version: string) {
 }
 
 vi.mock('../../../../../../hooks/use_request', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks/use_request')),
-      sendGetAgentlessPolicy: vi.fn(),
-      sendUpdateAgentlessPolicy: vi.fn(),
-      sendUpdatePackagePolicy: vi.fn(),
-      sendGetOnePackagePolicy: (packagePolicyId: string) => {
-        if (packagePolicyId === 'package-policy-1') {
-          return {
-            data: {
-              item: {
-                id: 'nginx-1',
-                name: 'nginx-1',
-                namespace: 'default',
-                description: 'Nginx description',
-                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-                enabled: true,
-                policy_id: 'agent-policy-1',
-                policy_ids: ['agent-policy-1'],
-                inputs: [
-                  {
-                    type: 'logfile',
-                    policy_template: 'nginx',
-                    enabled: true,
-                    streams: [
-                      {
-                        enabled: true,
-                        data_stream: { type: 'logs', dataset: 'nginx.access' },
-                        vars: {
-                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                        },
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks/use_request')),
+    sendGetAgentlessPolicy: vi.fn(),
+    sendUpdateAgentlessPolicy: vi.fn(),
+    sendUpdatePackagePolicy: vi.fn(),
+    sendGetOnePackagePolicy: (packagePolicyId: string) => {
+      if (packagePolicyId === 'package-policy-1') {
+        return {
+          data: {
+            item: {
+              id: 'nginx-1',
+              name: 'nginx-1',
+              namespace: 'default',
+              description: 'Nginx description',
+              package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+              enabled: true,
+              policy_id: 'agent-policy-1',
+              policy_ids: ['agent-policy-1'],
+              inputs: [
+                {
+                  type: 'logfile',
+                  policy_template: 'nginx',
+                  enabled: true,
+                  streams: [
+                    {
+                      enabled: true,
+                      data_stream: { type: 'logs', dataset: 'nginx.access' },
+                      vars: {
+                        paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
                       },
-                    ],
-                    vars: undefined,
-                  },
-                ],
-              },
-            },
-          };
-        }
-        if (packagePolicyId === 'package-policy-2') {
-          return {
-            data: {
-              item: {
-                id: 'nginx-1',
-                name: 'nginx-1',
-                namespace: 'default',
-                description: 'Nginx description',
-                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-                enabled: true,
-                policy_id: 'agent-policy-1',
-                policy_ids: ['agent-policy-1'],
-                inputs: [
-                  {
-                    type: 'logfile',
-                    policy_template: 'nginx',
-                    enabled: true,
-                    streams: [
-                      {
-                        enabled: true,
-                        data_stream: { type: 'logs', dataset: 'nginx.access' },
-                        vars: {
-                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                        },
-                      },
-                    ],
-                    vars: {
-                      existing_input_level_var: { value: 'existing-value', type: 'text' },
                     },
-                  },
-                ],
-              },
-            },
-          };
-        }
-        // An agentless policy instance read through the package-policy API (i.e. the `isAgentless`
-        // hint was dropped). It carries the authoritative per-instance `supports_agentless` flag.
-        if (packagePolicyId === 'agentless-detect') {
-          return {
-            data: {
-              item: {
-                id: 'nginx-1',
-                name: 'nginx-1',
-                namespace: 'default',
-                description: 'Nginx description',
-                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-                enabled: true,
-                supports_agentless: true,
-                policy_id: 'agentless-agent-policy-1',
-                policy_ids: ['agentless-agent-policy-1'],
-                inputs: [
-                  {
-                    type: 'logfile',
-                    policy_template: 'nginx',
-                    enabled: true,
-                    streams: [
-                      {
-                        enabled: true,
-                        data_stream: { type: 'logs', dataset: 'nginx.access' },
-                        vars: {
-                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                        },
-                      },
-                    ],
-                    vars: undefined,
-                  },
-                ],
-              },
-            },
-          };
-        }
-      },
-      sendGetPackageInfoByKey: vi
-        .fn()
-        .mockImplementation((name: string, version: string) =>
-          Promise.resolve({ data: { item: mockPackageInfoItem(name, version) }, isLoading: false })
-        ),
-      sendGetPackageInfoByKeyForRq: vi
-        .fn()
-        .mockImplementation((name: string, version: string) =>
-          Promise.resolve({ item: mockPackageInfoItem(name, version) })
-        ),
-      sendUpgradePackagePolicyDryRun: vi.fn().mockResolvedValue({
-        data: [
-          {
-            diff: [
-              {
-                id: 'nginx-1',
-                name: 'nginx-1',
-                namespace: 'default',
-                description: 'Nginx description',
-                package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
-                enabled: true,
-                policy_id: 'agent-policy-1',
-                policy_ids: ['agent-policy-1'],
-                vars: {},
-                inputs: [
-                  {
-                    type: 'logfile',
-                    policy_template: 'nginx',
-                    enabled: true,
-                    streams: [
-                      {
-                        enabled: true,
-                        data_stream: { type: 'logs', dataset: 'nginx.access' },
-                        vars: {
-                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                        },
-                      },
-                    ],
-                    vars: undefined,
-                  },
-                ],
-              },
-              {
-                id: 'nginx-1',
-                name: 'nginx-1',
-                namespace: 'default',
-                description: 'Nginx description',
-                package: { name: 'nginx', title: 'Nginx', version: '1.4.0' },
-                enabled: true,
-                policy_id: 'agent-policy-1',
-                policy_ids: ['agent-policy-1'],
-                vars: {
-                  new_package_level_var: { value: 'test', type: 'text' },
+                  ],
+                  vars: undefined,
                 },
-                inputs: [
-                  {
-                    type: 'logfile',
-                    policy_template: 'nginx',
-                    enabled: true,
-                    streams: [
-                      {
-                        enabled: true,
-                        data_stream: { type: 'logs', dataset: 'nginx.access' },
-                        vars: {
-                          paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
-                        },
-                      },
-                    ],
-                    vars: {
-                      new_input_level_var: { value: 'test', type: 'text' },
-                    },
-                  },
-                ],
-              },
-            ],
+              ],
+            },
           },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        };
+      }
+      if (packagePolicyId === 'package-policy-2') {
+        return {
+          data: {
+            item: {
+              id: 'nginx-1',
+              name: 'nginx-1',
+              namespace: 'default',
+              description: 'Nginx description',
+              package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+              enabled: true,
+              policy_id: 'agent-policy-1',
+              policy_ids: ['agent-policy-1'],
+              inputs: [
+                {
+                  type: 'logfile',
+                  policy_template: 'nginx',
+                  enabled: true,
+                  streams: [
+                    {
+                      enabled: true,
+                      data_stream: { type: 'logs', dataset: 'nginx.access' },
+                      vars: {
+                        paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                      },
+                    },
+                  ],
+                  vars: {
+                    existing_input_level_var: { value: 'existing-value', type: 'text' },
+                  },
+                },
+              ],
+            },
+          },
+        };
+      }
+      // An agentless policy instance read through the package-policy API (i.e. the `isAgentless`
+      // hint was dropped). It carries the authoritative per-instance `supports_agentless` flag.
+      if (packagePolicyId === 'agentless-detect') {
+        return {
+          data: {
+            item: {
+              id: 'nginx-1',
+              name: 'nginx-1',
+              namespace: 'default',
+              description: 'Nginx description',
+              package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+              enabled: true,
+              supports_agentless: true,
+              policy_id: 'agentless-agent-policy-1',
+              policy_ids: ['agentless-agent-policy-1'],
+              inputs: [
+                {
+                  type: 'logfile',
+                  policy_template: 'nginx',
+                  enabled: true,
+                  streams: [
+                    {
+                      enabled: true,
+                      data_stream: { type: 'logs', dataset: 'nginx.access' },
+                      vars: {
+                        paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                      },
+                    },
+                  ],
+                  vars: undefined,
+                },
+              ],
+            },
+          },
+        };
+      }
+    },
+    sendGetPackageInfoByKey: vi
+      .fn()
+      .mockImplementation((name: string, version: string) =>
+        Promise.resolve({ data: { item: mockPackageInfoItem(name, version) }, isLoading: false })
+      ),
+    sendGetPackageInfoByKeyForRq: vi
+      .fn()
+      .mockImplementation((name: string, version: string) =>
+        Promise.resolve({ item: mockPackageInfoItem(name, version) })
+      ),
+    sendUpgradePackagePolicyDryRun: vi.fn().mockResolvedValue({
+      data: [
+        {
+          diff: [
+            {
+              id: 'nginx-1',
+              name: 'nginx-1',
+              namespace: 'default',
+              description: 'Nginx description',
+              package: { name: 'nginx', title: 'Nginx', version: '1.3.0' },
+              enabled: true,
+              policy_id: 'agent-policy-1',
+              policy_ids: ['agent-policy-1'],
+              vars: {},
+              inputs: [
+                {
+                  type: 'logfile',
+                  policy_template: 'nginx',
+                  enabled: true,
+                  streams: [
+                    {
+                      enabled: true,
+                      data_stream: { type: 'logs', dataset: 'nginx.access' },
+                      vars: {
+                        paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                      },
+                    },
+                  ],
+                  vars: undefined,
+                },
+              ],
+            },
+            {
+              id: 'nginx-1',
+              name: 'nginx-1',
+              namespace: 'default',
+              description: 'Nginx description',
+              package: { name: 'nginx', title: 'Nginx', version: '1.4.0' },
+              enabled: true,
+              policy_id: 'agent-policy-1',
+              policy_ids: ['agent-policy-1'],
+              vars: {
+                new_package_level_var: { value: 'test', type: 'text' },
+              },
+              inputs: [
+                {
+                  type: 'logfile',
+                  policy_template: 'nginx',
+                  enabled: true,
+                  streams: [
+                    {
+                      enabled: true,
+                      data_stream: { type: 'logs', dataset: 'nginx.access' },
+                      vars: {
+                        paths: { value: ['/var/log/nginx/access.log*'], type: 'text' },
+                      },
+                    },
+                  ],
+                  vars: {
+                    new_input_level_var: { value: 'test', type: 'text' },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePackagePolicy', () => {
   it('should load the package policy if this is a not an upgrade', async () => {
@@ -701,9 +701,7 @@ describe('usePackagePolicy - agentless', () => {
   });
 
   it('saves through the agentless API', async () => {
-    vi
-      .mocked(sendUpdateAgentlessPolicy)
-      .mockResolvedValue({ item: { id: 'agentless-1' } } as any);
+    vi.mocked(sendUpdateAgentlessPolicy).mockResolvedValue({ item: { id: 'agentless-1' } } as any);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
@@ -734,9 +732,9 @@ describe('usePackagePolicy - agentless', () => {
     // Simulates a refresh / deep link / foreign entry point where the `?isAgentless` hint is
     // absent: the policy is read via the package-policy API, and its per-instance
     // `supports_agentless` flag must still route the write through the agentless API.
-    vi
-      .mocked(sendUpdateAgentlessPolicy)
-      .mockResolvedValue({ item: { id: 'agentless-detect' } } as any);
+    vi.mocked(sendUpdateAgentlessPolicy).mockResolvedValue({
+      item: { id: 'agentless-detect' },
+    } as any);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>
@@ -767,9 +765,10 @@ describe('usePackagePolicy - agentless', () => {
     // Param-only navigation re-runs this hook with a new `packagePolicyId` without a remount.
     // A stale detection from the previously loaded (agentless) policy must not route the next
     // (agent-based) policy's save through the agentless PUT — the server rejects it.
-    vi
-      .mocked(sendUpdatePackagePolicy)
-      .mockResolvedValue({ data: { item: { id: 'nginx-1' } }, error: null } as any);
+    vi.mocked(sendUpdatePackagePolicy).mockResolvedValue({
+      data: { item: { id: 'nginx-1' } },
+      error: null,
+    } as any);
 
     let packagePolicyId = 'agentless-detect';
     const renderer = createFleetTestRendererMock();
@@ -830,9 +829,9 @@ describe('usePackagePolicy - agentless', () => {
   it('allows an agentless save that echoes the unchanged policy_ids', async () => {
     // The edit page always submits `{ policy_ids: packagePolicy.policy_ids }` — an unchanged
     // echo must not trip the reassignment guard.
-    vi
-      .mocked(sendUpdateAgentlessPolicy)
-      .mockResolvedValue({ item: { id: 'agentless-detect' } } as any);
+    vi.mocked(sendUpdateAgentlessPolicy).mockResolvedValue({
+      item: { id: 'agentless-detect' },
+    } as any);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>

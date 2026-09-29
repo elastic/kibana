@@ -16,7 +16,7 @@ import { ErrorsPopover } from '.';
 
 const mockCopyToClipboard = vi.fn((value) => true);
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     copyToClipboard: (value: string) => mockCopyToClipboard(value),

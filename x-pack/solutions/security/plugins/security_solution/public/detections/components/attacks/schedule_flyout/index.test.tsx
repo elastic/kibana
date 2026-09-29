@@ -22,15 +22,15 @@ import {
 vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('../../../../common/lib/kibana');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   onClose: vi.fn(),

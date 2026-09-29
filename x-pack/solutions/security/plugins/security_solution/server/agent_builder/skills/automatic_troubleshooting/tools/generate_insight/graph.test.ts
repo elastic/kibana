@@ -18,20 +18,20 @@ import { getPolicyResponseFailureEvents } from './refetch_policy_response_failur
 import { createGenerateInsightGraph } from './graph';
 
 vi.mock('../../../../../endpoint/services', () => {
-      const mocked = {
-      securityWorkflowInsightsService: {
-        createFromDefendInsights: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityWorkflowInsightsService: {
+      createFromDefendInsights: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./refetch_policy_response_failures', () => {
-      const mocked = {
-      getPolicyResponseFailureEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPolicyResponseFailureEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateFromDefendInsights =
   securityWorkflowInsightsService.createFromDefendInsights as Mock;

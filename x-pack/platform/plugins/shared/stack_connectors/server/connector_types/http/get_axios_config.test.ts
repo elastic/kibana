@@ -21,18 +21,18 @@ import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/serv
 import { AuthType } from '@kbn/connector-schemas/common/auth';
 
 vi.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => {
-      const mocked = {
-      getOAuthClientCredentialsAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthClientCredentialsAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/actions-plugin/server/lib/get_oauth_password_access_token', () => {
-      const mocked = {
-      getOAuthPasswordAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthPasswordAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createServicesMock = () => {
   const mock: Mocked<

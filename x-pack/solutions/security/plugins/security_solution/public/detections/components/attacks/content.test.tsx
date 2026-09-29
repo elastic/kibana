@@ -30,83 +30,83 @@ import { useAttackDiscoveryControls } from '../../../attack_discovery/pages/use_
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('./kpis/kpis_section', () => {
-      const mocked = {
-      KPIsSection: () => <div data-test-subj="attacks-kpis-section" />,
-      KPIS_SECTION: 'attacks-kpis-section',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KPIsSection: () => <div data-test-subj="attacks-kpis-section" />,
+    KPIS_SECTION: 'attacks-kpis-section',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./search_bar/search_bar_section', () => {
-      const mocked = {
-      SearchBarSection: () => <div data-test-subj="search-bar-section" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchBarSection: () => <div data-test-subj="search-bar-section" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./filters/type_filter', () => {
-      const mocked = {
-      TypeFilter: () => <div data-test-subj="mock-type-filter" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TypeFilter: () => <div data-test-subj="mock-type-filter" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../common/components/filter_by_assignees_popover/filter_by_assignees_popover',
   () => {
-      const mocked = {
-        FilterByAssigneesPopover: () => <div data-test-subj="mock-filter-by-assignees-popover" />,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      FilterByAssigneesPopover: () => <div data-test-subj="mock-filter-by-assignees-popover" />,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('./table/table_section', () => {
-      const mocked = {
-      TableSection: () => <div data-test-subj="attacks-page-table-section" />,
-      TABLE_SECTION_TEST_ID: 'attacks-page-table-section',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableSection: () => <div data-test-subj="attacks-page-table-section" />,
+    TABLE_SECTION_TEST_ID: 'attacks-page-table-section',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../attack_discovery/pages/use_attack_discovery_controls', () => {
-      const mocked = {
-      useAttackDiscoveryControls: vi.fn().mockReturnValue({
-        connectorId: 'test-connector',
-        isLoading: false,
-        onGenerate: vi.fn(),
-        openFlyout: vi.fn(),
-        settingsFlyout: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryControls: vi.fn().mockReturnValue({
+      connectorId: 'test-connector',
+      isLoading: false,
+      onGenerate: vi.fn(),
+      openFlyout: vi.fn(),
+      settingsFlyout: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./generations_control_center', () => {
-      const mocked = {
-      GenerationsControlCenterFlyout: () => (
-        <div data-test-subj="generationsControlCenterFlyout">
-          {'Mock GenerationsControlCenterFlyout'}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GenerationsControlCenterFlyout: () => (
+      <div data-test-subj="generationsControlCenterFlyout">
+        {'Mock GenerationsControlCenterFlyout'}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../attack_discovery/pages/use_find_attack_discoveries')),
-      useFindAttackDiscoveries: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../attack_discovery/pages/use_find_attack_discoveries')),
+    useFindAttackDiscoveries: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView: DataView = createStubDataView({ spec: {} });
 

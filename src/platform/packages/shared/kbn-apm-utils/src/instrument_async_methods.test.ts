@@ -18,11 +18,11 @@ import { withSpan } from './with_span';
 const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 
 vi.mock('./with_span', () => {
-      const mocked = {
-      withSpan: vi.fn((options, cb) => cb()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSpan: vi.fn((options, cb) => cb()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('instrumentAsyncMethods', () => {
   beforeEach(() => {

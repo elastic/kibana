@@ -16,37 +16,37 @@ import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summar
 import { ProposalsTrendChartRow } from './proposals_trend_chart_row';
 
 vi.mock('../../hooks/use_proposal_charts_summary', () => {
-      const mocked = {
-      DEFAULT_WINDOW_HOURS: 24,
-      DEFAULT_BUCKET_MINUTES: 30,
-      useProposalChartsSummary: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DEFAULT_WINDOW_HOURS: 24,
+    DEFAULT_BUCKET_MINUTES: 30,
+    useProposalChartsSummary: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // @elastic/charts wants a real canvas; what this row owns is which series and
 // which window reach the chart, so the chart itself stands in as its props.
 vi.mock('./trend_sparkline', () => {
-      const mocked = {
-      SPARKLINE_HEIGHT_SIZE: 'xxxl',
-      TrendSparkline: ({
-        series,
-        panelId,
-        bucketMinutes,
-      }: {
-        series: Array<{ x: number; y: number }>;
-        panelId: string;
-        bucketMinutes: number;
-      }) => (
-        <div
-          data-test-subj={`sparkline-${panelId}`}
-          data-series={JSON.stringify(series)}
-          data-bucket-minutes={bucketMinutes}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SPARKLINE_HEIGHT_SIZE: 'xxxl',
+    TrendSparkline: ({
+      series,
+      panelId,
+      bucketMinutes,
+    }: {
+      series: Array<{ x: number; y: number }>;
+      panelId: string;
+      bucketMinutes: number;
+    }) => (
+      <div
+        data-test-subj={`sparkline-${panelId}`}
+        data-series={JSON.stringify(series)}
+        data-bucket-minutes={bucketMinutes}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseProposalChartsSummary = useProposalChartsSummary as Mock;
 

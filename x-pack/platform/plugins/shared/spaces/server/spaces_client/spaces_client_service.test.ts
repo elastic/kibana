@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { CPSServerStart } from '@kbn/cps/server/types';

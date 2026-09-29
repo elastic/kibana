@@ -21,7 +21,7 @@ import { ScreenCapturePanelContent } from './screen_capture_panel_content';
 // Capture the textToCopy prop passed to EuiCopy without executing execCommand (not available in jsdom)
 let capturedTextToCopy = '';
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiCopy: ({

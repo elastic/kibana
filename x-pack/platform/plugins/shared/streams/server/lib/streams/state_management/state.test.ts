@@ -127,11 +127,9 @@ describe('State', () => {
       },
     }));
 
-    vi
-      .spyOn(streamFromDefinition, 'streamFromDefinition')
-      .mockImplementation((definition) =>
-        streamThatModifiesStartingState(definition.name, stateDependenciesMock)
-      );
+    vi.spyOn(streamFromDefinition, 'streamFromDefinition').mockImplementation((definition) =>
+      streamThatModifiesStartingState(definition.name, stateDependenciesMock)
+    );
 
     await expect(
       async () =>
@@ -155,9 +153,9 @@ describe('State', () => {
       },
     }));
 
-    vi
-      .spyOn(streamFromDefinition, 'streamFromDefinition')
-      .mockImplementationOnce(() => streamThatCascadesTooMuch(stateDependenciesMock));
+    vi.spyOn(streamFromDefinition, 'streamFromDefinition').mockImplementationOnce(() =>
+      streamThatCascadesTooMuch(stateDependenciesMock)
+    );
 
     await expect(
       async () =>
@@ -181,9 +179,9 @@ describe('State', () => {
       },
     }));
 
-    vi
-      .spyOn(streamFromDefinition, 'streamFromDefinition')
-      .mockImplementation((definition) => failingStream(stateDependenciesMock));
+    vi.spyOn(streamFromDefinition, 'streamFromDefinition').mockImplementation((definition) =>
+      failingStream(stateDependenciesMock)
+    );
 
     await expect(
       async () =>
@@ -209,9 +207,9 @@ describe('State', () => {
 
     const FlowStream = flowStream();
 
-    vi
-      .spyOn(streamFromDefinition, 'streamFromDefinition')
-      .mockImplementation((definition) => new FlowStream(definition, stateDependenciesMock));
+    vi.spyOn(streamFromDefinition, 'streamFromDefinition').mockImplementation(
+      (definition) => new FlowStream(definition, stateDependenciesMock)
+    );
 
     const applyChangeSpy = vi.spyOn(FlowStream.prototype, 'applyChange');
     const validateSpy = vi.spyOn(FlowStream.prototype, 'validate');
@@ -222,11 +220,9 @@ describe('State', () => {
     const planSpy = vi.spyOn(ExecutionPlan.prototype, 'plan').mockImplementation(async () => {
       // Do nothing
     });
-    const executeSpy = vi
-      .spyOn(ExecutionPlan.prototype, 'execute')
-      .mockImplementation(async () => {
-        // Do nothing
-      });
+    const executeSpy = vi.spyOn(ExecutionPlan.prototype, 'execute').mockImplementation(async () => {
+      // Do nothing
+    });
 
     await State.attemptChanges(
       [

@@ -16,18 +16,18 @@ import { deleteList } from './delete_list';
 import { getDeleteListOptionsMock } from './delete_list.mock';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      waitUntilDocumentIndexed: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    waitUntilDocumentIndexed: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_list', () => {
-      const mocked = {
-      getList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('delete_list', () => {
   beforeEach(() => {

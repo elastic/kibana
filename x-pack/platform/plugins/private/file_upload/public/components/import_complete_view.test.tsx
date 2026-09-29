@@ -14,42 +14,42 @@ import 'jest-canvas-mock';
 import { ImportCompleteView } from './import_complete_view';
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      get: vi.fn(),
-      getDocLinks: () => {
-        return {
-          links: {
-            maps: {
-              importGeospatialPrivileges: 'linkToPrvilegesDocs',
-            },
+  const mocked = {
+    get: vi.fn(),
+    getDocLinks: () => {
+      return {
+        links: {
+          maps: {
+            importGeospatialPrivileges: 'linkToPrvilegesDocs',
           },
-        };
-      },
-      getHttp: () => {
-        return {
-          basePath: {
-            prepend: (path: string) => `abc${path}`,
-          },
-        };
-      },
-      getUiSettings: () => {
-        return {
-          get: vi.fn(),
-        };
-      },
-      getSettings: () => {
-        return {
-          get: vi.fn(),
-        };
-      },
-      getTheme: () => {
-        return {
-          theme$: vi.fn(),
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        },
+      };
+    },
+    getHttp: () => {
+      return {
+        basePath: {
+          prepend: (path: string) => `abc${path}`,
+        },
+      };
+    },
+    getUiSettings: () => {
+      return {
+        get: vi.fn(),
+      };
+    },
+    getSettings: () => {
+      return {
+        get: vi.fn(),
+      };
+    },
+    getTheme: () => {
+      return {
+        theme$: vi.fn(),
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 test('Should render success', async () => {
   await act(async () => {

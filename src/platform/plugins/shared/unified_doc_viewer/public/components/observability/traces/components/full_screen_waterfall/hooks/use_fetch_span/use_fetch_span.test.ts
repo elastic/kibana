@@ -16,11 +16,11 @@ import { useFetchSpan } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../../../plugin';
 
 vi.mock('../../../../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchSpan = vi.fn<Promise<UnifiedSpanDocument | undefined>, any>();
 const mockAddDanger = vi.fn();

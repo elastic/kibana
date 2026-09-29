@@ -13,31 +13,31 @@ import { identifyDependencyUsageWithCruiser } from './dependency_graph/providers
 import { configureYargs } from './cli';
 
 vi.mock('chalk', () => {
-      const mocked = {
-      green: vi.fn((str) => str),
-      yellow: vi.fn((str) => str),
-      cyan: vi.fn((str) => str),
-      magenta: vi.fn((str) => str),
-      blue: vi.fn((str) => str),
-      bold: { magenta: vi.fn((str) => str), blue: vi.fn((str) => str) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    green: vi.fn((str) => str),
+    yellow: vi.fn((str) => str),
+    cyan: vi.fn((str) => str),
+    magenta: vi.fn((str) => str),
+    blue: vi.fn((str) => str),
+    bold: { magenta: vi.fn((str) => str), blue: vi.fn((str) => str) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./dependency_graph/providers/cruiser', () => {
-      const mocked = {
-      identifyDependencyUsageWithCruiser: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    identifyDependencyUsageWithCruiser: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cli', async () => {
-      const mocked = {
-      ...(await vi.importActual('./cli')),
-      runCLI: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./cli')),
+    runCLI: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('dependency-usage CLI', () => {
   const parser = configureYargs()

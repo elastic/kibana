@@ -30,11 +30,11 @@ const queryClient = new QueryClient();
 
 vi.mock('../../../../app_dependencies');
 vi.mock('../../../../hooks/use_get_transform_cps_enabled', () => {
-      const mocked = {
-      useGetTransformCpsEnabled: () => ({ data: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTransformCpsEnabled: () => ({ data: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Transform: Transform List <TransformList />', () => {
   test('Minimal initialization', async () => {

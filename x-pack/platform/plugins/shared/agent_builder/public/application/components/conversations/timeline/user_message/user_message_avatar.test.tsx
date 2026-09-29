@@ -14,20 +14,20 @@ import { UserAvatar, type UserProfileWithAvatar } from '@kbn/user-profile-compon
 import { UserMessageAvatar } from './user_message_avatar';
 
 vi.mock('@kbn/user-profile-components', () => {
-      const mocked = {
-      UserAvatar: vi.fn(({ avatar }) => (
-        <div data-test-subj="agentBuilderUserAvatar">{avatar?.initials}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserAvatar: vi.fn(({ avatar }) => (
+      <div data-test-subj="agentBuilderUserAvatar">{avatar?.initials}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      EuiAvatar: vi.fn(({ name }) => <div data-test-subj="agentBuilderFallbackAvatar">{name}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EuiAvatar: vi.fn(({ name }) => <div data-test-subj="agentBuilderFallbackAvatar">{name}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUserAvatar = vi.mocked(UserAvatar);
 const mockEuiAvatar = vi.mocked(EuiAvatar);

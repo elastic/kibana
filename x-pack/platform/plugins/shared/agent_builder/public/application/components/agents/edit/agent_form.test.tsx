@@ -43,85 +43,85 @@ const createModeState: AgentEditState = {
 };
 
 vi.mock('../../../hooks/agents/use_agent_edit', () => {
-      const mocked = {
-      useAgentEdit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentEdit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The settings tab's AI indices section reads a ui setting this test's Kibana context does not
 // provide. Off keeps the section out of the way; it has its own tests.
 vi.mock('../../../hooks/use_is_context_engine_enabled', () => {
-      const mocked = {
-      useIsContextEngineEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsContextEngineEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          uiSettings: { get: () => false },
-          notifications: { toasts: { addSuccess: vi.fn(), addDanger: vi.fn() } },
-          http: {},
-          overlays: { openConfirm: vi.fn().mockResolvedValue(true) },
-          application: { navigateToUrl: vi.fn() },
-          appParams: { history: { replace: vi.fn(), push: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        uiSettings: { get: () => false },
+        notifications: { toasts: { addSuccess: vi.fn(), addDanger: vi.fn() } },
+        http: {},
+        overlays: { openConfirm: vi.fn().mockResolvedValue(true) },
+        application: { navigateToUrl: vi.fn() },
+        appParams: { history: { replace: vi.fn(), push: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_navigation', () => {
-      const mocked = {
-      useNavigation: () => ({
-        navigateToAgentBuilderUrl: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: () => ({
+      navigateToAgentBuilderUrl: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        docLinksService: { agentBuilderAgents: 'https://docs.example.com/agents' },
-        agentService: { list: vi.fn().mockResolvedValue([]) },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      docLinksService: { agentBuilderAgents: 'https://docs.example.com/agents' },
+      agentService: { list: vi.fn().mockResolvedValue([]) },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_ui_privileges', () => {
-      const mocked = {
-      useUiPrivileges: () => ({ manageAgents: true, isAdmin: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiPrivileges: () => ({ manageAgents: true, isAdmin: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/tools/use_tools', () => {
-      const mocked = {
-      useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToolsService: () => ({ tools: [], isLoading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useExperimentalFeatures: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExperimentalFeatures: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/unsaved-changes-prompt', () => {
-      const mocked = {
-      useUnsavedChangesPrompt: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnsavedChangesPrompt: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useAgentEdit } = (await vi.importMock('../../../hooks/agents/use_agent_edit'));
+const { useAgentEdit } = await vi.importMock('../../../hooks/agents/use_agent_edit');
 
 const renderWithIntl = (ui: React.ReactElement) => {
   const queryClient = new QueryClient({
@@ -137,21 +137,19 @@ const renderWithIntl = (ui: React.ReactElement) => {
 describe('AgentForm', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (useAgentEdit as Mock).mockImplementation(
-      ({ editingAgentId }: { editingAgentId?: string }) => {
-        const state: AgentEditState = !editingAgentId ? createModeState : { ...editModeState };
-        return {
-          state,
-          isLoading: false,
-          isSubmitting: false,
-          submit: mockSubmit,
-          tools: [],
-          skills: [],
-          plugins: [],
-          error: undefined,
-        };
-      }
-    );
+    (useAgentEdit as Mock).mockImplementation(({ editingAgentId }: { editingAgentId?: string }) => {
+      const state: AgentEditState = !editingAgentId ? createModeState : { ...editModeState };
+      return {
+        state,
+        isLoading: false,
+        isSubmitting: false,
+        submit: mockSubmit,
+        tools: [],
+        skills: [],
+        plugins: [],
+        error: undefined,
+      };
+    });
   });
 
   it('displays owner name in edit mode when agent has created_by with username', () => {

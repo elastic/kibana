@@ -14,11 +14,11 @@ import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import { withPerformanceMetrics } from './with_performance_metrics';
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      reportPerformanceMetricEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reportPerformanceMetricEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('withPerformanceMetrics', () => {
   const analytics = {} as AnalyticsServiceStart;

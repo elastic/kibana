@@ -15,21 +15,21 @@ import { RenderPanelContext, resolvePreviewHeight } from './render_panel_context
 
 const mockComponentProps = vi.fn();
 vi.mock('@kbn/custom-content-renderer', () => {
-      const mocked = {
-      CustomContentComponent: (props: Record<string, unknown>) => {
-        mockComponentProps(props);
-        return <span data-test-subj="custom-content" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomContentComponent: (props: Record<string, unknown>) => {
+      mockComponentProps(props);
+      return <span data-test-subj="custom-content" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services', () => {
-      const mocked = {
-      getServices: () => ({ core: { http: {}, uiSettings: {} }, search: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({ core: { http: {}, uiSettings: {} }, search: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeData = (
   data: Partial<CustomContentContextAttachmentData> = {}

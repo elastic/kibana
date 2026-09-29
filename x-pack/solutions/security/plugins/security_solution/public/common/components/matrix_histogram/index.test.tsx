@@ -26,20 +26,21 @@ vi.mock('../visualization_actions/actions');
 vi.mock('../visualization_actions/visualization_embeddable');
 
 vi.mock('../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../visualization_actions/use_visualization_response', async () => {
-      const mocked = {
-      ...(await vi.importActual('../visualization_actions/use_visualization_response')),
-      useVisualizationResponse: (await vi.importActual('../visualization_actions/use_visualization_response.mock'))
-        .useVisualizationResponseMock.create(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../visualization_actions/use_visualization_response')),
+    useVisualizationResponse: (
+      await vi.importActual('../visualization_actions/use_visualization_response.mock')
+    ).useVisualizationResponseMock.create(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 

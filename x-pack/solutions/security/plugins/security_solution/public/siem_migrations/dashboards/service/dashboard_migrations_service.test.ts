@@ -33,18 +33,18 @@ import type { ExperimentalFeatures } from '../../../../common';
 import { MigrationSource } from '../../common/types';
 
 vi.mock('../api', () => {
-      const mocked = {
-      createDashboardMigration: vi.fn(),
-      deleteDashboardMigration: vi.fn(),
-      upsertDashboardMigrationResources: vi.fn(),
-      startDashboardMigration: vi.fn(),
-      stopDashboardMigration: vi.fn(),
-      getDashboardMigrationStats: vi.fn(),
-      getDashboardMigrationAllStats: vi.fn(),
-      addDashboardsToDashboardMigration: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createDashboardMigration: vi.fn(),
+    deleteDashboardMigration: vi.fn(),
+    upsertDashboardMigrationResources: vi.fn(),
+    startDashboardMigration: vi.fn(),
+    stopDashboardMigration: vi.fn(),
+    getDashboardMigrationStats: vi.fn(),
+    getDashboardMigrationAllStats: vi.fn(),
+    addDashboardsToDashboardMigration: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/service/capabilities', async () => {
   return {
@@ -58,43 +58,43 @@ const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as Mocke
 >;
 
 vi.mock('../../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: vi.fn(() => ({ automaticDashboardsMigration: true, siemMigrationsDisabled: false })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: vi.fn(() => ({ automaticDashboardsMigration: true, siemMigrationsDisabled: false })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_license', () => {
-      const mocked = {
-      licenseService: {
-        isEnterprise: vi.fn(() => true),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    licenseService: {
+      isEnterprise: vi.fn(() => true),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./notification/success_notification', () => {
-      const mocked = {
-      getSuccessToast: vi.fn().mockReturnValue({ title: 'Success' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSuccessToast: vi.fn().mockReturnValue({ title: 'Success' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/service/notifications/no_connector_notification', () => {
-      const mocked = {
-      getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/service/notifications/missing_capabilities_notification', () => {
-      const mocked = {
-      getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetDashboardMigrationStats = api.getDashboardMigrationStats as Mock;
 const mockGetDashboardMigrationAllStats = api.getDashboardMigrationAllStats as Mock;
@@ -365,9 +365,9 @@ describe('SiemDashboardMigrationsService', () => {
 
   describe('stopDashboardMigration', () => {
     it('should notify and not stop migration if missing capabilities exist', async () => {
-      vi
-        .spyOn(service, 'getMissingCapabilities')
-        .mockReturnValue([{ capability: 'cap', description: 'desc' }]);
+      vi.spyOn(service, 'getMissingCapabilities').mockReturnValue([
+        { capability: 'cap', description: 'desc' },
+      ]);
       const result = await service.stopDashboardMigration({
         migrationId: defaultMigrationStats.id,
         vendor: defaultMigrationStats.vendor,

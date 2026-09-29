@@ -8,7 +8,7 @@
 import { vi } from 'vitest';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     // EuiTitle applies size via CSS-in-JS only (no stable DOM class); mock to inspect props

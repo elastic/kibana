@@ -20,20 +20,20 @@ const MockCspComponent = ({
 }) => <>{children({ createRuleFn: mockCreateRuleFn })}</>;
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          cloudSecurityPosture: {
-            getCloudSecurityPostureMisconfigurationFlyout: () => ({
-              Component: MockCspComponent,
-              TakeAction: mockCspTakeAction,
-            }),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        cloudSecurityPosture: {
+          getCloudSecurityPostureMisconfigurationFlyout: () => ({
+            Component: MockCspComponent,
+            TakeAction: mockCspTakeAction,
+          }),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<Footer /> (misconfiguration)', () => {
   beforeEach(() => {

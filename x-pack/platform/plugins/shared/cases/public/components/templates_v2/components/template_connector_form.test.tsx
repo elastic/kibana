@@ -14,30 +14,30 @@ import { TemplateConnectorForm } from './template_connector_form';
 const mockUseFormData = vi.fn();
 
 vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => {
-      const mocked = {
-      Form: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-      useForm: () => ({ form: {} }),
-      useFormData: () => mockUseFormData(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Form: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    useForm: () => ({ form: {} }),
+    useFormData: () => mockUseFormData(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../case_form_fields/connector', () => {
-      const mocked = {
-      Connector: () => <div data-test-subj="mock-connector" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Connector: () => <div data-test-subj="mock-connector" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/configure/use_get_supported_action_connectors', () => {
-      const mocked = {
-      useGetSupportedActionConnectors: () => ({
-        data: [{ id: 'my-connector', name: 'My Connector', actionTypeId: '.jira' }],
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSupportedActionConnectors: () => ({
+      data: [{ id: 'my-connector', name: 'My Connector', actionTypeId: '.jira' }],
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplateConnectorForm', () => {
   beforeEach(() => {

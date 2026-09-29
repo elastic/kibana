@@ -22,11 +22,11 @@ import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const alerting = alertsMock.createStart();
 const currentDate = new Date().toISOString();

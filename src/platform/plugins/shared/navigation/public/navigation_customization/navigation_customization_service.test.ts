@@ -19,33 +19,33 @@ import { NAV_CUSTOMIZATION_STORAGE_KEY } from '../../common/constants';
 import { NAV_CUSTOMIZATION_EVENT_TYPE, NAV_LOADED_EVENT_TYPE } from './telemetry';
 
 vi.mock('@kbn/navigation-customization-components', () => {
-      const mocked = {
-      createCustomizeNavMenuLink: vi.fn((_openModal: () => void) => ({
-        iconType: 'controls',
-        label: 'Customize navigation',
-        href: '',
-        order: 500,
-        content: vi.fn(),
-      })),
-      openCustomizeNavigationModal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCustomizeNavMenuLink: vi.fn((_openModal: () => void) => ({
+      iconType: 'controls',
+      label: 'Customize navigation',
+      href: '',
+      order: 500,
+      content: vi.fn(),
+    })),
+    openCustomizeNavigationModal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The modal opener dynamically imports computeMoves; stub it so the import resolves.
 vi.mock('@kbn/core-chrome-navigation-customization', () => {
-      const mocked = {
-      computeMoves: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    computeMoves: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-chrome-browser-navigation-utils', () => {
-      const mocked = {
-      getNavigationNodeIcon: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNavigationNodeIcon: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const openModalMock = openCustomizeNavigationModal as Mock;
 
@@ -297,8 +297,7 @@ describe('NavigationCustomizationService', () => {
       service.enableUi({ core, chrome });
       await flushAsync();
 
-      const [handler] = (chrome.project.registerCustomizeNavigationHandler as Mock).mock
-        .calls[0];
+      const [handler] = (chrome.project.registerCustomizeNavigationHandler as Mock).mock.calls[0];
       // openModal fires run() without awaiting it, so flush microtasks to let the
       // dynamic imports and getNavigationItems resolve before inspecting callbacks.
       (handler as () => void)();

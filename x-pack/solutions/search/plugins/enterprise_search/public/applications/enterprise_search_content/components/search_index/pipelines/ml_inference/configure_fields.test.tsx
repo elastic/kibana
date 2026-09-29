@@ -10,12 +10,12 @@ import { vi } from 'vitest';
 import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logic';
 
 vi.mock('./multi_field_selector', () => {
-      const mocked = {
-      MultiFieldMapping: () => <div data-test-subj="multiFieldMapping" />,
-      SelectedFieldMappings: () => <div data-test-subj="selectedFieldMappings" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MultiFieldMapping: () => <div data-test-subj="multiFieldMapping" />,
+    SelectedFieldMappings: () => <div data-test-subj="selectedFieldMappings" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

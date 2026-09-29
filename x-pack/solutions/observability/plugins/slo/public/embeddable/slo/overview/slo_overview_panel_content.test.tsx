@@ -20,23 +20,23 @@ import { hasSloGroupBy, SloOverviewPanelContent } from './slo_overview_panel_con
 
 vi.mock('../../../hooks/use_fetch_slo_details');
 vi.mock('./slo_overview', () => {
-      const mocked = {
-      SloOverview: () => <div data-test-subj="slo-overview">SloOverview</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloOverview: () => <div data-test-subj="slo-overview">SloOverview</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./slo_overview_grid', () => {
-      const mocked = {
-      SloCardChartList: () => <div data-test-subj="slo-card-chart-list">SloCardChartList</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloCardChartList: () => <div data-test-subj="slo-card-chart-list">SloCardChartList</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./group_view/group_view', () => {
-      const mocked = {
-      GroupSloView: () => <div data-test-subj="group-slo-view">GroupSloView</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GroupSloView: () => <div data-test-subj="group-slo-view">GroupSloView</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useFetchSloDetailsMock = useFetchSloDetails as MockedFunction<typeof useFetchSloDetails>;
 

@@ -12,11 +12,11 @@ import { setCategoryStepDefinition } from './set_category';
 import { getCategories } from '../containers/api';
 
 vi.mock('../containers/api', () => {
-      const mocked = {
-      getCategories: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCategories: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('setCategoryStepDefinition', () => {
   const getCategoriesMock = vi.mocked(getCategories);

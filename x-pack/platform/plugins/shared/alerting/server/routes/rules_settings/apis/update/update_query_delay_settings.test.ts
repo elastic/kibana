@@ -18,11 +18,11 @@ import { updateQueryDelaySettingsRoute } from './update_query_delay_settings';
 let rulesSettingsClient: RulesSettingsClientMock;
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();
@@ -54,9 +54,7 @@ describe('updateQueryDelaySettingsRoute', () => {
     `);
 
     (rulesSettingsClient.queryDelay().get as Mock).mockResolvedValue(mockQueryDelaySettings);
-    (rulesSettingsClient.queryDelay().update as Mock).mockResolvedValue(
-      mockQueryDelaySettings
-    );
+    (rulesSettingsClient.queryDelay().update as Mock).mockResolvedValue(mockQueryDelaySettings);
 
     const updateResult = {
       delay: 6,
@@ -73,8 +71,7 @@ describe('updateQueryDelaySettingsRoute', () => {
     await handler(context, req, res);
 
     expect(rulesSettingsClient.queryDelay().update).toHaveBeenCalledTimes(1);
-    expect((rulesSettingsClient.queryDelay().update as Mock).mock.calls[0])
-      .toMatchInlineSnapshot(`
+    expect((rulesSettingsClient.queryDelay().update as Mock).mock.calls[0]).toMatchInlineSnapshot(`
       Array [
         Object {
           "delay": 6,

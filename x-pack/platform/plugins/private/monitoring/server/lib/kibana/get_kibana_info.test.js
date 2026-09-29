@@ -11,23 +11,23 @@ import moment from 'moment';
 import { handleResponse } from './get_kibana_info';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              kibana: {
-                reporting: {
-                  stale_status_threshold_seconds: 120,
-                },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            kibana: {
+              reporting: {
+                stale_status_threshold_seconds: 120,
               },
             },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('get_kibana_info', () => {
   // TODO: test was not running before and is not up to date

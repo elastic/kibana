@@ -23,37 +23,43 @@ import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_man
 import type { IWorkflowEventLogger } from '../../workflow_event_logger';
 
 vi.mock('./hitl_external_resume_helpers', () => {
-      const mocked = {
-      invalidateHitlExternalResumeTokenIfPresent: vi.fn(),
-      mintHitlExternalResumeToken: vi.fn().mockReturnValue({
-        token: 'resume-token',
-        tokenHash: 'resume-token-hash',
-        expiresAt: '2999-01-01T00:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invalidateHitlExternalResumeTokenIfPresent: vi.fn(),
+    mintHitlExternalResumeToken: vi.fn().mockReturnValue({
+      token: 'resume-token',
+      tokenHash: 'resume-token-hash',
+      expiresAt: '2999-01-01T00:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hitl_notifications/has_external_hitl_channels', () => {
-      const mocked = {
-      hasExternalHitlChannels: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasExternalHitlChannels: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hitl_notifications/send_wait_for_input_notifications', () => {
-      const mocked = {
-      sendWaitForInputNotifications: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendWaitForInputNotifications: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMintHitlExternalResumeToken = (await vi.importMock('./hitl_external_resume_helpers'))
   .mintHitlExternalResumeToken as Mock;
-const mockInvalidateHitlExternalResumeTokenIfPresent = (await vi.importMock('./hitl_external_resume_helpers')).invalidateHitlExternalResumeTokenIfPresent as Mock;
+const mockInvalidateHitlExternalResumeTokenIfPresent = (
+  await vi.importMock('./hitl_external_resume_helpers')
+).invalidateHitlExternalResumeTokenIfPresent as Mock;
 
-const { hasExternalHitlChannels } = (await vi.importMock('../hitl_notifications/has_external_hitl_channels'));
-const { sendWaitForInputNotifications } = (await vi.importMock('../hitl_notifications/send_wait_for_input_notifications'));
+const { hasExternalHitlChannels } = await vi.importMock(
+  '../hitl_notifications/has_external_hitl_channels'
+);
+const { sendWaitForInputNotifications } = await vi.importMock(
+  '../hitl_notifications/send_wait_for_input_notifications'
+);
 const mockHasExternalHitlChannels = hasExternalHitlChannels as Mock;
 const mockSendWaitForInputNotifications = sendWaitForInputNotifications as Mock;
 

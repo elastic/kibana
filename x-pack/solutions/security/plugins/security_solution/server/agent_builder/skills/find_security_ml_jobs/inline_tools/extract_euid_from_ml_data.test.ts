@@ -14,11 +14,11 @@ import { extractEuidFromMlDataTool } from './extract_euid_from_ml_data';
 import type { EntityType } from '../../../../../common/entity_analytics/types';
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: { getEuidFromObject: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    euid: { getEuidFromObject: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetEuidFromObject = euid.getEuidFromObject as Mock;
 
@@ -34,8 +34,11 @@ describe('extractEuidFromMlDataTool handler', () => {
     vi.clearAllMocks();
     // Default: delegate to the real implementation
     mockGetEuidFromObject.mockImplementation(async (entityType: string, doc: unknown) =>
-      (await vi.importActual<typeof import('@kbn/entity-store/common/euid_helpers')>('@kbn/entity-store/common/euid_helpers'))
-        .euid.getEuidFromObject(entityType as EntityType, doc)
+      (
+        await vi.importActual<typeof import('@kbn/entity-store/common/euid_helpers')>(
+          '@kbn/entity-store/common/euid_helpers'
+        )
+      ).euid.getEuidFromObject(entityType as EntityType, doc)
     );
   });
 

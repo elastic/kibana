@@ -26,14 +26,14 @@ vi.mock('./embeddable', () => ({
 }));
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useFetcher: vi.fn(() => ({
-        data: { formula: {} },
-        loading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: vi.fn(() => ({
+      data: { formula: {} },
+      loading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTimeRange1 = {
   from: '2022-02-15T16:00:00.000Z',

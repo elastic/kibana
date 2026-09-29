@@ -20,11 +20,11 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 vi.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_inference_endpoints');
 vi.mock('@kbn/inference-endpoint-ui-common/src/components/inference_flyout_wrapper', () => {
-      const mocked = {
-      InferenceFlyoutWrapper: vi.fn(() => <div data-test-subj="inferenceFlyoutWrapper" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InferenceFlyoutWrapper: vi.fn(() => <div data-test-subj="inferenceFlyoutWrapper" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseQueryInferenceEndpoints = useQueryInferenceEndpoints as Mock;

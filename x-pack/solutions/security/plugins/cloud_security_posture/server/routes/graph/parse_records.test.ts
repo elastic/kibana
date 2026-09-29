@@ -683,11 +683,11 @@ describe('parseRecords', () => {
   describe('unknown target processing', () => {
     // Mock uuid module for unknown target tests
     vi.doMock('uuid', () => {
-          const mocked = {
-              v4: vi.fn(),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        v4: vi.fn(),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
     const { v4: uuidv4 } = require('uuid');

@@ -21,11 +21,11 @@ import {
 } from './use_bootstrap_ease_rules';
 
 vi.mock('../../api', () => {
-      const mocked = {
-      bootstrapEaseRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bootstrapEaseRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../use_find_rules_query');
 
 const bootstrapEaseRulesMock = bootstrapEaseRules as MockedFunction<typeof bootstrapEaseRules>;

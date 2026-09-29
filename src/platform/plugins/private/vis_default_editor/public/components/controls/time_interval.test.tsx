@@ -16,17 +16,17 @@ import { aggParamCommonPropsMock } from './test_utils';
 import type { AggParamEditorProps } from '../agg_param_props';
 
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = {
-      search: {
-        aggs: {
-          isValidInterval: vi.fn().mockReturnValue(true),
-          parseEsInterval: vi.fn(),
-          InvalidEsCalendarIntervalError: class {},
-        },
+  const mocked = {
+    search: {
+      aggs: {
+        isValidInterval: vi.fn().mockReturnValue(true),
+        parseEsInterval: vi.fn(),
+        InvalidEsCalendarIntervalError: class {},
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { search } from '@kbn/data-plugin/public';
 

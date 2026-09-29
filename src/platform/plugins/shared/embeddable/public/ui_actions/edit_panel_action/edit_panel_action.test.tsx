@@ -70,14 +70,15 @@ describe('Edit panel action', () => {
   });
 
   it('getCompatibilityChangesSubject emits when view mode changes', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const subject = action.getCompatibilityChangesSubject(context);
-          subject?.pipe(take(1)).subscribe(() => {
-            done();
-          });
-          setViewMode('view');
-        
-      }));
+      const subject = action.getCompatibilityChangesSubject(context);
+      subject?.pipe(take(1)).subscribe(() => {
+        done();
+      });
+      setViewMode('view');
+    }));
 });

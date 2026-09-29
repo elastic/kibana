@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { act, renderHook } from '@testing-library/react';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useExportWithReferences } from './use_export_with_references';
 
@@ -28,31 +28,31 @@ const mockApi = {
 };
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: () => mockApi,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => mockApi,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          notifications: mockNotifications,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        notifications: mockNotifications,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportWorkflowExported: mockReportWorkflowExported,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportWorkflowExported: mockReportWorkflowExported,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock export_workflows module
 const mockExportWorkflows = vi.fn();
@@ -61,14 +61,14 @@ const mockFindMissingReferencedIds = vi.fn();
 const mockResolveAllReferences = vi.fn();
 
 vi.mock('../../../common/lib/export_workflows', () => {
-      const mocked = {
-      exportWorkflows: (...args: unknown[]) => mockExportWorkflows(...args),
-      exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
-      findMissingReferencedIds: (...args: unknown[]) => mockFindMissingReferencedIds(...args),
-      resolveAllReferences: (...args: unknown[]) => mockResolveAllReferences(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    exportWorkflows: (...args: unknown[]) => mockExportWorkflows(...args),
+    exportSingleWorkflow: (...args: unknown[]) => mockExportSingleWorkflow(...args),
+    findMissingReferencedIds: (...args: unknown[]) => mockFindMissingReferencedIds(...args),
+    resolveAllReferences: (...args: unknown[]) => mockResolveAllReferences(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
   id: 'wf-1',

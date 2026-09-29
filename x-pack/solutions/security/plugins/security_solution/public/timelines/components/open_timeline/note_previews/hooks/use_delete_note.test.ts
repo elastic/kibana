@@ -30,7 +30,7 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('@kbn/react-query', async () => {
-  const originalModule = (await vi.importActual('@kbn/react-query'));
+  const originalModule = await vi.importActual('@kbn/react-query');
   return {
     ...originalModule,
     useMutation: vi.fn((...args) => originalModule.useMutation(...args)),
@@ -38,19 +38,19 @@ vi.mock('@kbn/react-query', async () => {
 });
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/hooks/use_selector');
 
 vi.mock('../../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDeleteNote', () => {
   const mockHttp = {

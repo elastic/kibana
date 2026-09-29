@@ -15,23 +15,23 @@ const mockHttpGet = vi.fn();
 const mockAddDanger = vi.fn();
 
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { http: { get: mockHttpGet } },
-      }),
-      useToasts: () => ({
-        addDanger: mockAddDanger,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { http: { get: mockHttpGet } },
+    }),
+    useToasts: () => ({
+      addDanger: mockAddDanger,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuery = (await vi.importMock('@kbn/react-query')).useQuery;
 

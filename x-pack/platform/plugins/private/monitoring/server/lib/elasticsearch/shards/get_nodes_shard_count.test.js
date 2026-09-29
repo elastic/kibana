@@ -10,19 +10,19 @@ import { vi } from 'vitest';
 import { getNodesShardCount } from './get_nodes_shard_count';
 
 vi.mock('../../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getNodeShardCount', () => {
   it('should return the shard count per node', async () => {

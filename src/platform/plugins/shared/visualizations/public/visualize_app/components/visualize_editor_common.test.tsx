@@ -19,42 +19,42 @@ import { VisChartWarning } from './vis_chart_warning';
 const mockGetLegacyUrlConflict = vi.fn();
 const mockRedirectLegacyUrl = vi.fn(() => Promise.resolve());
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          spaces: {
-            ui: {
-              redirectLegacyUrl: mockRedirectLegacyUrl,
-              components: {
-                getLegacyUrlConflict: mockGetLegacyUrlConflict,
-              },
-            },
-          },
-          history: {
-            location: {
-              search: '?_g=test',
-            },
-          },
-          http: {
-            basePath: {
-              prepend: (url: string) => url,
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        spaces: {
+          ui: {
+            redirectLegacyUrl: mockRedirectLegacyUrl,
+            components: {
+              getLegacyUrlConflict: mockGetLegacyUrlConflict,
             },
           },
         },
-      })),
-      withKibana: vi.fn((comp) => comp),
-    };
-      return { ...mocked, default: mocked };
-    });
+        history: {
+          location: {
+            search: '?_g=test',
+          },
+        },
+        http: {
+          basePath: {
+            prepend: (url: string) => url,
+          },
+        },
+      },
+    })),
+    withKibana: vi.fn((comp) => comp),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services', () => {
-      const mocked = {
-      getUISettings: vi.fn(() => ({
-        get: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUISettings: vi.fn(() => ({
+      get: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('VisualizeEditorCommon', () => {
   it('should display a conflict callout if saved object conflicts', async () => {

@@ -20,42 +20,42 @@ vi.mock('./rule_migrations_telemetry_client');
 const mockRetrieverInitialize = vi.fn().mockResolvedValue(undefined);
 const mockGetResources = vi.fn().mockResolvedValue({});
 vi.mock('./retrievers', async () => {
-      const mocked = {
-      ...(await vi.importActual('./retrievers')),
-      RuleMigrationsRetriever: vi.fn().mockImplementation(() => ({
-        initialize: mockRetrieverInitialize,
-        resources: {
-          getResources: mockGetResources,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./retrievers')),
+    RuleMigrationsRetriever: vi.fn().mockImplementation(() => ({
+      initialize: mockRetrieverInitialize,
+      resources: {
+        getResources: mockGetResources,
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateModel = vi.fn(() => ({ model: 'test-model', bindTools: vi.fn() }));
 const mockGetModelName = vi.fn(() => 'test-model');
 vi.mock('../../common/task/util/actions_client_chat', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/task/util/actions_client_chat')),
-      ActionsClientChat: vi
-        .fn()
-        .mockImplementation(() => ({ createModel: mockCreateModel, getModelName: mockGetModelName })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/task/util/actions_client_chat')),
+    ActionsClientChat: vi
+      .fn()
+      .mockImplementation(() => ({ createModel: mockCreateModel, getModelName: mockGetModelName })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvoke = vi.fn().mockResolvedValue({});
 const mockGetRuleMigrationAgent = vi.fn(() => ({ invoke: mockInvoke }));
 const mockInvokeV2 = vi.fn().mockResolvedValue({});
 const mockGetRuleMigrationAgentV2 = vi.fn(() => ({ invoke: mockInvokeV2 }));
 vi.mock('./agent', async () => {
-      const mocked = {
-      ...(await vi.importActual('./agent')),
-      getRuleMigrationAgent: () => mockGetRuleMigrationAgent(),
-      getRuleMigrationAgentV2: () => mockGetRuleMigrationAgentV2(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./agent')),
+    getRuleMigrationAgent: () => mockGetRuleMigrationAgent(),
+    getRuleMigrationAgentV2: () => mockGetRuleMigrationAgentV2(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock dependencies
 const mockLogger = loggerMock.create();

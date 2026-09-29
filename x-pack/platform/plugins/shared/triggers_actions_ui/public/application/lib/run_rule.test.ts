@@ -11,12 +11,12 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { runRule } from './run_rule';
 
 vi.mock('./rule_api/run_soon', () => {
-      const mocked = {
-      runSoon: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { runSoon: mockRunSoon } = (await vi.importMock('./rule_api/run_soon'));
+  const mocked = {
+    runSoon: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { runSoon: mockRunSoon } = await vi.importMock('./rule_api/run_soon');
 
 describe('runRule', () => {
   const mockCoreSetup = coreMock.createSetup();

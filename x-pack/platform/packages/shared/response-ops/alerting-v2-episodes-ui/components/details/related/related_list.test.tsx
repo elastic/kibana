@@ -16,13 +16,17 @@ import { RuleStateStatus } from '../../../types/rule_state';
 import { RelatedAlertEpisodesList } from './related_list';
 
 vi.mock('../../related/related_alert_episode', () => {
-      const mocked = {
-      RelatedAlertEpisode: ({ episode, title }: { episode: AlertEpisode; title: React.ReactNode }) => (
-        <div data-test-subj="mockRelatedAlertEpisode">{title || episode['episode.id']}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RelatedAlertEpisode: ({
+      episode,
+      title,
+    }: {
+      episode: AlertEpisode;
+      title: React.ReactNode;
+    }) => <div data-test-subj="mockRelatedAlertEpisode">{title || episode['episode.id']}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRule = {
   id: 'rule-1',

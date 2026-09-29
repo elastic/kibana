@@ -21,25 +21,28 @@ vi.mock('../../common/experimental_features_context');
 vi.mock('../../results/use_export_results');
 vi.mock('../../results/export_filters_context');
 vi.mock('../../cases/add_to_cases', () => {
-      const mocked = {
-      AddToCaseContextProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToCaseContextProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../cases/add_to_cases_button', () => {
-      const mocked = {
-      AddToCaseButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToCaseButton: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../timelines/add_to_timeline_button', () => {
-      const mocked = {
-      AddToTimelineButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToTimelineButton: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../shared_components/attachments/pack_queries_attachment_wrapper', () => {
-  const { createContext } = (require('react') as typeof import('react'));
+  const { createContext } = require('react') as typeof import('react');
 
   return { CasesAttachmentWrapperContext: createContext(false) };
 });

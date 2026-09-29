@@ -26,29 +26,29 @@ import {
 } from './iac_provisioner';
 
 vi.mock('undici', () => {
-      const mocked = {
-      fetch: vi.fn(),
-      Agent: vi.fn().mockImplementation((opts) => ({ __agentOptions: opts })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetch: vi.fn(),
+    Agent: vi.fn().mockImplementation((opts) => ({ __agentOptions: opts })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./app_context');
 
 vi.mock('@kbn/server-http-tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/server-http-tools')),
-      // rejectUnauthorized: false mirrors the real SslConfig default (it carries
-      // server-side client-auth semantics) — the service must NOT propagate it to
-      // the outbound Agent, so the Agent assertion below would catch it if it did.
-      SslConfig: vi.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
-        rejectUnauthorized: false,
-        certificate,
-        key,
-        certificateAuthorities,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/server-http-tools')),
+    // rejectUnauthorized: false mirrors the real SslConfig default (it carries
+    // server-side client-auth semantics) — the service must NOT propagate it to
+    // the outbound Agent, so the Agent assertion below would catch it if it did.
+    SslConfig: vi.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
+      rejectUnauthorized: false,
+      certificate,
+      key,
+      certificateAuthorities,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedFetch = vi.mocked(undiciFetch);
 const mockedAgent = vi.mocked(Agent);

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { BehaviorSubject, Subject } from 'rxjs';
 import { vi } from 'vitest';
 
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import { WORKFLOW_YAML_CHANGED_EVENT } from '@kbn/workflows/common/constants';

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiContextMenuItem, EuiProvider } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { findTestSubject, mountWithIntl, nextTick, shallowWithIntl } from '@kbn/test-jest-helpers';
 

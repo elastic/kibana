@@ -23,11 +23,11 @@ vi.mock('../../../contexts/synthetics_settings_context');
 
 let mockHasEnterprise = false;
 vi.mock('../../../hooks/use_license', () => {
-      const mocked = {
-      useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: () => ({ hasAtLeast: () => mockHasEnterprise, getLicense: () => null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient();
 

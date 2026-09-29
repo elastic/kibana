@@ -32,29 +32,29 @@ vi.mock('../../hooks/use_default_model_validation');
 vi.mock('../../hooks/use_connectors');
 vi.mock('../../hooks/use_kibana');
 vi.mock('./no_models_empty_prompt', () => {
-      const mocked = {
-      NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoModelsEmptyPrompt: () => <div data-test-subj="settings-no-models">NoModelsEmptyPrompt</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./feature_section', () => {
-      const mocked = {
-      FeatureSection: ({ parentName }: { parentName: string }) => (
-        <div data-test-subj={`featureSection-${parentName}`} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FeatureSection: ({ parentName }: { parentName: string }) => (
+      <div data-test-subj={`featureSection-${parentName}`} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./default_model_section', () => {
-      const mocked = {
-      DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
-        <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
-          DefaultModelSection
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultModelSection: ({ disabled }: { disabled?: boolean }) => (
+      <div data-test-subj="defaultModelSection" data-disabled={String(Boolean(disabled))}>
+        DefaultModelSection
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseModelSettingsForm = useModelSettingsForm as Mock;
 const mockUseDefaultModelSettings = useDefaultModelSettings as Mock;

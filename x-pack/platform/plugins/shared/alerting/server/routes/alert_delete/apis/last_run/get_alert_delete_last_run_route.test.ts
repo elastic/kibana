@@ -15,18 +15,18 @@ import { alertDeletionClientMock } from '../../../../alert_deletion/alert_deleti
 import { rulesClientMock } from '../../../../rules_client.mock';
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/track_legacy_terminology', () => {
-      const mocked = {
-      trackLegacyTerminology: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trackLegacyTerminology: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

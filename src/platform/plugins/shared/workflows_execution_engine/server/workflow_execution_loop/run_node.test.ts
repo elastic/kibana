@@ -38,10 +38,7 @@ const mockCatchError = catchErrorModule.catchError as Mock;
 const mockHandleExecutionDelay = handleExecutionDelayModule.handleExecutionDelay as Mock;
 const mockRunStackMonitor = runStackMonitorModule.runStackMonitor as Mock;
 
-type RunNodeTestParams = Omit<
-  Mocked<WorkflowExecutionLoopParams>,
-  'workflowExecutionCursor'
-> & {
+type RunNodeTestParams = Omit<Mocked<WorkflowExecutionLoopParams>, 'workflowExecutionCursor'> & {
   workflowExecutionCursor: MockWorkflowExecutionCursor;
 };
 

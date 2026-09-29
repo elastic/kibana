@@ -18,7 +18,7 @@ import type { Entity } from '../../../common';
 import { runWithSpan } from '../../telemetry/traces';
 
 vi.mock('../../telemetry/traces', async () => {
-  const actual = (await vi.importActual('../../telemetry/traces'));
+  const actual = await vi.importActual('../../telemetry/traces');
   return {
     ...actual,
     runWithSpan: vi.fn(actual.runWithSpan),

@@ -28,22 +28,22 @@ import {
 } from './handler';
 
 vi.mock('../../assert_context_engine_write_access', () => {
-      const mocked = {
-      assertContextEngineWriteAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertContextEngineWriteAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
-      const mocked = {
-      hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
-      hasWorkflowCreatePrivilege: vi.fn().mockResolvedValue(true),
-      hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
-      hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
-      executeWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
+    hasWorkflowCreatePrivilege: vi.fn().mockResolvedValue(true),
+    hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
+    hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
+    executeWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const {
   hasWorkflowReadPrivilege,
@@ -51,7 +51,7 @@ const {
   hasWorkflowUpdatePrivilege,
   hasWorkflowExecutePrivilege,
   executeWorkflow,
-} = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
+} = await vi.importMock('@kbn/agent-builder-tools-base/workflows');
 
 const WORKFLOW_ATTACHMENT_ID = 'workflow-attachment-1';
 const WORKFLOW_YAML = 'name: pilot\nsteps: []';
@@ -174,9 +174,7 @@ describe('saveAutomationHandler', () => {
   const logger = loggingSystemMock.createLogger();
   const getCoreStart = vi.fn();
   const getSecurityStart = vi.fn().mockResolvedValue(undefined);
-  let aiIndexService: Mocked<
-    Pick<AiIndexService, 'addAutomation' | 'assertCanAcceptAutomation'>
-  >;
+  let aiIndexService: Mocked<Pick<AiIndexService, 'addAutomation' | 'assertCanAcceptAutomation'>>;
   let workflowsManagement: {
     getWorkflow: Mock;
     createWorkflow: Mock;

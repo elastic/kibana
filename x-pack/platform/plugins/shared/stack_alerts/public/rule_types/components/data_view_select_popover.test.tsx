@@ -43,14 +43,14 @@ const MockedDataViewSelector = vi.fn(
   )
 );
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      DataViewSelector: (props: {
-        dataViewsList: Array<{ id: string; title: string }>;
-        onChangeDataView: (id: string) => void;
-      }) => MockedDataViewSelector(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataViewSelector: (props: {
+      dataViewsList: Array<{ id: string; title: string }>;
+      onChangeDataView: (id: string) => void;
+    }) => MockedDataViewSelector(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const selectedDataView = {
   id: 'mock-data-logs-id',

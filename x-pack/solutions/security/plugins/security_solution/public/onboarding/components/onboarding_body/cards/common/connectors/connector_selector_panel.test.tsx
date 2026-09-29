@@ -32,18 +32,18 @@ const mockActionTypeRegistry = {
 };
 
 vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
-          settings: {
-            client: { get: vi.fn() },
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: { actionTypeRegistry: mockActionTypeRegistry },
+        settings: {
+          client: { get: vi.fn() },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ConnectorSelectorPanel', () => {
   it('renders correctly', () => {

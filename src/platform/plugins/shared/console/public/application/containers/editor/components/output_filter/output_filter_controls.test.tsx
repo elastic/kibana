@@ -22,19 +22,19 @@ import {
 } from '../../../../contexts/output_filter_context';
 
 vi.mock('../../../../contexts', () => {
-      const mocked = {
-      useRequestReadContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRequestReadContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../contexts/output_filter_context', () => {
-      const mocked = {
-      useOutputFilterReadContext: vi.fn(),
-      useOutputFilterActionContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOutputFilterReadContext: vi.fn(),
+    useOutputFilterActionContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRequestReadContext = useRequestReadContext as MockedFunction<
   typeof useRequestReadContext

@@ -7,66 +7,65 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { basePath: { prepend: (path: string) => path } },
-          notifications: { toasts: { addError: vi.fn() } },
-          workflowsExtensions: {
-            getStepDefinition: vi.fn(),
-            getRegisteredSteps: vi.fn().mockReturnValue([]),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { basePath: { prepend: (path: string) => path } },
+        notifications: { toasts: { addError: vi.fn() } },
+        workflowsExtensions: {
+          getStepDefinition: vi.fn(),
+          getRegisteredSteps: vi.fn().mockReturnValue([]),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => {
-      const mocked = {
-      useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui/step_icons/step_icon', () => {
-      const mocked = {
-      StepIcon: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepIcon: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getTriggerDefinitions: vi.fn().mockReturnValue([]),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getTriggerDefinitions: vi.fn().mockReturnValue([]),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/schema', () => {
-      const mocked = {
-      getAllConnectors: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/get_action_options', () => {
-      const mocked = {
-      getActionOptions: vi.fn().mockReturnValue([]),
-      flattenOptions: vi.fn().mockReturnValue([]),
-      getIconGlyphColor: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getActionOptions: vi.fn().mockReturnValue([]),
+    flattenOptions: vi.fn().mockReturnValue([]),
+    getIconGlyphColor: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ActionsMenu } from './actions_menu';
 import type { EditorCommand, JumpToStepEntry } from '../types';

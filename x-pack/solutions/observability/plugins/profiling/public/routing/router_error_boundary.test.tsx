@@ -15,38 +15,38 @@ import { NotFoundRouteException } from '@kbn/typed-react-router-config';
 import { RouterErrorBoundary } from './router_error_boundary';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          observabilityShared: {
-            navigation: {
-              PageTemplate: ({ children }: { children: React.ReactNode }) => (
-                <div data-test-subj="page-template">{children}</div>
-              ),
-            },
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        observabilityShared: {
+          navigation: {
+            PageTemplate: ({ children }: { children: React.ReactNode }) => (
+              <div data-test-subj="page-template">{children}</div>
+            ),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-prompt-not-found', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/shared-ux-prompt-not-found')),
-      NotFoundPrompt: () => <div data-test-subj="not-found-prompt">Not Found</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/shared-ux-prompt-not-found')),
+    NotFoundPrompt: () => <div data-test-subj="not-found-prompt">Not Found</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-error-boundary', async () => {
   const ActualReact = require('react') as typeof import('react');

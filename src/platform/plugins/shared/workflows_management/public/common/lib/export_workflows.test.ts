@@ -21,11 +21,11 @@ import {
 
 const mockDownloadFileAs = vi.fn();
 vi.mock('@kbn/share-plugin/public', () => {
-      const mocked = {
-      downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
   id: 'w-1',
@@ -43,11 +43,11 @@ const mockGenerateWorkflowsZip = vi
   .fn()
   .mockResolvedValue(new Blob(['zip'], { type: 'application/zip' }));
 vi.mock('./export/generate_zip_archive', () => {
-      const mocked = {
-      generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateWorkflowsZip: (...args: unknown[]) => mockGenerateWorkflowsZip(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockWorkflowApi = (
   yamlEntries: Array<{ id: string; yaml: string }> = [

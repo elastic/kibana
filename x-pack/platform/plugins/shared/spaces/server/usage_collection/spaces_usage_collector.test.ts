@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { KibanaFeature } from '@kbn/features-plugin/server';

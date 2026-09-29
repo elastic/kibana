@@ -15,24 +15,24 @@ import { deserializeMessage } from './deserialize_message';
 import { safeJsonParse } from './safe_json_parse';
 
 vi.mock('lodash', () => {
-      const mocked = {
-      cloneDeep: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cloneDeep: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./safe_json_parse', () => {
-      const mocked = {
-      safeJsonParse: vi.fn((value) => {
-        try {
-          return JSON.parse(value);
-        } catch {
-          return value;
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    safeJsonParse: vi.fn((value) => {
+      try {
+        return JSON.parse(value);
+      } catch {
+        return value;
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('deserializeMessage', () => {
   const baseMessage: Message = {

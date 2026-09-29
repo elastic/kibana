@@ -19,12 +19,12 @@ import { TestProviders } from '../../../common/mock/test_providers';
 
 vi.mock('../api');
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Get Migration Privileges Hooks', () => {
   afterEach(() => {

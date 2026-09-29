@@ -13,29 +13,29 @@ import { AgentRouteGuard } from './agent_route_guard';
 
 const mockUseEffectiveSpaceDefaultAgent = vi.fn();
 vi.mock('../../hooks/use_space_default_agent', () => {
-      const mocked = {
-      useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockPathname = '/agents/agent-a';
 // Render Redirect as a marker so we can assert redirects without a full router.
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => ({ pathname: mockPathname }),
-      Redirect: ({ to }: { to: string }) => <div>{`navigate:${to}`}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => ({ pathname: mockPathname }),
+    Redirect: ({ to }: { to: string }) => <div>{`navigate:${to}`}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render the loading spinner as a marker so we can assert the isReady gate.
 vi.mock('./redirect_loading', () => {
-      const mocked = {
-      RedirectLoading: () => <div>loading-spinner</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectLoading: () => <div>loading-spinner</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const Child = () => <div>child-content</div>;
 

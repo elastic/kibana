@@ -31,18 +31,18 @@ import {
 
 const mockReportError = vi.fn();
 vi.mock('../../chart/hooks/use_report_chart_section_error', () => {
-      const mocked = {
-      useReportChartSectionError: vi.fn(() => mockReportError),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReportChartSectionError: vi.fn(() => mockReportError),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../observability/metrics/context/metrics_experience_state_provider', () => {
-      const mocked = {
-      useMetricsExperienceState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsExperienceState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseMetricsExperienceState = useMetricsExperienceState as Mock;
 const mockedUseReportChartSectionError = useReportChartSectionError as Mock;

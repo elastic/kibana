@@ -12,14 +12,14 @@ import { useEsqlGlobalFilterQuery } from './use_esql_global_filter';
 import { TestProviders } from '../../mock';
 
 vi.mock('../../containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn(() => ({
-        from: '2024-01-01T00:00:00.000Z',
-        to: '2024-01-02T00:00:00.000Z',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn(() => ({
+      from: '2024-01-01T00:00:00.000Z',
+      to: '2024-01-02T00:00:00.000Z',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useEsqlGlobalFilterQuery', () => {
   it('returns the expected ESBoolQuery with time range filter', () => {

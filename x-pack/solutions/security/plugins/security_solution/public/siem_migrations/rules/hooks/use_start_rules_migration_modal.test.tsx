@@ -12,25 +12,25 @@ import { renderHook, act, fireEvent, render } from '@testing-library/react';
 import { useStartRulesMigrationModal } from './use_start_rules_migration_modal';
 
 vi.mock('../../common/components', () => {
-      const mocked = {
-      StartMigrationModal: (props: {
-        onStartMigrationWithSettings: (settings: { connectorId: string }) => void;
-        additionalSettings: React.ReactNode;
-      }) => (
-        <div>
-          <button
-            type="button"
-            onClick={() => props.onStartMigrationWithSettings({ connectorId: 'test-connector' })}
-          >
-            {'Start Test Migration'}
-          </button>
-          {props.additionalSettings}
-        </div>
-      ),
-      DATA_TEST_SUBJ_PREFIX: 'test',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StartMigrationModal: (props: {
+      onStartMigrationWithSettings: (settings: { connectorId: string }) => void;
+      additionalSettings: React.ReactNode;
+    }) => (
+      <div>
+        <button
+          type="button"
+          onClick={() => props.onStartMigrationWithSettings({ connectorId: 'test-connector' })}
+        >
+          {'Start Test Migration'}
+        </button>
+        {props.additionalSettings}
+      </div>
+    ),
+    DATA_TEST_SUBJ_PREFIX: 'test',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useStartRulesMigrationModal', () => {
   const mockOnStartMigrationWithSettings = vi.fn();

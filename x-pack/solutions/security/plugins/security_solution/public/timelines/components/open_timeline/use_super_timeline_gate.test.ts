@@ -16,22 +16,22 @@ import { SUPER_TIMELINE_TOO_FEW, SUPER_TIMELINE_TOO_MANY } from '../super_timeli
 // ── Mocks ─────────────────────────────────────────────────────────────────────
 
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenSuperTimeline = vi.fn();
 const mockUseOpenSuperTimeline = vi.fn();
 
 vi.mock('../super_timeline/use_open_super_timeline', () => {
-      const mocked = {
-      useOpenSuperTimeline: (...args: unknown[]) => mockUseOpenSuperTimeline(...args),
-      MAX_SUPER_TIMELINE_COUNT: 10,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOpenSuperTimeline: (...args: unknown[]) => mockUseOpenSuperTimeline(...args),
+    MAX_SUPER_TIMELINE_COUNT: 10,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 

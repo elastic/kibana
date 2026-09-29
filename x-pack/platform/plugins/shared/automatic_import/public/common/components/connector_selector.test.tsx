@@ -53,15 +53,15 @@ const mockActionTypes = [
 // Mock the useLoadConnectors hook
 const mockRefetch = vi.fn();
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => ({
-        data: [],
-        isLoading: false,
-        refetch: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => ({
+      data: [],
+      isLoading: false,
+      refetch: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseLoadConnectors = useLoadConnectors as Mock;
 
 const mockHttpGet = vi.fn();

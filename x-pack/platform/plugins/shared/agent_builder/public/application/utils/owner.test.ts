@@ -10,13 +10,13 @@ import { vi } from 'vitest';
 import { resolveOwnerLabel } from './owner';
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resolveOwnerLabel', () => {
   it('returns undefined when owner is undefined', () => {

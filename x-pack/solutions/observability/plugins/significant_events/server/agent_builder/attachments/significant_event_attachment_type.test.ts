@@ -36,9 +36,7 @@ const event: SignificantEvent = {
   confidence: 0.8,
 };
 
-const createGetScopedClients = (
-  events: SignificantEvent[]
-): MockedFunction<GetScopedClients> => {
+const createGetScopedClients = (events: SignificantEvent[]): MockedFunction<GetScopedClients> => {
   const getEventClient = vi.fn(() => ({
     findLatestByEventId: vi.fn().mockResolvedValue(events.at(-1)),
   }));

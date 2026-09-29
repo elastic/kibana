@@ -19,34 +19,34 @@ import { TestProviders } from '../../../../common/mock';
 vi.mock('../../../rule_management/logic/use_rule_with_fallback');
 const mockUseParams = vi.fn().mockReturnValue({ ruleId: 'rule-1' });
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => mockUseParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => mockUseParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/utils/route/spy_routes', () => {
-      const mocked = { SpyRoute: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SpyRoute: () => null };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/changes_history', () => {
-      const mocked = {
-      RuleChangesHistory: () => <div data-test-subj="mockRuleChangesHistory" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleChangesHistory: () => <div data-test-subj="mockRuleChangesHistory" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_change_history_page_header', () => {
-      const mocked = {
-      RuleChangesHistoryPageHeader: () => <div data-test-subj="mockRuleChangesHistoryPageHeader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleChangesHistoryPageHeader: () => <div data-test-subj="mockRuleChangesHistoryPageHeader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
 
   return {
     ...original,

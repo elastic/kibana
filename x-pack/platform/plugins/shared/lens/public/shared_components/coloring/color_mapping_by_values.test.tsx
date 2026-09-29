@@ -14,13 +14,13 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { ColorMappingByValues } from './color_mapping_by_values';
 
 vi.mock('./palette_panel_container', () => {
-      const mocked = {
-      PalettePanelContainer: ({ palette }: { palette: string[]; children?: React.ReactNode }) => (
-        <div data-test-subj="mock-palette-panel" data-palette={palette.join('|')} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PalettePanelContainer: ({ palette }: { palette: string[]; children?: React.ReactNode }) => (
+      <div data-test-subj="mock-palette-panel" data-palette={palette.join('|')} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ColorMappingByValues', () => {
   const paletteService = chartPluginMock.createPaletteRegistry();

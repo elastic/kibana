@@ -30,14 +30,14 @@ vi.mock('../../../../../common/hooks/use_connectors');
 vi.mock('../../workflow_configuration/hooks/use_list_workflows');
 vi.mock('../../workflow_configuration/hooks/use_generate_workflow');
 vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn().mockReturnValue({
-        dataView: undefined,
-        status: 'ready',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn().mockReturnValue({
+      dataView: undefined,
+      status: 'ready',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 // Stub the heavy RuleActionsField subtree. It renders the triggers_actions_ui
 // `ActionForm` via `React.lazy`/`Suspense` (`getActionFormLazy`), whose first
 // mount pays a large one-time lazy-import cost and whose connector/action-type
@@ -45,44 +45,44 @@ vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
 // dominant cost and the source of the "not wrapped in act(...)" churn that
 // tripped Jest's 5s per-test timeout in CI.
 vi.mock('../../../../../common/components/rule_actions_field', () => {
-      const mocked = {
-      RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsField: () => <div data-test-subj="mockRuleActionsField" />,
+  };
+  return { ...mocked, default: mocked };
+});
 // Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
 // alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
 // stub keeps the `alertSelection` marker and an `alertsRange` control wired to
 // `onSettingsChanged` so the unsaved-changes assertions still exercise it.
 vi.mock('../../alert_selection', () => {
-      const mocked = {
-      AlertSelection: ({
-        settings,
-        onSettingsChanged,
-      }: {
-        settings: Record<string, unknown>;
-        onSettingsChanged?: (settings: Record<string, unknown>) => void;
-      }) => (
-        <div data-test-subj="alertSelection">
-          <input
-            data-test-subj="alertsRange"
-            onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertSelection: ({
+      settings,
+      onSettingsChanged,
+    }: {
+      settings: Record<string, unknown>;
+      onSettingsChanged?: (settings: Record<string, unknown>) => void;
+    }) => (
+      <div data-test-subj="alertSelection">
+        <input
+          data-test-subj="alertsRange"
+          onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConnectors: unknown[] = [
   {

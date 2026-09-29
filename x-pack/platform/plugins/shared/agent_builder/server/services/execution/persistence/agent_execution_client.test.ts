@@ -16,12 +16,12 @@ const mockStorageClient = {
 };
 
 vi.mock('./agent_execution_storage', async () => {
-      const mocked = {
-      ...(await vi.importActual('./agent_execution_storage')),
-      createStorage: () => ({ getClient: () => mockStorageClient }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./agent_execution_storage')),
+    createStorage: () => ({ getClient: () => mockStorageClient }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { createAgentExecutionClient } from './agent_execution_client';
 

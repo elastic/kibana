@@ -20,11 +20,11 @@ const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as Mocke
 >;
 
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 

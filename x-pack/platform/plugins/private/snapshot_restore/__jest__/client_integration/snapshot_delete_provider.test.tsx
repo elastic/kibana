@@ -16,12 +16,12 @@ import { deleteSnapshots } from '../../public/application/services/http';
 import { WithAppDependencies } from './helpers/setup_environment';
 
 vi.mock('../../public/application/services/http', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../public/application/services/http')),
-      deleteSnapshots: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../public/application/services/http')),
+    deleteSnapshots: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WHEN deleting snapshots', () => {
   const addSuccess = vi.fn();

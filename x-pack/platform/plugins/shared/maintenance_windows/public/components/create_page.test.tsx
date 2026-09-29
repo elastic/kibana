@@ -16,17 +16,17 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsCreate } from './create_page';
 
 vi.mock('../hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./create_maintenance_windows_form', () => {
-      const mocked = {
-      CreateMaintenanceWindowForm: () => <div data-test-subj="createMaintenanceWindowForm" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateMaintenanceWindowForm: () => <div data-test-subj="createMaintenanceWindowForm" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MaintenanceWindowsCreate', () => {
   let appMockRenderer: AppMockRenderer;

@@ -22,7 +22,7 @@ import type { ExportFiltersStore } from '../../results/export_filters_context';
 // provider — not anything the test renders around it. Spy on the hook to
 // capture that exact store instance.
 vi.mock('../../results/export_filters_context', async () => {
-  const actual = (await vi.importActual('../../results/export_filters_context'));
+  const actual = await vi.importActual('../../results/export_filters_context');
 
   return {
     ...actual,
@@ -34,52 +34,60 @@ const useExportFiltersContextMock = useExportFiltersContext as MockedFunction<
   typeof useExportFiltersContext
 >;
 vi.mock('../../routes/saved_queries/edit/tabs', () => {
-      const mocked = {
-      ResultTabs: () => <div data-test-subj="mock-result-tabs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResultTabs: () => <div data-test-subj="mock-result-tabs" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./query_details_flyout', () => {
-      const mocked = {
-      QueryDetailsFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryDetailsFlyout: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./pack_results_header', () => {
-      const mocked = {
-      PackResultsHeader: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackResultsHeader: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 // Capturing spies rather than `() => null`: the date window these two build is
 // derived entirely from the props this table hands them, so withholding a prop
 // here is invisible to any assertion made further down the tree.
 const mockPackViewInLensAction = vi.fn((_props: Record<string, unknown>) => null);
 const mockPackViewInDiscoverAction = vi.fn((_props: Record<string, unknown>) => null);
 vi.mock('../../lens/pack_view_in_lens', () => {
-      const mocked = {
-      PackViewInLensAction: (props: Record<string, unknown>) => mockPackViewInLensAction(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackViewInLensAction: (props: Record<string, unknown>) => mockPackViewInLensAction(props),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../discover/pack_view_in_discover', () => {
-      const mocked = {
-      PackViewInDiscoverAction: (props: Record<string, unknown>) => mockPackViewInDiscoverAction(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackViewInDiscoverAction: (props: Record<string, unknown>) =>
+      mockPackViewInDiscoverAction(props),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../actions/components/tags_column', () => {
-      const mocked = {
-      TagsColumn: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TagsColumn: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./row_kebab_menu', () => {
-      const mocked = {
-      RowKebabMenu: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RowKebabMenu: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const renderWithContext = (Element: React.ReactElement) =>
   render(

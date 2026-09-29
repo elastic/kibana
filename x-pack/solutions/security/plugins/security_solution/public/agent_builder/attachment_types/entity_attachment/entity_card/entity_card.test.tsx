@@ -17,66 +17,66 @@ import { useEntityAnalyticsAgentNavigation } from '../../entity_analytics_agent_
 import { EntityCard } from './entity_card';
 
 vi.mock('../use_entity_for_attachment', () => {
-      const mocked = {
-      useEntityForAttachment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityForAttachment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_analytics_agent_navigation_context', () => {
-      const mocked = {
-      useEntityAnalyticsAgentNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsAgentNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./resolution_mini', () => {
-      const mocked = {
-      ResolutionMini: (props: Record<string, unknown>) => (
-        <div
-          data-test-subj="resolutionMiniMock"
-          data-has-entity-id={String(Boolean(props.entityStoreEntityId))}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResolutionMini: (props: Record<string, unknown>) => (
+      <div
+        data-test-subj="resolutionMiniMock"
+        data-has-entity-id={String(Boolean(props.entityStoreEntityId))}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./entity_summary_grid', () => {
-      const mocked = {
-      EntitySummaryGridMini: (props: Record<string, unknown>) => (
-        <div
-          data-test-subj="entitySummaryGridMock"
-          data-entity-id={String(props.entityId ?? '')}
-          data-source={String(props.source ?? '')}
-          data-watchlists-enabled={String(props.watchlistsEnabled)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntitySummaryGridMini: (props: Record<string, unknown>) => (
+      <div
+        data-test-subj="entitySummaryGridMock"
+        data-entity-id={String(props.entityId ?? '')}
+        data-source={String(props.source ?? '')}
+        data-watchlists-enabled={String(props.watchlistsEnabled)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./risk_summary_mini', () => {
-      const mocked = {
-      RiskSummaryMini: (props: Record<string, unknown>) => {
-        const riskStats = props.riskStats as Record<string, unknown> | undefined;
-        const resolutionRiskStats = props.resolutionRiskStats as Record<string, unknown> | undefined;
-        return (
-          <div
-            data-test-subj="riskSummaryMiniMock"
-            data-has-stats={String(Boolean(riskStats))}
-            data-primary-cat1-score={String(riskStats?.category_1_score ?? '')}
-            data-primary-cat1-count={String(riskStats?.category_1_count ?? '')}
-            data-has-resolution-stats={String(Boolean(resolutionRiskStats))}
-            data-resolution-score={String(props.resolutionRiskScore ?? '')}
-            data-resolution-level={String(props.resolutionRiskLevel ?? '')}
-            data-resolution-cat1-score={String(resolutionRiskStats?.category_1_score ?? '')}
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskSummaryMini: (props: Record<string, unknown>) => {
+      const riskStats = props.riskStats as Record<string, unknown> | undefined;
+      const resolutionRiskStats = props.resolutionRiskStats as Record<string, unknown> | undefined;
+      return (
+        <div
+          data-test-subj="riskSummaryMiniMock"
+          data-has-stats={String(Boolean(riskStats))}
+          data-primary-cat1-score={String(riskStats?.category_1_score ?? '')}
+          data-primary-cat1-count={String(riskStats?.category_1_count ?? '')}
+          data-has-resolution-stats={String(Boolean(resolutionRiskStats))}
+          data-resolution-score={String(props.resolutionRiskScore ?? '')}
+          data-resolution-level={String(props.resolutionRiskLevel ?? '')}
+          data-resolution-cat1-score={String(resolutionRiskStats?.category_1_score ?? '')}
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseEntityForAttachment = useEntityForAttachment as Mock;
 const mockedUseEntityAnalyticsAgentNavigation = useEntityAnalyticsAgentNavigation as Mock;

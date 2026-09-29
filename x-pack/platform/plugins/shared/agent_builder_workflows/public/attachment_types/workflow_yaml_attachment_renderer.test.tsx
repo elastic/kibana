@@ -20,20 +20,20 @@ import { createWorkflowYamlAttachmentUiDefinition } from './workflow_yaml_attach
 import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsMonacoTheme: vi.fn(),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsMonacoTheme: vi.fn(),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowApi = createMockWorkflowApi();
 
 const mockAllWorkflowCapabilitiesTrue = createMockWorkflowsCapabilities();
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsApi: vi.fn(() => mockWorkflowApi),

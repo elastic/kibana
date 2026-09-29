@@ -16,22 +16,23 @@ const mockRemove = vi.fn();
 const mockPost = vi.fn();
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { post: mockPost },
-          executionContext: { get: vi.fn() },
-          notifications: {
-            toasts: {
-              addError: mockAddError,
-              remove: mockRemove,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { post: mockPost },
+        executionContext: { get: vi.fn() },
+        notifications: {
+          toasts: {
+            addError: mockAddError,
+            remove: mockRemove,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { useCreateLiveQuery } from './use_create_live_query_action';
 

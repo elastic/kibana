@@ -18,17 +18,17 @@ import { createJWTAssertion } from './create_jwt_assertion';
 import { requestOAuthJWTToken } from './request_oauth_jwt_token';
 
 vi.mock('./create_jwt_assertion', () => {
-      const mocked = {
-      createJWTAssertion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createJWTAssertion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./request_oauth_jwt_token', () => {
-      const mocked = {
-      requestOAuthJWTToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestOAuthJWTToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();
@@ -240,9 +240,7 @@ describe('getOAuthJwtAccessToken', () => {
       connectorToken: null,
     });
     (createJWTAssertion as Mock).mockReturnValueOnce('newassertion');
-    (requestOAuthJWTToken as Mock).mockRejectedValueOnce(
-      new Error('requestOAuthJWTToken error!!')
-    );
+    (requestOAuthJWTToken as Mock).mockRejectedValueOnce(new Error('requestOAuthJWTToken error!!'));
 
     await expect(
       getOAuthJwtAccessToken(getOAuthJwtAccessTokenOpts)

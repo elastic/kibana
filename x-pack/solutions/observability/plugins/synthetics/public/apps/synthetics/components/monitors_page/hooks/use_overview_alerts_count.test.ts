@@ -20,11 +20,11 @@ const mockHttpPost = vi.fn();
 const mockServices = { services: { http: { post: mockHttpPost } } };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => mockServices,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockServices,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const bucketsResponse = (buckets: Array<{ key: string; doc_count: number }>) => ({
   aggregations: { count: { buckets } },

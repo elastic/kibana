@@ -22,16 +22,16 @@ import {
 const mockTrackMaxDimensionsReached = vi.fn();
 
 vi.mock('../../context/ebt_telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        trackMaxDimensionsReached: mockTrackMaxDimensionsReached,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      trackMaxDimensionsReached: mockTrackMaxDimensionsReached,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-toolbar-selector', async () => {
-  const actual = (await vi.importActual('@kbn/shared-ux-toolbar-selector'));
+  const actual = await vi.importActual('@kbn/shared-ux-toolbar-selector');
   return {
     ...actual,
     ToolbarSelector: ({
@@ -125,7 +125,7 @@ vi.mock('lodash', () => {
 });
 
 vi.mock('../../common/constants', async () => {
-  const actual = (await vi.importActual('../../common/constants'));
+  const actual = await vi.importActual('../../common/constants');
   return {
     ...actual,
     MAX_DIMENSIONS_SELECTIONS: 5, // Override for tests to allow multiple selections

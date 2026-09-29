@@ -20,33 +20,33 @@ const mockNotifyError = vi.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: (selector: any) => selector(mockGetState()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: (selector: any) => selector(mockGetState()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/canvas_workpad_service', () => {
-      const mocked = {
-      getCanvasWorkpadService: () => {
-        return {
-          updateWorkpad: mockUpdateWorkpad,
-          updateAssets: mockUpdateAssets,
-          update: mockUpdate,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCanvasWorkpadService: () => {
+      return {
+        updateWorkpad: mockUpdateWorkpad,
+        updateAssets: mockUpdateAssets,
+        update: mockUpdate,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services', () => {
-      const mocked = {
-      useNotifyService: () => ({
-        error: mockNotifyError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNotifyService: () => ({
+      error: mockNotifyError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useWorkpadPersist', () => {
   const initialState = {

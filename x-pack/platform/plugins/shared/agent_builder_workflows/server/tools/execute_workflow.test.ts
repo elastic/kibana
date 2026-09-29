@@ -15,7 +15,7 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { executeWorkflowTool } from './execute_workflow';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-tools-base/workflows'));
+  const actual = await vi.importActual('@kbn/agent-builder-tools-base/workflows');
   return {
     ...actual,
     executeWorkflow: vi.fn(),

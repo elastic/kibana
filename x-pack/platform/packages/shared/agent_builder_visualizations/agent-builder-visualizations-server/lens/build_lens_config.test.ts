@@ -18,33 +18,33 @@ import { createVisualizationGraph } from './graph_lens';
 import { buildLensConfig } from './build_lens_config';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      validateEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-server-utils', () => {
-      const mocked = {
-      buildServerESQLCallbacks: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildServerESQLCallbacks: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./graph_lens', async () => {
-      const mocked = {
-      ...(await vi.importActual('./graph_lens')),
-      createVisualizationGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./graph_lens')),
+    createVisualizationGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./schemas', () => {
-      const mocked = {
-      getSchemaForChartType: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSchemaForChartType: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedValidateEsqlQuery = vi.mocked(validateEsqlQuery);
 const mockedBuildCallbacks = vi.mocked(buildServerESQLCallbacks);

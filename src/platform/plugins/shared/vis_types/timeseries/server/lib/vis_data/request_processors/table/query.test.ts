@@ -19,9 +19,7 @@ describe('query', () => {
   let seriesIndex: TableRequestProcessorsParams['seriesIndex'];
   let buildSeriesMetaParams: TableRequestProcessorsParams['buildSeriesMetaParams'];
 
-  const next = vi.fn((x) => x) as unknown as ReturnType<
-    ReturnType<TableRequestProcessorsFunction>
-  >;
+  const next = vi.fn((x) => x) as unknown as ReturnType<ReturnType<TableRequestProcessorsFunction>>;
 
   beforeEach(() => {
     req = {

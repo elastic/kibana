@@ -19,7 +19,7 @@ import {
 } from '../../services/watches/hunt/common/resolve_index_scope';
 
 vi.mock('../../services/watches/hunt/common/resolve_index_scope', async () => {
-  const actual = (await vi.importActual('../../services/watches/hunt/common/resolve_index_scope'));
+  const actual = await vi.importActual('../../services/watches/hunt/common/resolve_index_scope');
   return { ...actual, resolveIndexScope: vi.fn() };
 });
 

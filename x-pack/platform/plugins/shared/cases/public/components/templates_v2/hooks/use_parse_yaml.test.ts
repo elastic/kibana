@@ -15,12 +15,12 @@ import type { ValidatedFile } from './use_validate_yaml';
 import { MAX_TEMPLATES_PER_FILE, MAX_TOTAL_IMPORT_TEMPLATES } from '../constants';
 
 vi.mock('../utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils')),
-      checkTemplateExists: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils')),
+    checkTemplateExists: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeValidatedFile = (name: string, documents: unknown[]): ValidatedFile => ({
   file: new File([''], name, { type: 'application/x-yaml' }),

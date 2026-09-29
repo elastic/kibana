@@ -21,26 +21,26 @@ vi.mock('../../api/hooks/use_get_rule_ids_with_gaps');
 vi.mock('../../../../common/components/user_privileges');
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          docLinks: { links: { siem: { gapsTable: 'https://example.com' } } },
-          spaces: {
-            getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
-          },
-          uiSettings: { get: vi.fn() },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        docLinks: { links: { siem: { gapsTable: 'https://example.com' } } },
+        spaces: {
+          getActiveSpace: vi.fn().mockResolvedValue({ id: 'default' }),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        uiSettings: { get: vi.fn() },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../context/gap_auto_fill_scheduler_context', () => {
-      const mocked = {
-      useGapAutoFillSchedulerContext: () => ({ scheduler: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGapAutoFillSchedulerContext: () => ({ scheduler: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 

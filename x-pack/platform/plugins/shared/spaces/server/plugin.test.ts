@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { firstValueFrom } from 'rxjs';
+import { vi } from 'vitest';
 
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';

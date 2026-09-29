@@ -17,12 +17,12 @@ const mockUseSourceContext = vi.fn();
 const mockUseMetricsDataViewContext = vi.fn();
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      useSourceContext: () => mockUseSourceContext(),
-      useMetricsDataViewContext: () => mockUseMetricsDataViewContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSourceContext: () => mockUseSourceContext(),
+    useMetricsDataViewContext: () => mockUseMetricsDataViewContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildSourceContext = (overrides: Record<string, unknown> = {}) => ({
   source: { id: 'default' },

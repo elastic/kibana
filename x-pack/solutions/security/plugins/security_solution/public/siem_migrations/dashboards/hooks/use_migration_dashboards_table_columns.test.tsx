@@ -12,15 +12,15 @@ import { useMigrationDashboardsTableColumns } from './use_migration_dashboards_t
 import * as columns from '../components/dashboard_table_columns';
 
 vi.mock('../components/dashboard_table_columns', () => {
-      const mocked = {
-      createActionsColumn: vi.fn(),
-      createNameColumn: vi.fn(),
-      createStatusColumn: vi.fn(),
-      createTagsColumn: vi.fn(),
-      createUpdatedColumn: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createActionsColumn: vi.fn(),
+    createNameColumn: vi.fn(),
+    createStatusColumn: vi.fn(),
+    createTagsColumn: vi.fn(),
+    createUpdatedColumn: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMigrationDashboardsTableColumns', () => {
   const installDashboard = vi.fn();

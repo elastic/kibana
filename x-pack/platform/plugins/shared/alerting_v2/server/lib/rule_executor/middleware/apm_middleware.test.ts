@@ -24,13 +24,13 @@ const mockSpan = {
 const mockStartSpan = vi.fn(() => mockSpan);
 
 vi.mock('@kbn/default-tracer', () => {
-      const mocked = {
-      getDefaultTracer: vi.fn(() => ({
-        startSpan: mockStartSpan,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultTracer: vi.fn(() => ({
+      startSpan: mockStartSpan,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getDefaultTracerMock = getDefaultTracer as MockedFunction<typeof getDefaultTracer>;
 

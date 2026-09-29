@@ -23,7 +23,7 @@ vi.mock('../apis/get_muted_alerts_instances_by_rule');
 // Wrap useQuery in a call-through mock so we can assert the `context` option it
 // receives while the real query behaviour (api call, error toast) still runs.
 vi.mock('@kbn/react-query', async () => {
-  const actual = (await vi.importActual('@kbn/react-query'));
+  const actual = await vi.importActual('@kbn/react-query');
   return { __esModule: true, ...actual, useQuery: vi.fn(actual.useQuery) };
 });
 
@@ -73,9 +73,7 @@ describe('useGetAlertSnoozeStateQuery', () => {
   });
 
   it('shows a toast error when the api returns an error', async () => {
-    const spy = vi
-      .spyOn(api, 'getAlertSnoozeStateByRule')
-      .mockRejectedValue(new Error('An error'));
+    const spy = vi.spyOn(api, 'getAlertSnoozeStateByRule').mockRejectedValue(new Error('An error'));
 
     renderHook(() => useGetAlertSnoozeStateQuery({ http, notifications, ruleIds }), {
       wrapper: Wrapper,

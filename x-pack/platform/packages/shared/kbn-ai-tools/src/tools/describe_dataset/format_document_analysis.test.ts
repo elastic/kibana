@@ -12,7 +12,7 @@ import { formatDocumentAnalysis } from './format_document_analysis';
 
 // disable shuffle to get deterministic results
 vi.mock('lodash', () => {
-  const actual = (require('lodash') as typeof import('lodash'));
+  const actual = require('lodash') as typeof import('lodash');
   return {
     ...actual,
     shuffle: vi.fn((value: unknown[]) => value),

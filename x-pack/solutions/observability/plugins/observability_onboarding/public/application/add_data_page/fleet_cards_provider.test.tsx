@@ -22,13 +22,13 @@ const mockUseGetSettingsQuery = vi.fn();
 // executes Fleet's whole public bundle, which costs more than Jest's timeout on a
 // cold cache. Nothing here searches, so the search index hook is never called.
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
-      AvailablePackagesHook: () => mockAvailablePackagesHook(),
-      useGetSettingsQuery: (options: { enabled?: boolean }) => mockUseGetSettingsQuery(options),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
+    AvailablePackagesHook: () => mockAvailablePackagesHook(),
+    useGetSettingsQuery: (options: { enabled?: boolean }) => mockUseGetSettingsQuery(options),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const redisCard = {
   id: 'epr:redis',

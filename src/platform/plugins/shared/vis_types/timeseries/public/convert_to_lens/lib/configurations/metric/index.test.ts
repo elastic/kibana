@@ -18,11 +18,11 @@ import { getConfigurationForMetric, getConfigurationForGauge } from '.';
 const mockGetPalette = vi.fn();
 
 vi.mock('../palette', () => {
-      const mocked = {
-      getPalette: vi.fn(() => mockGetPalette()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPalette: vi.fn(() => mockGetPalette()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createEmptyLensLayer(partialLayer: Partial<Layer>): Layer {
   return {

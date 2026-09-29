@@ -19,7 +19,7 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 import type { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 vi.mock('../lib/task_recovery', async () => {
-  const actual = (await vi.importActual('../lib/task_recovery'));
+  const actual = await vi.importActual('../lib/task_recovery');
   return {
     ...actual,
     markExecutionFailedTaskRecovery: vi.fn().mockResolvedValue(undefined),

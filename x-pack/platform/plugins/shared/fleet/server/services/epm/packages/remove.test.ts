@@ -80,40 +80,40 @@ vi.mock('../../audit_logging');
 vi.mock('../../package_policies/populate_package_policy_assigned_agents_count');
 
 vi.mock('./knowledge_base_index', () => {
-      const mocked = {
-      deletePackageKnowledgeBase: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deletePackageKnowledgeBase: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get', () => {
-      const mocked = {
-      getPackageInfo: vi.fn().mockResolvedValue({
-        name: 'test-package',
-        version: '1.0.0',
-        conditions: { kibana: { version: '^8.0.0' } },
-      }),
-      getInstallation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageInfo: vi.fn().mockResolvedValue({
+      name: 'test-package',
+      version: '1.0.0',
+      conditions: { kibana: { version: '^8.0.0' } },
+    }),
+    getInstallation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../kibana/index_pattern/install', () => {
-      const mocked = {
-      removeUnusedIndexPatterns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    removeUnusedIndexPatterns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../archive', () => {
-      const mocked = {
-      deletePackageCache: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deletePackageCache: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../archive/storage', () => {
-      const mocked = {
-      removeArchiveEntries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    removeArchiveEntries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;

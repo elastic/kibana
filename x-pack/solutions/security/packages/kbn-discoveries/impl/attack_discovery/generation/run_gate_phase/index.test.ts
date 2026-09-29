@@ -18,18 +18,19 @@ const mockInvokeGateWorkflow = vi.fn();
 const mockRetrieveAnonymizedAlertsByIds = vi.fn();
 
 vi.mock('../invoke_gate_workflow', () => {
-      const mocked = {
-      invokeGateWorkflow: (...args: unknown[]) => mockInvokeGateWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invokeGateWorkflow: (...args: unknown[]) => mockInvokeGateWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../retrieve_anonymized_alerts_by_ids', () => {
-      const mocked = {
-      retrieveAnonymizedAlertsByIds: (...args: unknown[]) => mockRetrieveAnonymizedAlertsByIds(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retrieveAnonymizedAlertsByIds: (...args: unknown[]) =>
+      mockRetrieveAnonymizedAlertsByIds(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = {
   debug: vi.fn(),

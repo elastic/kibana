@@ -34,7 +34,7 @@ const mockedCasesServices = {
 
 const mockReportEvent = vi.fn();
 vi.mock('../../../../common/lib/kibana/kibana_react', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana/kibana_react'));
+  const original = await vi.importActual('../../../../common/lib/kibana/kibana_react');
   return {
     ...original,
     useKibana: () => ({

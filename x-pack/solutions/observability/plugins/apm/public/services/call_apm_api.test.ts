@@ -11,9 +11,7 @@ import * as callApiExports from './rest/call_api';
 import { createCallApmApi, callApmApi } from './rest/create_call_apm_api';
 import type { CoreStart } from '@kbn/core/public';
 
-const callApi = vi
-  .spyOn(callApiExports, 'callApi')
-  .mockImplementation(() => Promise.resolve(null));
+const callApi = vi.spyOn(callApiExports, 'callApi').mockImplementation(() => Promise.resolve(null));
 
 describe('callApmApi', () => {
   beforeEach(() => {

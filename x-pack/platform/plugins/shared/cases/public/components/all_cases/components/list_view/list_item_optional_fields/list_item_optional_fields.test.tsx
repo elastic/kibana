@@ -21,19 +21,19 @@ import { ListItemOptionalFields } from './list_item_optional_fields';
 import * as i18n from '../../../translations';
 
 vi.mock('../../../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../common/lib/kibana')),
-      useCasesConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../common/lib/kibana')),
+    useCasesConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_global_inline_fields', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../hooks/use_global_inline_fields')),
-      useGlobalInlineFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../hooks/use_global_inline_fields')),
+    useGlobalInlineFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useCasesConfigMock = useCasesConfig as Mock;
 const useGlobalInlineFieldsMock = useGlobalInlineFields as Mock;

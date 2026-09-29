@@ -20,24 +20,24 @@ import { incrementCasesClientCounter, withUsageCounter } from './usage_counters'
 import { createAttachmentsSubClient } from './attachments/client';
 
 vi.mock('./cases/create', () => {
-      const mocked = { create: vi.fn().mockResolvedValue({ id: 123 }) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { create: vi.fn().mockResolvedValue({ id: 123 }) };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./cases/get', () => {
-      const mocked = {
-      get: vi.fn().mockResolvedValue({}),
-      resolve: vi.fn().mockResolvedValue({}),
-      getCasesByAlertID: vi.fn().mockResolvedValue([]),
-      getReporters: vi.fn().mockResolvedValue([]),
-      getTags: vi.fn().mockResolvedValue([]),
-      getCategories: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    get: vi.fn().mockResolvedValue({}),
+    resolve: vi.fn().mockResolvedValue({}),
+    getCasesByAlertID: vi.fn().mockResolvedValue([]),
+    getReporters: vi.fn().mockResolvedValue([]),
+    getTags: vi.fn().mockResolvedValue([]),
+    getCategories: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attachments/add', () => {
-      const mocked = { addComment: vi.fn().mockResolvedValue({}) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { addComment: vi.fn().mockResolvedValue({}) };
+  return { ...mocked, default: mocked };
+});
 
 describe('withUsageCounter', () => {
   beforeEach(() => {

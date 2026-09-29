@@ -25,17 +25,17 @@ vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability');
 vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment');
 // Mock leaf UI components with their known data-test-subj values
 vi.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => {
-      const mocked = {
-      NewAgentBuilderAttachment: () => <div data-test-subj="newAgentBuilderAttachment" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewAgentBuilderAttachment: () => <div data-test-subj="newAgentBuilderAttachment" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      NewChatByTitle: () => <div data-test-subj="newChatByTitle" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewChatByTitle: () => <div data-test-subj="newChatByTitle" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const AGENT_BUTTON_TEST_ID = 'newAgentBuilderAttachment';
 const CHAT_BUTTON_TEST_ID = 'newChatByTitle';

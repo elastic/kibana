@@ -43,10 +43,7 @@ const createClient = ({
   episodeRows = [],
 }: CreateClientOptions = {}) => {
   const queryService: Mocked<Pick<QueryServiceContract, 'executeQueryRows'>> = {
-    executeQueryRows: vi
-      .fn()
-      .mockResolvedValueOnce(lookupRows)
-      .mockResolvedValueOnce(episodeRows),
+    executeQueryRows: vi.fn().mockResolvedValueOnce(lookupRows).mockResolvedValueOnce(episodeRows),
   };
 
   const client = new EpisodesClient(queryService as unknown as QueryServiceContract, SPACE_ID);

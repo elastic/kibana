@@ -13,19 +13,19 @@ import { useServiceFlyoutCapabilities } from './use_service_flyout_capabilities'
 const mockUseAbortableAsync = vi.fn();
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAbortableAsync: (...args: unknown[]) => mockUseAbortableAsync(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCallApmApi = vi.fn();
 vi.mock('../../../../plugin', () => {
-      const mocked = {
-      getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApmInternalServices: () => ({ callApmApi: mockCallApmApi }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseParams = {
   serviceName: 'opbeans-java',

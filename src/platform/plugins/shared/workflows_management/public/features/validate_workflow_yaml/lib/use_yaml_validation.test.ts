@@ -7,26 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
+import { vi } from 'vitest';
 import { monaco } from '@kbn/monaco';
 
 const mockValidateEsqlSteps = vi.fn().mockResolvedValue([]);
 
 vi.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
-      const mocked = {
-      validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlSteps: (...args: unknown[]) => mockValidateEsqlSteps(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_workflow_yaml_validation_context', async () => {
-  const actual = (await vi.importActual('./use_workflow_yaml_validation_context'));
+  const actual = await vi.importActual('./use_workflow_yaml_validation_context');
   // Required lazily: the factory body runs before this module's own consts initialize.
-  const { createMockWorkflowContextRegistry: createRegistry } = (await vi.importActual('../../../../common/lib/create_workflow_context_registry.mock'));
+  const { createMockWorkflowContextRegistry: createRegistry } = await vi.importActual(
+    '../../../../common/lib/create_workflow_context_registry.mock'
+  );
   const mockValidationContext = {
     registry: createRegistry(),
     connectorTypes: { status: 'ready', value: {} },
@@ -45,11 +46,11 @@ vi.mock('./use_workflow_yaml_validation_context', async () => {
 vi.mock(
   '../../../widgets/workflow_yaml_editor/lib/esql_validation/use_workflow_esql_callbacks',
   () => {
-      const mocked = {
-        useWorkflowEsqlCallbacks: () => ({}),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useWorkflowEsqlCallbacks: () => ({}),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 import type { WorkflowLookup } from '@kbn/workflows-yaml';
@@ -80,11 +81,11 @@ const readyValidationContext: WorkflowYamlValidationContext = {
 };
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => mockKibanaValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(() => mockKibanaValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock Monaco editor
 const createMockEditor = (value: string) => {
@@ -127,33 +128,33 @@ const getLastBatchedMarkers = (): unknown[] => {
 
 // Mock schema functions
 vi.mock('../../../../common/schema', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/schema')),
-      getCachedDynamicConnectorTypes: vi.fn(() => ({})),
-      getWorkflowZodSchemaLoose: vi.fn(() => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { z } = require('@kbn/zod/v4');
-        // mock actual schema, we only test the name uniqueness validation
-        return z
-          .object({
-            version: z.string().optional(),
-            name: z.string(),
-            enabled: z.boolean().optional(),
-            triggers: z.array(z.any()).optional(),
-            steps: z
-              .array(
-                z.object({
-                  name: z.string(),
-                  type: z.string(),
-                })
-              )
-              .optional(),
-          })
-          .passthrough();
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/schema')),
+    getCachedDynamicConnectorTypes: vi.fn(() => ({})),
+    getWorkflowZodSchemaLoose: vi.fn(() => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { z } = require('@kbn/zod/v4');
+      // mock actual schema, we only test the name uniqueness validation
+      return z
+        .object({
+          version: z.string().optional(),
+          name: z.string(),
+          enabled: z.boolean().optional(),
+          triggers: z.array(z.any()).optional(),
+          steps: z
+            .array(
+              z.object({
+                name: z.string(),
+                type: z.string(),
+              })
+            )
+            .optional(),
+        })
+        .passthrough();
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Helper to render hook with proper Redux context
 const renderHookWithProviders = (

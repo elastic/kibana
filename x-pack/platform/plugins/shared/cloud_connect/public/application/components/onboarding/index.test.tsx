@@ -18,34 +18,34 @@ import type { CloudConnectedAppContextValue } from '../../app_context';
 
 vi.mock('../../app_context');
 vi.mock('@elastic/eui-illustrations', () => {
-      const mocked = {
-      arrowDeployCloud: {
-        id: 'arrow-deploy-cloud',
-        title: 'Arrow deploy cloud',
-        light: '<svg></svg>',
-        dark: '<svg></svg>',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    arrowDeployCloud: {
+      id: 'arrow-deploy-cloud',
+      title: 'Arrow deploy cloud',
+      light: '<svg></svg>',
+      dark: '<svg></svg>',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./connection_wizard', () => {
-      const mocked = {
-      ConnectionWizard: ({ onConnect }: { onConnect: () => void }) => (
-        <div data-test-subj="connection-wizard">Connection Wizard Mock</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectionWizard: ({ onConnect }: { onConnect: () => void }) => (
+      <div data-test-subj="connection-wizard">Connection Wizard Mock</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./service_cards', () => {
-      const mocked = {
-      ServiceCards: ({ hasPermissions }: { hasPermissions?: boolean }) => (
-        <div data-test-subj="service-cards">
-          Service Cards Mock - hasPermissions: {String(hasPermissions)}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceCards: ({ hasPermissions }: { hasPermissions?: boolean }) => (
+      <div data-test-subj="service-cards">
+        Service Cards Mock - hasPermissions: {String(hasPermissions)}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCloudConnectedAppContext = useCloudConnectedAppContext as MockedFunction<
   typeof useCloudConnectedAppContext

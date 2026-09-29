@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('./tile_request_tab', () => {
-      const mocked = {
-      TileRequestTab: () => {
-        return <div>mockTileRequestTab</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TileRequestTab: () => {
+      return <div>mockTileRequestTab</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';

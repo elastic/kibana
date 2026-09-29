@@ -23,132 +23,132 @@ import {
 } from './enrollment_settings_handler';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      agentPolicyService: {
-        get: vi.fn(),
-        getByIds: vi.fn(),
-      },
-      appContextService: {
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-      },
-      downloadSourceService: {
-        list: vi.fn().mockResolvedValue({
-          items: [
-            {
-              id: 'source-1',
-              name: 'Source 1',
-              host: 'https://source-1/',
-              is_default: true,
-              auth: {
-                username: 'elastic',
-                password: 'source-password',
-                api_key: 'source-api-key',
-              },
+  const mocked = {
+    agentPolicyService: {
+      get: vi.fn(),
+      getByIds: vi.fn(),
+    },
+    appContextService: {
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+    },
+    downloadSourceService: {
+      list: vi.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'source-1',
+            name: 'Source 1',
+            host: 'https://source-1/',
+            is_default: true,
+            auth: {
+              username: 'elastic',
+              password: 'source-password',
+              api_key: 'source-api-key',
+            },
+            ssl: {
+              certificate_authorities: ['/path/to/source-ca'],
+              certificate: '/path/to/source-cert',
+              key: '/path/to/source-key',
+            },
+            secrets: {
               ssl: {
-                certificate_authorities: ['/path/to/source-ca'],
-                certificate: '/path/to/source-cert',
-                key: '/path/to/source-key',
-              },
-              secrets: {
-                ssl: {
-                  key: { id: 'source-ssl-key-secret' },
-                },
+                key: { id: 'source-ssl-key-secret' },
               },
             },
-            {
-              id: 'source-2',
-              name: 'Source 2',
-              host: 'https://source-2/',
-              is_default: false,
-              proxy_id: 'proxy-1',
-            },
-          ],
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          },
+          {
+            id: 'source-2',
+            name: 'Source 2',
+            host: 'https://source-2/',
+            is_default: false,
+            proxy_id: 'proxy-1',
+          },
+        ],
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/fleet_server', () => {
-      const mocked = {
-      getFleetServerPolicies: vi.fn(),
-      hasFleetServersForPolicies: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFleetServerPolicies: vi.fn(),
+    hasFleetServersForPolicies: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/fleet_server_host', () => {
-      const mocked = {
-      getFleetServerHostsForAgentPolicy: vi.fn().mockResolvedValue({
-        id: 'host-1',
-        is_default: true,
-        is_preconfigured: true,
-        name: 'Host 1',
-        host_urls: ['http://localhost:8220'],
-        proxy_id: 'proxy-1',
+  const mocked = {
+    getFleetServerHostsForAgentPolicy: vi.fn().mockResolvedValue({
+      id: 'host-1',
+      is_default: true,
+      is_preconfigured: true,
+      name: 'Host 1',
+      host_urls: ['http://localhost:8220'],
+      proxy_id: 'proxy-1',
+      ssl: {
+        certificate: '/path/to/cert',
+        certificate_authorities: ['/path/to/ca'],
+        key: '/path/to/key',
+        es_certificate: '/path/to/es-cert',
+        es_key: '/path/to/es-key',
+        agent_certificate: '/path/to/agent-cert',
+        agent_key: '/path/to/agent-key',
+      },
+      secrets: {
         ssl: {
-          certificate: '/path/to/cert',
-          certificate_authorities: ['/path/to/ca'],
-          key: '/path/to/key',
-          es_certificate: '/path/to/es-cert',
-          es_key: '/path/to/es-key',
-          agent_certificate: '/path/to/agent-cert',
-          agent_key: '/path/to/agent-key',
+          key: { id: 'host-key-secret' },
+          es_key: { id: 'host-es-key-secret' },
+          agent_key: { id: 'host-agent-key-secret' },
         },
-        secrets: {
-          ssl: {
-            key: { id: 'host-key-secret' },
-            es_key: { id: 'host-es-key-secret' },
-            agent_key: { id: 'host-agent-key-secret' },
-          },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/fleet_proxies', () => {
-      const mocked = {
-      getFleetProxy: vi.fn().mockResolvedValue({
-        id: 'proxy-1',
-        name: 'Proxy 1',
-        url: 'https://proxy-1/',
-        is_preconfigured: true,
-        proxy_headers: {
-          authorization: 'Bearer secret-token',
-        },
-        certificate: 'proxy-cert',
-        certificate_authorities: 'proxy-ca',
-        certificate_key: 'proxy-key',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFleetProxy: vi.fn().mockResolvedValue({
+      id: 'proxy-1',
+      name: 'Proxy 1',
+      url: 'https://proxy-1/',
+      is_preconfigured: true,
+      proxy_headers: {
+        authorization: 'Bearer secret-token',
+      },
+      certificate: 'proxy-cert',
+      certificate_authorities: 'proxy-ca',
+      certificate_key: 'proxy-key',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agent_policies', () => {
-      const mocked = {
-      getDataOutputForAgentPolicy: vi.fn().mockResolvedValue({
-        id: 'output-1',
-        name: 'Default output',
-        type: 'elasticsearch',
-        is_default: true,
-        is_default_monitoring: true,
-        hosts: ['https://elasticsearch:9200'],
-        proxy_id: 'proxy-1',
+  const mocked = {
+    getDataOutputForAgentPolicy: vi.fn().mockResolvedValue({
+      id: 'output-1',
+      name: 'Default output',
+      type: 'elasticsearch',
+      is_default: true,
+      is_default_monitoring: true,
+      hosts: ['https://elasticsearch:9200'],
+      proxy_id: 'proxy-1',
+      ssl: {
+        certificate: '/path/to/output-cert',
+        key: '/path/to/output-key',
+        certificate_authorities: ['/path/to/output-ca'],
+      },
+      secrets: {
         ssl: {
-          certificate: '/path/to/output-cert',
-          key: '/path/to/output-key',
-          certificate_authorities: ['/path/to/output-ca'],
+          key: { id: 'output-ssl-key-secret' },
         },
-        secrets: {
-          ssl: {
-            key: { id: 'output-ssl-key-secret' },
-          },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EnrollmentSettingsHandler utils', () => {
   const mockSoClient = savedObjectsClientMock.create();

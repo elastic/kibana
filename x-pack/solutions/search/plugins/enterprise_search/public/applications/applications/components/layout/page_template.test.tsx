@@ -5,29 +5,28 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { waitFor } from '@testing-library/react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 const mockUseEnterpriseSearchApplicationNav = vi.fn().mockReturnValue([]);
 
 vi.mock('../../../shared/layout', () => {
-      const mocked = {
-      useEnterpriseSearchApplicationNav: (...args: any[]) =>
-        mockUseEnterpriseSearchApplicationNav(...args),
-      EnterpriseSearchPageTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnterpriseSearchApplicationNav: (...args: any[]) =>
+      mockUseEnterpriseSearchApplicationNav(...args),
+    EnterpriseSearchPageTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
+      <div>{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { EnterpriseSearchApplicationsPageTemplate } from './page_template';
 

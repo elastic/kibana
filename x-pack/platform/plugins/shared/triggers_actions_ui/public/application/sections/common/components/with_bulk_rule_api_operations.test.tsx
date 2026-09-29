@@ -20,78 +20,82 @@ import { useKibana } from '../../../../common/lib/kibana';
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
-      const mocked = {
-      loadExecutionLogAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadExecutionLogAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/mute', () => {
-      const mocked = {
-      muteRules: vi.fn(),
-      muteRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    muteRules: vi.fn(),
+    muteRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/unmute', () => {
-      const mocked = {
-      unmuteRules: vi.fn(),
-      unmuteRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    unmuteRules: vi.fn(),
+    unmuteRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/bulk_delete', () => {
-      const mocked = {
-      bulkDeleteRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkDeleteRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/bulk_enable', () => {
-      const mocked = {
-      bulkEnableRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkEnableRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/bulk_disable', () => {
-      const mocked = {
-      bulkDisableRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkDisableRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/get_rule', () => {
-      const mocked = {
-      loadRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule', () => {
-      const mocked = {
-      resolveRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
-      const mocked = {
-      getRuleTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRuleTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/load_action_error_log', () => {
-      const mocked = {
-      loadActionErrorLog: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadActionErrorLog: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { loadExecutionLogAggregations } = (await vi.importMock('../../../lib/rule_api/load_execution_log_aggregations'));
-const { muteRules, muteRule } = (await vi.importMock('../../../lib/rule_api/mute'));
-const { unmuteRules, unmuteRule } = (await vi.importMock('../../../lib/rule_api/unmute'));
-const { bulkDeleteRules } = (await vi.importMock('../../../lib/rule_api/bulk_delete'));
-const { bulkEnableRules } = (await vi.importMock('../../../lib/rule_api/bulk_enable'));
-const { bulkDisableRules } = (await vi.importMock('../../../lib/rule_api/bulk_disable'));
-const { loadRule } = (await vi.importMock('../../../lib/rule_api/get_rule'));
-const { resolveRule } = (await vi.importMock('@kbn/response-ops-rule-form/src/common/apis/resolve_rule'));
-const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
-const { loadActionErrorLog } = (await vi.importMock('../../../lib/rule_api/load_action_error_log'));
+const { loadExecutionLogAggregations } = await vi.importMock(
+  '../../../lib/rule_api/load_execution_log_aggregations'
+);
+const { muteRules, muteRule } = await vi.importMock('../../../lib/rule_api/mute');
+const { unmuteRules, unmuteRule } = await vi.importMock('../../../lib/rule_api/unmute');
+const { bulkDeleteRules } = await vi.importMock('../../../lib/rule_api/bulk_delete');
+const { bulkEnableRules } = await vi.importMock('../../../lib/rule_api/bulk_enable');
+const { bulkDisableRules } = await vi.importMock('../../../lib/rule_api/bulk_disable');
+const { loadRule } = await vi.importMock('../../../lib/rule_api/get_rule');
+const { resolveRule } = await vi.importMock(
+  '@kbn/response-ops-rule-form/src/common/apis/resolve_rule'
+);
+const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const { loadActionErrorLog } = await vi.importMock('../../../lib/rule_api/load_action_error_log');
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 

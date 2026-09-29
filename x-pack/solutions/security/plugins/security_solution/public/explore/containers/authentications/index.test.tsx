@@ -15,11 +15,11 @@ import { TestProviders } from '../../../common/mock';
 import { useSearchStrategy } from '../../../common/containers/use_search_strategy';
 
 vi.mock('../../../common/containers/use_search_strategy', () => {
-      const mocked = {
-      useSearchStrategy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchStrategy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseSearchStrategy = useSearchStrategy as Mock;
 const mockSearch = vi.fn();
 

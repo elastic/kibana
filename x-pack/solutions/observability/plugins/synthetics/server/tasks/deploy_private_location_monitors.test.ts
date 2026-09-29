@@ -100,13 +100,7 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
     attributes: {},
   });
 
-  const buildDeployer = ({
-    pages,
-    editMonitors,
-  }: {
-    pages: string[][];
-    editMonitors: Mock;
-  }) => {
+  const buildDeployer = ({ pages, editMonitors }: { pages: string[][]; editMonitors: Mock }) => {
     const close = vi.fn().mockResolvedValue(undefined);
     // one finder per maintenance window; monitor ids are unique per finder because
     // the production code skips monitors already handled for an earlier window
@@ -141,9 +135,10 @@ describe('DeployPrivateLocationMonitors failed-create handling', () => {
       configsBySpaces: { space1: monitors },
       monitorSpaceIds: new Set(['space1']),
     }));
-    vi
-      .spyOn(deployer, 'parseLocations')
-      .mockReturnValue({ privateLocations, publicLocations: [] } as any);
+    vi.spyOn(deployer, 'parseLocations').mockReturnValue({
+      privateLocations,
+      publicLocations: [],
+    } as any);
 
     return { deployer, close, editMonitors };
   };

@@ -9,8 +9,8 @@ import { vi } from 'vitest';
 
 export const mountExpiredBannerMock = vi.fn();
 vi.doMock('./expired_banner', () => {
-      const mocked = {
-      mountExpiredBanner: mountExpiredBannerMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mountExpiredBanner: mountExpiredBannerMock,
+  };
+  return { ...mocked, default: mocked };
+});

@@ -15,11 +15,11 @@ import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { getDetectionsExceptionListSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_schema.mock';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('duplicateExceptions', () => {
   let exceptionsClient: ExceptionListClient;
@@ -79,9 +79,7 @@ describe('duplicateExceptions', () => {
       namespace_type: 'single',
       id: '5678',
     });
-    exceptionsClient.duplicateExceptionListAndItems = vi
-      .fn()
-      .mockResolvedValue(newDefaultRuleList);
+    exceptionsClient.duplicateExceptionListAndItems = vi.fn().mockResolvedValue(newDefaultRuleList);
 
     const sharedExceptionListReference: List = {
       type: ExceptionListTypeEnum.DETECTION,

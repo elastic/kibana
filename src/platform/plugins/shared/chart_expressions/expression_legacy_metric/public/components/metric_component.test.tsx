@@ -18,20 +18,20 @@ import MetricVisComponent from './metric_component';
 import { LabelPosition } from '../../common/constants';
 
 vi.mock('../services', () => {
-      const mocked = {
-      getFormatService: () => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { getFormatService } = require('../__mocks__/services');
-        return getFormatService();
-      },
-      getPaletteService: () => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { getPaletteService } = require('../__mocks__/services');
-        return getPaletteService();
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormatService: () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getFormatService } = require('../__mocks__/services');
+      return getFormatService();
+    },
+    getPaletteService: () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { getPaletteService } = require('../__mocks__/services');
+      return getPaletteService();
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 type Props = MetricVisComponentProps;
 

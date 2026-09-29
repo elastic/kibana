@@ -33,12 +33,12 @@ const GENERIC_RUN_PROPS = {
 const mockUseCaseAttachmentWorkflowRun = vi.fn();
 const mockUseCaseAttachmentWorkflowRouting = vi.fn();
 vi.mock('@kbn/cases-plugin/public', () => {
-      const mocked = {
-      useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
-      useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCaseAttachmentWorkflowRun: (params: unknown) => mockUseCaseAttachmentWorkflowRun(params),
+    useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMutate = vi.fn();
 const mockUseRunWorkflow = vi.fn(() => ({ mutate: mockMutate }));
@@ -56,7 +56,7 @@ const mockUseWorkflowsUIEnabledSetting = vi.fn(() => true);
 const mockUseWorkflows = vi.fn((_params: unknown) => ({ data: { results: [] } }));
 const mockRunWorkflowPanelProps: RunWorkflowPanelProps[] = [];
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const actual = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...actual,
     useKibana: vi.fn(),
@@ -64,48 +64,48 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 });
 vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useRunWorkflow: () => mockUseRunWorkflow(),
-      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-      useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
-      useWorkflows: (params: unknown) => mockUseWorkflows(params),
-      WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
-        <div data-test-subj="workflow-selector-mock">
-          {'Workflow selector'}
-          <button
-            data-test-subj="select-workflow-option"
-            type="button"
-            onClick={() => onWorkflowChange('test-workflow-id')}
-          >
-            {'Select workflow'}
+  const mocked = {
+    useRunWorkflow: () => mockUseRunWorkflow(),
+    useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+    useWorkflowsUIEnabledSetting: () => mockUseWorkflowsUIEnabledSetting(),
+    useWorkflows: (params: unknown) => mockUseWorkflows(params),
+    WorkflowSelector: ({ onWorkflowChange }: { onWorkflowChange: (id: string) => void }) => (
+      <div data-test-subj="workflow-selector-mock">
+        {'Workflow selector'}
+        <button
+          data-test-subj="select-workflow-option"
+          type="button"
+          onClick={() => onWorkflowChange('test-workflow-id')}
+        >
+          {'Select workflow'}
+        </button>
+      </div>
+    ),
+    // RunWorkflowPanel now lives in @kbn/workflows-ui.
+    // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
+    // This stub captures caller-owned inputs, visibility, filtering, and sorting.
+    RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
+      mockRunWorkflowPanelProps.push(props);
+      return (
+        <div>
+          <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
+          <button data-test-subj="run-workflow-execute-button" type="button">
+            {'Run workflow'}
           </button>
         </div>
-      ),
-      // RunWorkflowPanel now lives in @kbn/workflows-ui.
-      // Its full behavior is tested in src/platform/packages/shared/kbn-workflows-ui.
-      // This stub captures caller-owned inputs, visibility, filtering, and sorting.
-      RunWorkflowPanel: (props: RunWorkflowPanelProps) => {
-        mockRunWorkflowPanelProps.push(props);
-        return (
-          <div>
-            <div data-test-subj="workflow-selector-mock">{'Workflow selector stub'}</div>
-            <button data-test-subj="run-workflow-execute-button" type="button">
-              {'Run workflow'}
-            </button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/loader', () => {
-      const mocked = {
-      Loader: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="loader">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Loader: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="loader">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
 

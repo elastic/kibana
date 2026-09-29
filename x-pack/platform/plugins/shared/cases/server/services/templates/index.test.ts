@@ -1184,23 +1184,21 @@ describe('TemplatesService', () => {
     const definition = buildDefinition('Updated case defaults');
     const service = createService();
 
-    vi
-      .spyOn(
-        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-        '_getTemplate'
-      )
-      .mockResolvedValue({
-        id: 'template-so-id',
-        attributes: {
-          templateId: 'template-id',
-          name: 'Previous Template',
-          owner: 'securitySolution',
-          definition: buildDefinition('Previous Template'),
-          templateVersion: 1,
-          deletedAt: null,
-          author: 'bob',
-        },
-      } as SavedObject<Template>);
+    vi.spyOn(
+      service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+      '_getTemplate'
+    ).mockResolvedValue({
+      id: 'template-so-id',
+      attributes: {
+        templateId: 'template-id',
+        name: 'Previous Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Previous Template'),
+        templateVersion: 1,
+        deletedAt: null,
+        author: 'bob',
+      },
+    } as SavedObject<Template>);
 
     unsecuredSavedObjectsClient.create.mockResolvedValue({
       id: 'template-new-so-id',
@@ -1242,23 +1240,21 @@ describe('TemplatesService', () => {
     });
     const service = createService();
 
-    vi
-      .spyOn(
-        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-        '_getTemplate'
-      )
-      .mockResolvedValue({
-        id: 'template-so-id',
-        attributes: {
-          templateId: 'template-id',
-          name: 'Previous Template',
-          owner: 'securitySolution',
-          definition: buildDefinition('Previous Template'),
-          templateVersion: 1,
-          deletedAt: null,
-          author: 'bob',
-        },
-      } as SavedObject<Template>);
+    vi.spyOn(
+      service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+      '_getTemplate'
+    ).mockResolvedValue({
+      id: 'template-so-id',
+      attributes: {
+        templateId: 'template-id',
+        name: 'Previous Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Previous Template'),
+        templateVersion: 1,
+        deletedAt: null,
+        author: 'bob',
+      },
+    } as SavedObject<Template>);
 
     unsecuredSavedObjectsClient.create.mockResolvedValue({
       id: 'template-new-so-id',
@@ -1290,23 +1286,21 @@ describe('TemplatesService', () => {
     });
     const service = createService();
 
-    vi
-      .spyOn(
-        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-        '_getTemplate'
-      )
-      .mockResolvedValue({
-        id: 'template-so-id',
-        attributes: {
-          templateId: 'template-id',
-          name: 'Previous',
-          owner: 'securitySolution',
-          definition: buildDefinition('Previous'),
-          templateVersion: 1,
-          deletedAt: null,
-          author: 'alice',
-        },
-      } as SavedObject<Template>);
+    vi.spyOn(
+      service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+      '_getTemplate'
+    ).mockResolvedValue({
+      id: 'template-so-id',
+      attributes: {
+        templateId: 'template-id',
+        name: 'Previous',
+        owner: 'securitySolution',
+        definition: buildDefinition('Previous'),
+        templateVersion: 1,
+        deletedAt: null,
+        author: 'alice',
+      },
+    } as SavedObject<Template>);
 
     unsecuredSavedObjectsClient.create.mockResolvedValue({
       id: 'template-new-so-id',
@@ -1336,22 +1330,20 @@ describe('TemplatesService', () => {
     const definition = buildDefinition('Case defaults');
     const service = createService();
 
-    vi
-      .spyOn(
-        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-        '_getTemplate'
-      )
-      .mockResolvedValue(
-        createTemplateSO('current-so', {
-          templateId: 'current-template-id',
-          name: 'Current Template',
-          owner: 'securitySolution',
-          definition: buildDefinition('Current case defaults'),
-          templateVersion: 2,
-          isLatest: true,
-          deletedAt: null,
-        })
-      );
+    vi.spyOn(
+      service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+      '_getTemplate'
+    ).mockResolvedValue(
+      createTemplateSO('current-so', {
+        templateId: 'current-template-id',
+        name: 'Current Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Current case defaults'),
+        templateVersion: 2,
+        isLatest: true,
+        deletedAt: null,
+      })
+    );
 
     unsecuredSavedObjectsClient.find.mockResolvedValue(
       createMockFindResponse([
@@ -1380,22 +1372,20 @@ describe('TemplatesService', () => {
     const definition = buildDefinition('Case defaults');
     const service = createService();
 
-    vi
-      .spyOn(
-        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-        '_getTemplate'
-      )
-      .mockResolvedValue(
-        createTemplateSO('current-so', {
-          templateId: 'current-template-id',
-          name: 'Current Template',
-          owner: 'securitySolution',
-          definition: buildDefinition('Current case defaults'),
-          templateVersion: 2,
-          isLatest: true,
-          deletedAt: null,
-        })
-      );
+    vi.spyOn(
+      service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+      '_getTemplate'
+    ).mockResolvedValue(
+      createTemplateSO('current-so', {
+        templateId: 'current-template-id',
+        name: 'Current Template',
+        owner: 'securitySolution',
+        definition: buildDefinition('Current case defaults'),
+        templateVersion: 2,
+        isLatest: true,
+        deletedAt: null,
+      })
+    );
 
     unsecuredSavedObjectsClient.find.mockResolvedValue(
       createMockFindResponse([
@@ -1426,12 +1416,10 @@ describe('TemplatesService', () => {
   describe('updateTemplate', () => {
     it('throws when the template does not exist', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(undefined);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(undefined);
 
       await expect(
         service.updateTemplate('missing-template', {
@@ -1446,25 +1434,23 @@ describe('TemplatesService', () => {
       const definition = buildDefinition('Edited Template');
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue({
-          id: 'template-so-id',
-          attributes: {
-            templateId: 'template-id',
-            name: 'Previous Template',
-            owner: 'securitySolution',
-            definition: buildDefinition('Previous Template'),
-            templateVersion: 3,
-            deletedAt: null,
-            author: 'alice',
-            usageCount: 42,
-            lastUsedAt: '2025-12-01T00:00:00.000Z',
-          },
-        } as SavedObject<Template>);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue({
+        id: 'template-so-id',
+        attributes: {
+          templateId: 'template-id',
+          name: 'Previous Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Previous Template'),
+          templateVersion: 3,
+          deletedAt: null,
+          author: 'alice',
+          usageCount: 42,
+          lastUsedAt: '2025-12-01T00:00:00.000Z',
+        },
+      } as SavedObject<Template>);
 
       unsecuredSavedObjectsClient.create.mockResolvedValue({
         id: 'template-new-so-id',
@@ -1491,23 +1477,21 @@ describe('TemplatesService', () => {
     it('carries the v1 legacyKey lineage forward across edits (incl. rename)', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue({
-          id: 'template-so-id',
-          attributes: {
-            templateId: 'template-id',
-            name: 'Migrated Template',
-            owner: 'securitySolution',
-            definition: buildDefinition('Migrated Template'),
-            templateVersion: 1,
-            deletedAt: null,
-            legacyKey: 'v1-template-key',
-          },
-        } as SavedObject<Template>);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue({
+        id: 'template-so-id',
+        attributes: {
+          templateId: 'template-id',
+          name: 'Migrated Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Migrated Template'),
+          templateVersion: 1,
+          deletedAt: null,
+          legacyKey: 'v1-template-key',
+        },
+      } as SavedObject<Template>);
 
       unsecuredSavedObjectsClient.create.mockResolvedValue({
         id: 'template-new-so-id',
@@ -1547,22 +1531,20 @@ describe('TemplatesService', () => {
 
       const mockCurrentTemplate = (definition: string) => {
         const service = createService();
-        vi
-          .spyOn(
-            service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-            '_getTemplate'
-          )
-          .mockResolvedValue({
-            id: 'template-so-id',
-            attributes: {
-              templateId: 'template-id',
-              name: 'Existing Template',
-              owner: 'securitySolution',
-              definition,
-              templateVersion: 1,
-              deletedAt: null,
-            },
-          } as SavedObject<Template>);
+        vi.spyOn(
+          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+          '_getTemplate'
+        ).mockResolvedValue({
+          id: 'template-so-id',
+          attributes: {
+            templateId: 'template-id',
+            name: 'Existing Template',
+            owner: 'securitySolution',
+            definition,
+            templateVersion: 1,
+            deletedAt: null,
+          },
+        } as SavedObject<Template>);
         unsecuredSavedObjectsClient.create.mockResolvedValue({
           id: 'template-new-so-id',
           attributes: {} as Template,
@@ -1716,18 +1698,16 @@ describe('TemplatesService', () => {
 
     it('rejects an owner-changing update when the target owner is at the template limit', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('template-so-id', {
-            templateId: 'template-id',
-            name: 'Existing',
-            owner: 'securitySolution',
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('template-so-id', {
+          templateId: 'template-id',
+          name: 'Existing',
+          owner: 'securitySolution',
+        })
+      );
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
       );
@@ -1745,18 +1725,16 @@ describe('TemplatesService', () => {
 
     it('allows a same-owner update when the owner is at the template limit', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('template-so-id', {
-            templateId: 'template-id',
-            name: 'Existing',
-            owner: 'securitySolution',
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('template-so-id', {
+          templateId: 'template-id',
+          name: 'Existing',
+          owner: 'securitySolution',
+        })
+      );
       unsecuredSavedObjectsClient.find.mockResolvedValue(
         createMockFindResponse([], MAX_TEMPLATES_PER_OWNER)
       );
@@ -1882,17 +1860,15 @@ describe('TemplatesService', () => {
 
     it('rejects update when a definition declares too many fields', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('template-so-id', {
-            templateId: 'template-id',
-            name: 'Existing',
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('template-so-id', {
+          templateId: 'template-id',
+          name: 'Existing',
+        })
+      );
 
       await expect(
         service.updateTemplate('template-id', {
@@ -1907,17 +1883,15 @@ describe('TemplatesService', () => {
 
     it('rejects update when a non-ASCII template default exceeds the maximum byte size', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('template-so-id', {
-            templateId: 'template-id',
-            name: 'Existing',
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('template-so-id', {
+          templateId: 'template-id',
+          name: 'Existing',
+        })
+      );
 
       await expect(
         service.updateTemplate('template-id', {
@@ -1937,20 +1911,18 @@ describe('TemplatesService', () => {
 
     it('does not cap version history: allows update well past the former version limit', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('template-so-id', {
-            templateId: 'template-id',
-            name: 'Busy Template',
-            owner: 'securitySolution',
-            definition: buildDefinition('Busy Template'),
-            templateVersion: 1000,
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('template-so-id', {
+          templateId: 'template-id',
+          name: 'Busy Template',
+          owner: 'securitySolution',
+          definition: buildDefinition('Busy Template'),
+          templateVersion: 1000,
+        })
+      );
 
       await service.updateTemplate('template-id', {
         name: 'Busy Template',
@@ -2170,20 +2142,18 @@ describe('TemplatesService', () => {
     it('increments usageCount and sets lastUsedAt for an existing template', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue({
-          id: 'so-1',
-          attributes: {
-            templateId: 'template-1',
-            name: 'Template',
-            usageCount: 5,
-            lastUsedAt: '2025-01-01T00:00:00.000Z',
-          },
-        } as SavedObject<Template>);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue({
+        id: 'so-1',
+        attributes: {
+          templateId: 'template-1',
+          name: 'Template',
+          usageCount: 5,
+          lastUsedAt: '2025-01-01T00:00:00.000Z',
+        },
+      } as SavedObject<Template>);
 
       await service.incrementUsageStats('template-1');
 
@@ -2205,19 +2175,17 @@ describe('TemplatesService', () => {
     it('adds the given number of cases to usageCount', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue({
-          id: 'so-1',
-          attributes: {
-            templateId: 'template-1',
-            name: 'Template',
-            usageCount: 5,
-          },
-        } as SavedObject<Template>);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue({
+        id: 'so-1',
+        attributes: {
+          templateId: 'template-1',
+          name: 'Template',
+          usageCount: 5,
+        },
+      } as SavedObject<Template>);
 
       await service.incrementUsageStats('template-1', 3);
 
@@ -2239,18 +2207,16 @@ describe('TemplatesService', () => {
     it('sets usageCount to 1 when usageCount is undefined', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue({
-          id: 'so-1',
-          attributes: {
-            templateId: 'template-1',
-            name: 'Template',
-          },
-        } as SavedObject<Template>);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue({
+        id: 'so-1',
+        attributes: {
+          templateId: 'template-1',
+          name: 'Template',
+        },
+      } as SavedObject<Template>);
 
       await service.incrementUsageStats('template-1');
 
@@ -2272,12 +2238,10 @@ describe('TemplatesService', () => {
     it('does nothing when template does not exist', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(undefined);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(undefined);
 
       await service.incrementUsageStats('non-existent');
 
@@ -2289,18 +2253,16 @@ describe('TemplatesService', () => {
     it('marks all matching templates as deleted', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('so-1', {
-            name: 'Template',
-            templateId: 'template-1',
-            owner: 'securitySolution',
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('so-1', {
+          name: 'Template',
+          templateId: 'template-1',
+          owner: 'securitySolution',
+        })
+      );
 
       const findResponse: SavedObjectsFindResponse = {
         page: 1,
@@ -2348,12 +2310,10 @@ describe('TemplatesService', () => {
     it('does nothing when template does not exist', async () => {
       const service = createService();
 
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(undefined);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(undefined);
 
       await service.deleteTemplate('non-existent');
 
@@ -2596,12 +2556,10 @@ describe('TemplatesService', () => {
         owner: 'securitySolution',
         templateVersion: 1,
       });
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(currentTemplate);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(currentTemplate);
       unsecuredSavedObjectsClient.create.mockResolvedValue({
         id: 'new-id',
         attributes: {} as Template,
@@ -2618,18 +2576,16 @@ describe('TemplatesService', () => {
 
     it('fires the refresh hook after deleteTemplate', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(
-          createTemplateSO('so-1', {
-            templateId: 'template-1',
-            name: 'Template 1',
-            owner: 'securitySolution',
-          })
-        );
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(
+        createTemplateSO('so-1', {
+          templateId: 'template-1',
+          name: 'Template 1',
+          owner: 'securitySolution',
+        })
+      );
       unsecuredSavedObjectsClient.find.mockResolvedValue({
         page: 1,
         per_page: 10000,
@@ -2652,12 +2608,10 @@ describe('TemplatesService', () => {
 
     it('does NOT fire the refresh hook when deleteTemplate finds nothing to delete', async () => {
       const service = createService();
-      vi
-        .spyOn(
-          service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
-          '_getTemplate'
-        )
-        .mockResolvedValue(undefined);
+      vi.spyOn(
+        service as unknown as Record<'_getTemplate', typeof service.getTemplate>,
+        '_getTemplate'
+      ).mockResolvedValue(undefined);
 
       await service.deleteTemplate('non-existent');
 

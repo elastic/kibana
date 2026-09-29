@@ -87,14 +87,14 @@ describe('tab_sync actions', () => {
       const releaseDataViewLoad = Promise.withResolvers<void>();
       const { internalState, services, tabId, initializeSingleTab } = await setup();
 
-      vi
-        .spyOn(resolveDataViewModule, 'loadAndResolveDataView')
-        .mockImplementation(async (params) => {
+      vi.spyOn(resolveDataViewModule, 'loadAndResolveDataView').mockImplementation(
+        async (params) => {
           loadDataViewStarted.resolve(undefined);
           await releaseDataViewLoad.promise;
 
           return originalLoadAndResolveDataView(params);
-        });
+        }
+      );
 
       const initializeAndSyncSpy = vi.spyOn(tabSyncApi, 'initializeAndSync');
       const fetchDataSpy = vi.spyOn(internalStateActions, 'fetchData');
@@ -248,9 +248,10 @@ describe('tab_sync actions', () => {
 
     it('should dispatch syncLocallyPersistedTabState when tabState observable emits', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
-      vi
-        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
-        .mockReturnValue(mockTabState$);
+      vi.spyOn(
+        createTabPersistableStateObservableModule,
+        'createTabPersistableStateObservable'
+      ).mockReturnValue(mockTabState$);
 
       // Spy on the action creator before initialization
       const syncLocallyPersistedTabStateSpy = vi.spyOn(
@@ -355,9 +356,10 @@ describe('tab_sync actions', () => {
 
     it('should unsubscribe from tabStateSubscription when stopSyncing is called', async () => {
       const mockTabState$: Subject<TabPersistableState> = new Subject();
-      vi
-        .spyOn(createTabPersistableStateObservableModule, 'createTabPersistableStateObservable')
-        .mockReturnValue(mockTabState$);
+      vi.spyOn(
+        createTabPersistableStateObservableModule,
+        'createTabPersistableStateObservable'
+      ).mockReturnValue(mockTabState$);
 
       const { tabId, initializeSingleTab, runtimeStateManager } = await setup();
 

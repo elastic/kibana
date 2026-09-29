@@ -20,7 +20,7 @@ vi.mock('../../../../common/hooks/use_has_graph_visualization_license');
 vi.mock('../../../../flyout/shared/hooks/use_is_entity_store_v2_available');
 vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store');
 vi.mock('@kbn/entity-store/public', async () => {
-  const actual = (await vi.importActual('@kbn/entity-store/public'));
+  const actual = await vi.importActual('@kbn/entity-store/public');
   return {
     ...actual,
     useEntityStoreEuidApi: vi.fn(),

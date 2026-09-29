@@ -113,18 +113,18 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/mocks';
 
 const RULE_EXECUTION_UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/wrap_scoped_cluster_client', () => {
-      const mocked = {
-      createWrappedScopedClusterClientFactory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createWrappedScopedClusterClientFactory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/alerting_event_logger/alerting_event_logger');
 vi.mock('../monitoring/rule_result_service');
@@ -224,15 +224,16 @@ describe('Task Runner', () => {
     vi.resetAllMocks();
     vi.restoreAllMocks(); // clear spy mock implementations
     logger.isLevelEnabled.mockReturnValue(true);
-    (await vi.importMock('../lib/wrap_scoped_cluster_client'))
-      .createWrappedScopedClusterClientFactory.mockReturnValue({
-        client: () => services.scopedClusterClient,
-        getMetrics: () => ({
-          numSearches: 3,
-          esSearchDurationMs: 33,
-          totalSearchDurationMs: 23423,
-        }),
-      });
+    (
+      await vi.importMock('../lib/wrap_scoped_cluster_client')
+    ).createWrappedScopedClusterClientFactory.mockReturnValue({
+      client: () => services.scopedClusterClient,
+      getMetrics: () => ({
+        numSearches: 3,
+        esSearchDurationMs: 33,
+        totalSearchDurationMs: 23423,
+      }),
+    });
     savedObjectsService.getScopedClient.mockReturnValue(services.savedObjectsClient);
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     taskRunnerFactoryInitializerParams.actionsPlugin.getActionsClientWithRequest.mockResolvedValue(
@@ -412,7 +413,8 @@ describe('Task Runner', () => {
     );
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
     expect(
-      (await vi.importMock('../lib/wrap_scoped_cluster_client')).createWrappedScopedClusterClientFactory
+      (await vi.importMock('../lib/wrap_scoped_cluster_client'))
+        .createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
   });
 
@@ -432,10 +434,7 @@ describe('Task Runner', () => {
   });
 
   test('passes total_search_duration_ms from execution metrics into rule monitoring via addFrameworkMetrics', async () => {
-    const addFrameworkMetricsSpy = vi.spyOn(
-      RuleMonitoringService.prototype,
-      'addFrameworkMetrics'
-    );
+    const addFrameworkMetricsSpy = vi.spyOn(RuleMonitoringService.prototype, 'addFrameworkMetrics');
     const taskRunner = createTaskRunner({
       taskInstance: {
         ...mockedTaskInstance,

@@ -24,12 +24,12 @@ import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, ApiRequest, LoadedApi } from '../../api';
 
 vi.mock('../../api/registry', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../api/registry')),
-      getRegistries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../api/registry')),
+    getRegistries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRegistries = vi.mocked(getRegistries);
 
@@ -963,9 +963,9 @@ describe('createExecuteApiTool', () => {
       context.prompts.checkConfirmationStatus.mockReturnValue({
         status: ConfirmationStatus.accepted,
       });
-      vi
-        .mocked(context.esClient.asCurrentUser.transport.request)
-        .mockResolvedValue({ acknowledged: true });
+      vi.mocked(context.esClient.asCurrentUser.transport.request).mockResolvedValue({
+        acknowledged: true,
+      });
 
       const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
       const result = (await tool.handler(deleteIndexParams, context)) as ToolHandlerStandardReturn;
@@ -1181,9 +1181,9 @@ describe('createExecuteApiTool', () => {
           enabled: false,
           autoApprovedApis: covered,
         });
-        vi
-          .mocked(context.esClient.asCurrentUser.transport.request)
-          .mockRejectedValue(new Error('index_not_found_exception'));
+        vi.mocked(context.esClient.asCurrentUser.transport.request).mockRejectedValue(
+          new Error('index_not_found_exception')
+        );
 
         const tool = createExecuteApiTool({ selfClient, discoveryEnabled: true });
         const result = (await tool.handler(

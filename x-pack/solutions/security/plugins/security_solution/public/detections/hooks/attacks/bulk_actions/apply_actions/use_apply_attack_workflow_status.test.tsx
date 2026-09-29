@@ -25,9 +25,7 @@ vi.mock('../../../../../common/containers/attacks/hooks/use_set_attacks_status')
 vi.mock('../confirmation_modal/use_update_attacks_modal');
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
-const mockUseSetAttacksStatus = useSetAttacksStatus as MockedFunction<
-  typeof useSetAttacksStatus
->;
+const mockUseSetAttacksStatus = useSetAttacksStatus as MockedFunction<typeof useSetAttacksStatus>;
 const mockUseUpdateAttacksModal = useUpdateAttacksModal as MockedFunction<
   typeof useUpdateAttacksModal
 >;

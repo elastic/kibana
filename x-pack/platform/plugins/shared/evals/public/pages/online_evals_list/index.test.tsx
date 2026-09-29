@@ -25,18 +25,18 @@ vi.mock('../../hooks/use_online_eval_workflows');
 vi.mock('../../hooks/use_evals_permissions');
 vi.mock('../../hooks/use_model_connectors');
 vi.mock('../../components/create_online_eval_flyout', () => {
-      const mocked = {
-      CreateOnlineEvalFlyout: ({ onClose }: { onClose: () => void }) => (
-        <div data-test-subj="createOnlineEvalFlyoutMock">
-          <button onClick={onClose} type="button">
-            close
-          </button>
-          create flyout mock
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateOnlineEvalFlyout: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="createOnlineEvalFlyoutMock">
+        <button onClick={onClose} type="button">
+          close
+        </button>
+        create flyout mock
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseOnlineEvalWorkflows = vi.mocked(useOnlineEvalWorkflows);
 const mockedUseToggleOnlineEvalWorkflow = vi.mocked(useToggleOnlineEvalWorkflow);

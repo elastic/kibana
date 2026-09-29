@@ -19,12 +19,12 @@ type Props = ComponentProps<typeof XyAxisSettings>;
 
 vi.useFakeTimers();
 vi.mock('lodash', () => {
-      const mocked = {
-      ...require('lodash'),
-      debounce: vi.fn((fn) => fn),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('lodash'),
+    debounce: vi.fn((fn) => fn),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Axis settings', () => {
   let defaultProps: Props;

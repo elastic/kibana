@@ -24,20 +24,20 @@ import { useGetTransformStats } from '../../../../hooks';
 import { useEnabledFeatures } from '../../../../serverless_context';
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      useGetTransformStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTransformStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../app_dependencies');
 
 vi.mock('../../../../serverless_context', () => {
-      const mocked = {
-      useEnabledFeatures: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnabledFeatures: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetTransformStats = useGetTransformStats as MockedFunction<
   typeof useGetTransformStats

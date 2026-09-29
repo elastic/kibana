@@ -18,13 +18,13 @@ import { useRuleWithFallback } from '../../../../detection_engine/rule_managemen
 
 vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback');
 vi.mock('../../../shared/components/document_tools_flyout_header', () => {
-      const mocked = {
-      DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
-        <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
+      <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderInvestigationGuide = ({
   hit = buildDataTableRecord(mockContextValue.searchHit as EsHitRecord),

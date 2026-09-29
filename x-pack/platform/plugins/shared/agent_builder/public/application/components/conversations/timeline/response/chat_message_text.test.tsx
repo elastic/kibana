@@ -57,25 +57,25 @@ const http = {} as HttpStart;
 const uiSettings = {} as IUiSettingsClient;
 
 vi.mock('../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_steps_from_saved_turns', () => {
-      const mocked = {
-      useStepsFromSavedTurns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepsFromSavedTurns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockVisualizeESQL = VisualizeESQL as MockedFunction<any>;
 const mockInlineVisualization = InlineVisualization as MockedFunction<any>;

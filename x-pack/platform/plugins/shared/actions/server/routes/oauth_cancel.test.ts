@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mock, MockedClass } from 'vitest';
 
 vi.mock('./verify_access_and_context', () => {
-      const mocked = {
-      verifyAccessAndContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyAccessAndContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/oauth_state_client');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';

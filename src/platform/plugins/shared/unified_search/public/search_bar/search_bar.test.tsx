@@ -11,12 +11,12 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('@kbn/esql/public/kibana_services', () => {
-      const mocked = {
-      useKibanaServices: vi.fn(() => ({})),
-      untilPluginStartServicesReady: vi.fn(() => new Promise(() => {})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaServices: vi.fn(() => ({})),
+    untilPluginStartServicesReady: vi.fn(() => new Promise(() => {})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import type { SearchBarProps, SearchBarState } from './search_bar';

@@ -116,9 +116,7 @@ describe('findFirstFiberWithDebugSource', () => {
       writable: true,
     });
 
-    (getFiberFromHtmlElement as Mock)
-      .mockReturnValueOnce(undefined)
-      .mockReturnValueOnce(undefined);
+    (getFiberFromHtmlElement as Mock).mockReturnValueOnce(undefined).mockReturnValueOnce(undefined);
 
     const result = findFirstFiberWithDebugSource(mockElement);
 

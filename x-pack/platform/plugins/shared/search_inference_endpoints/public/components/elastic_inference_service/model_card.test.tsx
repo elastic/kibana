@@ -63,9 +63,7 @@ describe('ModelCard', () => {
         ...baseModel,
         modelStatus: EisModelStatus.Preview,
       };
-      const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={vi.fn()} />
-      );
+      const { getByTestId, queryByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelPreviewBadge-my-model')).toBeInTheDocument();
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
@@ -89,9 +87,7 @@ describe('ModelCard', () => {
           },
         },
       };
-      const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={vi.fn()} />
-      );
+      const { getByTestId, queryByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelDeprecatedBadge-my-model')).toBeInTheDocument();
       expect(queryByTestId('modelEolBadge-my-model')).not.toBeInTheDocument();
     });
@@ -128,9 +124,7 @@ describe('ModelCard', () => {
           },
         },
       };
-      const { getByTestId, queryByTestId } = render(
-        <ModelCard model={model} onClick={vi.fn()} />
-      );
+      const { getByTestId, queryByTestId } = render(<ModelCard model={model} onClick={vi.fn()} />);
       expect(getByTestId('modelEolBadge-my-model')).toBeInTheDocument();
       expect(queryByTestId('modelDeprecatedBadge-my-model')).not.toBeInTheDocument();
     });

@@ -15,20 +15,20 @@ import { ResponseDetails } from '.';
 import { ResponseDetailsContent } from './components/response_details';
 
 vi.mock('../../../shared/components/tools_flyout_header', () => {
-      const mocked = {
-      ToolsFlyoutHeader: ({ title }: { title: string }) => (
-        <div data-test-subj="toolsFlyoutHeaderMock">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolsFlyoutHeader: ({ title }: { title: string }) => (
+      <div data-test-subj="toolsFlyoutHeaderMock">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/response_details', () => {
-      const mocked = {
-      ResponseDetailsContent: vi.fn(() => <div data-test-subj="responseDetailsContentMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponseDetailsContent: vi.fn(() => <div data-test-subj="responseDetailsContentMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const hit = {
   id: '1',

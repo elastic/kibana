@@ -16,12 +16,12 @@ import { CopyRelativePathButton } from './copy_relative_path_button';
 import { copyToClipboard } from '@elastic/eui';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      copyToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCopyToClipboard = vi.mocked(copyToClipboard);
 

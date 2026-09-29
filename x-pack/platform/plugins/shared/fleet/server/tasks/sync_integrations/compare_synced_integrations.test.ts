@@ -1842,18 +1842,18 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
   });
 
   it('should return empty integrations array if feature flag is not available', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: false,
+    } as any);
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
       integrations: [],
     });
   });
 
   it('should return empty integrations array if license is less than Enterprise', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
     expect(await getRemoteSyncedIntegrationsStatus(esClientMock, soClientMock)).toEqual({
@@ -1862,9 +1862,9 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
   });
 
   it('should return error if there is an error in getFollowerIndexInfo', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     getIndicesMock.mockResolvedValue({
       'fleet-synced-integrations-ccr-remote1': {},
     });
@@ -1875,9 +1875,9 @@ describe('getRemoteSyncedIntegrationsStatus', () => {
   });
 
   it('should return error if there is an error inside fetchAndCompareSyncedIntegrations', async () => {
-    vi
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
 
     esClientMock = {
       search: vi.fn().mockRejectedValueOnce(new Error('Some ES error')),

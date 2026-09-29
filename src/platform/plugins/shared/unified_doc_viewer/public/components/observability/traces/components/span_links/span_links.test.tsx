@@ -22,45 +22,45 @@ import {
 } from '@kbn/discover-utils';
 // Mock dependencies
 vi.mock('../../../../../hooks/use_data_sources', () => {
-      const mocked = {
-      useDataSourcesContext: () => ({
-        indexes: { apm: { traces: 'apm-traces-*' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataSourcesContext: () => ({
+      indexes: { apm: { traces: 'apm-traces-*' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../hooks/use_generate_discover_link', () => {
-      const mocked = {
-      useGetGenerateDiscoverLink: () => ({
-        generateDiscoverLink: vi.fn(() => 'http://discover/link'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetGenerateDiscoverLink: () => ({
+      generateDiscoverLink: vi.fn(() => 'http://discover/link'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get_columns', () => {
-      const mocked = {
-      getColumns: vi.fn(() => [{ field: 'duration', name: 'Duration' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getColumns: vi.fn(() => [{ field: 'duration', name: 'Duration' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_fetch_span_links', () => {
-      const mocked = {
-      useFetchSpanLinks: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSpanLinks: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
-      const mocked = {
-      ContentFrameworkSection: ({ children, title, ...rest }: any) => (
-        <div data-test-subj="ContentFrameworkSection" {...rest}>
-          <h2>{title}</h2>
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+      <div data-test-subj="ContentFrameworkSection" {...rest}>
+        <h2>{title}</h2>
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const mockUseFetchSpanLinks = require('./use_fetch_span_links').useFetchSpanLinks;

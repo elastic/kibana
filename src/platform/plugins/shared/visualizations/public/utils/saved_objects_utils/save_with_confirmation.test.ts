@@ -57,18 +57,18 @@ const mockUpdateContent = vi.fn(() => ({
 }));
 
 vi.mock('../../services', () => {
-      const mocked = {
-      getContentManagement: vi.fn(() => ({
-        client: {
-          create: mockCreateContent,
-          update: mockUpdateContent,
-          get: mockGetContent,
-          search: mockFindContent,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getContentManagement: vi.fn(() => ({
+      client: {
+        create: mockCreateContent,
+        update: mockUpdateContent,
+        get: mockGetContent,
+        search: mockFindContent,
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('saveWithConfirmation', () => {
   const source: VisualizationSavedObjectAttributes = {} as VisualizationSavedObjectAttributes;

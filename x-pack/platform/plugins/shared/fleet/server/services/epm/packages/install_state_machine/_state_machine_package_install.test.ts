@@ -55,10 +55,9 @@ vi.mock('./state_machine');
 vi.mock('../install');
 vi.mock('./steps');
 
-const mockedInstallIndexTemplatesAndPipelines =
-  installIndexTemplatesAndPipelines as MockedFunction<
-    typeof installIndexTemplatesAndPipelines
-  >;
+const mockedInstallIndexTemplatesAndPipelines = installIndexTemplatesAndPipelines as MockedFunction<
+  typeof installIndexTemplatesAndPipelines
+>;
 const mockedUpdateCurrentWriteIndices = updateCurrentWriteIndices as MockedFunction<
   typeof updateCurrentWriteIndices
 >;

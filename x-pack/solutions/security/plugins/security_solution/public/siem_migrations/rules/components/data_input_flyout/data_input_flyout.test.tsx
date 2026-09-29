@@ -25,7 +25,7 @@ const mockStartMigration = vi.fn();
 const mockShowModal = vi.fn();
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useGeneratedHtmlId: vi.fn(() => 'generated-id'),
@@ -33,50 +33,50 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            rules: {
-              api: {
-                getMissingResources: vi.fn(),
-              },
-              telemetry: {
-                reportSetupLookupNameCopied: vi.fn(),
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          rules: {
+            api: {
+              getMissingResources: vi.fn(),
             },
-          },
-          notifications: {
-            toasts: {
-              addError: vi.fn(),
-              addSuccess: vi.fn(),
-              addWarning: vi.fn(),
-              addInfo: vi.fn(),
-              remove: vi.fn(),
-            },
-          },
-          triggersActionsUi: {
-            actionTypeRegistry: {
-              get: vi.fn().mockReturnValue('Mock Action Type'),
+            telemetry: {
+              reportSetupLookupNameCopied: vi.fn(),
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: {
+          toasts: {
+            addError: vi.fn(),
+            addSuccess: vi.fn(),
+            addWarning: vi.fn(),
+            addInfo: vi.fn(),
+            remove: vi.fn(),
+          },
+        },
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: vi.fn().mockReturnValue('Mock Action Type'),
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => {
-      const mocked = {
-      useGetCurrentUserProfile: () => ({
-        data: { user: { full_name: 'Test User', username: 'testuser' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetCurrentUserProfile: () => ({
+      data: { user: { full_name: 'Test User', username: 'testuser' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_get_missing_resources', async () => {
-  const actual = (await vi.importActual('../../../common/hooks/use_get_missing_resources'));
+  const actual = await vi.importActual('../../../common/hooks/use_get_missing_resources');
   return {
     ...actual,
     useGetMissingResources: () => ({
@@ -88,7 +88,7 @@ vi.mock('../../../common/hooks/use_get_missing_resources', async () => {
 });
 
 vi.mock('../../logic/use_start_migration', async () => {
-  const actual = (await vi.importActual('../../logic/use_start_migration'));
+  const actual = await vi.importActual('../../logic/use_start_migration');
   return {
     ...actual,
     useStartMigration: () => ({
@@ -100,33 +100,33 @@ vi.mock('../../logic/use_start_migration', async () => {
 });
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMissingResources = vi.fn();
 vi.mock('../../../common/hooks/use_missing_resources', () => {
-      const mocked = {
-      useMissingResources: (...args: unknown[]) => mockUseMissingResources(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMissingResources: (...args: unknown[]) => mockUseMissingResources(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../service/hooks/use_enhance_rules', () => {
-      const mocked = {
-      useEnhanceRules: () => ({ enhanceRules: vi.fn(), isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnhanceRules: () => ({ enhanceRules: vi.fn(), isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addError: vi.fn(), addSuccess: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addError: vi.fn(), addSuccess: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_start_rules_migration_modal');
 const useStartRulesMigrationModalMock = useStartRulesMigrationModal as MockedFunction<

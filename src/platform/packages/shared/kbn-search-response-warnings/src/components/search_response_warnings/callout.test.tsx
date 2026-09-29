@@ -20,11 +20,7 @@ const warnings = [searchResponseIncompleteWarningLocalCluster];
 describe('SearchResponseWarningsCallout', () => {
   it('renders the callout when warnings are present', () => {
     render(
-      <SearchResponseWarningsCallout
-        warnings={warnings}
-        isDismissed={false}
-        onDismiss={vi.fn()}
-      />
+      <SearchResponseWarningsCallout warnings={warnings} isDismissed={false} onDismiss={vi.fn()} />
     );
 
     expect(screen.getByTestId('searchResponseWarningsCallout')).toBeInTheDocument();

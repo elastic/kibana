@@ -29,7 +29,7 @@ import {
 import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../../../common/constants';
 
 vi.mock('../../../../filters/filter_store', async () => {
-  const actual = (await vi.importActual('../../../../filters/filter_store'));
+  const actual = await vi.importActual('../../../../filters/filter_store');
   return {
     ...actual,
     isFilterActiveForScope: vi.fn(() => false),

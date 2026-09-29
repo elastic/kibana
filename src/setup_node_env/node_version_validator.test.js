@@ -15,42 +15,40 @@ var INVALID_NODE_JS_VERSION = 'v0.10.0';
 
 describe('NodeVersionValidator', function () {
   it('should run the script WITH error', () =>
-      new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
 
-          var processVersionOverwrite =
-            "Object.defineProperty(process, 'version', { value: '" +
-            INVALID_NODE_JS_VERSION +
-            "', writable: true });";
-          var command =
-            'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
+      var processVersionOverwrite =
+        "Object.defineProperty(process, 'version', { value: '" +
+        INVALID_NODE_JS_VERSION +
+        "', writable: true });";
+      var command =
+        'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
 
-          exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
-            expect(error.code).toBe(1);
-            expect(stderr).toBeDefined();
-            expect(stderr).not.toHaveLength(0);
-            done();
-          });
-        
-      }));
+      exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
+        expect(error.code).toBe(1);
+        expect(stderr).toBeDefined();
+        expect(stderr).not.toHaveLength(0);
+        done();
+      });
+    }));
 
   it('should run the script WITHOUT error', () =>
-      new Promise((resolve, reject) => {
+    new Promise((resolve, reject) => {
       const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
 
-          var processVersionOverwrite =
-            "Object.defineProperty(process, 'version', { value: '" +
-            REQUIRED_NODE_JS_VERSION +
-            "', writable: true });";
-          var command =
-            'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
+      var processVersionOverwrite =
+        "Object.defineProperty(process, 'version', { value: '" +
+        REQUIRED_NODE_JS_VERSION +
+        "', writable: true });";
+      var command =
+        'node -e "' + processVersionOverwrite + "require('./node_version_validator.js')\"";
 
-          exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
-            expect(error).toBeNull();
-            expect(stderr).toBeDefined();
-            expect(stderr).toHaveLength(0);
-            done();
-          });
-        
-      }));
+      exec(command, { cwd: __dirname }, function (error, stdout, stderr) {
+        expect(error).toBeNull();
+        expect(stderr).toBeDefined();
+        expect(stderr).toHaveLength(0);
+        done();
+      });
+    }));
 });

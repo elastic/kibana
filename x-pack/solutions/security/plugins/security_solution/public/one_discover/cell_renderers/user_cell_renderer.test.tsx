@@ -28,63 +28,63 @@ const mockOpenSystemFlyout = vi.fn();
 const mockReportEvent = vi.fn();
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          overlays: { openSystemFlyout: mockOpenSystemFlyout },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        overlays: { openSystemFlyout: mockOpenSystemFlyout },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: vi.fn(), location: { pathname: '/' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: vi.fn(), location: { pathname: '/' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/hooks/use_default_flyout_properties', () => {
-      const mocked = {
-      useDefaultDocumentFlyoutProperties: () => ({
-        ownFocus: false,
-        paddingSize: 'm',
-        resizable: true,
-        size: 's',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultDocumentFlyoutProperties: () => ({
+      ownFocus: false,
+      paddingSize: 'm',
+      resizable: true,
+      size: 's',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/entity/user/main', () => {
-      const mocked = {
-      User: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    User: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => {
-      const mocked = {
-      DataViewManagerBootstrap: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataViewManagerBootstrap: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = {
   overlays: { openSystemFlyout: mockOpenSystemFlyout },

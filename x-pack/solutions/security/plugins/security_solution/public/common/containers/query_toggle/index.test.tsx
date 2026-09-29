@@ -25,11 +25,11 @@ const mockRouteSpy: RouteSpyState = {
 };
 vi.mock('../../lib/kibana');
 vi.mock('../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: () => [mockRouteSpy],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: () => [mockRouteSpy],
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useQueryToggle', () => {
   let result: RenderHookResult<QueryToggle, unknown>['result'];

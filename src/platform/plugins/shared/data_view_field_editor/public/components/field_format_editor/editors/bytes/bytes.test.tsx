@@ -19,11 +19,11 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { screen } from '@testing-library/react';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      context: (await vi.importActual('@kbn/kibana-react-plugin/public/context')).context,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    context: (await vi.importActual('@kbn/kibana-react-plugin/public/context')).context,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fieldType = 'number';
 

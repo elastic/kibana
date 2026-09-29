@@ -50,10 +50,9 @@ const mockBulkUpsertBatch = bulkUpsertBatch as MockedFunction<typeof bulkUpsertB
 const mockSoftDeleteOmittedUsers = softDeleteOmittedUsers as MockedFunction<
   typeof softDeleteOmittedUsers
 >;
-const mockCreatePrivmonIndexService =
-  mockIndexModule.createPrivmonIndexService as MockedFunction<
-    typeof mockIndexModule.createPrivmonIndexService
-  >;
+const mockCreatePrivmonIndexService = mockIndexModule.createPrivmonIndexService as MockedFunction<
+  typeof mockIndexModule.createPrivmonIndexService
+>;
 
 describe('CSV Upload Service', () => {
   let mockDataClient: PrivilegeMonitoringDataClient;

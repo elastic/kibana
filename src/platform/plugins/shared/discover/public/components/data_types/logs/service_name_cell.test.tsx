@@ -36,7 +36,7 @@ const core = {
 };
 
 vi.mock('../../../hooks/use_discover_services', async () => {
-  const originalModule = (await vi.importActual('../../../hooks/use_discover_services'));
+  const originalModule = await vi.importActual('../../../hooks/use_discover_services');
   return {
     ...originalModule,
     useDiscoverServices: () => ({ core, share: {} }),

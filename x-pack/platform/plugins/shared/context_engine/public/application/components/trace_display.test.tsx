@@ -16,11 +16,11 @@ import { TraceDisplay } from './trace_display';
 const mockUseAgentBuilderAgents = vi.fn();
 
 vi.mock('../hooks/use_agent_builder_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderDisplay = (trace: React.ComponentProps<typeof TraceDisplay>['trace']) =>
   render(

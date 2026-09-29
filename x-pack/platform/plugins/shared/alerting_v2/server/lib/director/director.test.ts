@@ -23,11 +23,11 @@ import { createExecutionContext } from '../execution_context';
 const testExecutionContext = createExecutionContext(new AbortController().signal);
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'mocked-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'mocked-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The existing precondition-matrix tests default `last_lifecycle_action_type`
 // to `null` — no user has issued activate/deactivate on the group. Tests that

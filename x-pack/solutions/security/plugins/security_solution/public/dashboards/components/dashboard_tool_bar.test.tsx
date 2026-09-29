@@ -24,7 +24,7 @@ import type { DashboardInternalApi } from '@kbn/dashboard-plugin/public/dashboar
 const mockDashboardTopNav = DashboardTopNav as Mock;
 
 vi.mock('../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../common/lib/kibana'));
+  const actual = await vi.importActual('../../common/lib/kibana');
   return {
     ...actual,
     useNavigation: vi.fn(),
@@ -32,15 +32,15 @@ vi.mock('../../common/lib/kibana', async () => {
   };
 });
 vi.mock('../../common/components/link_to', () => {
-      const mocked = { useGetSecuritySolutionUrl: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useGetSecuritySolutionUrl: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/dashboard-plugin/public', () => {
-      const mocked = {
-      DashboardTopNav: vi.fn(() => <div data-test-subj="dashboard-top-nav" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardTopNav: vi.fn(() => <div data-test-subj="dashboard-top-nav" />),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockCore = coreMock.createStart();
 const mockNavigateTo = vi.fn();
 const mockGetAppUrl = vi.fn();

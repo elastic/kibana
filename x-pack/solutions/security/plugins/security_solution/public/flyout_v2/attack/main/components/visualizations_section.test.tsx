@@ -14,62 +14,62 @@ import { VisualizationsSection } from './visualizations_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/expandable_section', () => {
-      const mocked = {
-      ExpandableSection: ({
-        title,
-        children,
-        'data-test-subj': dataTestSubj,
-      }: {
-        title: React.ReactNode;
-        children: React.ReactNode;
-        'data-test-subj'?: string;
-      }) => (
-        <section data-test-subj={dataTestSubj}>
-          <div>{title}</div>
-          {children}
-        </section>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpandableSection: ({
+      title,
+      children,
+      'data-test-subj': dataTestSubj,
+    }: {
+      title: React.ReactNode;
+      children: React.ReactNode;
+      'data-test-subj'?: string;
+    }) => (
+      <section data-test-subj={dataTestSubj}>
+        <div>{title}</div>
+        {children}
+      </section>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../attack_discovery/pages/results/attack_discovery_panel/tabs/attack_discovery_tab/attack/attack_chain',
   () => {
-      const mocked = {
-        AttackChain: ({ attackTactics }: { attackTactics: string[] | undefined }) => (
-          <div data-test-subj="attack-chain" data-tactics={JSON.stringify(attackTactics)} />
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AttackChain: ({ attackTactics }: { attackTactics: string[] | undefined }) => (
+        <div data-test-subj="attack-chain" data-tactics={JSON.stringify(attackTactics)} />
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('./section_panel', () => {
-      const mocked = {
-      SectionPanel: ({ title, children }: { title: React.ReactNode; children: React.ReactNode }) => (
-        <div data-test-subj="section-panel">
-          <div>{title}</div>
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SectionPanel: ({ title, children }: { title: React.ReactNode; children: React.ReactNode }) => (
+      <div data-test-subj="section-panel">
+        <div>{title}</div>
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseExpandSection = vi.mocked(useExpandSection);
 

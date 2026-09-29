@@ -27,11 +27,11 @@ import {
 vi.mock('../app_context');
 vi.mock('../agent_policy');
 vi.mock('../epm/packages/cache', () => {
-      const mocked = {
-      runWithCache: vi.fn((fn: () => Promise<unknown>) => fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runWithCache: vi.fn((fn: () => Promise<unknown>) => fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAgentPolicyService = vi.mocked(agentPolicyService);
 const mockedAppContextService = vi.mocked(appContextService);

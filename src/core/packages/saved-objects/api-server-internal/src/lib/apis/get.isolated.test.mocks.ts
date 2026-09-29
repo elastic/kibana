@@ -14,7 +14,7 @@ export const isFoundGetResponseMock = vi.fn();
 export const rawDocExistsInNamespaceMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     isFoundGetResponse: isFoundGetResponseMock,

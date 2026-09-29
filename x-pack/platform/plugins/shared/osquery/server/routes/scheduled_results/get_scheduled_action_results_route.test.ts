@@ -21,11 +21,12 @@ import { OSQUERY_SEARCH_STRATEGY } from '../../search_strategy/constants';
 import { getScheduledActionResultsRoute } from './get_scheduled_action_results_route';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const ROUTE_PATH = '/api/osquery/scheduled_results/{scheduleId}/{executionCount}';
 
@@ -82,10 +83,7 @@ const createMockScheduledResponse = ({
   inspect: { dsl: [] },
 });
 
-const createMockContext = (
-  mockSearchFn: Mock,
-  soClientOverrides?: Record<string, Mock>
-) => {
+const createMockContext = (mockSearchFn: Mock, soClientOverrides?: Record<string, Mock>) => {
   const mockCoreContext = coreMock.createRequestHandlerContext();
 
   if (soClientOverrides) {
@@ -208,9 +206,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('space ID resolution', () => {
     it('should pass resolved space ID to search strategy', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         isCpsActive: vi.fn().mockResolvedValue(false),
@@ -236,9 +232,7 @@ describe('getScheduledActionResultsRoute', () => {
     });
 
     it('should fall back to default space when getActiveSpace is absent', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         isCpsActive: vi.fn().mockResolvedValue(false),
@@ -264,9 +258,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('CPS strict space scoping', () => {
     it('passes matchMissingSpaceId false to the search strategy when CPS is enabled', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
       const mockCpsSearch = vi.fn().mockReturnValue({ search: mockSearchFn });
 
       const mockOsqueryContext = {
@@ -337,9 +329,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('integration namespace scoping', () => {
     it('passes resolved integration namespaces to the search strategy', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         isCpsActive: vi.fn().mockResolvedValue(false),
@@ -369,9 +359,7 @@ describe('getScheduledActionResultsRoute', () => {
     });
 
     it('passes undefined namespaces when Fleet resolves none', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         isCpsActive: vi.fn().mockResolvedValue(false),
@@ -592,9 +580,7 @@ describe('getScheduledActionResultsRoute', () => {
     });
 
     it('should skip pack lookup when packId is empty', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const soGet = vi.fn();
 
@@ -626,9 +612,7 @@ describe('getScheduledActionResultsRoute', () => {
 
   describe('pagination and sorting', () => {
     it('should use default values when query params are not provided', async () => {
-      const mockSearchFn = vi
-        .fn()
-        .mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
+      const mockSearchFn = vi.fn().mockReturnValue(of(createMockScheduledResponse({ packId: '' })));
 
       const mockOsqueryContext = {
         isCpsActive: vi.fn().mockResolvedValue(false),

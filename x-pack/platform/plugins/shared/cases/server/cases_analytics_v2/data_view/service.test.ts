@@ -697,9 +697,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
 
       await service.refreshForSpace(deps);
 
-      expect((internalSoClient.find as Mock).mock.calls.length).toBeGreaterThan(
-        fetchesAfterEnsure
-      );
+      expect((internalSoClient.find as Mock).mock.calls.length).toBeGreaterThan(fetchesAfterEnsure);
     });
 
     it('runs the data view update when the recomputed snake-key set differs from the cached one', async () => {
@@ -918,9 +916,7 @@ describe('CasesAnalyticsV2DataViewService', () => {
       expect(dvService.get).toHaveBeenCalledTimes(1);
       expect(dvService.createSavedObject).toHaveBeenCalledTimes(1);
       if (childLogger) {
-        const debugCalls = (childLogger.debug as Mock).mock.calls.map(
-          ([msg]: [string]) => msg
-        );
+        const debugCalls = (childLogger.debug as Mock).mock.calls.map(([msg]: [string]) => msg);
         expect(
           debugCalls.some((m) => m.includes('bootstrap cache expired') && m.includes(spaceId))
         ).toBe(true);

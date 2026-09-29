@@ -36,7 +36,7 @@ const SOME_MIGRATION_RESULT: MigrationResult = {
 };
 
 vi.mock('./migrations_state_action_machine', async () => {
-  const actual = (await vi.importActual('./migrations_state_action_machine'));
+  const actual = await vi.importActual('./migrations_state_action_machine');
   return {
     ...actual,
     migrationStateActionMachine: vi.fn(() => Promise.resolve(SOME_MIGRATION_RESULT)),
@@ -44,7 +44,7 @@ vi.mock('./migrations_state_action_machine', async () => {
 });
 
 vi.mock('./initial_state', async () => {
-  const actual = (await vi.importActual('./initial_state'));
+  const actual = await vi.importActual('./initial_state');
   return {
     ...actual,
     createInitialState: vi.fn(actual.createInitialState),
@@ -52,7 +52,7 @@ vi.mock('./initial_state', async () => {
 });
 
 vi.mock('./next', async () => {
-  const actual = (await vi.importActual('./next'));
+  const actual = await vi.importActual('./next');
   return {
     ...actual,
     next: vi.fn(actual.next),
@@ -89,8 +89,8 @@ describe('runResilientMigrator', () => {
     });
 
     // store the created initial state
-    initialState = (createInitialState as MockedFunction<typeof createInitialState>).mock
-      .results[0].value;
+    initialState = (createInitialState as MockedFunction<typeof createInitialState>).mock.results[0]
+      .value;
 
     // store the generated "next" function
     nextFunc = (next as MockedFunction<typeof next>).mock.results[0].value;

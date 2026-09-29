@@ -23,11 +23,11 @@ import { TimelineId } from '../../../../../common/types/timeline';
 vi.mock('../../../../timelines/components/open_timeline/use_update_timeline');
 vi.mock('../../../../timelines/hooks/use_create_timeline');
 vi.mock('../actions', () => {
-      const mocked = {
-      sendBulkEventsToTimelineAction: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendBulkEventsToTimelineAction: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUpdateTimeline = useUpdateTimeline as Mock;
 const mockUseCreateTimeline = useCreateTimeline as Mock;

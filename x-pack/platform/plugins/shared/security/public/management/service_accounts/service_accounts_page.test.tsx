@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { screen, waitFor } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';

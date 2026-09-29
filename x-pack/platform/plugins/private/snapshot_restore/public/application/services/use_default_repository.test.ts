@@ -15,12 +15,12 @@ const mockGetDefaultRepository = vi.fn();
 const mockSetDefaultRepository = vi.fn();
 
 vi.mock('./http/repository_requests', () => {
-      const mocked = {
-      getDefaultRepository: (...args: unknown[]) => mockGetDefaultRepository(...args),
-      setDefaultRepository: (...args: unknown[]) => mockSetDefaultRepository(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultRepository: (...args: unknown[]) => mockGetDefaultRepository(...args),
+    setDefaultRepository: (...args: unknown[]) => mockSetDefaultRepository(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDefaultRepository', () => {
   beforeEach(() => {

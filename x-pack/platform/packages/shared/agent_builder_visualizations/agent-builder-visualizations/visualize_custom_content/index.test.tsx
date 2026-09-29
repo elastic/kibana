@@ -15,32 +15,32 @@ import { VisualizeCustomContent } from '.';
 import type { VisualizationServices } from '../services';
 
 vi.mock('@kbn/custom-content-renderer', () => {
-      const mocked = {
-      CustomContentComponent: () => <span data-test-subj="custom-content" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomContentComponent: () => <span data-test-subj="custom-content" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/use_vis_preview_unified_search', () => {
-      const mocked = {
-      useVisPreviewUnifiedSearch: () => ({
-        searchBarProps: {},
-        effectiveTimeRange: { from: 'now-15m', to: 'now' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useVisPreviewUnifiedSearch: () => ({
+      searchBarProps: {},
+      effectiveTimeRange: { from: 'now-15m', to: 'now' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedOnSave: ((args: Record<string, unknown>) => void) | undefined;
 vi.mock('@kbn/presentation-util-plugin/public', () => {
-      const mocked = {
-      SavedObjectSaveModalDashboard: (props: { onSave: (args: Record<string, unknown>) => void }) => {
-        capturedOnSave = props.onSave;
-        return <span data-test-subj="save-modal" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedObjectSaveModalDashboard: (props: { onSave: (args: Record<string, unknown>) => void }) => {
+      capturedOnSave = props.onSave;
+      return <span data-test-subj="save-modal" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const navigateToWithEmbeddablePackages = vi.fn();
 

@@ -17,14 +17,14 @@ import {
 } from '../../../../helpers';
 
 vi.mock('../../../../helpers', () => {
-      const mocked = {
-      showEmptyPrompt: vi.fn().mockReturnValue(false),
-      showFailurePrompt: vi.fn().mockReturnValue(false),
-      showNoAlertsPrompt: vi.fn().mockReturnValue(false),
-      showWelcomePrompt: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    showEmptyPrompt: vi.fn().mockReturnValue(false),
+    showFailurePrompt: vi.fn().mockReturnValue(false),
+    showNoAlertsPrompt: vi.fn().mockReturnValue(false),
+    showWelcomePrompt: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultArgs = {
   aiConnectorsCount: 0,

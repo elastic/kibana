@@ -25,18 +25,18 @@ import * as i18n from './translations';
 import * as buildDiagnosticReportModule from '../diagnostic_report/helpers/build_diagnostic_report';
 
 vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenChat = vi.fn();
 const mockReportEvent = vi.fn();

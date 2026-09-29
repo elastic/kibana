@@ -32,7 +32,9 @@ vi.mock('../../../../hooks/timeline/use_open_timeline_in_new_tab');
 const openAdHocTimelineInNewTab = vi.fn();
 
 vi.mock('../../../event_details/investigate_in_timeline_button', async () => {
-  const originalModule = (await vi.importActual('../../../event_details/investigate_in_timeline_button'));
+  const originalModule = await vi.importActual(
+    '../../../event_details/investigate_in_timeline_button'
+  );
   return {
     ...originalModule,
     InvestigateInTimelineButton: function InvestigateInTimelineButton(

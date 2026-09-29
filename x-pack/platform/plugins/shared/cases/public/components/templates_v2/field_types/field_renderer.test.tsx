@@ -25,22 +25,22 @@ import { buildInitialDefaultValues, FieldsRenderer, TemplateFieldRenderer } from
 import { controlRegistry } from './field_types_registry';
 
 vi.mock('../../field_library/hooks/use_resolved_fields', () => {
-      const mocked = {
-      useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
-        // Inline fields have `control`; ref fields have `$ref` without `control`
-        resolvedFields: fields.filter((f) => 'control' in f),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
+      // Inline fields have `control`; ref fields have `$ref` without `control`
+      resolvedFields: fields.filter((f) => 'control' in f),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: () => ({ owner: ['cases'], permissions: { update: true } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: () => ({ owner: ['cases'], permissions: { update: true } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Template with a required field whose show_when condition is false by default

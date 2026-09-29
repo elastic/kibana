@@ -12,14 +12,14 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import { RulePageNameInput } from './rule_page_name_input';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
 const dispatch = vi.fn();
 

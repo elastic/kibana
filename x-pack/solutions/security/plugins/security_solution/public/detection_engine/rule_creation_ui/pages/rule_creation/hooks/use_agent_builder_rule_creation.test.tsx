@@ -33,19 +33,19 @@ vi.mock('../../../../../common/hooks/use_app_toasts');
 
 const mockFormatRule = vi.fn();
 vi.mock('../helpers', () => {
-      const mocked = {
-      formatRule: (...args: unknown[]) => mockFormatRule(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatRule: (...args: unknown[]) => mockFormatRule(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetStepsData = vi.fn();
 vi.mock('../../../../common/helpers', () => {
-      const mocked = {
-      getStepsData: (...args: unknown[]) => mockGetStepsData(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getStepsData: (...args: unknown[]) => mockGetStepsData(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SYNC_DEBOUNCE_MS = 500;
 

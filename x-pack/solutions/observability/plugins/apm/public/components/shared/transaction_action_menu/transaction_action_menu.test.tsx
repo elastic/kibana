@@ -80,11 +80,11 @@ const apmContextMock = {
 } as unknown as ApmPluginContextValue;
 
 vi.mock('../../../hooks/use_profiling_integration_setting', () => {
-      const mocked = {
-      useProfilingPluginSetting: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfilingPluginSetting: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const history = createMemoryHistory();
 history.replace(

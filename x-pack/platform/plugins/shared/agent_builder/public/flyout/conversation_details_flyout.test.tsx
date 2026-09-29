@@ -32,7 +32,7 @@ import {
 vi.mock('../application/hooks/use_conversation');
 vi.mock('../application/hooks/use_agent_builder_service');
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const { createElement } = require('react');
   return { ...actual, EuiFlyout: vi.fn((props) => createElement(actual.EuiFlyout, props)) };
 });

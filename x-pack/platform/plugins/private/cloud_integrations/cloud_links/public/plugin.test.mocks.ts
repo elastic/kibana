@@ -10,8 +10,8 @@ import { vi } from 'vitest';
 export const maybeAddCloudLinksMock = vi.fn();
 
 vi.doMock('./maybe_add_cloud_links', () => {
-      const mocked = {
-      maybeAddCloudLinks: maybeAddCloudLinksMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    maybeAddCloudLinks: maybeAddCloudLinksMock,
+  };
+  return { ...mocked, default: mocked };
+});

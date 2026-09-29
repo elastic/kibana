@@ -26,12 +26,12 @@ import {
 import { reportStringLengthViolation } from '@kbn/schema-string-helpers';
 
 vi.mock('@kbn/schema-string-helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/schema-string-helpers')),
-      reportStringLengthViolation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/schema-string-helpers')),
+    reportStringLengthViolation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => vi.clearAllMocks());
 
@@ -135,9 +135,7 @@ test('exposes helpers on schema and composes with optional fields', () => {
 });
 
 test('preserves custom validation, coercion, defaults and metadata in reporting mode', () => {
-  const validate = vi.fn((value: string) =>
-    value.startsWith('x') ? 'invalid prefix' : undefined
-  );
+  const validate = vi.fn((value: string) => (value.startsWith('x') ? 'invalid prefix' : undefined));
   const reporting = schema.savedObjectId.warn({
     maxLength: 2,
     validate,

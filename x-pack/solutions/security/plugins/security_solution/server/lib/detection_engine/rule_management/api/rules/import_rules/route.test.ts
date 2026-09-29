@@ -31,17 +31,17 @@ import {
 import { importRulesRoute } from './route';
 
 vi.mock('../../../../../../endpoint/services', () => {
-      const mocked = {
-      validateRuleImportResponseActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateRuleImportResponseActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client', () => {
-      const mocked = {
-      createPrebuiltRuleAssetsClient: vi.fn(() => 'assets-client'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPrebuiltRuleAssetsClient: vi.fn(() => 'assets-client'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../prebuilt_rules/logic/integrations/ensure_latest_rules_package_installed');
 vi.mock('../../../logic/import/action_connectors/import_rule_action_connectors');
 vi.mock('../../../logic/import/action_connectors/validate_rule_actions');
@@ -53,9 +53,7 @@ const stream = createPromiseFromRuleImportStream as MockedFunction<
   typeof createPromiseFromRuleImportStream
 >;
 const exceptions = importRuleExceptions as MockedFunction<typeof importRuleExceptions>;
-const connectors = importRuleActionConnectors as MockedFunction<
-  typeof importRuleActionConnectors
->;
+const connectors = importRuleActionConnectors as MockedFunction<typeof importRuleActionConnectors>;
 const dedupe = getTupleDuplicateErrorsAndUniqueRules as MockedFunction<
   typeof getTupleDuplicateErrorsAndUniqueRules
 >;

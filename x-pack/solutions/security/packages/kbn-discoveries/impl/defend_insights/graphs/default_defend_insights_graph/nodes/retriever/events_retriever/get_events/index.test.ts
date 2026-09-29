@@ -21,13 +21,13 @@ import { mockAnonymizedEventsReplacements } from '../../../../mock/mock_anonymiz
 import { getAnonymizedEvents } from '.';
 
 vi.mock('@kbn/elastic-assistant-common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/elastic-assistant-common')),
-      getRawDataOrDefault: vi.fn(),
-      transformRawData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/elastic-assistant-common')),
+    getRawDataOrDefault: vi.fn(),
+    transformRawData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockEsClient = () => {
   return {

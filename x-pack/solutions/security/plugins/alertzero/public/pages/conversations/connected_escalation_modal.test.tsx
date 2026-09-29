@@ -25,42 +25,40 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ConnectedEscalationModal } from './connected_escalation_modal';
 
 vi.mock('@kbn/agentic-investigations-plugin/public', () => {
-      const mocked = {
-      useListEscalations: vi.fn(),
-      useCreateEscalation: vi.fn(),
-      useAttachToEscalation: vi.fn(),
-      useCurrentUserProfile: vi.fn(),
-      useSuggestUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useListEscalations: vi.fn(),
+    useCreateEscalation: vi.fn(),
+    useAttachToEscalation: vi.fn(),
+    useCurrentUserProfile: vi.fn(),
+    useSuggestUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/user-profile-components', () => {
-      const mocked = {
-      getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
-      UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUserDisplayName: (user: { username?: string }) => user?.username ?? '',
+    UserProfilesSelectable: () => <div data-test-subj="escalationModalCollaboratorPicker" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-http-browser', () => {
-      const mocked = {
-      isHttpFetchError: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isHttpFetchError: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseListEscalations = useListEscalations as MockedFunction<typeof useListEscalations>;
-const mockUseCreateEscalation = useCreateEscalation as MockedFunction<
-  typeof useCreateEscalation
->;
+const mockUseCreateEscalation = useCreateEscalation as MockedFunction<typeof useCreateEscalation>;
 const mockUseAttachToEscalation = useAttachToEscalation as MockedFunction<
   typeof useAttachToEscalation
 >;

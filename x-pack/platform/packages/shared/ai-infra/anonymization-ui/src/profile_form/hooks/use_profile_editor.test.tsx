@@ -14,11 +14,11 @@ import { useProfileForm } from '../../common/hooks/use_profile_form';
 import { useProfileEditor } from './use_profile_editor';
 
 vi.mock('../../common/hooks/use_profile_form', () => {
-      const mocked = {
-      useProfileForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfileForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseFormController = {
   values: {
@@ -70,9 +70,9 @@ const createClient = () => ({
 describe('useProfileEditor', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .mocked(useProfileForm)
-      .mockReturnValue(baseFormController as ReturnType<typeof useProfileForm>);
+    vi.mocked(useProfileForm).mockReturnValue(
+      baseFormController as ReturnType<typeof useProfileForm>
+    );
   });
 
   it('loads profile on mount when profileId is provided', async () => {

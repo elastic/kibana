@@ -21,31 +21,31 @@ const mockGetPercentageModeConfig = vi.fn();
 const mockGetPalette = vi.fn();
 
 vi.mock('../services', () => {
-      const mocked = {
-      getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/visualizations-plugin/public', () => {
-      const mocked = {
-      getConvertToLensModule: async () => ({
-        getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
-        getPercentageColumnFormulaColumn: vi.fn(() => mockGetPercentageColumnFormulaColumn()),
-        getPercentageModeConfig: vi.fn(() => mockGetPercentageModeConfig()),
-        getPalette: vi.fn(() => mockGetPalette()),
-      }),
-      getDataViewByIndexPatternId: vi.fn(() => ({ id: 'index-pattern' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConvertToLensModule: async () => ({
+      getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
+      getPercentageColumnFormulaColumn: vi.fn(() => mockGetPercentageColumnFormulaColumn()),
+      getPercentageModeConfig: vi.fn(() => mockGetPercentageModeConfig()),
+      getPalette: vi.fn(() => mockGetPalette()),
+    }),
+    getDataViewByIndexPatternId: vi.fn(() => ({ id: 'index-pattern' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configurations', () => {
-      const mocked = {
-      getConfiguration: vi.fn(() => mockGetConfiguration()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: vi.fn(() => mockGetConfiguration()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const params: VisParams = {
   addTooltip: false,

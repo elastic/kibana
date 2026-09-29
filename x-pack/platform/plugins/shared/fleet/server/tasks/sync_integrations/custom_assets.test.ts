@@ -18,13 +18,13 @@ import {
 } from './custom_assets';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      packagePolicyService: {
-        list: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    packagePolicyService: {
+      list: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 

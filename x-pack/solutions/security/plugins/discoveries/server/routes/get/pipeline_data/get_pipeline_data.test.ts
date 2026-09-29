@@ -20,11 +20,11 @@ import { registerGetPipelineDataRoute, type GetPipelineDataResponse } from './ge
 import { getWorkflowExecutionsTracking } from './helpers/get_workflow_executions_tracking';
 
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 import { extractPipelineAlertData } from './helpers/extract_pipeline_alert_data';
 import { extractPipelineGateData } from './helpers/extract_pipeline_gate_data';
 import { extractPipelineGenerationData } from './helpers/extract_pipeline_generation_data';
@@ -33,53 +33,53 @@ import { computeCombinedAlerts } from './helpers/compute_combined_alerts';
 import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 
 vi.mock('./helpers/get_workflow_executions_tracking', () => {
-      const mocked = {
-      getWorkflowExecutionsTracking: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowExecutionsTracking: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/extract_pipeline_alert_data', () => {
-      const mocked = {
-      extractPipelineAlertData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractPipelineAlertData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/extract_pipeline_gate_data', () => {
-      const mocked = {
-      extractPipelineGateData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractPipelineGateData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/extract_pipeline_generation_data', () => {
-      const mocked = {
-      extractPipelineGenerationData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractPipelineGenerationData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/extract_pipeline_validation_data', () => {
-      const mocked = {
-      extractPipelineValidationData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractPipelineValidationData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/compute_combined_alerts', () => {
-      const mocked = {
-      computeCombinedAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    computeCombinedAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/discoveries/impl/lib/helpers/get_space_id', () => {
-      const mocked = {
-      getSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpaceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetWorkflowExecutionsTracking = getWorkflowExecutionsTracking as MockedFunction<
   typeof getWorkflowExecutionsTracking

@@ -20,11 +20,11 @@ import type { AnalyticsCollection } from '../../../../../common/types/analytics'
 import { AnalyticsCollectionTable } from './analytics_collection_table';
 
 vi.mock('../../utils/find_or_create_data_view', () => {
-      const mocked = {
-      findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnalyticsCollectionTable', () => {
   const analyticsCollections: AnalyticsCollection[] = [

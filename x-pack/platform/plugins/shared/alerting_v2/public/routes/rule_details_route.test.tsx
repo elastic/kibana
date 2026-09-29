@@ -19,25 +19,25 @@ const mockLocators = createMockLocators();
 
 const mockUseFetchRule = vi.fn();
 vi.mock('../hooks/use_fetch_rule', () => {
-      const mocked = {
-      useFetchRule: (...args: unknown[]) => mockUseFetchRule(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRule: (...args: unknown[]) => mockUseFetchRule(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/rule_details/skeleton', () => {
-      const mocked = {
-      Skeleton: () => <div data-test-subj="skeleton">Loading...</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Skeleton: () => <div data-test-subj="skeleton">Loading...</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/rule_details/rule_detail_page', () => {
-      const mocked = {
-      RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDetailPage: () => <div data-test-subj="ruleDetailPage">Rule detail page</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderRoute = (ruleId = 'rule-1') =>
   render(

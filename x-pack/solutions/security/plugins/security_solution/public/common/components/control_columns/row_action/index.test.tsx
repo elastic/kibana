@@ -33,11 +33,11 @@ import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 vi.mock('../../../hooks/use_is_new_flyout_enabled');
 vi.mock('../../../../flyout_v2/use_flyout_api');
 vi.mock('../../../hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
   const original = require('react-redux-v7');
@@ -55,7 +55,7 @@ vi.mock('@kbn/expandable-flyout');
 
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../lib/kibana', async () => {
-  const original = (await vi.importActual('../../../lib/kibana'));
+  const original = await vi.importActual('../../../lib/kibana');
   return {
     ...original,
     useKibana: () => ({

@@ -20,39 +20,43 @@ import { ROLE_CAPABILITIES } from '../__test_helpers__/create_mock_kibana_servic
 const mockPush = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: mockPush }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: mockPush }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 
 vi.mock('../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockCopyMutateAsync = vi.fn().mockResolvedValue(undefined);
 const mockDeleteMutateAsync = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('./use_copy_pack', () => {
-      const mocked = {
-      useCopyPack: () => ({ mutateAsync: mockCopyMutateAsync, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCopyPack: () => ({ mutateAsync: mockCopyMutateAsync, isLoading: false }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_delete_pack', () => {
-      const mocked = {
-      useDeletePack: () => ({ mutateAsync: mockDeleteMutateAsync, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeletePack: () => ({ mutateAsync: mockDeleteMutateAsync, isLoading: false }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const setupKibana = (capabilities: Partial<OsqueryCapabilities> = {}) => {
   mockUseKibana.mockReturnValue({

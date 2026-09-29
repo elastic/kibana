@@ -47,25 +47,25 @@ describe('updateAgentPolicySpaces', () => {
     ] as any);
     appContextService.start(createAppContextStartContractMock());
 
-    vi
-      .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension())
-      .updateObjectsSpaces.mockResolvedValue({ objects: [] });
+    vi.mocked(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension()
+    ).updateObjectsSpaces.mockResolvedValue({ objects: [] });
 
-    vi
-      .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension())
-      .find.mockResolvedValue({
-        total: 1,
-        page: 1,
-        per_page: 100,
-        saved_objects: [
-          {
-            id: 'token1',
-            attributes: {
-              namespaces: ['default'],
-            },
-          } as any,
-        ],
-      });
+    vi.mocked(
+      appContextService.getInternalUserSOClientWithoutSpaceExtension()
+    ).find.mockResolvedValue({
+      total: 1,
+      page: 1,
+      per_page: 100,
+      saved_objects: [
+        {
+          id: 'token1',
+          attributes: {
+            namespaces: ['default'],
+          },
+        } as any,
+      ],
+    });
 
     vi.mocked(getAgentsByKuery).mockResolvedValue({
       agents: [],
@@ -236,9 +236,9 @@ describe('updateAgentPolicySpaces', () => {
   });
 
   it('throw when policy name already exists on another space', async () => {
-    vi
-      .mocked(mockValidatePackagePoliciesUniqueNameAcrossSpaces)
-      .mockRejectedValueOnce(new Error('Name already exists'));
+    vi.mocked(mockValidatePackagePoliciesUniqueNameAcrossSpaces).mockRejectedValueOnce(
+      new Error('Name already exists')
+    );
 
     const agentPolicy = {
       id: 'policy1',

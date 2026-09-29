@@ -23,14 +23,14 @@ const mockQuery = {
 };
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        path: { serviceName: 'opbeans-java' },
-        query: mockQuery,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      path: { serviceName: 'opbeans-java' },
+      query: mockQuery,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RedirectFocusedServiceMapToGlobal', () => {
   it('redirects to the global service map with service.name controlSelections', () => {

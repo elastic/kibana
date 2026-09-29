@@ -11,17 +11,17 @@ import { setMockActions, setMockValues } from '../../../../../__mocks__/kea_logi
 import { connectorIndex } from '../../../../__mocks__/view_index.mock';
 
 vi.mock('./default_pipeline_item', () => {
-      const mocked = {
-      DefaultPipelineItem: () => <div data-test-subj="defaultPipelineItem" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultPipelineItem: () => <div data-test-subj="defaultPipelineItem" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./custom_pipeline_item', () => {
-      const mocked = {
-      CustomPipelineItem: () => <div data-test-subj="customPipelineItem" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomPipelineItem: () => <div data-test-subj="customPipelineItem" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

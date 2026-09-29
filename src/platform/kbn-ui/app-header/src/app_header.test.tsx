@@ -22,11 +22,11 @@ import { APP_HEADER_TEST_SUBJECTS } from './test_subjects';
 let mockApplicationBreakpoint: string | undefined;
 
 vi.mock('@kbn/ui-chrome-layout', () => {
-      const mocked = {
-      useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ENHANCE_TOOLTIP = 'Improve the content and style of your dashboard using AI';
 

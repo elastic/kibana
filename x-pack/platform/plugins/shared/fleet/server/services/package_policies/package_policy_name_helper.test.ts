@@ -14,13 +14,13 @@ import { packagePolicyService } from '../package_policy';
 import { incrementPackageName, incrementPackagePolicyCopyName } from './package_policy_name_helper';
 
 vi.mock('..', () => {
-      const mocked = {
-      appContextService: {
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Package policy name helper', () => {
   describe('increment package name', () => {

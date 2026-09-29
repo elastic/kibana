@@ -20,18 +20,18 @@ import {
 } from '../../../../../state';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 const mockSelectorReturns = new Map<unknown, unknown>();

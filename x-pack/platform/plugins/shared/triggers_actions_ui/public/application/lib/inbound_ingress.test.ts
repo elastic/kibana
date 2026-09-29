@@ -18,7 +18,7 @@ import {
 } from './inbound_ingress';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeIsDual: vi.fn((id: string) => id === '.dual'),

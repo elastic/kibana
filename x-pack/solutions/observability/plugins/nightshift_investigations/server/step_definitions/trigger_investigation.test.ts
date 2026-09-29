@@ -15,11 +15,11 @@ import type { GetInvestigationsClient } from '../routes/types';
 import { triggerInvestigationStepDefinition } from './trigger_investigation';
 
 vi.mock('@kbn/workflows-extensions/server', () => {
-      const mocked = {
-      createServerStepDefinition: vi.fn((definition) => definition),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createServerStepDefinition: vi.fn((definition) => definition),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const request = {} as KibanaRequest;
 const createContext = (input: Record<string, unknown>) =>

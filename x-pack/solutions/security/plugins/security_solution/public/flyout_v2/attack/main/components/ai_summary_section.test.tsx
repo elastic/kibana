@@ -15,48 +15,48 @@ import { AISummarySection } from './ai_summary_section';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/expandable_section', () => {
-      const mocked = {
-      ExpandableSection: ({
-        title,
-        children,
-        extraAction,
-        'data-test-subj': dataTestSubj,
-      }: {
-        title: React.ReactNode;
-        children: React.ReactNode;
-        extraAction?: React.ReactNode;
-        'data-test-subj'?: string;
-      }) => (
-        <section data-test-subj={dataTestSubj}>
-          <div>{title}</div>
-          {extraAction}
-          {children}
-        </section>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpandableSection: ({
+      title,
+      children,
+      extraAction,
+      'data-test-subj': dataTestSubj,
+    }: {
+      title: React.ReactNode;
+      children: React.ReactNode;
+      extraAction?: React.ReactNode;
+      'data-test-subj'?: string;
+    }) => (
+      <section data-test-subj={dataTestSubj}>
+        <div>{title}</div>
+        {extraAction}
+        {children}
+      </section>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
-      const mocked = {
-      AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => <div>{markdown}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryMarkdownFormatter: ({ markdown }: { markdown: string }) => <div>{markdown}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseExpandSection = vi.mocked(useExpandSection);
 

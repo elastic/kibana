@@ -14,17 +14,17 @@ import type { MessageEditorInstance } from './use_message_editor';
 import { stripZeroWidthSpaces } from './utils';
 
 vi.mock('../../../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useExperimentalFeatures: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExperimentalFeatures: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./command_menu/use_command_menu_prefetch', () => {
-      const mocked = {
-      useCommandMenuPrefetch: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCommandMenuPrefetch: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const NBSP = ' ';
 

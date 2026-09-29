@@ -15,18 +15,18 @@ import { useCanRunCaseWorkflow } from './use_run_case_workflow';
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../case_view/use_on_refresh_case_view_page', () => {
-      const mocked = {
-      useRefreshCaseViewPage: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRefreshCaseViewPage: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_run_case_workflow', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_run_case_workflow')),
-      useCanRunCaseWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_run_case_workflow')),
+    useCanRunCaseWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCanRunCaseWorkflow = vi.mocked(useCanRunCaseWorkflow);
 

@@ -19,17 +19,17 @@ let mockTelemetryService: { reportEvent: Mock } | undefined = {
 };
 
 vi.mock('../common/hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          get telemetry() {
-            return mockTelemetryService;
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        get telemetry() {
+          return mockTelemetryService;
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <TelemetryContextProvider>{children}</TelemetryContextProvider>

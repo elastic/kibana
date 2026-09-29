@@ -12,14 +12,16 @@ import { getSourceRuleToNaturalLanguageNode } from './source_rule_to_natural_lan
 import type { MigrateRuleConfig, MigrateRuleState } from '../../types';
 
 vi.mock('../../../../../common/task/util/has_unsupported_function', () => {
-      const mocked = {
-      hasUnsupportedFunctions: vi.fn(),
-      UNSUPPORTED_FUNCTIONS: ['UnsupportedFunc_A', 'UnsupportedFunc_B'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasUnsupportedFunctions: vi.fn(),
+    UNSUPPORTED_FUNCTIONS: ['UnsupportedFunc_A', 'UnsupportedFunc_B'],
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { hasUnsupportedFunctions } = (await vi.importMock('../../../../../common/task/util/has_unsupported_function')) as { hasUnsupportedFunctions: Mock };
+const { hasUnsupportedFunctions } = (await vi.importMock(
+  '../../../../../common/task/util/has_unsupported_function'
+)) as { hasUnsupportedFunctions: Mock };
 
 const mockQRadarState = {
   original_rule: {

@@ -92,13 +92,13 @@ function createMockBinaryResponse(data: Uint8Array, contentType: string, status 
 
 // Mock undici
 vi.mock('undici', () => {
-      const mocked = {
-      Agent: vi.fn().mockImplementation((options) => ({
-        _options: options, // Store options for testing
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Agent: vi.fn().mockImplementation((options) => ({
+      _options: options, // Store options for testing
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('KibanaActionStepImpl - Fetcher Configuration', () => {
   let mockStepExecutionRuntime: Mocked<StepExecutionRuntime>;

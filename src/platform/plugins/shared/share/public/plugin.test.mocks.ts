@@ -15,9 +15,9 @@ import { shareMenuManagerMock } from './services/share_menu_manager.mock';
 export const registryMock = shareMenuRegistryMock.create();
 export const managerMock = shareMenuManagerMock.create();
 vi.doMock('./services', () => {
-      const mocked = {
-      ShareRegistry: vi.fn(() => registryMock),
-      ShareMenuManager: vi.fn(() => managerMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ShareRegistry: vi.fn(() => registryMock),
+    ShareMenuManager: vi.fn(() => managerMock),
+  };
+  return { ...mocked, default: mocked };
+});

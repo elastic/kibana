@@ -24,16 +24,16 @@ export const loggingMock = {
 };
 
 vi.doMock('./deprecations', () => {
-      const mocked = {
-      registerConfigDeprecationsInfo: registerConfigDeprecationsInfoMock,
-      registerApiDeprecationsInfo: registerApiDeprecationsInfoMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerConfigDeprecationsInfo: registerConfigDeprecationsInfoMock,
+    registerApiDeprecationsInfo: registerApiDeprecationsInfoMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock('./deprecations_factory', () => {
-      const mocked = {
-      DeprecationsFactory: DeprecationsFactoryMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeprecationsFactory: DeprecationsFactoryMock,
+  };
+  return { ...mocked, default: mocked };
+});

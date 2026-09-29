@@ -12,11 +12,11 @@ import { buildFlyoutNavTitle } from './build_flyout_nav_title';
 const mockGetState = vi.fn();
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      getFlyoutManagerStore: () => ({ getState: mockGetState }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFlyoutManagerStore: () => ({ getState: mockGetState }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const withSession = (session: Record<string, unknown>) => ({ sessions: [session] });
 

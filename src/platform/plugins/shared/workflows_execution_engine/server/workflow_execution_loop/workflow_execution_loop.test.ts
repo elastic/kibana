@@ -23,19 +23,19 @@ vi.mock('elastic-apm-node', () => ({
 }));
 
 vi.mock('./execution_flow_loop', () => {
-      const mocked = {
-      executionFlowLoop: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executionFlowLoop: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./persistence_loop', () => {
-      const mocked = {
-      persistenceLoop: vi.fn().mockResolvedValue(undefined),
-      flushState: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    persistenceLoop: vi.fn().mockResolvedValue(undefined),
+    flushState: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('workflowExecutionLoop', () => {
   const createParams = () => ({

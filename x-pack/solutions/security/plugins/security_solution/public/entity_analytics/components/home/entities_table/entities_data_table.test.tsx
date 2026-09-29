@@ -40,7 +40,7 @@ const capturedProps: {
 } = {};
 
 vi.mock('@kbn/unified-data-table', async () => {
-  const actual = (await vi.importActual('@kbn/unified-data-table'));
+  const actual = await vi.importActual('@kbn/unified-data-table');
   return {
     ...actual,
     UnifiedDataTable: (props: {
@@ -59,31 +59,31 @@ vi.mock('@kbn/unified-data-table', async () => {
 });
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(() => ({
-        openRightPanel: vi.fn(),
-        openFlyout: vi.fn(),
-        closeFlyout: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(() => ({
+      openRightPanel: vi.fn(),
+      openFlyout: vi.fn(),
+      closeFlyout: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: () => ({
-        openEntityFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: () => ({
+      openEntityFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
 vi.mock('../../../../common/components/user_privileges');
@@ -91,15 +91,15 @@ vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_pr
 vi.mock('../../../../common/containers/use_global_time');
 vi.mock('./hooks/use_fetch_grid_data');
 vi.mock('./hooks/use_styles', () => {
-      const mocked = {
-      useStyles: () => ({
-        gridContainer: 'gridContainer',
-        gridProgressBar: 'gridProgressBar',
-        gridStyle: 'gridStyle',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStyles: () => ({
+      gridContainer: 'gridContainer',
+      gridProgressBar: 'gridProgressBar',
+      gridStyle: 'gridStyle',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana');
 
@@ -284,9 +284,7 @@ describe('EntitiesDataTable', () => {
   describe('entity.source column renderer', () => {
     const renderCell = (value: unknown) => {
       const state = createMockState();
-      (state.getRowsFromPages as Mock).mockReturnValue([
-        { flattened: { 'entity.source': value } },
-      ]);
+      (state.getRowsFromPages as Mock).mockReturnValue([{ flattened: { 'entity.source': value } }]);
 
       renderWithProviders(state);
 

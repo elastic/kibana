@@ -83,16 +83,16 @@ const mockAgentlessDeploymentResponse: Partial<AxiosResponse<AgentlessApiDeploym
 const AxiosError = require('axios').AxiosError;
 
 vi.mock('@kbn/server-http-tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/server-http-tools')),
-      SslConfig: vi.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
-        certificate,
-        key,
-        certificateAuthorities: [certificateAuthorities],
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/server-http-tools')),
+    SslConfig: vi.fn().mockImplementation(({ certificate, key, certificateAuthorities }) => ({
+      certificate,
+      key,
+      certificateAuthorities: [certificateAuthorities],
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Agentless Agent service', () => {
   beforeEach(() => {
@@ -134,9 +134,9 @@ describe('Agentless Agent service', () => {
       },
     } as any);
     vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -235,12 +235,13 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isElasticStaffOwned: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isElasticStaffOwned: true,
+    } as any);
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -303,12 +304,13 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+    } as any);
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -412,12 +414,13 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+    } as any);
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -515,12 +518,13 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+    } as any);
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -632,12 +636,13 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+    } as any);
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -758,9 +763,9 @@ describe('Agentless Agent service', () => {
       },
     } as any);
     vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -912,9 +917,10 @@ describe('Agentless Agent service', () => {
         },
       },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: true,
+    } as any);
 
     const deleteAgentlessAgentReturnValue = await agentlessAgentService.deleteAgentlessAgent(
       'mocked-agentless-agent-policy-id'
@@ -955,9 +961,9 @@ describe('Agentless Agent service', () => {
       },
     } as any);
     vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
 
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
@@ -1009,9 +1015,9 @@ describe('Agentless Agent service', () => {
       },
     } as any);
     vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
 
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
@@ -1133,9 +1139,9 @@ describe('Agentless Agent service', () => {
       },
     } as any);
     vi.spyOn(appContextService, 'getCloud').mockReturnValue({ isCloudEnabled: true } as any);
-    vi
-      .spyOn(appContextService, 'getKibanaVersion')
-      .mockReturnValue('mocked-kibana-version-infinite');
+    vi.spyOn(appContextService, 'getKibanaVersion').mockReturnValue(
+      'mocked-kibana-version-infinite'
+    );
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'mocked-fleet-server-id',
       host: 'http://fleetserver:8220',
@@ -1215,9 +1221,10 @@ describe('Agentless Agent service', () => {
       const soClient = getAgentPolicyCreateMock();
       // ignore unrelated unique name constraint
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      vi
-        .spyOn(appContextService, 'getCloud')
-        .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: false } as any);
+      vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+        isCloudEnabled: false,
+        isServerlessEnabled: false,
+      } as any);
       vi.spyOn(appContextService, 'getConfig').mockReturnValue({
         agentless: {
           enabled: true,

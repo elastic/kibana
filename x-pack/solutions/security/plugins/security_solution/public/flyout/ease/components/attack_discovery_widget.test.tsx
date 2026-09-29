@@ -20,19 +20,19 @@ import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_fi
 import type { AttackDiscoveryPanelProps } from './attack_discovery_panel';
 
 vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
-      const mocked = {
-      useFindAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attack_discovery_panel', () => {
-      const mocked = {
-      AttackDiscoveryPanel: ({ attackDiscovery }: AttackDiscoveryPanelProps) => (
-        <h1>{attackDiscovery.title}</h1>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryPanel: ({ attackDiscovery }: AttackDiscoveryPanelProps) => (
+      <h1>{attackDiscovery.title}</h1>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockData = {
   id: '123',

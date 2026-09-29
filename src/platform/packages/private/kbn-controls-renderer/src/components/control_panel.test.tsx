@@ -23,11 +23,11 @@ import { ControlPanel } from './control_panel';
 // Stub the async embeddable renderer: the width/grow assertions read classes that
 // `ControlPanel` renders synchronously from props, independent of the renderer.
 vi.mock('@kbn/embeddable-plugin/public', () => {
-      const mocked = {
-      EmbeddableRenderer: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmbeddableRenderer: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = {
   services: {
@@ -46,11 +46,11 @@ const mockServices = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockImplementation(() => mockServices),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockImplementation(() => mockServices),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Alias required so the jest.mock factory can reference useEffect without triggering
 // Babel's hoisting guard (only `mock`-prefixed names are allowed inside factories).
@@ -61,7 +61,7 @@ const mockUseEffect = React.useEffect;
 let capturedOnApiAvailable: ((api: DefaultEmbeddableApi) => void) | undefined;
 
 vi.mock('@kbn/embeddable-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/embeddable-plugin/public'));
+  const original = await vi.importActual('@kbn/embeddable-plugin/public');
   return {
     ...original,
     EmbeddableRenderer: ({ onApiAvailable, maybeId }: any) => {

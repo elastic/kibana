@@ -16,23 +16,23 @@ import { PersistedState } from '../persisted_state';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 
 vi.mock('./to_ast', () => {
-      const mocked = {
-      toExpressionAst: vi.fn().mockResolvedValue('mock expression'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toExpressionAst: vi.fn().mockResolvedValue('mock expression'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services', () => {
-      const mocked = {
-      getExecutionContext: vi.fn().mockReturnValue({
-        get: vi.fn().mockReturnValue({}),
-      }),
-      getTimeFilter: vi.fn().mockReturnValue({
-        getTime: vi.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getExecutionContext: vi.fn().mockReturnValue({
+      get: vi.fn().mockReturnValue({}),
+    }),
+    getTimeFilter: vi.fn().mockReturnValue({
+      getTime: vi.fn().mockReturnValue({ from: 'now-15m', to: 'now' }),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockVis = (overrides: Partial<Vis<VisParams>> = {}): Vis<VisParams> =>
   ({

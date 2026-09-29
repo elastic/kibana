@@ -21,17 +21,17 @@ import {
 
 vi.mock('../../../../common/hooks/mitre/use_mitre_configuration');
 vi.mock('../api', () => {
-      const mocked = {
-      fetchCoverageOverview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchCoverageOverview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addError: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addError: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMitreConfiguration = useMitreConfiguration as Mock;
 const mockFetchCoverageOverview = fetchCoverageOverview as Mock;

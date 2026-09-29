@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { useLibraryEnabled } from '@kbn/workflows-ui';
 import { WorkflowsEmptyState, WorkflowsEmptyStateReadOnly } from './workflows_empty_state';
 import { TestProvider } from '../../shared/mocks/test_providers';
@@ -18,28 +17,28 @@ import { TestProvider } from '../../shared/mocks/test_providers';
 const mockNavigateToApp = vi.fn();
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            basePath: {
-              prepend: (path: string) => `/mock-base-path${path}`,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          basePath: {
+            prepend: (path: string) => `/mock-base-path${path}`,
           },
-          application: { navigateToApp: mockNavigateToApp },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: { navigateToApp: mockNavigateToApp },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useLibraryEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useLibraryEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLibraryEnabled = vi.mocked(useLibraryEnabled);
 

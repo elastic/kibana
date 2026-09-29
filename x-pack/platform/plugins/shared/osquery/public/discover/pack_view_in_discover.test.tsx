@@ -18,12 +18,13 @@ vi.mock('../packs/use_pack_query_last_results');
 
 const mockViewResultsInDiscoverAction = vi.fn((_props: Record<string, unknown>) => null);
 vi.mock('./view_results_in_discover', () => {
-      const mocked = {
-      ViewResultsInDiscoverAction: (props: Record<string, unknown>) =>
-        mockViewResultsInDiscoverAction(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ViewResultsInDiscoverAction: (props: Record<string, unknown>) =>
+      mockViewResultsInDiscoverAction(props),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const usePackQueryLastResultsMock = usePackQueryLastResults as MockedFunction<
   typeof usePackQueryLastResults

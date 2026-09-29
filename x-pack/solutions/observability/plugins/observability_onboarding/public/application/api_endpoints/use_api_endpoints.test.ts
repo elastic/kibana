@@ -19,7 +19,7 @@ import {
 import { useApiEndpoints } from './use_api_endpoints';
 
 vi.mock('../../hooks/use_fetcher', async () => {
-  const actual = (await vi.importActual('../../hooks/use_fetcher'));
+  const actual = await vi.importActual('../../hooks/use_fetcher');
   return {
     ...actual,
     useFetcher: vi.fn(),
@@ -27,24 +27,23 @@ vi.mock('../../hooks/use_fetcher', async () => {
 });
 
 vi.mock('../shared/use_managed_otlp_service_availability', () => {
-      const mocked = {
-      useManagedOtlpServiceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedOtlpServiceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = useFetcher as MockedFunction<typeof useFetcher>;
-const mockUseManagedOtlpServiceAvailability =
-  useManagedOtlpServiceAvailability as MockedFunction<
-    typeof useManagedOtlpServiceAvailability
-  >;
+const mockUseManagedOtlpServiceAvailability = useManagedOtlpServiceAvailability as MockedFunction<
+  typeof useManagedOtlpServiceAvailability
+>;
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 interface Options {

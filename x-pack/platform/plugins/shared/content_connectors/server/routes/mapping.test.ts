@@ -11,11 +11,11 @@ import type { Mock, Mocked } from 'vitest';
 import type { RequestHandlerContext } from '@kbn/core/server';
 
 vi.mock('../lib/fetch_mapping', () => {
-      const mocked = {
-      fetchMapping: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchMapping: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 import { fetchMapping } from '../lib/fetch_mapping';
 
 import { registerMappingRoute } from './mapping';

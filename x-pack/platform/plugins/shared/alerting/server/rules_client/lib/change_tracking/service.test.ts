@@ -20,11 +20,11 @@ import type { RuleChange, RuleChangeHistorySnapshot } from './types';
 import { ChangeTrackingService } from './service';
 
 vi.mock('@kbn/change-history', () => {
-      const mocked = {
-      ChangeHistoryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangeHistoryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ChangeHistoryClientMock = ChangeHistoryClient as MockedClass<typeof ChangeHistoryClient>;
 
@@ -32,10 +32,7 @@ interface MockChangeHistoryClient {
   isInitialized: Mock<boolean, []>;
   initialize: Mock<Promise<void>, [unknown]>;
   logBulk: Mock<Promise<void>, [unknown, unknown]>;
-  getHistory: Mock<
-    Promise<{ items: unknown[]; total: number }>,
-    [string, string, string, unknown]
-  >;
+  getHistory: Mock<Promise<{ items: unknown[]; total: number }>, [string, string, string, unknown]>;
 }
 
 const createMockClient = (): MockChangeHistoryClient => ({

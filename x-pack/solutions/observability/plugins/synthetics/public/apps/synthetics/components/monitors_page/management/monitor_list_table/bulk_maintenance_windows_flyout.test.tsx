@@ -19,66 +19,66 @@ import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkMaintenanceWindowsFlyout } from './bulk_maintenance_windows_flyout';
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useGetUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useGetUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../state')),
-      fetchBulkUpdateMonitors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../state')),
+    fetchBulkUpdateMonitors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The real field renders an EuiComboBox backed by redux data; a lightweight
 // stand-in keeps these tests focused on the flyout's own apply/remove logic.
 vi.mock('../../../monitor_add_edit/fields/maintenance_windows/maintenance_windows', () => {
-      const mocked = {
-      MaintenanceWindowsField: ({
-        value,
-        onChange,
-      }: {
-        value?: string[];
-        onChange: (val: string[]) => void;
-      }) => (
-        <button data-test-subj="mockMaintenanceWindowsField" onClick={() => onChange(['mw-2'])}>
-          {`selected:${value?.join(',') ?? ''}`}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MaintenanceWindowsField: ({
+      value,
+      onChange,
+    }: {
+      value?: string[];
+      onChange: (val: string[]) => void;
+    }) => (
+      <button data-test-subj="mockMaintenanceWindowsField" onClick={() => onChange(['mw-2'])}>
+        {`selected:${value?.join(',') ?? ''}`}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../monitor_add_edit/fields/maintenance_windows/create_maintenance_windows_btn',
   () => {
-      const mocked = {
-        MaintenanceWindowsLink: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      MaintenanceWindowsLink: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 // Remove mode reads the full window list to resolve id -> title for the
 // applied-windows selector.
 vi.mock('../../../monitor_add_edit/fields/maintenance_windows/use_maintenance_windows', () => {
-      const mocked = {
-      useMaintenanceWindows: () => ({
-        isLoading: false,
-        data: {
-          data: [
-            { id: 'mw-1', title: 'MW One' },
-            { id: 'mw-2', title: 'MW Two' },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMaintenanceWindows: () => ({
+      isLoading: false,
+      data: {
+        data: [
+          { id: 'mw-1', title: 'MW One' },
+          { id: 'mw-2', title: 'MW Two' },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetUrlParamsMock = useGetUrlParams as MockedFunction<typeof useGetUrlParams>;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as MockedFunction<

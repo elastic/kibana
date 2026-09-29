@@ -29,7 +29,7 @@ vi.mock('../../../main/hooks/use_fetch_related_cases');
 
 const mockNavigateToApp = vi.fn();
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...original,
     useKibana: () => ({

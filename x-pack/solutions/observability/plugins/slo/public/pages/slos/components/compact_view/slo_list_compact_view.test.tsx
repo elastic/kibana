@@ -27,11 +27,11 @@ import { useUrlSearchState } from '../../hooks/use_url_search_state';
 import { SloListCompactView } from './slo_list_compact_view';
 
 vi.mock('@kbn/response-ops-rule-form/flyout', () => {
-      const mocked = {
-      RuleFormFlyout: vi.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleFormFlyout: vi.fn(() => <div data-test-subj="add-rule-flyout">Add rule flyout</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_kibana');
 vi.mock('../../../../hooks/use_permissions');
@@ -43,11 +43,11 @@ vi.mock('../../../../context/action_modal');
 vi.mock('../../hooks/use_url_search_state');
 vi.mock('../../../../hooks/use_space');
 vi.mock('../slo_sparkline', () => {
-      const mocked = {
-      SloSparkline: () => <div data-test-subj="sloSparkline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloSparkline: () => <div data-test-subj="sloSparkline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const usePermissionsMock = usePermissions as Mock;

@@ -18,15 +18,15 @@ import { huntForThreat } from '../../services/watches/hunt/tier1/hunt_for_threat
 import type { HuntForThreatServiceResult } from '../../services/watches/hunt/tier1/types';
 
 vi.mock('../../services/watches/hunt/common/resolve_index_scope', async () => {
-  const actual = (await vi.importActual('../../services/watches/hunt/common/resolve_index_scope'));
+  const actual = await vi.importActual('../../services/watches/hunt/common/resolve_index_scope');
   return { ...actual, resolveIndexScope: vi.fn() };
 });
 vi.mock('../../services/watches/hunt/tier1/hunt_for_threat', () => {
-      const mocked = {
-      huntForThreat: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    huntForThreat: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const resolveIndexScopeMock = resolveIndexScope as MockedFunction<typeof resolveIndexScope>;
 const huntForThreatMock = huntForThreat as MockedFunction<typeof huntForThreat>;

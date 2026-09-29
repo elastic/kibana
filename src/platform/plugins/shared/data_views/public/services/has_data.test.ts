@@ -63,9 +63,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = vi
-        .spyOn(http, 'get')
-        .mockImplementation(() => Promise.reject(new Error('Oops')));
+      const spy = vi.spyOn(http, 'get').mockImplementation(() => Promise.reject(new Error('Oops')));
 
       const hasData = new HasData();
       const hasDataService = hasData.start(coreStart, true);
@@ -121,9 +119,7 @@ describe('when calling hasData service', () => {
       const http = coreStart.http;
 
       // Mock getIndices
-      const spy = vi
-        .spyOn(http, 'get')
-        .mockImplementation(() => Promise.reject(new Error('Oops')));
+      const spy = vi.spyOn(http, 'get').mockImplementation(() => Promise.reject(new Error('Oops')));
 
       const hasData = new HasData();
       const hasDataService = hasData.start(coreStart, true);

@@ -56,7 +56,8 @@ describe('accessAgreementApp', () => {
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = (await vi.importMock('./access_agreement_page')).renderAccessAgreementPage;
+    const mockRenderApp = (await vi.importMock('./access_agreement_page'))
+      .renderAccessAgreementPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
+import { vi } from 'vitest';
 
 import type { BuildFlavor } from '@kbn/config';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
@@ -21,56 +20,56 @@ import { rolesManagementApp } from './roles_management_app';
 import { licenseMock } from '../../../common/licensing/index.mock';
 
 vi.mock('./roles_grid', () => {
-      const mocked = {
-      RolesGridPage: ({
-        // props object is too big to include into test snapshot, so we just check for existence of fields we care about
-        buildFlavor,
-        cloudOrgUrl,
-        readOnly,
-        rolesAPIClient,
-      }: RolesGridPageProps) =>
-        `Roles Page: ${JSON.stringify(
-          {
-            buildFlavor,
-            cloudOrgUrl,
-            readOnly,
-            rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
-          },
-      null,
-      '  '
-    )}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RolesGridPage: ({
+      // props object is too big to include into test snapshot, so we just check for existence of fields we care about
+      buildFlavor,
+      cloudOrgUrl,
+      readOnly,
+      rolesAPIClient,
+    }: RolesGridPageProps) =>
+      `Roles Page: ${JSON.stringify(
+        {
+          buildFlavor,
+          cloudOrgUrl,
+          readOnly,
+          rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+        },
+        null,
+        '  '
+      )}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_role', () => {
-      const mocked = {
-      EditRolePage: ({
-        // props object is too big to include into test snapshot, so we just check for existence of fields we care about
-        buildFlavor,
-        cloudOrgUrl,
-        roleName,
-        indicesAPIClient,
-        privilegesAPIClient,
-        rolesAPIClient,
-        userAPIClient,
-      }: EditRolePageProps) =>
-        `Role Edit Page: ${JSON.stringify(
-          {
-            buildFlavor,
-            cloudOrgUrl,
-            roleName,
-            indicesAPIClient: indicesAPIClient ? 'indicesAPIClient' : undefined,
-            privilegesAPIClient: privilegesAPIClient ? 'privilegesAPIClient' : undefined,
-            rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
-            userAPIClient: userAPIClient ? 'userAPIClient' : undefined,
-          },
-      null,
-      '  '
-    )}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditRolePage: ({
+      // props object is too big to include into test snapshot, so we just check for existence of fields we care about
+      buildFlavor,
+      cloudOrgUrl,
+      roleName,
+      indicesAPIClient,
+      privilegesAPIClient,
+      rolesAPIClient,
+      userAPIClient,
+    }: EditRolePageProps) =>
+      `Role Edit Page: ${JSON.stringify(
+        {
+          buildFlavor,
+          cloudOrgUrl,
+          roleName,
+          indicesAPIClient: indicesAPIClient ? 'indicesAPIClient' : undefined,
+          privilegesAPIClient: privilegesAPIClient ? 'privilegesAPIClient' : undefined,
+          rolesAPIClient: rolesAPIClient ? 'rolesAPIClient' : undefined,
+          userAPIClient: userAPIClient ? 'userAPIClient' : undefined,
+        },
+        null,
+        '  '
+      )}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 async function mountApp(basePath: string, pathname: string, buildFlavor?: BuildFlavor) {
   const { fatalErrors } = coreMock.createSetup();

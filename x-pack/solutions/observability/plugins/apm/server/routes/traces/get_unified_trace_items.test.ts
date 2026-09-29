@@ -1591,9 +1591,7 @@ describe('getUnifiedTraceItems', () => {
     });
 
     it('sets missingDestination on an OTel exit span whose child is a transaction and destination is absent', async () => {
-      (mockApmEventClient.search as Mock).mockResolvedValue(
-        otelSpanAndChildTransaction(false)
-      );
+      (mockApmEventClient.search as Mock).mockResolvedValue(otelSpanAndChildTransaction(false));
 
       const result = await getUnifiedTraceItems(defaultParams);
 

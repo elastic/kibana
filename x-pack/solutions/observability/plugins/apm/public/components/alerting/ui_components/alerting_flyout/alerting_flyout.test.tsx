@@ -19,73 +19,73 @@ const start = '2024-01-01T00:00:00.000Z';
 const end = '2024-01-01T01:00:00.000Z';
 
 vi.mock('@kbn/response-ops-rule-form/flyout', () => {
-      const mocked = {
-      RuleFormFlyout: (props: any) => {
-        mockRuleFormFlyout(props);
-        return <div data-test-subj="mockRuleFormFlyout">Rule Form Flyout</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleFormFlyout: (props: any) => {
+      mockRuleFormFlyout(props);
+      return <div data-test-subj="mockRuleFormFlyout">Rule Form Flyout</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rule-form/lib', () => {
-      const mocked = {
-      isValidRuleFormPlugins: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isValidRuleFormPlugins: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          triggersActionsUi: {
-            ruleTypeRegistry: { get: vi.fn() },
-            actionTypeRegistry: { get: vi.fn() },
-          },
-          application: { capabilities: {} },
-          notifications: { toasts: {} },
-          http: { basePath: { prepend: vi.fn() } },
-          docLinks: { links: {} },
-          uiSettings: { get: vi.fn() },
-          settings: { client: { get: vi.fn() } },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        triggersActionsUi: {
+          ruleTypeRegistry: { get: vi.fn() },
+          actionTypeRegistry: { get: vi.fn() },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: { capabilities: {} },
+        notifications: { toasts: {} },
+        http: { basePath: { prepend: vi.fn() } },
+        docLinks: { links: {} },
+        uiSettings: { get: vi.fn() },
+        settings: { client: { get: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_service_name', () => {
-      const mocked = {
-      useServiceName: () => 'test-service',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceName: () => 'test-service',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => ({
-        query: {
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          environment: 'production',
-          transactionType: 'request',
-        },
-        path: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => ({
+      query: {
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        environment: 'production',
+        transactionType: 'request',
+      },
+      path: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start,
-        end,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start,
+      end,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderAlertingFlyout(props: Partial<React.ComponentProps<typeof AlertingFlyout>> = {}) {
   const defaultProps = {

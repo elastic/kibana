@@ -13,17 +13,17 @@ import { setMockActions, setMockValues } from '../../../__mocks__/kea_logic';
 import React from 'react';
 
 vi.mock('./get_updated_columns', () => {
-      const mocked = {
-      getUpdatedColumns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUpdatedColumns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../reorderable_table', () => {
-      const mocked = {
-      ReorderableTable: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReorderableTable: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { screen } from '@testing-library/react';
 

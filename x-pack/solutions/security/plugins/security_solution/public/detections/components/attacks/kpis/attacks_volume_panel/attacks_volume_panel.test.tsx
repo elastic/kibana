@@ -19,29 +19,29 @@ const kibanaContextMock = createStartServicesMock();
 
 vi.mock('./use_attacks_volume_data');
 vi.mock('../../../../../common/components/charts/common', () => {
-      const mocked = {
-      useThemes: vi.fn(() => ({
-        theme: {},
-        baseTheme: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useThemes: vi.fn(() => ({
+      theme: {},
+      baseTheme: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@elastic/charts', () => {
-      const mocked = {
-      Chart: (props: { children: React.ReactNode }) => (
-        <div data-test-subj="mock-chart">{props.children}</div>
-      ),
-      Settings: () => null,
-      LineSeries: () => <div data-test-subj="mock-line-series" />,
-      Axis: () => null,
-      Position: { Bottom: 'bottom', Left: 'left' },
-      ScaleType: { Time: 'time' },
-      CurveType: { CURVE_MONOTONE_X: 'monotone_x' },
-      timeFormatter: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: (props: { children: React.ReactNode }) => (
+      <div data-test-subj="mock-chart">{props.children}</div>
+    ),
+    Settings: () => null,
+    LineSeries: () => <div data-test-subj="mock-line-series" />,
+    Axis: () => null,
+    Position: { Bottom: 'bottom', Left: 'left' },
+    ScaleType: { Time: 'time' },
+    CurveType: { CURVE_MONOTONE_X: 'monotone_x' },
+    timeFormatter: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttacksVolumePanel', () => {
   const mockUseAttacksVolumeData = Hook.useAttacksVolumeData as Mock;

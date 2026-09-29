@@ -39,9 +39,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(mockResponse, 'ok')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'ok').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
@@ -79,9 +79,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(mockResponse, 'ok')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'ok').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
@@ -124,9 +124,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(mockResponse, 'ok')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'ok').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
@@ -166,9 +166,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(mockResponse, 'customError')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'customError').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);
@@ -226,9 +226,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(mockResponse, 'customError')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'customError').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(2);
@@ -286,9 +286,9 @@ describe('has_es_data route', () => {
     } as unknown as RequestHandlerContext;
     const mockRequest = httpServerMock.createKibanaRequest();
     const mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(mockResponse, 'customError')
-      .mockImplementation((params) => params as unknown as IKibanaResponse);
+    vi.spyOn(mockResponse, 'customError').mockImplementation(
+      (params) => params as unknown as IKibanaResponse
+    );
     const handler = createHandler(mockLogger, mockEsDataTimeout);
     const response = await handler(mockContext, mockRequest, mockResponse);
     expect(mockESClient.indices.resolveCluster).toHaveBeenCalledTimes(1);

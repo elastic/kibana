@@ -95,100 +95,102 @@ describe('streamFactory', () => {
   // the browser on the client side will automatically take care of unzipping
   // without the need for additional custom code.
   it('should encode and receive a compressed string based stream', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          void (async () => {
-            const { end, push, responseWithHeaders } = streamFactory(
-              {
-                'accept-encoding': 'gzip',
-              },
-              mockLogger
-            );
+      void (async () => {
+        const { end, push, responseWithHeaders } = streamFactory(
+          {
+            'accept-encoding': 'gzip',
+          },
+          mockLogger
+        );
 
-            push('push1');
-            push('push2');
-            end();
+        push('push1');
+        push('push2');
+        end();
 
-            const chunks = [];
-            for await (const chunk of responseWithHeaders.body) {
-              chunks.push(chunk);
-            }
+        const chunks = [];
+        for await (const chunk of responseWithHeaders.body) {
+          chunks.push(chunk);
+        }
 
-            const buffer = Buffer.concat(chunks);
+        const buffer = Buffer.concat(chunks);
 
-            zlib.gunzip(buffer, function (err, decoded) {
-              expect(err).toBe(null);
+        zlib.gunzip(buffer, function (err, decoded) {
+          expect(err).toBe(null);
 
-              const streamResult = decoded.toString('utf8');
+          const streamResult = decoded.toString('utf8');
 
-              expect(responseWithHeaders.headers).toStrictEqual({
-                'Cache-Control': 'no-cache',
-                Connection: 'keep-alive',
-                'content-encoding': 'gzip',
-                'Transfer-Encoding': 'chunked',
-                'X-Accel-Buffering': 'no',
-                'X-Content-Type-Options': 'nosniff',
-              });
-              expect(streamResult).toBe('push1push2');
+          expect(responseWithHeaders.headers).toStrictEqual({
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'content-encoding': 'gzip',
+            'Transfer-Encoding': 'chunked',
+            'X-Accel-Buffering': 'no',
+            'X-Content-Type-Options': 'nosniff',
+          });
+          expect(streamResult).toBe('push1push2');
 
-              done();
-            });
-          })();
-        
-      }));
+          done();
+        });
+      })();
+    }));
 
   it('should encode and receive a compressed NDJSON based stream', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          void (async () => {
-            const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>(
-              {
-                'accept-encoding': 'gzip',
-              },
-              mockLogger
-            );
+      void (async () => {
+        const { DELIMITER, end, push, responseWithHeaders } = streamFactory<MockItem>(
+          {
+            'accept-encoding': 'gzip',
+          },
+          mockLogger
+        );
 
-            push(mockItem1);
-            push(mockItem2);
-            end();
+        push(mockItem1);
+        push(mockItem2);
+        end();
 
-            const chunks = [];
-            for await (const chunk of responseWithHeaders.body) {
-              chunks.push(chunk);
-            }
+        const chunks = [];
+        for await (const chunk of responseWithHeaders.body) {
+          chunks.push(chunk);
+        }
 
-            const buffer = Buffer.concat(chunks);
+        const buffer = Buffer.concat(chunks);
 
-            zlib.gunzip(buffer, function (err, decoded) {
-              expect(err).toBe(null);
+        zlib.gunzip(buffer, function (err, decoded) {
+          expect(err).toBe(null);
 
-              const streamResult = decoded.toString('utf8');
+          const streamResult = decoded.toString('utf8');
 
-              const streamItems = streamResult.split(DELIMITER);
-              const lastItem = streamItems.pop();
+          const streamItems = streamResult.split(DELIMITER);
+          const lastItem = streamItems.pop();
 
-              const parsedItems = streamItems.map((d) => JSON.parse(d));
+          const parsedItems = streamItems.map((d) => JSON.parse(d));
 
-              expect(responseWithHeaders.headers).toStrictEqual({
-                'Cache-Control': 'no-cache',
-                Connection: 'keep-alive',
-                'content-encoding': 'gzip',
-                'Transfer-Encoding': 'chunked',
-                'X-Accel-Buffering': 'no',
-                'X-Content-Type-Options': 'nosniff',
-              });
-              expect(parsedItems).toHaveLength(2);
-              expect(parsedItems[0]).toStrictEqual(mockItem1);
-              expect(parsedItems[1]).toStrictEqual(mockItem2);
-              expect(lastItem).toBe('');
+          expect(responseWithHeaders.headers).toStrictEqual({
+            'Cache-Control': 'no-cache',
+            Connection: 'keep-alive',
+            'content-encoding': 'gzip',
+            'Transfer-Encoding': 'chunked',
+            'X-Accel-Buffering': 'no',
+            'X-Content-Type-Options': 'nosniff',
+          });
+          expect(parsedItems).toHaveLength(2);
+          expect(parsedItems[0]).toStrictEqual(mockItem1);
+          expect(parsedItems[1]).toStrictEqual(mockItem2);
+          expect(lastItem).toBe('');
 
-              done();
-            });
-          })();
-        
-      }));
+          done();
+        });
+      })();
+    }));
 
   it('should log an error when a string based stream receives a non-string chunk', async () => {
     const { push } = streamFactory({}, mockLogger);

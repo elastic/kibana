@@ -16,49 +16,49 @@ import '../../tests/mocks';
 
 // Stub heavy dependencies that aren't relevant for scroll-offset tests.
 vi.mock('../../../components/edit/library/insert_element', () => {
-      const mocked = {
-      renderEuiComponentLive: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    renderEuiComponentLive: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../components/edit/library/library_entries', () => {
-      const mocked = {
-      EUI_LIBRARY: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EUI_LIBRARY: [],
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../components/edit/library/serializable_state', () => {
-      const mocked = {
-      readStateAttributes: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readStateAttributes: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../components/edit/library/eui_icon_cache', () => {
-      const mocked = {
-      replaceIconContent: vi.fn(),
-      applySourceAttribute: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    replaceIconContent: vi.fn(),
+    applySourceAttribute: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../dom/get_page_color_mode', () => {
-      const mocked = {
-      getPageColorScheme: () => ({ colorMode: 'light', forcedColors: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPageColorScheme: () => ({ colorMode: 'light', forcedColors: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../dom/color_token_lookup', () => {
-      const mocked = {
-      resolveColorTokensDeep: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveColorTokensDeep: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../edit_engine/remap_emotion_classes', () => {
-      const mocked = {
-      buildEmotionClassMap: () => new Map(),
-      remapEmotionClasses: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEmotionClassMap: () => new Map(),
+    remapEmotionClasses: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('session_io scroll offset', () => {
   afterEach(() => {

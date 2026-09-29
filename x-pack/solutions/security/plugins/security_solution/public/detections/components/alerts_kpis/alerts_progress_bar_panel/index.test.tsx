@@ -23,12 +23,12 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../../common/components/cell_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/components/cell_actions')),
-      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/components/cell_actions')),
+    SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../alerts_summary_charts_panel/use_summary_chart_data');
 const mockUseSummaryChartData = useSummaryChartData as Mock;

@@ -43,9 +43,7 @@ const mockCoverageOverviewContextReturn = {
   },
 };
 
-(useCoverageOverviewDashboardContext as Mock).mockReturnValue(
-  mockCoverageOverviewContextReturn
-);
+(useCoverageOverviewDashboardContext as Mock).mockReturnValue(mockCoverageOverviewContextReturn);
 
 const renderFiltersPanel = () => {
   return render(

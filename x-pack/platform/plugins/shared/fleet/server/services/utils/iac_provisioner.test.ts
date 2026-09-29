@@ -29,9 +29,10 @@ const mockEnvironment = ({
   vi.spyOn(appContextService, 'getConfig').mockReturnValue({
     agentless: { enabled: agentlessEnabled },
   } as any);
-  vi
-    .spyOn(appContextService, 'getCloud')
-    .mockReturnValue({ isCloudEnabled, isServerlessEnabled } as any);
+  vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+    isCloudEnabled,
+    isServerlessEnabled,
+  } as any);
 
   if (iacProvisionerEnabled === undefined) {
     vi.spyOn(appContextService, 'getFeatureFlags').mockReturnValue(undefined);

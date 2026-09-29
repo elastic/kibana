@@ -26,18 +26,18 @@ import { internalScheduledDiscoveryRoutes } from './route';
 import { installDiscoveryAgents } from '../../../agent_builder/agents/discovery';
 
 vi.mock('../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../agent_builder/agents/discovery', () => {
-      const mocked = {
-      installDiscoveryAgents: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installDiscoveryAgents: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const installDiscoveryAgentsMock = installDiscoveryAgents as MockedFunction<
   typeof installDiscoveryAgents

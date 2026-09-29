@@ -49,7 +49,7 @@ const mockCreateAlertFactory = {
   }),
 };
 vi.mock('../alert/create_alert_factory', async () => {
-  const original = (await vi.importActual('../alert/create_alert_factory'));
+  const original = await vi.importActual('../alert/create_alert_factory');
   return {
     ...original,
     getPublicAlertFactory: vi.fn().mockImplementation(() => {
@@ -69,7 +69,7 @@ vi.mock('../alert/create_alert_factory', async () => {
 });
 
 vi.mock('../lib', async () => {
-  const original = (await vi.importActual('../lib'));
+  const original = await vi.importActual('../lib');
   return {
     ...original,
     processAlerts: vi.fn(),
@@ -90,9 +90,9 @@ vi.mock('../lib/determine_delayed_alerts', () => {
 });
 
 vi.mock('../task_runner/log_alerts', () => {
-      const mocked = { logAlerts: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { logAlerts: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 let logger: ReturnType<(typeof loggingSystemMock)['createLogger']>;
 const ruleRunMetricsStore = ruleRunMetricsStoreMock.create();

@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 /**
  * Component-level tests for WorkflowGraphEdge gate logic.
  *
@@ -23,6 +21,7 @@ import { cleanup, render, screen } from '@testing-library/react';
 import { Position } from '@xyflow/react';
 import type { EdgeProps } from '@xyflow/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 // ---------------------------------------------------------------------------
 // Mocks — registered before any import of the module under test.

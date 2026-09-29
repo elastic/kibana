@@ -22,11 +22,11 @@ const mockNoPrivileges = vi.fn(
 );
 
 vi.mock('../../../../common/components/no_privileges', () => {
-      const mocked = {
-      NoPrivileges: (props: Record<string, unknown>) => mockNoPrivileges(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoPrivileges: (props: Record<string, unknown>) => mockNoPrivileges(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<FlyoutMissingAlertsPrivilege />', () => {
   it('renders with the correct test id', () => {

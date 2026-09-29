@@ -20,9 +20,9 @@ const mockNodeTracerProvider = {
   shutdown: vi.fn().mockResolvedValue(undefined),
 };
 
-vi
-  .spyOn(node, 'NodeTracerProvider')
-  .mockReturnValue(mockNodeTracerProvider as unknown as node.NodeTracerProvider);
+vi.spyOn(node, 'NodeTracerProvider').mockReturnValue(
+  mockNodeTracerProvider as unknown as node.NodeTracerProvider
+);
 
 describe('inference_tracer_provider', () => {
   afterEach(async () => {

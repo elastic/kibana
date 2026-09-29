@@ -15,11 +15,11 @@ import { OnboardingContextProvider } from '../../../onboarding_context';
 import { ExperimentalFeaturesService } from '../../../../../common/experimental_features_service';
 
 vi.mock('../../../../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: { get: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: { get: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as Mock;
 const mockIsCardComplete = vi.fn();
 const mockIsCardAvailable = vi.fn();

@@ -19,31 +19,30 @@ import type { AlertingPluginsStart } from '../../../../plugin';
 import { hasRequiredPrivilegeGrantedInAllSpaces } from '../../../../lib/has_required_privilege_granted_in_all_spaces';
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/track_legacy_terminology', () => {
-      const mocked = {
-      trackLegacyTerminology: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trackLegacyTerminology: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/has_required_privilege_granted_in_all_spaces', () => {
-      const mocked = {
-      hasRequiredPrivilegeGrantedInAllSpaces: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasRequiredPrivilegeGrantedInAllSpaces: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('alertDeleteScheduleRoute', () => {
   const alertDeletionClient = alertDeletionClientMock.create();
   const rulesClient = rulesClientMock.create();
-  const hasRequiredPrivilegeGrantedInAllSpacesMock =
-    hasRequiredPrivilegeGrantedInAllSpaces as Mock;
+  const hasRequiredPrivilegeGrantedInAllSpacesMock = hasRequiredPrivilegeGrantedInAllSpaces as Mock;
   const coreMock = {
     getStartServices: async () => [
       {} as unknown,

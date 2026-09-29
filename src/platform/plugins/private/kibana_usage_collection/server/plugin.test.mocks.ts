@@ -17,17 +17,17 @@ export const cloudDetailsMock = mock.getCloudDetails;
 export const detectCloudServiceMock = mock.detectCloudService;
 
 vi.doMock('./collectors/cloud/detector', () => {
-      const mocked = {
-      CloudDetector: vi.fn().mockImplementation(() => mock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CloudDetector: vi.fn().mockImplementation(() => mock),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const registerEbtCountersMock = vi.fn();
 
 vi.doMock('./ebt_counters', () => {
-      const mocked = {
-      registerEbtCounters: registerEbtCountersMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerEbtCounters: registerEbtCountersMock,
+  };
+  return { ...mocked, default: mocked };
+});

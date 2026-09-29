@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import {

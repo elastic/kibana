@@ -25,13 +25,13 @@ vi.mock('react-router-dom', () => {
 vi.mock('../lib/kibana');
 vi.mock('./use_selector');
 vi.mock('../../timelines/store', () => {
-      const mocked = {
-      timelineSelectors: {
-        getTimelineByIdSelector: () => vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timelineSelectors: {
+      getTimelineByIdSelector: () => vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useResolveRedirect', () => {
   const mockRedirectLegacyUrl = vi.fn();

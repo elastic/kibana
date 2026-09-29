@@ -331,11 +331,7 @@ describe('buildSecurityApi', () => {
       [
         'withScopedRequestForWorkload',
         () =>
-          api.serviceAccounts.withScopedRequestForWorkload(
-            'alerting',
-            WORKLOAD_IN_SPACE,
-            vi.fn()
-          ),
+          api.serviceAccounts.withScopedRequestForWorkload('alerting', WORKLOAD_IN_SPACE, vi.fn()),
       ],
     ])('rejects %s when service accounts are not enabled', async (_name, invoke) => {
       serviceAccounts = null;
@@ -394,9 +390,9 @@ describe('buildSecurityApi', () => {
 
       it('should properly delegate getInternalCallerAttestationHeaders to the service', () => {
         const attestationHeaders = { 'x-some-attestation': 'some-attestation' };
-        vi
-          .mocked(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders)
-          .mockReturnValue(attestationHeaders);
+        vi.mocked(authc.apiKeys.uiam!.getInternalCallerAttestationHeaders).mockReturnValue(
+          attestationHeaders
+        );
 
         const credential = new HTTPAuthorizationHeader('Bearer', 'essu_one');
         expect(api.authc.apiKeys.uiam!.getInternalCallerAttestationHeaders(credential)).toBe(

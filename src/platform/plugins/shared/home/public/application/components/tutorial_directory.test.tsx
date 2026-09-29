@@ -29,42 +29,42 @@ const mockGetUrlForApp = vi.fn(
 const mockAddBasePath = vi.fn((url: string) => url);
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        addDataService: {
-          getAddDataTabs: mockGetAddDataTabs,
-        },
-        tutorialService: {
-          getDirectoryHeaderLinks: mockGetDirectoryHeaderLinks,
-        },
-        chrome: {
-          setBreadcrumbs: mockSetBreadcrumbs,
-        },
-        application: {
-          getUrlForApp: mockGetUrlForApp,
-        },
-        history: {
-          push: mockHistoryPush,
-          location: { hash: '#/tutorial_directory/sampleData' },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({
+      addDataService: {
+        getAddDataTabs: mockGetAddDataTabs,
+      },
+      tutorialService: {
+        getDirectoryHeaderLinks: mockGetDirectoryHeaderLinks,
+      },
+      chrome: {
+        setBreadcrumbs: mockSetBreadcrumbs,
+      },
+      application: {
+        getUrlForApp: mockGetUrlForApp,
+      },
+      history: {
+        push: mockHistoryPush,
+        location: { hash: '#/tutorial_directory/sampleData' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../load_tutorials', () => {
-      const mocked = {
-      getTutorials: vi.fn(async () => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTutorials: vi.fn(async () => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/home-sample-data-tab', () => {
-      const mocked = {
-      SampleDataTab: () => <div data-test-subj="sampleDataTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SampleDataTab: () => <div data-test-subj="sampleDataTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TutorialDirectory', () => {
   beforeEach(() => {

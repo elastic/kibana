@@ -25,11 +25,11 @@ import type { EditorVisState } from './sidebar/state/reducers';
 import { groupAndSortBy } from '../utils';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      groupAndSortBy: vi.fn(() => ['indexedFields']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    groupAndSortBy: vi.fn(() => ['indexedFields']),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DefaultEditorAggParams helpers', () => {
   describe('getAggParamsToRender', () => {

@@ -35,45 +35,49 @@ const mockReplace = vi.fn();
 const mockUseKibana = vi.fn();
 
 vi.mock('../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({
-        push: mockPush,
-        replace: mockReplace,
-        location: { search: '', pathname: '/history' },
-      }),
-      useLocation: () => ({ search: '', pathname: '/history' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({
+      push: mockPush,
+      replace: mockReplace,
+      location: { search: '', pathname: '/history' },
+    }),
+    useLocation: () => ({ search: '', pathname: '/history' }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      formatDate: (value: unknown) => String(value),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    formatDate: (value: unknown) => String(value),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_unified_history');
 vi.mock('./use_user_profiles');
 vi.mock('../packs/use_packs');
 vi.mock('../common/use_persisted_page_size', () => {
-      const mocked = {
-      usePersistedPageSize: () => [10, vi.fn()],
-      PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePersistedPageSize: () => [10, vi.fn()],
+    PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const useUnifiedHistoryMock = useUnifiedHistory as MockedFunction<typeof useUnifiedHistory>;
 const useBulkGetUserProfilesMock = useBulkGetUserProfiles as MockedFunction<

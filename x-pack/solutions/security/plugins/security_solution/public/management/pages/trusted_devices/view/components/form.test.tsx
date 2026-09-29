@@ -43,11 +43,11 @@ vi.mock('../../../../../common/hooks/use_license', () => {
 
 vi.mock('../../hooks/use_get_trusted_device_suggestions');
 vi.mock('../../../../../common/containers/source', () => {
-      const mocked = {
-      useFetchIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useFetchIndex } from '../../../../../common/containers/source';
 

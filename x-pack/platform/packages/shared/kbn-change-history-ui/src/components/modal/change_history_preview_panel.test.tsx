@@ -26,25 +26,25 @@ import {
 import { TestProvider } from '../../test_utils/test_providers';
 
 vi.mock('../../provider/use_change_history_config', () => {
-      const mocked = {
-      useChangeHistoryConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeHistoryConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_change_history_detail', () => {
-      const mocked = {
-      useChangeHistoryDetail: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeHistoryDetail: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_change_history_compare', () => {
-      const mocked = {
-      useChangeHistoryCompare: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeHistoryCompare: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseChangeHistoryConfig = useChangeHistoryConfig as Mock;
 const mockUseChangeHistoryDetail = useChangeHistoryDetail as Mock;

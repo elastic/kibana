@@ -48,34 +48,34 @@ vi.mock('fs', () => {
 });
 
 vi.mock('@kbn/repo-packages', () => {
-      const mocked = {
-      findPackageForPath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findPackageForPath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/scout-info', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/scout-info')),
-      SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/scout-info')),
+    SCOUT_PLAYWRIGHT_CONFIGS_PATH: '/path/to/scout_playwright_configs.json',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../tests_discovery/search_configs', () => {
-      const mocked = {
-      filterModulesByScoutCiConfig: vi.fn(),
-      getScoutCiExcludedConfigs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterModulesByScoutCiConfig: vi.fn(),
+    getScoutCiExcludedConfigs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/scout-reporting/src/registry', async () => {
   // Access the module-level store
@@ -92,11 +92,11 @@ vi.mock('@kbn/scout-reporting/src/registry', async () => {
 });
 
 vi.mock('../servers/configs', () => {
-      const mocked = {
-      getScoutPlaywrightConfigs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getScoutPlaywrightConfigs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('runDiscoverPlaywrightConfigs', () => {
   let flagsReader: Mocked<FlagsReader>;

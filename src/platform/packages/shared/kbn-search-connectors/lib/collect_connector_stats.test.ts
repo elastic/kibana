@@ -27,12 +27,12 @@ import {
 } from './collect_connector_stats_test_data';
 
 vi.mock('.', () => {
-      const mocked = {
-      fetchConnectors: vi.fn(),
-      fetchSyncJobs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchConnectors: vi.fn(),
+    fetchSyncJobs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('collect connector stats', () => {
   const mockClient = {

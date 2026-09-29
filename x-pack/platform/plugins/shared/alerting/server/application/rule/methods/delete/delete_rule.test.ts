@@ -19,11 +19,11 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/rule_gaps/soft_delete/soft_delete_gaps');
 

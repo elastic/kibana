@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import { NestedWorkflowExecutionLinks } from './nested_workflow_execution_links';
 import { createStartServicesMock } from '../../../mocks';
@@ -18,20 +17,20 @@ import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockStepExecutionDto } from '../../../shared/test_utils';
 
 vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
-      const mocked = {
-      useNavigateToExecution: ({
-        workflowId,
-        executionId,
-      }: {
-        workflowId: string;
-        executionId?: string;
-      }) => ({
-        href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
-        navigate: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToExecution: ({
+      workflowId,
+      executionId,
+    }: {
+      workflowId: string;
+      executionId?: string;
+    }) => ({
+      href: `/app/workflows/${workflowId}${executionId ? `?executionId=${executionId}` : ''}`,
+      navigate: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const childExecution = {
   parentStepExecutionId: 'parent-execute',

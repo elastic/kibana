@@ -25,14 +25,14 @@ import { requestContextMock } from '../../../../__mocks__/request_context';
 import { postAttackDiscoveryGenerateRoute } from './post_attack_discovery_generate';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'static-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'static-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers/index_privileges', async () => {
-  const privilegesOriginal = (await vi.importActual('../../helpers/index_privileges'));
+  const privilegesOriginal = await vi.importActual('../../helpers/index_privileges');
   return {
     ...privilegesOriginal,
     hasReadWriteAttackDiscoveryAlertsPrivileges: vi.fn(),
@@ -40,7 +40,7 @@ vi.mock('../../helpers/index_privileges', async () => {
 });
 
 vi.mock('../../../helpers', async () => {
-  const helpersModuleOriginal = (await vi.importActual('../../../helpers'));
+  const helpersModuleOriginal = await vi.importActual('../../../helpers');
   return {
     ...helpersModuleOriginal,
     performChecks: vi.fn(),
@@ -48,18 +48,18 @@ vi.mock('../../../helpers', async () => {
 });
 
 vi.mock('./helpers/request_is_valid', () => {
-      const mocked = {
-      requestIsValid: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestIsValid: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers/generate_and_update_discoveries', () => {
-      const mocked = {
-      generateAndUpdateAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateAndUpdateAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();
@@ -137,7 +137,9 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     // Mock generateAndUpdateAttackDiscoveries to resolve successfully
-    const { generateAndUpdateAttackDiscoveries } = (await vi.importMock('../../helpers/generate_and_update_discoveries'));
+    const { generateAndUpdateAttackDiscoveries } = await vi.importMock(
+      '../../helpers/generate_and_update_discoveries'
+    );
     generateAndUpdateAttackDiscoveries.mockResolvedValue({
       anonymizedAlerts: [],
       attackDiscoveries: [],
@@ -154,14 +156,12 @@ describe('postAttackDiscoveryGenerateRoute', () => {
   describe('privilege validation', () => {
     it('returns a 403 status when the privilege check returns forbidden', async () => {
       context.core.featureFlags.getBooleanValue = vi.fn().mockResolvedValue(true);
-      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
-        ({ response }) => {
-          return Promise.resolve({
-            isSuccess: false,
-            response: response.forbidden({ body: { message: 'forbidden' } }),
-          });
-        }
-      );
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(({ response }) => {
+        return Promise.resolve({
+          isSuccess: false,
+          response: response.forbidden({ body: { message: 'forbidden' } }),
+        });
+      });
       const response = await server.inject(
         postAttackDiscoveryRequest(mockRequestBody),
         requestContextMock.convertContext(context)
@@ -171,14 +171,12 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('returns a 403 status when the user has missing privileges', async () => {
-      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
-        ({ response }) => {
-          return Promise.resolve({
-            isSuccess: false,
-            response: response.forbidden({ body: { message: 'no privileges' } }),
-          });
-        }
-      );
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(({ response }) => {
+        return Promise.resolve({
+          isSuccess: false,
+          response: response.forbidden({ body: { message: 'no privileges' } }),
+        });
+      });
 
       const response = await server.inject(
         postAttackDiscoveryRequest(mockRequestBody),
@@ -189,14 +187,12 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('returns the correct error message when the user has missing privileges', async () => {
-      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
-        ({ response }) => {
-          return Promise.resolve({
-            isSuccess: false,
-            response: response.forbidden({ body: { message: 'no privileges' } }),
-          });
-        }
-      );
+      (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(({ response }) => {
+        return Promise.resolve({
+          isSuccess: false,
+          response: response.forbidden({ body: { message: 'no privileges' } }),
+        });
+      });
 
       const response = await server.inject(
         postAttackDiscoveryRequest(mockRequestBody),
@@ -296,7 +292,9 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('always calls generateAndUpdateAttackDiscoveries with withReplacements: false for the _generate route', async () => {
-      const { generateAndUpdateAttackDiscoveries } = (await vi.importMock('../../helpers/generate_and_update_discoveries'));
+      const { generateAndUpdateAttackDiscoveries } = await vi.importMock(
+        '../../helpers/generate_and_update_discoveries'
+      );
 
       // Make sure the mock is cleared
       generateAndUpdateAttackDiscoveries.mockClear();
@@ -315,7 +313,9 @@ describe('postAttackDiscoveryGenerateRoute', () => {
     });
 
     it('always calls generateAndUpdateAttackDiscoveries with enableFieldRendering: true for the _generate route', async () => {
-      const { generateAndUpdateAttackDiscoveries } = (await vi.importMock('../../helpers/generate_and_update_discoveries'));
+      const { generateAndUpdateAttackDiscoveries } = await vi.importMock(
+        '../../helpers/generate_and_update_discoveries'
+      );
 
       // Make sure the mock is cleared
       generateAndUpdateAttackDiscoveries.mockClear();

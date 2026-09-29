@@ -17,57 +17,57 @@ import { QueryRulesetDetail } from './query_ruleset_detail';
 import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../../common/__fixtures__/query_rules_ruleset';
 
 vi.mock('../../hooks/use_fetch_ruleset_exists', () => {
-      const mocked = {
-      useFetchQueryRulesetExist: vi.fn(() => ({
-        data: { exists: false },
-        isLoading: false,
-        isError: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchQueryRulesetExist: vi.fn(() => ({
+      data: { exists: false },
+      isLoading: false,
+      isError: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_query_ruleset_detail_state', () => {
-      const mocked = {
-      useQueryRulesetDetailState: vi.fn(() => ({
-        queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
-        rules: [
-          ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE.rules.map((rule) => ({
-            ...rule,
-            criteria: Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria],
-          })),
-        ],
+  const mocked = {
+    useQueryRulesetDetailState: vi.fn(() => ({
+      queryRuleset: MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
+      rules: [
+        ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE.rules.map((rule) => ({
+          ...rule,
+          criteria: Array.isArray(rule.criteria) ? rule.criteria : [rule.criteria],
+        })),
+      ],
 
-        setNewRules: vi.fn(),
-        updateRule: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      setNewRules: vi.fn(),
+      updateRule: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_fetch_query_ruleset', () => {
-      const mocked = {
-      useFetchQueryRuleset: vi.fn(() => ({
-        data: {
-          ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
-        },
-        isLoading: false,
-        isError: false,
-        isInitialLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchQueryRuleset: vi.fn(() => ({
+      data: {
+        ...MOCK_QUERY_RULESET_RESPONSE_FIXTURE,
+      },
+      isLoading: false,
+      isError: false,
+      isInitialLoading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: vi.fn(() => ({ rulesetId: MOCK_QUERY_RULESET_RESPONSE_FIXTURE.ruleset_id })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: vi.fn(() => ({ rulesetId: MOCK_QUERY_RULESET_RESPONSE_FIXTURE.ruleset_id })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', async () => {
-  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
+  const { notificationServiceMock } = await vi.importActual('@kbn/core/public/mocks');
   return {
     useKibana: () => ({
       services: {
@@ -107,11 +107,11 @@ vi.mock('../../hooks/use_kibana', async () => {
 });
 
 vi.mock('@kbn/unsaved-changes-prompt', () => {
-      const mocked = {
-      useUnsavedChangesPrompt: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnsavedChangesPrompt: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Query rule detail', () => {
   const TEST_IDS = {

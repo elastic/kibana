@@ -16,37 +16,37 @@ import { useEuiTheme } from '@elastic/eui';
 import { Sparkline } from '.';
 
 vi.mock('@elastic/charts', () => {
-      const mocked = {
-      Chart: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="mock-chart">{children}</div>
-      ),
-      LineSeries: () => null,
-      AreaSeries: () => null,
-      BarSeries: () => null,
-      Settings: () => null,
-      Tooltip: () => null,
-      ScaleType: { Linear: 'linear', Time: 'time' },
-      CurveType: { CURVE_MONOTONE_X: 'monotoneX' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="mock-chart">{children}</div>
+    ),
+    LineSeries: () => null,
+    AreaSeries: () => null,
+    BarSeries: () => null,
+    Settings: () => null,
+    Tooltip: () => null,
+    ScaleType: { Linear: 'linear', Time: 'time' },
+    CurveType: { CURVE_MONOTONE_X: 'monotoneX' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_chart_theme', () => {
-      const mocked = {
-      useChartThemes: () => ({ theme: [], baseTheme: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChartThemes: () => ({ theme: [], baseTheme: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: vi.fn(),
-      EuiLoadingChart: () => <div data-test-subj="loading-chart" />,
-      EuiIcon: ({ type }: { type: string }) => <div data-test-subj={`icon-${type}`} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: vi.fn(),
+    EuiLoadingChart: () => <div data-test-subj="loading-chart" />,
+    EuiIcon: ({ type }: { type: string }) => <div data-test-subj={`icon-${type}`} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const color = '#000';
 const validSeries = [

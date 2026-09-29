@@ -25,105 +25,105 @@ import {
 vi.mock(
   './tools/get_policy_field_reference',
   () => {
-      const mocked = {
-        GET_POLICY_FIELD_REFERENCE_TOOL_ID: 'security.policy_management.get_policy_field_reference',
-        createGetPolicyFieldReferenceTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.get_policy_field_reference',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      GET_POLICY_FIELD_REFERENCE_TOOL_ID: 'security.policy_management.get_policy_field_reference',
+      createGetPolicyFieldReferenceTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.get_policy_field_reference',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
 vi.mock(
   './tools/list_policies',
   () => {
-      const mocked = {
-        LIST_POLICIES_TOOL_ID: 'security.policy_management.list_policies',
-        createListPoliciesTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.list_policies',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      LIST_POLICIES_TOOL_ID: 'security.policy_management.list_policies',
+      createListPoliciesTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.list_policies',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
 vi.mock(
   './tools/get_policy',
   () => {
-      const mocked = {
-        GET_POLICY_TOOL_ID: 'security.policy_management.get_policy',
-        createGetPolicyTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.get_policy',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      GET_POLICY_TOOL_ID: 'security.policy_management.get_policy',
+      createGetPolicyTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.get_policy',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
 vi.mock(
   './tools/compare_policies',
   () => {
-      const mocked = {
-        COMPARE_POLICIES_TOOL_ID: 'security.policy_management.compare_policies',
-        createComparePoliciesTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.compare_policies',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      COMPARE_POLICIES_TOOL_ID: 'security.policy_management.compare_policies',
+      createComparePoliciesTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.compare_policies',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
 vi.mock(
   './tools/get_policy_rollout_status',
   () => {
-      const mocked = {
-        GET_POLICY_ROLLOUT_STATUS_TOOL_ID: 'security.policy_management.get_policy_rollout_status',
-        createGetPolicyRolloutStatusTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.get_policy_rollout_status',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      GET_POLICY_ROLLOUT_STATUS_TOOL_ID: 'security.policy_management.get_policy_rollout_status',
+      createGetPolicyRolloutStatusTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.get_policy_rollout_status',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
 vi.mock(
   './tools/apply_policy_change',
   () => {
-      const mocked = {
-        APPLY_POLICY_CHANGE_TOOL_ID: 'security.policy_management.apply_policy_change',
-        createApplyPolicyChangeTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.apply_policy_change',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      APPLY_POLICY_CHANGE_TOOL_ID: 'security.policy_management.apply_policy_change',
+      createApplyPolicyChangeTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.apply_policy_change',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
 vi.mock(
   './tools/assess_policy_change',
   () => {
-      const mocked = {
-        ASSESS_POLICY_CHANGE_TOOL_ID: 'security.policy_management.assess_policy_change',
-        createAssessPolicyChangeTool: vi.fn((deps: unknown) => ({
-          id: 'security.policy_management.assess_policy_change',
-          ...((deps ?? {}) as object),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      ASSESS_POLICY_CHANGE_TOOL_ID: 'security.policy_management.assess_policy_change',
+      createAssessPolicyChangeTool: vi.fn((deps: unknown) => ({
+        id: 'security.policy_management.assess_policy_change',
+        ...((deps ?? {}) as object),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 

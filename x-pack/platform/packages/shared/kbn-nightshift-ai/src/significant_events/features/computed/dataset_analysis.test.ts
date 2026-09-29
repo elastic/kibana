@@ -13,13 +13,13 @@ import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { datasetAnalysisGenerator } from './dataset_analysis';
 
 vi.mock('@kbn/ai-tools', () => {
-      const mocked = {
-      describeDataset: vi.fn(),
-      formatDocumentAnalysis: vi.fn(),
-      getMappingConflicts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    describeDataset: vi.fn(),
+    formatDocumentAnalysis: vi.fn(),
+    getMappingConflicts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const describeDatasetMock = vi.mocked(describeDataset);
 const formatDocumentAnalysisMock = vi.mocked(formatDocumentAnalysis);

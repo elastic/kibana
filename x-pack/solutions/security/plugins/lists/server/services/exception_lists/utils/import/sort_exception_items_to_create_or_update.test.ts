@@ -14,11 +14,11 @@ import { getExceptionListItemSchemaMock } from '../../../../../common/schemas/re
 import { sortExceptionItemsToUpdateOrCreate } from './sort_exception_items_to_create_update';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: (): string => 'NEW_UUID',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: (): string => 'NEW_UUID',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('sort_exception_lists_items_to_create_update', () => {
   beforeEach(() =>

@@ -19,18 +19,18 @@ import { Main } from './main';
 import type { DataSetWithName, DataSource } from '../common';
 
 vi.mock('./datasets_tab_content', () => {
-      const mocked = {
-      DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DatasetsTabContent: () => <div data-test-subj="datasetsTabContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./data_sources_tab_content', () => {
-      const mocked = {
-      DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataSourcesTabContent: () => <div data-test-subj="dataSourcesTabContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createToastsMock = () => ({
   addSuccess: vi.fn(),

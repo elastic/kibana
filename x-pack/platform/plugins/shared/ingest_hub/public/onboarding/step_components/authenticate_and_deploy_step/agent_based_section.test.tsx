@@ -15,51 +15,51 @@ import { I18nProvider } from '@kbn/i18n-react';
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LazyAgentEnrollmentFlyout: vi.fn(),
-      LazyAwsStaticKeysForm: vi.fn(),
-      LazyAwsTemporaryKeysForm: vi.fn(),
-      LazyAgentPolicyIntegrationForm: vi.fn(),
-      useGetAgentPoliciesQuery: vi.fn(),
-      agentPolicyFormValidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazyAgentEnrollmentFlyout: vi.fn(),
+    LazyAwsStaticKeysForm: vi.fn(),
+    LazyAwsTemporaryKeysForm: vi.fn(),
+    LazyAgentPolicyIntegrationForm: vi.fn(),
+    useGetAgentPoliciesQuery: vi.fn(),
+    agentPolicyFormValidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_based_deploy/agent_policy_name', () => {
-      const mocked = {
-      buildAgentPolicyName: vi.fn().mockResolvedValue('AWS Agent Policy 1'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAgentPolicyName: vi.fn().mockResolvedValue('AWS Agent Policy 1'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_based_section/shared_credentials_form', () => {
-      const mocked = {
-      SharedCredentialsForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SharedCredentialsForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_based_section/assume_role_form', () => {
-      const mocked = {
-      AssumeRoleForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssumeRoleForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   LazyAgentEnrollmentFlyout,

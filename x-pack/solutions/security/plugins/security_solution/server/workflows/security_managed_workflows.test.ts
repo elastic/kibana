@@ -52,12 +52,8 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
     (alertAnalysisInstall.installSecurityAlertAnalysisWorkflow as Mock).mockResolvedValue(
       undefined
     );
-    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockResolvedValue(
-      undefined
-    );
-    (threatIntelInstall.uninstallThreatIntelManagedWorkflows as Mock).mockResolvedValue(
-      undefined
-    );
+    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockResolvedValue(undefined);
+    (threatIntelInstall.uninstallThreatIntelManagedWorkflows as Mock).mockResolvedValue(undefined);
   });
 
   it('calls ready exactly once after alert analysis and threat intel install when the flag is on', async () => {
@@ -71,11 +67,9 @@ describe('installSecurityManagedWorkflowsAndMarkReady', () => {
         order.push('alert');
       }
     );
-    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockImplementation(
-      async () => {
-        order.push('ti');
-      }
-    );
+    (threatIntelInstall.installThreatIntelManagedWorkflows as Mock).mockImplementation(async () => {
+      order.push('ti');
+    });
 
     const workflowsExtensions = workflowsExtensionsMock.createStart();
     workflowsExtensions.initManagedWorkflowsClient.mockResolvedValue(managed);

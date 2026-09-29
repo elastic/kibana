@@ -105,26 +105,26 @@ const installEndpointSecurityPrebuiltRuleMock = _installEndpointSecurityPrebuilt
 vi.mock(
   '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule',
   async () => {
-    const actualModule = (await vi.importActual('../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule'));
+    const actualModule = await vi.importActual(
+      '../lib/detection_engine/prebuilt_rules/logic/integrations/install_endpoint_security_prebuilt_rule'
+    );
 
     return {
       ...actualModule,
-      installEndpointSecurityPrebuiltRule: vi.fn(
-        actualModule.installEndpointSecurityPrebuiltRule
-      ),
+      installEndpointSecurityPrebuiltRule: vi.fn(actualModule.installEndpointSecurityPrebuiltRule),
     };
   }
 );
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: (): string => 'NEW_UUID',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: (): string => 'NEW_UUID',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./handlers/create_policy_datastreams', async () => {
-  const actualModule = (await vi.importActual('./handlers/create_policy_datastreams'));
+  const actualModule = await vi.importActual('./handlers/create_policy_datastreams');
 
   return {
     ...actualModule,
@@ -132,8 +132,7 @@ vi.mock('./handlers/create_policy_datastreams', async () => {
   };
 });
 
-const createPolicyDataStreamsIfNeededMock =
-  _createPolicyDataStreamsIfNeeded as unknown as Mock;
+const createPolicyDataStreamsIfNeededMock = _createPolicyDataStreamsIfNeeded as unknown as Mock;
 
 describe('Fleet integrations', () => {
   let endpointAppContextStartContract: EndpointAppContextServiceStartContract;
@@ -177,9 +176,9 @@ describe('Fleet integrations', () => {
     logger = metadataMocks.logger;
     endpointMetadataService = metadataMocks.endpointMetadataService;
 
-    vi
-      .spyOn(endpointMetadataService, 'getFleetEndpointPackagePolicy')
-      .mockResolvedValue(createMockPolicyData());
+    vi.spyOn(endpointMetadataService, 'getFleetEndpointPackagePolicy').mockResolvedValue(
+      createMockPolicyData()
+    );
   });
 
   afterEach(() => {

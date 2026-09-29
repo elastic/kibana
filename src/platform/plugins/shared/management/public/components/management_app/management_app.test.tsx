@@ -19,30 +19,30 @@ import { ManagementSection } from '../../utils';
 import type { SectionsServiceStart, NavigationCardsSubject } from '../../types';
 
 vi.mock('@kbn/shared-ux-page-kibana-template', () => {
-      const mocked = {
-      KibanaPageTemplate: vi.fn(({ mainProps, children }) => (
-        <div data-test-subj="page-template" data-main-padding={mainProps?.paddingSize}>
-          {children}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaPageTemplate: vi.fn(({ mainProps, children }) => (
+      <div data-test-subj="page-template" data-main-padding={mainProps?.paddingSize}>
+        {children}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./management_router', () => {
-      const mocked = {
-      ManagementRouter: ({ onAppMounted }: { onAppMounted: (id: string) => void }) => {
-        const { useEffect } = (require('react') as typeof import('react'));
+  const mocked = {
+    ManagementRouter: ({ onAppMounted }: { onAppMounted: (id: string) => void }) => {
+      const { useEffect } = require('react') as typeof import('react');
 
-        useEffect(() => {
-          onAppMounted('cases');
-        }, [onAppMounted]);
+      useEffect(() => {
+        onAppMounted('cases');
+      }, [onAppMounted]);
 
-        return <div data-test-subj="management-router" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return <div data-test-subj="management-router" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderManagementApp = (section: ManagementSection) => {
   const coreStart = coreMock.createStart();

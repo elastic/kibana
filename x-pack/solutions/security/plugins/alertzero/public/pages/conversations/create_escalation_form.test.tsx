@@ -14,13 +14,13 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { CreateEscalationForm, type CreateEscalationFormProps } from './create_escalation_form';
 
 vi.mock('@kbn/user-profile-components', () => {
-      const mocked = {
-      UserProfilesSelectable: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
-        <div data-test-subj={testSubj ?? 'escalationModalCollaboratorPicker'} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserProfilesSelectable: ({ 'data-test-subj': testSubj }: { 'data-test-subj'?: string }) => (
+      <div data-test-subj={testSubj ?? 'escalationModalCollaboratorPicker'} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: CreateEscalationFormProps = {
   investigationTitle: 'Suspicious login activity',

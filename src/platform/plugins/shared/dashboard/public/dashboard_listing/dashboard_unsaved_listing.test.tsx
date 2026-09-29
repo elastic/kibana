@@ -34,13 +34,13 @@ const renderDashboardUnsavedListing = (props: Partial<DashboardUnsavedListingPro
 
 const mockFindByIds = vi.fn();
 vi.mock('../dashboard_client', () => {
-      const mocked = {
-      findService: {
-        findByIds: (ids: string[]) => mockFindByIds(ids),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findService: {
+      findByIds: (ids: string[]) => mockFindByIds(ids),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Unsaved listing', () => {
   const dashboardBackupService = getDashboardBackupService();

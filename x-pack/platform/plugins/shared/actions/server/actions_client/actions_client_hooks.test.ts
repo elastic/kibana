@@ -40,11 +40,11 @@ import type { AuthTypeRegistry } from '../auth_types/auth_type_registry';
 import { authTypeRegistryMock } from '../auth_types/auth_type_registry.mock';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => ConnectorSavedObject.id,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => ConnectorSavedObject.id,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

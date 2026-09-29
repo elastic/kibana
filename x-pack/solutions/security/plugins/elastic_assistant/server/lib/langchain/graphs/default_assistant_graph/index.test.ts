@@ -180,9 +180,9 @@ describe('callAssistantGraph', () => {
     });
 
     it('handles error when anonymizationFieldsDataClient.findDocuments fails', async () => {
-      (
-        mockDataClients?.anonymizationFieldsDataClient?.findDocuments as Mock
-      ).mockRejectedValue(new Error('test error'));
+      (mockDataClients?.anonymizationFieldsDataClient?.findDocuments as Mock).mockRejectedValue(
+        new Error('test error')
+      );
 
       await expect(callAssistantGraph(defaultParams)).rejects.toThrow('test error');
     });

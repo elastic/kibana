@@ -18,9 +18,9 @@ import * as reduxHooks from 'react-redux-v7';
 import * as searchHooks from '@kbn/observability-shared-plugin/public/hooks/use_es_search';
 
 describe('useStepWaterfallMetrics', () => {
-  vi
-    .spyOn(reduxHooks, 'useSelector')
-    .mockReturnValue({ settings: { heartbeatIndices: 'heartbeat-*' } });
+  vi.spyOn(reduxHooks, 'useSelector').mockReturnValue({
+    settings: { heartbeatIndices: 'heartbeat-*' },
+  });
 
   it('returns result as expected', () => {
     // @ts-ignore

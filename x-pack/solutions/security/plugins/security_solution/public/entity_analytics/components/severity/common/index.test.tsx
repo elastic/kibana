@@ -21,7 +21,7 @@ import { RiskSeverity } from '../../../../../common/search_strategy';
 import { RiskScoreLevel } from '.';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...(await vi.importActual('@elastic/eui')),
     EuiHealth: vi.fn((props: EuiHealthProps) => <original.EuiHealth {...props} />),

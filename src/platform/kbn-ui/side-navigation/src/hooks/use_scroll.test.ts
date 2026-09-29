@@ -14,13 +14,13 @@ import { renderHook } from '@testing-library/react';
 import { useScroll } from './use_scroll';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiOverflowScroll: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiOverflowScroll: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useEuiOverflowScroll } = (await vi.importMock('@elastic/eui'));
+const { useEuiOverflowScroll } = await vi.importMock('@elastic/eui');
 
 describe('useScroll', () => {
   beforeEach(() => {

@@ -29,11 +29,11 @@ import {
 const mockUseIndexContext = vi.fn<IndexStateContext, []>();
 
 vi.mock('./context', () => {
-      const mocked = {
-      useIndexContext: () => mockUseIndexContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIndexContext: () => mockUseIndexContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseDeprecation = {
   level: 'critical',

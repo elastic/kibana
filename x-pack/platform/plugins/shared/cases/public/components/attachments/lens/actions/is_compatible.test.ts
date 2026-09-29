@@ -15,14 +15,14 @@ import { canUseCases } from '../../../../client/helpers/can_use_cases';
 import { getMockLensApi } from './mocks';
 
 vi.mock('../../../../../common/utils/owner', () => {
-      const mocked = {
-      getCaseOwnerByAppId: () => 'securitySolution',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCaseOwnerByAppId: () => 'securitySolution',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../client/helpers/can_use_cases', async () => {
-  const actual = (await vi.importActual('../../../../client/helpers/can_use_cases'));
+  const actual = await vi.importActual('../../../../client/helpers/can_use_cases');
   return {
     ...actual,
     canUseCases: vi.fn(),

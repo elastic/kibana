@@ -19,30 +19,30 @@ import { useAssistantAvailability } from '../use_assistant_availability';
 
 vi.mock('../use_assistant_availability');
 vi.mock('../../timelines/components/notes/helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../timelines/components/notes/helpers')),
-      updateAndAssociateNode: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../timelines/components/notes/helpers')),
+    updateAndAssociateNode: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/lib/kibana')),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          cases: {
-            hooks: {
-              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
-                open: vi.fn(),
-              }),
-            },
+  const mocked = {
+    ...(await vi.importActual('../../common/lib/kibana')),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        cases: {
+          hooks: {
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({
+              open: vi.fn(),
+            }),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const Wrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
   const store = createMockStore(mockGlobalState);

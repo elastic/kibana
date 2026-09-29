@@ -16,47 +16,47 @@ import { Subject, of } from 'rxjs';
 import { useSearchState } from './use_search_state';
 
 vi.mock('@elastic/apm-rum', () => {
-      const mocked = {
-      apm: {
-        captureError: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apm: {
+      captureError: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../suggestions', () => {
-      const mocked = {
-      getSuggestions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSuggestions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib', () => {
-      const mocked = {
-      resultToOption: vi.fn((r: { id: string; title: string; url: string; type: string }) => ({
-        key: r.id,
-        label: r.title,
-        url: r.url,
-        type: r.type,
-      })),
-      suggestionToOption: vi.fn((s: { suggestion: string }) => ({
-        label: s.suggestion,
-        type: '__suggestion__',
-        suggestion: s.suggestion,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resultToOption: vi.fn((r: { id: string; title: string; url: string; type: string }) => ({
+      key: r.id,
+      label: r.title,
+      url: r.url,
+      type: r.type,
+    })),
+    suggestionToOption: vi.fn((s: { suggestion: string }) => ({
+      label: s.suggestion,
+      type: '__suggestion__',
+      suggestion: s.suggestion,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../search_syntax', () => {
-      const mocked = {
-      parseSearchParams: vi.fn((value: string) => ({
-        term: value,
-        filters: { types: [], tags: [] },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseSearchParams: vi.fn((value: string) => ({
+      term: value,
+      filters: { types: [], tags: [] },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type Result =
   | string

@@ -26,41 +26,41 @@ const mockGetDatasourceValue = vi
 const mockExtractOrGenerateDatasourceInfo = vi.fn();
 
 vi.mock('../../services', () => {
-      const mocked = {
-      getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/series', () => {
-      const mocked = {
-      getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
-      getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
+    getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/configurations/metric', () => {
-      const mocked = {
-      getConfigurationForMetric: vi.fn(() => mockGetConfigurationForMetric()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigurationForMetric: vi.fn(() => mockGetConfigurationForMetric()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/metrics', () => {
-      const mocked = {
-      isValidMetrics: vi.fn(() => mockIsValidMetrics()),
-      getReducedTimeRange: vi.fn().mockReturnValue('10'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isValidMetrics: vi.fn(() => mockIsValidMetrics()),
+    getReducedTimeRange: vi.fn().mockReturnValue('10'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/datasource', () => {
-      const mocked = {
-      extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToLens', () => {
   const model = createPanel({

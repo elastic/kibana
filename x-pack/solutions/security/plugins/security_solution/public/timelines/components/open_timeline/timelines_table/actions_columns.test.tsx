@@ -20,7 +20,7 @@ import { TestProvidersComponent } from '../../../../common/mock';
 
 vi.mock('../../../../common/lib/kibana');
 
-const { TimelinesTable } = (await vi.importActual('.'));
+const { TimelinesTable } = await vi.importActual('.');
 
 describe('#getActionsColumns', () => {
   let mockResults: OpenTimelineResult[];

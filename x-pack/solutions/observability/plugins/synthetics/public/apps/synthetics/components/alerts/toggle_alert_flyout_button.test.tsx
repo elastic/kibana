@@ -17,11 +17,11 @@ import { ToggleAlertFlyoutButton } from './toggle_alert_flyout_button';
 import { makeSyntheticsPermissionsCore } from '../../utils/testing/rtl_helpers';
 
 vi.mock('./hooks/use_synthetics_rules', () => {
-      const mocked = {
-      useSyntheticsRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const useSyntheticsRulesModule = require('./hooks/use_synthetics_rules');

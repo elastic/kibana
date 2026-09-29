@@ -20,52 +20,52 @@ const mockUseFetchRuleEvents = vi.fn();
 let capturedOnRefresh: (() => void) | undefined;
 
 vi.mock('../../../../hooks/use_fetch_rule_events', () => {
-      const mocked = {
-      useFetchRuleEvents: (...args: unknown[]) => mockUseFetchRuleEvents(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleEvents: (...args: unknown[]) => mockUseFetchRuleEvents(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_alert_timeline_url_state', () => {
-      const mocked = {
-      useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, vi.fn()],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertTimelineUrlState: () => [{ from: 'now-24h', to: 'now' }, vi.fn()],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../utils/discover_href_for_episode', () => {
-      const mocked = {
-      getDiscoverHrefForRuleQuery: () => '/discover',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDiscoverHrefForRuleQuery: () => '/discover',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../rule_context', () => {
-      const mocked = {
-      useRule: () => ({
-        id: 'rule-1',
-        grouping: { fields: [] },
-        query: { base: 'FROM logs-*' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRule: () => ({
+      id: 'rule-1',
+      grouping: { fields: [] },
+      query: { base: 'FROM logs-*' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-browser-shared', () => {
-      const mocked = {
-      AlertingDateRangePicker: ({
-        onRefresh,
-        'data-test-subj': dataTestSubj,
-      }: {
-        onRefresh?: () => void;
-        'data-test-subj'?: string;
-      }) => {
-        capturedOnRefresh = onRefresh;
-        return <div data-test-subj={dataTestSubj} />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingDateRangePicker: ({
+      onRefresh,
+      'data-test-subj': dataTestSubj,
+    }: {
+      onRefresh?: () => void;
+      'data-test-subj'?: string;
+    }) => {
+      capturedOnRefresh = onRefresh;
+      return <div data-test-subj={dataTestSubj} />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices: Record<string, unknown> = {
   data: {},
@@ -77,12 +77,12 @@ const mockServices: Record<string, unknown> = {
 };
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: (token: string) => mockServices[token],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: (token: string) => mockServices[token],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const successResult = {
   phases: [],

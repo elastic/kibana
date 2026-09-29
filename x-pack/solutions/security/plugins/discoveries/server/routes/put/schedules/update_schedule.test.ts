@@ -16,11 +16,11 @@ import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import { registerUpdateScheduleRoute } from './update_schedule';
 
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnalytics = coreMock.createSetup().analytics;
 import { createScheduleDataClient } from '../../../lib/schedules/create_schedule_data_client';
@@ -207,12 +207,10 @@ describe('registerUpdateScheduleRoute', () => {
 
   it('does NOT inject DEFAULT_WORKFLOW_CONFIG into a pre-FF schedule update', async () => {
     mockGetSchedule.mockResolvedValue(getScheduleMock());
-    (transformUpdatePropsFromApi as Mock).mockImplementation(
-      (_body, existingWorkflowConfig) => ({
-        name: 'internal-updated',
-        workflowConfig: existingWorkflowConfig,
-      })
-    );
+    (transformUpdatePropsFromApi as Mock).mockImplementation((_body, existingWorkflowConfig) => ({
+      name: 'internal-updated',
+      workflowConfig: existingWorkflowConfig,
+    }));
 
     const router = httpServiceMock.createRouter();
     const addVersionMock = vi.fn();

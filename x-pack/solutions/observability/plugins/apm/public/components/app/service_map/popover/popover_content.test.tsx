@@ -18,43 +18,43 @@ import { ResourceContents } from './resource_contents';
 import { EdgeContents } from './edge_contents';
 
 vi.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          uiSettings: { get: vi.fn().mockReturnValue(false) },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        uiSettings: { get: vi.fn().mockReturnValue(false) },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./dependency_contents', () => {
-      const mocked = {
-      DependencyContents: vi.fn(() => <div data-testid="dependency-contents" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DependencyContents: vi.fn(() => <div data-testid="dependency-contents" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./externals_list_contents', () => {
-      const mocked = {
-      ExternalsListContents: vi.fn(() => <div data-testid="externals-list-contents" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExternalsListContents: vi.fn(() => <div data-testid="externals-list-contents" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./resource_contents', () => {
-      const mocked = {
-      ResourceContents: vi.fn(() => <div data-testid="resource-contents" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResourceContents: vi.fn(() => <div data-testid="resource-contents" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edge_contents', () => {
-      const mocked = {
-      EdgeContents: vi.fn(() => <div data-testid="edge-contents" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EdgeContents: vi.fn(() => <div data-testid="edge-contents" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function node(data: ServiceMapNode['data'], id = data.id): ServiceMapNode {
   return { id, type: 'dependency', position: { x: 0, y: 0 }, data };

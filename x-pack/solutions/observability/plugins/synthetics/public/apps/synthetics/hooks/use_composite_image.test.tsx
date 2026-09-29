@@ -20,11 +20,11 @@ import * as compose from '../utils/monitor_test_result/compose_screenshot_images
 
 const mockUrlParams = vi.fn();
 vi.mock('./use_url_params', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MIME = 'image/jpeg';
 

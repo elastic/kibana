@@ -56,11 +56,11 @@ vi.mock('../app/use_available_owners');
 
 const mockReportTemplateAppliedOnCreate = vi.fn();
 vi.mock('../../analytics/templates/use_template_apply_ebt', () => {
-      const mocked = {
-      useTemplateAppliedOnCreateEBT: () => mockReportTemplateAppliedOnCreate,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTemplateAppliedOnCreateEBT: () => mockReportTemplateAppliedOnCreate,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as Mock;

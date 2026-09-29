@@ -13,15 +13,15 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { regenerateIds } from './regenerate_ids';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi
-        .fn()
-        .mockReturnValueOnce('uuidv4 #1')
-        .mockReturnValueOnce('uuidv4 #2')
-        .mockReturnValueOnce('uuidv4 #3'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi
+      .fn()
+      .mockReturnValueOnce('uuidv4 #1')
+      .mockReturnValueOnce('uuidv4 #2')
+      .mockReturnValueOnce('uuidv4 #3'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('#regenerateIds', () => {
   const objects = [

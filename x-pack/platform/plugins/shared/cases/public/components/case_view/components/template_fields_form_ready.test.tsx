@@ -16,11 +16,11 @@ import { FieldType } from '../../../../common/types/domain/template/fields';
 import type { InlineField } from '../../../../common/types/domain/template/fields';
 
 vi.mock('../../templates_v2/field_types/field_renderer', () => {
-      const mocked = {
-      FieldsRenderer: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldsRenderer: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Helper: mount in batch mode and read form values after mount
 const getInitialValues = (

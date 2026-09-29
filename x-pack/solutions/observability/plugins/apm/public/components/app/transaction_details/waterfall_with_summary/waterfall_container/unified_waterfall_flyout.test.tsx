@@ -16,59 +16,59 @@ import type { TraceItem } from '../../../../../../common/waterfall/unified_trace
 import { UnifiedWaterfallFlyout } from './unified_waterfall_flyout';
 
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      useTraceWaterfallContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTraceWaterfallContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        query: {
-          flyoutDetailTab: 'metadata',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      query: {
+        flyoutDetailTab: 'metadata',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start: '2025-01-15T11:00:00.000Z',
-        end: '2025-01-15T13:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start: '2025-01-15T11:00:00.000Z',
+      end: '2025-01-15T13:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../shared/span_flyout', () => {
-      const mocked = {
-      SpanFlyout: vi.fn((props) => (
-        <div data-test-subj="mockSpanFlyout" data-props={JSON.stringify(props)} />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpanFlyout: vi.fn((props) => (
+      <div data-test-subj="mockSpanFlyout" data-props={JSON.stringify(props)} />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../shared/transaction_flyout', () => {
-      const mocked = {
-      TransactionFlyout: vi.fn((props) => (
-        <div data-test-subj="mockTransactionFlyout" data-props={JSON.stringify(props)} />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionFlyout: vi.fn((props) => (
+      <div data-test-subj="mockTransactionFlyout" data-props={JSON.stringify(props)} />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseTraceWaterfallContext = useTraceWaterfallContext as MockedFunction<
   typeof useTraceWaterfallContext
 >;
 
-const { SpanFlyout } = (await vi.importMock('../../../../shared/span_flyout'));
-const { TransactionFlyout } = (await vi.importMock('../../../../shared/transaction_flyout'));
+const { SpanFlyout } = await vi.importMock('../../../../shared/span_flyout');
+const { TransactionFlyout } = await vi.importMock('../../../../shared/transaction_flyout');
 
 const ROOT_TRANSACTION: TraceItem = {
   id: 'transaction-1',

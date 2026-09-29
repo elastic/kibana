@@ -16,11 +16,11 @@ import type { EuiThemeComputed } from '@elastic/eui';
 
 // Mock dependencies
 vi.mock('./helpers', () => {
-      const mocked = {
-      getPercChange: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPercChange: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetPercChange = getPercChange as MockedFunction<typeof getPercChange>;
 const renderNote = (note: React.ReactNode) => render(<>{note}</>);

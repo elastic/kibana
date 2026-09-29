@@ -21,11 +21,11 @@ import type { RunEsqlMatcherDeps } from './run';
 import type { PerRuleState } from '../maintainers/automated_resolution/types';
 
 vi.mock('../../../asset_manager/resolve_entity_store_indices', () => {
-      const mocked = {
-      resolveLatestEntitiesIndexName: vi.fn().mockResolvedValue('.entities.v2.latest.default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveLatestEntitiesIndexName: vi.fn().mockResolvedValue('.entities.v2.latest.default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const EMAIL_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.EMAIL_EXACT_MATCH)!.matcher!;
 const SID_SPEC = getResolutionRuleConfig(RESOLUTION_RULE_IDS.WINDOWS_SID_BRIDGE)!.matcher!;

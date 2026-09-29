@@ -16,12 +16,10 @@ import {
 } from './inbound_events_enabled';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
-    connectorTypeIsInboundOnly: vi.fn(
-      (actionTypeId: string) => actionTypeId === '.inboundWebhook'
-    ),
+    connectorTypeIsInboundOnly: vi.fn((actionTypeId: string) => actionTypeId === '.inboundWebhook'),
     connectorTypeIsDual: vi.fn((actionTypeId: string) => actionTypeId === '.dual'),
     connectorTypeHasInboundEvents: vi.fn(
       (actionTypeId: string) => actionTypeId === '.inboundWebhook' || actionTypeId === '.dual'

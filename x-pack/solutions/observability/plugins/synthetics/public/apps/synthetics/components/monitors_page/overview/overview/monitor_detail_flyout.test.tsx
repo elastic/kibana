@@ -66,9 +66,9 @@ useEsSearchMock.mockReturnValue({
 
 describe('Monitor Detail Flyout', () => {
   beforeEach(() => {
-    vi
-      .spyOn(observabilitySharedPublic, 'useTheme')
-      .mockReturnValue({ eui: { euiColorVis0: 'red', euiColorVis9: 'red' } } as any);
+    vi.spyOn(observabilitySharedPublic, 'useTheme').mockReturnValue({
+      eui: { euiColorVis0: 'red', euiColorVis9: 'red' },
+    } as any);
     vi.spyOn(monitorDetail, 'useMonitorDetail').mockReturnValue({
       data: {
         docId: 'docId',
@@ -577,9 +577,9 @@ describe('Monitor Detail Flyout', () => {
     };
 
     it('resolves a stale heartbeat monitor and renders it read-only (no Edit, no Go to monitor, no 404 callout)', () => {
-      vi
-        .spyOn(monitorDetailLocator, 'useMonitorDetailLocator')
-        .mockReturnValue('/app/synthetics/monitor/hb-config-id?locationId=us-east');
+      vi.spyOn(monitorDetailLocator, 'useMonitorDetailLocator').mockReturnValue(
+        '/app/synthetics/monitor/hb-config-id?locationId=us-east'
+      );
 
       const { queryByText } = render(
         <MonitorDetailFlyout

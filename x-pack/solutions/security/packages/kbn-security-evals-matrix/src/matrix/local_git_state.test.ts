@@ -13,9 +13,9 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { readLocalGitState } from './local_git_state';
 
 vi.mock('child_process', () => {
-      const mocked = { execFileSync: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { execFileSync: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 // Cast needed: the typed signature resolves to the Buffer overload, but the source passes `encoding: 'utf8'`.
 const execFileSyncMock = execFileSync as unknown as Mock;

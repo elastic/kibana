@@ -35,89 +35,89 @@ const mockConnectors: unknown[] = [
 ];
 
 vi.mock('react-router', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('../../../../../common/hooks/use_connectors');
 vi.mock('../../workflow_configuration/hooks/use_list_workflows');
 vi.mock('../../workflow_configuration/hooks/use_generate_workflow');
 vi.mock('../../../use_workflow_editor_link', () => {
-      const mocked = {
-      useWorkflowEditorLink: vi.fn().mockReturnValue({
-        editorUrl: null,
-        navigateToEditor: vi.fn(),
-        resolvedWorkflowId: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowEditorLink: vi.fn().mockReturnValue({
+      editorUrl: null,
+      navigateToEditor: vi.fn(),
+      resolvedWorkflowId: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn().mockReturnValue({
-        dataView: undefined,
-        status: 'ready',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn().mockReturnValue({
+      dataView: undefined,
+      status: 'ready',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../workflow_settings_view/alert_retrieval_step/alert_retrieval_content', () => {
-      const mocked = {
-      AlertRetrievalContent: ({
-        alertRetrievalHasError,
-        connectorId,
-        workflowConfiguration,
-      }: {
-        alertRetrievalHasError: boolean;
-        connectorId: string | undefined;
-        workflowConfiguration: { alertRetrievalMode: string; esqlQuery?: string };
-      }) => (
-        <div
-          data-test-subj="alertRetrievalContent"
-          data-alert-retrieval-has-error={String(alertRetrievalHasError)}
-          data-connector-id={connectorId ?? ''}
-          data-default-alert-retrieval-mode={workflowConfiguration.alertRetrievalMode}
-          data-esql-query={workflowConfiguration.esqlQuery ?? ''}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertRetrievalContent: ({
+      alertRetrievalHasError,
+      connectorId,
+      workflowConfiguration,
+    }: {
+      alertRetrievalHasError: boolean;
+      connectorId: string | undefined;
+      workflowConfiguration: { alertRetrievalMode: string; esqlQuery?: string };
+    }) => (
+      <div
+        data-test-subj="alertRetrievalContent"
+        data-alert-retrieval-has-error={String(alertRetrievalHasError)}
+        data-connector-id={connectorId ?? ''}
+        data-default-alert-retrieval-mode={workflowConfiguration.alertRetrievalMode}
+        data-esql-query={workflowConfiguration.esqlQuery ?? ''}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 // Stub the heavy AlertSelection subtree (lens embeddable, unified-search bar,
 // alert-preview tabs) that otherwise blows the 5s render budget under jsdom. The
 // stub keeps the `alertSelection` marker and an `alertsRange` control wired to
 // `onSettingsChanged` so the settings-change assertion still exercises it.
 vi.mock('../../alert_selection', () => {
-      const mocked = {
-      AlertSelection: ({
-        settings,
-        onSettingsChanged,
-      }: {
-        settings: Record<string, unknown>;
-        onSettingsChanged?: (settings: Record<string, unknown>) => void;
-      }) => (
-        <div data-test-subj="alertSelection">
-          <input
-            data-test-subj="alertsRange"
-            onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertSelection: ({
+      settings,
+      onSettingsChanged,
+    }: {
+      settings: Record<string, unknown>;
+      onSettingsChanged?: (settings: Record<string, unknown>) => void;
+    }) => (
+      <div data-test-subj="alertSelection">
+        <input
+          data-test-subj="alertsRange"
+          onChange={(e) => onSettingsChanged?.({ ...settings, size: e.target.value })}
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const onChangeMock = vi.fn();
@@ -734,9 +734,7 @@ describe('EditForm', () => {
 describe.skip('EditForm — empty alert retrieval workflows (deferred validation)', () => {
   const mockTriggersActionsUi = triggersActionsUiMock.createStart();
   const mockUseListWorkflows = useListWorkflows as MockedFunction<typeof useListWorkflows>;
-  const mockUseGenerateWorkflow = useGenerateWorkflow as MockedFunction<
-    typeof useGenerateWorkflow
-  >;
+  const mockUseGenerateWorkflow = useGenerateWorkflow as MockedFunction<typeof useGenerateWorkflow>;
 
   const emptyWorkflowsConfig = {
     alertRetrievalMode: 'custom_query' as const,

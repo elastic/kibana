@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import {

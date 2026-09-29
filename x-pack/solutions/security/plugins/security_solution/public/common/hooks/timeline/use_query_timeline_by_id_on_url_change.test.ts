@@ -21,11 +21,11 @@ const mockFlyoutTimeline = vi
   .fn()
   .mockReturnValue({ timelineDefaults, savedObjectId: 'savedObjectId_12345' });
 vi.mock('../use_selector', () => {
-      const mocked = {
-      useShallowEqualSelector: () => mockFlyoutTimeline(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShallowEqualSelector: () => mockFlyoutTimeline(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocation = vi.fn().mockReturnValue({ pathname: '/test', search: '?' });
 vi.mock('react-router-dom', () => {

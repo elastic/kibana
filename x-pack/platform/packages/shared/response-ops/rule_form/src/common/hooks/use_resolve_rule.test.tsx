@@ -21,13 +21,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 vi.mock('../apis/resolve_rule/resolve_rule', () => {
-      const mocked = {
-      resolveRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { resolveRule } = (await vi.importMock('../apis/resolve_rule/resolve_rule'));
+const { resolveRule } = await vi.importMock('../apis/resolve_rule/resolve_rule');
 
 const httpMock = vi.fn();
 

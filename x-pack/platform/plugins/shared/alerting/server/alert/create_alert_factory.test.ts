@@ -15,11 +15,11 @@ import { createAlertFactory, getPublicAlertFactory } from './create_alert_factor
 import { processAlerts } from '../lib';
 
 vi.mock('../lib', () => {
-      const mocked = {
-      processAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    processAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let clock: sinon.SinonFakeTimers;
 const logger = loggingSystemMock.create().get();

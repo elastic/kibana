@@ -13,19 +13,19 @@ import { useActionPolicyForm } from './use_action_policy_form';
 import { DEFAULT_FORM_STATE } from './constants';
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      isActionValid: (action: {
-        source: 'existing' | 'inline';
-        workflowId?: string | null;
-        connectorId?: string | null;
-        params?: string;
-      }) =>
-        action.source === 'existing'
-          ? Boolean(action.workflowId)
-          : action.connectorId != null && (action.params ?? '').trim() !== '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isActionValid: (action: {
+      source: 'existing' | 'inline';
+      workflowId?: string | null;
+      connectorId?: string | null;
+      params?: string;
+    }) =>
+      action.source === 'existing'
+        ? Boolean(action.workflowId)
+        : action.connectorId != null && (action.params ?? '').trim() !== '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const EXISTING_POLICY: ActionPolicyResponse = {
   id: 'policy-1',

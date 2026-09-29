@@ -19,23 +19,23 @@ const mockGet = vi.fn();
 const mockSet = vi.fn();
 
 vi.mock('@kbn/kibana-utils-plugin/public', () => {
-      const mocked = {
-      createKbnUrlStateStorage: () => ({
-        get: mockGet,
-        set: mockSet,
-      }),
-      withNotifyOnErrors: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createKbnUrlStateStorage: () => ({
+      get: mockGet,
+      set: mockSet,
+    }),
+    withNotifyOnErrors: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHistory = { replace: vi.fn(), location: { search: '' } };
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => mockHistory,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => mockHistory,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const filterUpdates$ = new Subject<void>();
 const mockFilterManager = {
@@ -46,16 +46,16 @@ const mockFilterManager = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          data: { query: { filterManager: mockFilterManager } },
-          notifications: { toasts: {} },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        data: { query: { filterManager: mockFilterManager } },
+        notifications: { toasts: {} },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFilterUrlSync', () => {
   beforeEach(() => {

@@ -26,55 +26,55 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      useToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_license', () => {
-      const mocked = {
-      licenseService: {
-        isEnterprise: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    licenseService: {
+      isEnterprise: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../assistant/use_assistant_availability', () => {
-      const mocked = {
-      useAssistantAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_find_cost_savings_prompts', () => {
-      const mocked = {
-      useFindCostSavingsPrompts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindCostSavingsPrompts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../providers/ai_value/export_provider', () => {
-      const mocked = {
-      useAIValueExportContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAIValueExportContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockLicenseService = licenseService as Mocked<typeof licenseService>;

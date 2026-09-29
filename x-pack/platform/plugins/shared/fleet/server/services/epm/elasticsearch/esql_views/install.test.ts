@@ -56,11 +56,11 @@ async function createPackageInstallContext() {
 describe('installEsqlViews', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi
-      .mocked(updateEsAssetReferences)
-      .mockImplementation(async (_, __, currentAssets, { assetsToAdd }) => {
+    vi.mocked(updateEsAssetReferences).mockImplementation(
+      async (_, __, currentAssets, { assetsToAdd }) => {
         return [...currentAssets, ...(assetsToAdd ?? [])];
-      });
+      }
+    );
   });
 
   it('should install esql views', async () => {

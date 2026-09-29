@@ -21,7 +21,7 @@ import { getAgentStatusClient as _getAgentStatusClient } from '../../services';
 import type { DeepMutable } from '../../../../common/endpoint/types';
 
 vi.mock('../../services', async () => {
-  const realModule = (await vi.importActual('../../services'));
+  const realModule = await vi.importActual('../../services');
 
   return {
     ...realModule,
@@ -58,9 +58,9 @@ describe('Agent Status API route handler', () => {
       query: { agentType: 'sentinel_one', agentIds: ['one', 'two'] },
     });
 
-    (
-      (await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as Mock
-    ).mockReturnValue(sentinelOneMock.createConnectorActionsClient());
+    ((await apiTestSetup.httpHandlerContextMock.actions).getActionsClient as Mock).mockReturnValue(
+      sentinelOneMock.createConnectorActionsClient()
+    );
 
     registerAgentStatusRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
@@ -125,9 +125,7 @@ describe('Agent Status API route handler', () => {
   });
 
   it('should use a scoped SO client when spaces awareness feature is enabled', async () => {
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
-      'foo'
-    );
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue('foo');
 
     await apiTestSetup
       .getRegisteredVersionedRoute('get', AGENT_STATUS_ROUTE, '1')

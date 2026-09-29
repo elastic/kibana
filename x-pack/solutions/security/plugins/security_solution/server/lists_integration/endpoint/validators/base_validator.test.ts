@@ -70,9 +70,7 @@ describe('When using Artifacts Exceptions BaseValidator', () => {
       if (withNoAuth) {
         const fleetAuthz = createFleetAuthzMock();
         fleetAuthz.fleet.all = false;
-        (servicesStart.fleetStartServices.authz.fromRequest as Mock).mockResolvedValue(
-          fleetAuthz
-        );
+        (servicesStart.fleetStartServices.authz.fromRequest as Mock).mockResolvedValue(fleetAuthz);
         (servicesStart.security.authc.getCurrentUser as Mock).mockReturnValue(
           securityMock.createMockAuthenticatedUser()
         );

@@ -314,9 +314,9 @@ describe('registerUsageMetricsRoute', () => {
         data_streams: [{ name: '.ds-1' }, { name: '.ds-2' }],
       });
 
-    vi
-      .spyOn(DataUsageService.prototype, 'getMetrics')
-      .mockRejectedValue(new AutoOpsError('Uh oh, something went wrong!'));
+    vi.spyOn(DataUsageService.prototype, 'getMetrics').mockRejectedValue(
+      new AutoOpsError('Uh oh, something went wrong!')
+    );
 
     registerUsageMetricsRoute(router, mockedDataUsageContext);
 

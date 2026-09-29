@@ -22,28 +22,31 @@ import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 
 vi.mock('../../../actions/use_user_profiles');
 vi.mock('../../../common/experimental_features_context', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-      useExperimentalFeatures: vi
-        .fn()
-        .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
-      ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    useExperimentalFeatures: vi
+      .fn()
+      .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
+    ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../results/export_filters_context', () => {
-      const mocked = {
-      useExportFilters: vi.fn().mockReturnValue(undefined),
-      ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportFilters: vi.fn().mockReturnValue(undefined),
+    ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../cases/add_to_cases', () => {
-      const mocked = {
-      AddToCaseWrapper: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToCaseWrapper: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as MockedFunction<
   typeof useBulkGetUserProfiles
@@ -52,13 +55,14 @@ const mockUseBulkGetUserProfiles = useBulkGetUserProfiles as MockedFunction<
 const mockUseKibana = vi.fn();
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const baseData: LiveQueryDetailsItem = {
   action_id: 'action-123',
@@ -193,7 +197,9 @@ describe('QueryDetailsHeader', () => {
     });
 
     it('is shown when exportResults flag is on', async () => {
-      const { useIsExperimentalFeatureEnabled } = (await vi.importMock('../../../common/experimental_features_context'));
+      const { useIsExperimentalFeatureEnabled } = await vi.importMock(
+        '../../../common/experimental_features_context'
+      );
       (useIsExperimentalFeatureEnabled as Mock).mockReturnValue(true);
 
       renderHeader();

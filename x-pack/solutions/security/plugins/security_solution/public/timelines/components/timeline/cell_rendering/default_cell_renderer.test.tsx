@@ -136,7 +136,9 @@ describe('host link rendering', () => {
   const hostNameHeader = cloneDeep(defaultHeaders[4]);
 
   beforeEach(async () => {
-    const { getColumnRenderer: realGetColumnRenderer } = (await vi.importActual('../body/renderers/get_column_renderer'));
+    const { getColumnRenderer: realGetColumnRenderer } = await vi.importActual(
+      '../body/renderers/get_column_renderer'
+    );
 
     getColumnRendererMock.mockImplementation(realGetColumnRenderer); // link rendering tests must use the real renderer
   });

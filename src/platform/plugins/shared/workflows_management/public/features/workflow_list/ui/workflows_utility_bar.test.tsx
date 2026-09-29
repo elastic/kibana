@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { fireEvent, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowBulkActions } from './use_workflow_bulk_actions';

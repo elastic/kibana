@@ -14,21 +14,21 @@ import React from 'react';
 import { ElasticAgentCard } from './elastic_agent_card';
 
 vi.mock('../../../context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../context')),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          http: {
-            basePath: { prepend: vi.fn((path: string) => (path ? path : 'path')) },
-          },
-          application: { capabilities: { navLinks: { integrations: true } } },
-          uiSettings: { get: vi.fn() },
-          theme: { theme$: vi.fn() },
+  const mocked = {
+    ...(await vi.importActual('../../../context')),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        http: {
+          basePath: { prepend: vi.fn((path: string) => (path ? path : 'path')) },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: { capabilities: { navLinks: { integrations: true } } },
+        uiSettings: { get: vi.fn() },
+        theme: { theme$: vi.fn() },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ElasticAgentCard', () => {
   test('renders', () => {

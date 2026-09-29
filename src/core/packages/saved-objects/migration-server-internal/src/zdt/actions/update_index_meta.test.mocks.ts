@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const updateMappingsMock = vi.fn();
 
 vi.doMock('../../actions/update_mappings', async () => {
-  const actual = (await vi.importActual('../../actions/update_mappings'));
+  const actual = await vi.importActual('../../actions/update_mappings');
   return {
     ...actual,
     updateMappings: updateMappingsMock,

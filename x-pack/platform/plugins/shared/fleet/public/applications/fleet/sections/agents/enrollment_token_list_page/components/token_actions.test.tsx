@@ -20,20 +20,21 @@ const mockAddError = vi.fn();
 const mockSendDeleteOneEnrollmentAPIKey = vi.fn();
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: (...args: unknown[]) => mockAddSuccess(...args),
-            addError: (...args: unknown[]) => mockAddError(...args),
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: (...args: unknown[]) => mockAddSuccess(...args),
+          addError: (...args: unknown[]) => mockAddError(...args),
         },
-      }),
-      sendDeleteOneEnrollmentAPIKey: (...args: unknown[]) => mockSendDeleteOneEnrollmentAPIKey(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    sendDeleteOneEnrollmentAPIKey: (...args: unknown[]) =>
+      mockSendDeleteOneEnrollmentAPIKey(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MOCK_API_KEY: EnrollmentAPIKey = {
   id: 'key-1',

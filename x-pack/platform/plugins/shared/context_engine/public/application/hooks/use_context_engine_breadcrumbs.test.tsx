@@ -16,11 +16,11 @@ import { useContextEngineBreadcrumbs } from './use_context_engine_breadcrumbs';
 const mockUseKibana = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useContextEngineBreadcrumbs', () => {
   const createServices = (

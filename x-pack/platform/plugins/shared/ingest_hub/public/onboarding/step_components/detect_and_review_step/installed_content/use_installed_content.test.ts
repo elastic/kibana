@@ -11,18 +11,18 @@ import type { Mock } from 'vitest';
 import { renderHook } from '@testing-library/react';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@kbn/react-query';

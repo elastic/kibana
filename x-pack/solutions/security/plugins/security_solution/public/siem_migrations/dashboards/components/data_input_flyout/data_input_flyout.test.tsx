@@ -34,7 +34,7 @@ const mockOnClose = vi.fn();
 const mockShowModal = vi.fn();
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useGeneratedHtmlId: vi.fn(() => 'generated-id'),
@@ -42,44 +42,46 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            dashboards: {
-              api: {
-                getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
-              },
-            },
-          },
-          notifications: {
-            toasts: {
-              addError: mockAddError,
-              addSuccess: mockAddSuccess,
-            },
-          },
-          triggersActionsUi: {
-            actionTypeRegistry: {
-              get: vi.fn().mockReturnValue('Mock Action Type'),
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          dashboards: {
+            api: {
+              getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: {
+          toasts: {
+            addError: mockAddError,
+            addSuccess: mockAddSuccess,
+          },
+        },
+        triggersActionsUi: {
+          actionTypeRegistry: {
+            get: vi.fn().mockReturnValue('Mock Action Type'),
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/user_profiles/use_get_current_user_profile', () => {
-      const mocked = {
-      useGetCurrentUserProfile: () => ({
-        data: { user: { full_name: 'Test User', username: 'testuser' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetCurrentUserProfile: () => ({
+      data: { user: { full_name: 'Test User', username: 'testuser' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/migration_data_input_flyout_context', async () => {
-  const actual = (await vi.importActual('../../../common/components/migration_data_input_flyout_context'));
+  const actual = await vi.importActual(
+    '../../../common/components/migration_data_input_flyout_context'
+  );
   return {
     ...actual,
     useMigrationDataInputContext: () => ({
@@ -89,7 +91,7 @@ vi.mock('../../../common/components/migration_data_input_flyout_context', async 
 });
 
 vi.mock('../../../common/hooks/use_get_missing_resources', async () => {
-  const actual = (await vi.importActual('../../../common/hooks/use_get_missing_resources'));
+  const actual = await vi.importActual('../../../common/hooks/use_get_missing_resources');
   return {
     ...actual,
     useGetMissingResources: () => ({
@@ -101,7 +103,7 @@ vi.mock('../../../common/hooks/use_get_missing_resources', async () => {
 });
 
 vi.mock('../../logic/use_start_migration', async () => {
-  const actual = (await vi.importActual('../../logic/use_start_migration'));
+  const actual = await vi.importActual('../../logic/use_start_migration');
   return {
     ...actual,
     useStartMigration: () => ({
@@ -113,8 +115,9 @@ vi.mock('../../logic/use_start_migration', async () => {
 });
 
 vi.mock('../../hooks/use_start_dashboard_migration_modal');
-const useStartDashboardsMigrationModalMock =
-  useStartDashboardsMigrationModal as MockedFunction<typeof useStartDashboardsMigrationModal>;
+const useStartDashboardsMigrationModalMock = useStartDashboardsMigrationModal as MockedFunction<
+  typeof useStartDashboardsMigrationModal
+>;
 
 describe('DashboardMigrationDataInputFlyout', () => {
   beforeEach(() => {

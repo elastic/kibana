@@ -23,7 +23,7 @@ import {
 } from '../../components';
 
 vi.mock('../../../../kibana_services', async () => {
-  const services = (await vi.importActual('../../../../kibana_services'));
+  const services = await vi.importActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: vi.fn(),

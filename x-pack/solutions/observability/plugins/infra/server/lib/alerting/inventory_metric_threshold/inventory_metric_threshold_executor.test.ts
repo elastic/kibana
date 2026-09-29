@@ -31,9 +31,9 @@ import type {
 } from '@kbn/observability-shared-plugin/common';
 
 vi.mock('./evaluate_condition', () => {
-      const mocked = { evaluateCondition: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { evaluateCondition: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockAssetDetailsLocator = {
   getRedirectUrl: vi
@@ -103,8 +103,9 @@ const mockOptions = {
 };
 
 const setEvaluationResults = async (response: Record<string, ConditionResult>) => {
-  return (await vi.importMock('./evaluate_condition'))
-    .evaluateCondition.mockImplementation(() => response);
+  return (await vi.importMock('./evaluate_condition')).evaluateCondition.mockImplementation(
+    () => response
+  );
 };
 const createMockStaticConfiguration = (sources: any) => ({
   alerting: {

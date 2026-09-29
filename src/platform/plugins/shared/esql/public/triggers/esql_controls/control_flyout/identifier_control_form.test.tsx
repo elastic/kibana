@@ -26,7 +26,7 @@ import {
 } from '@kbn/controls-constants';
 
 vi.mock('@kbn/esql-utils', async () => {
-  const actual = (await vi.importActual('@kbn/esql-utils'));
+  const actual = await vi.importActual('@kbn/esql-utils');
   return {
     getESQLQueryColumnsRaw: vi.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
     getValuesFromQueryField: vi.fn().mockReturnValue('field'),

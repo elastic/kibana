@@ -10,11 +10,11 @@ import { vi } from 'vitest';
 import { getListItemTemplate } from './get_list_item_template';
 
 vi.mock('./list_item_mappings.json', () => {
-      const mocked = {
-      listMappings: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    listMappings: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('get_list_item_template', () => {
   beforeEach(() => {

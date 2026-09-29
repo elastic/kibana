@@ -16,11 +16,11 @@ import { TARGET_TYPE_INDEX } from '../../common/target_types';
 import { useProfilesListView } from './use_profiles_list_view';
 
 vi.mock('../../common/services/profiles/hooks/use_find_all_profiles', () => {
-      const mocked = {
-      useFindAllProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAllProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createProfile = (id: string): AnonymizationProfile => ({
   id,

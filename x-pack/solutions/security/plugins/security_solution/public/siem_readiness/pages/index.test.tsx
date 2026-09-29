@@ -16,50 +16,50 @@ import { useKibana } from '../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../common/lib/telemetry/events/siem_readiness/types';
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [[], vi.fn()]));
 vi.mock('@kbn/siem-readiness', () => {
-      const mocked = { ALL_CATEGORIES: [] };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ALL_CATEGORIES: [] };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./visibility_section_boxes', () => {
-      const mocked = {
-      VisibilitySectionBoxes: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
-        <button type="button" onClick={() => onTabSelect('quality')}>
-          {'box-tab'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisibilitySectionBoxes: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
+      <button type="button" onClick={() => onTabSelect('quality')}>
+        {'box-tab'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./visibility_section_tabs', () => {
-      const mocked = {
-      VisibilitySectionTabs: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
-        <button type="button" onClick={() => onTabSelect('continuity')}>
-          {'nav-tab'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisibilitySectionTabs: ({ onTabSelect }: { onTabSelect: (id: string) => void }) => (
+      <button type="button" onClick={() => onTabSelect('continuity')}>
+        {'nav-tab'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/configuration_panel', () => {
-      const mocked = {
-      CategoryConfigurationPanel: () => null,
-      ACTIVE_CATEGORIES_STORAGE_KEY: 'test-key',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CategoryConfigurationPanel: () => null,
+    ACTIVE_CATEGORIES_STORAGE_KEY: 'test-key',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPush = vi.fn();
 const mockReportEvent = vi.fn();

@@ -137,16 +137,16 @@ const elasticDescription = 'Runs on GPUs (token-based billing)';
 const elasticsearchDescription = 'Runs on ML Nodes (resource-based billing)';
 
 vi.mock('../../hooks/use_delete_endpoint', () => {
-      const mocked = {
-      useDeleteEndpoint: () => ({
-        mutate: vi.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteEndpoint: () => ({
+      mutate: vi.fn().mockImplementation(() => Promise.resolve()), // Mock implementation of the mutate function
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const actual = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...actual,
     useKibana: vi.fn(() => ({

@@ -15,19 +15,19 @@ import type { Mock } from 'vitest';
 // MongoServerError inline so instanceof checks in the implementation resolve
 // against the same class reference that the test uses.
 vi.mock('mongodb', () => {
-      const mocked = {
-      MongoClient: vi.fn(),
-      MongoServerError: class MongoServerError extends Error {
-        code: number | undefined;
-        constructor(message: string, options?: { code?: number }) {
-          super(message);
-          this.name = 'MongoServerError';
-          this.code = options?.code;
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MongoClient: vi.fn(),
+    MongoServerError: class MongoServerError extends Error {
+      code: number | undefined;
+      constructor(message: string, options?: { code?: number }) {
+        super(message);
+        this.name = 'MongoServerError';
+        this.code = options?.code;
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { MongoClient, MongoServerError } from 'mongodb';
 import { getNodeSSLOptions } from '@kbn/actions-utils';
@@ -271,13 +271,11 @@ describe('mongodbClientType', () => {
 
     it('rejects before creating a client when an SRV-resolved host is denied', async () => {
       const ctx = makeBuildContext({ config: { uri: 'mongodb+srv://cluster0.example.com/mydb' } });
-      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation(
-        (hostname: string) => {
-          if (hostname === 'shard2.example.com') {
-            throw new Error('host "shard2.example.com" is not in the allowedHosts list');
-          }
+      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation((hostname: string) => {
+        if (hostname === 'shard2.example.com') {
+          throw new Error('host "shard2.example.com" is not in the allowedHosts list');
         }
-      );
+      });
 
       await expect(mongodbClientType.build(ctx)).rejects.toThrow('is not in the allowedHosts list');
       expect(MockMongoClient).not.toHaveBeenCalled();
@@ -321,13 +319,11 @@ describe('mongodbClientType', () => {
       const ctx = makeBuildContext({
         config: { uri: 'mongodb://allowed.example.com:27017,denied.example.com:27017/mydb' },
       });
-      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation(
-        (hostname: string) => {
-          if (hostname === 'denied.example.com') {
-            throw new Error('host "denied.example.com" is not in the allowedHosts list');
-          }
+      (ctx.networkSettings.ensureHostnameAllowed as Mock).mockImplementation((hostname: string) => {
+        if (hostname === 'denied.example.com') {
+          throw new Error('host "denied.example.com" is not in the allowedHosts list');
         }
-      );
+      });
 
       await expect(mongodbClientType.build(ctx)).rejects.toThrow('is not in the allowedHosts list');
       expect(MockMongoClient).not.toHaveBeenCalled();

@@ -12,31 +12,31 @@ import { renderHook } from '@testing-library/react';
 const mockSetModelMarkers = vi.fn();
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        editor: {
-          setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
-        },
-        MarkerSeverity: { Error: 8, Warning: 4 },
+  const mocked = {
+    monaco: {
+      editor: {
+        setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      MarkerSeverity: { Error: 8, Warning: 4 },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConditionMarkers = vi.fn();
 const mockRuleMarkers = vi.fn();
 vi.mock('../utils/validate_condition_field_references', () => {
-      const mocked = {
-      getMissingConditionFieldMarkers: (value: string) => mockConditionMarkers(value),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMissingConditionFieldMarkers: (value: string) => mockConditionMarkers(value),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/validate_field_validation_rules', () => {
-      const mocked = {
-      getInapplicableValidationRuleMarkers: (value: string) => mockRuleMarkers(value),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInapplicableValidationRuleMarkers: (value: string) => mockRuleMarkers(value),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useSemanticValidation } from './use_semantic_validation';
 

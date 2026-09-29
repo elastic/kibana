@@ -18,14 +18,14 @@ import { useTimeRangeUpdate } from '../../hooks/use_time_range_update';
 import { useTimefilter } from '../../hooks/use_timefilter';
 
 vi.mock('./uncontrolled_streams_app_bar', () => {
-      const mocked = {
-      UncontrolledStreamsAppSearchBar: (props: UncontrolledStreamsAppSearchBarProps) => {
-        // Store onQuerySubmit on the DOM so tests can invoke it
-        return <div data-testid="mockSearchBar" ref={() => (capturedProps = props)} />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UncontrolledStreamsAppSearchBar: (props: UncontrolledStreamsAppSearchBarProps) => {
+      // Store onQuerySubmit on the DOM so tests can invoke it
+      return <div data-testid="mockSearchBar" ref={() => (capturedProps = props)} />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_time_range');
 vi.mock('../../hooks/use_time_range_update');

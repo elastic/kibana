@@ -23,49 +23,46 @@ import {
 } from '../../../../common/constants/action_ids';
 
 vi.mock('../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_workflow_status_context_menu_items',
   () => {
-      const mocked = {
-        useAttackWorkflowStatusContextMenuItems: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAttackWorkflowStatusContextMenuItems: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../attack_discovery/pages/use_find_attack_discoveries', () => {
-      const mocked = {
-      useInvalidateFindAttackDiscoveries: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateFindAttackDiscoveries: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../attack_discovery/pages/use_attack_discovery_bulk', () => {
-      const mocked = {
-      useAttackDiscoveryBulk: () => ({
-        mutateAsync: vi.fn().mockResolvedValue(undefined),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryBulk: () => ({
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-vi.mock(
-  '../../../../attack_discovery/pages/results/take_action/use_update_alerts_status',
-  () => {
-      const mocked = {
-        useUpdateAlertsStatus: () => ({
-          mutateAsync: vi.fn().mockResolvedValue(undefined),
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../attack_discovery/pages/results/take_action/use_update_alerts_status', () => {
+  const mocked = {
+    useUpdateAlertsStatus: () => ({
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildHit = (overrides: Record<string, unknown> = {}): DataTableRecord =>
   ({

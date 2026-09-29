@@ -135,9 +135,7 @@ describe('useHighlightedFieldsPrivilege', () => {
     });
 
     it('should return isDisabled as true when rule is immutable (prebuilt rule) and upselling message is available', () => {
-      (usePrebuiltRuleCustomizationUpsellingMessage as Mock).mockReturnValue(
-        'upselling message'
-      );
+      (usePrebuiltRuleCustomizationUpsellingMessage as Mock).mockReturnValue('upselling message');
       const { result } = renderUseHighlightedFieldsPrivilege({
         ...defaultProps,
         rule: { type: 'query', immutable: true } as RuleResponse,

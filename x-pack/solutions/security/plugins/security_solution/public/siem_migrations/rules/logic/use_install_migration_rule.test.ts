@@ -19,27 +19,27 @@ import { useQueryClient } from '@kbn/react-query';
 
 vi.mock('../api');
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addSuccess: vi.fn(),
-        addError: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addSuccess: vi.fn(),
+      addError: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResponse = { installed: 1 };
 const mockError = new Error('API error');

@@ -22,20 +22,20 @@ import { BehaviorSubject } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 
 vi.mock('@kbn/presentation-util', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/presentation-util')),
-      openLazyFlyout: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/presentation-util')),
+    openLazyFlyout: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDashboardMenuItems', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi
-      .mocked(shareService!.availableIntegrations)
-      .mockImplementation(() => [] as ShareActionIntents[]);
+    vi.mocked(shareService!.availableIntegrations).mockImplementation(
+      () => [] as ShareActionIntents[]
+    );
   });
 
   describe('Add panel', () => {
@@ -85,9 +85,8 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Export top-nav item with JSON when only exportDerivatives integrations are available', () => {
-      vi
-        .mocked(shareService!.availableIntegrations)
-        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+      vi.mocked(shareService!.availableIntegrations).mockImplementation(
+        (_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
             return [];
           }
@@ -104,7 +103,8 @@ describe('useDashboardMenuItems', () => {
           }
 
           return [];
-        });
+        }
+      );
 
       const { result } = renderHook(
         () =>
@@ -132,9 +132,8 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('does not include Schedule export when only exportJson and scheduledReports are available', () => {
-      vi
-        .mocked(shareService!.availableIntegrations)
-        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+      vi.mocked(shareService!.availableIntegrations).mockImplementation(
+        (_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
             return [];
           }
@@ -157,7 +156,8 @@ describe('useDashboardMenuItems', () => {
           }
 
           return [];
-        });
+        }
+      );
 
       const { result } = renderHook(
         () =>
@@ -185,9 +185,8 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Schedule export when a schedulable export integration is available', () => {
-      vi
-        .mocked(shareService!.availableIntegrations)
-        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+      vi.mocked(shareService!.availableIntegrations).mockImplementation(
+        (_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
             return [
               {
@@ -217,7 +216,8 @@ describe('useDashboardMenuItems', () => {
           }
 
           return [];
-        });
+        }
+      );
 
       const { result } = renderHook(
         () =>
@@ -247,9 +247,8 @@ describe('useDashboardMenuItems', () => {
     });
 
     test('includes Export top-nav item with JSON and Reporting items when export and exportDerivatives integrations are available', () => {
-      vi
-        .mocked(shareService!.availableIntegrations)
-        .mockImplementation((_objectType: string, groupId?: string): ShareActionIntents[] => {
+      vi.mocked(shareService!.availableIntegrations).mockImplementation(
+        (_objectType: string, groupId?: string): ShareActionIntents[] => {
           if (groupId === 'export') {
             return [
               {
@@ -279,7 +278,8 @@ describe('useDashboardMenuItems', () => {
           }
 
           return [];
-        });
+        }
+      );
 
       const { result } = renderHook(
         () =>

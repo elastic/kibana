@@ -20,14 +20,14 @@ vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../containers/use_create_attachments');
 vi.mock('../../../case_view/use_on_refresh_case_view_page');
 vi.mock('@kbn/agent-builder-dashboards-common', () => {
-      const mocked = {
-      dashboardStateToAttachmentData: vi.fn((attrs) => ({
-        panels: attrs?.panels ?? [],
-        fromConverter: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    dashboardStateToAttachmentData: vi.fn((attrs) => ({
+      panels: attrs?.panels ?? [],
+      fromConverter: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useToastsMock = useToasts as Mock;

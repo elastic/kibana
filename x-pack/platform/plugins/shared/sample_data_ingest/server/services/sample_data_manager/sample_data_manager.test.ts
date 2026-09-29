@@ -42,9 +42,7 @@ import { getInstallTaskId, type InstallSampleDataTaskState } from '../../tasks/i
 
 const MockedArtifactManager = ArtifactManager as MockedClass<typeof ArtifactManager>;
 const MockedIndexManager = IndexManager as MockedClass<typeof IndexManager>;
-const MockedSavedObjectsManager = SavedObjectsManager as MockedClass<
-  typeof SavedObjectsManager
->;
+const MockedSavedObjectsManager = SavedObjectsManager as MockedClass<typeof SavedObjectsManager>;
 
 describe('SampleDataManager', () => {
   let logger: MockedLogger;

@@ -30,7 +30,7 @@ import {
 import { setupEuiMatchers } from '@elastic/eui/lib/test/rtl/matchers';
 
 vi.mock('@kbn/esql-utils', async () => {
-  const actual = (await vi.importActual('@kbn/esql-utils'));
+  const actual = await vi.importActual('@kbn/esql-utils');
   return {
     getESQLResults: vi.fn().mockResolvedValue({
       response: {

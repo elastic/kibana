@@ -117,9 +117,9 @@ describe('isManagedBulkEnabled', () => {
     vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { managedBulk: { enabled: false } },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.com' },
+    } as any);
 
     expect(isManagedBulkEnabled()).toBe(false);
   });
@@ -128,9 +128,9 @@ describe('isManagedBulkEnabled', () => {
     vi.spyOn(appContextService, 'getConfig').mockReturnValue({
       agentless: { managedBulk: { enabled: true } },
     } as any);
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.com' },
+    } as any);
 
     expect(isManagedBulkEnabled()).toBe(true);
   });
@@ -148,17 +148,17 @@ describe('getManagedBulkEndpoint', () => {
   });
 
   it('should append /_es to the managedOtlp url when present', () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com' } } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.com' },
+    } as any);
 
     expect(getManagedBulkEndpoint()).toBe('https://managed-otlp.example.com/_es');
   });
 
   it('should strip a trailing slash before appending /_es', () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ managedOtlp: { url: 'https://managed-otlp.example.com/' } } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      managedOtlp: { url: 'https://managed-otlp.example.com/' },
+    } as any);
 
     expect(getManagedBulkEndpoint()).toBe('https://managed-otlp.example.com/_es');
   });
@@ -170,9 +170,10 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
   });
 
   it('should prepend the agentless api base path to the endpoint with ess if in cloud', () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+    } as any);
     const agentlessConfig = {
       api: {
         url: 'https://agentless-api.com',
@@ -186,9 +187,10 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
   });
 
   it('should prepend the agentless api base path to the endpoint with serverless if in serverless', () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: false, isServerlessEnabled: true } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: false,
+      isServerlessEnabled: true,
+    } as any);
     const agentlessConfig = {
       api: {
         url: 'https://agentless-api.com',
@@ -202,9 +204,10 @@ describe('prependAgentlessApiBasePathToEndpoint', () => {
   });
 
   it('should prepend the agentless api base path to the endpoint with a dynamic path', () => {
-    vi
-      .spyOn(appContextService, 'getCloud')
-      .mockReturnValue({ isCloudEnabled: true, isServerlessEnabled: false } as any);
+    vi.spyOn(appContextService, 'getCloud').mockReturnValue({
+      isCloudEnabled: true,
+      isServerlessEnabled: false,
+    } as any);
 
     const agentlessConfig = {
       api: {

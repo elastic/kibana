@@ -14,11 +14,11 @@ import { transformIn } from './transform_in';
 import { DASHBOARD_LINK_TYPE } from '../../constants';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValueOnce('fb1b3fc7-6e12-4542-bcf5-c61ad77241c5'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValueOnce('fb1b3fc7-6e12-4542-bcf5-c61ad77241c5'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformIn', () => {
   test('should extract saved object reference from "by reference" state', () => {

@@ -80,18 +80,18 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return empty integrations array if feature flag is not available', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: false } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: false,
+    } as any);
     expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
       integrations: [],
     });
   });
 
   it('should return empty integrations array if license is not at least Enterprise', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(false);
 
     expect(await getRemoteSyncedIntegrationsInfoByOutputId(soClientMock, 'remote1')).toEqual({
@@ -100,9 +100,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return response with error if the passed outputId is not found', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockRejectedValue({ isBoom: true, output: { statusCode: 404 } } as any);
 
     expect(
@@ -119,9 +119,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
       is_default_monitoring: true,
       name: 'ES Output',
     } as any;
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue(outputEs);
 
     await expect(
@@ -130,9 +130,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should throw error if the output has sync_integrations = false', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({ ...output, sync_integrations: false } as any);
 
     await expect(
@@ -141,9 +141,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should throw error if kibanaUrl is not present', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({ ...output, sync_integrations: true } as any);
 
     await expect(
@@ -152,9 +152,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should throw error if kibanaApiKey is not present', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -169,9 +169,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return an error if it cannot establish a connection with remote kibana', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -193,9 +193,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return the response from the remote status api', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -215,9 +215,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should work if kibanaUrl has a trailing slash', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -237,9 +237,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should not throw if the remote status api has errors in the body', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -266,9 +266,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return an error if the remote api returns error', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -287,9 +287,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return an error if kibanaUrl is not found', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,
@@ -310,9 +310,9 @@ describe('getRemoteSyncedIntegrationsInfoByOutputId', () => {
   });
 
   it('should return error if the fetch returns invalid-json error', async () => {
-    vi
-      .spyOn(mockedAppContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableSyncIntegrationsOnRemote: true } as any);
+    vi.spyOn(mockedAppContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableSyncIntegrationsOnRemote: true,
+    } as any);
     mockedOutputService.get.mockResolvedValue({
       ...output,
       sync_integrations: true,

@@ -26,71 +26,71 @@ import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../..', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../..')),
-      useConnectorContext: vi.fn().mockReturnValue({
-        services: {
-          validateEmailAddresses: vi.fn(),
-          enabledEmailServices: ['*'],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../..')),
+    useConnectorContext: vi.fn().mockReturnValue({
+      services: {
+        validateEmailAddresses: vi.fn(),
+        enabledEmailServices: ['*'],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-oauth-hooks', () => {
-      const mocked = {
-      useConnectorOAuthConnect: vi.fn().mockReturnValue({
-        connect: vi.fn(),
-        cancelConnect: vi.fn(),
-        isConnecting: false,
-        isAwaitingCallback: false,
-      }),
-      useConnectorOAuthDisconnect: vi.fn().mockReturnValue({
-        disconnect: vi.fn(),
-        isDisconnecting: false,
-      }),
-      OAuthRedirectMode: { NewTab: 'new_tab' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConnectorOAuthConnect: vi.fn().mockReturnValue({
+      connect: vi.fn(),
+      cancelConnect: vi.fn(),
+      isConnecting: false,
+      isAwaitingCallback: false,
+    }),
+    useConnectorOAuthDisconnect: vi.fn().mockReturnValue({
+      disconnect: vi.fn(),
+      isDisconnecting: false,
+    }),
+    OAuthRedirectMode: { NewTab: 'new_tab' },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/action_connector_api', () => {
-      const mocked = {
-      loadAllActions: vi.fn(),
-      loadActionTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadAllActions: vi.fn(),
+    loadActionTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn().mockReturnValue({}),
-      useLocation: vi.fn().mockReturnValue({ search: '' }),
-      useHistory: vi.fn().mockReturnValue({ push: vi.fn(), createHref: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn().mockReturnValue({}),
+    useLocation: vi.fn().mockReturnValue({ search: '' }),
+    useHistory: vi.fn().mockReturnValue({ push: vi.fn(), createHref: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-oauth-hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/response-ops-oauth-hooks')),
-      useConnectorOAuthConnect: vi.fn().mockReturnValue({
-        connect: vi.fn(),
-        cancelConnect: vi.fn(),
-        isConnecting: false,
-        isAwaitingCallback: false,
-      }),
-      useConnectorOAuthDisconnect: vi.fn().mockReturnValue({
-        disconnect: vi.fn(),
-        isDisconnecting: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/response-ops-oauth-hooks')),
+    useConnectorOAuthConnect: vi.fn().mockReturnValue({
+      connect: vi.fn(),
+      cancelConnect: vi.fn(),
+      isConnecting: false,
+      isAwaitingCallback: false,
+    }),
+    useConnectorOAuthDisconnect: vi.fn().mockReturnValue({
+      disconnect: vi.fn(),
+      isDisconnecting: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const mocks = coreMock.createSetup();
-const { loadActionTypes } = (await vi.importMock('../../../lib/action_connector_api'));
+const { loadActionTypes } = await vi.importMock('../../../lib/action_connector_api');
 
 describe('actions_connectors_list', () => {
   describe('component empty', () => {

@@ -27,47 +27,48 @@ import type { AlertingServerSetupDependencies } from '../types';
 import { bindAgentBuilder } from './bind_agent_builder';
 
 vi.mock('../agent_builder/attachments/rule_attachment_type', () => {
-      const mocked = {
-      createRuleAttachmentType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRuleAttachmentType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../agent_builder/attachments/action_policy_attachment_type', () => {
-      const mocked = {
-      createActionPolicyAttachmentType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createActionPolicyAttachmentType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../agent_builder/attachments/episode_attachment_type', () => {
-      const mocked = {
-      createEpisodeAttachmentType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEpisodeAttachmentType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../agent_builder/sml/rule_sml_type', () => {
-      const mocked = {
-      createRuleSmlType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRuleSmlType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../agent_builder/sml/action_policy_sml_type', () => {
-      const mocked = {
-      createActionPolicySmlType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createActionPolicySmlType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../agent_builder/skills/register_skills', () => {
-      const mocked = {
-      registerSkills: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerSkills: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createRuleAttachmentTypeMock = createRuleAttachmentType as MockedFunction<
   typeof createRuleAttachmentType
 >;
-const createActionPolicyAttachmentTypeMock =
-  createActionPolicyAttachmentType as MockedFunction<typeof createActionPolicyAttachmentType>;
+const createActionPolicyAttachmentTypeMock = createActionPolicyAttachmentType as MockedFunction<
+  typeof createActionPolicyAttachmentType
+>;
 const createEpisodeAttachmentTypeMock = createEpisodeAttachmentType as MockedFunction<
   typeof createEpisodeAttachmentType
 >;

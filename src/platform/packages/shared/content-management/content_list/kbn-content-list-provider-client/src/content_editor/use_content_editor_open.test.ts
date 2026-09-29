@@ -15,13 +15,11 @@ import { contentListQueryClient } from '@kbn/content-list-provider';
 import { useContentEditorOpen } from './use_content_editor_open';
 import type { ContentEditorConfig } from './types';
 
-const mockOpenContentEditor = vi.fn((_params: OpenContentEditorParams): (() => void) =>
-  vi.fn()
-);
+const mockOpenContentEditor = vi.fn((_params: OpenContentEditorParams): (() => void) => vi.fn());
 const mockOnSave = vi.fn(async () => {});
 
 vi.mock('@kbn/content-list-provider', async () => {
-  const actual = (await vi.importActual('@kbn/content-list-provider'));
+  const actual = await vi.importActual('@kbn/content-list-provider');
   return {
     ...actual,
     contentListQueryClient: {

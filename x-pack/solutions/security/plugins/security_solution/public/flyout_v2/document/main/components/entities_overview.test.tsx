@@ -25,21 +25,21 @@ import { useEntitiesOverview } from '../hooks/use_entities_overview';
 
 vi.mock('../hooks/use_entities_overview');
 vi.mock('./user_entity_overview', () => {
-      const mocked = {
-      UserEntityOverview: ({ userName }: { userName: string }) => (
-        <div data-test-subj="userEntityOverviewMock">{userName}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserEntityOverview: ({ userName }: { userName: string }) => (
+      <div data-test-subj="userEntityOverviewMock">{userName}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./host_entity_overview', () => {
-      const mocked = {
-      HostEntityOverview: ({ hostName }: { hostName: string }) => (
-        <div data-test-subj="hostEntityOverviewMock">{hostName}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostEntityOverview: ({ hostName }: { hostName: string }) => (
+      <div data-test-subj="hostEntityOverviewMock">{hostName}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEntitiesOverview = useEntitiesOverview as Mock;
 

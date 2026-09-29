@@ -11,12 +11,12 @@ import type { Mock } from 'vitest';
 import type { HttpSetup } from '@kbn/core/public';
 
 vi.mock('../../shared_imports', () => {
-      const mocked = {
-      sendRequest: vi.fn(),
-      useRequest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendRequest: vi.fn(),
+    useRequest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { API_BASE_PATH } from '../../../common/constants';
 import { ApiService } from './api';

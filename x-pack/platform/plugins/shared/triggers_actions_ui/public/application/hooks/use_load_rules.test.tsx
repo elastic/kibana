@@ -21,15 +21,15 @@ import type { IToasts } from '@kbn/core-notifications-browser';
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../lib/rule_api/rules_kuery_filter', () => {
-      const mocked = {
-      loadRulesWithKueryFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRulesWithKueryFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
-const { loadRulesWithKueryFilter } = (await vi.importMock('../lib/rule_api/rules_kuery_filter'));
+const { loadRulesWithKueryFilter } = await vi.importMock('../lib/rule_api/rules_kuery_filter');
 
 const onPage = vi.fn();
 

@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderHook, waitFor } from '@testing-library/react';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import {
@@ -24,12 +24,12 @@ import { getIconBase64 } from '../../../shared/ui/step_icons/get_icon_base64';
 import { triggerSchemas } from '../../../trigger_schemas';
 
 vi.mock('../../../shared/ui/step_icons/get_icon_base64', () => {
-      const mocked = {
-      getIconBase64: vi.fn().mockResolvedValue('data:image/png;base64,xx'),
-      getTriggerBoltFallbackDataUrl: vi.fn().mockReturnValue('data:image/png;base64,bolt'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIconBase64: vi.fn().mockResolvedValue('data:image/png;base64,xx'),
+    getTriggerBoltFallbackDataUrl: vi.fn().mockReturnValue('data:image/png;base64,bolt'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function connectorTypeStub(actionTypeId: string): ConnectorTypeInfo {
   return {
@@ -138,11 +138,9 @@ describe('useDynamicTypeIcons', () => {
       }
       return 'data:image/png;base64,xx';
     });
-    vi
-      .spyOn(triggerSchemas, 'getTriggerDefinitions')
-      .mockReturnValue([
-        { id: 'datadog.alert', title: 'Datadog alert' } as PublicTriggerDefinition,
-      ]);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinitions').mockReturnValue([
+      { id: 'datadog.alert', title: 'Datadog alert' } as PublicTriggerDefinition,
+    ]);
 
     const services = createStartServicesMock();
     const connectorsData: ConnectorsResponse = {
@@ -202,9 +200,9 @@ describe('useDynamicTypeIcons', () => {
       }
       return 'data:image/png;base64,xx';
     });
-    vi
-      .spyOn(triggerSchemas, 'getTriggerDefinitions')
-      .mockReturnValue([{ id: triggerId, title: triggerId } as PublicTriggerDefinition]);
+    vi.spyOn(triggerSchemas, 'getTriggerDefinitions').mockReturnValue([
+      { id: triggerId, title: triggerId } as PublicTriggerDefinition,
+    ]);
 
     const services = createStartServicesMock();
     const onShadowIconsCssReady = vi.fn();

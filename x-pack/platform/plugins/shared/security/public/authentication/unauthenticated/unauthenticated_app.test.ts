@@ -14,11 +14,11 @@ import { unauthenticatedApp } from './unauthenticated_app';
 // Mock the dynamic import
 const mockRenderUnauthenticatedPage = vi.fn(() => vi.fn());
 vi.mock('./unauthenticated_page', () => {
-      const mocked = {
-      renderUnauthenticatedPage: mockRenderUnauthenticatedPage,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    renderUnauthenticatedPage: mockRenderUnauthenticatedPage,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('unauthenticatedApp', () => {
   const originalWindowLocation = window.location;

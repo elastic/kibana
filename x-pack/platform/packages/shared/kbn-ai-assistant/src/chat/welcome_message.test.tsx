@@ -46,26 +46,26 @@ const mockEmptyConnectors: UseGenAIConnectorsResult = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: vi.fn(),
-          },
-          triggersActionsUi: {
-            getAddConnectorFlyout: vi.fn(() => null),
-          },
-          observabilityAIAssistant: {
-            service: {
-              getScreenContexts: vi.fn(() => []),
-            },
-            useGenAIConnectors: vi.fn(() => mockConnectors),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        triggersActionsUi: {
+          getAddConnectorFlyout: vi.fn(() => null),
+        },
+        observabilityAIAssistant: {
+          service: {
+            getScreenContexts: vi.fn(() => []),
+          },
+          useGenAIConnectors: vi.fn(() => mockConnectors),
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockKnowledgeBase = (
   partial: Partial<UseKnowledgeBaseResult> = {}

@@ -21,7 +21,7 @@ const mockGetLabel = vi.fn();
 const mockGetLabelForPercentile = vi.fn();
 
 vi.mock('../utils', async () => {
-  const utils = (await vi.importActual('../utils'));
+  const utils = await vi.importActual('../utils');
   return {
     ...utils,
     getFieldNameFromField: vi.fn(() => mockGetFieldNameFromField()),

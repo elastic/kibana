@@ -18,11 +18,11 @@ import type { AggregatedWorkflowExecution } from '../../types';
 import { DiagnosticReport } from '.';
 
 vi.mock('../../../../../common/utils/download_blob', () => {
-      const mocked = {
-      downloadBlob: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadBlob: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDownloadBlob = downloadBlob as Mock;
 

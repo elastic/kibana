@@ -17,23 +17,23 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          detailName: '192.168.1.1',
-          pageName: 'network',
-          tabName: 'events',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        detailName: '192.168.1.1',
+        pageName: 'network',
+        tabName: 'events',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('kpiUniqueFlowIdsLensAttributes', () => {
   beforeAll(() => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(['auditbeat-mytest-*'], 'security-solution-my-test')
+    );
   });
 
   it('should render', () => {

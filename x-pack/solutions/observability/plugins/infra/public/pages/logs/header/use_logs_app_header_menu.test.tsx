@@ -57,40 +57,40 @@ const mockLogView = {
 };
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          application: { capabilities: mockCapabilities, navigateToUrl: mockNavigateToUrl },
-          observability: {
-            useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
-          },
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-              },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        application: { capabilities: mockCapabilities, navigateToUrl: mockNavigateToUrl },
+        observability: {
+          useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
+        },
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/logs-shared-plugin/public', () => {
-      const mocked = {
-      useLogViewContext: () => mockLogView,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLogViewContext: () => mockLogView,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alerting/log_threshold/components/alert_flyout', () => {
-      const mocked = {
-      AlertFlyout: ({ visible }: { visible: boolean }) =>
-        visible ? <div data-test-subj="logsAlertFlyout" /> : null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertFlyout: ({ visible }: { visible: boolean }) =>
+      visible ? <div data-test-subj="logsAlertFlyout" /> : null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function findItem(
   items: AppHeaderMenu['items'],

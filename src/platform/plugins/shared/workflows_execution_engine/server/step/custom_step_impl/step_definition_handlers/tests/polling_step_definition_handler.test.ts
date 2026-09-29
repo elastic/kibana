@@ -271,8 +271,7 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
-        .calls[0][0] as Date;
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock.calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 3_000);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 3_000 + 50);
     });
@@ -296,8 +295,7 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
-        .calls[0][0] as Date;
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock.calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 1_000);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 1_000 + 50);
     });
@@ -321,8 +319,7 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
-        .calls[0][0] as Date;
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock.calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 2_000);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 2_000 + 50);
     });
@@ -346,8 +343,7 @@ describe('PollPolicyStepHandler', () => {
 
       await handler.run({}, {}, pollNode.configuration);
 
-      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock
-        .calls[0][0] as Date;
+      const resumeAt = (mocks.stepExecutionRuntime.enterWaitUntil as Mock).mock.calls[0][0] as Date;
       expect(resumeAt.getTime()).toBeGreaterThanOrEqual(before + 123);
       expect(resumeAt.getTime()).toBeLessThanOrEqual(Date.now() + 123 + 50);
     });

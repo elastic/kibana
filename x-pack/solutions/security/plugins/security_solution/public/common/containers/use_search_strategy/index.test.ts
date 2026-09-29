@@ -24,14 +24,14 @@ vi.mock('@kbn/securitysolution-hook-utils');
 const mockAddToastError = vi.fn();
 const mockAddToastWarning = vi.fn();
 vi.mock('../../hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn(() => ({
-        addError: mockAddToastError,
-        addWarning: mockAddToastWarning,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn(() => ({
+      addError: mockAddToastError,
+      addWarning: mockAddToastWarning,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSearch = vi.fn(() =>
   // default to completed response
@@ -42,7 +42,7 @@ const mockSearch = vi.fn(() =>
   })
 );
 vi.mock('../../lib/kibana', async () => {
-  const original = (await vi.importActual('../../lib/kibana'));
+  const original = await vi.importActual('../../lib/kibana');
   return {
     ...original,
     useKibana: () => ({
@@ -64,11 +64,11 @@ const mockStartTracking = vi.fn(() => ({
   endTracking: mockEndTracking,
 }));
 vi.mock('../../lib/apm/use_track_http_request', () => {
-      const mocked = {
-      useTrackHttpRequest: () => ({ startTracking: mockStartTracking }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTrackHttpRequest: () => ({ startTracking: mockStartTracking }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAbortController = new AbortController();
 mockAbortController.abort = vi.fn();

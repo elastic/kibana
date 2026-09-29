@@ -23,7 +23,7 @@ const Wrapper: FC<PropsWithChildren<unknown>> = ({ children }) => (
 vi.mock('./use_language_hook');
 
 vi.mock('@kbn/i18n', async () => {
-  const original = (await vi.importActual('@kbn/i18n'));
+  const original = await vi.importActual('@kbn/i18n');
   return {
     ...original,
     getAvailableLocales: vi.fn(() => [

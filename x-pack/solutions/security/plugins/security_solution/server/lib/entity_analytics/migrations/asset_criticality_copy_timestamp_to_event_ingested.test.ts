@@ -8,15 +8,15 @@
 import { vi } from 'vitest';
 
 vi.mock('../asset_criticality/asset_criticality_migration_client', () => {
-      const mocked = {
-      AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
-        copyTimestampToEventIngestedForAssetCriticality: vi
-          .fn()
-          .mockResolvedValue({ updated: 0, failures: [] }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
+      copyTimestampToEventIngestedForAssetCriticality: vi
+        .fn()
+        .mockResolvedValue({ updated: 0, failures: [] }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

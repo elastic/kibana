@@ -22,14 +22,14 @@ import { ALERT_ANALYSIS_WORKFLOW_API_VERSION, ALERT_ANALYSIS_WORKFLOW_SETTINGS_R
 import { AlertAnalysisWorkflowPage } from '.';
 
 vi.mock('../../../../common/containers/use_full_screen', () => {
-      const mocked = {
-      useGlobalFullScreen: () => ({
-        globalFullScreen: false,
-        setGlobalFullScreen: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFullScreen: () => ({
+      globalFullScreen: false,
+      setGlobalFullScreen: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_license');
 vi.mock('../../../../common/components/user_privileges');

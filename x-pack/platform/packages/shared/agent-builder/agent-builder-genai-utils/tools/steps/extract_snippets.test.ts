@@ -14,11 +14,11 @@ import type { MappingField } from '../utils/mappings';
 import { extractSnippetsBatch } from './extract_snippets';
 
 vi.mock('../utils/esql', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { executeEsql } from '../utils/esql';
 

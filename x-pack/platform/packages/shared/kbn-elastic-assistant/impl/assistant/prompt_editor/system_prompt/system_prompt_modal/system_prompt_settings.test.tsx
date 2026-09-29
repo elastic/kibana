@@ -36,42 +36,42 @@ const testProps = {
 };
 
 vi.mock('./system_prompt_selector/system_prompt_selector', () => {
-      const mocked = {
-      // @ts-ignore
-      SystemPromptSelector: ({ onSystemPromptDeleted, onSystemPromptSelectionChange }) => (
-        <>
-          <button
-            type="button"
-            data-test-subj="delete-sp"
-            onClick={() => onSystemPromptDeleted(mockSystemPromptSettings[1].name)}
-          />
-          <button
-            type="button"
-            data-test-subj="change-sp"
-            onClick={() => onSystemPromptSelectionChange(mockSystemPromptSettings[1])}
-          />
-          <button
-            type="button"
-            data-test-subj="change-sp-custom"
-            onClick={() => onSystemPromptSelectionChange('sooper custom prompt')}
-          />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    SystemPromptSelector: ({ onSystemPromptDeleted, onSystemPromptSelectionChange }) => (
+      <>
+        <button
+          type="button"
+          data-test-subj="delete-sp"
+          onClick={() => onSystemPromptDeleted(mockSystemPromptSettings[1].name)}
+        />
+        <button
+          type="button"
+          data-test-subj="change-sp"
+          onClick={() => onSystemPromptSelectionChange(mockSystemPromptSettings[1])}
+        />
+        <button
+          type="button"
+          data-test-subj="change-sp-custom"
+          onClick={() => onSystemPromptSelectionChange('sooper custom prompt')}
+        />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockConvos = [alertConvo, welcomeConvo];
 vi.mock('./conversation_multi_selector/conversation_multi_selector', () => {
-      const mocked = {
-      // @ts-ignore
-      ConversationMultiSelector: ({ onConversationSelectionChange: onChange }) => (
-        <>
-          <button type="button" data-test-subj="change-multi" onClick={() => onChange(mockConvos)} />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    ConversationMultiSelector: ({ onConversationSelectionChange: onChange }) => (
+      <>
+        <button type="button" data-test-subj="change-multi" onClick={() => onChange(mockConvos)} />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SystemPromptSettings', () => {
   beforeEach(() => {

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render } from '@testing-library/react';
 import React, { useRef } from 'react';
+import { vi } from 'vitest';
 import type { ChangeHistoryAdapter, ChangeHistoryPendingChange } from '@kbn/change-history-ui';
 import { ChangeHistoryProvider } from '@kbn/change-history-ui';
 import type { WorkflowDetailDto } from '@kbn/workflows';
@@ -26,7 +25,7 @@ const modalState = {
 };
 
 vi.mock('@kbn/change-history-ui', async () => {
-  const actual = (await vi.importActual('@kbn/change-history-ui'));
+  const actual = await vi.importActual('@kbn/change-history-ui');
 
   return {
     ...actual,

@@ -17,12 +17,12 @@ import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 
 const mockUseUiSetting = vi.fn().mockReturnValue(false);
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockChatRef = {
   close: vi.fn(),

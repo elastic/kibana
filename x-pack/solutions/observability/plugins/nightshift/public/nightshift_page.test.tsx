@@ -20,19 +20,19 @@ import { useKibana } from './hooks/use_kibana';
 import { useSignificantEventsAvailability } from './hooks/use_significant_events_availability';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = { useBreadcrumbs: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useBreadcrumbs: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./app/app', () => {
-      const mocked = {
-      NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NightshiftApp: () => <div data-test-subj="nightshiftAppStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_significant_events_availability');
 
 const mockUseKibana = useKibana as Mock;

@@ -14,18 +14,18 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 import { useLatestStats as useLatestStatsBase } from '../../../common/service';
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/service', () => {
-      const mocked = {
-      useLatestStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLatestStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useLatestStatsBaseMock = useLatestStatsBase as Mock;

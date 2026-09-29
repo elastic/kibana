@@ -15,18 +15,16 @@ import { ECF_FALLBACK_TEMPLATE_VERSION } from '../../common/providers/aws/ecf_te
 import { registerEcfVersionRoute } from './ecf_version';
 
 vi.mock('../services/ecf_version', () => {
-      const mocked = {
-      getLatestEcfVersion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLatestEcfVersion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getLatestEcfVersion } from '../services/ecf_version';
-const mockGetLatestEcfVersion = getLatestEcfVersion as MockedFunction<
-  typeof getLatestEcfVersion
->;
+const mockGetLatestEcfVersion = getLatestEcfVersion as MockedFunction<typeof getLatestEcfVersion>;
 
-const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
+const { loggerMock } = await vi.importActual('@kbn/logging-mocks');
 const mockLogger = loggerMock.create();
 
 describe('registerEcfVersionRoute()', () => {

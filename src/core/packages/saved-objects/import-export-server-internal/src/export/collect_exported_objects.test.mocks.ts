@@ -11,8 +11,8 @@ import { vi } from 'vitest';
 
 export const applyExportTransformsMock = vi.fn();
 vi.doMock('./apply_export_transforms', () => {
-      const mocked = {
-      applyExportTransforms: applyExportTransformsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyExportTransforms: applyExportTransformsMock,
+  };
+  return { ...mocked, default: mocked };
+});

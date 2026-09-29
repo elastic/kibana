@@ -1404,9 +1404,7 @@ describe('StepIoService', () => {
 
     function makeGraph(innerStepIdsByLoop: Record<string, Set<string>>) {
       return {
-        getInnerStepIds: vi.fn(
-          (loopStepId: string) => innerStepIdsByLoop[loopStepId] ?? new Set()
-        ),
+        getInnerStepIds: vi.fn((loopStepId: string) => innerStepIdsByLoop[loopStepId] ?? new Set()),
       };
     }
 

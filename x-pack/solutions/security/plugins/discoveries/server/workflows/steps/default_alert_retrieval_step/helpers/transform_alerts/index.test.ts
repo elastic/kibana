@@ -17,17 +17,17 @@ import {
 } from '.';
 
 vi.mock('@kbn/elastic-assistant-common', () => {
-      const mocked = {
-      getAnonymizedValue: vi.fn((value: unknown) => String(value)),
-      getRawDataOrDefault: vi.fn((data: unknown) => data),
-      transformRawData: vi.fn(({ rawData }: { rawData: Record<string, unknown[]> }) =>
-        Object.entries(rawData)
-          .map(([k, v]) => `${k},${v[0] ?? ''}`)
-          .join(',')
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAnonymizedValue: vi.fn((value: unknown) => String(value)),
+    getRawDataOrDefault: vi.fn((data: unknown) => data),
+    transformRawData: vi.fn(({ rawData }: { rawData: Record<string, unknown[]> }) =>
+      Object.entries(rawData)
+        .map(([k, v]) => `${k},${v[0] ?? ''}`)
+        .join(',')
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertEsqlRowToRawData', () => {
   it('maps column names to arrays of values', () => {
@@ -205,7 +205,9 @@ describe('getAnonymizedAlertsFromEsql', () => {
   });
 
   it('calls onNewReplacements when replacements are updated', async () => {
-    const { transformRawData: mockTransformRawData } = (await vi.importMock('@kbn/elastic-assistant-common'));
+    const { transformRawData: mockTransformRawData } = await vi.importMock(
+      '@kbn/elastic-assistant-common'
+    );
     mockTransformRawData.mockImplementation(
       ({ onNewReplacements: cb }: { onNewReplacements: (r: Record<string, string>) => void }) => {
         cb({ 'server-1': 'SERVER_001' });

@@ -35,18 +35,18 @@ import { getBuildAgent } from '../../lib/detection_engine/ai_rule_creation/agent
 import { getAgentBuilderResourceAvailability } from '../utils/get_agent_builder_resource_availability';
 
 vi.mock('../../lib/detection_engine/ai_rule_creation/agent', () => {
-      const mocked = {
-      getBuildAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBuildAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/get_agent_builder_resource_availability', () => {
-      const mocked = {
-      getAgentBuilderResourceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentBuilderResourceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetBuildAgent = getBuildAgent as Mock;
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;

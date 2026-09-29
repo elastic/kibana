@@ -13,11 +13,11 @@ import type { SelectableTableColumn } from './use_table_column_selector';
 import { useTableColumnSelector } from './use_table_column_selector';
 
 vi.mock('../../../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: () => ({ space: { id: 'default' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: () => ({ space: { id: 'default' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const STORAGE_KEY_PREFIX = 'synthetics.test.columns.v1.';
 const STORAGE_KEY = `${STORAGE_KEY_PREFIX}default`;

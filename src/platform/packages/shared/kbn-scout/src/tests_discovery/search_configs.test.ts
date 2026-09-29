@@ -16,11 +16,11 @@ import { stringify } from 'yaml';
 import type { ModuleDiscoveryInfo } from './types';
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs');
 vi.mock('fast-glob');

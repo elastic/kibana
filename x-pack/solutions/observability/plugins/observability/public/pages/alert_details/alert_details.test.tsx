@@ -36,14 +36,14 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-      useLocation: vi.fn(),
-      useHistory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+    useLocation: vi.fn(),
+    useHistory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/kibana_react');
 vi.mock('@kbn/response-ops-rule-form/src/common');
@@ -53,12 +53,12 @@ const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: (): boolean => true,
 }));
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
-      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+    useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+  };
+  return { ...mocked, default: mocked };
+});
 const validationMethod = (): ValidationResult => ({ errors: {} });
 const ruleType: RuleTypeModel = {
   id: 'logs.alert.document.count',
@@ -72,45 +72,45 @@ const ruleType: RuleTypeModel = {
 };
 
 vi.mock('./hooks/use_add_suggested_dashboard', () => {
-      const mocked = {
-      useAddSuggestedDashboards: () => ({
-        onClickAddSuggestedDashboard: vi.fn(),
-        addingDashboardId: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddSuggestedDashboards: () => ({
+      onClickAddSuggestedDashboard: vi.fn(),
+      addingDashboardId: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_discover_url', () => {
-      const mocked = {
-      useDiscoverUrl: () => ({
-        discoverUrl: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoverUrl: () => ({
+      discoverUrl: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_related_dashboards', () => {
-      const mocked = {
-      useRelatedDashboards: () => ({
-        isLoadingSuggestedDashboards: false,
-        suggestedDashboards: [
-          {
-            id: 'suggested-dashboard-1',
-            title: 'Suggested Dashboard 1',
-            description: 'A suggested dashboard for testing',
-            tags: ['SuggestedTag', 'SecondTag'],
-          },
-        ],
-        linkedDashboards: [
-          {
-            id: 'dashboard-1',
-          },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRelatedDashboards: () => ({
+      isLoadingSuggestedDashboards: false,
+      suggestedDashboards: [
+        {
+          id: 'suggested-dashboard-1',
+          title: 'Suggested Dashboard 1',
+          description: 'A suggested dashboard for testing',
+          tags: ['SuggestedTag', 'SecondTag'],
+        },
+      ],
+      linkedDashboards: [
+        {
+          id: 'dashboard-1',
+        },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
 
@@ -256,9 +256,7 @@ const config: Subset<ConfigSchema> = {
 };
 
 describe('Alert details', () => {
-  vi
-    .spyOn(useUiSettingHook, 'useUiSetting')
-    .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
+  vi.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
 
   beforeEach(() => {
     vi.clearAllMocks();

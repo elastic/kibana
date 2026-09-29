@@ -25,23 +25,23 @@ import { ConnectorStats } from './connector_stats';
 
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({
-        createHref: ({ pathname }: { pathname: string }) => pathname,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({
+      createHref: ({ pathname }: { pathname: string }) => pathname,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./connector_detail', () => {
-      const mocked = {
-      ConnectorDetailTabId: {
-        CONFIGURATION: 'configuration',
-        DOCUMENTS: 'documents',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorDetailTabId: {
+      CONFIGURATION: 'configuration',
+      DOCUMENTS: 'documents',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const CONNECTOR_ID = '65b72bc6-823e-4278-8f21-9864c8a93046';
 const AGENT_ID = 'b03f48ce-7150-11f1-b0f6-56955dd08213';

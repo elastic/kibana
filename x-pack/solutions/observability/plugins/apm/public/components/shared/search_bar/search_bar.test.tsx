@@ -72,9 +72,10 @@ function setup({
   });
 
   // mock transaction types
-  vi
-    .spyOn(useApmDataViewHook, 'useAdHocApmDataView')
-    .mockReturnValue({ dataView: undefined, apmIndices: undefined });
+  vi.spyOn(useApmDataViewHook, 'useAdHocApmDataView').mockReturnValue({
+    dataView: undefined,
+    apmIndices: undefined,
+  });
 
   vi.spyOn(useFetcherHook, 'useFetcher').mockReturnValue({} as any);
 

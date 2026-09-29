@@ -73,20 +73,20 @@ const TestProvidersWithUiSettings = ({
 };
 
 vi.mock('./hooks/use_get_generic_entity', () => {
-      const mocked = {
-      useGetGenericEntity: vi.fn(), // ✅ return a Jest mock function
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetGenericEntity: vi.fn(), // ✅ return a Jest mock function
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetGenericEntity = useGetGenericEntity as Mock;
 
 vi.mock('./hooks/use_generic_entity_criticality', () => {
-      const mocked = {
-      useGenericEntityCriticality: vi.fn(), // ✅ return a Jest mock function
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGenericEntityCriticality: vi.fn(), // ✅ return a Jest mock function
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGenericEntityCriticality = useGenericEntityCriticality as Mock;
 
@@ -98,20 +98,20 @@ const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
 ];
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      useExpandableFlyoutHistory: vi.fn(),
-      useExpandableFlyoutState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    useExpandableFlyoutHistory: vi.fn(),
+    useExpandableFlyoutState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/utils/timeline/use_show_timeline', () => {
-      const mocked = {
-      useShowTimeline: vi.fn(() => [true]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShowTimeline: vi.fn(() => [true]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GenericEntityPanel', () => {
   beforeEach(() => {

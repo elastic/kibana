@@ -28,8 +28,8 @@ type UseFieldType = typeof import('./shared_imports').UseField;
 type GetFieldConfigType = typeof import('./lib').getFieldConfig;
 
 vi.mock('./components/document_fields/field_parameters/type_parameter', async () => {
-  const sharedImports = (await vi.importActual('./shared_imports'));
-  const lib = (await vi.importActual('./lib'));
+  const sharedImports = await vi.importActual('./shared_imports');
+  const lib = await vi.importActual('./lib');
   const UseFieldActual = sharedImports.UseField as UseFieldType;
   const getFieldConfigActual = lib.getFieldConfig as GetFieldConfigType;
 
@@ -67,7 +67,7 @@ vi.mock('./components/document_fields/field_parameters/type_parameter', async ()
 });
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,
@@ -104,7 +104,7 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual('../../app_context'));
+  const actual = await vi.importActual('../../app_context');
   return {
     ...actual,
     useAppContext: vi.fn(),

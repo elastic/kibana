@@ -19,52 +19,52 @@ import { mockUnifiedDocViewerServices } from '../../../../../__mocks__';
 
 const mockUseFetchTraceRootSpanContext = vi.fn();
 vi.mock('../../doc_viewer_overview/hooks/use_fetch_trace_root_span', () => {
-      const mocked = {
-      useFetchTraceRootSpanContext: () => mockUseFetchTraceRootSpanContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchTraceRootSpanContext: () => mockUseFetchTraceRootSpanContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => {
-      const mocked = {
-      useDocViewerExtensionActionsContext: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocViewerExtensionActionsContext: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../doc_viewer_flyout/flyout_history_key_context', () => {
-      const mocked = {
-      useFlyoutHistoryKey: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutHistoryKey: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/apm-ui-shared', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/apm-ui-shared')),
-      Timestamp: () => <span>timestamp</span>,
-      HttpStatusCode: ({ code }: { code: number }) => <span>{code}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/apm-ui-shared')),
+    Timestamp: () => <span>timestamp</span>,
+    HttpStatusCode: ({ code }: { code: number }) => <span>{code}</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({
-        euiTheme: {
-          font: { weight: { semiBold: 700 } },
-          border: { thin: '1px solid #ccc' },
-          size: { xs: '12px' },
-        },
-      }),
-      useEuiFontSize: () => ({ fontSize: '12px' }),
-      euiFontSize: (_themeContext: unknown, size: string) => ({
-        fontSize: size === 's' ? '12px' : '10px',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({
+      euiTheme: {
+        font: { weight: { semiBold: 700 } },
+        border: { thin: '1px solid #ccc' },
+        size: { xs: '12px' },
+      },
+    }),
+    useEuiFontSize: () => ({ fontSize: '12px' }),
+    euiFontSize: (_themeContext: unknown, size: string) => ({
+      fontSize: size === 's' ? '12px' : '10px',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = buildDataViewMock({ name: 'data-view-mock', fields: deepMockedFields });
 

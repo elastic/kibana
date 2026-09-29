@@ -24,18 +24,18 @@ const mockShare = {
 const mockHttp = {} as any;
 
 vi.mock('../../../../shared/service_flyout/hooks/use_apm_indices', () => {
-      const mocked = {
-      useApmIndices: () => ({ indices: { transaction: 'traces-*' }, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmIndices: () => ({ indices: { transaction: 'traces-*' }, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../shared/service_flyout/utils/get_flyout_discover_navigation', () => {
-      const mocked = {
-      getFlyoutDiscoverNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFlyoutDiscoverNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getFlyoutDiscoverNavigation } from '../../../../shared/service_flyout/utils/get_flyout_discover_navigation';
 

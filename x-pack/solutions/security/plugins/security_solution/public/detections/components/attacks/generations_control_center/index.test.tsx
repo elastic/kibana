@@ -25,44 +25,44 @@ import {
 } from '.';
 
 vi.mock('../../../../attack_discovery/pages/use_get_attack_discovery_generations', () => {
-      const mocked = {
-      useGetAttackDiscoveryGenerations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetAttackDiscoveryGenerations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_poll_generations', () => {
-      const mocked = {
-      usePollGenerations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePollGenerations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../attack_discovery/pages/results/history/generations', () => {
-      const mocked = {
-      Generations: ({ onViewDetails }: { onViewDetails?: (executionUuid: string) => void }) => (
-        <div data-test-subj="mockGenerations">
-          <button
-            data-test-subj="mockViewDetails"
-            onClick={() => onViewDetails?.('uuid-1')}
-            type="button"
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Generations: ({ onViewDetails }: { onViewDetails?: (executionUuid: string) => void }) => (
+      <div data-test-subj="mockGenerations">
+        <button
+          data-test-subj="mockViewDetails"
+          onClick={() => onViewDetails?.('uuid-1')}
+          type="button"
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../attack_discovery/pages/loading_callout/workflow_execution_details_flyout/workflow_execution_details',
   () => {
-      const mocked = {
-        WorkflowExecutionDetails: ({ executionUuid }: { executionUuid?: string }) => (
-          <div data-test-subj="mockWorkflowExecutionDetails">{executionUuid}</div>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      WorkflowExecutionDetails: ({ executionUuid }: { executionUuid?: string }) => (
+        <div data-test-subj="mockWorkflowExecutionDetails">{executionUuid}</div>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseGetAttackDiscoveryGenerations = useGetAttackDiscoveryGenerations as Mock;

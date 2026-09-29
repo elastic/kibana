@@ -24,42 +24,39 @@ const mockUseQueryAlerts = vi.fn().mockReturnValue({
 });
 
 vi.mock('../../../../../../detections/containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSignalIndex = vi.fn().mockReturnValue({
   signalIndexName: '.alerts-security.alerts-default',
 });
 
-vi.mock(
-  '../../../../../../detections/containers/detection_engine/alerts/use_signal_index',
-  () => {
-      const mocked = {
-        useSignalIndex: () => mockUseSignalIndex(),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../../detections/containers/detection_engine/alerts/use_signal_index', () => {
+  const mocked = {
+    useSignalIndex: () => mockUseSignalIndex(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSearch = vi.fn();
 
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          data: {
-            search: {
-              search: mockSearch,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        data: {
+          search: {
+            search: mockSearch,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultSettings = {
   end: 'now',

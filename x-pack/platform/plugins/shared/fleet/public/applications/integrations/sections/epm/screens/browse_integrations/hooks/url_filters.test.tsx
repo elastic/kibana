@@ -19,18 +19,18 @@ import { dataTypes } from '../../../../../../../../common/constants';
 import { useAddUrlFilters, useUrlFilters } from './url_filters';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks', () => {
-      const mocked = {
-      useUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUrlFilters', () => {
   beforeEach(() => {

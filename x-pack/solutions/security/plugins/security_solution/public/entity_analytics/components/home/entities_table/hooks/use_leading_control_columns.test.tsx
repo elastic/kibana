@@ -19,19 +19,19 @@ const mockUseEntityStoreEuidApi = vi.fn();
 const mockInvestigateInTimeline = vi.fn();
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
-      ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreEuidApi: (...args: unknown[]) => mockUseEntityStoreEuidApi(...args),
+    ENTITY_STORE_ROUTES: { public: { RESOLUTION_GROUP: '/mock/resolution/group' } },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInvestigateInTimeline = vi.mocked(useInvestigateInTimeline);
 

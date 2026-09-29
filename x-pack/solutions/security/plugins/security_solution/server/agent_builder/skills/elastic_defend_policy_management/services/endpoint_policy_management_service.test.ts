@@ -21,33 +21,33 @@ import { readPolicyBaseline } from './read_policy_baseline';
 import { applyPolicyChange, previewApplyPolicyChange } from './apply_policy_change';
 
 vi.mock('./list_endpoint_policies', () => {
-      const mocked = {
-      listEndpointPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    listEndpointPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./count_endpoints', () => {
-      const mocked = {
-      countEndpoints: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    countEndpoints: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./read_policy_baseline', () => {
-      const mocked = {
-      readPolicyBaseline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readPolicyBaseline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./apply_policy_change', () => {
-      const mocked = {
-      previewApplyPolicyChange: vi.fn(),
-      applyPolicyChange: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    previewApplyPolicyChange: vi.fn(),
+    applyPolicyChange: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SPACE_ID = 'space-marketing';
 const POLICY_ID = 'policy-1';

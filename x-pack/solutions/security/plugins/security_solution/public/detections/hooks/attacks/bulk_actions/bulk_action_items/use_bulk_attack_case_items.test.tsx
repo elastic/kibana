@@ -18,22 +18,24 @@ import {
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case', () => {
-      const mocked = {
-      useAddToCase: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddToCase: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { useKibana } = (await vi.importMock('../../../../../common/lib/kibana')) as {
   useKibana: Mock;
 };
-const { useAddToCase } = (await vi.importMock('../../../../../attack_discovery/pages/results/take_action/use_add_to_case')) as { useAddToCase: Mock };
+const { useAddToCase } = (await vi.importMock(
+  '../../../../../attack_discovery/pages/results/take_action/use_add_to_case'
+)) as { useAddToCase: Mock };
 
 const alertItems: TimelineItem[] = [
   {

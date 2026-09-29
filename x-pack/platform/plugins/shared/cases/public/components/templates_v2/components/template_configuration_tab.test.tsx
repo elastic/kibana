@@ -16,17 +16,17 @@ const mockMetadataForm = vi.fn((_props?: unknown) => <div data-test-subj="mockMe
 const mockSettingsForm = vi.fn((_props?: unknown) => <div data-test-subj="mockSettingsForm" />);
 
 vi.mock('./template_metadata_form', () => {
-      const mocked = {
-      TemplateMetadataForm: (props: unknown) => mockMetadataForm(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateMetadataForm: (props: unknown) => mockMetadataForm(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./template_settings_form', () => {
-      const mocked = {
-      TemplateSettingsForm: (props: unknown) => mockSettingsForm(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateSettingsForm: (props: unknown) => mockSettingsForm(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplateConfigurationTab', () => {
   const defaultProps = {

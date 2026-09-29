@@ -25,32 +25,34 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../lib/rule_api/load_action_error_log', () => {
-      const mocked = {
-      loadActionErrorLog: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadActionErrorLog: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
-      const mocked = {
-      loadExecutionLogAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadExecutionLogAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_load_rule_event_logs', () => {
-      const mocked = {
-      useLoadRuleEventLogs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadRuleEventLogs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getIsExperimentalFeatureEnabled } = (await vi.importMock('../../../../common/get_experimental_features'));
-const { useLoadRuleEventLogs } = (await vi.importMock('../../../hooks/use_load_rule_event_logs'));
+const { getIsExperimentalFeatureEnabled } = await vi.importMock(
+  '../../../../common/get_experimental_features'
+);
+const { useLoadRuleEventLogs } = await vi.importMock('../../../hooks/use_load_rule_event_logs');
 
 const queryClient = new QueryClient({
   defaultOptions: {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
+
+import { vi } from 'vitest';
 
 import { License } from '@kbn/licensing-plugin/common/license';
 

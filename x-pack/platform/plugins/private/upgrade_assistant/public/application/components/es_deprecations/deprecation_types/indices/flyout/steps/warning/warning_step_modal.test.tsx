@@ -19,7 +19,7 @@ import { WarningModalStep } from './warning_step_modal';
 
 // Mocks
 vi.mock('../../../../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../../../../app_context'));
+  const actual = await vi.importActual('../../../../../../../app_context');
 
   return {
     ...actual,
@@ -37,62 +37,62 @@ vi.mock('../../../../../../../app_context', async () => {
 });
 
 vi.mock('./warning_step_checkbox', () => {
-      const mocked = {
-      DeprecatedSettingWarningCheckbox: ({
-        isChecked,
-        onChange,
-        id,
-      }: {
-        isChecked: boolean;
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-        id: string;
-      }) => (
-        <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
-      ),
-      ReplaceIndexWithAliasWarningCheckbox: ({
-        isChecked,
-        onChange,
-        id,
-      }: {
-        isChecked: boolean;
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-        id: string;
-      }) => (
-        <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
-      ),
-      MakeIndexReadonlyWarningCheckbox: ({
-        isChecked,
-        onChange,
-        id,
-      }: {
-        isChecked: boolean;
-        onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-        id: string;
-      }) => (
-        <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeprecatedSettingWarningCheckbox: ({
+      isChecked,
+      onChange,
+      id,
+    }: {
+      isChecked: boolean;
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+      id: string;
+    }) => (
+      <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
+    ),
+    ReplaceIndexWithAliasWarningCheckbox: ({
+      isChecked,
+      onChange,
+      id,
+    }: {
+      isChecked: boolean;
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+      id: string;
+    }) => (
+      <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
+    ),
+    MakeIndexReadonlyWarningCheckbox: ({
+      isChecked,
+      onChange,
+      id,
+    }: {
+      isChecked: boolean;
+      onChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+      id: string;
+    }) => (
+      <input type="checkbox" checked={isChecked} onChange={onChange} id={id} data-test-subj={id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../callouts', () => {
-      const mocked = {
-      FollowerIndexCallout: () => <div data-test-subj="FollowerIndexCallout" />,
-      ESTransformsTargetCallout: () => <div data-test-subj="ESTransformsTargetCallout" />,
-      MlAnomalyCallout: () => <div data-test-subj="MlAnomalyCallout" />,
-      FetchFailedCallOut: ({ errorMessage }: { errorMessage: string }) => (
-        <div data-test-subj="FetchFailedCallOut">{errorMessage}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FollowerIndexCallout: () => <div data-test-subj="FollowerIndexCallout" />,
+    ESTransformsTargetCallout: () => <div data-test-subj="ESTransformsTargetCallout" />,
+    MlAnomalyCallout: () => <div data-test-subj="MlAnomalyCallout" />,
+    FetchFailedCallOut: ({ errorMessage }: { errorMessage: string }) => (
+      <div data-test-subj="FetchFailedCallOut">{errorMessage}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/nodes_low_disk_space', () => {
-      const mocked = {
-      NodesLowSpaceCallOut: () => <div data-test-subj="NodesLowSpaceCallOut" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NodesLowSpaceCallOut: () => <div data-test-subj="NodesLowSpaceCallOut" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReindexState = {
   status: ReindexStatus.inProgress,

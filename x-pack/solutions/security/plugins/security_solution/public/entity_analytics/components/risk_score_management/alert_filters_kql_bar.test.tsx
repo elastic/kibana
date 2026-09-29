@@ -30,11 +30,11 @@ const mockDataView: Partial<DataView> = {
 };
 
 vi.mock('../../../common/components/page_loader', () => {
-      const mocked = {
-      PageLoader: (props: Record<string, unknown>) => <div data-test-subj="page-loader" {...props} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageLoader: (props: Record<string, unknown>) => <div data-test-subj="page-loader" {...props} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertFiltersKqlBar', () => {
   let queryClient: QueryClient;

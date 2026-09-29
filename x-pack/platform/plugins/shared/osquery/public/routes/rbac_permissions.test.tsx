@@ -27,77 +27,84 @@ import {
 let mockCapabilities: OsqueryCapabilities = ROLE_CAPABILITIES.admin;
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          appName: 'osquery',
-          application: {
-            getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
-            navigateToApp: vi.fn(),
-            capabilities: {
-              osquery: mockCapabilities,
-              navLinks: {},
-              management: {},
-              catalogue: {},
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        appName: 'osquery',
+        application: {
+          getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
+          navigateToApp: vi.fn(),
+          capabilities: {
+            osquery: mockCapabilities,
+            navLinks: {},
+            management: {},
+            catalogue: {},
           },
-          chrome: {
-            setBreadcrumbs: vi.fn(),
-            docTitle: { change: vi.fn(), reset: vi.fn() },
-          },
-          http: {
-            basePath: { get: vi.fn().mockReturnValue(''), prepend: vi.fn((p: string) => p) },
-          },
-          notifications: {
-            toasts: { addWarning: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
-          },
-          uiSettings: { get: vi.fn().mockReturnValue(false) },
         },
-      }),
-      useRouterNavigate: () => ({ href: '/app/osquery', onClick: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        chrome: {
+          setBreadcrumbs: vi.fn(),
+          docTitle: { change: vi.fn(), reset: vi.fn() },
+        },
+        http: {
+          basePath: { get: vi.fn().mockReturnValue(''), prepend: vi.fn((p: string) => p) },
+        },
+        notifications: {
+          toasts: { addWarning: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
+        },
+        uiSettings: { get: vi.fn().mockReturnValue(false) },
+      },
+    }),
+    useRouterNavigate: () => ({ href: '/app/osquery', onClick: vi.fn() }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // Mock route components to avoid loading full trees
 vi.mock('./history', () => {
-      const mocked = {
-      History: () => <div data-test-subj="history" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    History: () => <div data-test-subj="history" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./saved_queries', () => {
-      const mocked = {
-      SavedQueries: () => <div data-test-subj="saved-queries" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedQueries: () => <div data-test-subj="saved-queries" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./packs', () => {
-      const mocked = {
-      Packs: () => <div data-test-subj="packs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Packs: () => <div data-test-subj="packs" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./live_queries/new', () => {
-      const mocked = {
-      NewLiveQueryPage: () => <div data-test-subj="new-live-query" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewLiveQueryPage: () => <div data-test-subj="new-live-query" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components', () => {
-      const mocked = {
-      MissingPrivileges: () => <div data-test-subj="missing-privileges">Permission denied</div>,
-      NotFoundPage: () => <div data-test-subj="not-found" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MissingPrivileges: () => <div data-test-subj="missing-privileges">Permission denied</div>,
+    NotFoundPage: () => <div data-test-subj="not-found" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });

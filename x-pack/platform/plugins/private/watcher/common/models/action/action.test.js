@@ -11,16 +11,16 @@ import { Action } from './action';
 import { ACTION_TYPES } from '../../constants';
 
 vi.mock('./logging_action', () => {
-      const mocked = {
-      LoggingAction: {
-        fromUpstreamJson: vi.fn(({ id }) => ({
-          errors: null,
-          action: { id, type: 'logging' },
-        })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoggingAction: {
+      fromUpstreamJson: vi.fn(({ id }) => ({
+        errors: null,
+        action: { id, type: 'logging' },
+      })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('action', () => {
   describe('Action', () => {

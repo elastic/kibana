@@ -17,12 +17,12 @@ import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 vi.mock('../../common/hooks/use_experimental_features');
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGet = vi.fn();
 const mockToastsDanger = vi.fn();
@@ -43,7 +43,7 @@ const fakeDataView = new DataView({
 });
 
 vi.mock('../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../common/lib/kibana'));
+  const actual = await vi.importActual('../../common/lib/kibana');
   return {
     ...actual,
     useKibana: () => ({
@@ -58,9 +58,10 @@ vi.mock('../../common/lib/kibana', async () => {
 describe('useDataView', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .mocked(useSelector)
-      .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'ready' });
+    vi.mocked(useSelector).mockReturnValue({
+      dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      status: 'ready',
+    });
   });
 
   it('should return DataView instance when data view is available', async () => {
@@ -97,9 +98,7 @@ describe('useDataView', () => {
       expect(result.current.status).toEqual('ready');
     });
 
-    vi
-      .mocked(useSelector)
-      .mockReturnValue({ dataViewId: 'different-data-view', status: 'ready' });
+    vi.mocked(useSelector).mockReturnValue({ dataViewId: 'different-data-view', status: 'ready' });
 
     // Dont await on purpose
     act(() => rerender());
@@ -121,9 +120,10 @@ describe('useDataView', () => {
   });
 
   it('should not call get if status is not ready', async () => {
-    vi
-      .mocked(useSelector)
-      .mockReturnValue({ dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, status: 'loading' });
+    vi.mocked(useSelector).mockReturnValue({
+      dataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+      status: 'loading',
+    });
 
     const { result, rerender } = renderHook(() => useDataView(PageScope.default));
 

@@ -30,14 +30,13 @@ import { getPrivateLocationsForNamespaces } from '../synthetics_service/get_priv
 import { SyntheticsPrivateLocation } from '../synthetics_service/private_location/synthetics_private_location';
 import { PackagePolicyService } from '../synthetics_service/private_location/package_policy_service';
 
-const mockedGetPrivateLocationsForNamespaces =
-  getPrivateLocationsForNamespaces as MockedFunction<typeof getPrivateLocationsForNamespaces>;
+const mockedGetPrivateLocationsForNamespaces = getPrivateLocationsForNamespaces as MockedFunction<
+  typeof getPrivateLocationsForNamespaces
+>;
 const MockedSyntheticsPrivateLocation = SyntheticsPrivateLocation as MockedClass<
   typeof SyntheticsPrivateLocation
 >;
-const MockedPackagePolicyService = PackagePolicyService as MockedClass<
-  typeof PackagePolicyService
->;
+const MockedPackagePolicyService = PackagePolicyService as MockedClass<typeof PackagePolicyService>;
 
 const SPACE_ID = 'default';
 
@@ -104,9 +103,7 @@ const buildApi = (overrides: BuildApiOverrides = {}): MonitorIntegrationHealthAp
 
   const fleetAgentPolicyGetByIds =
     overrides.fleetAgentPolicyGetByIds ??
-    vi
-      .fn()
-      .mockImplementation(async (_soClient: any, ids: string[]) => ids.map((id) => ({ id })));
+    vi.fn().mockImplementation(async (_soClient: any, ids: string[]) => ids.map((id) => ({ id })));
 
   const fleetGetInstallation =
     overrides.fleetGetInstallation ?? vi.fn().mockResolvedValue({ install_status: 'installed' });
@@ -224,10 +221,7 @@ describe('MonitorIntegrationHealthApi', () => {
         'synthetics-monitor',
         'mon-2'
       );
-      const getMock = vi
-        .fn()
-        .mockResolvedValueOnce(successSO)
-        .mockRejectedValueOnce(notFoundError);
+      const getMock = vi.fn().mockResolvedValueOnce(successSO).mockRejectedValueOnce(notFoundError);
 
       const api = buildApi({ monitorConfigRepository: { getAcrossSpaces: getMock } });
 

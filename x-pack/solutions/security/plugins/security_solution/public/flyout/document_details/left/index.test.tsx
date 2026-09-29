@@ -20,60 +20,60 @@ import { DocumentEventTypes } from '../../../common/lib/telemetry/types';
 
 const mockOpenLeftPanel = vi.fn();
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openLeftPanel: mockOpenLeftPanel }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openLeftPanel: mockOpenLeftPanel }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/user_privileges');
 
 const mockReportEvent = vi.fn();
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: { telemetry: { reportEvent: mockReportEvent } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { telemetry: { reportEvent: mockReportEvent } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./header', () => {
-      const mocked = {
-      PanelHeader: ({
-        tabs,
-        selectedTabId,
-        setSelectedTabId,
-      }: {
-        tabs: LeftPanelTabType[];
-        selectedTabId: string;
-        setSelectedTabId: (id: string) => void;
-      }) => (
-        <div
-          data-test-subj="mockPanelHeader"
-          data-tab-ids={tabs.map((t) => t.id).join(',')}
-          data-selected-tab={selectedTabId}
-        >
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              data-test-subj={`tab-${tab.id}`}
-              onClick={() => setSelectedTabId(tab.id)}
-            >
-              {tab.id}
-            </button>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PanelHeader: ({
+      tabs,
+      selectedTabId,
+      setSelectedTabId,
+    }: {
+      tabs: LeftPanelTabType[];
+      selectedTabId: string;
+      setSelectedTabId: (id: string) => void;
+    }) => (
+      <div
+        data-test-subj="mockPanelHeader"
+        data-tab-ids={tabs.map((t) => t.id).join(',')}
+        data-selected-tab={selectedTabId}
+      >
+        {tabs.map((tab) => (
+          <button
+            key={tab.id}
+            type="button"
+            data-test-subj={`tab-${tab.id}`}
+            onClick={() => setSelectedTabId(tab.id)}
+          >
+            {tab.id}
+          </button>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./content', () => {
-      const mocked = {
-      PanelContent: () => <div data-test-subj="mockPanelContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PanelContent: () => <div data-test-subj="mockPanelContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUserPrivileges = useUserPrivileges as Mock;
 

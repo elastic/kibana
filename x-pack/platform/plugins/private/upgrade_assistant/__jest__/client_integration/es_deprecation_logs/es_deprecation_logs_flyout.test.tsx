@@ -24,7 +24,7 @@ import { advanceTime } from '../helpers/time_manipulation';
 // to remove this mock and follow a similar approach to how discover link is tested.
 // See: https://github.com/elastic/kibana/issues/104855
 vi.mock('../../../public/application/lib/logs_checkpoint', async () => {
-  const originalModule = (await vi.importActual('../../../public/application/lib/logs_checkpoint'));
+  const originalModule = await vi.importActual('../../../public/application/lib/logs_checkpoint');
 
   return {
     __esModule: true,

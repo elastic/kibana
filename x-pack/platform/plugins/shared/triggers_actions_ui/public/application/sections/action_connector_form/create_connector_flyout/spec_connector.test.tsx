@@ -17,15 +17,15 @@ import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 
 vi.mock('../../../lib/action_connector_api', async () => {
-      const mocked = {
-      ...((await vi.importActual('../../../lib/action_connector_api')) as object),
-      loadActionTypes: vi.fn(),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...((await vi.importActual('../../../lib/action_connector_api')) as object),
+    loadActionTypes: vi.fn(),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { loadActionTypes } = (await vi.importMock('../../../lib/action_connector_api'));
+const { loadActionTypes } = await vi.importMock('../../../lib/action_connector_api');
 
 describe('spec connector with API fetch', () => {
   let appMockRenderer: AppMockRenderer;

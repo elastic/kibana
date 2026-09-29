@@ -23,62 +23,62 @@ vi.mock('../../../use_flyout_api');
 // Capture the `onShowRuleSummary` prop passed to AlertDescription so the test can invoke it.
 let capturedOnShowRuleSummary: (() => void) | undefined;
 vi.mock('./alert_description', () => {
-      const mocked = {
-      AlertDescription: ({ onShowRuleSummary }: { onShowRuleSummary?: () => void }) => {
-        capturedOnShowRuleSummary = onShowRuleSummary;
-        return <div>{'AlertDescription'}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertDescription: ({ onShowRuleSummary }: { onShowRuleSummary?: () => void }) => {
+      capturedOnShowRuleSummary = onShowRuleSummary;
+      return <div>{'AlertDescription'}</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./alert_reason', () => {
-      const mocked = {
-      AlertReason: () => <div>{'AlertReason'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertReason: () => <div>{'AlertReason'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./alert_status', () => {
-      const mocked = {
-      AlertStatus: () => <div>{'AlertStatus'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertStatus: () => <div>{'AlertStatus'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./mitre_attack', () => {
-      const mocked = {
-      MitreAttack: () => <div>{'MitreAttack'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MitreAttack: () => <div>{'MitreAttack'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./event_category_description', () => {
-      const mocked = {
-      EventCategoryDescription: () => <div>{'EventCategoryDescription'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventCategoryDescription: () => <div>{'EventCategoryDescription'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./event_kind_description', () => {
-      const mocked = {
-      EventKindDescription: () => <div>{'EventKindDescription'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventKindDescription: () => <div>{'EventKindDescription'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./event_renderer', () => {
-      const mocked = {
-      EventRenderer: () => <div>{'EventRenderer'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventRenderer: () => <div>{'EventRenderer'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

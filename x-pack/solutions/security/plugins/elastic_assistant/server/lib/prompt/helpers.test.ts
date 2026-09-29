@@ -13,9 +13,9 @@ describe('helper', () => {
   describe('getCurrentTimeForPrompt', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      vi
-        .useFakeTimers()
-        .setSystemTime(new Date('Fri Feb 14 2025 07:33:12 UTC+0000 (Greenwich Mean Time)'));
+      vi.useFakeTimers().setSystemTime(
+        new Date('Fri Feb 14 2025 07:33:12 UTC+0000 (Greenwich Mean Time)')
+      );
     });
 
     it.each([

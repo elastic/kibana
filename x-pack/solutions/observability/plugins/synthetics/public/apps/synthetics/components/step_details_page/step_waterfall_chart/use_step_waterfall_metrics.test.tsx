@@ -19,11 +19,11 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useStepWaterfallMetrics', () => {
   beforeEach(() => {

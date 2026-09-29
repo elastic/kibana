@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
 import type {
   SecurityActivateUserProfileResponse,
   SecurityGetUserProfileResponse,
   SecuritySuggestUserProfilesResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import {
   elasticsearchServiceMock,
@@ -34,14 +33,14 @@ import { securityTelemetry } from '../otel/instrumentation';
 import { sessionMock } from '../session_management/session.mock';
 
 vi.mock('../otel/instrumentation', () => {
-      const mocked = {
-      securityTelemetry: {
-        recordGetCurrentProfileInvocation: vi.fn(),
-        recordGetCurrentProfileIdInvocation: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityTelemetry: {
+      recordGetCurrentProfileInvocation: vi.fn(),
+      recordGetCurrentProfileIdInvocation: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = loggingSystemMock.createLogger();
 describe('UserProfileService', () => {

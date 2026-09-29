@@ -42,7 +42,7 @@ vi.mock('../../../services/ml_api_service', () => {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiInMemoryTable: vi.fn().mockImplementation(({ items }) => {

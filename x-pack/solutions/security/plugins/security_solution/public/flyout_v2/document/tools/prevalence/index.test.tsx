@@ -38,13 +38,13 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../../../shared/components/document_tools_flyout_header', () => {
-      const mocked = {
-      DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
-        <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentToolsFlyoutHeader: ({ title }: { title: string }) => (
+      <div data-test-subj="mockDocumentToolsFlyoutHeader">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedTelemetry = createTelemetryServiceMock();
 const mockStorage = vi.fn();

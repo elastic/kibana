@@ -14,18 +14,18 @@ import type { AgentName } from '@kbn/elastic-agent-utils';
 import { TransactionNameIcon } from './transaction_name_icon';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: vi.fn(() => ({
-        euiTheme: {
-          size: {
-            xs: '',
-          },
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: vi.fn(() => ({
+      euiTheme: {
+        size: {
+          xs: '',
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TransactionNameIcon', () => {
   const dataTestSub = 'discoverContextualComponentsSummaryColumnTransactionNameIcon';

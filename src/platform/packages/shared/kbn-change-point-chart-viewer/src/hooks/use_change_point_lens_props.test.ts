@@ -20,18 +20,18 @@ import { useChangePointLensProps, getChangePointLensProps } from './use_change_p
 // ---- module mocks ----
 
 vi.mock('@kbn/lens-embeddable-utils/config_builder', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: () => ({ euiTheme: { size: { base: '16px' } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTheme: () => ({ euiTheme: { size: { base: '16px' } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // IntersectionObserver is instantiated unconditionally inside the hook.
 // The callback is captured per-test so viewport-gate tests can trigger it directly.

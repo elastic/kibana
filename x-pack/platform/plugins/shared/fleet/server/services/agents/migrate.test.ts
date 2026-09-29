@@ -40,11 +40,11 @@ vi.mock('./crud', () => {
 
 // Mock uuid to return predictable values
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the license service
 vi.mock('..', () => {

@@ -17,18 +17,18 @@ import { getRequiredParamsForConnector } from './get_required_params_for_connect
 
 // Mock the dependencies
 vi.mock('./connectors_cache', () => {
-      const mocked = {
-      getCachedAllConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      isInternalConnector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInternalConnector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const isInternalConnector = (await vi.importMock('@kbn/workflows')).isInternalConnector as Mock;
 

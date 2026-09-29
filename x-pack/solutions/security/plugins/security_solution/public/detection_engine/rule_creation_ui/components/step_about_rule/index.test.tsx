@@ -51,7 +51,7 @@ vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -62,8 +62,7 @@ vi.mock('@elastic/eui', async () => {
   };
 });
 const mockedUseKibana = mockUseKibana();
-const mockedUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as Mock;
+const mockedUseGetEndpointExceptionsPerPolicyOptIn = useGetEndpointExceptionsPerPolicyOptIn as Mock;
 
 export const stepDefineStepMLRule: DefineStepRule = {
   ruleType: 'machine_learning',

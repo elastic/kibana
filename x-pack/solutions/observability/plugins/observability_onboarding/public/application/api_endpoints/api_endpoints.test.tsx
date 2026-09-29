@@ -19,53 +19,53 @@ import { useApiEndpoints } from './use_api_endpoints';
 import { useApiKeys } from './use_api_keys';
 
 vi.mock('./use_api_endpoints', () => {
-      const mocked = {
-      useApiEndpoints: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApiEndpoints: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_api_keys', () => {
-      const mocked = {
-      useApiKeys: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApiKeys: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./endpoint_field', () => {
-      const mocked = {
-      EndpointField: ({
-        label,
-        url,
-        dataTestSubjSuffix = '',
-      }: {
-        label?: string;
-        url?: string;
-        dataTestSubjSuffix?: string;
-      }) => (
-        <div data-test-subj={`endpointFieldStub${dataTestSubjSuffix}`} data-label={label ?? ''}>
-          {url}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EndpointField: ({
+      label,
+      url,
+      dataTestSubjSuffix = '',
+    }: {
+      label?: string;
+      url?: string;
+      dataTestSubjSuffix?: string;
+    }) => (
+      <div data-test-subj={`endpointFieldStub${dataTestSubjSuffix}`} data-label={label ?? ''}>
+        {url}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./api_key_field', () => {
-      const mocked = {
-      ApiKeyField: ({ dataTestSubjSuffix = '' }: { dataTestSubjSuffix?: string }) => (
-        <div data-test-subj={`apiKeyFieldStub${dataTestSubjSuffix}`} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApiKeyField: ({ dataTestSubjSuffix = '' }: { dataTestSubjSuffix?: string }) => (
+      <div data-test-subj={`apiKeyFieldStub${dataTestSubjSuffix}`} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseApiEndpoints = useApiEndpoints as MockedFunction<typeof useApiEndpoints>;
 const mockUseApiKeys = useApiKeys as MockedFunction<typeof useApiKeys>;

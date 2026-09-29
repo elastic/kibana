@@ -13,21 +13,21 @@ import { parse as parseYaml } from 'yaml';
 import { ParsedTemplateDefinitionSchema } from '../../../../common/types/domain/template/latest';
 
 vi.mock('../../field_library/hooks/use_resolved_fields', () => {
-      const mocked = {
-      useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
-        resolvedFields: fields.filter((f) => 'control' in f),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolvedFields: (fields: Array<Record<string, unknown>>) => ({
+      resolvedFields: fields.filter((f) => 'control' in f),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: () => ({ owner: ['cases'] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: () => ({ owner: ['cases'] }),
+  };
+  return { ...mocked, default: mocked };
+});
 import { render, screen } from '@testing-library/react';
 import { TemplateFieldRenderer } from './field_renderer';
 

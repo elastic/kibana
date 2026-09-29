@@ -18,11 +18,11 @@ import { deleteBackfillRoute, deleteBackfillPublicRoute } from './delete_backfil
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('deleteBackfillRoute', () => {
   beforeEach(() => {

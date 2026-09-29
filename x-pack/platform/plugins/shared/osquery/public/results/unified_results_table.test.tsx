@@ -20,46 +20,48 @@ import { useResultsFiltering } from './use_results_filtering';
 const mockSearchBar = vi.fn((_props: unknown) => null);
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          appName: 'osquery',
-          application: {
-            getUrlForApp: vi.fn().mockReturnValue('/fleet/agents/agent-1'),
-            capabilities: { osquery: { read: true, write: true, runSavedQueries: true } },
-          },
-          theme: { theme$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) } },
-          uiSettings: { get: vi.fn().mockReturnValue(false) },
-          notifications: {
-            toasts: { addWarning: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
-          },
-          data: {
-            fieldFormats: {},
-            dataViews: { create: vi.fn().mockResolvedValue({}) },
-          },
-          analytics: {},
-          i18n: {},
-          uiActions: { getTriggerCompatibleActions: vi.fn().mockResolvedValue([]) },
-          unifiedSearch: {
-            ui: {
-              SearchBar: (props: unknown) => mockSearchBar(props),
-            },
-          },
-          chrome: {},
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        appName: 'osquery',
+        application: {
+          getUrlForApp: vi.fn().mockReturnValue('/fleet/agents/agent-1'),
+          capabilities: { osquery: { read: true, write: true, runSavedQueries: true } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        theme: { theme$: { subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) } },
+        uiSettings: { get: vi.fn().mockReturnValue(false) },
+        notifications: {
+          toasts: { addWarning: vi.fn(), addSuccess: vi.fn(), addError: vi.fn() },
+        },
+        data: {
+          fieldFormats: {},
+          dataViews: { create: vi.fn().mockResolvedValue({}) },
+        },
+        analytics: {},
+        i18n: {},
+        uiActions: { getTriggerCompatibleActions: vi.fn().mockResolvedValue([]) },
+        unifiedSearch: {
+          ui: {
+            SearchBar: (props: unknown) => mockSearchBar(props),
+          },
+        },
+        chrome: {},
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/use_persisted_page_size', () => {
-      const mocked = {
-      usePersistedPageSize: () => [20, vi.fn()],
-      PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
-      RESULTS_PAGE_SIZE_STORAGE_KEY: 'osquery:resultsPageSize',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePersistedPageSize: () => [20, vi.fn()],
+    PAGE_SIZE_OPTIONS: [10, 25, 50, 100],
+    RESULTS_PAGE_SIZE_STORAGE_KEY: 'osquery:resultsPageSize',
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../action_results/use_action_results');
 
@@ -70,73 +72,78 @@ vi.mock('./use_osquery_data_view');
 vi.mock('./use_results_filtering');
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      pagePathGetters: {
-        agent_details: ({ agentId }: { agentId: string }) => ['', `/fleet/agents/${agentId}`],
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pagePathGetters: {
+      agent_details: ({ agentId }: { agentId: string }) => ['', `/fleet/agents/${agentId}`],
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cell-actions', () => {
-      const mocked = {
-      CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockSetFilters = vi.fn();
 const mockClearFilters = vi.fn();
 
 vi.mock('./export_filters_context', () => {
-      const mocked = {
-      useExportFiltersContext: () => ({
-        getFilters: vi.fn(),
-        setFilters: mockSetFilters,
-        clearFilters: mockClearFilters,
-        subscribe: vi.fn(() => () => undefined),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportFiltersContext: () => ({
+      getFilters: vi.fn(),
+      setFilters: mockSetFilters,
+      clearFilters: mockClearFilters,
+      subscribe: vi.fn(() => () => undefined),
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 let capturedOnInitialStateChange: ((state: Partial<{ isCompareActive: boolean }>) => void) | null =
   null;
 
 vi.mock('./results_flyout', () => {
-      const mocked = {
-      OsqueryResultsFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OsqueryResultsFlyout: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cell_renderers', () => {
-      const mocked = {
-      getOsqueryCellRenderers: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOsqueryCellRenderers: vi.fn().mockReturnValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./transform_results', () => {
-      const mocked = {
-      transformEdgesToRecords: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformEdgesToRecords: vi.fn().mockReturnValue([]),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const useActionResultsMock = useActionResults as MockedFunction<typeof useActionResults>;
 const useAllResultsMock = useAllResults as MockedFunction<typeof useAllResults>;
 const useOsqueryDataViewMock = useOsqueryDataView as MockedFunction<typeof useOsqueryDataView>;
-const useResultsFilteringMock = useResultsFiltering as MockedFunction<
-  typeof useResultsFiltering
->;
+const useResultsFilteringMock = useResultsFiltering as MockedFunction<typeof useResultsFiltering>;
 
 const mockDataView = {
   id: 'mock-data-view',
@@ -202,23 +209,24 @@ let capturedUnifiedDataTableProps: Record<string, unknown> = {};
 
 // Mock that also captures props for assertions
 vi.mock('@kbn/unified-data-table', () => {
-      const mocked = {
-      UnifiedDataTable: (props: Record<string, unknown>) => {
-        capturedUnifiedDataTableProps = props;
-        capturedOnInitialStateChange =
-          (
-            props as {
-              onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
-            }
-          ).onInitialStateChange ?? null;
+  const mocked = {
+    UnifiedDataTable: (props: Record<string, unknown>) => {
+      capturedUnifiedDataTableProps = props;
+      capturedOnInitialStateChange =
+        (
+          props as {
+            onInitialStateChange?: (state: Partial<{ isCompareActive: boolean }>) => void;
+          }
+        ).onInitialStateChange ?? null;
 
-        return <div data-test-subj="mockUnifiedDataTable" />;
-      },
-      DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-      DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return <div data-test-subj="mockUnifiedDataTable" />;
+    },
+    DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+    DataGridDensity: { EXPANDED: 'expanded', COMPACT: 'compact' },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('UnifiedResultsTable', () => {
   beforeEach(() => {

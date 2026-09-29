@@ -15,9 +15,7 @@ import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
-  typeof useApmPluginContext
->;
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 
 const DROPPED_SPANS_DOC_URL = 'https://example.com/dropped-spans';
 

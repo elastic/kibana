@@ -21,7 +21,7 @@ import { SCRIPTS_LIBRARY_ROUTE } from '../../../../common/endpoint/constants';
 const useQueryMock = _useQuery as Mock;
 
 vi.mock('@kbn/react-query', async () => {
-  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
+  const actualReactQueryModule = await vi.importActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

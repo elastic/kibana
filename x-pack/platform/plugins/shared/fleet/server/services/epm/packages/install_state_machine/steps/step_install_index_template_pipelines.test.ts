@@ -37,17 +37,17 @@ vi.mock('../../remove', async () => {
   };
 });
 vi.mock('../../../elasticsearch/template/template', () => {
-      const mocked = {
-      generateESIndexPatterns: vi.fn((dataStreams) => {
-        const result: Record<string, string> = {};
-        for (const ds of dataStreams) {
-          result[ds.path] = `${ds.type}-${ds.path}-*`;
-        }
-        return result;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateESIndexPatterns: vi.fn((dataStreams) => {
+      const result: Record<string, string> = {};
+      for (const ds of dataStreams) {
+        result[ds.path] = `${ds.type}-${ds.path}-*`;
+      }
+      return result;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockCleanupComponentTemplate = cleanupComponentTemplate as MockedFunction<
   typeof cleanupComponentTemplate
 >;
@@ -64,10 +64,9 @@ import {
   stepInstallIndexTemplatePipelines,
   cleanupIndexTemplatePipelinesStep,
 } from './step_install_index_template_pipelines';
-const mockedInstallIndexTemplatesAndPipelines =
-  installIndexTemplatesAndPipelines as MockedFunction<
-    typeof installIndexTemplatesAndPipelines
-  >;
+const mockedInstallIndexTemplatesAndPipelines = installIndexTemplatesAndPipelines as MockedFunction<
+  typeof installIndexTemplatesAndPipelines
+>;
 let soClient: Mocked<SavedObjectsClientContract>;
 let esClient: Mocked<ElasticsearchClient>;
 
@@ -718,9 +717,7 @@ describe('stepInstallIndexTemplatePipelines', () => {
         esReferences: standardRefs,
       });
 
-      vi
-        .mocked(optimisticallyAddEsAssetReferences)
-        .mockResolvedValue(updatedRefsWithCustom as any);
+      vi.mocked(optimisticallyAddEsAssetReferences).mockResolvedValue(updatedRefsWithCustom as any);
 
       const mockInstalledPackageSo = getMockInstalledPackageSo([
         {

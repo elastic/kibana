@@ -23,14 +23,14 @@ const mockOnPageReady = vi.fn();
 const mockOnPageRefreshStart = vi.fn();
 
 vi.mock('../../..', () => {
-      const mocked = {
-      usePerformanceContext: () => ({
-        onPageReady: mockOnPageReady,
-        onPageRefreshStart: mockOnPageRefreshStart,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({
+      onPageReady: mockOnPageReady,
+      onPageRefreshStart: mockOnPageRefreshStart,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePageReady', () => {
   beforeEach(() => {

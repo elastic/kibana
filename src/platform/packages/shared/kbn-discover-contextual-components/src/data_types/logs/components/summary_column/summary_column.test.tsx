@@ -36,18 +36,20 @@ import {
 import type { IFieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCodeBlock: ({
-        children,
-        dangerouslySetInnerHTML,
-      }: {
-        children?: string;
-        dangerouslySetInnerHTML?: { __html: string };
-      }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCodeBlock: ({
+      children,
+      dangerouslySetInnerHTML,
+    }: {
+      children?: string;
+      dangerouslySetInnerHTML?: { __html: string };
+    }) => (
+      <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getSummaryProps = (
   record: DataTableRecord,

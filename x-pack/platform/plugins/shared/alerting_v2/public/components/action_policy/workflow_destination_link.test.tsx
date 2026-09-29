@@ -14,23 +14,23 @@ import { WorkflowDestinationLink } from './workflow_destination_link';
 const mockUseFetchWorkflow = vi.fn();
 
 vi.mock('../../hooks/use_fetch_workflow', () => {
-      const mocked = {
-      useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetUrlForApp = vi.fn(
   (_appId: string, { path }: { path: string }) => `/app/workflows${path}`
 );
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: () => ({ getUrlForApp: mockGetUrlForApp }),
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: () => ({ getUrlForApp: mockGetUrlForApp }),
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowDestinationLink', () => {
   beforeEach(() => {

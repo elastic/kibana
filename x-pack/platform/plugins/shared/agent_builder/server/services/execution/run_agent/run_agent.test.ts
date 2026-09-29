@@ -11,19 +11,19 @@ import type { Mocked } from 'vitest';
 import { runAgent } from './run_agent';
 
 vi.mock('./run_chat_agent', () => {
-      const mocked = {
-      runDefaultAgentMode: vi.fn().mockResolvedValue({ round: { id: 'native-round' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runDefaultAgentMode: vi.fn().mockResolvedValue({ round: { id: 'native-round' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./deductive', () => {
-      const mocked = {
-      shouldUseDeductive: vi.fn().mockReturnValue(true),
-      runDeductiveAgent: vi.fn().mockResolvedValue({ round: { id: 'deductive-round' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldUseDeductive: vi.fn().mockReturnValue(true),
+    runDeductiveAgent: vi.fn().mockResolvedValue({ round: { id: 'deductive-round' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import * as chatAgent from './run_chat_agent';
 import * as deductive from './deductive';

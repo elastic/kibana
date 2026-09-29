@@ -13,17 +13,17 @@ import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/
 import { Model } from './model';
 
 vi.mock('@kbn/ml-trained-models-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ml-trained-models-utils')),
-      ELASTIC_MODEL_DEFINITIONS: {
-        '.multilingual-e5-small': {
-          license: 'MIT',
-          licenseUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
-        },
+  const mocked = {
+    ...(await vi.importActual('@kbn/ml-trained-models-utils')),
+    ELASTIC_MODEL_DEFINITIONS: {
+      '.multilingual-e5-small': {
+        license: 'MIT',
+        licenseUrl: 'https://huggingface.co/intfloat/multilingual-e5-small',
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Model component', () => {
   it('renders model_id when available in service_settings', () => {

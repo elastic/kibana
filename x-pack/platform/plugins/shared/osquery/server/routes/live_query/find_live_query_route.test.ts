@@ -17,25 +17,28 @@ import { findLiveQueryRoute } from './find_live_query_route';
 import { getResultCountsForActions } from '../../lib/get_result_counts_for_actions';
 
 vi.mock('../../lib/get_result_counts_for_actions', () => {
-      const mocked = {
-      getResultCountsForActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getResultCountsForActions: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/ccs_utils', () => {
-      const mocked = {
-      hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('findLiveQueryRoute', () => {
   let routeHandler: RequestHandler;
@@ -269,9 +272,7 @@ describe('findLiveQueryRoute', () => {
       })
     );
 
-    (getResultCountsForActions as Mock).mockRejectedValue(
-      new Error('index_not_found_exception')
-    );
+    (getResultCountsForActions as Mock).mockRejectedValue(new Error('index_not_found_exception'));
 
     setupRoute();
 

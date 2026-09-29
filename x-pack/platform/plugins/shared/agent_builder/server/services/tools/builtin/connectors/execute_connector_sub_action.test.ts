@@ -30,13 +30,13 @@ import {
 import type { ConnectorToolsOptions } from './types';
 
 vi.mock('@kbn/connector-specs', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/connector-specs')),
-      getConnectorSpec: vi.fn(),
-      isToolAction: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/connector-specs')),
+    getConnectorSpec: vi.fn(),
+    isToolAction: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 const isToolActionMock = isToolAction as MockedFunction<typeof isToolAction>;

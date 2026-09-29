@@ -15,7 +15,7 @@ import { runAdapter, UnknownAdapterError } from '../../../adapters';
 import type { SourceHit } from '../../../adapters';
 
 vi.mock('../../../adapters', async () => {
-  const actual = (await vi.importActual('../../../adapters'));
+  const actual = await vi.importActual('../../../adapters');
   return { ...actual, runAdapter: vi.fn() };
 });
 

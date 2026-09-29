@@ -22,7 +22,7 @@ import { requestContextMock } from '../../../../__mocks__/request_context';
 const mockAttackDiscoveryFindResponse = getMockAttackDiscoveryFindResponse();
 
 vi.mock('../../helpers/index_privileges', async () => {
-  const original = (await vi.importActual('../../helpers/index_privileges'));
+  const original = await vi.importActual('../../helpers/index_privileges');
 
   return {
     ...original,
@@ -53,9 +53,10 @@ describe('findAttackDiscoveriesRoute', () => {
       query: { page: 1, per_page: 10 },
     };
     mockResponse = httpServerMock.createResponseFactory();
-    vi
-      .spyOn(helpers, 'performChecks')
-      .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
+    vi.spyOn(helpers, 'performChecks').mockResolvedValue({
+      isSuccess: true,
+      currentUser: mockAuthenticatedUser,
+    });
 
     addVersionMock = vi.fn();
     (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });

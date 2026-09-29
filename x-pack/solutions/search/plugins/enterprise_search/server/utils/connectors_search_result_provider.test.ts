@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { NEVER, lastValueFrom, of } from 'rxjs';
+import { vi } from 'vitest';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 

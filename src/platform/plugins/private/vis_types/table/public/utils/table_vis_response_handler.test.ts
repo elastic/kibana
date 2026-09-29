@@ -12,35 +12,35 @@ import { vi } from 'vitest';
 const mockConverter = vi.fn((name) => `By ${name}`);
 
 vi.mock('../services', () => {
-      const mocked = {
-      getFormatService: vi.fn(() => ({
-        deserialize: vi.fn(() => ({
-          convertToText: mockConverter,
-        })),
+  const mocked = {
+    getFormatService: vi.fn(() => ({
+      deserialize: vi.fn(() => ({
+        convertToText: mockConverter,
       })),
-    };
-      return { ...mocked, default: mocked };
-    });
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./create_formatted_table', () => {
-      const mocked = {
-      createFormattedTable: vi.fn((data) => ({
-        ...data,
-        formattedColumns: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFormattedTable: vi.fn((data) => ({
+      ...data,
+      formattedColumns: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./add_percentage_column', () => {
-      const mocked = {
-      addPercentageColumn: vi.fn((data, column) => ({
-        ...data,
-        percentage: `${column} with percentage`,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addPercentageColumn: vi.fn((data, column) => ({
+      ...data,
+      percentage: `${column} with percentage`,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';

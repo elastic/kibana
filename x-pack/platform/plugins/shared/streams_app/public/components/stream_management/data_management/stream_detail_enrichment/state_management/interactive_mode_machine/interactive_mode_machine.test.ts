@@ -18,12 +18,12 @@ import type { InteractiveModeParentRef } from './types';
 // the same 'generated-id' for all calls, which breaks tests that create multiple steps)
 let mockIdCounter = 0;
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      htmlIdGenerator: () => () => `test-id-${mockIdCounter++}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    htmlIdGenerator: () => () => `test-id-${mockIdCounter++}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createParentRef = () => {
   const send = vi.fn();

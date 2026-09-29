@@ -19,27 +19,25 @@ import type { InitialBenchConfig } from './config/types';
 
 // Mock workspace operations to avoid real git checkouts
 vi.mock('@kbn/workspaces', () => {
-      const mocked = {
-      activateWorktreeOrUseSourceRepo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    activateWorktreeOrUseSourceRepo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock collectConfigPaths to avoid git ls-files in temp directory
 vi.mock('./config/collect_config_paths', () => {
-      const mocked = {
-      collectConfigPaths: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    collectConfigPaths: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { activateWorktreeOrUseSourceRepo } from '@kbn/workspaces';
 import { collectConfigPaths } from './config/collect_config_paths';
 
 // Type the mocked functions
-const mockedCollectConfigPaths = collectConfigPaths as MockedFunction<
-  typeof collectConfigPaths
->;
+const mockedCollectConfigPaths = collectConfigPaths as MockedFunction<typeof collectConfigPaths>;
 
 // Mock setup for activated worktree functions
 

@@ -31,7 +31,7 @@ const dataViewsMap: Record<string, DataView> = {
 const mockCreateDataView = vi.fn();
 
 vi.mock('../../../../common/index_patterns_utils', async () => {
-  const originalModule = (await vi.importActual('../../../../common/index_patterns_utils'));
+  const originalModule = await vi.importActual('../../../../common/index_patterns_utils');
   return {
     isStringTypeIndexPattern: originalModule.isStringTypeIndexPattern,
   };

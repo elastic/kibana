@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import React from 'react';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';

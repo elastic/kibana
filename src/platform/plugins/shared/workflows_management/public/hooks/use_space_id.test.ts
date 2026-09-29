@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { renderHook, waitFor } from '@testing-library/react';
 import { useKibana } from './use_kibana';
 import { useSpaceId } from './use_space_id';
 import { createStartServicesMock, createUseKibanaMockValue } from '../mocks';

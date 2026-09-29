@@ -20,17 +20,17 @@ import type { IntegrationFormData } from './types';
 const mockExistingPackageNames = ['existing_integration', 'my_custom_package', 'test_package'];
 
 vi.mock('../../../common/lib/api', () => {
-      const mocked = {
-      getInstalledPackages: vi.fn(() =>
-        Promise.resolve({
-          items: mockExistingPackageNames.map((id) => ({ id })),
-        })
-      ),
-      getAllIntegrations: vi.fn(() => Promise.resolve([])),
-      getAllIntegrationNames: vi.fn(() => Promise.resolve([])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstalledPackages: vi.fn(() =>
+      Promise.resolve({
+        items: mockExistingPackageNames.map((id) => ({ id })),
+      })
+    ),
+    getAllIntegrations: vi.fn(() => Promise.resolve([])),
+    getAllIntegrationNames: vi.fn(() => Promise.resolve([])),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = coreMock.createStart();
 
@@ -146,11 +146,7 @@ interface RenderFormOptions {
 }
 
 const renderForm = (options: RenderFormOptions = {}) => {
-  const {
-    initialValue,
-    onSubmit = vi.fn().mockResolvedValue(undefined),
-    onSubmitResult,
-  } = options;
+  const { initialValue, onSubmit = vi.fn().mockResolvedValue(undefined), onSubmitResult } = options;
 
   return {
     ...render(

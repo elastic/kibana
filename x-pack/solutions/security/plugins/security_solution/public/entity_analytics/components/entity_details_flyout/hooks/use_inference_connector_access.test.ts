@@ -15,17 +15,17 @@ import { useInferenceConnectorAccess } from './use_inference_connector_access';
 const mockHttpFetch = vi.fn();
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            fetch: mockHttpFetch,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          fetch: mockHttpFetch,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInferenceConnectorAccess', () => {
   const genAiConnector = {

@@ -16,11 +16,11 @@ import { useKibana } from '../../../../../common/lib/kibana';
 import { ConversationLink } from '.';
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetUrlForApp = vi.fn();
 const mockUseKibana = useKibana as Mock;

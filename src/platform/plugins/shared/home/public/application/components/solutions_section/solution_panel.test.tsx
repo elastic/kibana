@@ -23,13 +23,13 @@ const solutionEntry = {
 };
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        trackUiMetric: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({
+      trackUiMetric: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const addBasePathMock = (path: string) => (path ? path : 'path');
 

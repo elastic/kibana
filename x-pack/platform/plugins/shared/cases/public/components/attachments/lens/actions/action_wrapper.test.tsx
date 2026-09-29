@@ -22,7 +22,7 @@ vi.mock('../../../cases_context', () =>
 );
 
 vi.mock('../../../../client/helpers/can_use_cases', async () => {
-  const actual = (await vi.importActual('../../../../client/helpers/can_use_cases'));
+  const actual = await vi.importActual('../../../../client/helpers/can_use_cases');
   return {
     ...actual,
     canUseCases: vi.fn(),

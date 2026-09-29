@@ -16,21 +16,21 @@ import {
 } from './recent_anomalies_esql_source_query_hooks';
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = { useEntityStoreEuidApi: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useEntityStoreEuidApi: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_resolved_latest_entities_index_name', () => {
-      const mocked = {
-      useResolvedLatestEntitiesIndexName: vi.fn(() => ({
-        data: { indexName: '.entities.v2.latest.default' },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolvedLatestEntitiesIndexName: vi.fn(() => ({
+      data: { indexName: '.entities.v2.latest.default' },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../anomaly_heatmap_interval', () => {
-      const mocked = { useIntervalForHeatmap: vi.fn(() => 3) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useIntervalForHeatmap: vi.fn(() => 3) };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEntityStoreEuidApi = useEntityStoreEuidApi as Mock;
 

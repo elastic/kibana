@@ -31,11 +31,11 @@ import type { ActiveConversation } from '@kbn/agent-builder-browser/events';
 import { createIdGenerator, registerDashboardAttachmentUiDefinition } from '.';
 
 vi.mock('@kbn/dashboard-plugin/public', () => {
-      const mocked = {
-      DashboardRenderer: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardRenderer: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockRoundCompleteEvent = (
   attachments: VersionedAttachment[],

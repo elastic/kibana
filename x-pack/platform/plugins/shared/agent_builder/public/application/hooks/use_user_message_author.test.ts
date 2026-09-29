@@ -15,18 +15,18 @@ import { useUserProfiles } from './use_user_profiles';
 import { useUserMessageAuthor } from './use_user_message_author';
 
 vi.mock('./use_current_user', () => {
-      const mocked = {
-      useCurrentUser: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUser: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_user_profiles', () => {
-      const mocked = {
-      useUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCurrentUser = vi.mocked(useCurrentUser);
 const mockUseUserProfiles = vi.mocked(useUserProfiles);

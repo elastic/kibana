@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock, MockInstance } from 'vitest';
-
 import { EuiThemeProvider } from '@elastic/eui';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import crypto from 'crypto';
 import React from 'react';
+import type { Mock, MockInstance } from 'vitest';
+import { vi } from 'vitest';
 
 import {
   httpServiceMock,

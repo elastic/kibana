@@ -22,15 +22,15 @@ import {
 } from '.';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      appContextService: {
-        getSecurityLicense: vi.fn().mockReturnValue({ isEnabled: vi.fn().mockReturnValue(false) }),
-        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-        getLogger: vi.fn().mockReturnValue({ debug: vi.fn(), error: vi.fn() } as any),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getSecurityLicense: vi.fn().mockReturnValue({ isEnabled: vi.fn().mockReturnValue(false) }),
+      getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
+      getLogger: vi.fn().mockReturnValue({ debug: vi.fn(), error: vi.fn() } as any),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

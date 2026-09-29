@@ -224,9 +224,9 @@ describe('Initializing the store', () => {
 
       const mockFilters = faker.lorem.words(3).split(' ') as unknown as Filter[];
 
-      vi
-        .spyOn(deps.lensServices.data.query.filterManager, 'getFilters')
-        .mockReturnValue(mockFilters);
+      vi.spyOn(deps.lensServices.data.query.filterManager, 'getFilters').mockReturnValue(
+        mockFilters
+      );
 
       await loadInitialAppState(store, defaultProps);
 

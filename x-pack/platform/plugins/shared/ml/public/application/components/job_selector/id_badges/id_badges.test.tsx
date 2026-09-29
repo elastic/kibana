@@ -15,16 +15,16 @@ import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/s
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          share: { url: { locators: vi.fn() } },
-          application: { navigateToUrl: vi.fn() },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        share: { url: { locators: vi.fn() } },
+        application: { navigateToUrl: vi.fn() },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const props: IdBadgesProps = {
   page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,

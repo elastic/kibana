@@ -79,28 +79,29 @@ const getMockPolicyAWS = (): NewPackagePolicy => {
 // Mock dependencies
 vi.mock('../hooks/use_cloud_setup_context');
 vi.mock('./aws_setup_info', () => {
-      const mocked = {
-      AWSSetupInfoContent: vi.fn(({ info }: { info: React.ReactNode }) => (
-        <div data-test-subj="aws-setup-info">{info}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AWSSetupInfoContent: vi.fn(({ info }: { info: React.ReactNode }) => (
+      <div data-test-subj="aws-setup-info">{info}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./aws_credential_type_selector', () => {
-      const mocked = {
-      AwsCredentialTypeSelector: vi.fn(() => <div data-test-subj="aws-credentials-type-selector" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AwsCredentialTypeSelector: vi.fn(() => <div data-test-subj="aws-credentials-type-selector" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./aws_input_var_fields', () => {
-      const mocked = {
-      AwsInputVarFields: vi.fn(() => <div data-test-subj="aws-input-var-fields" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AwsInputVarFields: vi.fn(() => <div data-test-subj="aws-input-var-fields" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;
-const mockAwsCredentialTypeSelector = (await vi.importMock('./aws_credential_type_selector')).AwsCredentialTypeSelector;
+const mockAwsCredentialTypeSelector = (await vi.importMock('./aws_credential_type_selector'))
+  .AwsCredentialTypeSelector;
 const mockAwsInputVarFields = (await vi.importMock('./aws_input_var_fields')).AwsInputVarFields;
 const mockAWSSetupInfoContent = (await vi.importMock('./aws_setup_info')).AWSSetupInfoContent;
 

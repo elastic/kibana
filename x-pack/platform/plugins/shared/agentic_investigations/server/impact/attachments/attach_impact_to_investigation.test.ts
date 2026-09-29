@@ -83,9 +83,7 @@ describe('attachImpactToInvestigation', () => {
   it('does not write impact when the conversation is missing or not owned', async () => {
     const writeImpact = vi.fn();
     const conversations = {
-      get: vi
-        .fn()
-        .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' })),
+      get: vi.fn().mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' })),
     } as unknown as ConversationPublicClient;
 
     await expect(

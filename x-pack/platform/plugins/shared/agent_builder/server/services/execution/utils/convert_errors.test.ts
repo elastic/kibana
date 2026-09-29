@@ -20,11 +20,11 @@ import {
 import { convertErrors, toClientError } from './convert_errors';
 
 vi.mock('../../../tracing', () => {
-      const mocked = {
-      getCurrentTraceId: () => 'trace-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentTraceId: () => 'trace-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('toClientError', () => {
   it('returns the same AgentBuilderError instance with the trace id stamped on meta', () => {

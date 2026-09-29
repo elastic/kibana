@@ -38,10 +38,7 @@ const createQuery = (overrides: Partial<RunningQuery> = {}): RunningQuery => ({
   ...overrides,
 });
 
-const mockContext = (
-  fetchQueryDetails: Mock,
-  discoverLocator?: { getRedirectUrl: Mock }
-) =>
+const mockContext = (fetchQueryDetails: Mock, discoverLocator?: { getRedirectUrl: Mock }) =>
   ({
     chrome: {} as any,
     dataViews: { get: vi.fn().mockResolvedValue({}) } as any,

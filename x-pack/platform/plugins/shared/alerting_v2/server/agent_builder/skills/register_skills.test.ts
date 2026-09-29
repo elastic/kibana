@@ -20,26 +20,25 @@ import { createRuleManagementSkill } from './rule_management_skill';
 import { registerSkills } from './register_skills';
 
 vi.mock('./rule_management_skill', () => {
-      const mocked = {
-      createRuleManagementSkill: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRuleManagementSkill: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./action_policy_management_skill', () => {
-      const mocked = {
-      createActionPolicyManagementSkill: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createActionPolicyManagementSkill: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createRuleManagementSkillMock = createRuleManagementSkill as MockedFunction<
   typeof createRuleManagementSkill
 >;
-const createActionPolicyManagementSkillMock =
-  createActionPolicyManagementSkill as MockedFunction<
-    typeof createActionPolicyManagementSkill
-  >;
+const createActionPolicyManagementSkillMock = createActionPolicyManagementSkill as MockedFunction<
+  typeof createActionPolicyManagementSkill
+>;
 
 const createLogger = (): Mocked<
   Pick<LoggerServiceContract, 'debug' | 'info' | 'warn' | 'error' | 'forSubsystem'>

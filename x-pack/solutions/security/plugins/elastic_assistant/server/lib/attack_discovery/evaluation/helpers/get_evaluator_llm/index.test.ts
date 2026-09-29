@@ -16,14 +16,14 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import { getEvaluatorLlm } from '.';
 
 vi.mock('@kbn/langchain/server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/langchain/server')),
+  const mocked = {
+    ...(await vi.importActual('@kbn/langchain/server')),
 
-      ActionsClientLlm: vi.fn(),
-      InferenceClientLlm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+    ActionsClientLlm: vi.fn(),
+    InferenceClientLlm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const connectorTimeout = 1000;
 

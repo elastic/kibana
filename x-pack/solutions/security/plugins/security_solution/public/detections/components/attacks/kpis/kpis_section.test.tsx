@@ -19,64 +19,64 @@ import { useAttacksKpiState } from './common/use_attacks_kpi_state';
 import { KpiViewSelection } from './kpi_view_select/helpers';
 
 vi.mock('./attacks_summary_panel', () => {
-      const mocked = {
-      AttacksSummaryPanel: ({
-        title,
-        setIsExpanded,
-      }: {
-        title: React.ReactNode;
-        setIsExpanded: (val: boolean) => void;
-      }) => (
-        <div data-test-subj="mock-summary-view-content">
-          {title}
-          <button
-            data-test-subj="query-toggle-header"
-            onClick={() => setIsExpanded(false)}
-            type="button"
-          >
-            {'Toggle'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksSummaryPanel: ({
+      title,
+      setIsExpanded,
+    }: {
+      title: React.ReactNode;
+      setIsExpanded: (val: boolean) => void;
+    }) => (
+      <div data-test-subj="mock-summary-view-content">
+        {title}
+        <button
+          data-test-subj="query-toggle-header"
+          onClick={() => setIsExpanded(false)}
+          type="button"
+        >
+          {'Toggle'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attacks_trends_panel', () => {
-      const mocked = {
-      AttacksTrendsPanel: ({ title }: { title: React.ReactNode }) => (
-        <div data-test-subj="mock-trends-panel">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksTrendsPanel: ({ title }: { title: React.ReactNode }) => (
+      <div data-test-subj="mock-trends-panel">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attacks_count_panel', () => {
-      const mocked = {
-      AttacksCountPanel: ({ title }: { title: React.ReactNode }) => (
-        <div data-test-subj="mock-count-panel">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksCountPanel: ({ title }: { title: React.ReactNode }) => (
+      <div data-test-subj="mock-count-panel">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attacks_treemap_panel', () => {
-      const mocked = {
-      AttacksTreemapPanel: ({ title }: { title: React.ReactNode }) => (
-        <div data-test-subj="mock-treemap-panel">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksTreemapPanel: ({ title }: { title: React.ReactNode }) => (
+      <div data-test-subj="mock-treemap-panel">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/containers/query_toggle');
 
 vi.mock('./common/use_attacks_kpi_state', () => {
-      const mocked = {
-      useAttacksKpiState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttacksKpiState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetToggleStatus = vi.fn();
 const mockUseQueryToggle = useQueryToggle as Mock;

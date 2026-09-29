@@ -13,11 +13,11 @@ import { FieldRulesPanelHeader } from './header';
 import { useFieldRulesPanelContext } from './context';
 
 vi.mock('./context', () => {
-      const mocked = {
-      useFieldRulesPanelContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldRulesPanelContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FieldRulesPanelHeader', () => {
   it('renders rule policy counters', () => {

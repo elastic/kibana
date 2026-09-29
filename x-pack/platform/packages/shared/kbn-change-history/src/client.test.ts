@@ -17,20 +17,20 @@ import { ChangeHistoryClient } from './client';
 import type { ObjectChange } from './types';
 
 vi.mock('@kbn/data-streams', () => {
-      const mocked = {
-      DataStreamClient: {
-        initialize: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataStreamClient: {
+      initialize: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      withSpan: vi.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSpan: vi.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 

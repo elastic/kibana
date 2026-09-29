@@ -21,12 +21,12 @@ import { INSTALLED_STATUS, UNINSTALLED_STATUS } from './constants';
 
 // Mock the polling functions to resolve immediately in tests
 vi.mock('./hooks/poll_sample_data_status', () => {
-      const mocked = {
-      pollForInstallation: vi.fn(async () => Promise.resolve()),
-      pollForRemoval: vi.fn(async () => Promise.resolve()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pollForInstallation: vi.fn(async () => Promise.resolve()),
+    pollForRemoval: vi.fn(async () => Promise.resolve()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SampleDataCard', () => {
   const onStatusChange = vi.fn();

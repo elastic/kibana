@@ -19,11 +19,11 @@ import { type SlackChannel, useFetchSlackChannels } from '../hooks/use_fetch_sla
 import type { UseQueryResult } from '@kbn/react-query';
 
 vi.mock('../hooks/use_fetch_slack_channels', () => {
-      const mocked = {
-      useFetchSlackChannels: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSlackChannels: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchSlackChannels = useFetchSlackChannels as MockedFunction<
   typeof useFetchSlackChannels

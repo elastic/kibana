@@ -24,25 +24,25 @@ const mockGetExecution = vi.fn();
 const mockFindAgentExecution = vi.fn();
 
 vi.mock('@kbn/sse-utils-client', () => {
-      const mocked = {
-      /**
-       * Subscribes to the source (so the http.get() side effect still happens), but replaces
-       * its output with the test-controlled `mockEvents$` observable.
-       */
-      httpResponseIntoObservable: () => (source: { subscribe: (o: unknown) => void }) => {
-        source.subscribe({ error: () => {} });
-        return mockEvents$;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    /**
+     * Subscribes to the source (so the http.get() side effect still happens), but replaces
+     * its output with the test-controlled `mockEvents$` observable.
+     */
+    httpResponseIntoObservable: () => (source: { subscribe: (o: unknown) => void }) => {
+      source.subscribe({ error: () => {} });
+      return mockEvents$;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => ({ getExecution: mockGetExecution })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => ({ getExecution: mockGetExecution })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const validState = { summary: 'ok', hypotheses: [] };
 

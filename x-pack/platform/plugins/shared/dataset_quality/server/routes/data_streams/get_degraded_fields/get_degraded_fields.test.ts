@@ -13,7 +13,7 @@ import { createDatasetQualityESClient } from '../../../utils';
 import { getDegradedFields } from '.';
 
 vi.mock('../../../utils', async () => {
-  const actual = (await vi.importActual('../../../utils'));
+  const actual = await vi.importActual('../../../utils');
   return {
     ...actual,
     createDatasetQualityESClient: vi.fn(),

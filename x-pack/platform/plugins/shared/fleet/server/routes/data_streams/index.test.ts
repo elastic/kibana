@@ -21,12 +21,12 @@ import { ListDataStreamsResponseSchema } from '.';
 import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
 
 vi.mock('./handlers', () => {
-      const mocked = {
-      getListHandler: vi.fn(),
-      getDeprecatedILMCheckHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListHandler: vi.fn(),
+    getDeprecatedILMCheckHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getListHandlerMock = getListHandler as Mock;
 const getDeprecatedILMCheckHandlerMock = getDeprecatedILMCheckHandler as Mock;

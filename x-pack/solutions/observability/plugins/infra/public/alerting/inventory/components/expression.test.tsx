@@ -43,36 +43,36 @@ const mockDataView = {
 } as Mocked<DataView>;
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      withSourceProvider: () => vi.fn,
-      useSourceContext: () => ({
-        source: { id: 'default' },
-      }),
-      useMetricsDataViewContext: () => ({
-        metricsView: {
-          indices: 'metricbeat-*',
-          timeFieldName: mockDataView.timeFieldName,
-          fields: mockDataView.fields,
-          dataViewReference: mockDataView,
-        } as ResolvedDataView,
-        loading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSourceProvider: () => vi.fn,
+    useSourceContext: () => ({
+      source: { id: 'default' },
+    }),
+    useMetricsDataViewContext: () => ({
+      metricsView: {
+        indices: 'metricbeat-*',
+        timeFieldName: mockDataView.timeFieldName,
+        fields: mockDataView.fields,
+        dataViewReference: mockDataView,
+      } as ResolvedDataView,
+      loading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          ...mockCoreMock.createStart(),
-          unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        ...mockCoreMock.createStart(),
+        unifiedSearch: mockUnifiedSearchPluginMock.createStartContract(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const exampleCustomMetric = {
   id: 'this-is-an-id',
   field: 'some.system.field',

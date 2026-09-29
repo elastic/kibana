@@ -17,7 +17,7 @@ const mockAddDanger = vi.fn();
 const mockAddSuccess = vi.fn();
 
 vi.mock('../utils/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../utils/kibana_react'));
+  const originalModule = await vi.importActual('../utils/kibana_react');
   return {
     ...originalModule,
     useKibana: () => {
@@ -32,13 +32,13 @@ vi.mock('../utils/kibana_react', async () => {
   };
 });
 vi.mock('../services/create', () => {
-      const mocked = {
-      createMaintenanceWindow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createMaintenanceWindow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { createMaintenanceWindow } = (await vi.importMock('../services/create'));
+const { createMaintenanceWindow } = await vi.importMock('../services/create');
 
 const maintenanceWindow = {
   title: 'test',

@@ -30,11 +30,11 @@ vi.mock('../all_cases', () => ({
 }));
 
 vi.mock('../create', () => {
-      const mocked = {
-      CreateCase: () => <div>{'Create case'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateCase: () => <div>{'Create case'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../configure_cases/configure_cases', () => ({
   __esModule: true,

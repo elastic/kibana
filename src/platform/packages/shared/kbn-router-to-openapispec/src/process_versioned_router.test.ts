@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('./util', async () => {
-  const module = (await vi.importActual('./util'));
+  const module = await vi.importActual('./util');
   return {
     ...module,
     setXState: vi.fn(module.setXState),

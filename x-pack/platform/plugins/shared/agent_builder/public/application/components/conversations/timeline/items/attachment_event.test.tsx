@@ -19,29 +19,29 @@ import { AttachmentEvent } from './attachment_event';
 const mockAttachmentsService = { hasAttachmentType: vi.fn() };
 
 vi.mock('../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({ attachmentsService: mockAttachmentsService }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({ attachmentsService: mockAttachmentsService }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: () => ({ isEmbeddedContext: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: () => ({ isEmbeddedContext: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../response/attachments/inline_attachment_with_actions', () => {
-      const mocked = {
-      InlineAttachmentWithActions: vi.fn(() => <div data-test-subj="inlineCard" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InlineAttachmentWithActions: vi.fn(() => <div data-test-subj="inlineCard" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInlineCard = vi.mocked(InlineAttachmentWithActions);
 const lastCardProps = () => mockInlineCard.mock.calls.at(-1)![0];

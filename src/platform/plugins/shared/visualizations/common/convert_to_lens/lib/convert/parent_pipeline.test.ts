@@ -26,30 +26,30 @@ const mockGetFieldByName = vi.fn();
 const mockConvertMetricAggregationColumnWithoutSpecialParams = vi.fn();
 
 vi.mock('../utils', () => {
-      const mocked = {
-      getMetricFromParentPipelineAgg: vi.fn(() => mockGetMetricFromParentPipelineAgg()),
-      getLabel: vi.fn(() => 'label'),
-      getFieldNameFromField: vi.fn(() => 'document'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMetricFromParentPipelineAgg: vi.fn(() => mockGetMetricFromParentPipelineAgg()),
+    getLabel: vi.fn(() => 'label'),
+    getFieldNameFromField: vi.fn(() => 'document'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./metric', () => {
-      const mocked = {
-      convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
-        mockConvertMetricAggregationColumnWithoutSpecialParams()
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
+      mockConvertMetricAggregationColumnWithoutSpecialParams()
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../metrics', () => {
-      const mocked = {
-      getFormulaForPipelineAgg: vi.fn(() => mockGetFormulaForPipelineAgg()),
-      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormulaForPipelineAgg: vi.fn(() => mockGetFormulaForPipelineAgg()),
+    convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToOtherParentPipelineAggColumns', () => {
   const visType = 'heatmap';

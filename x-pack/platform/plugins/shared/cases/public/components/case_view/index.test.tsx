@@ -25,11 +25,11 @@ vi.mock('../../common/lib/kibana');
 vi.mock('../../common/navigation/hooks');
 vi.mock('../../containers/api');
 vi.mock('./case_view_page', () => {
-      const mocked = {
-      CaseViewPage: () => <div data-test-subj="case-view-page" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewPage: () => <div data-test-subj="case-view-page" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useFetchCaseMock = useGetCase as Mock;
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;

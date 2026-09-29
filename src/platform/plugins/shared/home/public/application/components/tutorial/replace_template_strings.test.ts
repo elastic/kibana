@@ -14,11 +14,11 @@ import { replaceTemplateStrings } from './replace_template_strings';
 import { getServices } from '../../kibana_services';
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('replaceTemplateStrings', () => {
   beforeEach(() => {

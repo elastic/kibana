@@ -14,45 +14,45 @@ import { JobSelector } from './job_selector';
 import type { MlSummaryJob } from '@kbn/ml-common-types/anomaly_detection_jobs/summary_job';
 
 vi.mock('../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({}),
-      useMlApi: () => ({}),
-      useNotifications: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: () => ({}),
+    useMlApi: () => ({}),
+    useNotifications: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./id_badges', () => {
-      const mocked = {
-      IdBadges: () => <div data-test-subj="mockIdBadges" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IdBadges: () => <div data-test-subj="mockIdBadges" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../anomaly_results_view_selector', () => {
-      const mocked = {
-      AnomalyResultsViewSelector: ({ viewId, selectedJobs }: any) => (
-        <div data-test-subj="mockAnomalyResultsViewSelector" data-view-id={viewId}>
-          {`Jobs: ${selectedJobs.length}`}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyResultsViewSelector: ({ viewId, selectedJobs }: any) => (
+      <div data-test-subj="mockAnomalyResultsViewSelector" data-view-id={viewId}>
+        {`Jobs: ${selectedJobs.length}`}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../contexts/kibana/use_create_url', () => {
-      const mocked = {
-      useCreateAndNavigateToManagementMlLink: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateAndNavigateToManagementMlLink: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('JobSelector', () => {
   const mockSelectedJobs: MlSummaryJob[] = [

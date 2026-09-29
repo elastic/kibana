@@ -22,21 +22,19 @@ import { DataSourceSelectionChange } from '../types';
 import { DATA_SOURCE_BROWSER_I18N_KEYS } from './i18n';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getDatasets: vi.fn(),
-      getESQLSources: vi.fn(),
-      getTimeseriesIndices: vi.fn(),
-      getViews: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDatasets: vi.fn(),
+    getESQLSources: vi.fn(),
+    getTimeseriesIndices: vi.fn(),
+    getViews: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getViewsMock = getViews as unknown as MockedFunction<
   (http: unknown) => Promise<EsqlViewsResult>
 >;
-const getDatasetsMock = getDatasets as unknown as MockedFunction<
-  () => Promise<{ datasets: [] }>
->;
+const getDatasetsMock = getDatasets as unknown as MockedFunction<() => Promise<{ datasets: [] }>>;
 const getESQLSourcesMock = getESQLSources as MockedFunction<typeof getESQLSources>;
 
 const views: EsqlView[] = [

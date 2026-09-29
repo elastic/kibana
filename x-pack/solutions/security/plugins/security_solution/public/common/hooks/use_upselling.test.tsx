@@ -18,7 +18,7 @@ import { UpsellingProvider } from '../components/upselling_provider';
 const mockUpselling = new UpsellingService();
 
 vi.mock('../lib/kibana', async () => {
-  const original = (await vi.importActual('../lib/kibana'));
+  const original = await vi.importActual('../lib/kibana');
   return {
     ...original,
     useKibana: () => ({

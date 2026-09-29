@@ -19,24 +19,24 @@ const mockSetIsEditing = vi.fn();
 const mockPanelRef: MutableRefObject<HTMLElement | null> = { current: null };
 
 vi.mock('./date_range_picker_context', () => {
-      const mocked = {
-      useDateRangePickerContext: () => ({
-        isEditing: true,
-        setIsEditing: mockSetIsEditing,
-        panelRef: mockPanelRef,
-        panelId: 'test-panel',
-        width: 'auto' as const,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateRangePickerContext: () => ({
+      isEditing: true,
+      setIsEditing: mockSetIsEditing,
+      panelRef: mockPanelRef,
+      panelId: 'test-panel',
+      width: 'auto' as const,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./date_range_picker_control', () => {
-      const mocked = {
-      DateRangePickerControl: () => <button>Open picker</button>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DateRangePickerControl: () => <button>Open picker</button>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Simulates CalendarPanel: header, day buttons, and footer.
 // `day-1` uses `tabIndex={0}` to allow focus (matches react-day-picker's expected pattern).

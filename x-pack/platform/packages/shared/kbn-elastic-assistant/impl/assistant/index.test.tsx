@@ -42,9 +42,9 @@ vi.mock('react-use/lib/useLocalStorage');
 vi.mock('react-use/lib/useSessionStorage');
 
 vi.mock('./quick_prompts/quick_prompts', () => {
-      const mocked = { QuickPrompts: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { QuickPrompts: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./api/conversations/use_fetch_current_user_conversations');
 vi.mock('./api/anonymization_fields/use_fetch_anonymization_fields');
 
@@ -159,9 +159,9 @@ describe('Assistant', () => {
       data: connectors,
     } as unknown as UseLoadConnectorsResult);
 
-    vi
-      .mocked(useFetchCurrentUserConversations)
-      .mockReturnValue(defaultFetchUserConversations as unknown as FetchCurrentUserConversations);
+    vi.mocked(useFetchCurrentUserConversations).mockReturnValue(
+      defaultFetchUserConversations as unknown as FetchCurrentUserConversations
+    );
 
     vi.mocked(useFetchAnonymizationFields).mockReturnValue(mockAnonymizationFields);
 
@@ -180,11 +180,10 @@ describe('Assistant', () => {
       return [value, persistToLocalStorage] as unknown as ReturnType<typeof useLocalStorage>;
     });
 
-    vi
-      .mocked(useSessionStorage)
-      .mockReturnValue([undefined, persistToSessionStorage] as unknown as ReturnType<
-        typeof useSessionStorage
-      >);
+    vi.mocked(useSessionStorage).mockReturnValue([
+      undefined,
+      persistToSessionStorage,
+    ] as unknown as ReturnType<typeof useSessionStorage>);
   });
 
   describe('persistent storage', () => {

@@ -13,16 +13,16 @@ import { LogsContent } from './logs';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 
 vi.mock('../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          getBasePath: () => '',
-          capabilities: { discover_v2: { show: true } },
-        },
+  const mocked = {
+    Legacy: {
+      shims: {
+        getBasePath: () => '',
+        capabilities: { discover_v2: { show: true } },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const sharePlugin = {
   url: {

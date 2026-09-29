@@ -13,11 +13,11 @@ import { partiallyUpdateRule } from '../saved_objects/partially_update_rule';
 import { RuleRunningHandler } from './rule_running_handler';
 
 vi.mock('../saved_objects/partially_update_rule', () => {
-      const mocked = {
-      partiallyUpdateRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    partiallyUpdateRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('isRunning handler', () => {
   const soClient = vi.fn() as unknown as ISavedObjectsRepository;

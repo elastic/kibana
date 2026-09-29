@@ -19,14 +19,14 @@ import { fetchAgentlessPolicyAsPackagePolicy } from './fetch_agentless_policy';
 // Mock the leaf `use_request` module (like the edit/copy hook tests) so the real inverse mapper
 // (`agentlessPolicyToPackagePolicy`) still runs against the nginx fixture below.
 vi.mock('../../../../../hooks/use_request', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks/use_request')),
-      sendGetAgentlessPolicy: vi.fn(),
-      sendGetPackageInfoByKeyForRq: vi.fn(),
-      sendGetSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks/use_request')),
+    sendGetAgentlessPolicy: vi.fn(),
+    sendGetPackageInfoByKeyForRq: vi.fn(),
+    sendGetSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetchAgentlessPolicyAsPackagePolicy', () => {
   const agentlessPolicy = {
@@ -41,9 +41,9 @@ describe('fetchAgentlessPolicyAsPackagePolicy', () => {
     vi.clearAllMocks();
     vi.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
     vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
-    vi
-      .mocked(sendGetSettings)
-      .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: false } } } as any);
+    vi.mocked(sendGetSettings).mockResolvedValue({
+      data: { item: { prerelease_integrations_enabled: false } },
+    } as any);
   });
 
   it('hydrates the policy through the inverse mapper against the full package info', async () => {
@@ -66,9 +66,9 @@ describe('fetchAgentlessPolicyAsPackagePolicy', () => {
   });
 
   it('resolves prerelease from settings when the setting is on', async () => {
-    vi
-      .mocked(sendGetSettings)
-      .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: true } } } as any);
+    vi.mocked(sendGetSettings).mockResolvedValue({
+      data: { item: { prerelease_integrations_enabled: true } },
+    } as any);
 
     await fetchAgentlessPolicyAsPackagePolicy('agentless-1');
 

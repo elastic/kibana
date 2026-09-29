@@ -18,12 +18,12 @@ import {
 } from './invalidate_rules_content_list';
 
 vi.mock('@kbn/content-list-provider', () => {
-      const mocked = {
-      contentListKeys: { all: vi.fn((id: string) => ['contentList', id]) },
-      contentListQueryClient: { invalidateQueries: vi.fn().mockResolvedValue(undefined) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    contentListKeys: { all: vi.fn((id: string) => ['contentList', id]) },
+    contentListQueryClient: { invalidateQueries: vi.fn().mockResolvedValue(undefined) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvalidateQueries = contentListQueryClient.invalidateQueries as Mock;
 

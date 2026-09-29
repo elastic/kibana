@@ -28,9 +28,7 @@ describe('when using PaginatedContent', () => {
 
   type PropsForPaginatedContent = PaginatedContentProps<Foo, FC<ItemComponentProps>>;
 
-  const ItemComponent: ItemComponentType = vi.fn((props) => (
-    <div className="foo-item">{'hi'}</div>
-  ));
+  const ItemComponent: ItemComponentType = vi.fn((props) => <div className="foo-item">{'hi'}</div>);
 
   const getPropsToRenderItem: PropsForPaginatedContent['itemComponentProps'] = vi.fn(
     (item: Foo) => {

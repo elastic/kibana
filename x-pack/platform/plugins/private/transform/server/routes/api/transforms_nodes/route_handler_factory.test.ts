@@ -124,10 +124,8 @@ describe('Transform: Nodes API endpoint', () => {
     const coreContext = coreMock.createRequestHandlerContext();
     const context = coreMock.createCustomRequestHandlerContext({ core: coreContext });
     const response = httpServerMock.createResponseFactory();
-    const nodesInfo = coreContext.elasticsearch.client.asInternalUser.nodes
-      .info as unknown as Mock;
-    const clusterInfo = coreContext.elasticsearch.client.asInternalUser
-      .info as unknown as Mock;
+    const nodesInfo = coreContext.elasticsearch.client.asInternalUser.nodes.info as unknown as Mock;
+    const clusterInfo = coreContext.elasticsearch.client.asInternalUser.info as unknown as Mock;
 
     nodesInfo.mockResolvedValue({
       nodes: {

@@ -232,10 +232,8 @@ describe('restoreSnapshot', () => {
       indexSettings: { 'index.auto_expand_replicas': '0-1' },
     });
 
-    const restoreOrder = (esClient.snapshot.restore as unknown as Mock).mock
-      .invocationCallOrder[0];
-    const healthOrder = (esClient.cluster.health as unknown as Mock).mock
-      .invocationCallOrder[0];
+    const restoreOrder = (esClient.snapshot.restore as unknown as Mock).mock.invocationCallOrder[0];
+    const healthOrder = (esClient.cluster.health as unknown as Mock).mock.invocationCallOrder[0];
     expect(restoreOrder).toBeLessThan(healthOrder);
     expect(result.success).toBe(true);
     expect(result.restoredIndices).toEqual(['logs-a', 'logs-b']);

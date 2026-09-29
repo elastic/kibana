@@ -32,44 +32,44 @@ vi.mock('./use_lens_draft_comment');
 vi.mock('../../../../common/hooks');
 vi.mock('../../../attachments/lens/lens_return/storage');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => ({ pathname: '/', search: '' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => ({ pathname: '/', search: '' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/saved-objects-finder-plugin/public', () => {
-      const mocked = {
-      SavedObjectFinder: ({
-        onChoose,
-        helpText,
-      }: {
-        onChoose: (
-          id: string,
-          type: string,
-          fullName: string,
-          savedObject: { attributes: unknown; references: unknown[] }
-        ) => void;
-        helpText?: string;
-      }) => (
-        <div>
-          <div data-test-subj="saved-object-finder-help">{helpText}</div>
-          <button
-            type="button"
-            data-test-subj="choose-lens-so"
-            onClick={() =>
-              onChoose('so-1', 'lens', 'Chart', {
-                attributes: { title: 'Chosen viz', type: 'lens' },
-                references: [],
-              })
-            }
-          >
-            {'choose'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedObjectFinder: ({
+      onChoose,
+      helpText,
+    }: {
+      onChoose: (
+        id: string,
+        type: string,
+        fullName: string,
+        savedObject: { attributes: unknown; references: unknown[] }
+      ) => void;
+      helpText?: string;
+    }) => (
+      <div>
+        <div data-test-subj="saved-object-finder-help">{helpText}</div>
+        <button
+          type="button"
+          data-test-subj="choose-lens-so"
+          onClick={() =>
+            onChoose('so-1', 'lens', 'Chart', {
+              attributes: { title: 'Chosen viz', type: 'lens' },
+              references: [],
+            })
+          }
+        >
+          {'choose'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const trackMarkdownEditorPluginClicked = vi.fn();
 const navigateToPrefilledEditor = vi.fn();
@@ -99,9 +99,7 @@ describe('lens markdown plugin', () => {
     getIncomingEmbeddablePackage.mockReturnValue(undefined);
     contentManagementGet.mockReset();
     getTime.mockReturnValue({});
-    (useMarkdownEditorPluginClickedEBT as Mock).mockReturnValue(
-      trackMarkdownEditorPluginClicked
-    );
+    (useMarkdownEditorPluginClickedEBT as Mock).mockReturnValue(trackMarkdownEditorPluginClicked);
     (useLensDraftComment as Mock).mockReturnValue({
       draftComment: undefined,
       clearDraftComment,
@@ -258,7 +256,7 @@ describe('lens markdown plugin', () => {
     );
 
     const markdownContextValue = { replaceNode: vi.fn() };
-    const { EuiMarkdownContext } = (await vi.importActual('@elastic/eui'));
+    const { EuiMarkdownContext } = await vi.importActual('@elastic/eui');
     render(
       <I18nProvider>
         <EuiMarkdownContext.Provider value={markdownContextValue}>
@@ -290,7 +288,7 @@ describe('lens markdown plugin', () => {
     });
 
     const markdownContextValue = { replaceNode: vi.fn() };
-    const { EuiMarkdownContext } = (await vi.importActual('@elastic/eui'));
+    const { EuiMarkdownContext } = await vi.importActual('@elastic/eui');
     render(
       <I18nProvider>
         <EuiMarkdownContext.Provider value={markdownContextValue}>

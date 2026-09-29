@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 
 const mockCopyToClipboard = vi.fn((_value: string) => true);
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     copyToClipboard: (value: string) => mockCopyToClipboard(value),
@@ -37,7 +37,7 @@ const mockUseWorkflowsCapabilities = vi.fn(() => ({
 }));
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useRunWorkflow: () => ({ mutateAsync: mockRunWorkflow }),

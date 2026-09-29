@@ -17,11 +17,11 @@ import { getSpaceId } from '@kbn/discoveries/impl/lib/helpers/get_space_id';
 vi.mock('@kbn/discoveries/impl/lib/build_default_esql_query');
 vi.mock('@kbn/discoveries/impl/lib/helpers/get_space_id');
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBuildDefaultEsqlQuery = buildDefaultEsqlQuery as MockedFunction<
   typeof buildDefaultEsqlQuery

@@ -19,14 +19,14 @@ import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/al
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 
 vi.mock('../../contexts/alerts_table_context', async () => {
-  const actual = (await vi.importActual('../../contexts/alerts_table_context'));
+  const actual = await vi.importActual('../../contexts/alerts_table_context');
   return {
     ...actual,
     useAlertsTableContext: vi.fn(),
   };
 });
 
-const { useAlertsTableContext } = (await vi.importMock('../../contexts/alerts_table_context'));
+const { useAlertsTableContext } = await vi.importMock('../../contexts/alerts_table_context');
 
 const queryClient = new QueryClient(testQueryClientConfig);
 

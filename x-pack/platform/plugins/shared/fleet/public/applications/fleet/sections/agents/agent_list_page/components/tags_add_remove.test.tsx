@@ -17,14 +17,14 @@ import { useUpdateTags } from '../hooks';
 import { TagsAddRemove } from './tags_add_remove';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useUpdateTags: vi.fn().mockReturnValue({
-        updateTags: vi.fn(),
-        bulkUpdateTags: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateTags: vi.fn().mockReturnValue({
+      updateTags: vi.fn(),
+      bulkUpdateTags: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TagsAddRemove', () => {
   let allTags: string[];

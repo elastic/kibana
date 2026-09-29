@@ -20,83 +20,84 @@ import { sendGetAgentsForRq, sendGetAgentStatus } from '../../../hooks';
 import { AgentListPage } from '.';
 
 vi.mock('../../../../integrations/hooks/use_confirm_force_install', () => {
-      const mocked = {
-      useConfirmForceInstall: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConfirmForceInstall: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_missing_encryption_key_callout', () => {
-      const mocked = {
-      useMissingEncryptionKeyCallout: vi.fn().mockReturnValue([true, vi.fn()]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMissingEncryptionKeyCallout: vi.fn().mockReturnValue([true, vi.fn()]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../hooks')),
-      UIExtensionsContext: {
-        Provider: (props: any) => {
-          return props.children;
-        },
-      },
-      sendGetAgentsForRq: vi.fn(),
-      useGetAgentPolicies: vi.fn().mockReturnValue({
-        data: {
-          items: [
-            { id: 'policy1', is_managed: false },
-            { id: 'managed_policy', is_managed: true },
-          ],
-        } as GetAgentPoliciesResponse,
-        isLoading: false,
-        resendRequest: vi.fn(),
-      }),
-      FleetStatusProvider: (props: any) => {
+  const mocked = {
+    ...(await vi.importActual('../../../hooks')),
+    UIExtensionsContext: {
+      Provider: (props: any) => {
         return props.children;
       },
-      useFleetStatus: vi.fn().mockReturnValue({}),
-      sendGetAgentStatus: vi.fn(),
-      sendBulkGetAgentPoliciesForRq: vi.fn().mockResolvedValue({
+    },
+    sendGetAgentsForRq: vi.fn(),
+    useGetAgentPolicies: vi.fn().mockReturnValue({
+      data: {
         items: [
           { id: 'policy1', is_managed: false },
           { id: 'managed_policy', is_managed: true },
         ],
-      }),
-      sendGetAgentPolicies: vi.fn().mockResolvedValue({ data: { items: [] } }),
-      sendGetAgentTagsForRq: vi.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
-      useAuthz: vi
-        .fn()
-        .mockReturnValue({ fleet: { all: true, allAgents: true, readAgents: true }, integrations: {} }),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addError: vi.fn(),
-          },
+      } as GetAgentPoliciesResponse,
+      isLoading: false,
+      resendRequest: vi.fn(),
+    }),
+    FleetStatusProvider: (props: any) => {
+      return props.children;
+    },
+    useFleetStatus: vi.fn().mockReturnValue({}),
+    sendGetAgentStatus: vi.fn(),
+    sendBulkGetAgentPoliciesForRq: vi.fn().mockResolvedValue({
+      items: [
+        { id: 'policy1', is_managed: false },
+        { id: 'managed_policy', is_managed: true },
+      ],
+    }),
+    sendGetAgentPolicies: vi.fn().mockResolvedValue({ data: { items: [] } }),
+    sendGetAgentTagsForRq: vi.fn().mockReturnValue({ items: ['tag1', 'tag2'] }),
+    useAuthz: vi.fn().mockReturnValue({
+      fleet: { all: true, allAgents: true, readAgents: true },
+      integrations: {},
+    }),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addError: vi.fn(),
         },
-        cloud: {},
-        data: { dataViews: { getFieldsForWildcard: vi.fn() } },
-        docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
-        uiSettings: {
-          get: vi.fn(),
-        },
-        storage: {
-          get: vi.fn(),
-        },
-      }),
-      useBreadcrumbs: vi.fn(),
-      useLink: vi.fn().mockReturnValue({ getHref: vi.fn() }),
-      useUrlParams: vi
-        .fn()
-        .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: vi.fn(() => '') }),
-      useKibanaVersion: vi.fn().mockReturnValue('8.3.0'),
-      useFleetServerUnhealthy: vi.fn().mockReturnValue({
-        isUnhealthy: false,
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      cloud: {},
+      data: { dataViews: { getFieldsForWildcard: vi.fn() } },
+      docLinks: { links: { kibana: { secureSavedObject: 'my-link' } } },
+      uiSettings: {
+        get: vi.fn(),
+      },
+      storage: {
+        get: vi.fn(),
+      },
+    }),
+    useBreadcrumbs: vi.fn(),
+    useLink: vi.fn().mockReturnValue({ getHref: vi.fn() }),
+    useUrlParams: vi
+      .fn()
+      .mockReturnValue({ urlParams: { kuery: '' }, toUrlParams: vi.fn(() => '') }),
+    useKibanaVersion: vi.fn().mockReturnValue('8.3.0'),
+    useFleetServerUnhealthy: vi.fn().mockReturnValue({
+      isUnhealthy: false,
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Create a stateful mock for useSessionAgentListState
 const mockSessionState = {
@@ -121,35 +122,35 @@ const mockOnTableChange = vi.fn((changes: any) => {
 });
 
 vi.mock('./hooks/use_session_agent_list_state', () => {
-      const mocked = {
-      useSessionAgentListState: vi.fn(() => ({
-        ...mockSessionState,
-        updateTableState: mockUpdateTableState,
-        onTableChange: mockOnTableChange,
-        clearFilters: vi.fn(),
-        resetToDefaults: vi.fn(),
-      })),
-      getDefaultAgentListState: vi.fn(() => ({
-        search: '',
-        selectedAgentPolicies: [],
-        selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
-        selectedTags: [],
-        showUpgradeable: false,
-        sort: { field: 'enrolled_at', direction: 'desc' },
-        page: { index: 0, size: 20 },
-      })),
-      defaultAgentListState: {
-        search: '',
-        selectedAgentPolicies: [],
-        selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
-        selectedTags: [],
-        showUpgradeable: false,
-        sort: { field: 'enrolled_at', direction: 'desc' },
-        page: { index: 0, size: 20 },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSessionAgentListState: vi.fn(() => ({
+      ...mockSessionState,
+      updateTableState: mockUpdateTableState,
+      onTableChange: mockOnTableChange,
+      clearFilters: vi.fn(),
+      resetToDefaults: vi.fn(),
+    })),
+    getDefaultAgentListState: vi.fn(() => ({
+      search: '',
+      selectedAgentPolicies: [],
+      selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+      selectedTags: [],
+      showUpgradeable: false,
+      sort: { field: 'enrolled_at', direction: 'desc' },
+      page: { index: 0, size: 20 },
+    })),
+    defaultAgentListState: {
+      search: '',
+      selectedAgentPolicies: [],
+      selectedStatus: ['healthy', 'unhealthy', 'orphaned', 'updating', 'offline'],
+      selectedTags: [],
+      showUpgradeable: false,
+      sort: { field: 'enrolled_at', direction: 'desc' },
+      page: { index: 0, size: 20 },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/search_and_filter_bar', () => {
   return {
@@ -165,24 +166,24 @@ vi.mock('./components/search_and_filter_bar', () => {
 });
 
 vi.mock('./components/add_collector_flyout', () => {
-      const mocked = {
-      AddCollectorFlyout: ({
-        onClose,
-        onClickViewAgents,
-      }: {
-        onClose: () => void;
-        onClickViewAgents: () => void;
-      }) => (
-        <div data-test-subj="addCollectorFlyout">
-          <button data-test-subj="mockViewCollectorsButton" onClick={onClickViewAgents}>
-            View connected collectors
-          </button>
-          <button onClick={onClose}>Close</button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddCollectorFlyout: ({
+      onClose,
+      onClickViewAgents,
+    }: {
+      onClose: () => void;
+      onClickViewAgents: () => void;
+    }) => (
+      <div data-test-subj="addCollectorFlyout">
+        <button data-test-subj="mockViewCollectorsButton" onClick={onClickViewAgents}>
+          View connected collectors
+        </button>
+        <button onClick={onClose}>Close</button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedSendGetAgentsForRq = sendGetAgentsForRq as Mock;
 const mockedSendGetAgentStatus = sendGetAgentStatus as Mock;

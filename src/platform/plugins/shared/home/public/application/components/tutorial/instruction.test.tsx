@@ -15,28 +15,28 @@ import type { InstructionProps } from './instruction';
 import { Instruction } from './instruction';
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        http: {
-          post: vi.fn().mockImplementation(async () => ({ count: 1 })),
-          basePath: { prepend: (path: string) => `/foo/${path}` },
+  const mocked = {
+    getServices: () => ({
+      http: {
+        post: vi.fn().mockImplementation(async () => ({ count: 1 })),
+        basePath: { prepend: (path: string) => `/foo/${path}` },
+      },
+      getBasePath: vi.fn(() => 'path'),
+      theme: {
+        getTheme: () => ({ darkMode: false }),
+      },
+      tutorialService: {
+        getCustomComponent: (customComponentName: string) => {
+          if (customComponentName === 'customComponent') {
+            return () => Promise.resolve(() => <div>Custom Component</div>);
+          }
+          return () => Promise.resolve(() => <div>Component Not Found</div>);
         },
-        getBasePath: vi.fn(() => 'path'),
-        theme: {
-          getTheme: () => ({ darkMode: false }),
-        },
-        tutorialService: {
-          getCustomComponent: (customComponentName: string) => {
-            if (customComponentName === 'customComponent') {
-              return () => Promise.resolve(() => <div>Custom Component</div>);
-            }
-            return () => Promise.resolve(() => <div>Component Not Found</div>);
-          },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const replaceTemplateStrings = (text: string) => text;
 const commonProps: InstructionProps = {

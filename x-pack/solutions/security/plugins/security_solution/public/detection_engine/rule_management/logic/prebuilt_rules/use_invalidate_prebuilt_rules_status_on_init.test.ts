@@ -17,10 +17,9 @@ import { useInvalidatePrebuiltRulesStatusOnInit } from './use_invalidate_prebuil
 vi.mock('../../../../common/components/initialization/use_security_solution_initialization');
 vi.mock('../../api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query');
 
-const useSecuritySolutionInitializationMock =
-  useSecuritySolutionInitialization as MockedFunction<
-    typeof useSecuritySolutionInitialization
-  >;
+const useSecuritySolutionInitializationMock = useSecuritySolutionInitialization as MockedFunction<
+  typeof useSecuritySolutionInitialization
+>;
 
 const mockInvalidate = vi.fn();
 

@@ -22,16 +22,16 @@ import { getContinuity } from '../../../lib/siem_readiness/dimensions';
 import { getSiemReadinessSharedContext } from '../../../lib/siem_readiness/fetchers';
 
 vi.mock('../../../lib/siem_readiness/dimensions', () => {
-      const mocked = { getContinuity: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getContinuity: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/siem_readiness/fetchers', () => {
-      const mocked = {
-      getSiemReadinessSharedContext: vi.fn(),
-      fetchSiemReadinessSharedContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSiemReadinessSharedContext: vi.fn(),
+    fetchSiemReadinessSharedContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetContinuity = getContinuity as Mock;
 const mockGetSharedContext = getSiemReadinessSharedContext as Mock;

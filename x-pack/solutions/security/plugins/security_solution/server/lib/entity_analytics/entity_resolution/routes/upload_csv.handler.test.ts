@@ -19,11 +19,11 @@ import { entityResolutionCsvUploadRoute } from './upload_csv';
 import { processResolutionCsvUpload } from '../csv_upload';
 
 vi.mock('../csv_upload', () => {
-      const mocked = {
-      processResolutionCsvUpload: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    processResolutionCsvUpload: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockStream = (): HapiReadableStream => {
   const stream = new Readable() as HapiReadableStream;

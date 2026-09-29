@@ -38,17 +38,17 @@ const mockStartDatafeeds = vi.fn();
 const mockStopDatafeeds = vi.fn();
 
 vi.mock('../api', () => {
-      const mocked = {
-      setupMlJob: () => mockSetupMlJob(),
-      startDatafeeds: (...params: unknown[]) => mockStartDatafeeds(...params),
-      stopDatafeeds: () => mockStopDatafeeds(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setupMlJob: () => mockSetupMlJob(),
+    startDatafeeds: (...params: unknown[]) => mockStartDatafeeds(...params),
+    stopDatafeeds: () => mockStopDatafeeds(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../lib/kibana', async () => {
-  const original = (await vi.importActual('../../../lib/kibana'));
+  const original = await vi.importActual('../../../lib/kibana');
 
   return {
     ...original,

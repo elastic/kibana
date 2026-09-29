@@ -40,18 +40,18 @@ const licenseMock: LicenseGetResponse = {
 
 vi.mock('axios', () => vi.fn());
 vi.mock('./utils/sanitize_error', () => {
-      const mocked = {
-      getSanitizedError: vi.fn().mockImplementation(() => 'sanitized error'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSanitizedError: vi.fn().mockImplementation(() => 'sanitized error'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/server-http-tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/server-http-tools')),
-      SslConfig: vi.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/server-http-tools')),
+    SslConfig: vi.fn().mockImplementation(({ certificate, key }) => ({ certificate, key })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 

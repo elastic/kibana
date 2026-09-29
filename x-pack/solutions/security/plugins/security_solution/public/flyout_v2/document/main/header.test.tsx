@@ -22,144 +22,144 @@ import { useIsInSecurityApp } from '../../../common/hooks/is_in_security_app';
 import { useFlyoutSessionContext } from '../../session_context';
 
 vi.mock('../../shared/components/settings_menu', () => {
-      const mocked = {
-      SettingsMenu: () => <div data-test-subj="mockSettingsMenu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SettingsMenu: () => <div data-test-subj="mockSettingsMenu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../session_context', () => {
-      const mocked = {
-      useFlyoutSessionContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutSessionContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: vi.fn().mockReturnValue('/app/security/alerts/redirect/test-id'),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: vi.fn().mockReturnValue('/app/security/alerts/redirect/test-id'),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana/hooks', () => {
-      const mocked = {
-      useAppUrl: () => ({
-        getAppUrl: vi.fn(({ path }: { path: string }) => path),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppUrl: () => ({
+      getAppUrl: vi.fn(({ path }: { path: string }) => path),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/title', () => {
-      const mocked = {
-      Title: ({ hit }: { hit: DataTableRecord }) => (
-        <div
-          data-test-subj="mockHeaderTitle"
-          data-hit-id={hit.id}
-          data-event-kind={String(hit.flattened['event.kind'] ?? '')}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Title: ({ hit }: { hit: DataTableRecord }) => (
+      <div
+        data-test-subj="mockHeaderTitle"
+        data-hit-id={hit.id}
+        data-event-kind={String(hit.flattened['event.kind'] ?? '')}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/severity', () => {
-      const mocked = {
-      DocumentSeverity: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="mockDocumentSeverity" data-hit-id={hit.id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentSeverity: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="mockDocumentSeverity" data-hit-id={hit.id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/risk_score', () => {
-      const mocked = {
-      RiskScore: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="mockRiskScore" data-hit-id={hit.id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScore: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="mockRiskScore" data-hit-id={hit.id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/status', () => {
-      const mocked = {
-      Status: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="mockHeaderStatus" data-hit-id={hit.id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Status: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="mockHeaderStatus" data-hit-id={hit.id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/components/notes', () => {
-      const mocked = {
-      Notes: ({ documentId, onShowNotes }: { documentId: string; onShowNotes?: () => void }) => (
-        <button
-          type="button"
-          data-test-subj="mockNotes"
-          data-document-id={documentId}
-          data-has-open-notes-tab={String(onShowNotes != null)}
-          onClick={onShowNotes}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Notes: ({ documentId, onShowNotes }: { documentId: string; onShowNotes?: () => void }) => (
+      <button
+        type="button"
+        data-test-subj="mockNotes"
+        data-document-id={documentId}
+        data-has-open-notes-tab={String(onShowNotes != null)}
+        onClick={onShowNotes}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/assignees', () => {
-      const mocked = {
-      Assignees: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => (
-        <div
-          data-test-subj="mockAssignees"
-          data-hit-id={hit.id}
-          data-has-on-assignees-updated={String(onAlertUpdated != null)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Assignees: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => (
+      <div
+        data-test-subj="mockAssignees"
+        data-hit-id={hit.id}
+        data-has-on-assignees-updated={String(onAlertUpdated != null)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/components/share_url_icon_button', () => {
-      const mocked = {
-      ShareUrlIconButton: ({
-        url,
-        dataTestSubj,
-      }: {
-        url: string | null | undefined;
-        dataTestSubj: string;
-      }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ShareUrlIconButton: ({
+      url,
+      dataTestSubj,
+    }: {
+      url: string | null | undefined;
+      dataTestSubj: string;
+    }) => (url ? <button type="button" data-test-subj={dataTestSubj} /> : null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout/document_details/right/hooks/use_get_flyout_link', () => {
-      const mocked = {
-      useGetFlyoutLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFlyoutLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/formatted_date', () => {
-      const mocked = {
-      PreferenceFormattedDate: ({ value }: { value: Date }) => (
-        <div data-test-subj="mockPreferenceFormattedDate">{value.toISOString()}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PreferenceFormattedDate: ({ value }: { value: Date }) => (
+      <div data-test-subj="mockPreferenceFormattedDate">{value.toISOString()}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

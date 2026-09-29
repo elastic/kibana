@@ -44,109 +44,109 @@ const queryClient = new QueryClient({
 
 vi.mock('../../../../common/lib/kibana');
 
-(await vi.importMock('../../../../common/get_experimental_features'));
+await vi.importMock('../../../../common/get_experimental_features');
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/rule_api/rule_summary', () => {
-      const mocked = {
-      loadRuleSummary: vi.fn().mockReturnValue({
-        alerts: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRuleSummary: vi.fn().mockReturnValue({
+      alerts: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/rule_api/load_execution_log_aggregations', () => {
-      const mocked = {
-      loadExecutionLogAggregations: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadExecutionLogAggregations: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
-      const mocked = {
-      getRuleTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRuleTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
-      const mocked = {
-      getRuleTypes: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRuleTypes: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
-      const mocked = {
-      fetchUiConfig: vi
-        .fn()
-        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchUiConfig: vi
+      .fn()
+      .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({
-        push: vi.fn(),
-        replace: vi.fn(),
-        createHref: vi.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
-        listen: vi.fn(() => vi.fn()),
-        location: {
-          pathname: '/triggersActions/rules/',
-          search: '',
-          hash: '',
-          state: undefined,
-        },
-      }),
-      useLocation: () => ({
+  const mocked = {
+    useHistory: () => ({
+      push: vi.fn(),
+      replace: vi.fn(),
+      createHref: vi.fn(({ pathname, search = '', hash = '' }) => `${pathname}${search}${hash}`),
+      listen: vi.fn(() => vi.fn()),
+      location: {
         pathname: '/triggersActions/rules/',
         search: '',
         hash: '',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        state: undefined,
+      },
+    }),
+    useLocation: () => ({
+      pathname: '/triggersActions/rules/',
+      search: '',
+      hash: '',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/action_connector_api', () => {
-      const mocked = {
-      loadAllActions: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadAllActions: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/rule_api/update_api_key', () => {
-      const mocked = {
-      bulkUpdateAPIKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkUpdateAPIKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_route', () => {
-      const mocked = {
-      RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleRouteWithApi: () => <div data-test-subj="ruleRouteWithApi" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { bulkUpdateAPIKey } = (await vi.importMock('../../../lib/rule_api/update_api_key'));
+const { bulkUpdateAPIKey } = await vi.importMock('../../../lib/rule_api/update_api_key');
 
 vi.mock('../../../lib/capabilities', () => {
-      const mocked = {
-      hasAllPrivilege: vi.fn(() => true),
-      hasSaveRulesCapability: vi.fn(() => true),
-      hasExecuteActionsCapability: vi.fn(() => true),
-      hasManageApiKeysCapability: vi.fn(() => true),
-      hasShowActionsCapability: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasAllPrivilege: vi.fn(() => true),
+    hasSaveRulesCapability: vi.fn(() => true),
+    hasExecuteActionsCapability: vi.fn(() => true),
+    hasManageApiKeysCapability: vi.fn(() => true),
+    hasShowActionsCapability: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const ruleTypeRegistry = ruleTypeRegistryMock.create();
@@ -394,7 +394,7 @@ describe('rule_details', () => {
     });
 
     it(`doesn't render the API key owner metadata when user can't manage API keys`, async () => {
-      const { hasManageApiKeysCapability } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasManageApiKeysCapability } = await vi.importMock('../../../lib/capabilities');
       hasManageApiKeysCapability.mockReturnValueOnce(false);
       const rule = mockRule();
       renderPage(rule);
@@ -463,7 +463,7 @@ describe('rule_details', () => {
     });
 
     it('does not render the actions menu if the user has only read permissions', async () => {
-      const { hasAllPrivilege } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasAllPrivilege } = await vi.importMock('../../../lib/capabilities');
       hasAllPrivilege.mockReturnValue(false);
       const rule = mockRule();
       const mockedRuleType: RuleType = {
@@ -695,7 +695,7 @@ describe('rule_details', () => {
     });
 
     it('should not render an edit button when rule editable but actions arent', async () => {
-      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasExecuteActionsCapability } = await vi.importMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValue(false);
       const rule = mockRule({
         enabled: true,
@@ -716,7 +716,7 @@ describe('rule_details', () => {
     });
 
     it('should render an edit button when rule editable but actions arent when there are no actions on the rule', async () => {
-      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasExecuteActionsCapability } = await vi.importMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValueOnce(false);
       const rule = mockRule({
         enabled: true,
@@ -759,7 +759,7 @@ describe('rule_details', () => {
     };
     ruleTypeRegistry.get.mockReturnValue(ruleTypeR);
     useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
-    const { loadAllActions } = (await vi.importMock('../../../lib/action_connector_api'));
+    const { loadAllActions } = await vi.importMock('../../../lib/action_connector_api');
     loadAllActions.mockResolvedValue([
       {
         secrets: {},
@@ -870,7 +870,7 @@ describe('rule_details', () => {
           },
         ],
       });
-      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasExecuteActionsCapability } = await vi.importMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValue(false);
       renderRuleDetails(
         <RuleDetails rule={rule} ruleType={ruleType} actionTypes={actionTypes} {...mockRuleApis} />

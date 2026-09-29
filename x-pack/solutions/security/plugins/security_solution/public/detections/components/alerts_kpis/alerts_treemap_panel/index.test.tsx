@@ -26,22 +26,20 @@ import { AlertsTreemapPanel } from '.';
 import { mockAlertSearchResponse } from './alerts_treemap/lib/mocks/mock_alert_search_response';
 
 vi.mock('../../../../common/components/cell_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/components/cell_actions')),
-      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/components/cell_actions')),
+    SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
 vi.mock('../../../../common/containers/use_global_time', async () => {
-  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
+  const actual = await vi.importActual('../../../../common/containers/use_global_time');
   return {
     ...actual,
-    useGlobalTime: vi
-      .fn()
-      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
+    useGlobalTime: vi.fn().mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
@@ -51,7 +49,7 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...originalModule,
     useUiSetting$: () => ['0,0.[000]'],
@@ -59,11 +57,11 @@ vi.mock('../../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: Props = {
   addFilter: vi.fn(),

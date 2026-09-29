@@ -15,38 +15,38 @@ const mockRedirect = vi.fn();
 const mockIsDateRangeSet = vi.fn();
 
 vi.mock('../../../../hooks/use_date_range_redirect', () => {
-      const mocked = {
-      useDateRangeRedirect: () => ({
-        isDateRangeSet: mockIsDateRangeSet(),
-        redirect: mockRedirect,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateRangeRedirect: () => ({
+      isDateRangeSet: mockIsDateRangeSet(),
+      redirect: mockRedirect,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: () => ({ pathname: '/services', search: '', hash: '', state: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: () => ({ pathname: '/services', search: '', hash: '', state: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsRouteWithTimeRange = vi.fn();
 
 vi.mock('../../../shared/is_route_with_time_range', () => {
-      const mocked = {
-      isRouteWithTimeRange: (...args: unknown[]) => mockIsRouteWithTimeRange(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isRouteWithTimeRange: (...args: unknown[]) => mockIsRouteWithTimeRange(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = () =>
   render(

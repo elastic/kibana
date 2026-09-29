@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { RunWorkflowPanel } from './run_workflow_panel';
 import type { RunWorkflowExecutor, RunWorkflowPanelProps } from './run_workflow_panel';
@@ -77,68 +76,68 @@ const requiredInputsWorkflow: WorkflowListItemDto = {
 let mockWorkflowsData: WorkflowListItemDto[] = [noInputsWorkflow];
 
 vi.mock('../../hooks/use_run_workflow', () => {
-      const mocked = {
-      useRunWorkflow: () => ({ mutate: mockMutate }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunWorkflow: () => ({ mutate: mockMutate }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflows', () => {
-      const mocked = {
-      useWorkflows: (params: unknown) => mockUseWorkflows(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflows: (params: unknown) => mockUseWorkflows(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_workflows_capabilities', () => {
-      const mocked = {
-      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../workflow_selector/workflow_selector', () => {
-      const mocked = {
-      WorkflowSelector: (props: MockWorkflowSelectorProps) => mockWorkflowSelector(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowSelector: (props: MockWorkflowSelectorProps) => mockWorkflowSelector(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./run_workflow_inputs_modal', () => {
-      const mocked = {
-      RunWorkflowInputsModal: ({
-        onSubmit,
-        onCancel,
-      }: {
-        onSubmit: (v: Record<string, unknown>) => void;
-        onCancel: () => void;
-      }) => (
-        <div data-test-subj="run-workflow-inputs-modal">
-          <button
-            data-test-subj="inputs-modal-submit"
-            type="button"
-            onClick={() => onSubmit({ ticketId: 'ABC' })}
-          >
-            {'Run'}
-          </button>
-          <button data-test-subj="inputs-modal-cancel" type="button" onClick={onCancel}>
-            {'Cancel'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunWorkflowInputsModal: ({
+      onSubmit,
+      onCancel,
+    }: {
+      onSubmit: (v: Record<string, unknown>) => void;
+      onCancel: () => void;
+    }) => (
+      <div data-test-subj="run-workflow-inputs-modal">
+        <button
+          data-test-subj="inputs-modal-submit"
+          type="button"
+          onClick={() => onSubmit({ ticketId: 'ABC' })}
+        >
+          {'Run'}
+        </button>
+        <button data-test-subj="inputs-modal-cancel" type="button" onClick={onCancel}>
+          {'Cancel'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: (node: unknown) => node,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: (node: unknown) => node,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const actual = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...actual,
     useKibana: () => ({

@@ -15,11 +15,11 @@ import { getSetupState } from '../setup_state';
 import { createGetStatusService } from '.';
 
 vi.mock('../setup_state', () => {
-      const mocked = {
-      getSetupState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSetupState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGetSetupState = vi.mocked(getSetupState);
 

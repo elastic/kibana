@@ -15,35 +15,35 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { TimeseriesChart } from './timeseries_chart';
 
 vi.mock('../../../util/time_buckets_service', () => {
-      const mocked = {
-      timeBucketsServiceFactory: function () {
-        return { getTimeBuckets: vi.fn() };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timeBucketsServiceFactory: function () {
+      return { getTimeBuckets: vi.fn() };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../util/time_series_explorer_service', () => {
-      const mocked = {
-      timeSeriesExplorerServiceFactory: function () {
-        return {
-          getAutoZoomDuration: vi.fn(),
-          calculateAggregationInterval: vi.fn(),
-          calculateInitialFocusRange: vi.fn(),
-          calculateDefaultFocusRange: vi.fn(),
-          processRecordScoreResults: vi.fn(),
-          processMetricPlotResults: vi.fn(),
-          processForecastResults: vi.fn(),
-          findChartPointForAnomalyTime: vi.fn(),
-          processDataForFocusAnomalies: vi.fn(),
-          findChartPointForScheduledEvent: vi.fn(),
-          processScheduledEventsForChart: vi.fn(),
-          getFocusData: vi.fn(),
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timeSeriesExplorerServiceFactory: function () {
+      return {
+        getAutoZoomDuration: vi.fn(),
+        calculateAggregationInterval: vi.fn(),
+        calculateInitialFocusRange: vi.fn(),
+        calculateDefaultFocusRange: vi.fn(),
+        processRecordScoreResults: vi.fn(),
+        processMetricPlotResults: vi.fn(),
+        processForecastResults: vi.fn(),
+        findChartPointForAnomalyTime: vi.fn(),
+        processDataForFocusAnomalies: vi.fn(),
+        findChartPointForScheduledEvent: vi.fn(),
+        processScheduledEventsForChart: vi.fn(),
+        getFocusData: vi.fn(),
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getTimeseriesChartPropsMock() {
   return {

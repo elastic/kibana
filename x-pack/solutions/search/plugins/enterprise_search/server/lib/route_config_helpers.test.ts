@@ -11,14 +11,14 @@ import { schema } from '@kbn/config-schema';
 
 const mockBuffer = {};
 vi.mock('@kbn/config-schema', () => {
-      const mocked = {
-      schema: {
-        buffer: () => mockBuffer,
-        object: () => ({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    schema: {
+      buffer: () => mockBuffer,
+      object: () => ({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSchema = schema.object({});
 

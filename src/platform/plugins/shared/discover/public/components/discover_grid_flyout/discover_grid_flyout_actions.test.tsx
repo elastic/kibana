@@ -19,7 +19,7 @@ import type { FlyoutActionItem } from './types';
 let mockBreakpointSize: string | undefined;
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useIsWithinBreakpoints: vi.fn((breakpoints: string[]) => {

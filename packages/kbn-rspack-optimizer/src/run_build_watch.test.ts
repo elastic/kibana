@@ -12,15 +12,15 @@ import { vi } from 'vitest';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 
 vi.mock('./rspack_runtime', () => {
-      const mocked = { rspack: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { rspack: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./config/create_single_compile_config', () => {
-      const mocked = {
-      createSingleCompileConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSingleCompileConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { rspack } from './rspack_runtime';
 import { createSingleCompileConfig } from './config/create_single_compile_config';

@@ -26,28 +26,28 @@ import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 
 let fakeTimer: sinon.SinonFakeTimers;
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'v4uuid',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'v4uuid',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['foo'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('elastic-apm-node', () => {
-      const mocked = {
-      currentTraceparent: 'parent',
-      currentTransaction: {
-        type: 'taskManager run',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    currentTraceparent: 'parent',
+    currentTransaction: {
+      type: 'taskManager run',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getTask = (overrides = {}): ConcreteTaskInstance => ({
   id: 'my-foo-id',
@@ -254,9 +254,10 @@ describe('TaskScheduling', () => {
   test('grants an API key only once when ensureScheduled is called repeatedly for the same task', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    vi
-      .spyOn(taskScheduling, 'bulkUpdateSchedules')
-      .mockResolvedValue({ tasks: [task], errors: [] });
+    vi.spyOn(taskScheduling, 'bulkUpdateSchedules').mockResolvedValue({
+      tasks: [task],
+      errors: [],
+    });
     mockTaskStore.taskExists.mockResolvedValueOnce(false).mockResolvedValue(true);
 
     const mockRequest = httpServerMock.createKibanaRequest();
@@ -271,9 +272,10 @@ describe('TaskScheduling', () => {
   test('does not look up the task when scheduling without a request', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    vi
-      .spyOn(taskScheduling, 'bulkUpdateSchedules')
-      .mockResolvedValue({ tasks: [task], errors: [] });
+    vi.spyOn(taskScheduling, 'bulkUpdateSchedules').mockResolvedValue({
+      tasks: [task],
+      errors: [],
+    });
     mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
 
     await taskScheduling.ensureScheduled(task);
@@ -285,9 +287,10 @@ describe('TaskScheduling', () => {
   test('does not look up the task when the store will not grant API keys despite a request (e.g. security disabled)', async () => {
     const task = getTask();
     const taskScheduling = new TaskScheduling(taskSchedulingOpts);
-    vi
-      .spyOn(taskScheduling, 'bulkUpdateSchedules')
-      .mockResolvedValue({ tasks: [task], errors: [] });
+    vi.spyOn(taskScheduling, 'bulkUpdateSchedules').mockResolvedValue({
+      tasks: [task],
+      errors: [],
+    });
     mockTaskStore.willGrantApiKeys.mockReturnValue(false);
     mockTaskStore.schedule.mockRejectedValueOnce({ statusCode: 409 });
 

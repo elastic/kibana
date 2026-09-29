@@ -15,69 +15,69 @@ import { render, screen } from '@testing-library/react';
 import { SimilarSpans, type SimilarSpansProps } from '.';
 
 vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
-      const mocked = {
-      ContentFrameworkSection: ({ children, title, ...rest }: any) => (
-        <div data-test-subj="ContentFrameworkSection" {...rest}>
-          <h2>{title}</h2>
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkSection: ({ children, title, ...rest }: any) => (
+      <div data-test-subj="ContentFrameworkSection" {...rest}>
+        <h2>{title}</h2>
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../content_framework/chart', () => {
-      const mocked = {
-      ContentFrameworkChart: ({ children, title, ...rest }: any) => (
-        <div data-test-subj="ContentFrameworkChart" {...rest}>
-          <span>{title}</span>
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentFrameworkChart: ({ children, title, ...rest }: any) => (
+      <div data-test-subj="ContentFrameworkChart" {...rest}>
+        <span>{title}</span>
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_data_sources', () => {
-      const mocked = {
-      useDataSourcesContext: () => ({
-        indexes: { apm: { traces: 'test-index' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataSourcesContext: () => ({
+      indexes: { apm: { traces: 'test-index' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: () => ({
-        data: {
-          query: {
+  const mocked = {
+    getUnifiedDocViewerServices: () => ({
+      data: {
+        query: {
+          timefilter: {
             timefilter: {
-              timefilter: {
-                getAbsoluteTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })),
-              },
+              getAbsoluteTime: vi.fn(() => ({ from: 'now-15m', to: 'now' })),
             },
           },
         },
-        share: {
-          url: {
-            locators: {
-              get: vi.fn(() => ({
-                getRedirectUrl: vi.fn(() => 'http://discover-url'),
-              })),
-            },
+      },
+      share: {
+        url: {
+          locators: {
+            get: vi.fn(() => ({
+              getRedirectUrl: vi.fn(() => 'http://discover-url'),
+            })),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_latency_chart', () => {
-      const mocked = {
-      useLatencyChart: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLatencyChart: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useLatencyChart } from '../../hooks/use_latency_chart';
 

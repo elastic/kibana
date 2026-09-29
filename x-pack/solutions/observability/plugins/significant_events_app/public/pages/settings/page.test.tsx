@@ -18,15 +18,16 @@ import { SettingsPage } from './page';
 vi.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_significant_events_availability');
 vi.mock('../significant_events/components/settings/tab', () => {
-      const mocked = {
-      SettingsTab: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SettingsTab: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
-const mockUseSignificantEventsAvailability =
-  useSignificantEventsAvailability as MockedFunction<typeof useSignificantEventsAvailability>;
+const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as MockedFunction<
+  typeof useSignificantEventsAvailability
+>;
 
 const getUrlForApp = vi.fn().mockReturnValue('/app/nightshift');
 const navigateToApp = vi.fn();

@@ -14,9 +14,9 @@ import React from 'react';
 import { LogAIAssistant } from './log_ai_assistant';
 
 const observabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
-vi
-  .spyOn(observabilityAIAssistant, 'getContextualInsightMessages')
-  .mockReturnValue([{ message: { content: 'hello' } } as Message]);
+vi.spyOn(observabilityAIAssistant, 'getContextualInsightMessages').mockReturnValue([
+  { message: { content: 'hello' } } as Message,
+]);
 
 describe('LogAIAssistant', () => {
   describe('when a message field is present', () => {

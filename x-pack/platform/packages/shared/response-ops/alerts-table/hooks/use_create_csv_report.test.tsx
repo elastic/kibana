@@ -18,20 +18,20 @@ import { useCreateCsvReport } from './use_create_csv_report';
 import { testQueryClientConfig } from '../utils/test';
 
 vi.mock('../apis/create_csv_report', () => {
-      const mocked = {
-      createCsvReport: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCsvReport: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn((node) => node),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn((node) => node),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { createCsvReport } = (await vi.importMock('../apis/create_csv_report'));
+const { createCsvReport } = await vi.importMock('../apis/create_csv_report');
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();

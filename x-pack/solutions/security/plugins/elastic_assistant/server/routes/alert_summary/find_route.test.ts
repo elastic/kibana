@@ -20,12 +20,12 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/act
 import { getAlertSummaryMock } from '../../__mocks__/alert_summary.mock';
 
 vi.mock('../../lib/prompt', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../lib/prompt')),
-      getPrompt: vi.fn().mockResolvedValue('hello world'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../lib/prompt')),
+    getPrompt: vi.fn().mockResolvedValue('hello world'),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('Find user prompts route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let { clients, context } = requestContextMock.createTools();

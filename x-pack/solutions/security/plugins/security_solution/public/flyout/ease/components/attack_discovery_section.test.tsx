@@ -17,11 +17,11 @@ import { ATTACK_DISCOVERY_SECTION_TEST_ID } from '..';
 
 vi.mock('../context');
 vi.mock('./attack_discovery_widget', () => {
-      const mocked = {
-      AttackDiscoveryWidget: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryWidget: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttackDiscoverySection', () => {
   it('should render the attack discovery section', () => {

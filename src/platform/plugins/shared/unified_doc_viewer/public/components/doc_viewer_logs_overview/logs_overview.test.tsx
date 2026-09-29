@@ -26,28 +26,28 @@ import type { ObservabilityIndexes } from '@kbn/discover-utils/src';
 import { hasErrorFields } from './utils/has_error_fields';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
-        <code data-test-subj="codeBlock">{children ?? ''}</code>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+      <code data-test-subj="codeBlock">{children ?? ''}</code>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/has_error_fields', () => {
-      const mocked = {
-      hasErrorFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasErrorFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sub_components/similar_errors', () => {
-      const mocked = {
-      SimilarErrors: () => <div data-test-subj="docViewerSimilarErrorsSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SimilarErrors: () => <div data-test-subj="docViewerSimilarErrorsSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DATASET_NAME = 'logs.overview';
 const NAMESPACE = 'default';

@@ -14,11 +14,11 @@ import type { Owner } from '../../common/bundled-types.gen';
 import type { CasesConfigurationUI } from '../../common/ui';
 
 vi.mock('../containers/configure/api', () => {
-      const mocked = {
-      getCaseConfigure: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCaseConfigure: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('setCustomFieldStepDefinition', () => {
   const getCaseConfigureMock = vi.mocked(getCaseConfigure);

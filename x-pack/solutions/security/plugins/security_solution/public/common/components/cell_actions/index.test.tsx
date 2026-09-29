@@ -15,39 +15,39 @@ import { CellActions } from '@kbn/cell-actions';
 import { SECURITY_CELL_ACTIONS_DEFAULT } from '@kbn/ui-actions-plugin/common/trigger_ids';
 
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(() => ({
-        dataView: {
-          id: 'security-default-dataview-id',
-          fields: {
-            getByName: vi.fn().mockReturnValue({
-              toSpec: vi.fn().mockReturnValue({
-                searchable: true,
-                aggregatable: true,
-              }),
+  const mocked = {
+    useDataView: vi.fn(() => ({
+      dataView: {
+        id: 'security-default-dataview-id',
+        fields: {
+          getByName: vi.fn().mockReturnValue({
+            toSpec: vi.fn().mockReturnValue({
+              searchable: true,
+              aggregatable: true,
             }),
-          },
+          }),
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockCellActions = CellActions as Mocked<typeof CellActions>;
 vi.mock('@kbn/cell-actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/cell-actions')),
-      CellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/cell-actions')),
+    CellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataViewId = 'security-default-dataview-id';
 

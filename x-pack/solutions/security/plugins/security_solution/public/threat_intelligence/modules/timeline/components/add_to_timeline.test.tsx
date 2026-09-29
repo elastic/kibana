@@ -30,21 +30,21 @@ const TIMELINE_TEST_ID = 'test-add-to-timeline';
 
 vi.mock('../../../../common/utils/timeline_capabilities');
 vi.mock('../hooks/use_add_to_timeline', () => {
-      const mocked = {
-      useAddToTimeline: vi.fn(() => ({ addToTimelineProps: {} })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddToTimeline: vi.fn(() => ({ addToTimelineProps: {} })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_add_to_timeline_button', () => {
-      const mocked = { useAddToTimelineButton: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAddToTimelineButton: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 describe('<AddToTimelineButtonIcon /> <AddToTimelineContextMenu />', () => {
   beforeEach(() => {
-    vi
-      .mocked(useAddToTimelineButton)
-      .mockReturnValue(() => <div data-test-subj={TIMELINE_TEST_ID} />);
+    vi.mocked(useAddToTimelineButton).mockReturnValue(() => (
+      <div data-test-subj={TIMELINE_TEST_ID} />
+    ));
 
     (extractTimelineCapabilities as Mock).mockReturnValue({ read: true });
   });

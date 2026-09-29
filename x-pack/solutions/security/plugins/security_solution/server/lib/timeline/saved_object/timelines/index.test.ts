@@ -50,36 +50,36 @@ import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { SavedObjectsUpdateResponse } from '@kbn/core/server';
 
 vi.mock('./convert_saved_object_to_savedtimeline', () => {
-      const mocked = {
-      convertSavedObjectToSavedTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertSavedObjectToSavedTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../notes/saved_object', () => {
-      const mocked = {
-      deleteNotesByTimelineId: vi.fn().mockResolvedValue(undefined),
-      getNotesByTimelineId: vi.fn().mockResolvedValue([]),
-      persistNote: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteNotesByTimelineId: vi.fn().mockResolvedValue(undefined),
+    getNotesByTimelineId: vi.fn().mockResolvedValue([]),
+    persistNote: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pinned_events', () => {
-      const mocked = {
-      deleteAllPinnedEventsOnTimeline: vi.fn().mockResolvedValue(undefined),
-      getAllPinnedEventsByTimelineId: vi.fn().mockResolvedValue([]),
-      persistPinnedEventOnTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteAllPinnedEventsOnTimeline: vi.fn().mockResolvedValue(undefined),
+    getAllPinnedEventsByTimelineId: vi.fn().mockResolvedValue([]),
+    persistPinnedEventOnTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../saved_search', () => {
-      const mocked = {
-      deleteSearchByTimelineId: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteSearchByTimelineId: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('saved_object', () => {
   describe('convertStringToBase64', () => {
@@ -275,9 +275,7 @@ describe('saved_object', () => {
     });
 
     test('should call getAllPinnedEventsByTimelineId', async () => {
-      expect((getAllPinnedEventsByTimelineId as Mock).mock.calls[0][1]).toEqual(
-        mockSavedObject.id
-      );
+      expect((getAllPinnedEventsByTimelineId as Mock).mock.calls[0][1]).toEqual(mockSavedObject.id);
     });
 
     test('should return correct result', async () => {
@@ -468,8 +466,7 @@ describe('saved_object', () => {
   });
   describe('field migrator', () => {
     let mockResolveSavedObject: Mock;
-    const convertSavedObjectToSavedTimelineMock: Mock =
-      convertSavedObjectToSavedTimeline as Mock;
+    const convertSavedObjectToSavedTimelineMock: Mock = convertSavedObjectToSavedTimeline as Mock;
     let mockRequest: FrameworkRequest;
     beforeEach(async () => {
       vi.clearAllMocks();

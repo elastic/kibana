@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 
 import type { HeaderActionButtonProps } from '@kbn/core-chrome-browser-components';
 
 import { UserMenuComponent } from './user_menu_component';
 
 vi.mock('@kbn/core-chrome-browser-components', () => {
-      const mocked = {
-      HeaderActionButton: ({ children, ...props }: HeaderActionButtonProps) => (
-        <button {...props} data-test-subj={props['data-test-subj']}>
-          {children}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HeaderActionButton: ({ children, ...props }: HeaderActionButtonProps) => (
+      <button {...props} data-test-subj={props['data-test-subj']}>
+        {children}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UserMenuComponent', () => {
   const defaultProps = {

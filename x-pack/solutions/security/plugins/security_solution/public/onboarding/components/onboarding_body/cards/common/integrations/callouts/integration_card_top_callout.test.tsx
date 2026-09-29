@@ -17,31 +17,31 @@ import { IntegrationTabId } from '../../../../../../../common/lib/integrations/t
 import { useShowMigrationCallout } from './migrations_callout';
 
 vi.mock('../../../../../hooks/use_onboarding_service', () => {
-      const mocked = {
-      useOnboardingService: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingService: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        pathname: '/test-path',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      pathname: '/test-path',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./agentless_available_callout');
 vi.mock('./active_integrations_callout');
 vi.mock('./endpoint_callout');
 vi.mock('./migrations_callout', () => {
-      const mocked = {
-      MigrationsCallout: () => <div data-test-subj="migrationsCallout" />,
-      useShowMigrationCallout: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationsCallout: () => <div data-test-subj="migrationsCallout" />,
+    useShowMigrationCallout: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IntegrationCardTopCallout', () => {
   beforeEach(() => {

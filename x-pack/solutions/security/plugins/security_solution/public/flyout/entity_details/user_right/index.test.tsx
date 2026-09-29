@@ -37,36 +37,36 @@ vi.mock('../../../common/components/visualization_actions/visualization_embeddab
 
 const mockedUseRiskScore = vi.fn().mockReturnValue(mockRiskScoreState);
 vi.mock('../../../entity_analytics/api/hooks/use_risk_score', () => {
-      const mocked = {
-      useRiskScore: () => mockedUseRiskScore(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: () => mockedUseRiskScore(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseEntityRiskScores = vi.fn();
 vi.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => {
-      const mocked = {
-      useEntityRiskScores: () => mockedUseEntityRiskScores(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityRiskScores: () => mockedUseEntityRiskScores(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseManagedUser = vi.fn().mockReturnValue(mockManagedUserData);
 const mockedUseObservedUser = vi.fn().mockReturnValue(mockObservedUser);
 
 vi.mock('../shared/hooks/use_managed_user', () => {
-      const mocked = {
-      useManagedUser: () => mockedUseManagedUser(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedUser: () => mockedUseManagedUser(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/entity/user/main/hooks/use_observed_user', () => {
-      const mocked = {
-      useObservedUser: () => mockedUseObservedUser(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useObservedUser: () => mockedUseObservedUser(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const flyoutContextValue = {
   closeLeftPanel: vi.fn(),
@@ -76,13 +76,13 @@ const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
 ];
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      useExpandableFlyoutHistory: vi.fn(),
-      useExpandableFlyoutState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    useExpandableFlyoutHistory: vi.fn(),
+    useExpandableFlyoutState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UserPanel', () => {
   beforeEach(() => {

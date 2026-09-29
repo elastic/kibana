@@ -21,19 +21,19 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { TablesAdapter, type Datatable } from '@kbn/expressions-plugin/common';
 
 vi.mock('@kbn/share-plugin/public', () => {
-      const mocked = {
-      downloadMultipleAs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadMultipleAs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common', () => {
-      const mocked = {
-      datatableToCSV: vi.fn().mockReturnValue('csv'),
-      tableHasFormulas: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    datatableToCSV: vi.fn().mockReturnValue('csv'),
+    tableHasFormulas: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Inspector Data View', () => {
   let DataView: InspectorViewDescription;

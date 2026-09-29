@@ -21,65 +21,69 @@ import {
 import type { LiveQueryDetailsItem } from '../../../actions/use_live_query_details';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ actionId: 'action-123' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ actionId: 'action-123' }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../actions/use_live_query_details');
 vi.mock('./use_save_query_from_details');
 vi.mock('../../../common/hooks/use_breadcrumbs');
 vi.mock('../../../common/experimental_features_context', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-      useExperimentalFeatures: vi
-        .fn()
-        .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
-      ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+    useExperimentalFeatures: vi
+      .fn()
+      .mockReturnValue({ exportResults: false, rruleScheduling: false, crossProjectSearch: false }),
+    ExperimentalFeaturesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../results/export_filters_context', () => {
-      const mocked = {
-      useExportFilters: vi.fn().mockReturnValue(undefined),
-      ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      useExportFiltersContext: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportFilters: vi.fn().mockReturnValue(undefined),
+    ExportFiltersProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    useExportFiltersContext: vi.fn().mockReturnValue(null),
+  };
+
+  return { ...mocked, default: mocked };
+});
 const mockResultTabs = vi.fn();
 
 vi.mock('../../saved_queries/edit/tabs', () => {
-      const mocked = {
-      ResultTabs: (props: { actionId: string }) => {
-        mockResultTabs(props);
+  const mocked = {
+    ResultTabs: (props: { actionId: string }) => {
+      mockResultTabs(props);
 
-        return <div data-test-subj="result-tabs">{`ResultTabs:${props.actionId}`}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return <div data-test-subj="result-tabs">{`ResultTabs:${props.actionId}`}</div>;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../live_queries/form/pack_queries_status_table', () => {
-      const mocked = {
-      PackQueriesStatusTable: () => <div data-test-subj="pack-queries-status-table" />,
-      ViewResultsActionButtonType: { icon: 'icon', button: 'button', menuItem: 'menuItem' },
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('./query_details_header', () => {
-      const mocked = {
-      QueryDetailsHeader: ({ actionId }: { actionId: string }) => (
-        <div data-test-subj="query-details-header">{`Header:${actionId}`}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackQueriesStatusTable: () => <div data-test-subj="pack-queries-status-table" />,
+    ViewResultsActionButtonType: { icon: 'icon', button: 'button', menuItem: 'menuItem' },
+  };
 
-const mockUseLiveQueryDetails = useLiveQueryDetails as MockedFunction<
-  typeof useLiveQueryDetails
->;
+  return { ...mocked, default: mocked };
+});
+vi.mock('./query_details_header', () => {
+  const mocked = {
+    QueryDetailsHeader: ({ actionId }: { actionId: string }) => (
+      <div data-test-subj="query-details-header">{`Header:${actionId}`}</div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
+
+const mockUseLiveQueryDetails = useLiveQueryDetails as MockedFunction<typeof useLiveQueryDetails>;
 const mockUseSaveQueryFromDetails = useSaveQueryFromDetails as MockedFunction<
   typeof useSaveQueryFromDetails
 >;

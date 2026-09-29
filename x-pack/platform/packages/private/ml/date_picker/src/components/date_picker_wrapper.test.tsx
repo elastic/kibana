@@ -55,33 +55,33 @@ vi.mock('@kbn/ml-url-state', () => {
 });
 
 vi.mock('../hooks/use_timefilter', () => {
-      const mocked = {
-      useRefreshIntervalUpdates: vi.fn(() => {
-        return {
-          pause: false,
-        };
-      }),
+  const mocked = {
+    useRefreshIntervalUpdates: vi.fn(() => {
+      return {
+        pause: false,
+      };
+    }),
 
-      useTimefilter: () => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { of } = require('rxjs');
-        return {
-          getRefreshIntervalUpdate$: of(),
-        };
-      },
-      useTimeRangeUpdates: vi.fn(() => {
-        return { from: '', to: '' };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+    useTimefilter: () => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { of } = require('rxjs');
+      return {
+        getRefreshIntervalUpdate$: of(),
+      };
+    },
+    useTimeRangeUpdates: vi.fn(() => {
+      return { from: '', to: '' };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_date_picker_context', () => {
-      const mocked = {
-      useDatePickerContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDatePickerContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockContextFactory = (addWarning: Mock<void, []>) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -134,9 +134,7 @@ const mockContextFactory = (addWarning: Mock<void, []>) => {
   });
 };
 
-const MockedEuiSuperDatePicker = EuiSuperDatePicker as MockedFunction<
-  typeof EuiSuperDatePicker
->;
+const MockedEuiSuperDatePicker = EuiSuperDatePicker as MockedFunction<typeof EuiSuperDatePicker>;
 
 describe('<DatePickerWrapper />', () => {
   beforeEach(() => {

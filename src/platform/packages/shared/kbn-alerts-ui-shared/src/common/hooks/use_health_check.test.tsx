@@ -18,21 +18,25 @@ import { useHealthCheck } from './use_health_check';
 import { healthCheckErrors } from '../apis';
 
 vi.mock('../apis/fetch_ui_health_status/fetch_ui_health_status', () => {
-      const mocked = {
-      fetchUiHealthStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchUiHealthStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../apis/fetch_alerting_framework_health/fetch_alerting_framework_health', () => {
-      const mocked = {
-      fetchAlertingFrameworkHealth: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAlertingFrameworkHealth: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { fetchUiHealthStatus } = (await vi.importMock('../apis/fetch_ui_health_status/fetch_ui_health_status'));
-const { fetchAlertingFrameworkHealth } = (await vi.importMock('../apis/fetch_alerting_framework_health/fetch_alerting_framework_health'));
+const { fetchUiHealthStatus } = await vi.importMock(
+  '../apis/fetch_ui_health_status/fetch_ui_health_status'
+);
+const { fetchAlertingFrameworkHealth } = await vi.importMock(
+  '../apis/fetch_alerting_framework_health/fetch_alerting_framework_health'
+);
 
 const queryClient = new QueryClient();
 

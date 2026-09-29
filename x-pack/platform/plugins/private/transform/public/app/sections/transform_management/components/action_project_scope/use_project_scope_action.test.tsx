@@ -23,22 +23,22 @@ const mockUseGetTransformCpsEnabled = vi.fn(
 vi.mock('../../../../app_dependencies');
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      useTransformCapabilities: vi.fn(),
-      useUpdateTransformsProjectScope: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTransformCapabilities: vi.fn(),
+    useUpdateTransformsProjectScope: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_get_transform_cps_enabled', () => {
-      const mocked = {
-      useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cps-utils', async () => {
-  const actual = (await vi.importActual('@kbn/cps-utils'));
+  const actual = await vi.importActual('@kbn/cps-utils');
   return {
     ...actual,
     useFetchProjects: vi.fn(),

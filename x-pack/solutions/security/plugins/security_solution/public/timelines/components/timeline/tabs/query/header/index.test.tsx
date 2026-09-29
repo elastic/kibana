@@ -30,17 +30,17 @@ vi.mock('../hooks/use_show_alerts_only_migration_message');
 // Stub the heavy search-bar and data-provider subtrees; mounting the real
 // unified-search + DataProviders trees intermittently blew the 5s Jest budget.
 vi.mock('../../../search_or_filter', () => {
-      const mocked = {
-      StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StatefulSearchOrFilter: () => <div data-test-subj="mockStatefulSearchOrFilter" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../data_providers', () => {
-      const mocked = {
-      DataProviders: () => <div data-test-subj="dataProviders" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataProviders: () => <div data-test-subj="dataProviders" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Header', () => {
   const indexPattern = mockIndexPattern;

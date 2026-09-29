@@ -36,8 +36,7 @@ vi.mock('../hooks/use_get_device_control_component');
 vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
 const useLicenseMock = _useLicense as Mock;
-const useGetProtectionsUnavailableComponentMock =
-  _useGetProtectionsUnavailableComponent as Mock;
+const useGetProtectionsUnavailableComponentMock = _useGetProtectionsUnavailableComponent as Mock;
 const useGetDeviceControlUpsellComponentMock = _useGetDeviceControlUpsellComponent as Mock;
 
 describe('PerOsPolicySettingsForm', () => {
@@ -131,8 +130,7 @@ describe('PerOsPolicySettingsForm', () => {
       );
     };
 
-    const getUpdatedPolicy = () =>
-      (formProps.onChange as Mock).mock.calls.at(-1)[0].updatedPolicy;
+    const getUpdatedPolicy = () => (formProps.onChange as Mock).mock.calls.at(-1)[0].updatedPolicy;
 
     it('syncs antivirus registration with Windows malware when the AV mode is sync', async () => {
       setAntivirusRegistration(formProps.policy, AntivirusRegistrationModes.sync, true);

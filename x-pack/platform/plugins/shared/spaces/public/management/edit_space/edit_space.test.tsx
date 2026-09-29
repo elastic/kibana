@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -36,25 +35,25 @@ import { getRolesAPIClientMock } from '../roles_api_client.mock';
 import { getSecurityLicenseMock } from '../security_license.mock';
 
 vi.mock('./edit_space_general_tab', () => {
-      const mocked = {
-      EditSpaceSettingsTab: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditSpaceSettingsTab: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_space_roles_tab', () => {
-      const mocked = {
-      EditSpaceAssignedRolesTab: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditSpaceAssignedRolesTab: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_space_content_tab', () => {
-      const mocked = {
-      EditSpaceContentTab: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditSpaceContentTab: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const spaceId = asSpaceId('my-space');
 const space = {

@@ -32,7 +32,7 @@ import { getFieldByNameFactory } from '../../../pure_helpers';
 
 // mocking random id generator function
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

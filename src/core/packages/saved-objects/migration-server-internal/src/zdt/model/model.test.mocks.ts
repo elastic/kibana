@@ -10,7 +10,7 @@
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-const realStages = (await vi.importActual('./stages'));
+const realStages = await vi.importActual('./stages');
 
 export const StageMocks = Object.keys(realStages).reduce((mocks, key) => {
   mocks[key] = vi.fn().mockImplementation((state: unknown) => state);

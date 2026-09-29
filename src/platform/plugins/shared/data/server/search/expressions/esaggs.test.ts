@@ -26,12 +26,12 @@ import type {
 import { getFunctionDefinition } from './esaggs';
 
 vi.mock('../../../common/search/expressions', () => {
-      const mocked = {
-      getEsaggsMeta: vi.fn().mockReturnValue({ name: 'esaggs' }),
-      handleEsaggsRequest: vi.fn(() => mockOf({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsaggsMeta: vi.fn().mockReturnValue({ name: 'esaggs' }),
+    handleEsaggsRequest: vi.fn(() => mockOf({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
 

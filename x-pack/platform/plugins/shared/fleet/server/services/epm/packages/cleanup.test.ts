@@ -18,15 +18,15 @@ import { packagePolicyService } from '../../package_policy';
 import { removeOldAssets } from './cleanup';
 
 vi.mock('../..', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: () => ({
-          debug: vi.fn(),
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: () => ({
+        debug: vi.fn(),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../package_policy');
 

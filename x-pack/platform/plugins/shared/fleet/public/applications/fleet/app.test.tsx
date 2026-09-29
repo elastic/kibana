@@ -14,30 +14,30 @@ import { AppRoutes } from './app';
 import { useAuthz } from './hooks';
 
 vi.mock('./sections/agents', () => {
-      const mocked = {
-      AgentsApp: () => <p>AgentsApp</p>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentsApp: () => <p>AgentsApp</p>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./sections/agent_policy', () => {
-      const mocked = {
-      AgentPolicyApp: () => <p>AgentPolicyApp</p>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentPolicyApp: () => <p>AgentPolicyApp</p>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./sections/settings', () => {
-      const mocked = {
-      SettingsApp: () => <p>SettingsApp</p>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SettingsApp: () => <p>SettingsApp</p>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks')),
-      useAuthz: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks')),
+    useAuthz: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AppRoutes', () => {
   describe('Privileges', () => {

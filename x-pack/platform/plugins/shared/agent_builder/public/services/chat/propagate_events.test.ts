@@ -22,12 +22,12 @@ const setup = () => {
   const eventsService = new EventsService();
   const propagated: Array<[string, ChatEvent]> = [];
   const runsEnded: string[] = [];
-  vi
-    .spyOn(eventsService, 'propagateChatEvent')
-    .mockImplementation((conversationId, event) => propagated.push([conversationId, event]));
-  vi
-    .spyOn(eventsService, 'notifyStreamEnded')
-    .mockImplementation((conversationId) => runsEnded.push(conversationId));
+  vi.spyOn(eventsService, 'propagateChatEvent').mockImplementation((conversationId, event) =>
+    propagated.push([conversationId, event])
+  );
+  vi.spyOn(eventsService, 'notifyStreamEnded').mockImplementation((conversationId) =>
+    runsEnded.push(conversationId)
+  );
   return {
     operator: propagateEvents({ eventsService, conversationId: 'A' }),
     propagated,

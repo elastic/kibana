@@ -13,40 +13,40 @@ import { AgentPolicyDetailsFlyout } from './agent_policy_details_flyout';
 import type { LocationAgentStats } from '../../../../../../common/types';
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: (selector: (state: unknown) => unknown) =>
-        selector({
-          agentPolicies: {
-            data: [
-              {
-                id: 'policy-1',
-                name: 'Policy One',
-                agents: 1,
-                status: 'active',
-                namespace: 'default',
-                description: 'Synthetics policy',
-                spaceIds: ['default'],
-              },
-            ],
-          },
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: (selector: (state: unknown) => unknown) =>
+      selector({
+        agentPolicies: {
+          data: [
+            {
+              id: 'policy-1',
+              name: 'Policy One',
+              agents: 1,
+              status: 'active',
+              namespace: 'default',
+              description: 'Synthetics policy',
+              spaceIds: ['default'],
+            },
+          ],
+        },
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const locationStats: LocationAgentStats = {
   locationId: 'loc-1',

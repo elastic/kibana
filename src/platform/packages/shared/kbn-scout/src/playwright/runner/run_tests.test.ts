@@ -16,17 +16,17 @@ import { execPromise } from '../utils';
 import { ScoutTestTarget } from '@kbn/scout-info';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      execPromise: vi.fn(),
-      withKibanaSwcRegister: vi.fn((env = {}) => ({
-        ...env,
-        NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
-          .filter(Boolean)
-          .join(' '),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    execPromise: vi.fn(),
+    withKibanaSwcRegister: vi.fn((env = {}) => ({
+      ...env,
+      NODE_OPTIONS: [env.NODE_OPTIONS, '--require=@kbn/swc-register/install']
+        .filter(Boolean)
+        .join(' '),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getPlaywrightProject', () => {
   it('returns "local" for testTarget with location "local"', () => {

@@ -13,13 +13,13 @@ import { AzureSetupInfoContent } from './azure_setup_info';
 
 // Mock the cloud setup hook
 vi.mock('../hooks/use_cloud_setup_context', () => {
-      const mocked = {
-      useCloudSetup: vi.fn(() => ({
-        shortName: 'CSPM',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudSetup: vi.fn(() => ({
+      shortName: 'CSPM',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AzureSetupInfoContent', () => {
   const mockDocumentationLink =

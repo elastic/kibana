@@ -23,16 +23,16 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
 
 vi.mock('lodash', () => {
-      const mocked = {
-      ...require('lodash'),
-      throttle: vi.fn().mockImplementation((fn) => fn),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('lodash'),
+    throttle: vi.fn().mockImplementation((fn) => fn),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToursIsEnabled = vi.fn(() => true);
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
+  const { notificationServiceMock } = await vi.importActual('@kbn/core/public/mocks');
   return {
     useKibana: () => ({
       services: {

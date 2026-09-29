@@ -24,11 +24,11 @@ const actionsConfigUtils = (inboundEventsEnabled = false) => {
 };
 
 vi.mock('../../verify_access_and_context', () => {
-      const mocked = {
-      verifyAccessAndContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyAccessAndContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

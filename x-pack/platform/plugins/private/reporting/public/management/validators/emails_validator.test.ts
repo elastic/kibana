@@ -11,12 +11,12 @@ import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import { getEmailsValidator } from './emails_validator';
 
 vi.mock('../translations', () => {
-      const mocked = {
-      getInvalidEmailAddress: (value: string) => `invalid: ${value}`,
-      getNotAllowedEmailAddress: (value: string) => `not allowed: ${value}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInvalidEmailAddress: (value: string) => `invalid: ${value}`,
+    getNotAllowedEmailAddress: (value: string) => `not allowed: ${value}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getEmailsValidator', () => {
   it('returns undefined for all valid emails', () => {

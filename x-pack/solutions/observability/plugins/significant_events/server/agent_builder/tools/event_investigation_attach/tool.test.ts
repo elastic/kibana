@@ -18,25 +18,25 @@ import { attachEventInvestigationToolHandler } from './handler';
 import { createEventInvestigationAttachTool } from './tool';
 
 vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
-      const mocked = {
-      assertCanManageSignificantEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanManageSignificantEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../routes/utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./handler', () => {
-      const mocked = {
-      attachEventInvestigationToolHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    attachEventInvestigationToolHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('event_investigation_attach tool', () => {
   it('requires manage privilege and passes its logger to the handler', async () => {

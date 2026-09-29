@@ -16,10 +16,10 @@ export const eventLoopUtilizationMock = vi.fn().mockImplementation(() => ({
 }));
 
 vi.doMock('perf_hooks', () => {
-      const mocked = {
-      performance: {
-        eventLoopUtilization: eventLoopUtilizationMock,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performance: {
+      eventLoopUtilization: eventLoopUtilizationMock,
+    },
+  };
+  return { ...mocked, default: mocked };
+});

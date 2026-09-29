@@ -18,11 +18,11 @@ import { getILMExplainRoute } from './get_ilm_explain';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 
 vi.mock('../lib', () => {
-      const mocked = {
-      fetchILMExplain: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchILMExplain: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getILMExplainRoute route', () => {
   let server: ReturnType<typeof serverMock.create>;

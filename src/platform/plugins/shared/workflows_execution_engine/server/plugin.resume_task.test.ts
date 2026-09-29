@@ -17,19 +17,19 @@ import type { ConcreteTaskInstance, TaskRegisterDefinition } from '@kbn/task-man
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 vi.mock('./repositories/data_access_layer', async () => {
-  const actual = (await vi.importActual('./repositories/data_access_layer'));
-  const { createDataClientJestMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
+  const actual = await vi.importActual('./repositories/data_access_layer');
+  const { createDataClientJestMock } = await vi.importActual('./test_utils/data_client_jest_mock');
   return {
     ...actual,
     createDataClientBundle: vi.fn(() => createDataClientJestMock()),
   };
 });
 vi.mock('./lib/check_license', () => {
-      const mocked = {
-      checkLicense: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkLicense: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('elastic-apm-node', () => ({
   default: {
     currentTransaction: null,
@@ -41,7 +41,7 @@ const mockResolveInterruptedWorkflowResumeTask = vi.fn();
 const mockResolveExhaustedWorkflowRunTask = vi.fn().mockResolvedValue(undefined);
 const mockFailExecutionMissingIdentity = vi.fn().mockResolvedValue(undefined);
 vi.mock('./lib/task_recovery', async () => {
-  const actual = (await vi.importActual('./lib/task_recovery'));
+  const actual = await vi.importActual('./lib/task_recovery');
   return {
     ...actual,
     resolveInterruptedWorkflowResumeTask: (...args: unknown[]) =>
@@ -54,15 +54,15 @@ vi.mock('./lib/task_recovery', async () => {
 
 const mockHandlePostExecutionLoop = vi.fn().mockResolvedValue(undefined);
 vi.mock('./execution_functions/handle_post_execution_loop', () => {
-      const mocked = {
-      handlePostExecutionLoop: (...args: unknown[]) => mockHandlePostExecutionLoop(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handlePostExecutionLoop: (...args: unknown[]) => mockHandlePostExecutionLoop(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResumeWorkflow = vi.fn();
 vi.mock('./execution_functions', async () => {
-  const actual = (await vi.importActual('./execution_functions'));
+  const actual = await vi.importActual('./execution_functions');
   return {
     ...actual,
     resumeWorkflow: (...args: unknown[]) => mockResumeWorkflow(...args),
@@ -71,13 +71,13 @@ vi.mock('./execution_functions', async () => {
 
 const mockGetWorkflowExecutionById = vi.fn();
 vi.mock('./repositories/workflow_execution_repository', () => {
-      const mocked = {
-      WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
-        getWorkflowExecutionById: mockGetWorkflowExecutionById,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
+      getWorkflowExecutionById: mockGetWorkflowExecutionById,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { WorkflowsExecutionEnginePlugin } from './plugin';
 import { WORKFLOW_RESUME_TASK_TYPE } from './workflow_task_manager/types';

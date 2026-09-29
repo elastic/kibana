@@ -19,12 +19,12 @@ const mockFilterManager = { addFilters: vi.fn() } as unknown as FilterManager;
 
 const mockCreateFilter = vi.fn((_: unknown) => ({}));
 vi.mock('./create_filter', async () => {
-      const mocked = {
-      ...(await vi.importActual('./create_filter')),
-      createFilter: (params: unknown) => mockCreateFilter(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./create_filter')),
+    createFilter: (params: unknown) => mockCreateFilter(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fieldName = 'user.name';
 const value = 'the value';

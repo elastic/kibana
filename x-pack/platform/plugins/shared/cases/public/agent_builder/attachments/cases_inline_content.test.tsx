@@ -59,16 +59,17 @@ describe('CasesInlineContent', () => {
   });
 
   it('does not break when no cases passed', () =>
-      new Promise<void>((resolve, reject) => {
-      const cb = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const cb = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const cases: CaseAttachmentData[] = [];
-          expect(() => {
-            renderInline(buildAttachment(cases, 0));
-            cb();
-          }).not.toThrow();
-        
-      }));
+      const cases: CaseAttachmentData[] = [];
+      expect(() => {
+        renderInline(buildAttachment(cases, 0));
+        cb();
+      }).not.toThrow();
+    }));
 
   it('renders clickable title links and badge links for each row', () => {
     const cases = [buildCase({ id: '125', incremental_id: 125, title: 'Suspicious OAuth Token' })];

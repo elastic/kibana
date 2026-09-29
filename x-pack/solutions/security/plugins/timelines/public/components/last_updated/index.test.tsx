@@ -13,8 +13,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { LastUpdatedAt } from '.';
 
 vi.mock('@kbn/i18n-react', async () => {
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
   const FormattedRelative = vi.fn();
   FormattedRelative.mockImplementation(() => '2 minutes ago');

@@ -27,7 +27,7 @@ vi.mock('../inspect/use_inspect', () => {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiContextMenu: vi.fn(() => <div data-test-subj="viz-actions-menu" />),

@@ -16,44 +16,44 @@ import { JobCreatorContext } from '../job_creator_context';
 import { PickFieldsStep } from './pick_fields';
 
 vi.mock('../wizard_nav', () => {
-      const mocked = { WizardNav: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { WizardNav: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/json_editor_flyout', () => {
-      const mocked = {
-      JsonEditorFlyout: () => null,
-      EDITOR_MODE: { EDITABLE: 'editable' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JsonEditorFlyout: () => null,
+    EDITOR_MODE: { EDITABLE: 'editable' },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/single_metric_view', () => {
-      const mocked = { SingleMetricView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SingleMetricView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/multi_metric_view', () => {
-      const mocked = { MultiMetricView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { MultiMetricView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/population_view', () => {
-      const mocked = { PopulationView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { PopulationView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/advanced_view', () => {
-      const mocked = { AdvancedView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { AdvancedView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/categorization_view', () => {
-      const mocked = { CategorizationView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { CategorizationView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/rare_view', () => {
-      const mocked = { RareView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { RareView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/geo_view', () => {
-      const mocked = { GeoView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { GeoView: () => null };
+  return { ...mocked, default: mocked };
+});
 
 describe('PickFieldsStep', () => {
   const setIsFlyoutVisible = vi.fn();

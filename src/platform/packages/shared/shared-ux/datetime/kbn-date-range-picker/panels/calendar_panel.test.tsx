@@ -23,43 +23,43 @@ const mockUseDateRangePickerContext = vi.fn();
 const mockCalendarRangeSpy = vi.fn();
 
 vi.mock('../date_range_picker_context', () => {
-      const mocked = {
-      useDateRangePickerContext: () => mockUseDateRangePickerContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateRangePickerContext: () => mockUseDateRangePickerContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../date_range_picker_panel_ui', () => {
-      const mocked = {
-      PanelContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      PanelHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      PanelBody: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      PanelFooter: ({
-        children,
-        primaryAction,
-      }: {
-        children: React.ReactNode;
-        primaryAction?: React.ReactNode;
-      }) => (
-        <>
-          {primaryAction}
-          {children}
-        </>
-      ),
-      SubPanelHeading: ({
-        children,
-        onGoBack,
-      }: {
-        children: React.ReactNode;
-        onGoBack?: () => void;
-      }) => (
-        <button data-test-subj="back-button" onClick={onGoBack}>
-          {children}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PanelContainer: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    PanelHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    PanelBody: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    PanelFooter: ({
+      children,
+      primaryAction,
+    }: {
+      children: React.ReactNode;
+      primaryAction?: React.ReactNode;
+    }) => (
+      <>
+        {primaryAction}
+        {children}
+      </>
+    ),
+    SubPanelHeading: ({
+      children,
+      onGoBack,
+    }: {
+      children: React.ReactNode;
+      onGoBack?: () => void;
+    }) => (
+      <button data-test-subj="back-button" onClick={onGoBack}>
+        {children}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Calendar mock: renders numbered day buttons for February 2026 (days 1-28).

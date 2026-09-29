@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { renderHook, waitFor } from '@testing-library/react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { i18n, setAvailableLocales } from '@kbn/i18n';

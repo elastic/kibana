@@ -20,13 +20,13 @@ import { securityTelemetry } from '../otel/instrumentation';
 
 // Mock the telemetry module
 vi.mock('../otel/instrumentation', () => {
-      const mocked = {
-      securityTelemetry: {
-        recordPrivilegeRegistrationDuration: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityTelemetry: {
+      recordPrivilegeRegistrationDuration: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (

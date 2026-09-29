@@ -22,11 +22,11 @@ import { FooterAiActions } from '../../../flyout_v2/document/main/components/foo
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../flyout_v2/document/main/components/footer_ai_actions', () => {
-      const mocked = {
-      FooterAiActions: vi.fn(() => <div data-test-subj="footerAiActions" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FooterAiActions: vi.fn(() => <div data-test-subj="footerAiActions" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
   const original = require('react-router-dom');
   return {
@@ -34,18 +34,16 @@ vi.mock('react-router-dom', () => {
     useLocation: vi.fn().mockReturnValue({ search: '' }),
   };
 });
-vi.mock(
-  '../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline'
-);
+vi.mock('../../../detections/components/alerts_table/timeline_actions/use_investigate_in_timeline');
 vi.mock('../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 vi.mock('../shared/components/take_action_button', () => {
-      const mocked = {
-      TakeActionButton: () => (
-        <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TakeActionButton: () => (
+      <button data-test-subj="securitySolutionFlyoutFooterDropdownButton" type="button" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderPanelFooter = (isPreview: boolean) =>
   render(

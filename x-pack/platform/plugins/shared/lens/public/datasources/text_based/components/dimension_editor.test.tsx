@@ -23,32 +23,34 @@ vi.mock('lodash', () => {
 });
 
 vi.mock('./fetch_fields_from_esql_expression', () => {
-      const mocked = {
-      fetchFieldsFromESQLExpression: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchFieldsFromESQLExpression: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedOnChoose: FieldSelectProps['onChoose'] | undefined;
 
 vi.mock('./field_select', () => {
-      const mocked = {
-      FieldSelect: (props: FieldSelectProps) => {
-        capturedOnChoose = props.onChoose;
-        return <div data-test-subj="text-based-dimension-field" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldSelect: (props: FieldSelectProps) => {
+      capturedOnChoose = props.onChoose;
+      return <div data-test-subj="text-based-dimension-field" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form_based/dimension_panel/format_selector', () => {
-      const mocked = {
-      FormatSelector: () => <div data-test-subj="format-selector" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormatSelector: () => <div data-test-subj="format-selector" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { fetchFieldsFromESQLExpression } = (await vi.importMock('./fetch_fields_from_esql_expression'));
+const { fetchFieldsFromESQLExpression } = await vi.importMock(
+  './fetch_fields_from_esql_expression'
+);
 
 const waitToLoad = async () =>
   await waitFor(() => {

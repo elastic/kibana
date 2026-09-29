@@ -19,39 +19,39 @@ const mockSetComplete = vi.fn();
 
 vi.mock('./use_stream');
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: () => ({
-        assistantAvailability: {
-          hasSearchAILakeConfigurations: true,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => ({
+      assistantAvailability: {
+        hasSearchAILakeConfigurations: true,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/security-solution-navigation', () => {
-      const mocked = {
-      useNavigation: vi.fn().mockReturnValue({
-        navigateTo: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: vi.fn().mockReturnValue({
+      navigateTo: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/typed_kibana_context/typed_kibana_context', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          discover: {
-            locator: vi.fn(),
-          },
-          application: {
-            navigateToApp: vi.fn(),
-          },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        discover: {
+          locator: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          navigateToApp: vi.fn(),
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const content = 'Test Content';
 const mockAbortStream = vi.fn();

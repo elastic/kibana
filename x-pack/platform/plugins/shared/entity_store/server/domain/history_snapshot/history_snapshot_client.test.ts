@@ -20,14 +20,16 @@ import {
 } from '../asset_manager/resolve_entity_store_indices';
 
 vi.mock('../../infra/elasticsearch', async () => {
-      const mocked = {
-      ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
-        '../../infra/elasticsearch'
-      ),
-      chunkByUrlLength: (await vi.importActual<typeof import('../../infra/elasticsearch')>('../../infra/elasticsearch')).chunkByUrlLength,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...jest.createMockFromModule<typeof import('../../infra/elasticsearch')>(
+      '../../infra/elasticsearch'
+    ),
+    chunkByUrlLength: (
+      await vi.importActual<typeof import('../../infra/elasticsearch')>('../../infra/elasticsearch')
+    ).chunkByUrlLength,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../asset_manager/resolve_entity_store_indices');
 
 const mockCreateIndex = createIndex as MockedFunction<typeof createIndex>;
@@ -36,9 +38,7 @@ const mockUpdateByQueryWithScript = updateByQueryWithScript as MockedFunction<
   typeof updateByQueryWithScript
 >;
 const mockResolveHistorySnapshotIndexPatterns =
-  resolveHistorySnapshotIndexPatterns as MockedFunction<
-    typeof resolveHistorySnapshotIndexPatterns
-  >;
+  resolveHistorySnapshotIndexPatterns as MockedFunction<typeof resolveHistorySnapshotIndexPatterns>;
 const mockResolveLatestEntitiesIndexName = resolveLatestEntitiesIndexName as MockedFunction<
   typeof resolveLatestEntitiesIndexName
 >;

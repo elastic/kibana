@@ -17,13 +17,13 @@ import { getTimelineRoute } from '.';
 import type { SecuritySolutionRequestHandlerContextMock } from '../../../../detection_engine/routes/__mocks__/request_context';
 
 vi.mock('../../../saved_object/timelines', () => {
-      const mocked = {
-      getAllTimeline: vi.fn(),
-      getTimelineOrNull: vi.fn(),
-      getTimelineTemplateOrNull: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllTimeline: vi.fn(),
+    getTimelineOrNull: vi.fn(),
+    getTimelineTemplateOrNull: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('get timeline', () => {
   let server: ReturnType<typeof serverMock.create>;

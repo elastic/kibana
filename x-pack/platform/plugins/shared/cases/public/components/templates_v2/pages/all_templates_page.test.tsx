@@ -30,51 +30,51 @@ import * as api from '../api/api';
 vi.mock('../api/api');
 
 vi.mock('../../use_breadcrumbs', () => {
-      const mocked = {
-      useCasesTemplatesBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesTemplatesBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateToAllCases = vi.fn();
 const mockNavigateToCasesCreateTemplate = vi.fn();
 const mockNavigateToCasesEditTemplate = vi.fn();
 
 vi.mock('../../../common/navigation/hooks', () => {
-      const mocked = {
-      useAllCasesNavigation: () => ({
-        getAllCasesUrl: vi.fn().mockReturnValue('/'),
-        navigateToAllCases: mockNavigateToAllCases,
-      }),
-      useCasesCreateTemplateNavigation: () => ({
-        getCasesCreateTemplateUrl: vi.fn().mockReturnValue('/templates/create'),
-        navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
-      }),
-      useCasesFieldLibraryNavigation: () => ({
-        getCasesFieldLibraryUrl: vi.fn().mockReturnValue('/field-library'),
-        navigateToCasesFieldLibrary: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAllCasesNavigation: () => ({
+      getAllCasesUrl: vi.fn().mockReturnValue('/'),
+      navigateToAllCases: mockNavigateToAllCases,
+    }),
+    useCasesCreateTemplateNavigation: () => ({
+      getCasesCreateTemplateUrl: vi.fn().mockReturnValue('/templates/create'),
+      navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+    }),
+    useCasesFieldLibraryNavigation: () => ({
+      getCasesFieldLibraryUrl: vi.fn().mockReturnValue('/field-library'),
+      navigateToCasesFieldLibrary: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/navigation', () => {
-      const mocked = {
-      useCasesCreateTemplateNavigation: () => ({
-        getCasesCreateTemplateUrl: vi.fn().mockReturnValue('/templates/create'),
-        navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
-      }),
-      useCasesEditTemplateNavigation: () => ({
-        getCasesEditTemplateUrl: vi.fn().mockReturnValue('/templates/edit'),
-        navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
-      }),
-      useCasesFieldLibraryNavigation: () => ({
-        getCasesFieldLibraryUrl: vi.fn().mockReturnValue('/field-library'),
-        navigateToCasesFieldLibrary: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesCreateTemplateNavigation: () => ({
+      getCasesCreateTemplateUrl: vi.fn().mockReturnValue('/templates/create'),
+      navigateToCasesCreateTemplate: mockNavigateToCasesCreateTemplate,
+    }),
+    useCasesEditTemplateNavigation: () => ({
+      getCasesEditTemplateUrl: vi.fn().mockReturnValue('/templates/edit'),
+      navigateToCasesEditTemplate: mockNavigateToCasesEditTemplate,
+    }),
+    useCasesFieldLibraryNavigation: () => ({
+      getCasesFieldLibraryUrl: vi.fn().mockReturnValue('/field-library'),
+      navigateToCasesFieldLibrary: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const apiMock = api as Mocked<typeof api>;
 
@@ -125,11 +125,9 @@ describe('AllTemplatesPage', () => {
     // clearAllMocks keeps implementations, so reset this one: the tests below install a promise they
     // resolve by hand, which any later test would otherwise inherit as a delete that never settles.
     apiMock.bulkDeleteTemplates.mockResolvedValue({ success: true, deleted: [], errors: [] });
-    vi
-      .spyOn(KibanaServices, 'getConfig')
-      .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-        typeof KibanaServices.getConfig
-      >);
+    vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+      templates: { enabled: true },
+    } as ReturnType<typeof KibanaServices.getConfig>);
   });
 
   it('renders the page correctly', async () => {

@@ -117,9 +117,7 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('breaks silently when sort is missing (default)', async () => {
-    const search = vi
-      .fn()
-      .mockResolvedValueOnce(makeSearchResponse([makeHit('a'), makeHit('b')]));
+    const search = vi.fn().mockResolvedValueOnce(makeSearchResponse([makeHit('a'), makeHit('b')]));
     const onPage = vi.fn();
 
     const result = await paginateWithSearchAfter(
@@ -132,9 +130,7 @@ describe('paginateWithSearchAfter', () => {
   });
 
   it('throws when sort is missing and throwOnMissingSort is true', async () => {
-    const search = vi
-      .fn()
-      .mockResolvedValueOnce(makeSearchResponse([makeHit('a'), makeHit('b')]));
+    const search = vi.fn().mockResolvedValueOnce(makeSearchResponse([makeHit('a'), makeHit('b')]));
     const onPage = vi.fn();
 
     await expect(

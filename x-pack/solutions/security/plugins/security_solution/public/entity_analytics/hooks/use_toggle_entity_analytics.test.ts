@@ -15,11 +15,11 @@ import { useToggleEntityAnalytics } from './use_toggle_entity_analytics';
 const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 vi.mock('../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInstallEntityStore = vi.fn().mockResolvedValue({});
 const mockStartEntityStore = vi.fn().mockResolvedValue({});
@@ -38,24 +38,24 @@ let mockEntityStoreStatusReturn: {
 };
 
 vi.mock('../components/entity_store/hooks/use_entity_store', () => {
-      const mocked = {
-      useInstallEntityStoreMutation: () => mockInstallEntityStoreMutationReturn,
-      useStartEntityStoreMutation: () => ({
-        mutateAsync: mockStartEntityStore,
-        isLoading: false,
-        isError: false,
-        error: null,
-      }),
-      useStopEntityStoreMutation: () => ({
-        mutateAsync: mockStopEntityStore,
-        isLoading: false,
-        isError: false,
-        error: null,
-      }),
-      useEntityStoreStatus: () => mockEntityStoreStatusReturn,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInstallEntityStoreMutation: () => mockInstallEntityStoreMutationReturn,
+    useStartEntityStoreMutation: () => ({
+      mutateAsync: mockStartEntityStore,
+      isLoading: false,
+      isError: false,
+      error: null,
+    }),
+    useStopEntityStoreMutation: () => ({
+      mutateAsync: mockStopEntityStore,
+      isLoading: false,
+      isError: false,
+      error: null,
+    }),
+    useEntityStoreStatus: () => mockEntityStoreStatusReturn,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSaveSettings = vi.fn().mockResolvedValue(undefined);
 const defaultOptions = {

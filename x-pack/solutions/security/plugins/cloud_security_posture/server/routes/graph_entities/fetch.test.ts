@@ -38,9 +38,7 @@ describe('fetchEntities', () => {
     });
 
     // Default: index does not exist (no enrichment)
-    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
-      .fn()
-      .mockResolvedValue(false);
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi.fn().mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -96,9 +94,7 @@ describe('fetchEntities', () => {
 
   it('uses lookup join when the entities index exists', async () => {
     // Mock index exists → enrichment via LOOKUP JOIN is enabled
-    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
-      .fn()
-      .mockResolvedValueOnce(true);
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi.fn().mockResolvedValueOnce(true);
 
     await fetchEntities({
       esClient,

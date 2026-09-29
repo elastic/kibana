@@ -21,18 +21,18 @@ import { SELECT_TIMELINE_MODAL_TITLE, INSERT_TIMELINE_ATTACH_HINT } from './tran
 
 vi.mock('../../../../lib/kibana');
 vi.mock('../../../link_to', () => {
-      const mocked = {
-      useFormatUrl: () => ({ formatUrl: vi.fn() }),
-      getTimelineUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFormatUrl: () => ({ formatUrl: vi.fn() }),
+    getTimelineUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../cases/attachments/timeline/select_timeline_modal_body', () => {
-      const mocked = {
-      SelectTimelineModalBody: () => <div data-test-subj="select-timeline-modal-body-mock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SelectTimelineModalBody: () => <div data-test-subj="select-timeline-modal-body-mock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('timeline markdown plugin', () => {
   const reportEvent = vi.fn();

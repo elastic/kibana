@@ -16,20 +16,21 @@ const mockDocTitleChange = vi.fn();
 const mockPrepend = vi.fn((path: string) => path);
 
 vi.mock('../lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          chrome: {
-            setBreadcrumbs: mockSetBreadcrumbs,
-            docTitle: { change: mockDocTitleChange },
-          },
-          http: { basePath: { prepend: mockPrepend } },
-          application: { navigateToUrl: vi.fn() },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        chrome: {
+          setBreadcrumbs: mockSetBreadcrumbs,
+          docTitle: { change: mockDocTitleChange },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        http: { basePath: { prepend: mockPrepend } },
+        application: { navigateToUrl: vi.fn() },
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const lastBreadcrumbText = () => {
   const breadcrumbs = mockSetBreadcrumbs.mock.calls.at(-1)?.[0] ?? [];

@@ -15,26 +15,26 @@ import { getEntityAnomalyOverview } from './get_anomaly_overview';
 import { getJobConfig, getSecurityMlJobIds } from '../ml_anomaly_detection';
 
 vi.mock('../ml_anomaly_detection', async () => {
-      const mocked = {
-      ...(await vi.importActual('../ml_anomaly_detection')),
-      getJobConfig: vi.fn(),
-      getSecurityMlJobIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../ml_anomaly_detection')),
+    getJobConfig: vi.fn(),
+    getSecurityMlJobIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        dsl: {
-          getEuidFilterBasedOnEntityRecord: vi
-            .fn()
-            .mockReturnValue({ bool: { filter: [{ term: { 'host.name': 'entity-1' } }] } }),
-        },
+  const mocked = {
+    euid: {
+      dsl: {
+        getEuidFilterBasedOnEntityRecord: vi
+          .fn()
+          .mockReturnValue({ bool: { filter: [{ term: { 'host.name': 'entity-1' } }] } }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetJobConfig = getJobConfig as Mock;
 const mockGetSecurityMlJobIds = getSecurityMlJobIds as Mock;

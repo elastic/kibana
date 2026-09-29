@@ -97,12 +97,12 @@ function createStreamMock({
 let mockStream = createStreamMock();
 const mockGetContentStream = vi.fn();
 vi.mock('../content_stream', () => {
-      const mocked = {
-      getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
-      finishedWithNoPendingCallbacks: () => Promise.resolve(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getContentStream: (...args: unknown[]) => mockGetContentStream(...args),
+    finishedWithNoPendingCallbacks: () => Promise.resolve(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/notifications/email_notification_service');
 
@@ -1647,9 +1647,9 @@ describe('Run Scheduled Report Task', () => {
 
     it('logs a warning and sets the execution to warning if the notification service throws an error', async () => {
       mockReporting.getEventTracker = vi.fn().mockReturnValue(mockEventTracker);
-      vi
-        .spyOn(emailNotificationService, 'notify')
-        .mockRejectedValueOnce(new Error('This is a test error!'));
+      vi.spyOn(emailNotificationService, 'notify').mockRejectedValueOnce(
+        new Error('This is a test error!')
+      );
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,
@@ -1711,9 +1711,9 @@ describe('Run Scheduled Report Task', () => {
     });
 
     it('logs an error if there is an error thrown setting execution to warning', async () => {
-      vi
-        .spyOn(reportStore, 'setReportWarning')
-        .mockRejectedValueOnce('Error setting status to warning');
+      vi.spyOn(reportStore, 'setReportWarning').mockRejectedValueOnce(
+        'Error setting status to warning'
+      );
       const task = new RunScheduledReportTask({
         reporting: mockReporting,
         config: configType,

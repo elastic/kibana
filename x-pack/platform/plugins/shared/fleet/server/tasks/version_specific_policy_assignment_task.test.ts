@@ -82,10 +82,9 @@ const mockedDeleteVersionSpecificFleetServerPoliciesForVersions =
   deleteVersionSpecificFleetServerPoliciesForVersions as MockedFunction<
     typeof deleteVersionSpecificFleetServerPoliciesForVersions
   >;
-const mockedGetAgentCountsForVariantPolicyIds =
-  getAgentCountsForVariantPolicyIds as MockedFunction<
-    typeof getAgentCountsForVariantPolicyIds
-  >;
+const mockedGetAgentCountsForVariantPolicyIds = getAgentCountsForVariantPolicyIds as MockedFunction<
+  typeof getAgentCountsForVariantPolicyIds
+>;
 const mockedGetAgentVersionsForVersionSpecificPolicies =
   getAgentVersionsForVersionSpecificPolicies as MockedFunction<
     typeof getAgentVersionsForVersionSpecificPolicies
@@ -203,12 +202,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
   describe('Task execution', () => {
     beforeEach(() => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-      vi
-        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-        .mockReturnValue({} as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      vi.spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension').mockReturnValue(
+        {} as any
+      );
 
       // Default mocks for package policy compilation
       mockPackagePolicyService.findAllForAgentPolicy = vi.fn().mockResolvedValue([]);
@@ -228,9 +227,9 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
     });
 
     it('Should not run if feature is disabled', async () => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableVersionSpecificPolicies: false } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableVersionSpecificPolicies: false,
+      } as any);
 
       await runTask();
 
@@ -590,12 +589,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
   describe('Version extraction', () => {
     beforeEach(() => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-      vi
-        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-        .mockReturnValue({} as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      vi.spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension').mockReturnValue(
+        {} as any
+      );
 
       // Default mocks for package policy compilation
       mockPackagePolicyService.findAllForAgentPolicy = vi.fn().mockResolvedValue([]);
@@ -653,12 +652,12 @@ describe('VersionSpecificPolicyAssignmentTask', () => {
 
   describe('Orphaned version-specific policy sweep', () => {
     beforeEach(() => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-      vi
-        .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-        .mockReturnValue({} as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableVersionSpecificPolicies: true,
+      } as any);
+      vi.spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension').mockReturnValue(
+        {} as any
+      );
       // No agent policies with version conditions, so the main processing is a no-op and only the
       // orphan sweep runs.
       mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([]);

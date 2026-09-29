@@ -17,12 +17,12 @@ import { usePackagePolicyEditorPageUrl } from './datastream_hooks';
 const mockedUseRouteMatch = useRouteMatch as MockedFunction<typeof useRouteMatch>;
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useRouteMatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useRouteMatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePackagePolicyEditorPageUrl', () => {
   it('should render an integration url if no policy id is provided', () => {

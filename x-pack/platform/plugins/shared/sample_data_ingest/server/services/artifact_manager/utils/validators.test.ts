@@ -12,11 +12,11 @@ import { open } from 'fs/promises';
 import { validatePath, validateUrl, validateMimeType, validateFileSignature } from './validators';
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      open: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    open: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('validators', () => {
   describe('validatePath', () => {

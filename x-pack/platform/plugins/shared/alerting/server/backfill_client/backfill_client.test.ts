@@ -33,13 +33,13 @@ import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/serve
 import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 
 vi.mock('../lib/rule_gaps/update/update_gaps', () => {
-      const mocked = {
-      updateGaps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateGaps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/calculate_schedule', async () => {
-  const actual = (await vi.importActual('./lib/calculate_schedule'));
+  const actual = await vi.importActual('./lib/calculate_schedule');
   return {
     ...actual,
     calculateSchedule: vi.fn(actual.calculateSchedule),
@@ -255,7 +255,9 @@ describe('BackfillClient', () => {
 
   beforeEach(async () => {
     vi.resetAllMocks();
-    const { calculateSchedule: realCalculateSchedule } = (await vi.importActual('./lib/calculate_schedule'));
+    const { calculateSchedule: realCalculateSchedule } = await vi.importActual(
+      './lib/calculate_schedule'
+    );
     (calculateSchedule as Mock).mockImplementation(realCalculateSchedule);
     isSystemAction = vi.fn().mockReturnValue(false);
     actionsClient.isSystemAction.mockImplementation(isSystemAction);
@@ -1669,11 +1671,13 @@ describe('BackfillClient', () => {
       const rule1 = getMockRule();
       const mockRules = [rule1];
 
-      (calculateSchedule as Mock).mockImplementation(async (interval: string, ranges: unknown[]) => {
-        const { calculateSchedule: realCalc } = (await vi.importActual('./lib/calculate_schedule'));
-        const result = realCalc(interval, ranges);
-        return { ...result, truncated: true };
-      });
+      (calculateSchedule as Mock).mockImplementation(
+        async (interval: string, ranges: unknown[]) => {
+          const { calculateSchedule: realCalc } = await vi.importActual('./lib/calculate_schedule');
+          const result = realCalc(interval, ranges);
+          return { ...result, truncated: true };
+        }
+      );
 
       const mockAttributes = getMockAdHocRunAttributes({
         overwrites: {

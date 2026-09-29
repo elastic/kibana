@@ -22,7 +22,7 @@ import { RepositoryForm } from './repository_form';
 const repositoryTypes: RepositoryType[] = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];
 
 vi.mock('../../services/http', async () => {
-  const actual = (await vi.importActual<typeof import('../../services/http')>('../../services/http'));
+  const actual = await vi.importActual<typeof import('../../services/http')>('../../services/http');
   return {
     ...actual,
     useLoadRepositoryTypes: vi.fn().mockReturnValue({
@@ -52,7 +52,7 @@ const mockDocLinks = {
 };
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual<typeof import('../../app_context')>('../../app_context'));
+  const actual = await vi.importActual<typeof import('../../app_context')>('../../app_context');
 
   return {
     ...actual,

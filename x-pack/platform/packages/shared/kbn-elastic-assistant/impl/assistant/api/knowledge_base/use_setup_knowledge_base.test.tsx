@@ -18,7 +18,7 @@ import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 const postKnowledgeBaseMock = _postKnowledgeBase as Mock;
 const useMutationMock = _useMutation as Mock;
 vi.mock('./api', async () => {
-  const actual = (await vi.importActual('./api'));
+  const actual = await vi.importActual('./api');
   return {
     ...actual,
     postKnowledgeBase: vi.fn((...args) => actual.postKnowledgeBase(...args)),
@@ -28,18 +28,18 @@ vi.mock('./use_knowledge_base_status');
 vi.mock('./entries/use_knowledge_base_entries');
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useMutation: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
-        try {
-          const res = await fn();
-          return Promise.resolve(res);
-        } catch (e) {
-          opts.onError(e);
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMutation: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+      try {
+        const res = await fn();
+        return Promise.resolve(res);
+      } catch (e) {
+        opts.onError(e);
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const statusResponse = {
   success: true,

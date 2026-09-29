@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { useStableByFingerprint } from './use_stable_by_fingerprint';
 
 describe('useStableByFingerprint', () => {

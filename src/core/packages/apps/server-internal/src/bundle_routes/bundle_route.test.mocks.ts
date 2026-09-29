@@ -11,8 +11,8 @@ import { vi } from 'vitest';
 
 export const createDynamicAssetHandlerMock = vi.fn();
 vi.doMock('./dynamic_asset_response', () => {
-      const mocked = {
-      createDynamicAssetHandler: createDynamicAssetHandlerMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createDynamicAssetHandler: createDynamicAssetHandlerMock,
+  };
+  return { ...mocked, default: mocked };
+});

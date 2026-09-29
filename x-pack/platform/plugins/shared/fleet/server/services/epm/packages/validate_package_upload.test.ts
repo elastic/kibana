@@ -24,35 +24,35 @@ import { getPackageSavedObjects } from './get';
 import { validatePackageUpload } from './validate_package_upload';
 
 vi.mock('../../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getConfig: vi.fn(() => ({})),
-        getExperimentalFeatures: vi.fn(() => ({ enableOtelIntegrations: true })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getConfig: vi.fn(() => ({})),
+      getExperimentalFeatures: vi.fn(() => ({ enableOtelIntegrations: true })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../registry', () => {
-      const mocked = {
-      fetchFindLatestPackageOrThrow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchFindLatestPackageOrThrow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get', () => {
-      const mocked = {
-      getPackageSavedObjects: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageSavedObjects: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./bundled_packages', () => {
-      const mocked = {
-      getBundledPackageByName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBundledPackageByName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGetConfig = appContextService.getConfig as Mock;
 const mockedGetExperimentalFeatures = appContextService.getExperimentalFeatures as Mock;

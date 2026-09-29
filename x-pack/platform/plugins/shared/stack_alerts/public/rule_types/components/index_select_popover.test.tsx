@@ -20,26 +20,26 @@ import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 // In jsdom the container has zero height so the list renders no items.
 // Mock it to render all items directly so options appear in the DOM.
 vi.mock('react-window', () => {
-      const mocked = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      FixedSizeList: ({ children, itemCount, itemData }: any) => (
-        <div>
-          {Array.from({ length: itemCount }, (_, index) =>
-            children({ index, style: {}, data: itemData })
-          )}
-        </div>
-      ),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      VariableSizeList: ({ children, itemCount, itemData }: any) => (
-        <div>
-          {Array.from({ length: itemCount }, (_, index) =>
-            children({ index, style: {}, data: itemData })
-          )}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    FixedSizeList: ({ children, itemCount, itemData }: any) => (
+      <div>
+        {Array.from({ length: itemCount }, (_, index) =>
+          children({ index, style: {}, data: itemData })
+        )}
+      </div>
+    ),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    VariableSizeList: ({ children, itemCount, itemData }: any) => (
+      <div>
+        {Array.from({ length: itemCount }, (_, index) =>
+          children({ index, style: {}, data: itemData })
+        )}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('lodash', () => {
   const module = require('lodash');
@@ -50,7 +50,7 @@ vi.mock('lodash', () => {
 });
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
+  const original = await vi.importActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     getIndexPatterns: () => {

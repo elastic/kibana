@@ -27,7 +27,9 @@ import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const props = createPartialObjectMock<CellComponentProps>({
   ...mockRenderContext,

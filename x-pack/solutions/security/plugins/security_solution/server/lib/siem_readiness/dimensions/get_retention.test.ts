@@ -14,11 +14,11 @@ import { getRetention } from './get_retention';
 import { fetchRetention } from '../fetchers';
 
 vi.mock('../fetchers', () => {
-      const mocked = {
-      fetchRetention: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchRetention: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchRetention = fetchRetention as Mock;
 

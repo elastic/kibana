@@ -16,11 +16,11 @@ import { loadMitreArtifact } from '@kbn/security-mitre-attack-server';
 import { MitreAttackDataService } from './mitre_attack_data_service';
 
 vi.mock('@kbn/security-mitre-attack-server', () => {
-      const mocked = {
-      loadMitreArtifact: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadMitreArtifact: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLoadMitreArtifact = vi.mocked(loadMitreArtifact);
 

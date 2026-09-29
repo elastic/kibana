@@ -28,9 +28,9 @@ import { createMockGraphStore } from '../state_management/mocks';
 import { Provider } from 'react-redux';
 
 vi.mock('../services/source_modal', () => {
-      const mocked = { openSourceModal: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { openSourceModal: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 // Lightweight stand-in for the real KQL QueryStringInput: mounting the live editor kicks off
 // autocomplete/data-view async that intermittently overruns Jest's 5s budget under CI load. The

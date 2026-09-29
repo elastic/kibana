@@ -48,9 +48,7 @@ vi.mock('./epm/packages/bundled_packages');
 vi.mock('./epm/archive');
 
 const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
-const mockedGetBundledPackages = getBundledPackages as MockedFunction<
-  typeof getBundledPackages
->;
+const mockedGetBundledPackages = getBundledPackages as MockedFunction<typeof getBundledPackages>;
 
 const mockInstalledPackages = new Map();
 const mockInstallPackageErrors = new Map<string, string>();
@@ -146,222 +144,222 @@ function getPutPreconfiguredPackagesMock() {
 }
 
 vi.mock('./epm/registry', async () => {
-      const mocked = {
-      ...(await vi.importActual('./epm/registry')),
-      async fetchFindLatestPackageOrThrow(
-        packageName: string,
-        options?: { prerelease?: boolean }
-      ): Promise<RegistrySearchResult> {
-        let latestVersion = '1.0.0';
-        if (options?.prerelease && packageName === 'test_package') {
-          latestVersion = '3.0.1-beta.1';
-        }
+  const mocked = {
+    ...(await vi.importActual('./epm/registry')),
+    async fetchFindLatestPackageOrThrow(
+      packageName: string,
+      options?: { prerelease?: boolean }
+    ): Promise<RegistrySearchResult> {
+      let latestVersion = '1.0.0';
+      if (options?.prerelease && packageName === 'test_package') {
+        latestVersion = '3.0.1-beta.1';
+      }
 
-        return {
-          name: packageName,
-          version: latestVersion,
-          description: '',
-          release: 'experimental',
-          title: '',
-          path: '',
-          download: '',
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return {
+        name: packageName,
+        version: latestVersion,
+        description: '',
+        release: 'experimental',
+        title: '',
+        path: '',
+        download: '',
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./epm/packages/install', () => {
-      const mocked = {
-      installPackage: vi.fn(
-        async (args: InstallPackageParams): Promise<InstallResult | undefined> => {
-          if (args.installSource === 'registry') {
-            const [pkgName, pkgVersion] = args.pkgkey.split('-');
-            const installError = mockInstallPackageErrors.get(pkgName);
-            if (installError) {
-              return {
-                error: new Error(installError),
-                installType: 'install',
-                installSource: 'registry',
-                pkgName,
-              };
-            }
-
-            const installedPackage = mockInstalledPackages.get(pkgName);
-            if (installedPackage) {
-              if (installedPackage.version === pkgVersion) return installedPackage;
-            }
-
-            const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
-            mockInstalledPackages.set(pkgName, packageInstallation);
-
+  const mocked = {
+    installPackage: vi.fn(
+      async (args: InstallPackageParams): Promise<InstallResult | undefined> => {
+        if (args.installSource === 'registry') {
+          const [pkgName, pkgVersion] = args.pkgkey.split('-');
+          const installError = mockInstallPackageErrors.get(pkgName);
+          if (installError) {
             return {
-              status: 'installed',
+              error: new Error(installError),
               installType: 'install',
               installSource: 'registry',
               pkgName,
             };
-          } else if (args.installSource === 'upload') {
-            const { archiveBuffer } = args;
-
-            // Treat the buffer value passed in tests as the package's name for simplicity
-            const pkgName = archiveBuffer.toString('utf8');
-
-            // Just install every bundled package at version '1.0.0'
-            const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
-            mockInstalledPackages.set(pkgName, packageInstallation);
-
-            return { status: 'installed', installType: 'install', installSource: 'upload', pkgName };
           }
+
+          const installedPackage = mockInstalledPackages.get(pkgName);
+          if (installedPackage) {
+            if (installedPackage.version === pkgVersion) return installedPackage;
+          }
+
+          const packageInstallation = { name: pkgName, version: pkgVersion, title: pkgName };
+          mockInstalledPackages.set(pkgName, packageInstallation);
+
+          return {
+            status: 'installed',
+            installType: 'install',
+            installSource: 'registry',
+            pkgName,
+          };
+        } else if (args.installSource === 'upload') {
+          const { archiveBuffer } = args;
+
+          // Treat the buffer value passed in tests as the package's name for simplicity
+          const pkgName = archiveBuffer.toString('utf8');
+
+          // Just install every bundled package at version '1.0.0'
+          const packageInstallation = { name: pkgName, version: '1.0.0', title: pkgName };
+          mockInstalledPackages.set(pkgName, packageInstallation);
+
+          return { status: 'installed', installType: 'install', installSource: 'upload', pkgName };
         }
-      ),
-      ensurePackagesCompletedInstall() {
-        return [];
-      },
-      isPackageVersionOrLaterInstalled({
-        soClient,
-        pkgName,
-        pkgVersion,
-      }: {
-        soClient: any;
-        pkgName: string;
-        pkgVersion: string;
-      }) {
-        const installedPackage = mockInstalledPackages.get(pkgName);
+      }
+    ),
+    ensurePackagesCompletedInstall() {
+      return [];
+    },
+    isPackageVersionOrLaterInstalled({
+      soClient,
+      pkgName,
+      pkgVersion,
+    }: {
+      soClient: any;
+      pkgName: string;
+      pkgVersion: string;
+    }) {
+      const installedPackage = mockInstalledPackages.get(pkgName);
 
-        if (installedPackage) {
-          if (installedPackage.version === pkgVersion) {
-            return { package: installedPackage, installType: 'reinstall' };
-          }
-
-          // Importing semver methods throws an error in jest, so just use a rough check instead
-          if (installedPackage.version < pkgVersion) {
-            return false;
-          }
-          if (installedPackage.version > pkgVersion) {
-            return { package: installedPackage, installType: 'rollback' };
-          }
-        }
-
-        return false;
-      },
-      getInstallType: vi.fn(),
-      async updateInstallStatus(soClient: any, pkgName: string, status: string) {
-        const installedPackage = mockInstalledPackages.get(pkgName);
-
-        if (!installedPackage) {
-          return;
+      if (installedPackage) {
+        if (installedPackage.version === pkgVersion) {
+          return { package: installedPackage, installType: 'reinstall' };
         }
 
-        installedPackage.install_status = status;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        // Importing semver methods throws an error in jest, so just use a rough check instead
+        if (installedPackage.version < pkgVersion) {
+          return false;
+        }
+        if (installedPackage.version > pkgVersion) {
+          return { package: installedPackage, installType: 'rollback' };
+        }
+      }
+
+      return false;
+    },
+    getInstallType: vi.fn(),
+    async updateInstallStatus(soClient: any, pkgName: string, status: string) {
+      const installedPackage = mockInstalledPackages.get(pkgName);
+
+      if (!installedPackage) {
+        return;
+      }
+
+      installedPackage.install_status = status;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./epm/packages/get', () => {
-      const mocked = {
-      getPackageInfo({ pkgName }: { pkgName: string }) {
-        const installedPackage = mockInstalledPackages.get(pkgName);
-        if (!installedPackage) return { status: 'not_installed' };
-        return {
-          status: 'installed',
-          ...installedPackage,
-          policy_templates: [
-            {
-              name: 'test_template',
-              inputs: [
-                {
-                  type: 'foo',
-                  vars: [
-                    {
-                      name: 'bar',
-                      type: 'text',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        };
-      },
-      getInstallation({ pkgName }: { pkgName: string }) {
-        return mockInstalledPackages.get(pkgName) ?? false;
-      },
-      getInstallationObject({ pkgName }: { pkgName: string }) {
-        return mockInstalledPackages.get(pkgName) ?? false;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageInfo({ pkgName }: { pkgName: string }) {
+      const installedPackage = mockInstalledPackages.get(pkgName);
+      if (!installedPackage) return { status: 'not_installed' };
+      return {
+        status: 'installed',
+        ...installedPackage,
+        policy_templates: [
+          {
+            name: 'test_template',
+            inputs: [
+              {
+                type: 'foo',
+                vars: [
+                  {
+                    name: 'bar',
+                    type: 'text',
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      };
+    },
+    getInstallation({ pkgName }: { pkgName: string }) {
+      return mockInstalledPackages.get(pkgName) ?? false;
+    },
+    getInstallationObject({ pkgName }: { pkgName: string }) {
+      return mockInstalledPackages.get(pkgName) ?? false;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./epm/kibana/index_pattern/install');
 
 vi.mock('./package_policy', async () => {
-      const mocked = {
-      ...(await vi.importActual('./package_policy')),
-      packagePolicyService: {
-        ...(await vi.importActual('./package_policy')).packagePolicyService,
-        findAllForAgentPolicy: vi.fn().mockReturnValue([]),
-        listIds: vi.fn().mockReturnValue({ items: [] }),
-        create: vi
-          .fn()
-          .mockImplementation((soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
-            return {
-              id: 'mocked',
-              version: 'mocked',
-              ...newPackagePolicy,
-            };
-          }),
-        get(soClient: any, id: string) {
+  const mocked = {
+    ...(await vi.importActual('./package_policy')),
+    packagePolicyService: {
+      ...(await vi.importActual('./package_policy')).packagePolicyService,
+      findAllForAgentPolicy: vi.fn().mockReturnValue([]),
+      listIds: vi.fn().mockReturnValue({ items: [] }),
+      create: vi
+        .fn()
+        .mockImplementation((soClient: any, esClient: any, newPackagePolicy: NewPackagePolicy) => {
           return {
             id: 'mocked',
             version: 'mocked',
+            ...newPackagePolicy,
           };
-        },
+        }),
+      get(soClient: any, id: string) {
+        return {
+          id: 'mocked',
+          version: 'mocked',
+        };
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./app_context', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn(
-          () =>
-            new Proxy(
-              {},
-              {
-                get() {
-                  return vi.fn();
-                },
-              }
-            )
-        ),
-        getUninstallTokenService: () => ({
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn(
+        () =>
+          new Proxy(
+            {},
+            {
+              get() {
+                return vi.fn();
+              },
+            }
+          )
+      ),
+      getUninstallTokenService: () => ({
+        generateTokenForPolicyId: vi.fn(),
+        scoped: vi.fn().mockReturnValue({
           generateTokenForPolicyId: vi.fn(),
-          scoped: vi.fn().mockReturnValue({
-            generateTokenForPolicyId: vi.fn(),
-          }),
         }),
-        getExternalCallbacks: vi.fn(),
-        getCloud: vi.fn(),
-        getConfig: vi.fn(),
-        getExperimentalFeatures: vi.fn().mockReturnValue({}),
-        getInternalUserSOClientForSpaceId: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      }),
+      getExternalCallbacks: vi.fn(),
+      getCloud: vi.fn(),
+      getConfig: vi.fn(),
+      getExperimentalFeatures: vi.fn().mockReturnValue({}),
+      getInternalUserSOClientForSpaceId: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./audit_logging');
 
 vi.mock('./secrets', () => {
-      const mocked = {
-      isActionSecretStorageEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isActionSecretStorageEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const spyAgentPolicyServiceUpdate = vi.spyOn(agentPolicy.agentPolicyService, 'update');
 const spyAgentPolicyServiceBumpAllAgentPoliciesForOutput = vi.spyOn(
@@ -1170,9 +1168,9 @@ describe('policy preconfiguration', () => {
       const soClient = getPutPreconfiguredPackagesMock();
       const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
 
-      vi
-        .mocked(appContextService)
-        .getInternalUserSOClientForSpaceId.mockReturnValue(namespacedSOClient);
+      vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(
+        namespacedSOClient
+      );
 
       await ensurePreconfiguredPackagesAndPolicies(
         soClient,
@@ -1288,9 +1286,7 @@ describe('policy preconfiguration', () => {
 
           const soClient = getPutPreconfiguredPackagesMock();
           const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-          vi
-            .mocked(appContextService)
-            .getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+          vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
           // Install an older version of a test package
           mockInstalledPackages.set('test_package', {
@@ -1332,9 +1328,7 @@ describe('policy preconfiguration', () => {
 
           const soClient = getPutPreconfiguredPackagesMock();
           const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-          vi
-            .mocked(appContextService)
-            .getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
+          vi.mocked(appContextService).getInternalUserSOClientForSpaceId.mockReturnValue(soClient);
 
           // Install an older version of a test package
           mockInstalledPackages.set('test_package', {

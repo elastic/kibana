@@ -16,13 +16,13 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 vi.mock('./use_inference_endpoint_mutation', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_inference_endpoint_mutation')),
-      addInferenceEndpoint: vi.fn(),
-      updateInferenceEndpoint: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_inference_endpoint_mutation')),
+    addInferenceEndpoint: vi.fn(),
+    updateInferenceEndpoint: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const httpMock = httpServiceMock.createStartContract();
 const mockToasts = notificationServiceMock.createStartContract().toasts;

@@ -53,9 +53,7 @@ describe('Create Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: vi
-                .fn()
-                .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
+              getCurrentUser: vi.fn().mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
           },
         },

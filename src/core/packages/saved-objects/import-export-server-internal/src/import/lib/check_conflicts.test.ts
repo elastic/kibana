@@ -21,11 +21,11 @@ import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-ser
 import { checkConflicts } from './check_conflicts';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'uuidv4',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'uuidv4',
+  };
+  return { ...mocked, default: mocked };
+});
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckConflictsParams = Parameters<typeof checkConflicts>[0];

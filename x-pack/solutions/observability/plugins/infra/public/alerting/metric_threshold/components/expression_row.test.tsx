@@ -43,24 +43,24 @@ const mockDataView = {
 } as Mocked<DataView>;
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      withSourceProvider: () => vi.fn,
-      useSourceContext: () => ({
-        source: { id: 'default' },
-      }),
-      useMetricsDataViewContext: () => ({
-        metricsView: {
-          indices: 'metricbeat-*',
-          timeFieldName: mockDataView.timeFieldName,
-          fields: mockDataView.fields,
-          dataViewReference: mockDataView,
-        } as ResolvedDataView,
-        loading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSourceProvider: () => vi.fn,
+    useSourceContext: () => ({
+      source: { id: 'default' },
+    }),
+    useMetricsDataViewContext: () => ({
+      metricsView: {
+        indices: 'metricbeat-*',
+        timeFieldName: mockDataView.timeFieldName,
+        fields: mockDataView.fields,
+        dataViewReference: mockDataView,
+      } as ResolvedDataView,
+      loading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ExpressionRow', () => {
   async function setup(expression: MetricExpression) {

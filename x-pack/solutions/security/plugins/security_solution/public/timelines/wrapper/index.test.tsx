@@ -52,11 +52,11 @@ vi.mock('react-redux-v7', () => {
   };
 });
 vi.mock('../components/timeline', () => {
-      const mocked = {
-      StatefulTimeline: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StatefulTimeline: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/timeline/use_timeline_save_prompt');
 vi.mock('../../common/hooks/use_is_new_flyout_enabled');
 
@@ -64,18 +64,18 @@ const mockGetFlyoutManagerState = vi.fn(() => ({ sessions: [] as unknown[] }));
 const mockCloseFlyout = vi.fn();
 const mockCloseAllFlyouts = vi.fn();
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      getFlyoutManagerStore: vi.fn(() => ({
-        getState: mockGetFlyoutManagerState,
-        closeFlyout: mockCloseFlyout,
-        closeAllFlyouts: mockCloseAllFlyouts,
-        addUnmanagedFlyout: vi.fn(),
-        closeUnmanagedFlyout: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    getFlyoutManagerStore: vi.fn(() => ({
+      getState: mockGetFlyoutManagerState,
+      closeFlyout: mockCloseFlyout,
+      closeAllFlyouts: mockCloseAllFlyouts,
+      addUnmanagedFlyout: vi.fn(),
+      closeUnmanagedFlyout: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TimelineWrapper', () => {
   const props = {

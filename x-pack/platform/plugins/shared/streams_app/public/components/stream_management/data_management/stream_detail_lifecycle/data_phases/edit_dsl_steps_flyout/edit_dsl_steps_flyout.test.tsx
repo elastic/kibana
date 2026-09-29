@@ -17,11 +17,11 @@ import { EditDslStepsFlyout } from './edit_dsl_steps_flyout';
 const DATA_TEST_SUBJ = 'streamsEditDslStepsFlyout';
 
 vi.mock('../../../../../../hooks/use_streams_privileges', () => {
-      const mocked = {
-      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const tick = async () => {
   await act(async () => {

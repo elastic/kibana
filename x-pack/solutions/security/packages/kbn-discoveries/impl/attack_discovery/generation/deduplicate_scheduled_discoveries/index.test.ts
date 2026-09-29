@@ -16,13 +16,13 @@ const mockGetScheduledIndexPattern = vi.fn();
 const mockNormalizeAttackDiscovery = vi.fn();
 
 vi.mock('@kbn/attack-discovery-schedules-common', () => {
-      const mocked = {
-      deduplicateAttackDiscoveries: (...args: unknown[]) => mockDeduplicateAttackDiscoveries(...args),
-      getScheduledIndexPattern: (...args: unknown[]) => mockGetScheduledIndexPattern(...args),
-      normalizeAttackDiscovery: (...args: unknown[]) => mockNormalizeAttackDiscovery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deduplicateAttackDiscoveries: (...args: unknown[]) => mockDeduplicateAttackDiscoveries(...args),
+    getScheduledIndexPattern: (...args: unknown[]) => mockGetScheduledIndexPattern(...args),
+    normalizeAttackDiscovery: (...args: unknown[]) => mockNormalizeAttackDiscovery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = {
   debug: vi.fn(),

@@ -33,13 +33,13 @@ import {
 
 vi.mock('../package_policy');
 vi.mock('./fleet_policies', () => {
-      const mocked = {
-      findFleetPoliciesUsingSecrets: vi
-        .fn()
-        .mockResolvedValue({ referencedIds: new Set(), checkFailed: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findFleetPoliciesUsingSecrets: vi
+      .fn()
+      .mockResolvedValue({ referencedIds: new Set(), checkFailed: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 

@@ -148,12 +148,12 @@ describe('getFieldsFromFieldCaps', () => {
 });
 
 vi.mock('./mappings', async () => {
-      const mocked = {
-      ...(await vi.importActual('./mappings')),
-      getIndexMappings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./mappings')),
+    getIndexMappings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getIndexMappingsMock = getIndexMappings as MockedFunction<typeof getIndexMappings>;
 

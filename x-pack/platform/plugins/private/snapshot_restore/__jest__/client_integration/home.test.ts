@@ -31,8 +31,8 @@ type Snapshot = ReturnType<typeof fixtures.getSnapshot>;
 
 // Mocking FormattedDate and FormattedTime due to timezone differences on CI
 vi.mock('@kbn/i18n-react', async () => {
-  const original = (await vi.importActual('@kbn/i18n-react'));
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const original = await vi.importActual('@kbn/i18n-react');
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
 
   return {

@@ -18,29 +18,29 @@ import { AgentBuilderSpanProcessor } from './agent_builder_span_processor';
 import { DATA_STREAM_NAMESPACE_ATTR } from './agent_builder_context';
 
 vi.mock('@kbn/inference-tracing', () => {
-      const mocked = {
-      initInferenceTracerProvider: vi.fn(),
-      shutdownInferenceTracerProvider: vi.fn().mockResolvedValue(undefined),
-      EXECUTION_ID_BAGGAGE_KEY: 'execution.id.baggage.key',
-      EVAL_EXPERIMENT_ID_BAGGAGE_KEY: 'experiment.id.baggage.key',
-      EVALUATOR_NAME_BAGGAGE_KEY: 'evaluator.name.baggage.key',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initInferenceTracerProvider: vi.fn(),
+    shutdownInferenceTracerProvider: vi.fn().mockResolvedValue(undefined),
+    EXECUTION_ID_BAGGAGE_KEY: 'execution.id.baggage.key',
+    EVAL_EXPERIMENT_ID_BAGGAGE_KEY: 'experiment.id.baggage.key',
+    EVALUATOR_NAME_BAGGAGE_KEY: 'evaluator.name.baggage.key',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./global_bridge_processor', () => {
-      const mocked = {
-      GlobalBridgeProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GlobalBridgeProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./opik_distributed_tracing', () => {
-      const mocked = {
-      OpikDistributedTracingSpanProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OpikDistributedTracingSpanProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResource = {
   attributes: { 'service.name': 'kibana' },
@@ -48,11 +48,11 @@ const mockResource = {
 };
 
 vi.mock('@kbn/telemetry', () => {
-      const mocked = {
-      buildOtelResources: vi.fn(() => mockResource),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildOtelResources: vi.fn(() => mockResource),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLateBindingInstance = {
   onStart: vi.fn(),
@@ -62,31 +62,31 @@ const mockLateBindingInstance = {
 };
 
 vi.mock('@kbn/tracing', () => {
-      const mocked = {
-      LateBindingSpanProcessor: {
-        register: vi.fn(() => vi.fn().mockResolvedValue(undefined)),
-        hasInstance: vi.fn(() => false),
-        get: vi.fn(() => mockLateBindingInstance),
-      },
-      ElasticsearchOtlpExporter: vi.fn(),
-      EvalSpanProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LateBindingSpanProcessor: {
+      register: vi.fn(() => vi.fn().mockResolvedValue(undefined)),
+      hasInstance: vi.fn(() => false),
+      get: vi.fn(() => mockLateBindingInstance),
+    },
+    ElasticsearchOtlpExporter: vi.fn(),
+    EvalSpanProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@opentelemetry/exporter-trace-otlp-proto', () => {
-      const mocked = {
-      OTLPTraceExporter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OTLPTraceExporter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_builder_span_processor', () => {
-      const mocked = {
-      AgentBuilderSpanProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentBuilderSpanProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type TracingConfig = AgentBuilderConfig['tracing'];
 
@@ -205,7 +205,7 @@ describe('registerTracingExporter', () => {
   });
 
   it('teardown shuts down processors', async () => {
-    const { shutdownInferenceTracerProvider } = (await vi.importMock('@kbn/inference-tracing'));
+    const { shutdownInferenceTracerProvider } = await vi.importMock('@kbn/inference-tracing');
     const coreStart = createCore();
     const tracingConfig: TracingConfig = {
       exporters: [],

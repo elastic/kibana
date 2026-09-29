@@ -12,13 +12,13 @@ import { apm } from '@elastic/apm-rum';
 import { fetchLogDocumentById, FETCH_LOG_BY_ID_OPERATION_ID } from './fetch_log_document_by_id';
 
 vi.mock('@elastic/apm-rum', () => {
-      const mocked = {
-      apm: {
-        captureError: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apm: {
+      captureError: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSearch = vi.fn();
 

@@ -15,17 +15,17 @@ import { updatePrivateLocationMonitors } from './helpers';
 import { getPrivateLocations } from '../../../synthetics_service/get_private_locations';
 
 vi.mock('../../../synthetics_service/get_private_locations', () => {
-      const mocked = {
-      getPrivateLocations: vi.fn().mockResolvedValue([]),
-      getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPrivateLocations: vi.fn().mockResolvedValue([]),
+    getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Privilege-check and label-sync wiring are under test here; the actual
 // monitor rewrite is exercised by helpers.test.ts.
 vi.mock('./helpers', async () => {
-  const actual = (await vi.importActual('./helpers'));
+  const actual = await vi.importActual('./helpers');
   return {
     ...actual,
     updatePrivateLocationMonitors: vi.fn().mockResolvedValue(undefined),
@@ -69,15 +69,13 @@ describe('editPrivateLocationRoute', () => {
   });
 
   const stubRepo = (updatedAttributes = {}) => {
-    vi
-      .spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation')
-      .mockResolvedValue(existingLocation as any);
-    return vi
-      .spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation')
-      .mockResolvedValue({
-        ...existingLocation,
-        attributes: { ...existingLocation.attributes, ...updatedAttributes },
-      } as any);
+    vi.spyOn(PrivateLocationRepository.prototype, 'getPrivateLocation').mockResolvedValue(
+      existingLocation as any
+    );
+    return vi.spyOn(PrivateLocationRepository.prototype, 'editPrivateLocation').mockResolvedValue({
+      ...existingLocation,
+      attributes: { ...existingLocation.attributes, ...updatedAttributes },
+    } as any);
   };
 
   it('persists a tag-only edit without rewriting monitors', async () => {

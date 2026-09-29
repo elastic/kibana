@@ -27,14 +27,14 @@ import {
 } from './use_trace_waterfall';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      euiPaletteColorBlind: vi.fn(({ rotations }) => {
-        // Return a palette of 20 colors for testing
-        return Array.from({ length: 10 * rotations }, (_, i) => `color${i}`);
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    euiPaletteColorBlind: vi.fn(({ rotations }) => {
+      // Return a palette of 20 colors for testing
+      return Array.from({ length: 10 * rotations }, (_, i) => `color${i}`);
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const root: TraceItem = {
   id: '1',

@@ -8,11 +8,11 @@
 import { vi } from 'vitest';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import sinon from 'sinon';
 import { MockSyncContext } from '../../__fixtures__/mock_sync_context';

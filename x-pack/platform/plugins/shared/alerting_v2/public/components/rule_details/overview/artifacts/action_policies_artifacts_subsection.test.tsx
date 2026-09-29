@@ -25,41 +25,42 @@ const mockUseLinkedActionPolicies = vi.fn();
 const mockUseActionPolicyConnectorTypes = vi.fn();
 
 vi.mock('./use_linked_action_policies', () => {
-      const mocked = {
-      useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLinkedActionPolicies: (...args: unknown[]) => mockUseLinkedActionPolicies(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-rule-form', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-v2-rule-form')),
-      useActionPolicyConnectorTypes: (...args: unknown[]) => mockUseActionPolicyConnectorTypes(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-v2-rule-form')),
+    useActionPolicyConnectorTypes: (...args: unknown[]) =>
+      mockUseActionPolicyConnectorTypes(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../action_policy/details_flyout/action_policy_details_flyout_container', () => {
-      const mocked = {
-      ActionPolicyDetailsFlyoutContainer: ({
-        policyId,
-        onClose,
-        session,
-      }: {
-        policyId: string;
-        onClose: () => void;
-        session?: string;
-      }) => (
-        <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
-          <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
-          <button type="button" onClick={onClose}>
-            close
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyDetailsFlyoutContainer: ({
+      policyId,
+      onClose,
+      session,
+    }: {
+      policyId: string;
+      onClose: () => void;
+      session?: string;
+    }) => (
+      <div data-test-subj="actionPolicyDetailsFlyoutMock" data-session={session}>
+        <span data-test-subj="actionPolicyDetailsFlyoutMockId">{policyId}</span>
+        <button type="button" onClick={onClose}>
+          close
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',
@@ -128,9 +129,9 @@ describe('ActionPoliciesArtifactsSubsection', () => {
       connectorTypesByPolicy: new Map(),
       isLoading: false,
     });
-    vi
-      .mocked(mockLocators.actionPolicyLocators.getRedirectUrl)
-      .mockReturnValue('/mock-locator-url');
+    vi.mocked(mockLocators.actionPolicyLocators.getRedirectUrl).mockReturnValue(
+      '/mock-locator-url'
+    );
   });
 
   it('loads linked policies using the current rule tags', () => {

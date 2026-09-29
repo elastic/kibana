@@ -14,11 +14,11 @@ import type { EuiComboBoxProps } from '@elastic/eui';
 import { AutocompleteSelector } from './autocomplete_selector';
 
 vi.mock('@kbn/react-field', () => {
-      const mocked = {
-      FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldIcon: ({ type }: { type: string }) => <span data-test-subj={`field-icon-${type}`} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AutocompleteSelector', () => {
   const mockSuggestions = [

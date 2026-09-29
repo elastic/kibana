@@ -12,20 +12,20 @@ import { fetchIndexShardSize } from './fetch_index_shard_size';
 import type { estypes } from '@elastic/elasticsearch';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getKeyStoreValue: () => '*',
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        getKeyStoreValue: () => '*',
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 import { Globals } from '../../static_globals';
 
 describe('fetchIndexShardSize', () => {

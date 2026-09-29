@@ -14,23 +14,23 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetProxyForm } from './use_fleet_proxy_form';
 
 vi.mock('../../hooks/use_confirm_modal', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_confirm_modal')),
-      useConfirmModal: () => ({ confirm: () => true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_confirm_modal')),
+    useConfirmModal: () => ({ confirm: () => true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks/use_authz', () => {
-      const mocked = {
-      useAuthz: () => ({
-        fleet: {
-          allSettings: true,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAuthz: () => ({
+      fleet: {
+        allSettings: true,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFleetProxyForm', () => {
   describe('validate url', () => {

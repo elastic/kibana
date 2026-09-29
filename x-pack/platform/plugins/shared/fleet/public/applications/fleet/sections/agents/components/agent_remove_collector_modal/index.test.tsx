@@ -19,21 +19,21 @@ import { sendPostRemoveCollector, sendPostBulkRemoveCollectors } from '../../../
 import { AgentRemoveCollectorModal } from '.';
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      sendPostRemoveCollector: vi.fn().mockResolvedValue({}),
-      sendPostBulkRemoveCollectors: vi.fn().mockResolvedValue({}),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: vi.fn(),
-            addError: vi.fn(),
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    sendPostRemoveCollector: vi.fn().mockResolvedValue({}),
+    sendPostBulkRemoveCollectors: vi.fn().mockResolvedValue({}),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendPostRemoveCollector = sendPostRemoveCollector as Mock;
 const mockSendPostBulkRemoveCollectors = sendPostBulkRemoveCollectors as Mock;
@@ -164,7 +164,7 @@ describe('AgentRemoveCollectorModal', () => {
 
   it('shows error toast and does not close on API failure', async () => {
     const mockAddError = vi.fn();
-    const { useStartServices } = (await vi.importMock('../../../../hooks'));
+    const { useStartServices } = await vi.importMock('../../../../hooks');
     useStartServices.mockReturnValue({
       notifications: { toasts: { addSuccess: vi.fn(), addError: mockAddError } },
     });

@@ -17,12 +17,12 @@ import userEvent from '@testing-library/user-event';
 import { duplicateTagNameErrorMessage, managedTagConflictMessage } from './utils';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useGeneratedHtmlId: vi.fn(() => 'mockedId'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useGeneratedHtmlId: vi.fn(() => 'mockedId'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('create modal', () => {
   const getMockTagClient = (findByNameResult: Tag | null = null) =>

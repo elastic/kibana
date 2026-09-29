@@ -16,32 +16,32 @@ import { useApmRoutePath } from '../../../hooks/use_apm_route_path';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_route_path', () => {
-      const mocked = {
-      useApmRoutePath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRoutePath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseApmRouter = vi.mocked(useApmRouter);
 const mockedUseAnyOfApmParams = vi.mocked(useAnyOfApmParams);

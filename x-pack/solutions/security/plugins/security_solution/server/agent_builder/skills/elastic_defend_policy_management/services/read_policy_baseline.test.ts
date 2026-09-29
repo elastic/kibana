@@ -27,9 +27,7 @@ describe('readPolicyBaseline', () => {
     const service = new EndpointAppContextService();
     const setupContract = createMockEndpointAppContextServiceSetupContract();
     const startContract = createMockEndpointAppContextServiceStartContract();
-    startContract.licenseService.getLicenseInformation = vi
-      .fn()
-      .mockReturnValue(availableLicense);
+    startContract.licenseService.getLicenseInformation = vi.fn().mockReturnValue(availableLicense);
     startContract.licenseService.getLicenseType = vi.fn().mockReturnValue('platinum');
     startContract.licenseService.getLicenseUID = vi.fn().mockReturnValue('license-uid');
     startContract.telemetryConfigProvider.getIsOptedIn.mockReturnValue(

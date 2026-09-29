@@ -22,17 +22,17 @@ import {
 import { metricByField } from './use_container_metrics_table';
 
 vi.mock('../../../pages/link_to/use_asset_details_redirect', () => {
-      const mocked = {
-      useAssetDetailsRedirect: vi.fn(() => ({
-        getAssetDetailUrl: vi.fn(() => ({
-          app: 'metrics',
-          pathname: 'link-to/container-detail/example-01',
-          search: { from: '1546340400000', to: '1546344000000' },
-        })),
+  const mocked = {
+    useAssetDetailsRedirect: vi.fn(() => ({
+      getAssetDetailUrl: vi.fn(() => ({
+        app: 'metrics',
+        pathname: 'link-to/container-detail/example-01',
+        search: { from: '1546340400000', to: '1546344000000' },
       })),
-    };
-      return { ...mocked, default: mocked };
-    });
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ContainerMetricsTable', () => {
   const timerange = {

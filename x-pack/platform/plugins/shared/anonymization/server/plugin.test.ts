@@ -21,33 +21,33 @@ import type { AnonymizationProfileInitializer } from './types';
 // without exposing any production config option.
 let mockFeatureActive = true;
 vi.mock('@kbn/anonymization-common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/anonymization-common')),
-      get ANONYMIZATION_FEATURE_ACTIVE() {
-        return mockFeatureActive;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/anonymization-common')),
+    get ANONYMIZATION_FEATURE_ACTIVE() {
+      return mockFeatureActive;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./system_index', () => {
-      const mocked = {
-      ensureProfilesIndex: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ensureProfilesIndex: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./initialization', () => {
-      const mocked = {
-      GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE: 'index',
-      GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID: '__kbn_global_anonymization_profile__',
-      LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
-      ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
-      migrateLegacyUiSettingsIntoGlobalProfile: vi.fn().mockResolvedValue(undefined),
-      ensureGlobalProfileForNamespace: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GLOBAL_ANONYMIZATION_PROFILE_TARGET_TYPE: 'index',
+    GLOBAL_ANONYMIZATION_PROFILE_TARGET_ID: '__kbn_global_anonymization_profile__',
+    LEGACY_ANONYMIZATION_UI_SETTING_KEY: 'ai:anonymizationSettings',
+    ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
+    migrateLegacyUiSettingsIntoGlobalProfile: vi.fn().mockResolvedValue(undefined),
+    ensureGlobalProfileForNamespace: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 const initializationMock = (await vi.importMock('./initialization')) as {
   ensureGlobalProfileForNamespace: Mock;
 };
@@ -191,9 +191,8 @@ describe('AnonymizationPlugin policy resolution', () => {
       asScopedToNamespace,
     });
 
-    vi
-      .spyOn(ProfilesRepository.prototype, 'findByTarget')
-      .mockImplementation(async (_namespace, targetType, targetId) => {
+    vi.spyOn(ProfilesRepository.prototype, 'findByTarget').mockImplementation(
+      async (_namespace, targetType, targetId) => {
         if (targetType === 'data_view' && targetId === 'my-data-view') {
           return createProfile({
             targetType: 'data_view',
@@ -202,7 +201,8 @@ describe('AnonymizationPlugin policy resolution', () => {
           });
         }
         return null;
-      });
+      }
+    );
 
     const start = plugin.start(coreStart, {
       encryptedSavedObjects: encryptedSavedObjectsMock.createStart(),

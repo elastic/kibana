@@ -25,11 +25,11 @@ vi.mock('../../kibana_services', () => {
   };
 });
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   DEFAULT_EMS_DARKMAP_ID,

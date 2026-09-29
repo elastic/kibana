@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act, render } from '@testing-library/react';
 import type { FormikContextType } from 'formik';
 import { Formik, FormikConsumer } from 'formik';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { FormChangesProvider } from './form_changes';
 import { FormLabel } from './form_label';

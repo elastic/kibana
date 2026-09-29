@@ -24,7 +24,7 @@ import { defaultColumnHeaderType } from '../column_headers/default_headers';
 vi.mock('./plain_column_renderer');
 
 vi.mock('../../../../../common/components/link_to', async () => {
-  const original = (await vi.importActual('../../../../../common/components/link_to'));
+  const original = await vi.importActual('../../../../../common/components/link_to');
   return {
     ...original,
     useFormatUrl: () => ({

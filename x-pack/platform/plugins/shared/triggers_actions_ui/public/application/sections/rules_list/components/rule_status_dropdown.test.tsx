@@ -18,20 +18,20 @@ const NOW_STRING = '2020-03-01T00:00:00.000Z';
 const SNOOZE_UNTIL = new Date('2020-03-04T00:00:00.000Z');
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          notifications: {
-            toasts: {
-              addSuccess: vi.fn(),
-              addDanger: vi.fn(),
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RuleStatusDropdown', () => {
   const enableRule = vi.fn();

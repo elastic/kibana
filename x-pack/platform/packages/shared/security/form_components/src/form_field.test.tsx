@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiFieldNumber } from '@elastic/eui';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { createFieldValidator, FormField } from './form_field';
 

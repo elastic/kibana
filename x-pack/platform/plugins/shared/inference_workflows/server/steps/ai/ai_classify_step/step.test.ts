@@ -12,55 +12,55 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 vi.mock('./build_prompts', () => {
-      const mocked = {
-      buildSystemPart: vi.fn(),
-      buildDataPart: vi.fn(),
-      buildInstructionsPart: vi.fn(),
-      buildClassificationRequestPart: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildSystemPart: vi.fn(),
+    buildDataPart: vi.fn(),
+    buildInstructionsPart: vi.fn(),
+    buildClassificationRequestPart: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./validate_model_response', () => {
-      const mocked = {
-      validateModelResponse: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateModelResponse: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./schemas', () => {
-      const mocked = {
-      convertOutputToModelResponseSchema: vi.fn((schema) => schema),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertOutputToModelResponseSchema: vi.fn((schema) => schema),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/steps/ai', () => {
-      const mocked = {
-      AiClassifyStepCommonDefinition: {
-        id: 'ai.classify',
-        inputSchema: {},
-        outputSchema: {},
-        configSchema: {},
-      },
-      buildStructuredOutputSchema: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AiClassifyStepCommonDefinition: {
+      id: 'ai.classify',
+      inputSchema: {},
+      outputSchema: {},
+      configSchema: {},
+    },
+    buildStructuredOutputSchema: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-extensions/server', () => {
-      const mocked = {
-      createServerStepDefinition: vi.fn((definition) => definition),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createServerStepDefinition: vi.fn((definition) => definition),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/resolve_connector_id', () => {
-      const mocked = {
-      resolveConnectorId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   buildClassificationRequestPart,
@@ -93,10 +93,9 @@ const mockValidateModelResponse = validateModelResponse as MockedFunction<
 const mockBuildStructuredOutputSchema = buildStructuredOutputSchema as MockedFunction<
   typeof buildStructuredOutputSchema
 >;
-const mockConvertOutputToModelResponseSchema =
-  convertOutputToModelResponseSchema as MockedFunction<
-    typeof convertOutputToModelResponseSchema
-  >;
+const mockConvertOutputToModelResponseSchema = convertOutputToModelResponseSchema as MockedFunction<
+  typeof convertOutputToModelResponseSchema
+>;
 const mockCreateServerStepDefinition = createServerStepDefinition as MockedFunction<
   typeof createServerStepDefinition
 >;

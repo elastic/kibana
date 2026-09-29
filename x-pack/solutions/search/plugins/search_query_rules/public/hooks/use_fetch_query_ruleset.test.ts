@@ -13,31 +13,31 @@ import { MOCK_QUERY_RULESET_RESPONSE_FIXTURE } from '../../common/__fixtures__/q
 const mockHttpGet = vi.fn();
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
-        try {
-          const res = await queryFn();
-          return Promise.resolve(res);
-        } catch (_) {
-          // silent fail as we don't handle error yet
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
+      try {
+        const res = await queryFn();
+        return Promise.resolve(res);
+      } catch (_) {
+        // silent fail as we don't handle error yet
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          http: {
-            get: mockHttpGet,
-          },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        http: {
+          get: mockHttpGet,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFetchQueryRuleset hook', () => {
   beforeEach(() => {
@@ -47,7 +47,7 @@ describe('useFetchQueryRuleset hook', () => {
   it('should return query ruleset', async () => {
     mockHttpGet.mockReturnValue(MOCK_QUERY_RULESET_RESPONSE_FIXTURE);
 
-    const { useFetchQueryRuleset } = (await vi.importActual('./use_fetch_query_ruleset'));
+    const { useFetchQueryRuleset } = await vi.importActual('./use_fetch_query_ruleset');
 
     const { result } = renderHook(() => useFetchQueryRuleset('my-ruleset'));
     await waitFor(() => {

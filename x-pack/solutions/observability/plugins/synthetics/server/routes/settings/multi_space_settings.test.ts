@@ -174,13 +174,11 @@ describe('multi space settings routes', () => {
     });
 
     it('invalidates the synthetics indices cache after a successful save', async () => {
-      vi
-        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
-        .mockResolvedValue({
-          useAllRemoteClusters: true,
-          selectedRemoteClusters: ['cluster-a'],
-          spaces: ['default'],
-        });
+      vi.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save').mockResolvedValue({
+        useAllRemoteClusters: true,
+        selectedRemoteClusters: ['cluster-a'],
+        spaces: ['default'],
+      });
 
       const invalidateCache = vi.fn();
       const route = createPutMultiSpaceSettingsRoute();
@@ -213,9 +211,9 @@ describe('multi space settings routes', () => {
     });
 
     it('invalidates the cache even when save throws after a partial update', async () => {
-      vi
-        .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save')
-        .mockRejectedValue(new Error('updateObjectsSpaces failed'));
+      vi.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'save').mockRejectedValue(
+        new Error('updateObjectsSpaces failed')
+      );
 
       const invalidateCache = vi.fn();
       const route = createPutMultiSpaceSettingsRoute();

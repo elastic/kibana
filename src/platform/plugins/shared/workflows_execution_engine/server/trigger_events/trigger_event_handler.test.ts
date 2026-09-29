@@ -20,7 +20,9 @@ import type { WorkflowExecutionRepository } from '../repositories/workflow_execu
 const mockClassifyWorkflowTriggerMatch = vi.fn().mockReturnValue('matched');
 
 vi.mock('./filter_workflows_by_trigger_condition', async () => {
-  const actual = (await vi.importActual<typeof import('./filter_workflows_by_trigger_condition')>('./filter_workflows_by_trigger_condition'));
+  const actual = await vi.importActual<typeof import('./filter_workflows_by_trigger_condition')>(
+    './filter_workflows_by_trigger_condition'
+  );
   return {
     ...actual,
     classifyWorkflowTriggerMatch: (...args: unknown[]) => mockClassifyWorkflowTriggerMatch(...args),
@@ -28,36 +30,38 @@ vi.mock('./filter_workflows_by_trigger_condition', async () => {
 });
 
 vi.mock('./event_logs', () => {
-      const mocked = {
-      initializeTriggerEventsClient: vi.fn().mockResolvedValue(null),
-      writeTriggerEvent: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeTriggerEventsClient: vi.fn().mockResolvedValue(null),
+    writeTriggerEvent: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetWorkflowExecutionById = vi.fn().mockResolvedValue(null);
 
 vi.mock('../repositories/workflow_execution_repository', () => {
-      const mocked = {
-      WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
-        getWorkflowExecutionById: (...args: unknown[]) => mockGetWorkflowExecutionById(...args),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
+      getWorkflowExecutionById: (...args: unknown[]) => mockGetWorkflowExecutionById(...args),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows/server', () => {
-      const mocked = {
-      validateWorkflowForExecution: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateWorkflowForExecution: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetEventChainContext = vi.fn().mockReturnValue(undefined);
 const mockGetEmitterWorkflowExecutionIdFromRequest = vi.fn().mockReturnValue(undefined);
 
 vi.mock('./event_context/event_chain_context', async () => {
-  const actual = (await vi.importActual<typeof import('./event_context/event_chain_context')>('./event_context/event_chain_context'));
+  const actual = await vi.importActual<typeof import('./event_context/event_chain_context')>(
+    './event_context/event_chain_context'
+  );
   return {
     ...actual,
     getEventChainContext: (...args: unknown[]) => mockGetEventChainContext(...args),
@@ -67,15 +71,17 @@ vi.mock('./event_context/event_chain_context', async () => {
 });
 
 vi.mock('../lib/telemetry/workflow_execution_telemetry_client', () => {
-      const mocked = {
-      WorkflowExecutionTelemetryClient: vi.fn().mockImplementation(() => ({
-        reportTriggerEventDispatched: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionTelemetryClient: vi.fn().mockImplementation(() => ({
+      reportTriggerEventDispatched: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { WorkflowExecutionTelemetryClient } = (await vi.importMock('../lib/telemetry/workflow_execution_telemetry_client')) as { WorkflowExecutionTelemetryClient: Mock };
+const { WorkflowExecutionTelemetryClient } = (await vi.importMock(
+  '../lib/telemetry/workflow_execution_telemetry_client'
+)) as { WorkflowExecutionTelemetryClient: Mock };
 
 const createMockWorkflow = (overrides: Partial<WorkflowDetailDto> = {}): WorkflowDetailDto =>
   ({

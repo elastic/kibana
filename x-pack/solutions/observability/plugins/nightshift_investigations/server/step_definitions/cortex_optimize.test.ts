@@ -13,11 +13,11 @@ import { runCortexOptimize } from '../cortex/register_cortex';
 import { cortexOptimizeStepDefinition } from './cortex_optimize';
 
 vi.mock('../cortex/register_cortex', () => {
-      const mocked = {
-      runCortexOptimize: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runCortexOptimize: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('cortexOptimizeStepDefinition', () => {
   const esClient = { search: vi.fn() };

@@ -12,11 +12,11 @@ import { getIsAlertSuppressionActive } from './get_is_alert_suppression_active';
 import type { ILicense } from '@kbn/licensing-types';
 
 vi.mock('@kbn/licensing-plugin/server', () => {
-      const mocked = {
-      LicensingPluginSetup: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LicensingPluginSetup: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const licensingMock = {
   license$: of({ hasAtLeast: vi.fn() }), // Use 'of' to create an observable
 } as unknown as Parameters<typeof getIsAlertSuppressionActive>[0]['licensing'];

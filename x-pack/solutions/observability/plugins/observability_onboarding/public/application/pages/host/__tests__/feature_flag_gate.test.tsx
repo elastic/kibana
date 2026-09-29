@@ -22,95 +22,95 @@ const LocationProbe: React.FC = () => {
 };
 
 vi.mock('../../landing', () => {
-      const mocked = {
-      LandingPage: () => <div data-test-subj="landingPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LandingPage: () => <div data-test-subj="landingPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../linux_otel_page', () => {
-      const mocked = {
-      HostLinuxOtelPage: () => <div data-test-subj="hostLinuxOtelPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostLinuxOtelPage: () => <div data-test-subj="hostLinuxOtelPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../linux_auto_detect_page', () => {
-      const mocked = {
-      HostLinuxAutoDetectPage: () => <div data-test-subj="hostLinuxAutoDetectPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostLinuxAutoDetectPage: () => <div data-test-subj="hostLinuxAutoDetectPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../macos_otel_page', () => {
-      const mocked = {
-      HostMacosOtelPage: () => <div data-test-subj="hostMacosOtelPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostMacosOtelPage: () => <div data-test-subj="hostMacosOtelPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../macos_auto_detect_page', () => {
-      const mocked = {
-      HostMacosAutoDetectPage: () => <div data-test-subj="hostMacosAutoDetectPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostMacosAutoDetectPage: () => <div data-test-subj="hostMacosAutoDetectPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../windows_otel_page', () => {
-      const mocked = {
-      HostWindowsOtelPage: () => <div data-test-subj="hostWindowsOtelPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostWindowsOtelPage: () => <div data-test-subj="hostWindowsOtelPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../auto_detect', () => {
-      const mocked = {
-      AutoDetectPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AutoDetectPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../otel_logs', () => {
-      const mocked = {
-      OtelLogsPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OtelLogsPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../firehose', () => {
-      const mocked = {
-      FirehosePage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FirehosePage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../otel_apm', () => {
-      const mocked = {
-      OtelApmPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OtelApmPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cloudforwarder', () => {
-      const mocked = {
-      CloudForwarderPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CloudForwarderPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/use_flow_breadcrumbs', () => {
-      const mocked = {
-      useFlowBreadcrumb: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlowBreadcrumb: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/use_managed_otlp_service_availability', () => {
-      const mocked = {
-      useManagedOtlpServiceAvailability: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedOtlpServiceAvailability: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeAll(() => {
   window.scrollTo = vi.fn();

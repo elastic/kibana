@@ -376,9 +376,9 @@ describe('getShare', () => {
 
     // `getTime` is a fixed stub, so configure it directly.
     const setTimeRange = (timeRange: { from: string; to: string }) => {
-      vi
-        .mocked(mockDiscoverService.data.query.timefilter.timefilter.getTime)
-        .mockReturnValue(timeRange);
+      vi.mocked(mockDiscoverService.data.query.timefilter.timefilter.getTime).mockReturnValue(
+        timeRange
+      );
     };
 
     const getHelpTextProps = async () => {

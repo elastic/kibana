@@ -13,25 +13,25 @@ import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
 vi.mock('../infra/feature_flags', () => {
-      const mocked = { isDualProcessEnabled: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { isDualProcessEnabled: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./should_delete_orphaned_task', () => {
-      const mocked = {
-      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./factories', () => {
-      const mocked = { createLogsExtractionClient: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { createLogsExtractionClient: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../domain/config', () => {
-      const mocked = {
-      getMergedConfig: vi.fn().mockReturnValue({ frequency: '1m' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMergedConfig: vi.fn().mockReturnValue({ frequency: '1m' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { isDualProcessEnabled } from '../infra/feature_flags';

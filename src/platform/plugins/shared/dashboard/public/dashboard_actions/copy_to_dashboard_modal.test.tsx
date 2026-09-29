@@ -19,34 +19,34 @@ import { CopyToDashboardModal } from './copy_to_dashboard_modal';
 import type { DashboardPickerProps } from '@kbn/presentation-util-plugin/public/components/dashboard_picker/dashboard_picker';
 
 vi.mock('../utils/get_dashboard_capabilities', () => {
-      const mocked = {
-      getDashboardCapabilities: () => ({
-        createNew: true,
-        showWriteControls: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDashboardCapabilities: () => ({
+      createNew: true,
+      showWriteControls: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/presentation-util-plugin/public', () => {
-      const mocked = {
-      withSuspense: (Component: ComponentType) => Component,
-      LazyDashboardPicker: ({ idsToOmit, onChange }: DashboardPickerProps) => {
-        const label = idsToOmit?.length
-          ? `mockDashboardPicker idsToOmit:${idsToOmit.join(',')}`
-          : `mockDashboardPicker`;
-        return (
-          <button
-            id="mockDashboardPicker"
-            onClick={() => onChange({ name: 'Dashboard Two', id: 'dashboardTwo' })}
-          >
-            {label}
-          </button>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSuspense: (Component: ComponentType) => Component,
+    LazyDashboardPicker: ({ idsToOmit, onChange }: DashboardPickerProps) => {
+      const label = idsToOmit?.length
+        ? `mockDashboardPicker idsToOmit:${idsToOmit.join(',')}`
+        : `mockDashboardPicker`;
+      return (
+        <button
+          id="mockDashboardPicker"
+          onClick={() => onChange({ name: 'Dashboard Two', id: 'dashboardTwo' })}
+        >
+          {label}
+        </button>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CopyToDashboardModal', () => {
   const api: CopyToDashboardAPI = {

@@ -19,25 +19,25 @@ const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            rules: { stopRuleMigration: mockStopRuleMigration },
-            dashboards: { stopDashboardMigration: mockStopDashboardMigration },
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          rules: { stopRuleMigration: mockStopRuleMigration },
+          dashboards: { stopDashboardMigration: mockStopDashboardMigration },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const client = new QueryClient();

@@ -14,11 +14,11 @@ import { resetSessionApp } from './reset_session_app';
 // Mock the dynamic import
 const mockRenderResetSessionPage = vi.fn(() => vi.fn());
 vi.mock('./reset_session_page', () => {
-      const mocked = {
-      renderResetSessionPage: mockRenderResetSessionPage,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    renderResetSessionPage: mockRenderResetSessionPage,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resetSessionApp', () => {
   beforeAll(() => {

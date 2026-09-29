@@ -14,52 +14,52 @@ import { AnomalyInsights } from '.';
 import { ANOMALY_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 
 vi.mock('../../../../shared/components/tools_flyout_header', () => {
-      const mocked = {
-      ToolsFlyoutHeader: ({
-        title,
-        label,
-        iconType,
-        onTitleClick,
-      }: {
-        title: string;
-        label?: string;
-        iconType?: string;
-        onTitleClick?: () => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="mockToolsFlyoutHeader"
-          data-title={title}
-          data-label={label}
-          data-icon-type={iconType}
-          onClick={onTitleClick}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolsFlyoutHeader: ({
+      title,
+      label,
+      iconType,
+      onTitleClick,
+    }: {
+      title: string;
+      label?: string;
+      iconType?: string;
+      onTitleClick?: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mockToolsFlyoutHeader"
+        data-title={title}
+        data-label={label}
+        data-icon-type={iconType}
+        onClick={onTitleClick}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../entity_analytics/components/anomalies/anomalies_tab', () => {
-      const mocked = {
-      AnomaliesTab: ({
-        entityId,
-        entityName,
-        entityType,
-      }: {
-        entityId: string;
-        entityName: string;
-        entityType: string;
-      }) => (
-        <div
-          data-test-subj="mockAnomaliesTab"
-          data-entity-id={entityId}
-          data-entity-name={entityName}
-          data-entity-type={entityType}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomaliesTab: ({
+      entityId,
+      entityName,
+      entityType,
+    }: {
+      entityId: string;
+      entityName: string;
+      entityType: string;
+    }) => (
+      <div
+        data-test-subj="mockAnomaliesTab"
+        data-entity-id={entityId}
+        data-entity-name={entityName}
+        data-entity-type={entityType}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<AnomalyInsights /> host', () => {
   beforeEach(() => {

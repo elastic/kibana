@@ -21,48 +21,50 @@ describe('getHasApiKeys$', () => {
   });
 
   it('should return the correct sequence of states', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const httpGetSpy = vi.spyOn(mockHttp, 'get');
-          httpGetSpy.mockResolvedValue({ hasApiKeys: true });
-          const source$ = getHasApiKeys$(mockHttp);
+      const httpGetSpy = vi.spyOn(mockHttp, 'get');
+      httpGetSpy.mockResolvedValue({ hasApiKeys: true });
+      const source$ = getHasApiKeys$(mockHttp);
 
-          const emittedValues: HasApiKeysResponse[] = [];
+      const emittedValues: HasApiKeysResponse[] = [];
 
-          source$.subscribe({
-            next: (value) => emittedValues.push(value),
-            complete: () => {
-              expect(emittedValues).toEqual([
-                { error: null, hasApiKeys: null, isLoading: true },
-                { error: null, hasApiKeys: true, isLoading: false },
-              ]);
-              done();
-            },
-          });
-        
-      }));
+      source$.subscribe({
+        next: (value) => emittedValues.push(value),
+        complete: () => {
+          expect(emittedValues).toEqual([
+            { error: null, hasApiKeys: null, isLoading: true },
+            { error: null, hasApiKeys: true, isLoading: false },
+          ]);
+          done();
+        },
+      });
+    }));
 
   it('should forward the error', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const httpGetSpy = vi.spyOn(mockHttp, 'get');
-          httpGetSpy.mockRejectedValue('something bad');
-          const source$ = getHasApiKeys$(mockHttp);
+      const httpGetSpy = vi.spyOn(mockHttp, 'get');
+      httpGetSpy.mockRejectedValue('something bad');
+      const source$ = getHasApiKeys$(mockHttp);
 
-          const emittedValues: HasApiKeysResponse[] = [];
+      const emittedValues: HasApiKeysResponse[] = [];
 
-          source$.subscribe({
-            next: (value) => emittedValues.push(value),
-            complete: () => {
-              expect(emittedValues).toEqual([
-                { error: null, hasApiKeys: null, isLoading: true },
-                { error: 'something bad', hasApiKeys: null, isLoading: false },
-              ]);
-              done();
-            },
-          });
-        
-      }));
+      source$.subscribe({
+        next: (value) => emittedValues.push(value),
+        complete: () => {
+          expect(emittedValues).toEqual([
+            { error: null, hasApiKeys: null, isLoading: true },
+            { error: 'something bad', hasApiKeys: null, isLoading: false },
+          ]);
+          done();
+        },
+      });
+    }));
 });

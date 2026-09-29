@@ -15,12 +15,12 @@ import { TestProviders } from '../../../common/mock';
 const MOCK_ML_HREF = '/app/ml/explorer';
 
 vi.mock('@kbn/ml-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ml-plugin/public')),
-      useMlHref: () => MOCK_ML_HREF,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/ml-plugin/public')),
+    useMlHref: () => MOCK_ML_HREF,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnomaliesPanel', () => {
   it('should render the panel', () => {

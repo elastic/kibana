@@ -15,11 +15,11 @@ import type { DocCountState, VectorCountState } from './quick_stats';
 import { SizeDocCountDetails } from './size_doc_count_details';
 
 vi.mock('../../../../../app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = vi.mocked(useAppContext);
 

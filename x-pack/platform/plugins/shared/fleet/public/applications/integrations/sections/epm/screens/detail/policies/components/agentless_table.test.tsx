@@ -24,29 +24,29 @@ import { ExperimentalFeaturesService } from '../../../../../../services';
 import { AgentlessPackagePoliciesTable } from './agentless_table';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks')),
-      useConfirmForceInstall: vi.fn(),
-      sendGetAgents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks')),
+    useConfirmForceInstall: vi.fn(),
+    sendGetAgents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../../../hooks')),
-      sendGetAgents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../../../hooks')),
+    sendGetAgents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocation = useLocation as MockedFunction<typeof useLocation>;
 

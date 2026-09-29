@@ -22,15 +22,15 @@ import { useKibana as mockUseKibana } from '../../../common/lib/kibana/__mocks__
 import { createQueryWrapperMock } from '../../../common/__mocks__/query_wrapper';
 
 vi.mock('../../../assistant/use_assistant_availability', () => {
-      const mocked = {
-      useAssistantAvailability: vi.fn(() => ({
-        hasAssistantPrivilege: true,
-        isAssistantEnabled: true,
-        isAssistantVisible: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantAvailability: vi.fn(() => ({
+      hasAssistantPrivilege: true,
+      isAssistantEnabled: true,
+      isAssistantVisible: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields'
@@ -49,28 +49,28 @@ const mockConnectors: unknown[] = [
   },
 ];
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
-      useAssistantContext: () => ({
-        alertsIndexPattern: 'alerts-index-pattern',
-        assistantAvailability: mockAssistantAvailability(),
-        knowledgeBase: {
-          latestAlerts: 20,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
+    useAssistantContext: () => ({
+      alertsIndexPattern: 'alerts-index-pattern',
+      assistantAvailability: mockAssistantAvailability(),
+      knowledgeBase: {
+        latestAlerts: 20,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => ({
-        isFetched: true,
-        data: mockConnectors,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => ({
+      isFetched: true,
+      data: mockConnectors,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setLoadingConnectorId = vi.fn();
 

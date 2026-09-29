@@ -14,15 +14,16 @@ import { Direction, type ResultsRequestOptions } from '../../../../../common/sea
 // Mock the utility functions
 
 vi.mock('../../../../utils/build_query', () => {
-      const mocked = {
-      getQueryFilter: vi.fn(({ filter }: { filter: string }) => ({
-        query_string: {
-          query: filter,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getQueryFilter: vi.fn(({ filter }: { filter: string }) => ({
+      query_string: {
+        query: filter,
+      },
+    })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('buildResultsQuery', () => {
   describe('basic functionality', () => {

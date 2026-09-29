@@ -14,9 +14,9 @@ import { AlertsQueryInspector } from './alerts_query_inspector';
 import { AlertsQueryInspectorModal } from './alerts_query_inspector_modal';
 
 vi.mock('./alerts_query_inspector_modal');
-vi
-  .mocked(AlertsQueryInspectorModal.type)
-  .mockImplementation(() => <div data-test-subj="mocked-modal" />);
+vi.mocked(AlertsQueryInspectorModal.type).mockImplementation(() => (
+  <div data-test-subj="mocked-modal" />
+));
 
 describe('AlertsQueryInspector', () => {
   const alertsQuerySnapshot = {

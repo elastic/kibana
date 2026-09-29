@@ -27,7 +27,7 @@ import type { Agent } from '../../../common/types';
 import { rollbackAgentHandler, bulkRollbackAgentHandler } from './rollback_handlers';
 
 vi.mock('../../../common', async () => {
-  const actual = (await vi.importActual('../../../common'));
+  const actual = await vi.importActual('../../../common');
   return {
     ...actual,
     getFileMetadataIndexName: vi.fn((integration: string) => `.fleet-fileds-${integration}-meta`),
@@ -36,13 +36,13 @@ vi.mock('../../../common', async () => {
 });
 
 vi.mock('../../services/agents', () => {
-      const mocked = {
-      getAgentById: vi.fn(),
-      sendRollbackAgentAction: vi.fn(),
-      sendRollbackAgentsActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentById: vi.fn(),
+    sendRollbackAgentAction: vi.fn(),
+    sendRollbackAgentsActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Rollback handlers', () => {
   let esClientMock: Mocked<ElasticsearchClient>;

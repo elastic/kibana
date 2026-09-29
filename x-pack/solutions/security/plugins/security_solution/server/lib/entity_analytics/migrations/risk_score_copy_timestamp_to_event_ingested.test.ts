@@ -8,22 +8,22 @@
 import { vi } from 'vitest';
 
 vi.mock('../risk_score/risk_score_data_client', () => {
-      const mocked = {
-      RiskScoreDataClient: vi.fn().mockImplementation(() => ({
-        copyTimestampToEventIngestedForRiskScore: vi
-          .fn()
-          .mockResolvedValue({ updated: 0, failures: [] }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreDataClient: vi.fn().mockImplementation(() => ({
+      copyTimestampToEventIngestedForRiskScore: vi
+        .fn()
+        .mockResolvedValue({ updated: 0, failures: [] }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../risk_score/tasks/helpers', () => {
-      const mocked = {
-      buildScopedInternalSavedObjectsClientUnsafe: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildScopedInternalSavedObjectsClientUnsafe: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';

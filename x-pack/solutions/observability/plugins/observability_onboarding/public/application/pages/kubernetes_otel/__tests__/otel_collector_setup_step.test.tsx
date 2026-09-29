@@ -18,64 +18,64 @@ import {
 import { OtelCollectorSetupStep } from '../otel_collector_setup_step';
 
 vi.mock('../../../quickstart_flows/otel_kubernetes/steps', () => {
-      const mocked = {
-      OtelKubernetesAddRepositoryStep: ({
-        addRepoCommand,
-        showTitle,
-        useInlineCopyOnly,
-      }: {
-        addRepoCommand: string;
-        showTitle?: boolean;
-        useInlineCopyOnly?: boolean;
-      }) => (
-        <div
-          data-test-subj="otelK8sAddRepoStep"
-          data-add-repo-command={addRepoCommand}
-          data-show-title={showTitle}
-          data-use-inline-copy-only={useInlineCopyOnly}
-        />
-      ),
-      OtelKubernetesInstallStep: ({
-        installStackCommand,
-        secretValues,
-        showTitle,
-        useInlineCopyOnly,
-      }: {
-        installStackCommand?: string;
-        secretValues?: string[];
-        showTitle?: boolean;
-        useInlineCopyOnly?: boolean;
-      }) => (
-        <div
-          data-test-subj="otelK8sInstallStep"
-          data-install-stack-command={installStackCommand}
-          data-secret-values={secretValues?.join('|')}
-          data-show-title={showTitle}
-          data-use-inline-copy-only={useInlineCopyOnly}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OtelKubernetesAddRepositoryStep: ({
+      addRepoCommand,
+      showTitle,
+      useInlineCopyOnly,
+    }: {
+      addRepoCommand: string;
+      showTitle?: boolean;
+      useInlineCopyOnly?: boolean;
+    }) => (
+      <div
+        data-test-subj="otelK8sAddRepoStep"
+        data-add-repo-command={addRepoCommand}
+        data-show-title={showTitle}
+        data-use-inline-copy-only={useInlineCopyOnly}
+      />
+    ),
+    OtelKubernetesInstallStep: ({
+      installStackCommand,
+      secretValues,
+      showTitle,
+      useInlineCopyOnly,
+    }: {
+      installStackCommand?: string;
+      secretValues?: string[];
+      showTitle?: boolean;
+      useInlineCopyOnly?: boolean;
+    }) => (
+      <div
+        data-test-subj="otelK8sInstallStep"
+        data-install-stack-command={installStackCommand}
+        data-secret-values={secretValues?.join('|')}
+        data-show-title={showTitle}
+        data-use-inline-copy-only={useInlineCopyOnly}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../quickstart_flows/shared/masked_code_block', () => {
-      const mocked = {
-      MaskedCodeBlock: ({
-        value,
-        secrets,
-        dataTestSubj,
-      }: {
-        value: string;
-        secrets: string[];
-        dataTestSubj: string;
-      }) => (
-        <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
-          {value}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MaskedCodeBlock: ({
+      value,
+      secrets,
+      dataTestSubj,
+    }: {
+      value: string;
+      secrets: string[];
+      dataTestSubj: string;
+    }) => (
+      <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
+        {value}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   addRepoCommand: 'helm repo add elastic https://helm.elastic.co',

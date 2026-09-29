@@ -22,29 +22,29 @@ import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/
 import type { ExperimentalFeatures } from '../../../../../../common';
 
 vi.mock('./search_enrichments', () => {
-      const mocked = {
-      searchEnrichments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    searchEnrichments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockSearchEnrichments = searchEnrichments as Mock;
 
 vi.mock('./utils/is_index_exist', () => {
-      const mocked = {
-      isIndexExist: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isIndexExist: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockIsIndexExist = isIndexExist as Mock;
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        getEuidFromObjectForSearch: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    euid: {
+      getEuidFromObjectForSearch: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as Mock;
 
 const hostEnrichmentResponse = [

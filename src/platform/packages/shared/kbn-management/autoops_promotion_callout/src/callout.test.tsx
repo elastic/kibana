@@ -16,16 +16,16 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutoOpsPromotionCallout, AUTOOPS_CALLOUT_DISMISSED_KEY } from './callout';
 
 vi.mock('@elastic/eui-illustrations', () => {
-      const mocked = {
-      megaphone: {
-        id: 'megaphone',
-        title: 'Megaphone',
-        light: '<svg></svg>',
-        dark: '<svg></svg>',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    megaphone: {
+      id: 'megaphone',
+      title: 'Megaphone',
+      light: '<svg></svg>',
+      dark: '<svg></svg>',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const CLOUD_CONNECT_DOCS_URL = 'https://www.elastic.co/docs/deploy-manage/cloud-connect';
 const CLOUD_CONNECT_PORTAL_URL = 'https://cloud.elastic.co/connect-cluster-services-portal';

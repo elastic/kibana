@@ -32,7 +32,7 @@ vi.mock('./batch_backfill_rule_gaps', () => {
 const batchBackfillRuleGapsMock = batchBackfillRuleGaps as Mock;
 
 vi.mock('../../../../rules_client/common/audit_events', async () => {
-  const actual = (await vi.importActual('../../../../rules_client/common/audit_events'));
+  const actual = await vi.importActual('../../../../rules_client/common/audit_events');
   return {
     ...actual,
     ruleAuditEvent: vi.fn(),

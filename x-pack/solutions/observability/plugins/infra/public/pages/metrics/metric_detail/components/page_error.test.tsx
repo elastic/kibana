@@ -17,11 +17,11 @@ import { useDocumentTitle } from '../../../../hooks/use_document_title';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../../../../hooks/use_document_title', () => {
-      const mocked = {
-      useDocumentTitle: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocumentTitle: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderErrorPage = () =>
   render(

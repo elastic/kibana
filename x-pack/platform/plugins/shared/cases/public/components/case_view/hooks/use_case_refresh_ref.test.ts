@@ -16,11 +16,11 @@ import { TestProviders } from '../../../common/mock';
 const mockRefreshCaseViewPage = vi.fn();
 
 vi.mock('../use_on_refresh_case_view_page', () => {
-      const mocked = {
-      useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) =>
   React.createElement(TestProviders, null, children);

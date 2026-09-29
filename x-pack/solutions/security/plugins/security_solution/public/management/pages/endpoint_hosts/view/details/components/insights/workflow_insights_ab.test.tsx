@@ -21,49 +21,49 @@ vi.mock('../../../hooks/insights/use_trigger_scan_ab');
 
 const mockAddDanger = vi.fn();
 vi.mock('../../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useToasts: () => ({ addDanger: mockAddDanger }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: () => ({ addDanger: mockAddDanger }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_insights_scan_ab', () => {
-      const mocked = {
-      WorkflowInsightsScanSectionAB: ({
-        onScanButtonClick,
-      }: {
-        onScanButtonClick: (connectorId: string) => void;
-      }) => (
-        <button type="button" onClick={() => onScanButtonClick('connector-1')}>
-          {'scan'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowInsightsScanSectionAB: ({
+      onScanButtonClick,
+    }: {
+      onScanButtonClick: (connectorId: string) => void;
+    }) => (
+      <button type="button" onClick={() => onScanButtonClick('connector-1')}>
+        {'scan'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/stale_endpoint_package_banner', () => {
-      const mocked = {
-      StaleEndpointPackageBanner: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StaleEndpointPackageBanner: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_insights_results', () => {
-      const mocked = {
-      WorkflowInsightsResults: ({
-        scanCompleted,
-        results,
-      }: {
-        scanCompleted: boolean;
-        results?: Array<unknown>;
-      }) =>
-        scanCompleted && (results ?? []).length === 0 ? (
-          <div data-test-subj="workflowInsightsEmptyResultsCallout" />
-        ) : null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowInsightsResults: ({
+      scanCompleted,
+      results,
+    }: {
+      scanCompleted: boolean;
+      results?: Array<unknown>;
+    }) =>
+      scanCompleted && (results ?? []).length === 0 ? (
+        <div data-test-subj="workflowInsightsEmptyResultsCallout" />
+      ) : null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useFetchInsightsABMock = useFetchInsightsAB as Mock;
 const useFetchPendingScansMock = useFetchPendingScans as Mock;

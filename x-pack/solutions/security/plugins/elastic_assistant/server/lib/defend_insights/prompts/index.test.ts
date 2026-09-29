@@ -17,18 +17,18 @@ import { getPolicyResponseFailurePrompt } from './policy_response_failure';
 import { getDefendInsightsPrompt } from '.';
 
 vi.mock('./incompatible_antivirus', () => {
-      const mocked = {
-      getIncompatibleAntivirusPrompt: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIncompatibleAntivirusPrompt: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./policy_response_failure', () => {
-      const mocked = {
-      getPolicyResponseFailurePrompt: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPolicyResponseFailurePrompt: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getDefendInsightsPrompt', () => {
   const mockArgs = {

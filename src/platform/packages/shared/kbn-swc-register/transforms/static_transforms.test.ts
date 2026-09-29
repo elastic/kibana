@@ -17,12 +17,12 @@ import { peggyTransform } from './peggy';
 import { yamlTransform } from './yaml';
 
 vi.mock('@kbn/peggy', () => {
-      const mocked = {
-      findConfigFile: vi.fn(() => '/repo/peggy.config.js'),
-      getJsSourceSync: vi.fn(() => ({ source: 'compiled peggy' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findConfigFile: vi.fn(() => '/repo/peggy.config.js'),
+    getJsSourceSync: vi.fn(() => ({ source: 'compiled peggy' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeCache = (code: string | undefined = undefined) => {
   const cache: Cache = {

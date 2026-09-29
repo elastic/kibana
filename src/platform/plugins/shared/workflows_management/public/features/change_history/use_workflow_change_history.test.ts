@@ -7,29 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
+import { useSelector } from 'react-redux-v7';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
-import { useSelector } from 'react-redux-v7';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 
 import { useWorkflowChangeHistoryRestoreEligibility } from './use_workflow_change_history';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelector = useSelector as MockedFunction<typeof useSelector>;
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -22,25 +21,25 @@ import { KibanaPrivilegesRegion } from './kibana_privileges_region';
 import { RoleValidator } from '../../validate_role';
 
 vi.mock('./simple_privilege_section', () => {
-      const mocked = {
-      SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./space_aware_privilege_section', () => {
-      const mocked = {
-      SpaceAwarePrivilegeSection: () => <div data-test-subj="spaceAwarePrivilegeSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpaceAwarePrivilegeSection: () => <div data-test-subj="spaceAwarePrivilegeSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./transform_error_section', () => {
-      const mocked = {
-      TransformErrorSection: () => <div data-test-subj="transformErrorSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransformErrorSection: () => <div data-test-subj="transformErrorSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();

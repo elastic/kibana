@@ -16,18 +16,18 @@ import { AiIcon } from './ai_icon';
 
 const mockUseSvgAiGradient = vi.fn();
 vi.mock('../gradient_styles/use_ai_gradient_styles', () => {
-      const mocked = {
-      useSvgAiGradient: () => mockUseSvgAiGradient(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSvgAiGradient: () => mockUseSvgAiGradient(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../gradient_styles/svg_ai_gradient_defs', () => {
-      const mocked = {
-      SvgAiGradientDefs: () => <div data-test-subj="svg-ai-gradient-defs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SvgAiGradientDefs: () => <div data-test-subj="svg-ai-gradient-defs" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultSvgGradient = {
   gradientId: 'test-gradient',

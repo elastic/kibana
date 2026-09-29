@@ -17,11 +17,11 @@ import { Actions, EventLogger, Transactions } from '.';
 import type { ElementPosition } from '../get_element_position_data';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'NEW_UUID',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'NEW_UUID',
+  };
+  return { ...mocked, default: mocked };
+});
 
 let otelExporter: tracing.InMemorySpanExporter;
 let otelProvider: tracing.BasicTracerProvider;

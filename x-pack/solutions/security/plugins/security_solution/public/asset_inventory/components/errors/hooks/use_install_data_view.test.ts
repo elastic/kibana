@@ -15,13 +15,13 @@ const mockPostInstallAssetInventoryDataView = vi.fn();
 const mockCallback = vi.fn();
 
 vi.mock('../../../hooks/use_asset_inventory_routes', () => {
-      const mocked = {
-      useAssetInventoryRoutes: () => ({
-        postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetInventoryRoutes: () => ({
+      postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderHookWithWrapper = () =>
   renderHook(

@@ -19,18 +19,20 @@ import { getLiveQueryDetailsRoute } from './get_live_query_details_route';
 import { getActionResponses } from './utils';
 
 vi.mock('./utils', () => {
-      const mocked = {
-      getActionResponses: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getActionResponses: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('getLiveQueryDetailsRoute', () => {
   let routeHandler: RequestHandler;

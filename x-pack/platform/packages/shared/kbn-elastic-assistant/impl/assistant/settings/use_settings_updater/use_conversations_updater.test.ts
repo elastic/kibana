@@ -19,11 +19,11 @@ import { MOCK_CURRENT_USER } from '../../../mock/conversation';
 vi.mock('../../../assistant_context');
 vi.mock('../../api/conversations/bulk_update_actions_conversations');
 vi.mock('../../api/conversations/delete_all_conversations', () => {
-      const mocked = {
-      deleteAllConversations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteAllConversations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConversations: Record<string, Conversation> = {
   '03a2ef3c-3aec-4f13-8f18-bb31b47b2df1': {

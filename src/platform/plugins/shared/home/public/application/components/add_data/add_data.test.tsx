@@ -21,22 +21,22 @@ vi.mock('../app_navigation_handler', () => {
 });
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: vi.fn().mockReturnValue({
-        trackUiMetric: vi.fn(),
-        addDataService: {
-          getCloudConnectStatusHook: vi.fn(() => () => ({
-            isLoading: false,
-            isCloudConnected: false,
-          })),
-        },
-        notifications: {
-          tours: { isEnabled: vi.fn().mockReturnValue(true) },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: vi.fn().mockReturnValue({
+      trackUiMetric: vi.fn(),
+      addDataService: {
+        getCloudConnectStatusHook: vi.fn(() => () => ({
+          isLoading: false,
+          isCloudConnected: false,
+        })),
+      },
+      notifications: {
+        tours: { isEnabled: vi.fn().mockReturnValue(true) },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.clearAllMocks();

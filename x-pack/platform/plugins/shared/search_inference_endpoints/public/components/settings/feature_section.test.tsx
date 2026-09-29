@@ -22,11 +22,11 @@ import type { InferenceFeatureResponse as InferenceFeatureConfig } from '../../.
 vi.mock('../../hooks/use_connectors');
 vi.mock('../../hooks/use_registered_features');
 vi.mock('./add_model_popover', () => {
-      const mocked = {
-      AddModelPopover: () => <button type="button">Add</button>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddModelPopover: () => <button type="button">Add</button>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConnectors = useConnectors as Mock;
 const mockUseRegisteredFeatures = useRegisteredFeatures as Mock;

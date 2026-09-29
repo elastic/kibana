@@ -20,8 +20,8 @@ import { INPMonitor } from './inp_monitor';
 import { FrameJankIndicator, getPerformanceWarning } from './frame_jank_indicator';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
-  const ReactModule = (require('react') as typeof React);
+  const actual = await vi.importActual('@elastic/eui');
+  const ReactModule = require('react') as typeof React;
   const MockToolTip = ({
     children,
     content,

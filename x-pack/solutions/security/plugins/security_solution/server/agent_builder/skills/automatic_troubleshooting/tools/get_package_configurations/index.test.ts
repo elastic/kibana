@@ -104,9 +104,9 @@ describe('automaticTroubleshootingGetPackageConfigurationsTool', () => {
         },
       } as Awaited<ReturnType<typeof mockPackageClient.getPackage>>;
 
-      (
-        mockPackageClient as Mocked<typeof mockPackageClient>
-      ).getInstallation.mockResolvedValue(mockInstallation);
+      (mockPackageClient as Mocked<typeof mockPackageClient>).getInstallation.mockResolvedValue(
+        mockInstallation
+      );
       (mockPackageClient as Mocked<typeof mockPackageClient>).getPackage.mockResolvedValue(
         mockPackageData
       );

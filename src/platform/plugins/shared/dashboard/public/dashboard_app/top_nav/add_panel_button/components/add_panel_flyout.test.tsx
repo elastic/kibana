@@ -21,7 +21,7 @@ import type { MenuItem } from '../types';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 
 vi.mock('../use_menu_item_groups', async () => {
-  const actual = (await vi.importActual('../use_menu_item_groups'));
+  const actual = await vi.importActual('../use_menu_item_groups');
   return { onAddPanelClick: actual.onAddPanelClick };
 });
 
@@ -50,11 +50,11 @@ const mockUseFeaturedItems = vi.fn((): { featuredItems: MenuItem[]; loading: boo
   loading: false,
 }));
 vi.mock('../use_featured_items', () => {
-      const mocked = {
-      useFeaturedItems: () => mockUseFeaturedItems(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFeaturedItems: () => mockUseFeaturedItems(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ContextWrapper = ({ children }: { children: React.ReactNode }) => (
   <EuiThemeProvider>

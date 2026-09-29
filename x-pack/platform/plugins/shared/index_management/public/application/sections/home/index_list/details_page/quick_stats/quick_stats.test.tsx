@@ -14,40 +14,40 @@ import { useAppContext } from '../../../../../app_context';
 import { loadIndexVectorCount } from '../../../../../services/api';
 
 vi.mock('../../../../../app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services/api', () => {
-      const mocked = {
-      loadIndexDocCount: vi.fn().mockResolvedValue({ data: { 'test-index': 0 } }),
-      loadIndexVectorCount: vi.fn().mockResolvedValue({ data: { vectorCount: 5 } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadIndexDocCount: vi.fn().mockResolvedValue({ data: { 'test-index': 0 } }),
+    loadIndexVectorCount: vi.fn().mockResolvedValue({ data: { vectorCount: 5 } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./storage_details', () => {
-      const mocked = { StorageDetails: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { StorageDetails: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./status_details', () => {
-      const mocked = { StatusDetails: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { StatusDetails: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./size_doc_count_details', () => {
-      const mocked = { SizeDocCountDetails: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SizeDocCountDetails: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./aliases_details', () => {
-      const mocked = { AliasesDetails: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { AliasesDetails: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./data_stream_details', () => {
-      const mocked = { DataStreamDetails: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { DataStreamDetails: () => null };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = vi.mocked(useAppContext);
 const mockLoadIndexVectorCount = vi.mocked(loadIndexVectorCount);

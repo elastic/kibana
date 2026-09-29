@@ -20,11 +20,11 @@ import { useGenAIConnectors } from '../../hooks/use_genai_connectors';
 import { useStreamingAiInsight } from '../../hooks/use_streaming_ai_insight';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting$: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting$: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_license');

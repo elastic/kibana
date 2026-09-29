@@ -16,14 +16,14 @@ export const mockPackage = {
 };
 
 vi.doMock('fs', () => {
-      const mocked = {
-      ...realFs,
-      readFileSync: (filePath: string, options?: unknown) => {
-        if (filePath === '/test/kibanaRoot/package.json') {
-          return JSON.stringify(mockPackage.raw);
-        }
-        return realFs.readFileSync(filePath, options);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...realFs,
+    readFileSync: (filePath: string, options?: unknown) => {
+      if (filePath === '/test/kibanaRoot/package.json') {
+        return JSON.stringify(mockPackage.raw);
+      }
+      return realFs.readFileSync(filePath, options);
+    },
+  };
+  return { ...mocked, default: mocked };
+});

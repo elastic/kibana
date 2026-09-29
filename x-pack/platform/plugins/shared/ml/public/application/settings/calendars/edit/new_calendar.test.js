@@ -14,50 +14,50 @@ import userEvent from '@testing-library/user-event';
 import { renderWithMlI18nContext } from '../../../test_utils/render_with_ml_context';
 
 vi.mock('../../../contexts/kibana/use_create_url', () => {
-      const mocked = {
-      useCreateAndNavigateToManagementMlLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateAndNavigateToManagementMlLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/help_menu', () => {
-      const mocked = {
-      HelpMenu: () => <div id="mockHelpMenu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HelpMenu: () => <div id="mockHelpMenu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../license', () => {
-      const mocked = {
-      hasLicenseExpired: () => false,
-      isFullLicense: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasLicenseExpired: () => false,
+    isFullLicense: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../capabilities/get_capabilities', () => {
-      const mocked = {
-      getCapabilities: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCapabilities: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../ml_nodes_check/check_ml_nodes', () => {
-      const mocked = {
-      mlNodesAvailable: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mlNodesAvailable: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const calendarsMock = [
   {
@@ -91,21 +91,21 @@ const calendarsMock = [
 ];
 
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      getCalendarSettingsData: vi.fn().mockImplementation(
-        () =>
-          new Promise((resolve) => {
-            resolve({
-              jobIds: ['test-job-one', 'test-job-2'],
-              groupIds: ['test-group-one', 'test-group-two'],
-              calendars: calendarsMock,
-            });
-          })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    getCalendarSettingsData: vi.fn().mockImplementation(
+      () =>
+        new Promise((resolve) => {
+          resolve({
+            jobIds: ['test-job-one', 'test-job-2'],
+            groupIds: ['test-group-one', 'test-group-two'],
+            calendars: calendarsMock,
+          });
+        })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddDanger = vi.fn();
 const mockKibanaContext = {
@@ -150,12 +150,12 @@ vi.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => mockKibanaContext,
-      useNavigateToPath: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: () => mockKibanaContext,
+    useNavigateToPath: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { NewCalendar } from './new_calendar';
 

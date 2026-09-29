@@ -17,7 +17,7 @@ import {
 import { useAttackDetails } from './use_attack_details';
 
 vi.mock('@kbn/elastic-assistant-common', async () => {
-  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
+  const actual = await vi.importActual('@kbn/elastic-assistant-common');
   return {
     ...actual,
     transformAttackDiscoveryAlertDocumentToApi: vi.fn(),
@@ -26,32 +26,32 @@ vi.mock('@kbn/elastic-assistant-common', async () => {
 });
 
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: () => ({ dataView: { getRuntimeMappings: () => ({}) } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: () => ({ dataView: { getRuntimeMappings: () => ({}) } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../timelines/containers/details', () => {
-      const mocked = {
-      useTimelineEventsDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEventsDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../document_details/shared/hooks/use_get_fields_data', () => {
-      const mocked = {
-      useGetFieldsData: () => ({ getFieldsData: () => null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldsData: () => ({ getFieldsData: () => null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTransformDocumentToApi = transformAttackDiscoveryAlertDocumentToApi as Mock;
 const mockTransformFromApi = transformAttackDiscoveryAlertFromApi as Mock;

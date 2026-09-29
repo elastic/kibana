@@ -19,29 +19,29 @@ import { useProfilesListView } from './hooks/use_profiles_list_view';
 import { useAnonymizationProfilesSectionState } from './use_anonymization_profiles_section_state';
 
 vi.mock('../common/services/profiles/client', () => {
-      const mocked = {
-      createAnonymizationProfilesClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createAnonymizationProfilesClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_delete_profile_flow', () => {
-      const mocked = {
-      useDeleteProfileFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteProfileFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/hooks/use_profile_form', () => {
-      const mocked = {
-      useProfileForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfileForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_profiles_list_view', () => {
-      const mocked = {
-      useProfilesListView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfilesListView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetch = vi.fn();
 
@@ -155,15 +155,9 @@ describe('useAnonymizationProfilesSectionState', () => {
   it('handles create submit success and calls onCreateSuccess', async () => {
     const onCreateSuccess = vi.fn();
     const reset = vi.fn();
-    vi
-      .mocked(useProfileForm)
-      .mockReturnValue(
-        createProfileFormMock(
-          vi.fn().mockResolvedValue({ profile: { id: 'p1' } }),
-          undefined,
-          reset
-        )
-      );
+    vi.mocked(useProfileForm).mockReturnValue(
+      createProfileFormMock(vi.fn().mockResolvedValue({ profile: { id: 'p1' } }), undefined, reset)
+    );
 
     const { result } = renderHook(() =>
       useAnonymizationProfilesSectionState({
@@ -236,9 +230,9 @@ describe('useAnonymizationProfilesSectionState', () => {
 
   it('confirms delete and notifies success callback', async () => {
     const onDeleteSuccess = vi.fn();
-    vi
-      .mocked(useDeleteProfileFlow)
-      .mockReturnValue(createDeleteFlowMock(vi.fn().mockResolvedValue(true)));
+    vi.mocked(useDeleteProfileFlow).mockReturnValue(
+      createDeleteFlowMock(vi.fn().mockResolvedValue(true))
+    );
 
     const { result } = renderHook(() =>
       useAnonymizationProfilesSectionState({

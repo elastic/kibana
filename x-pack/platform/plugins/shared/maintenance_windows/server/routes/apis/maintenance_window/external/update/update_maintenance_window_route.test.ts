@@ -25,11 +25,11 @@ import type {
 const maintenanceWindowClient = maintenanceWindowClientMock.create();
 
 vi.mock('../../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMaintenanceWindow = {
   ...getMockMaintenanceWindowDomain(),

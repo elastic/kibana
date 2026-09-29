@@ -20,33 +20,33 @@ import { casesQueriesKeys } from './constants';
 import { basicCaseFixture } from './test_fixtures';
 
 vi.mock('./api', () => {
-      const mocked = {
-      getCase: vi.fn(),
-      patchCase: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCase: vi.fn(),
+    patchCase: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useToasts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/use_cases_toast', () => {
-      const mocked = {
-      useCasesToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./utils', () => {
-      const mocked = {
-      createUpdateSuccessToaster: vi.fn().mockReturnValue({
-        title: 'Updated "Another horrible breach!!"',
-        className: 'eui-textBreakWord',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createUpdateSuccessToaster: vi.fn().mockReturnValue({
+      title: 'Updated "Another horrible breach!!"',
+      className: 'eui-textBreakWord',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUpdateCase', () => {
   const updateKey: UpdateKey = 'description';

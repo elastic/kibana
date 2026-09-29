@@ -9,7 +9,7 @@
 
 import { vi } from 'vitest';
 
-const actualHelpers = (await vi.importActual('./resolve_helpers'));
+const actualHelpers = await vi.importActual('./resolve_helpers');
 
 export const splitIntoBucketsMock = vi.fn().mockImplementation(actualHelpers.splitIntoBuckets);
 

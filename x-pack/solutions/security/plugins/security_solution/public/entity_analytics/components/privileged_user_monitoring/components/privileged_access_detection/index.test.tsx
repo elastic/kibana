@@ -17,18 +17,18 @@ import { usePrivilegedAccessDetectionRoutes } from './pad_routes';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('../../../../../common/containers/query_toggle', () => {
-      const mocked = {
-      useQueryToggle: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryToggle: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./pad_routes', () => {
-      const mocked = {
-      usePrivilegedAccessDetectionRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePrivilegedAccessDetectionRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAllRoutes = {
   getPrivilegedAccessDetectionStatus: vi.fn(),

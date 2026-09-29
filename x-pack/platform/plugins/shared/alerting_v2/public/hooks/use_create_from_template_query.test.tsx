@@ -19,12 +19,12 @@ import { RuleTemplatesApi } from '../services/rule_templates_api';
 import { useCreateFromTemplateQuery } from './use_create_from_template_query';
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: vi.fn(),
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: vi.fn(),
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseService = useService as MockedFunction<typeof useService>;
 

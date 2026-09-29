@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React, { useState } from 'react';
+import { vi } from 'vitest';
 
 import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

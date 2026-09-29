@@ -21,24 +21,24 @@ import { RECENT_FIELD } from './recents_filter_renderer';
 // This mirrors the fix in `@kbn/ui-react-assembly` where resolvers are
 // keyed by component function rather than stored in a shared slot.
 vi.mock('@kbn/content-list-toolbar', () => {
-      const mocked = {
-      filter: {
-        createComponent: vi.fn((options?: { resolve?: () => { component: React.FC } }) => {
-          const resolve = options?.resolve;
-          const Component = (props: Record<string, unknown>) => {
-            if (!resolve) {
-              return null;
-            }
-            const { component: Inner } = resolve();
-            return <Inner {...props} />;
-          };
-          Component.displayName = 'MockRecentsFilter';
-          return Component;
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filter: {
+      createComponent: vi.fn((options?: { resolve?: () => { component: React.FC } }) => {
+        const resolve = options?.resolve;
+        const Component = (props: Record<string, unknown>) => {
+          if (!resolve) {
+            return null;
+          }
+          const { component: Inner } = resolve();
+          return <Inner {...props} />;
+        };
+        Component.displayName = 'MockRecentsFilter';
+        return Component;
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRecentlyAccessedDecoration', () => {
   const buildSource = (entries: Array<{ id: string }>): RecentlyAccessedHistorySource => ({

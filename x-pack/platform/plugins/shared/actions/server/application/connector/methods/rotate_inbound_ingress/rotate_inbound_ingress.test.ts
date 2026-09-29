@@ -33,15 +33,13 @@ import { CONNECTOR_INGRESS_CREDENTIAL_SAVED_OBJECT_TYPE } from '../../../../cons
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
-      actual.connectorTypeIsDual(actionTypeId)
-    ),
+    connectorTypeIsDual: vi.fn((actionTypeId: string) => actual.connectorTypeIsDual(actionTypeId)),
   };
 });
 

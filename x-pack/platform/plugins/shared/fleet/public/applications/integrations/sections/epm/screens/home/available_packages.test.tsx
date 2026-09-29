@@ -14,58 +14,58 @@ import { EuiThemeProvider } from '@elastic/eui';
 
 const mockUseAvailablePackages = vi.fn();
 vi.mock('./hooks/use_available_packages', () => {
-      const mocked = {
-      useAvailablePackages: () => mockUseAvailablePackages(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAvailablePackages: () => mockUseAvailablePackages(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Capture the list prop so tests can invoke injected onCardClick handlers directly.
 let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
 vi.mock('../../components/package_list_grid', () => {
-      const mocked = {
-      PackageListGrid: ({ list }: { list: any[] }) => {
-        capturedFilteredCards = list;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageListGrid: ({ list }: { list: any[] }) => {
+      capturedFilteredCards = list;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/integration_preference', () => {
-      const mocked = {
-      IntegrationPreference: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IntegrationPreference: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/agentless_filter', () => {
-      const mocked = { AgentlessFilter: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { AgentlessFilter: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/no_epr_callout', () => {
-      const mocked = { NoEprCallout: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { NoEprCallout: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./category_facets', () => {
-      const mocked = { CategoryFacets: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { CategoryFacets: () => null };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocation = vi.fn();
 const mockHistoryReplace = vi.fn();
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => mockUseLocation(),
-      useHistory: () => ({ replace: mockHistoryReplace }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => mockUseLocation(),
+    useHistory: () => ({ replace: mockHistoryReplace }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { AvailablePackages } from './available_packages';
 

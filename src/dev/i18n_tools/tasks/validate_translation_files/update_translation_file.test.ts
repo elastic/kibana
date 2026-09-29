@@ -11,11 +11,11 @@ import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      writeFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    writeFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { writeFile } from 'fs/promises';
 import { updateTranslationFile } from './update_translation_file';

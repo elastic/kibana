@@ -16,21 +16,22 @@ import { MOCK_ALERT, MOCK_RULE, MOCK_DEPS } from '../testing/fixtures';
 import * as transactionFetcher from '../../../context/apm_service/use_service_transaction_types_fetcher';
 
 vi.mock('../../../context/apm_service/use_service_agent_fetcher', () => {
-      const mocked = {
-      useServiceAgentFetcher: vi.fn(() => ({
-        agentName: 'mockAgent',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceAgentFetcher: vi.fn(() => ({
+      agentName: 'mockAgent',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('renders chart', () => {
   const serviceName = 'ops-bean';
 
   beforeEach(() => {
-    vi
-      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
-      .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
+    vi.spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher').mockReturnValue({
+      transactionTypes: ['request'],
+      status: FETCH_STATUS.SUCCESS,
+    });
   });
 
   it('renders error when serviceName is not defined', async () => {
@@ -69,9 +70,10 @@ describe('renders chart', () => {
   });
 
   it('supports custom transactionType when transactionType is included in transaction types list', async () => {
-    vi
-      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
-      .mockReturnValue({ transactionTypes: ['request', 'custom'], status: FETCH_STATUS.SUCCESS });
+    vi.spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher').mockReturnValue({
+      transactionTypes: ['request', 'custom'],
+      status: FETCH_STATUS.SUCCESS,
+    });
     const { getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
         <APMAlertingThroughputChart
@@ -90,9 +92,10 @@ describe('renders chart', () => {
   });
 
   it('does not support custom transactionType when transactionType is not included in transaction types list', async () => {
-    vi
-      .spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher')
-      .mockReturnValue({ transactionTypes: ['request'], status: FETCH_STATUS.SUCCESS });
+    vi.spyOn(transactionFetcher, 'useServiceTransactionTypesFetcher').mockReturnValue({
+      transactionTypes: ['request'],
+      status: FETCH_STATUS.SUCCESS,
+    });
     const { queryByText, getByText } = render(
       <ApmEmbeddableContext deps={MOCK_DEPS}>
         <APMAlertingThroughputChart

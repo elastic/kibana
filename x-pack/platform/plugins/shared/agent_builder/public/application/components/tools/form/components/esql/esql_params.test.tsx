@@ -21,34 +21,34 @@ const mockUseEsqlEditorParams = vi.fn();
 const mockUseEsqlParamsValidation = vi.fn();
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_esql_editor_params', () => {
-      const mocked = {
-      useEsqlEditorParams: (props: any) => mockUseEsqlEditorParams(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlEditorParams: (props: any) => mockUseEsqlEditorParams(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_esql_params_validation', () => {
-      const mocked = {
-      useEsqlParamsValidation: () => mockUseEsqlParamsValidation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlParamsValidation: () => mockUseEsqlParamsValidation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./esql_param_row', () => {
-      const mocked = {
-      EsqlParamRow: ({ paramField }: { paramField: any }) => (
-        <div data-test-subj={`esql-param-row-${paramField.name}`}>{paramField.name}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsqlParamRow: ({ paramField }: { paramField: any }) => (
+      <div data-test-subj={`esql-param-row-${paramField.name}`}>{paramField.name}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EsqlParams - Array Type Warning', () => {
   const warningMessage = /in your ES\|QL query to filter by array type parameters/i;

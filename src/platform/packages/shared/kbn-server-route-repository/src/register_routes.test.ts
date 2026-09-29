@@ -318,10 +318,7 @@ describe('registerRoutes', () => {
   });
 
   describe('when using zod', () => {
-    const makeZodValidationObjectSpy = vi.spyOn(
-      makeZodValidationObject,
-      'makeZodValidationObject'
-    );
+    const makeZodValidationObjectSpy = vi.spyOn(makeZodValidationObject, 'makeZodValidationObject');
 
     const zodParamsRt = z.object({
       body: z.object({

@@ -25,88 +25,88 @@ import {
 vi.mock('./hooks/use_attack_entities_lists');
 vi.mock('../../../entity/use_entity_flyout_api');
 vi.mock('../../../shared/components/document_tools_flyout_header', () => {
-      const mocked = {
-      DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../flyout/attack_details/left/components/attack_entity_insight_rows', () => {
-      const mocked = {
-      AttackUserInsightsRow: ({
-        identityFields,
-        buildEntityOverrides,
-      }: {
-        identityFields: Record<string, string | undefined>;
-        buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
-          onPreviewEntity?: () => void;
-          onShowDetailsPanel?: (subTab: string) => void;
-        };
-      }) => {
-        const name = identityFields['user.name'] ?? 'unknown-user';
-        const overrides = buildEntityOverrides?.({ name });
-        return (
-          <div data-test-subj="mock-user-insights-row">
-            <span>{name}</span>
-            {overrides?.onPreviewEntity && (
-              <button
-                type="button"
-                data-test-subj="mock-user-preview-button"
-                onClick={overrides.onPreviewEntity}
-              >
-                {'preview'}
-              </button>
-            )}
-            {overrides?.onShowDetailsPanel && (
-              <button
-                type="button"
-                data-test-subj="mock-user-alerts-button"
-                onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
-              >
-                {'alerts'}
-              </button>
-            )}
-          </div>
-        );
-      },
-      AttackHostInsightsRow: ({
-        identityFields,
-        buildEntityOverrides,
-      }: {
-        identityFields: Record<string, string | undefined>;
-        buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
-          onPreviewEntity?: () => void;
-          onShowDetailsPanel?: (subTab: string) => void;
-        };
-      }) => {
-        const name = identityFields['host.name'] ?? 'unknown-host';
-        const overrides = buildEntityOverrides?.({ name });
-        return (
-          <div data-test-subj="mock-host-insights-row">
-            <span>{name}</span>
-            {overrides?.onPreviewEntity && (
-              <button
-                type="button"
-                data-test-subj="mock-host-preview-button"
-                onClick={overrides.onPreviewEntity}
-              >
-                {'preview'}
-              </button>
-            )}
-            {overrides?.onShowDetailsPanel && (
-              <button
-                type="button"
-                data-test-subj="mock-host-alerts-button"
-                onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
-              >
-                {'alerts'}
-              </button>
-            )}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackUserInsightsRow: ({
+      identityFields,
+      buildEntityOverrides,
+    }: {
+      identityFields: Record<string, string | undefined>;
+      buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+        onPreviewEntity?: () => void;
+        onShowDetailsPanel?: (subTab: string) => void;
+      };
+    }) => {
+      const name = identityFields['user.name'] ?? 'unknown-user';
+      const overrides = buildEntityOverrides?.({ name });
+      return (
+        <div data-test-subj="mock-user-insights-row">
+          <span>{name}</span>
+          {overrides?.onPreviewEntity && (
+            <button
+              type="button"
+              data-test-subj="mock-user-preview-button"
+              onClick={overrides.onPreviewEntity}
+            >
+              {'preview'}
+            </button>
+          )}
+          {overrides?.onShowDetailsPanel && (
+            <button
+              type="button"
+              data-test-subj="mock-user-alerts-button"
+              onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+            >
+              {'alerts'}
+            </button>
+          )}
+        </div>
+      );
+    },
+    AttackHostInsightsRow: ({
+      identityFields,
+      buildEntityOverrides,
+    }: {
+      identityFields: Record<string, string | undefined>;
+      buildEntityOverrides?: (opts: { name: string; entityId?: string }) => {
+        onPreviewEntity?: () => void;
+        onShowDetailsPanel?: (subTab: string) => void;
+      };
+    }) => {
+      const name = identityFields['host.name'] ?? 'unknown-host';
+      const overrides = buildEntityOverrides?.({ name });
+      return (
+        <div data-test-subj="mock-host-insights-row">
+          <span>{name}</span>
+          {overrides?.onPreviewEntity && (
+            <button
+              type="button"
+              data-test-subj="mock-host-preview-button"
+              onClick={overrides.onPreviewEntity}
+            >
+              {'preview'}
+            </button>
+          )}
+          {overrides?.onShowDetailsPanel && (
+            <button
+              type="button"
+              data-test-subj="mock-host-alerts-button"
+              onClick={() => overrides.onShowDetailsPanel?.('alertsTabId')}
+            >
+              {'alerts'}
+            </button>
+          )}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAttackEntitiesLists = useAttackEntitiesLists as Mock;
 const mockUseEntityFlyoutApi = useEntityFlyoutApi as Mock;

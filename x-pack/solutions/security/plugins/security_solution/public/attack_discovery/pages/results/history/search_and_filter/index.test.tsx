@@ -15,17 +15,17 @@ import { SearchAndFilter } from '.';
 import { TestProviders } from '../../../../../common/mock';
 
 vi.mock('../../../use_get_attack_discovery_generations', () => {
-      const mocked = {
-      useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../use_find_attack_discoveries', () => {
-      const mocked = {
-      useInvalidateFindAttackDiscoveries: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateFindAttackDiscoveries: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetQuery = vi.fn();
 const mockSetStart = vi.fn();

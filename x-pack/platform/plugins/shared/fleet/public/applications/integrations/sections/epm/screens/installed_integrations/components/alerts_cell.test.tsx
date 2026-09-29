@@ -15,19 +15,19 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 const mockHttpGet = vi.fn();
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        http: {
-          get: (...args: any[]) => mockHttpGet(...args),
-          basePath: {
-            prepend: (path: string) => `/mock${path}`,
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      http: {
+        get: (...args: any[]) => mockHttpGet(...args),
+        basePath: {
+          prepend: (path: string) => `/mock${path}`,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { AlertsCell } from './alerts_cell';
 

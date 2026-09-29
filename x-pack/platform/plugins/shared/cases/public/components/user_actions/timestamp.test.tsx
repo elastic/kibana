@@ -14,10 +14,10 @@ import { TestProviders } from '../../common/mock';
 import { UserActionTimestamp } from './timestamp';
 
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
 
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
   const FormattedRelative = vi.fn();
   FormattedRelative.mockImplementationOnce(() => '2 days ago');
   FormattedRelative.mockImplementation(() => '20 hours ago');

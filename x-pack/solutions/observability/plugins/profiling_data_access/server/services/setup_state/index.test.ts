@@ -15,25 +15,25 @@ import { selfManagedSetupState } from './self_managed_setup_state';
 import { serverlessSetupState } from './serverless_setup_state';
 
 vi.mock('./cloud_setup_state', () => {
-      const mocked = {
-      cloudSetupState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cloudSetupState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./self_managed_setup_state', () => {
-      const mocked = {
-      selfManagedSetupState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    selfManagedSetupState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./serverless_setup_state', () => {
-      const mocked = {
-      serverlessSetupState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    serverlessSetupState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedCloudSetupState = vi.mocked(cloudSetupState);
 const mockedSelfManagedSetupState = vi.mocked(selfManagedSetupState);

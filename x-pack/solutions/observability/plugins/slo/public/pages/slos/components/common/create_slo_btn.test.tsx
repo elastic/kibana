@@ -23,11 +23,11 @@ vi.mock('../../../../hooks/use_permissions');
 vi.mock('../../../../hooks/use_fetch_slo_templates');
 vi.mock('../../../../hooks/use_fetch_slo_template_tags');
 vi.mock('../../../../hooks/use_composite_slo_enabled', () => {
-      const mocked = {
-      useCompositeSloEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCompositeSloEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateToUrl = vi.fn();
 const useKibanaMock = useKibana as Mock;

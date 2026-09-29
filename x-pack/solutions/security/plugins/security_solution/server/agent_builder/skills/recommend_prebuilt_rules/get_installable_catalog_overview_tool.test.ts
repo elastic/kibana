@@ -24,34 +24,34 @@ import { getInstallableRuleVersions } from '../../../lib/detection_engine/prebui
 vi.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
   () => {
-      const mocked = { createPrebuiltRuleAssetsClient: vi.fn() };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = { createPrebuiltRuleAssetsClient: vi.fn() };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/rule_objects/prebuilt_rule_objects_client',
   () => {
-      const mocked = { createPrebuiltRuleObjectsClient: vi.fn() };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = { createPrebuiltRuleObjectsClient: vi.fn() };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock(
   '../../../lib/detection_engine/prebuilt_rules/logic/get_installable_rules_for_review',
   () => {
-      const mocked = {
-        getInstallableRuleVersions: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getInstallableRuleVersions: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock('../../../lib/machine_learning/authz', () => {
-      const mocked = {
-      buildMlAuthz: vi.fn().mockReturnValue({
-        validateRuleType: vi.fn().mockResolvedValue({ valid: true, message: undefined }),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildMlAuthz: vi.fn().mockReturnValue({
+      validateRuleType: vi.fn().mockResolvedValue({ valid: true, message: undefined }),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreatePrebuiltRuleAssetsClient = vi.mocked(createPrebuiltRuleAssetsClient);
 const mockCreatePrebuiltRuleObjectsClient = vi.mocked(createPrebuiltRuleObjectsClient);

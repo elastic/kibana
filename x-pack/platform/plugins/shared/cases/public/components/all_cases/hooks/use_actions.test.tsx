@@ -39,7 +39,7 @@ vi.mock('../../../containers/user_profiles/api');
 const mockCanExecuteWorkflow = vi.fn(() => false);
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsCapabilities: () => ({
@@ -50,11 +50,11 @@ vi.mock('@kbn/workflows-ui', async () => {
 });
 
 vi.mock('../../workflows/run_case_workflow_modal', () => {
-      const mocked = {
-      RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunCaseWorkflowModal: () => <div data-test-subj="cases-run-workflow-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useActions', () => {
   let user: UserEvent;

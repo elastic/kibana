@@ -12,11 +12,11 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { retryTransientEsErrors } from './retry';
 
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createResponseError = (
   statusCode: number,
@@ -94,7 +94,7 @@ describe('retryTransientEsErrors', () => {
   });
 
   it('retries multiple times with exponential backoff before succeeding', async () => {
-    const { setTimeout: setTimeoutMock } = (await vi.importMock('timers/promises'));
+    const { setTimeout: setTimeoutMock } = await vi.importMock('timers/promises');
 
     const esCall = vi
       .fn()

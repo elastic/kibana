@@ -14,13 +14,13 @@ import { sendGetAgents, sendGetAgentPolicies } from '../../../../../hooks';
 import { getCountsForDownloadSource } from './get_count';
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      sendGetAgents: vi.fn(),
-      sendGetAgentPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    sendGetAgents: vi.fn(),
+    sendGetAgentPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedSendGetAgents = sendGetAgents as Mock;
 const mockedSendGetAgentPolicies = sendGetAgentPolicies as Mock;

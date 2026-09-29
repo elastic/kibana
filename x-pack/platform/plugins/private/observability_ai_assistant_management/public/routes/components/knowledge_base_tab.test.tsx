@@ -25,14 +25,14 @@ vi.mock('../../hooks/use_import_knowledge_base_entries');
 vi.mock('../../hooks/use_delete_knowledge_base_entry');
 vi.mock('@kbn/ai-assistant/src/hooks');
 vi.mock('@kbn/ai-assistant/src/hooks/use_inference_endpoints', () => {
-      const mocked = {
-      useInferenceEndpoints: () => ({
-        inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInferenceEndpoints: () => ({
+      inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetKnowledgeBaseEntriesMock = useGetKnowledgeBaseEntries as Mock;
 const useCreateKnowledgeBaseEntryMock = useCreateKnowledgeBaseEntry as Mock;

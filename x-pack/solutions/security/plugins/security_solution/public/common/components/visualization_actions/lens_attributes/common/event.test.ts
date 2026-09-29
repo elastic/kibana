@@ -19,35 +19,35 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi
-        .fn()
-        .mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75')
-        .mockReturnValue('34919782-4546-43a5-b668-06ac934d3acd')
-        .mockReturnValue('aac9d7d0-13a3-480a-892b-08207a787926')
-        .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi
+      .fn()
+      .mockReturnValue('0039eb0c-9a1a-4687-ae54-0f4e239bec75')
+      .mockReturnValue('34919782-4546-43a5-b668-06ac934d3acd')
+      .mockReturnValue('aac9d7d0-13a3-480a-892b-08207a787926')
+      .mockReturnValue('e09e0380-0740-4105-becc-0a4ca12e3944'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'events',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        detailName: 'mockHost',
+        pageName: 'hosts',
+        tabName: 'events',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getEventsHistogramLensAttributes', () => {
   beforeAll(() => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(['auditbeat-mytest-*'], 'security-solution-my-test')
+    );
   });
 
   it('should render query and filters for hosts events histogram', () => {

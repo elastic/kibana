@@ -17,13 +17,13 @@ import { renderWithTheme } from '../../../utils/test_helpers';
 
 // Mock the usePerformanceContext hook
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({
-        onPageReady: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({
+      onPageReady: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { Example } = composeStories(stories);
 

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import apm from 'elastic-apm-node';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import apm from 'elastic-apm-node';
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -43,25 +43,25 @@ import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 const mockGetCurrentWorkflow = vi.fn().mockResolvedValue(null);
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      WorkflowRepository: vi.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    WorkflowRepository: vi.fn().mockImplementation(() => ({ getWorkflow: mockGetCurrentWorkflow })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./setup_dependencies');
 vi.mock('../concurrency/handle_queued_workflow_run_at_task_start', () => {
-      const mocked = {
-      handleQueuedWorkflowRunAtTaskStart: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handleQueuedWorkflowRunAtTaskStart: vi.fn().mockResolvedValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../workflow_execution_loop', () => {
-      const mocked = {
-      workflowExecutionLoop: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    workflowExecutionLoop: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
@@ -77,21 +77,21 @@ const mockStartSpan = apm.startSpan as Mock;
 
 const mockWorkflowExecutionEngine = workflowsExecutionEngineMock.createStart();
 
-const mockHandleQueuedWorkflowRunAtTaskStart =
-  handleQueuedWorkflowRunAtTaskStart as MockedFunction<
-    typeof handleQueuedWorkflowRunAtTaskStart
-  >;
+const mockHandleQueuedWorkflowRunAtTaskStart = handleQueuedWorkflowRunAtTaskStart as MockedFunction<
+  typeof handleQueuedWorkflowRunAtTaskStart
+>;
 
 describe('runWorkflow', () => {
   it('finalizes pending steps before publishing an identity failure', async () => {
     vi.clearAllMocks();
     const dependencies = mockContextDependencies();
     vi.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    vi
-      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
-      .mockRejectedValue(
-        new Error('The workload binding does not match the expected service account.')
-      );
+    vi.spyOn(
+      dependencies.coreStart.security.serviceAccounts,
+      'withScopedRequestForWorkload'
+    ).mockRejectedValue(
+      new Error('The workload binding does not match the expected service account.')
+    );
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       createMockWorkflowDataClient()
     );
@@ -125,12 +125,15 @@ describe('runWorkflow', () => {
       'default'
     );
     if (!execution) throw new Error('Missing test execution');
-    vi
-      .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
-      .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
-    vi
-      .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
-      .mockResolvedValue(true);
+    vi.spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion').mockResolvedValue({
+      execution,
+      seqNo: 1,
+      primaryTerm: 1,
+    });
+    vi.spyOn(
+      workflowExecutionRepository,
+      'tryUpdateWorkflowExecutionWithVersion'
+    ).mockResolvedValue(true);
     const stepExecutionRepository = createMockStepExecutionRepository();
     stepExecutionRepository.markNonTerminalStepsFailed.mockImplementation(async () => {
       expect(

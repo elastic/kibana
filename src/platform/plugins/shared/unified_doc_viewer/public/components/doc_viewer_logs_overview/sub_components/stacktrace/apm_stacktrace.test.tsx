@@ -21,11 +21,11 @@ import { screen } from '@testing-library/react';
 import { useEsDocSearch } from '../../../../hooks/use_es_doc_search';
 
 vi.mock('../../../../hooks/use_es_doc_search', () => {
-      const mocked = {
-      useEsDocSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsDocSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEsDocSearch = vi.mocked(useEsDocSearch);
 

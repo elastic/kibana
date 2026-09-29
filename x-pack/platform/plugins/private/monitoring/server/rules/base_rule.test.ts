@@ -10,15 +10,15 @@ import { vi } from 'vitest';
 import { BaseRule } from './base_rule';
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: () => ({ debug: vi.fn() }),
-        },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: () => ({ debug: vi.fn() }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('BaseRule', () => {
   describe('create', () => {

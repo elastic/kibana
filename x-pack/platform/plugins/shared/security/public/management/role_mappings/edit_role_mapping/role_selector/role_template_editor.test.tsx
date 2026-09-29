@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiComboBox } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 

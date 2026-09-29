@@ -16,11 +16,11 @@ import { useAssistantContext } from '@kbn/elastic-assistant';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const args = {
   documentId: '12345',
   connectorId: '67890',

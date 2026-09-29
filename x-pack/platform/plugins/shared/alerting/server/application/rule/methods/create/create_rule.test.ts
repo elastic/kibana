@@ -28,14 +28,14 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -50,11 +50,11 @@ vi.mock('uuid', () => {
 });
 
 vi.mock('../get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const connectorAdapterRegistry = new ConnectorAdapterRegistry();
 

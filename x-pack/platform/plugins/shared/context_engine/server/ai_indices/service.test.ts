@@ -26,12 +26,12 @@ import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } fro
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
 
 vi.mock('./storage', async () => {
-      const mocked = {
-      ...(await vi.importActual('./storage')),
-      createAiIndexStorageClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./storage')),
+    createAiIndexStorageClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAiIndexStorageClientMock = createAiIndexStorageClient as Mock;
 

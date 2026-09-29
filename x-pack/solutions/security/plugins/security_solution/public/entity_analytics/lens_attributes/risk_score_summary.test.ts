@@ -17,11 +17,11 @@ import type { Query } from '@kbn/es-query';
 import { EntityType } from '../../../common/entity_analytics/types';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getRiskScoreSummaryAttributes', () => {
   it('should render', () => {

@@ -13,11 +13,11 @@ import { prepareReinforcementTurn } from '../decision_trees/register_decision_tr
 import { decisionTreePrepareStepDefinition } from './decision_tree_prepare';
 
 vi.mock('../decision_trees/register_decision_trees', () => {
-      const mocked = {
-      prepareReinforcementTurn: vi.fn().mockResolvedValue({ message: 'turn prompt', treeCount: 1 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prepareReinforcementTurn: vi.fn().mockResolvedValue({ message: 'turn prompt', treeCount: 1 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('decisionTreePrepareStepDefinition', () => {
   const logger = loggerMock.create();

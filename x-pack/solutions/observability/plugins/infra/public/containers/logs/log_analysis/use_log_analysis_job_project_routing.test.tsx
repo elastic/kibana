@@ -17,11 +17,11 @@ import type { JobSummary } from './api/ml_get_jobs_summary_api';
 const mockUseKibanaContextForPlugin = vi.fn();
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: () => mockUseKibanaContextForPlugin(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCpsEnabled = (isCpsEnabled: boolean) => {
   mockUseKibanaContextForPlugin.mockReturnValue({

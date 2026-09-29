@@ -35,17 +35,17 @@ vi.mock('../common/lib/kibana');
 vi.mock('./hooks/use_get_nba');
 vi.mock('../common/hooks/use_experimental_features');
 vi.mock('./api', () => {
-      const mocked = {
-      postNBADismiss: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    postNBADismiss: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/hooks/use_product_feature_keys', () => {
-      const mocked = {
-      useProductFeatureKeys: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProductFeatureKeys: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface NBAResponse {
   value?: { openTODOs?: Milestone[]; dismiss?: boolean } | undefined;

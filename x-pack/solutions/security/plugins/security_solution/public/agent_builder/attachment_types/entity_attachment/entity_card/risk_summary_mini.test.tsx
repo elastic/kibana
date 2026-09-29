@@ -15,24 +15,24 @@ import type { RiskStats } from '../../../../../common/search_strategy';
 import { RiskSummaryMini } from './risk_summary_mini';
 
 vi.mock('../../../../entity_analytics/components/severity/common', () => {
-      const mocked = {
-      RiskScoreLevel: ({ severity }: { severity?: string }) => (
-        <span data-test-subj="riskScoreLevelMock">{severity}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreLevel: ({ severity }: { severity?: string }) => (
+      <span data-test-subj="riskScoreLevelMock">{severity}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../entity_analytics/components/home/entities_table/risk_score_cell', () => {
-      const mocked = {
-      RiskScoreCell: ({ riskScore }: { riskScore?: number }) => (
-        <span data-test-subj="riskScoreCellMock">
-          {typeof riskScore === 'number' ? riskScore : '—'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreCell: ({ riskScore }: { riskScore?: number }) => (
+      <span data-test-subj="riskScoreCellMock">
+        {typeof riskScore === 'number' ? riskScore : '—'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const stats = (override: Partial<RiskStats> = {}): RiskStats =>
   ({

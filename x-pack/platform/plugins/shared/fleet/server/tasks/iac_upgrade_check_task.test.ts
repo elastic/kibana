@@ -29,13 +29,13 @@ vi.mock('../services/telemetry/iac_provisioner_telemetry');
 // getIacKeyOutcome is stubbed at the barrel level so this test drives the task's bookkeeping
 // without mocking IaCP or the package registry.
 vi.mock('../services/cloud_connectors', async () => {
-      const mocked = {
-      ...(await vi.importActual('../services/cloud_connectors')),
-      getCloudConnectorIntegrationSelections: vi.fn(),
-      getIacKeyOutcome: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../services/cloud_connectors')),
+    getCloudConnectorIntegrationSelections: vi.fn(),
+    getIacKeyOutcome: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedEnabled = vi.mocked(isIacProvisionerEnabled);
 const mockedSelections = vi.mocked(getCloudConnectorIntegrationSelections);
@@ -71,9 +71,9 @@ describe('iac_upgrade_check_task', () => {
     mockLogger = loggingSystemMock.createLogger();
     appContextService.start(createAppContextStartContractMock());
     vi.spyOn(appContextService, 'getLogger').mockReturnValue(mockLogger);
-    vi
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(mockSoClient);
+    vi.spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension').mockReturnValue(
+      mockSoClient
+    );
     mockedEnabled.mockResolvedValue(true);
     mockedSelections.mockResolvedValue(
       stored([

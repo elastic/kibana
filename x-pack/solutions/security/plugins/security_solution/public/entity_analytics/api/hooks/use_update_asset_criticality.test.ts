@@ -15,38 +15,38 @@ import type { EntityStoreRecord } from '../../../flyout/entity_details/shared/ho
 
 const mockBulkUpdateEntities = vi.fn();
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      bulkUpdateEntities: (...args: unknown[]) => mockBulkUpdateEntities(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkUpdateEntities: (...args: unknown[]) => mockBulkUpdateEntities(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockApplyEntityStoreSearchCachePatch = vi.fn();
 vi.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      applyEntityStoreSearchCachePatch: (...args: unknown[]) =>
-        mockApplyEntityStoreSearchCachePatch(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyEntityStoreSearchCachePatch: (...args: unknown[]) =>
+      mockApplyEntityStoreSearchCachePatch(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddError = vi.fn();
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addError: (...args: unknown[]) => mockAddError(...args),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addError: (...args: unknown[]) => mockAddError(...args),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttp = {};
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: { http: mockHttp } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { http: mockHttp } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOnSuccess = vi.fn();
 

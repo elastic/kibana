@@ -24,15 +24,15 @@ const mockUseExecuteBulkAction = useExecuteBulkAction as Mock;
 
 // Simplified RuleLink component for testing.
 vi.mock('../../../rule_management_ui/components/rules_table/use_columns', () => {
-      const mocked = {
-      RuleLink: ({ name, id }: { name: string; id: string }) => (
-        <a href={`/rules/id/${id}`} data-test-subj="ruleName">
-          {name}
-        </a>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleLink: ({ name, id }: { name: string; id: string }) => (
+      <a href={`/rules/id/${id}`} data-test-subj="ruleName">
+        {name}
+      </a>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecuteBulkAction = vi.fn();
 const mockOnClose = vi.fn();

@@ -13,31 +13,31 @@ import { ListPageTestProviders } from '../../test_utils/test_providers';
 import { ListActionPoliciesPage } from './list_action_policies_page';
 
 vi.mock('../../application/breadcrumb_context', () => {
-      const mocked = {
-      useSetBreadcrumbs: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetBreadcrumbs: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'chrome') {
-          return { docTitle: { change: vi.fn() }, setBreadcrumbs: vi.fn() };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'chrome') {
+        return { docTitle: { change: vi.fn() }, setBreadcrumbs: vi.fn() };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/action_policies_table', () => {
-      const mocked = {
-      ActionPoliciesTable: () => <div data-test-subj="mockedActionPoliciesTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPoliciesTable: () => <div data-test-subj="mockedActionPoliciesTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderPage = () =>
   render(

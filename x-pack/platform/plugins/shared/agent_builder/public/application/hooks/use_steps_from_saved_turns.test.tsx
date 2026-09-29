@@ -18,9 +18,9 @@ import { createExecutionTerminatedEvent } from '../components/conversations/time
 import { useStepsFromSavedTurns } from './use_steps_from_saved_turns';
 
 vi.mock('./use_conversation', () => {
-      const mocked = { useConversation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useConversation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const turn = (n: number, reasoning: string) => [
   createUserMessageEvent({ id: `user-${n}` }),

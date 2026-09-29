@@ -585,8 +585,7 @@ describe('cascaded documents helpers utils', () => {
           };
 
           // only apply this mock for this test
-          vi
-            .spyOn(dataViewMock.fields, 'getByName')
+          vi.spyOn(dataViewMock.fields, 'getByName')
             .mockImplementationOnce(mockImpl) // satisfies first the call to getByName that marks the field as subType
             .mockImplementationOnce(mockImpl); // satisfies the call to getByName for the parent field
 

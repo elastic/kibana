@@ -15,11 +15,11 @@ import { getRRuleSchedulingSuggestions } from './get_rrule_scheduling_suggestion
 
 // Mock the dependencies
 vi.mock('../../../snippets/generate_trigger_snippet', () => {
-      const mocked = {
-      generateRRuleTriggerSnippet: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateRRuleTriggerSnippet: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { generateRRuleTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 

@@ -15,11 +15,11 @@ import { getAgentBuilderResourceAvailability } from '../../../utils/get_agent_bu
 import { getWatchlistToolAvailability } from './watchlist_availability';
 
 vi.mock('../../../utils/get_agent_builder_resource_availability', () => {
-      const mocked = {
-      getAgentBuilderResourceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentBuilderResourceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
 

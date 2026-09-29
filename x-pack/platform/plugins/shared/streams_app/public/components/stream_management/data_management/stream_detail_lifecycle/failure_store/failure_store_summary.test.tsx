@@ -22,19 +22,19 @@ import { useKibana } from '../../../../../hooks/use_kibana';
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 
 vi.mock('../hooks/use_ilm_phases_color_and_description', () => {
-      const mocked = {
-      useIlmPhasesColorAndDescription: () => ({
-        ilmPhases: {
-          hot: { color: '#FF0000', description: 'Hot phase' },
-          warm: { color: '#FFA500', description: 'Warm phase' },
-          cold: { color: '#0000FF', description: 'Cold phase' },
-          frozen: { color: '#00FFFF', description: 'Frozen phase' },
-          delete: { color: '#808080', description: 'Delete phase' },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmPhasesColorAndDescription: () => ({
+      ilmPhases: {
+        hot: { color: '#FF0000', description: 'Hot phase' },
+        warm: { color: '#FFA500', description: 'Warm phase' },
+        cold: { color: '#0000FF', description: 'Cold phase' },
+        frozen: { color: '#00FFFF', description: 'Frozen phase' },
+        delete: { color: '#808080', description: 'Delete phase' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FailureStoreSummary', () => {
   const createMockFailureStoreConfig = (

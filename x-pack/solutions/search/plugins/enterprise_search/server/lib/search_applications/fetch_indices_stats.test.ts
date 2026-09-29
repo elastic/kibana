@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { fetchIndicesStats } from './fetch_indices_stats';

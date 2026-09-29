@@ -32,7 +32,7 @@ const http = httpServiceMock.createStartContract();
 const { toasts } = notificationServiceMock.createStartContract();
 
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types');
-const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
+const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
 getRuleTypes.mockResolvedValue([
   {
     id: 'rule-type-1',

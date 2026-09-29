@@ -32,7 +32,7 @@ import { DataQualityPanel } from '@kbn/ecs-data-quality-dashboard';
 const mockedUseKibana = mockUseKibana();
 
 vi.mock('@kbn/ecs-data-quality-dashboard', async () => {
-  const actual = (await vi.importActual('@kbn/ecs-data-quality-dashboard'));
+  const actual = await vi.importActual('@kbn/ecs-data-quality-dashboard');
   const ReactActual = require('react');
 
   return {
@@ -45,7 +45,7 @@ vi.mock('@kbn/ecs-data-quality-dashboard', async () => {
 
 vi.mock('../../common/components/empty_prompt');
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
 
   const mockKibanaServices = {
     get: () => ({
@@ -77,11 +77,11 @@ const defaultUseSignalIndexReturn = {
 };
 const mockUseSignalIndex = vi.fn(() => defaultUseSignalIndexReturn);
 vi.mock('../../detections/containers/detection_engine/alerts/use_signal_index', () => {
-      const mocked = {
-      useSignalIndex: () => mockUseSignalIndex(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndex: () => mockUseSignalIndex(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DataQuality', () => {
   const defaultIlmPhases = 'hotwarmunmanaged';
@@ -117,9 +117,7 @@ describe('DataQuality', () => {
 
     mockUseSignalIndex.mockReturnValue(defaultUseSignalIndexReturn);
 
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']));
+    vi.mocked(useDataView).mockReturnValue(withIndices(['auditbeat-*', 'logs-*', 'packetbeat-*']));
   });
 
   describe('when indices exist, and loading is complete', () => {

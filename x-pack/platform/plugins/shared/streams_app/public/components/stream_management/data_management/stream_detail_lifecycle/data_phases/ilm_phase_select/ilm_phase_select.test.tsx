@@ -13,19 +13,19 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { IlmPhaseSelect } from './ilm_phase_select';
 
 vi.mock('../../hooks/use_ilm_phases_color_and_description', () => {
-      const mocked = {
-      useIlmPhasesColorAndDescription: () => ({
-        ilmPhases: {
-          hot: { color: '#FF0000', description: 'Hot desc' },
-          warm: { color: '#FFA500', description: 'Warm desc' },
-          cold: { color: '#0000FF', description: 'Cold desc' },
-          frozen: { color: '#00FFFF', description: 'Frozen desc' },
-          delete: { color: '#808080', description: 'Delete desc' },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmPhasesColorAndDescription: () => ({
+      ilmPhases: {
+        hot: { color: '#FF0000', description: 'Hot desc' },
+        warm: { color: '#FFA500', description: 'Warm desc' },
+        cold: { color: '#0000FF', description: 'Cold desc' },
+        frozen: { color: '#00FFFF', description: 'Frozen desc' },
+        delete: { color: '#808080', description: 'Delete desc' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IlmPhaseSelect', () => {
   it('renders the trigger button label', () => {

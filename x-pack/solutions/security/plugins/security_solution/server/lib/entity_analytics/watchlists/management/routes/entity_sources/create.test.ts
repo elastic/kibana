@@ -22,32 +22,36 @@ const mockSyncWatchlist = vi.fn();
 const mockGetStartServices = vi.fn();
 
 vi.mock('../../watchlist_config', () => {
-      const mocked = {
-      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
-        addEntitySourceReference: mockAddEntitySourceReference,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+      addEntitySourceReference: mockAddEntitySourceReference,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entity_sources/infra', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../entity_sources/infra')),
-      WatchlistEntitySourceClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../entity_sources/infra')),
+    WatchlistEntitySourceClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entity_sources/entity_sources_service', () => {
-      const mocked = {
-      createEntitySourcesService: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEntitySourcesService: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = (await vi.importMock('../../../entity_sources/infra')) as { WatchlistEntitySourceClient: Mock };
+const { WatchlistEntitySourceClient: MockWatchlistEntitySourceClient } = (await vi.importMock(
+  '../../../entity_sources/infra'
+)) as { WatchlistEntitySourceClient: Mock };
 
-const { createEntitySourcesService: mockCreateEntitySourcesService } = (await vi.importMock('../../../entity_sources/entity_sources_service')) as { createEntitySourcesService: Mock };
+const { createEntitySourcesService: mockCreateEntitySourcesService } = (await vi.importMock(
+  '../../../entity_sources/entity_sources_service'
+)) as { createEntitySourcesService: Mock };
 
 // Import after mocks are set up
 import { createEntitySourceRoute } from './create';

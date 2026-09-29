@@ -15,9 +15,7 @@ import { useTraceActions, type TraceGroup } from './use_trace_actions';
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
-  typeof useApmPluginContext
->;
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 
 const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
 const mockLocatorGet = vi.fn().mockReturnValue({ getRedirectUrl: mockGetRedirectUrl });

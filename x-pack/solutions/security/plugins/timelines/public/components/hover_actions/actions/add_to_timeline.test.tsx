@@ -28,13 +28,13 @@ const coreStart = coreMock.createStart();
 
 const mockAddSuccess = vi.fn();
 vi.mock('../../../hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addSuccess: mockAddSuccess,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addSuccess: mockAddSuccess,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_selector');
 
@@ -50,7 +50,7 @@ vi.mock('react-redux-v7', () => {
 
 const mockStartDragToTimeline = vi.fn();
 vi.mock('../../../hooks/use_add_to_timeline', async () => {
-  const originalModule = (await vi.importActual('../../../hooks/use_add_to_timeline'));
+  const originalModule = await vi.importActual('../../../hooks/use_add_to_timeline');
 
   return {
     ...originalModule,

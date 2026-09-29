@@ -16,7 +16,9 @@ import { getUpdatedRootFields, getNewAndUpdatedTypes } from './compare_mappings'
 import { diffMappings } from './diff_mappings';
 
 vi.mock('./compare_mappings');
-const getUpdatedRootFieldsMock = getUpdatedRootFields as MockedFunction<typeof getUpdatedRootFields>;
+const getUpdatedRootFieldsMock = getUpdatedRootFields as MockedFunction<
+  typeof getUpdatedRootFields
+>;
 const getNewAndUpdatedTypesMock = getNewAndUpdatedTypes as MockedFunction<
   typeof getNewAndUpdatedTypes
 >;

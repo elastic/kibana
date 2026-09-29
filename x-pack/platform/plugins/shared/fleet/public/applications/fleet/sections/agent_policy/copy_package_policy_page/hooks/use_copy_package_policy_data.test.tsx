@@ -23,15 +23,15 @@ import { useCopyPackagePolicyData } from './use_copy_package_policy_data';
 // Mock the leaf `use_request` module (like the edit hook test) so the real inverse mapper
 // (`agentlessPolicyToPackagePolicy`) still runs against the nginx fixture below.
 vi.mock('../../../../../../hooks/use_request', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks/use_request')),
-      useGetOnePackagePolicyQuery: vi.fn(),
-      sendGetAgentlessPolicy: vi.fn(),
-      sendGetPackageInfoByKeyForRq: vi.fn(),
-      sendGetSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks/use_request')),
+    useGetOnePackagePolicyQuery: vi.fn(),
+    sendGetAgentlessPolicy: vi.fn(),
+    sendGetPackageInfoByKeyForRq: vi.fn(),
+    sendGetSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useCopyPackagePolicyData', () => {
   const agentlessPolicy = {
@@ -44,12 +44,13 @@ describe('useCopyPackagePolicyData', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .mocked(useGetOnePackagePolicyQuery)
-      .mockReturnValue({ data: undefined, isLoading: false } as any);
-    vi
-      .mocked(sendGetSettings)
-      .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: false } } } as any);
+    vi.mocked(useGetOnePackagePolicyQuery).mockReturnValue({
+      data: undefined,
+      isLoading: false,
+    } as any);
+    vi.mocked(sendGetSettings).mockResolvedValue({
+      data: { item: { prerelease_integrations_enabled: false } },
+    } as any);
   });
 
   it('reads the package policy directly for a traditional copy', async () => {
@@ -99,9 +100,9 @@ describe('useCopyPackagePolicyData', () => {
   it('hydrates with prerelease enabled when the setting is on', async () => {
     vi.mocked(sendGetAgentlessPolicy).mockResolvedValue({ item: agentlessPolicy } as any);
     vi.mocked(sendGetPackageInfoByKeyForRq).mockResolvedValue({ item: nginxPackageInfo } as any);
-    vi
-      .mocked(sendGetSettings)
-      .mockResolvedValue({ data: { item: { prerelease_integrations_enabled: true } } } as any);
+    vi.mocked(sendGetSettings).mockResolvedValue({
+      data: { item: { prerelease_integrations_enabled: true } },
+    } as any);
 
     const renderer = createFleetTestRendererMock();
     const { result } = renderer.renderHook(() =>

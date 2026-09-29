@@ -15,9 +15,9 @@ import { VegaPanelIcon } from '../vega_icon';
 import { getAddVegaEmbeddableAction } from './add_vega_embeddable_action';
 
 vi.mock('../default_spec', () => {
-      const mocked = { getDefaultSpec: () => '{ mark: point }' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getDefaultSpec: () => '{ mark: point }' };
+  return { ...mocked, default: mocked };
+});
 
 describe('getAddVegaEmbeddableAction', () => {
   it('uses the Vega SVG icon in the add panel menu', () => {

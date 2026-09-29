@@ -27,7 +27,7 @@ import type { PaletteConfigurationActions } from './types';
 
 // mocking random id generator function
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -40,7 +40,7 @@ vi.mock('@elastic/eui', async () => {
 
 // mocking isAllColorRangesValid function
 vi.mock('./color_ranges/color_ranges_validation', async () => {
-  const original = (await vi.importActual('./color_ranges/color_ranges_validation'));
+  const original = await vi.importActual('./color_ranges/color_ranges_validation');
 
   return {
     ...original,

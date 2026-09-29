@@ -76,29 +76,29 @@ vi.mock('@kbn/saved-objects-finder-plugin/public', () => {
 const mockNavigateToPath = vi.fn();
 const mockLocatorNavigate = vi.fn();
 vi.mock('../../../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          uiSettings: {},
-          http: {},
-          savedObjectsManagement: {},
-          data: { dataViews: vi.fn() },
-          savedSearch: vi.fn(),
-          contentManagement: {},
-        },
-      }),
-      useNavigateToPath: () => mockNavigateToPath,
-      useNotifications: () => {
-        return {
-          toasts: { addSuccess: vi.fn(), addDanger: vi.fn(), addError: vi.fn() },
-        };
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        uiSettings: {},
+        http: {},
+        savedObjectsManagement: {},
+        data: { dataViews: vi.fn() },
+        savedSearch: vi.fn(),
+        contentManagement: {},
       },
-      useMlManagementLocator: () => ({
-        navigate: mockLocatorNavigate,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+    useNavigateToPath: () => mockNavigateToPath,
+    useNotifications: () => {
+      return {
+        toasts: { addSuccess: vi.fn(), addDanger: vi.fn(), addError: vi.fn() },
+      };
+    },
+    useMlManagementLocator: () => ({
+      navigate: mockLocatorNavigate,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../util/index_utils', () => {
   return {

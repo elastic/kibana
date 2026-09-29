@@ -9,44 +9,44 @@ import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
 vi.mock('@elastic/elasticsearch', () => {
-      const mocked = {
-      Client: vi.fn().mockImplementation(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Client: vi.fn().mockImplementation(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/restore', () => {
-      const mocked = {
-      restoreSnapshot: vi.fn().mockResolvedValue({
-        success: true,
-        snapshotName: 'snapshot',
-        restoredIndices: [],
-        errors: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    restoreSnapshot: vi.fn().mockResolvedValue({
+      success: true,
+      snapshotName: 'snapshot',
+      restoredIndices: [],
+      errors: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../src/replay', () => {
-      const mocked = {
-      replaySnapshot: vi.fn().mockResolvedValue({
-        success: true,
-        snapshotName: 'snapshot',
-        restoredIndices: [],
-        reindexedIndices: [],
-        maxTimestamp: '2024-01-15T12:00:00.000Z',
-        errors: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    replaySnapshot: vi.fn().mockResolvedValue({
+      success: true,
+      snapshotName: 'snapshot',
+      restoredIndices: [],
+      reindexedIndices: [],
+      maxTimestamp: '2024-01-15T12:00:00.000Z',
+      errors: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { run } from '@kbn/dev-cli-runner';
 import type { RunContext } from '@kbn/dev-cli-runner';

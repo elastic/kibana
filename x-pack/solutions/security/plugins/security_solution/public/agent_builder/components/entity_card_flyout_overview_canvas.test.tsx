@@ -29,18 +29,18 @@ import { EntityCardFlyoutOverviewCanvas } from './entity_card_flyout_overview_ca
  */
 
 vi.mock('../attachment_types/entity_attachment/use_entity_for_attachment', () => {
-      const mocked = {
-      useEntityForAttachment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityForAttachment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/components/flyout_loading', () => {
-      const mocked = {
-      FlyoutLoading: () => <div data-test-subj="flyoutLoadingMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutLoading: () => <div data-test-subj="flyoutLoadingMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseEntityForAttachment = useEntityForAttachment as Mock;
 

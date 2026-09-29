@@ -13,11 +13,11 @@ import { useHostIsolationExceptionsAccess } from './use_host_isolation_exception
 import { checkArtifactHasData } from '../../services/exceptions_list/check_artifact_has_data';
 
 vi.mock('../../services/exceptions_list/check_artifact_has_data', () => {
-      const mocked = {
-      checkArtifactHasData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkArtifactHasData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockArtifactHasData = (hasData = true) => {
   (checkArtifactHasData as Mock).mockResolvedValueOnce(hasData);

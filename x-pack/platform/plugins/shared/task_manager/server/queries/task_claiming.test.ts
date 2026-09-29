@@ -17,18 +17,18 @@ import type { KibanaDiscoveryService } from '../kibana_discovery_service';
 import { DEFAULT_KIBANAS_PER_PARTITION } from '../config';
 
 vi.mock('../constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-        'limitedToZero',
-        'limitedToOne',
-        'anotherLimitedToZero',
-        'anotherLimitedToOne',
-        'limitedToTwo',
-        'limitedToFive',
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+      'limitedToZero',
+      'limitedToOne',
+      'anotherLimitedToZero',
+      'anotherLimitedToOne',
+      'limitedToTwo',
+      'limitedToFive',
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const taskManagerLogger = mockLogger();
 const taskPartitioner = new TaskPartitioner({
@@ -75,8 +75,7 @@ const mockApmTrans = {
 describe('TaskClaiming', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .spyOn(apm, 'startTransaction')
+    vi.spyOn(apm, 'startTransaction')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);

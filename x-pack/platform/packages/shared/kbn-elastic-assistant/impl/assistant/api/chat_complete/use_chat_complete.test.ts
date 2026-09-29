@@ -16,25 +16,25 @@ import type { ChatCompleteResponse } from './post_chat_complete';
 import { postChatComplete } from './post_chat_complete';
 
 vi.mock('../../../..', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./post_chat_complete', () => {
-      const mocked = {
-      postChatComplete: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    postChatComplete: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useChatComplete', () => {
   const mockAbortController = {
@@ -44,9 +44,7 @@ describe('useChatComplete', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    global.AbortController = vi.fn(
-      () => mockAbortController
-    ) as unknown as typeof AbortController;
+    global.AbortController = vi.fn(() => mockAbortController) as unknown as typeof AbortController;
 
     (useAssistantContext as Mock).mockReturnValue({
       alertsIndexPattern: 'mock-alerts-index-pattern',

@@ -20,11 +20,11 @@ import {
 } from './entity_resolution';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecuteEsql = executeEsql as Mock;
 const esClient = {} as unknown as ElasticsearchClient;

@@ -21,22 +21,22 @@ vi.mock('../../../rule_management_ui/components/rules_table/rules_table/rules_ta
 vi.mock('../../context/gap_auto_fill_scheduler_context');
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/components/charts/donutchart', () => {
-      const mocked = {
-      DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DonutChart: vi.fn(() => <div data-test-subj="mock-donut-chart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetRuleIdsWithGaps = useGetRuleIdsWithGaps as Mock;
 const mockUseKibana = useKibana as Mock;
 const mockInvalidate = vi.fn();
 vi.mock('../../api/hooks/use_get_rule_ids_with_gaps', () => {
-      const mocked = {
-      useGetRuleIdsWithGaps: vi.fn(),
-      useInvalidateGetRuleIdsWithGapsQuery: () => mockInvalidate,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetRuleIdsWithGaps: vi.fn(),
+    useInvalidateGetRuleIdsWithGapsQuery: () => mockInvalidate,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createGapsResponse = ({
   filled = 0,

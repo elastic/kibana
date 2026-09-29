@@ -17,11 +17,11 @@ import { DashboardEnhanceButton } from './dashboard_enhance_button';
 let mockApplicationBreakpoint: string | undefined = 'xl';
 
 vi.mock('@kbn/core-chrome-layout-utils', () => {
-      const mocked = {
-      useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentChromeApplicationBreakpoint: () => mockApplicationBreakpoint,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TOOLTIP = 'Improve the content and style of your dashboard using AI';
 

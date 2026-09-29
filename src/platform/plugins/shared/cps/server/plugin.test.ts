@@ -15,11 +15,11 @@ import { CPS_TIER_ELIGIBLE_FEATURE } from '@kbn/cps-common';
 import { registerRoutes } from './routes';
 
 vi.mock('./routes', () => {
-      const mocked = {
-      registerRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CPSServerPlugin', () => {
   let plugin: CPSServerPlugin;

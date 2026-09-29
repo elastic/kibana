@@ -34,40 +34,40 @@ const mockUseGetTransformCpsEnabled = vi.fn(
 vi.mock('../../../../app_dependencies');
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../serverless_context', () => {
-      const mocked = {
-      useEnabledFeatures: () => ({ showNodeInfo: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnabledFeatures: () => ({ showNodeInfo: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      DataViewPicker: (props: Record<string, any>) => {
-        mockDataViewPickerProps = props;
-        return (
-          <button
-            type="button"
-            data-test-subj={props.trigger['data-test-subj']}
-            onClick={() => props.onChangeDataView('next-data-view-id')}
-          >
-            {props.trigger.label}
-          </button>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataViewPicker: (props: Record<string, any>) => {
+      mockDataViewPickerProps = props;
+      return (
+        <button
+          type="button"
+          data-test-subj={props.trigger['data-test-subj']}
+          onClick={() => props.onChangeDataView('next-data-view-id')}
+        >
+          {props.trigger.label}
+        </button>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cps-utils', async () => {
-  const actual = (await vi.importActual('@kbn/cps-utils'));
+  const actual = await vi.importActual('@kbn/cps-utils');
   return {
     ...actual,
     ProjectScopePicker: (props: Record<string, any>) => {
@@ -86,14 +86,14 @@ vi.mock('@kbn/cps-utils', async () => {
 });
 
 vi.mock('@kbn/ml-field-stats-flyout', () => {
-      const mocked = {
-      FieldStatsFlyoutProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldStatsFlyoutProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../step_define', async () => {
-  const actual = (await vi.importActual('../step_define/common'));
+  const actual = await vi.importActual('../step_define/common');
   return {
     ...actual,
     EmptyStepDefineForm: (props: Record<string, any>) => {
@@ -126,7 +126,7 @@ vi.mock('../step_define', async () => {
 });
 
 vi.mock('../step_details', async () => {
-  const actual = (await vi.importActual('../step_details/common'));
+  const actual = await vi.importActual('../step_details/common');
   return {
     ...actual,
     StepDetailsForm: (props: Record<string, any>) => {
@@ -138,13 +138,13 @@ vi.mock('../step_details', async () => {
 });
 
 vi.mock('../step_create', () => {
-      const mocked = {
-      getDefaultStepCreateState: () => ({ created: false, dataViewId: undefined, started: false }),
-      StepCreateForm: () => <div data-test-subj="mockStepCreateForm" />,
-      StepCreateSummary: () => <div data-test-subj="mockStepCreateSummary" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultStepCreateState: () => ({ created: false, dataViewId: undefined, started: false }),
+    StepCreateForm: () => <div data-test-subj="mockStepCreateForm" />,
+    StepCreateSummary: () => <div data-test-subj="mockStepCreateSummary" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createSearchItems = (id: string, name: string): SearchItems => ({
   dataView: {

@@ -29,18 +29,18 @@ import { buildEntityGraphAttachmentId } from './entity_graph_attachment_utils';
 import { getEntityGraphTool, SECURITY_GET_ENTITY_GRAPH_TOOL_ID } from './get_entity_graph_tool';
 
 vi.mock('../../utils/get_agent_builder_resource_availability', () => {
-      const mocked = {
-      getAgentBuilderResourceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentBuilderResourceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
 const mockExecuteEsql = executeEsql as Mock;

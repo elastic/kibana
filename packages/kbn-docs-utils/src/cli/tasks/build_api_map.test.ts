@@ -16,17 +16,17 @@ import type { CliOptions } from '../types';
 
 // Mock getPluginApiMap
 vi.mock('../../get_plugin_api_map', () => {
-      const mocked = {
-      getPluginApiMap: vi.fn(() => ({
-        pluginApiMap: {},
-        missingApiItems: {},
-        referencedDeprecations: {},
-        unreferencedDeprecations: {},
-        adoptionTrackedAPIs: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPluginApiMap: vi.fn(() => ({
+      pluginApiMap: {},
+      missingApiItems: {},
+      referencedDeprecations: {},
+      unreferencedDeprecations: {},
+      adoptionTrackedAPIs: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getPluginApiMap } from '../../get_plugin_api_map';
 

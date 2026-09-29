@@ -80,19 +80,19 @@ const mockAgentPolicy: AgentPolicy = createAgentPolicyMock({
 });
 
 vi.mock('../../services/agent_policy_update', () => {
-      const mocked = {
-      agentPolicyUpdateEventHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyUpdateEventHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agents', () => {
-      const mocked = {
-      getAgentsByKuery: vi.fn(),
-      getLatestAvailableAgentVersion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentsByKuery: vi.fn(),
+    getLatestAvailableAgentVersion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Upgrade Agentless Deployments', () => {
   const { createSetup: coreSetupMock } = coreMock;
@@ -191,17 +191,17 @@ describe('Upgrade Agentless Deployments', () => {
       mockAgentPolicyService.fetchAllAgentPolicies = getMockAgentPolicyFetchAllAgentPolicies([
         mockAgentPolicy,
       ]);
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: true } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enabledUpgradeAgentlessDeploymentsTask: true,
+      } as any);
 
       mockedGetAgentsByKuery.mockResolvedValue({
         agents,
       });
 
-      vi
-        .spyOn(agentlessAgentService, 'upgradeAgentlessDeployment')
-        .mockResolvedValueOnce(undefined);
+      vi.spyOn(agentlessAgentService, 'upgradeAgentlessDeployment').mockResolvedValueOnce(
+        undefined
+      );
     });
 
     afterEach(() => {
@@ -313,9 +313,9 @@ describe('Upgrade Agentless Deployments', () => {
     });
 
     it('should not call upgrade agentless api to upgrade when agent policy is not found', async () => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enabledUpgradeAgentlessDeploymentsTask: false } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enabledUpgradeAgentlessDeploymentsTask: false,
+      } as any);
 
       await runTask();
 

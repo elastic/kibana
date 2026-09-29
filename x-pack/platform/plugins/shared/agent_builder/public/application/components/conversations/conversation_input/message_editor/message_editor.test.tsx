@@ -31,21 +31,21 @@ import { COMMAND_METADATA_ATTRIBUTE } from './command_badge/attributes';
 import { serializeEditorContent } from './serialize';
 
 vi.mock('./command_menu/cursor_rect', () => {
-      const mocked = {
-      getRectAtOffset: () => ({
-        left: 100,
-        top: 200,
-        bottom: 220,
-        right: 100,
-        width: 0,
-        height: 20,
-        x: 100,
-        y: 200,
-        toJSON: () => ({}),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRectAtOffset: () => ({
+      left: 100,
+      top: 200,
+      bottom: 220,
+      right: 100,
+      width: 0,
+      height: 20,
+      x: 100,
+      y: 200,
+      toJSON: () => ({}),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockMenuComponent = React.forwardRef<CommandMenuHandle, CommandMenuComponentProps>(
   (_props, _ref) => <div />

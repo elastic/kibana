@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
@@ -31,12 +30,12 @@ import {
 
 vi.mock('../../../hooks/use_kibana');
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      SearchBar: MockSearchBar,
-      DataViewPicker: MockDataViewPicker,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchBar: MockSearchBar,
+    DataViewPicker: MockDataViewPicker,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 

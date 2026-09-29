@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
+import { vi } from 'vitest';
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';

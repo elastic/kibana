@@ -13,7 +13,7 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { MitreTacticDot, computeIsChipVisible, computeHaloOpacity } from './mitre_tactic_dot';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -85,10 +85,9 @@ describe('MitreTacticDot', () => {
     });
 
     it('sets chip aria-label to include tactic name and singular anomaly count', () => {
-      render(
-        <MitreTacticDot {...defaultProps} anomalyCount={1} isClickable onClick={vi.fn()} />,
-        { wrapper: Wrapper }
-      );
+      render(<MitreTacticDot {...defaultProps} anomalyCount={1} isClickable onClick={vi.fn()} />, {
+        wrapper: Wrapper,
+      });
       // The dot's outer button carries the chip aria-label.
       expect(
         screen.getByRole('button', { name: /Initial Access.*1 anomaly/i, pressed: false })
@@ -96,10 +95,9 @@ describe('MitreTacticDot', () => {
     });
 
     it('sets chip aria-label to include tactic name and plural anomaly count', () => {
-      render(
-        <MitreTacticDot {...defaultProps} anomalyCount={3} isClickable onClick={vi.fn()} />,
-        { wrapper: Wrapper }
-      );
+      render(<MitreTacticDot {...defaultProps} anomalyCount={3} isClickable onClick={vi.fn()} />, {
+        wrapper: Wrapper,
+      });
       expect(
         screen.getByRole('button', { name: /Initial Access.*3 anomalies/i, pressed: false })
       ).toBeInTheDocument();

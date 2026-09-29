@@ -27,40 +27,40 @@ const MOCK_DEFAULT_STATE = {
 };
 
 vi.mock('../../../hooks/use_timefilter_service', () => {
-      const mocked = {
-      useTimefilterService: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimefilterService: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-utils-plugin/public', () => {
-      const mocked = {
-      createKbnUrlStateStorage: vi.fn(),
-      syncState: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
-      useContainerSelector: vi.fn(() => {
-        return MOCK_DEFAULT_STATE;
-      }),
-      createStateContainer: vi.fn(() => ({
-        get: vi.fn(),
-        set: vi.fn(),
-        state$: { subscribe: vi.fn() },
-        transitions: {
-          setRangeFrom: vi.fn(),
-          setRangeTo: vi.fn(),
-          setKuery: vi.fn(),
-          setStatus: vi.fn(),
-          setFilters: vi.fn(),
-          setSavedQueryId: vi.fn(),
-          setControlConfigs: vi.fn(),
-          setGroupings: vi.fn(),
-        },
-      })),
-      createStateContainerReactHelpers: vi.fn(() => ({
-        useContainer: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createKbnUrlStateStorage: vi.fn(),
+    syncState: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+    useContainerSelector: vi.fn(() => {
+      return MOCK_DEFAULT_STATE;
+    }),
+    createStateContainer: vi.fn(() => ({
+      get: vi.fn(),
+      set: vi.fn(),
+      state$: { subscribe: vi.fn() },
+      transitions: {
+        setRangeFrom: vi.fn(),
+        setRangeTo: vi.fn(),
+        setKuery: vi.fn(),
+        setStatus: vi.fn(),
+        setFilters: vi.fn(),
+        setSavedQueryId: vi.fn(),
+        setControlConfigs: vi.fn(),
+        setGroupings: vi.fn(),
+      },
+    })),
+    createStateContainerReactHelpers: vi.fn(() => ({
+      useContainer: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAlertSearchBarStateContainer', () => {
   const mockSet = vi.fn();

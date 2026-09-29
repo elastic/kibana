@@ -34,7 +34,7 @@ import { getIndexDetails } from './core/get_index_details';
 import { isMemoryConstrained } from './low_memory';
 
 vi.mock('./low_memory', async () => {
-  const actual = (await vi.importActual('./low_memory'));
+  const actual = await vi.importActual('./low_memory');
   return {
     ...actual,
     isMemoryConstrained: vi.fn(() => false),
@@ -42,7 +42,7 @@ vi.mock('./low_memory', async () => {
 });
 
 vi.mock('./core', async () => {
-  const actual = (await vi.importActual('./core'));
+  const actual = await vi.importActual('./core');
   return {
     ...actual,
     createIndexMap: vi.fn(actual.createIndexMap),
@@ -50,7 +50,7 @@ vi.mock('./core', async () => {
 });
 
 vi.mock('./core/get_index_details', async () => {
-  const actual = (await vi.importActual('./core/get_index_details'));
+  const actual = await vi.importActual('./core/get_index_details');
   return {
     ...actual,
     getIndexDetails: vi.fn(() =>
@@ -83,7 +83,7 @@ const V2_SUCCESSFUL_MIGRATION_RESULT: MigrationResult[] = [
 ];
 
 vi.mock('./run_resilient_migrator', async () => {
-  const actual = (await vi.importActual('./run_resilient_migrator'));
+  const actual = await vi.importActual('./run_resilient_migrator');
   return {
     ...actual,
     runResilientMigrator: vi.fn(() => Promise.resolve(V2_SUCCESSFUL_MIGRATION_RESULT)),
@@ -97,9 +97,7 @@ const mockRunResilientMigrator = runResilientMigrator as MockedFunction<
 >;
 
 const mockGetIndexDetails = getIndexDetails as MockedFunction<typeof getIndexDetails>;
-const mockIsMemoryConstrained = isMemoryConstrained as MockedFunction<
-  typeof isMemoryConstrained
->;
+const mockIsMemoryConstrained = isMemoryConstrained as MockedFunction<typeof isMemoryConstrained>;
 
 describe('runV2Migration', () => {
   beforeEach(() => {

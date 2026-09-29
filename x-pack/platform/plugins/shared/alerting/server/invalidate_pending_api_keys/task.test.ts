@@ -20,12 +20,12 @@ import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { taskRunner } from './task';
 
 vi.mock('@kbn/task-manager-plugin/server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/task-manager-plugin/server')),
-      runInvalidate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/task-manager-plugin/server')),
+    runInvalidate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runInvalidateMock = runInvalidate as Mock;
 

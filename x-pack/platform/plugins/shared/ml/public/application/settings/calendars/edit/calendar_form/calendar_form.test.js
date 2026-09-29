@@ -13,31 +13,31 @@ import { renderWithI18n } from '../../../../test_utils/render_with_ml_context';
 import { CalendarForm } from './calendar_form';
 
 vi.mock('../../../../contexts/kibana/use_create_url', () => {
-      const mocked = {
-      useCreateAndNavigateToManagementMlLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateAndNavigateToManagementMlLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: vi.fn(),
-            getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/calendars_list'),
-          },
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: vi.fn(),
+          getUrlForApp: vi.fn(() => '/app/management/ml/ad_settings/calendars_list'),
         },
-      }),
-      useNavigateToPath: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    useNavigateToPath: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testProps = {
   calendarId: '',

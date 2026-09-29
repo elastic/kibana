@@ -19,45 +19,45 @@ import { documentFlyoutHistoryKey } from '../constants/flyout_history';
 import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useStore: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useStore: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/hooks/is_in_security_app');
 vi.mock('../components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: vi.fn(() => 'FLYOUT_CONTENT'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_default_flyout_properties', () => {
-      const mocked = {
-      useDefaultToolsFlyoutProperties: vi.fn(() => ({ minWidth: 384, size: 'm' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultToolsFlyoutProperties: vi.fn(() => ({ minWidth: 384, size: 'm' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWriteOnOpen = vi.fn();
 const mockBuildOnClose = vi.fn(() => vi.fn());
 vi.mock('../url_state/flyout_v2_url_writer', () => {
-      const mocked = {
-      useFlyoutV2UrlWriter: vi.fn(() => ({
-        writeOnOpen: mockWriteOnOpen,
-        buildOnClose: mockBuildOnClose,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutV2UrlWriter: vi.fn(() => ({
+      writeOnOpen: mockWriteOnOpen,
+      buildOnClose: mockBuildOnClose,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenSystemFlyout = vi.fn();
 const hit = {

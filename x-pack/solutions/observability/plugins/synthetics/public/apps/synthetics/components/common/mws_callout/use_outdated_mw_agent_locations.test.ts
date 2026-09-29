@@ -16,33 +16,33 @@ import { useUrlSpaceId } from '../../../hooks/use_url_space_id';
 import { useOutdatedMwAgentLocationIds } from './use_outdated_mw_agent_locations';
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      FETCH_STATUS: (await vi.importActual('@kbn/observability-shared-plugin/public')).FETCH_STATUS,
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FETCH_STATUS: (await vi.importActual('@kbn/observability-shared-plugin/public')).FETCH_STATUS,
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_url_space_id', () => {
-      const mocked = {
-      useUrlSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUrlSpaceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/api_service/api_service', () => {
-      const mocked = {
-      apiService: { get: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiService: { get: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = useFetcher as MockedFunction<typeof useFetcher>;
 const mockUseUrlSpaceId = useUrlSpaceId as MockedFunction<typeof useUrlSpaceId>;

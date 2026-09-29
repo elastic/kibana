@@ -22,11 +22,11 @@ import { CustomizePanelEditor } from './customize_panel_editor';
 
 // Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('customize panel editor', () => {
   let api: CustomizePanelActionApi;

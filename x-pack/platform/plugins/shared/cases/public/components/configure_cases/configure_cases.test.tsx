@@ -97,7 +97,7 @@ describe('ConfigureCasesRedesign', () => {
       isAtLeastPlatinum: () => true,
     });
 
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -191,7 +191,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('renders the legacy section with switch off by default when templates v2 is enabled', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -209,7 +209,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('shows legacy custom fields and templates lists when the switch is turned on', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -227,7 +227,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('forces the show-legacy switch on when required fields lack defaults', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -257,7 +257,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('shows add buttons for empty legacy custom fields and templates when the switch is on', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -291,7 +291,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('opens add custom field flyout with add header when switch is on', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -310,7 +310,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('opens add flyout after edit without keeping the previous field', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,
@@ -339,7 +339,7 @@ describe('ConfigureCasesRedesign', () => {
   });
 
   it('persists custom field deletion when switch is on', async () => {
-    const { useCasesConfig } = (await vi.importMock('../../common/lib/kibana'));
+    const { useCasesConfig } = await vi.importMock('../../common/lib/kibana');
     useCasesConfig.mockReturnValue({
       attachmentsEnabled: false,
       chatEnabled: false,

@@ -22,50 +22,50 @@ const ELASTIC_ACTOR = { profile_uid: ELASTIC_UID };
 const mockBulkGet = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return {
-            getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
-          };
-        }
-        if (token === 'settings') {
-          return {
-            client: { get: () => 'YYYY-MM-DD HH:mm' },
-          };
-        }
-        if (token === 'userProfile') {
-          return { bulkGet: mockBulkGet };
-        }
-        if (token === 'http') {
-          return {
-            basePath: { prepend: (path: string) => `/base${path}` },
-          };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return {
+          getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}${path}`,
+        };
+      }
+      if (token === 'settings') {
+        return {
+          client: { get: () => 'YYYY-MM-DD HH:mm' },
+        };
+      }
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
+      if (token === 'http') {
+        return {
+          basePath: { prepend: (path: string) => `/base${path}` },
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockIsLicenseValid = true;
 vi.mock('../../../hooks/use_is_action_policies_license_valid', () => {
-      const mocked = {
-      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_workflow', () => {
-      const mocked = {
-      useFetchWorkflow: (id: string) => ({
-        data: { id, name: `Workflow ${id}` },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchWorkflow: (id: string) => ({
+      data: { id, name: `Workflow ${id}` },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_SUBJ = {
   flyout: 'actionPolicyDetailsFlyout',

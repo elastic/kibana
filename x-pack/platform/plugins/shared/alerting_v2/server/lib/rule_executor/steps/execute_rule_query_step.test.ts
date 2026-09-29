@@ -531,9 +531,7 @@ describe('ExecuteRuleQueryStep', () => {
     it('marks ResponseError(400) ES|QL errors as TaskErrorSource.USER', async () => {
       mockHelpersEsqlToArrowReader(
         mockEsClient,
-        vi
-          .fn()
-          .mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
+        vi.fn().mockRejectedValue(new errors.ResponseError({ statusCode: 400 } as DiagnosticResult))
       );
 
       const state = createRulePipelineState({ rule: createRuleResponse() });

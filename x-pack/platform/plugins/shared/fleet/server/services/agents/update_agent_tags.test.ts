@@ -21,7 +21,7 @@ import { UpdateAgentTagsActionRunner, updateTagsBatch } from './update_agent_tag
 
 vi.mock('../spaces/helpers');
 vi.mock('../app_context', async () => {
-  const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
+  const { loggerMock } = await vi.importActual('@kbn/logging-mocks');
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
@@ -43,22 +43,22 @@ vi.mock('../agent_policy', () => {
   };
 });
 vi.mock('../secrets', () => {
-      const mocked = {
-      isActionSecretStorageEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isActionSecretStorageEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunAsync = vi.fn().mockResolvedValue({});
 vi.mock('./update_agent_tags_action_runner', async () => {
-      const mocked = {
-      ...(await vi.importActual('./update_agent_tags_action_runner')),
-      UpdateAgentTagsActionRunner: vi.fn().mockImplementation(() => {
-        return { runActionAsyncWithRetry: mockRunAsync, runActionAsyncTask: mockRunAsync };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./update_agent_tags_action_runner')),
+    UpdateAgentTagsActionRunner: vi.fn().mockImplementation(() => {
+      return { runActionAsyncWithRetry: mockRunAsync, runActionAsyncTask: mockRunAsync };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('update_agent_tags', () => {
   let esClient: ElasticsearchClientMock;

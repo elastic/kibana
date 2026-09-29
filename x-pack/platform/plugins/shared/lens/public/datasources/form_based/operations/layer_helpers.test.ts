@@ -56,11 +56,11 @@ dataMock.query.timefilter.timefilter.getAbsoluteTime = vi
 vi.mock('.');
 vi.mock('../../../id_generator');
 vi.mock('../dimension_panel/reference_editor', () => {
-      const mocked = {
-      ReferenceEditor: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReferenceEditor: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 const TARGET_BAR_COUNT = 100;
 
 const CoreStartMock = createCoreStartMock();
@@ -1874,9 +1874,7 @@ describe('state_helpers', () => {
           }),
           isTransferable: vi.fn(),
           toExpression: vi.fn().mockReturnValue([]),
-          getPossibleOperation: vi
-            .fn()
-            .mockReturnValue({ dataType: 'number', isBucketed: false }),
+          getPossibleOperation: vi.fn().mockReturnValue({ dataType: 'number', isBucketed: false }),
           getDefaultLabel: vi.fn().mockReturnValue('Test reference'),
         };
       });

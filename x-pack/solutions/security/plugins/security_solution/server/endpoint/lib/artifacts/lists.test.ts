@@ -45,12 +45,13 @@ import type { YaraValidateResult } from '../libyara';
 import { validateYaraRule, YaraEngineUnavailableError } from '../libyara';
 
 vi.mock('../libyara', async () => {
-      const mocked = {
-      validateYaraRule: vi.fn(),
-      YaraEngineUnavailableError: (await vi.importActual('../libyara/errors')).YaraEngineUnavailableError,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateYaraRule: vi.fn(),
+    YaraEngineUnavailableError: (await vi.importActual('../libyara/errors'))
+      .YaraEngineUnavailableError,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateYaraRule = validateYaraRule as MockedFunction<typeof validateYaraRule>;
 

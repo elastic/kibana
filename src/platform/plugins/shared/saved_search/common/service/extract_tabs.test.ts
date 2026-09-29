@@ -21,12 +21,12 @@ import { extractTabs, extractTabsBackfillFnV6, extractTabsTransformFnV13 } from 
 import { SavedSearchType, VIEW_MODE } from '..';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      ...require('uuid'),
-      v4: vi.fn(() => 'mock-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('uuid'),
+    v4: vi.fn(() => 'mock-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockContext: SavedObjectModelTransformationContext = {
   log: loggerMock.create(),

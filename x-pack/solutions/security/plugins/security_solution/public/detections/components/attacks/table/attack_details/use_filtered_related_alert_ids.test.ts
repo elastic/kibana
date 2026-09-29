@@ -18,55 +18,55 @@ import { useBrowserFields } from '../../../../../data_view_manager/hooks/use_bro
 import { useQueryAlerts } from '../../../../containers/detection_engine/alerts/use_query';
 
 vi.mock('../../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_selector', () => {
-      const mocked = {
-      useDeepEqualSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeepEqualSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kuery', () => {
-      const mocked = {
-      combineQueries: vi.fn(() => ({
-        filterQuery: '{"match_all":{}}',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    combineQueries: vi.fn(() => ({
+      filterQuery: '{"match_all":{}}',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFilteredRelatedAlertIds', () => {
   const setQueryMock = vi.fn();

@@ -21,13 +21,13 @@ import type { TelemetryConfiguration, TelemetryQueryConfiguration } from '../typ
 
 // Mock the artifact service
 vi.mock('../artifact', () => {
-      const mocked = {
-      artifactService: {
-        getArtifact: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    artifactService: {
+      getArtifact: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedArtifactService = artifactService as Mocked<typeof artifactService>;
 

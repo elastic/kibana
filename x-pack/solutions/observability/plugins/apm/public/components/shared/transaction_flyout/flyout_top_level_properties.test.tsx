@@ -14,29 +14,29 @@ import type { Transaction } from '../../../../typings/es_schemas/ui/transaction'
 import { FlyoutTopLevelProperties } from './flyout_top_level_properties';
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        query: {
-          kuery: '',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          environment: 'ENVIRONMENT_ALL',
-          comparisonEnabled: false,
-          offset: '1d',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      query: {
+        kuery: '',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
+        comparisonEnabled: false,
+        offset: '1d',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({
-        link: vi.fn().mockReturnValue('/mock-link'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({
+      link: vi.fn().mockReturnValue('/mock-link'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseTransaction = {
   '@timestamp': '2024-01-01T00:00:00.000Z',

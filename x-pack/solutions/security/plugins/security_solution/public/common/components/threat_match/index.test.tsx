@@ -30,11 +30,11 @@ const mockTheme = getMockTheme({
 
 vi.mock('../../lib/kibana');
 vi.mock('../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getDoublePayLoad = (): ThreatMapping => [
   { entries: [{ field: 'host.name', type: 'mapping', value: 'host.name' }] },

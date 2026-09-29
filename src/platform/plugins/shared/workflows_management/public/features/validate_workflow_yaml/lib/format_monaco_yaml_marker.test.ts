@@ -18,25 +18,25 @@ import { formatMonacoYamlMarker } from './format_monaco_yaml_marker';
 const mockEnrichErrorMessage = vi.fn();
 
 vi.mock('@kbn/workflows/common/utils/yaml', () => {
-      const mocked = {
-      getPathAtOffset: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPathAtOffset: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-yaml', () => {
-      const mocked = {
-      enrichErrorMessage: (...args: any[]) => mockEnrichErrorMessage(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    enrichErrorMessage: (...args: any[]) => mockEnrichErrorMessage(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/connector_params_schema_resolver', () => {
-      const mocked = {
-      connectorParamsSchemaResolver: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    connectorParamsSchemaResolver: vi.fn().mockReturnValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;

@@ -28,14 +28,14 @@ const mockedUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as MockedF
 const mockedUseDashboardLocator = vi.mocked(useDashboardLocator);
 
 vi.mock('../../../../../../hooks/use_fleet_status', () => {
-      const mocked = {
-      FleetStatusProvider: (props: any) => {
-        return props.children;
-      },
-      useFleetStatus: vi.fn().mockReturnValue({ spaceId: 'default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FleetStatusProvider: (props: any) => {
+      return props.children;
+    },
+    useFleetStatus: vi.fn().mockReturnValue({ spaceId: 'default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks/use_request/epm');
 

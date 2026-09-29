@@ -14,11 +14,11 @@ import { copyToClipboard } from '@elastic/eui';
 import { copyTextToClipboard } from './copy_text_to_clipboard';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      copyToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCopyToClipboard = copyToClipboard as MockedFunction<typeof copyToClipboard>;
 

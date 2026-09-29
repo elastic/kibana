@@ -16,11 +16,11 @@ import { ServiceNameLink } from './service_name_link';
 import { getUnifiedDocViewerServices } from '../../../../plugin';
 
 vi.mock('../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SERVICE_NAME = 'opbeans-java';
 const APM_HREF = 'http://apm/services/opbeans-java';

@@ -31,7 +31,7 @@ vi.mock('react-redux-v7', () => {
 });
 vi.mock('../../../common/hooks/use_selector');
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
 
   return {
     ...original,

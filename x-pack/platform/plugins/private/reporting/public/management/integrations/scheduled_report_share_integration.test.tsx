@@ -14,13 +14,13 @@ import type { ExportShareConfig, ShareContext } from '@kbn/share-plugin/public/t
 import type { ReportingAPIClient } from '@kbn/reporting-public';
 
 vi.mock('../components/scheduled_report_flyout_share_wrapper', () => {
-      const mocked = {
-      ScheduledReportFlyoutShareWrapper: () => (
-        <div data-test-subj="mockScheduledReportFlyoutShareWrapper" />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScheduledReportFlyoutShareWrapper: () => (
+      <div data-test-subj="mockScheduledReportFlyoutShareWrapper" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getReportingShareIntegrationConfig', () => {
   const mockApiClient = {} as Mocked<ReportingAPIClient>;

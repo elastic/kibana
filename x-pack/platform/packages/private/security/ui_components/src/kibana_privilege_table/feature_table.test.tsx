@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, screen, within } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import type { KibanaFeature, SubFeatureConfig } from '@kbn/features-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';

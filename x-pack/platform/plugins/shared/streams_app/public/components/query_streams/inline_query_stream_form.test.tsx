@@ -24,11 +24,11 @@ const mockRouter: StatefulStreamsAppRouter = {
 } as StatefulStreamsAppRouter;
 
 vi.mock('../../hooks/use_streams_app_router', () => {
-      const mocked = {
-      useStreamsAppRouter: () => mockRouter,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppRouter: () => mockRouter,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRoutingContext = {
   definition: { stream: { name: 'logs' } },
@@ -38,23 +38,23 @@ const mockRoutingContext = {
 vi.mock(
   '../stream_management/data_management/stream_detail_routing/state_management/stream_routing_state_machine',
   () => {
-      const mocked = {
-        useStreamsRoutingSelector: <TSelected,>(
-          selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
-        ): TSelected => selector({ context: mockRoutingContext }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useStreamsRoutingSelector: <TSelected,>(
+        selector: (snapshot: { context: typeof mockRoutingContext }) => TSelected
+      ): TSelected => selector({ context: mockRoutingContext }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../esql_query_editor', () => {
-      const mocked = {
-      StreamsESQLEditor: ({ query }: { query: { esql: string } }) => (
-        <div data-test-subj="stubEsqlEditor">{query.esql}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StreamsESQLEditor: ({ query }: { query: { esql: string } }) => (
+      <div data-test-subj="stubEsqlEditor">{query.esql}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 

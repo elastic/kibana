@@ -68,11 +68,11 @@ vi.mock('./loader');
 vi.mock('../../id_generator');
 vi.mock('./operations');
 vi.mock('./dimension_panel/reference_editor', () => {
-      const mocked = {
-      ReferenceEditor: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReferenceEditor: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const nowInstant = new Date();
 

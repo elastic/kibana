@@ -7,7 +7,6 @@
 
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
 import React from 'react';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';

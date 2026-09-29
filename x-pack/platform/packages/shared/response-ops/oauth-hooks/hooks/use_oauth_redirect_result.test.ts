@@ -10,12 +10,12 @@ import type { MockedFunction } from 'vitest';
 
 const mockReplace = vi.fn();
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: vi.fn(),
-      useHistory: vi.fn(() => ({ replace: mockReplace })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: vi.fn(),
+    useHistory: vi.fn(() => ({ replace: mockReplace })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { renderHook } from '@testing-library/react';
 import { useLocation } from 'react-router-dom';

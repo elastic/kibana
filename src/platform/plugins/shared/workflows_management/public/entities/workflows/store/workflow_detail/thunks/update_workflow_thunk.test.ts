@@ -30,21 +30,21 @@ const mockLoadWorkflowThunk = loadWorkflowThunk as MockedFunction<typeof loadWor
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the query client
 vi.mock('../../../../../shared/lib/query_client', () => {
-      const mocked = {
-      queryClient: {
-        invalidateQueries: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    queryClient: {
+      invalidateQueries: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 // Set up initial state with workflow and yaml
 const mockWorkflow: WorkflowDetailDto = {
   id: 'test-workflow-1',
@@ -59,7 +59,7 @@ const mockWorkflow: WorkflowDetailDto = {
   valid: true,
 };
 
-const { queryClient } = (await vi.importMock('../../../../../shared/lib/query_client'));
+const { queryClient } = await vi.importMock('../../../../../shared/lib/query_client');
 const defaultUpdateWorkflowResponse: UpdatedWorkflowResponseDto = {
   id: 'test-workflow-1',
   lastUpdatedAt: '2023-01-01T00:00:00Z',

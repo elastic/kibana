@@ -82,12 +82,12 @@ import type {
 import { AlertStates } from './types';
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      addTransactionLabels: vi.fn(),
-      withSpan: vi.fn((_opts: unknown, cb: () => unknown) => cb()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addTransactionLabels: vi.fn(),
+    withSpan: vi.fn((_opts: unknown, cb: () => unknown) => cb()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('elastic-apm-node', () => ({
   default: { setCustomContext: vi.fn() },

@@ -15,11 +15,11 @@ import { CONNECTOR_ID as MCP_CONNECTOR_TYPE_ID } from '@kbn/connector-schemas/mc
 import { validateConnector, validateToolName, validateConfig } from './validate_configuration';
 
 vi.mock('@kbn/agent-builder-common', () => {
-      const mocked = {
-      createBadRequestError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createBadRequestError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateBadRequestError = createBadRequestError as MockedFunction<
   typeof createBadRequestError

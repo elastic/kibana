@@ -25,9 +25,9 @@ import { Actions } from '../authorization';
 describe('ensureAuthorized', () => {
   function setupDependencies() {
     const actions = new Actions();
-    vi
-      .spyOn(actions.savedObject, 'get')
-      .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
+    vi.spyOn(actions.savedObject, 'get').mockImplementation(
+      (type: string, action: string) => `mock-saved_object:${type}/${action}`
+    );
     const errors = {
       decorateForbiddenError: vi.fn().mockImplementation((err) => err),
       decorateGeneralError: vi.fn().mockImplementation((err) => err),

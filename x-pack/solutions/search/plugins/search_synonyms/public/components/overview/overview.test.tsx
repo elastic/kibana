@@ -16,38 +16,38 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          console: undefined,
-          history: { push: vi.fn(), location: { search: '' } },
-          searchNavigation: {
-            useClassicNavigation: vi.fn(),
-            breadcrumbs: {
-              setSearchBreadCrumbs: vi.fn(),
-              clearBreadcrumbs: vi.fn(),
-            },
-          },
-          chrome: {
-            getChromeStyle: vi.fn().mockReturnValue('classic'),
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        console: undefined,
+        history: { push: vi.fn(), location: { search: '' } },
+        searchNavigation: {
+          useClassicNavigation: vi.fn(),
+          breadcrumbs: {
+            setSearchBreadCrumbs: vi.fn(),
+            clearBreadcrumbs: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        chrome: {
+          getChromeStyle: vi.fn().mockReturnValue('classic'),
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_fetch_synonyms_sets', () => {
-      const mocked = {
-      useFetchSynonymsSets: vi.fn(() => ({
-        data: undefined,
-        isLoading: false,
-        isError: true,
-        error: { body: { statusCode: 500 } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSynonymsSets: vi.fn(() => ({
+      data: undefined,
+      isLoading: false,
+      isError: true,
+      error: { body: { statusCode: 500 } },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Search Synonyms Overview', () => {
   const queryClient = new QueryClient();

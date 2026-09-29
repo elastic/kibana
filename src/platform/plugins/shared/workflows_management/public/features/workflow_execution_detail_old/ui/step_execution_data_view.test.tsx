@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { StepExecutionDataView } from './step_execution_data_view';
 
@@ -22,14 +21,14 @@ const renderWithIntl = (component: React.ReactElement) => {
 // Mock the JSONDataView component
 const mockJSONDataView = vi.fn();
 vi.mock('./shared/execution_data_viewer', () => {
-      const mocked = {
-      ExecutionDataViewer: (props: any) => {
-        mockJSONDataView(props);
-        return <div data-test-subj="mocked-json-data-view">{props.title}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExecutionDataViewer: (props: any) => {
+      mockJSONDataView(props);
+      return <div data-test-subj="mocked-json-data-view">{props.title}</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseStepExecution = {
   stepId: 'my-step',

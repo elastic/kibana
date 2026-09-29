@@ -20,11 +20,11 @@ import { createDataStreamAdapterMock } from '@kbn/alerting-plugin/server/mocks';
 import type { DataStreamAdapter } from '@kbn/alerting-plugin/server';
 
 vi.mock('../rule_data_client/rule_data_client', () => {
-      const mocked = {
-      RuleDataClient: vi.fn().mockImplementation(() => mockCreateRuleDataClient()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDataClient: vi.fn().mockImplementation(() => mockCreateRuleDataClient()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const frameworkAlertsService = {
   enabled: () => false,

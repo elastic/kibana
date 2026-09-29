@@ -26,11 +26,11 @@ const mockDocTitleChange = vi.fn();
 const mockFindItems = vi.fn();
 
 vi.mock('../../application/breadcrumb_context', () => {
-      const mocked = {
-      useSetBreadcrumbs: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetBreadcrumbs: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockAgentBuilderShow = true;
 let mockExperimentalFeaturesEnabled = true;
@@ -40,7 +40,9 @@ let mockCanWriteActionPolicies = true;
 let mockToursEnabled = true;
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -94,94 +96,94 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
-        <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
-          Compose Discover flyout
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComposeDiscoverFlyout: ({ onCreateRule }: { onCreateRule: (payload: unknown) => void }) => (
+      <button data-test-subj="composeDiscoverFlyout" onClick={() => onCreateRule({})}>
+        Compose Discover flyout
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rules_data_source', async () => {
-      const mocked = {
-      ...(await vi.importActual('./rules_data_source')),
-      useRulesDataSource: () => ({
-        findItems: mockFindItems,
-        // Skip Content List's search debounce so filter/search assertions stay synchronous.
-        debounceMs: 0,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./rules_data_source')),
+    useRulesDataSource: () => ({
+      findItems: mockFindItems,
+      // Skip Content List's search debounce so filter/search assertions stay synchronous.
+      debounceMs: 0,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_fetch_rule_tags', () => {
-      const mocked = {
-      useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleTags: () => ({ data: ['prod'], isLoading: false, isError: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateRuleMutate = vi.fn();
 vi.mock('../../hooks/use_create_rule', () => {
-      const mocked = {
-      useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateRule: () => ({ mutate: mockCreateRuleMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpdateRuleMutate = vi.fn();
 vi.mock('../../hooks/use_update_rule', () => {
-      const mocked = {
-      useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateRule: () => ({ mutate: mockUpdateRuleMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteMutate = vi.fn();
 const mockUseDeleteRule = vi.fn();
 vi.mock('../../hooks/use_delete_rule', () => {
-      const mocked = {
-      useDeleteRule: () => mockUseDeleteRule(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteRule: () => mockUseDeleteRule(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBulkDeleteMutate = vi.fn();
 vi.mock('../../hooks/use_bulk_delete_rules', () => {
-      const mocked = {
-      useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBulkEnableMutate = vi.fn();
 const mockBulkDisableMutate = vi.fn();
 vi.mock('../../hooks/use_bulk_enable_disable_rules', () => {
-      const mocked = {
-      useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
-      useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkEnableRules: () => ({ mutate: mockBulkEnableMutate, isLoading: false }),
+    useBulkDisableRules: () => ({ mutate: mockBulkDisableMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToggleEnabledMutate = vi.fn();
 const mockUseToggleRuleEnabled = vi.fn();
 vi.mock('../../hooks/use_toggle_rule_enabled', () => {
-      const mocked = {
-      useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunRuleMutate = vi.fn();
 vi.mock('../../hooks/use_run_rule', () => {
-      const mocked = {
-      useRunRule: () => ({ mutate: mockRunRuleMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunRule: () => ({ mutate: mockRunRuleMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createRule = (overrides: Partial<RuleApiResponse> = {}): RuleApiResponse =>
   ({

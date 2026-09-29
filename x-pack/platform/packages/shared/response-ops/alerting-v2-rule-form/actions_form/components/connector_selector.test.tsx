@@ -19,43 +19,43 @@ const mockInvalidateQueries = vi.fn();
 const mockSetQueryData = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') return {};
-        if (token === 'plugin.start.triggersActionsUi') {
-          return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') return {};
+      if (token === 'plugin.start.triggersActionsUi') {
+        return { getAddConnectorFlyout: mockGetAddConnectorFlyout };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di', () => {
-      const mocked = {
-      PluginStart: (key: string) => `plugin.start.${key}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginStart: (key: string) => `plugin.start.${key}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_connectors_by_type', () => {
-      const mocked = {
-      ALL_CONNECTORS_KEY: ['alertingV2', 'actionForm', 'connectors'],
-      useFetchConnectorsByType: () => ({ data: [], isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ALL_CONNECTORS_KEY: ['alertingV2', 'actionForm', 'connectors'],
+    useFetchConnectorsByType: () => ({ data: [], isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQueryClient: () => ({
-        invalidateQueries: mockInvalidateQueries,
-        setQueryData: mockSetQueryData,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryClient: () => ({
+      invalidateQueries: mockInvalidateQueries,
+      setQueryData: mockSetQueryData,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderSelector = (
   connectorCreation?: { mode: 'flyout' } | { mode: 'new-tab'; href: string }

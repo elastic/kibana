@@ -16,9 +16,9 @@ import { getAllDocFileIds } from './get_all_doc_file_ids';
 
 vi.mock('fs/promises');
 vi.mock('globby', () => {
-      const mocked = { globby: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { globby: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockFsp = Fsp as Mocked<typeof Fsp>;
 const mockGlobby = globby as MockedFunction<typeof globby>;

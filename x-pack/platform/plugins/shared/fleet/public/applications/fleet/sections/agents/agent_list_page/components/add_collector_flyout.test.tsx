@@ -28,39 +28,39 @@ import { useManagedOtlp } from './use_managed_otlp';
 import { AddCollectorFlyout } from './add_collector_flyout';
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      sendGetOneAgentPolicy: vi.fn(),
-      sendCreateAgentPolicyForRq: vi.fn(),
-      sendGetEnrollmentAPIKeys: vi.fn(),
-      useGetFleetServerHosts: vi.fn(),
-      useFleetStatus: vi.fn(),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    sendGetOneAgentPolicy: vi.fn(),
+    sendCreateAgentPolicyForRq: vi.fn(),
+    sendGetEnrollmentAPIKeys: vi.fn(),
+    useGetFleetServerHosts: vi.fn(),
+    useFleetStatus: vi.fn(),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../components', () => {
-      const mocked = {
-      AgentEnrollmentConfirmationStep: () => ({
-        title: 'Confirm enrollment',
-        children: <div>Confirmation</div>,
-      }),
-      usePollingAgentCount: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentEnrollmentConfirmationStep: () => ({
+      title: 'Confirm enrollment',
+      children: <div>Confirmation</div>,
+    }),
+    usePollingAgentCount: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../components/agent_enrollment_flyout/hooks', () => {
-      const mocked = {
-      useGetCreateApiKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetCreateApiKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_managed_otlp', () => {
-      const mocked = {
-      useManagedOtlp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedOtlp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedSendGetOneAgentPolicy = vi.mocked(sendGetOneAgentPolicy);
 const mockedSendCreateAgentPolicyForRq = vi.mocked(sendCreateAgentPolicyForRq);

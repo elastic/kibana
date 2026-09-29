@@ -37,90 +37,90 @@ import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
 vi.mock('../../hooks/use_alertzero_doc_title', () => {
-      const mocked = { useAlertZeroDocTitle: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAlertZeroDocTitle: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_can_write_alertzero', () => {
-      const mocked = {
-      useCanWriteAlertZero: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanWriteAlertZero: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_watches_api');
 vi.mock('../../hooks/use_workers_api');
 vi.mock('./components/watches_section_layout', () => {
-      const mocked = {
-      WatchesSectionLayout: ({
-        children,
-        title,
-        badges,
-        headerPrimaryActionItem,
-        headerItems,
-      }: {
-        children: React.ReactNode;
-        title: string;
-        badges?: Array<{ label: string; 'data-test-subj'?: string }>;
-        headerPrimaryActionItem?: {
-          label: string;
-          testId?: string;
-          disableButton?: boolean | (() => boolean);
-          isLoading?: boolean;
-          tooltipContent?: string | (() => string | undefined);
-          run: () => void;
-        };
-        headerItems?: Array<{
-          label: string;
-          testId?: string;
-          disableButton?: boolean | (() => boolean);
-          tooltipContent?: string | (() => string | undefined);
-          run: () => void;
-        }>;
-      }) => {
-        const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
-          typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
-        // Real AppMenu buttons wrap in an EuiToolTip and expose its content via the button's
-        // accessible `title`. Reading `tooltipContent` here (rather than dropping it like the real
-        // header items list) is what makes the read-only tooltip contract observable in this test.
-        const resolveTooltip = (tooltipContent?: string | (() => string | undefined)) =>
-          typeof tooltipContent === 'function' ? tooltipContent() : tooltipContent;
-        return (
-          <div>
-            <h1>{title}</h1>
-            {badges?.map((badge) => (
-              <span key={badge.label} data-test-subj={badge['data-test-subj']}>
-                {badge.label}
-              </span>
-            ))}
-            {headerItems?.map((item) => (
-              <button
-                key={item.testId}
-                type="button"
-                data-test-subj={item.testId}
-                disabled={resolveDisabled(item.disableButton)}
-                title={resolveTooltip(item.tooltipContent)}
-                onClick={() => item.run()}
-              >
-                {item.label}
-              </button>
-            ))}
-            {headerPrimaryActionItem ? (
-              <button
-                type="button"
-                data-test-subj={headerPrimaryActionItem.testId}
-                disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
-                title={resolveTooltip(headerPrimaryActionItem.tooltipContent)}
-                onClick={() => headerPrimaryActionItem.run()}
-              >
-                {headerPrimaryActionItem.label}
-              </button>
-            ) : null}
-            {children}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchesSectionLayout: ({
+      children,
+      title,
+      badges,
+      headerPrimaryActionItem,
+      headerItems,
+    }: {
+      children: React.ReactNode;
+      title: string;
+      badges?: Array<{ label: string; 'data-test-subj'?: string }>;
+      headerPrimaryActionItem?: {
+        label: string;
+        testId?: string;
+        disableButton?: boolean | (() => boolean);
+        isLoading?: boolean;
+        tooltipContent?: string | (() => string | undefined);
+        run: () => void;
+      };
+      headerItems?: Array<{
+        label: string;
+        testId?: string;
+        disableButton?: boolean | (() => boolean);
+        tooltipContent?: string | (() => string | undefined);
+        run: () => void;
+      }>;
+    }) => {
+      const resolveDisabled = (disableButton?: boolean | (() => boolean)) =>
+        typeof disableButton === 'function' ? disableButton() : Boolean(disableButton);
+      // Real AppMenu buttons wrap in an EuiToolTip and expose its content via the button's
+      // accessible `title`. Reading `tooltipContent` here (rather than dropping it like the real
+      // header items list) is what makes the read-only tooltip contract observable in this test.
+      const resolveTooltip = (tooltipContent?: string | (() => string | undefined)) =>
+        typeof tooltipContent === 'function' ? tooltipContent() : tooltipContent;
+      return (
+        <div>
+          <h1>{title}</h1>
+          {badges?.map((badge) => (
+            <span key={badge.label} data-test-subj={badge['data-test-subj']}>
+              {badge.label}
+            </span>
+          ))}
+          {headerItems?.map((item) => (
+            <button
+              key={item.testId}
+              type="button"
+              data-test-subj={item.testId}
+              disabled={resolveDisabled(item.disableButton)}
+              title={resolveTooltip(item.tooltipContent)}
+              onClick={() => item.run()}
+            >
+              {item.label}
+            </button>
+          ))}
+          {headerPrimaryActionItem ? (
+            <button
+              type="button"
+              data-test-subj={headerPrimaryActionItem.testId}
+              disabled={resolveDisabled(headerPrimaryActionItem.disableButton)}
+              title={resolveTooltip(headerPrimaryActionItem.tooltipContent)}
+              onClick={() => headerPrimaryActionItem.run()}
+            >
+              {headerPrimaryActionItem.label}
+            </button>
+          ) : null}
+          {children}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWatch = vi.mocked(useWatch);
 const mockUseWorkers = vi.mocked(useWorkers);

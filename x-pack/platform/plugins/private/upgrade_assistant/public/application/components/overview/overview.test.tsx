@@ -24,56 +24,56 @@ import { Overview } from './overview';
 
 const mockUseAppContext = vi.fn();
 vi.mock('../../app_context', () => {
-      const mocked = {
-      useAppContext: () => mockUseAppContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: () => mockUseAppContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCloudStackVersionInfo = vi.fn<
   CloudStackVersionState,
   [Pick<ApiService, 'getCloudStackVersionInfo'>, string]
 >();
 vi.mock('./use_cloud_stack_version_info', () => {
-      const mocked = {
-      useCloudStackVersionInfo: (
-        api: Pick<ApiService, 'getCloudStackVersionInfo'>,
-        currentVersion: string
-      ) => mockUseCloudStackVersionInfo(api, currentVersion),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudStackVersionInfo: (
+      api: Pick<ApiService, 'getCloudStackVersionInfo'>,
+      currentVersion: string
+    ) => mockUseCloudStackVersionInfo(api, currentVersion),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./backup_step', () => {
-      const mocked = {
-      getBackupStep: () => ({ title: 'Backup', children: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBackupStep: () => ({ title: 'Backup', children: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./fix_issues_step', () => {
-      const mocked = {
-      getFixIssuesStep: () => ({ title: 'Fix issues', children: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFixIssuesStep: () => ({ title: 'Fix issues', children: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./upgrade_step', () => {
-      const mocked = {
-      getUpgradeStep: () => ({ title: 'Upgrade', children: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUpgradeStep: () => ({ title: 'Upgrade', children: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./migrate_system_indices', () => {
-      const mocked = {
-      getMigrateSystemIndicesStep: () => ({ title: 'Migrate system indices', children: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMigrateSystemIndicesStep: () => ({ title: 'Migrate system indices', children: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./logs_step', () => {
-      const mocked = {
-      getLogsStep: () => ({ title: 'Logs', children: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLogsStep: () => ({ title: 'Logs', children: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderOverview = () =>
   renderWithI18n(

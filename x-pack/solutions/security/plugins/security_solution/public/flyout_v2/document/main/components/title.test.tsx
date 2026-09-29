@@ -15,44 +15,44 @@ import { Title } from './title';
 import { TITLE_LINK_TEST_ID, TITLE_TEST_ID } from './test_ids';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: (_appId: string, { path }: { path: string }) =>
-              `/app/securitySolutionUI${path}`,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: (_appId: string, { path }: { path: string }) =>
+            `/app/securitySolutionUI${path}`,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/flyout_title', () => {
-      const mocked = {
-      FlyoutTitle: ({
-        title,
-        iconType,
-        isLink = false,
-        'data-test-subj': dataTestSubj,
-      }: {
-        title: string;
-        iconType?: string;
-        isLink?: boolean;
-        'data-test-subj'?: string;
-      }) => (
-        <div
-          data-test-subj={dataTestSubj}
-          data-title={title}
-          data-icon-type={iconType ?? ''}
-          data-is-link={String(isLink)}
-        >
-          {title}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutTitle: ({
+      title,
+      iconType,
+      isLink = false,
+      'data-test-subj': dataTestSubj,
+    }: {
+      title: string;
+      iconType?: string;
+      isLink?: boolean;
+      'data-test-subj'?: string;
+    }) => (
+      <div
+        data-test-subj={dataTestSubj}
+        data-title={title}
+        data-icon-type={iconType ?? ''}
+        data-is-link={String(isLink)}
+      >
+        {title}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

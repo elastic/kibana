@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import Boom from '@hapi/boom';
+import { vi } from 'vitest';
 
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';

@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { fetchAlertsIndexNames } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
@@ -34,17 +33,17 @@ const mockFetchAlertsIndexNames = fetchAlertsIndexNames as MockedFunction<
 
 vi.mock('../../../hooks/use_kibana');
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      SearchBar: MockSearchBar,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchBar: MockSearchBar,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_index_names', () => {
-      const mocked = {
-      fetchAlertsIndexNames: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAlertsIndexNames: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockTheme = themeServiceMock.createSetupContract({ darkMode: false, name: 'borealis' });

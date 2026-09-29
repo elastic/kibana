@@ -13,11 +13,11 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
 import { getRulesClientMockParams } from '../../test_utils';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => '111-222',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => '111-222',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('addGeneratedActionValues()', () => {
   const uiSettings = uiSettingsServiceMock.createStartContract();

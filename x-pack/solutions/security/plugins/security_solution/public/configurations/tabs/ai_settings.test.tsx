@@ -21,17 +21,17 @@ import { useAgentBuilderAvailability } from '../../agent_builder/hooks/use_agent
 const mockNavigateTo = vi.fn();
 vi.mock('../../common/lib/kibana');
 vi.mock('../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AISettings', () => {
   beforeEach(() => {

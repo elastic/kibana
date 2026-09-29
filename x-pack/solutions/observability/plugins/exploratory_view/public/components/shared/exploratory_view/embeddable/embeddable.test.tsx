@@ -17,11 +17,11 @@ import type { ActionTypes } from './use_actions';
 import * as lensHook from './use_embeddable_attributes';
 
 vi.mock('../header/add_to_case_action', () => {
-      const mocked = {
-      AddToCaseAction: vi.fn(() => <div>mockAddToCaseAction</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToCaseAction: vi.fn(() => <div>mockAddToCaseAction</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLensAttrs = {
   title: '',
@@ -162,9 +162,7 @@ describe('Embeddable', () => {
       container.querySelector(`[data-test-subj="exploratoryView-singleMetric"]`)
     ).not.toBeInTheDocument();
     expect(container.querySelector(`[data-test-subj="exploratoryView"]`)).toBeInTheDocument();
-    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].id).toEqual(
-      'exploratoryView'
-    );
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].id).toEqual('exploratoryView');
     expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].attributes).toEqual(
       mockLensAttrs
     );
@@ -177,9 +175,9 @@ describe('Embeddable', () => {
     expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].withDefaultActions).toEqual(
       true
     );
-    expect(
-      (mockLens.EmbeddableComponent as Mock).mock.calls[0][0].onBeforeBadgesRender()
-    ).toEqual([]);
+    expect((mockLens.EmbeddableComponent as Mock).mock.calls[0][0].onBeforeBadgesRender()).toEqual(
+      []
+    );
   });
 
   it('forwards onBeforeBadgesRender to the Lens embeddable', () => {

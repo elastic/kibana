@@ -17,11 +17,11 @@ import { getFormulaEquivalent, getReducedTimeRange } from './metrics_helpers';
 import { createPanel, createSeries } from '../__mocks__';
 
 vi.mock('../../../services', () => {
-      const mocked = {
-      getUISettings: () => ({ get: () => 50 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUISettings: () => ({ get: () => 50 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getFormulaEquivalent', () => {
   const notSupportedMetric: Metric = {

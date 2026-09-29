@@ -11,13 +11,13 @@ import { transformAssetAggregationToChartData } from './transform_asset_aggregat
 import { ASSET_FIELDS } from '../../constants';
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformAssetAggregationToChartData', () => {
   it('returns flattened subtype entries and other count', () => {

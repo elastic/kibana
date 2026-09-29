@@ -16,17 +16,17 @@ import { buildCasesPermissions, renderWithTestingProviders } from '../../../comm
 import { AddFile } from './add_file';
 
 vi.mock('./upload_file_modal', () => {
-      const mocked = {
-      UploadFileModal: ({ onClose }: { onClose: () => void }) => (
-        <div data-test-subj="upload-file-modal-mock">
-          <button data-test-subj="upload-file-modal-mock-close" type="button" onClick={onClose}>
-            {'close'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UploadFileModal: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="upload-file-modal-mock">
+        <button data-test-subj="upload-file-modal-mock-close" type="button" onClick={onClose}>
+          {'close'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AddFile', () => {
   beforeEach(() => {

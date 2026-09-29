@@ -23,57 +23,57 @@ vi.mock('react-use/lib/useDebounce', () => vi.fn());
 const mockUseEuiContainerQuery = vi.fn();
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiContainerQuery: (condition: string) => ({
-        ref: { current: null },
-        matches: mockUseEuiContainerQuery(condition),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiContainerQuery: (condition: string) => ({
+      ref: { current: null },
+      matches: mockUseEuiContainerQuery(condition),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-browser-shared', () => {
-      const mocked = {
-      AlertingDateRangePicker: ({
-        collapsed,
-        showTimeWindowButtons,
-        'data-test-subj': dataTestSubj,
-      }: {
-        collapsed?: boolean;
-        showTimeWindowButtons?: boolean;
-        'data-test-subj'?: string;
-      }) => (
-        <div
-          data-test-subj={dataTestSubj}
-          data-collapsed={collapsed}
-          data-show-time-window-buttons={showTimeWindowButtons}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingDateRangePicker: ({
+      collapsed,
+      showTimeWindowButtons,
+      'data-test-subj': dataTestSubj,
+    }: {
+      collapsed?: boolean;
+      showTimeWindowButtons?: boolean;
+      'data-test-subj'?: string;
+    }) => (
+      <div
+        data-test-subj={dataTestSubj}
+        data-collapsed={collapsed}
+        data-show-time-window-buttons={showTimeWindowButtons}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_tag_options', () => {
-      const mocked = {
-      useFetchEpisodeTagOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEpisodeTagOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/apis/fetch_rules_search', () => {
-      const mocked = {
-      fetchRulesSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchRulesSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_bulk_get_profiles', () => {
-      const mocked = {
-      useBulkGetProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchEpisodeTagOptions = vi.mocked(useFetchEpisodeTagOptions);
 const mockFetchRulesSearch = vi.mocked(fetchRulesSearch);

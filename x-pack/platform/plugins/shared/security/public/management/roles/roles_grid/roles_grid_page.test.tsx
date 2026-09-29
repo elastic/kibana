@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Mocked } from 'vitest';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { Mocked } from 'vitest';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';

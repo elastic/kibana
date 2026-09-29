@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 
@@ -18,12 +17,12 @@ import { ClusterConfigurationForm } from './cluster_configuration_form';
 import { Providers } from './plugin';
 
 vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-      const mocked = {
-      htmlIdGenerator: () => () => `id-${Math.random()}`,
-      useGeneratedHtmlId: () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    htmlIdGenerator: () => () => `id-${Math.random()}`,
+    useGeneratedHtmlId: () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ClusterConfigurationForm', () => {
   vi.setConfig({ testTimeout: 20_000 });

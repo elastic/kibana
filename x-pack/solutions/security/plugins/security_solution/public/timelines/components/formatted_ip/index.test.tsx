@@ -36,19 +36,19 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('../../../common/lib/kibana/kibana_react', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana/kibana_react')),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          application: {
-            getUrlForApp: vi.fn(),
-            navigateToApp: vi.fn(),
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana/kibana_react')),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: vi.fn(),
+          navigateToApp: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../store');
 

@@ -18,27 +18,27 @@ import { useConversationContext } from '../../../context/conversation/conversati
 import { AttachmentGroupPill } from './attachment_group_pill';
 
 vi.mock('../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attachment_pill', () => {
-      const mocked = {
-      AttachmentPill: ({ attachment }: { attachment: { id: string } }) => (
-        <div data-test-subj={`mock-attachment-pill-${attachment.id}`} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentPill: ({ attachment }: { attachment: { id: string } }) => (
+      <div data-test-subj={`mock-attachment-pill-${attachment.id}`} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attachment_group_pill', () => {
-      const mocked = {
-      AttachmentGroupPill: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentGroupPill: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationContext = vi.mocked(useConversationContext);
 const MockAttachmentGroupPill = vi.mocked(AttachmentGroupPill);

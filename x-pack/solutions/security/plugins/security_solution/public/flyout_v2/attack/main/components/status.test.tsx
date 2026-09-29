@@ -15,37 +15,37 @@ import { HEADER_STATUS_BLOCK_TEST_ID } from '../constants/test_ids';
 import type { DataTableRecord } from '@kbn/discover-utils';
 
 vi.mock('../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./status_popover_button', () => {
-      const mocked = {
-      StatusPopoverButton: ({
-        hit,
-        disabled,
-        onAttackUpdated: _onAttackUpdated,
-      }: {
-        hit: DataTableRecord;
-        disabled: boolean;
-        onAttackUpdated: () => void;
-      }) => (
-        <div data-test-subj="status-popover" data-disabled={String(disabled)}>
-          {String(hit.flattened['kibana.alert.workflow_status'])}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StatusPopoverButton: ({
+      hit,
+      disabled,
+      onAttackUpdated: _onAttackUpdated,
+    }: {
+      hit: DataTableRecord;
+      disabled: boolean;
+      onAttackUpdated: () => void;
+    }) => (
+      <div data-test-subj="status-popover" data-disabled={String(disabled)}>
+        {String(hit.flattened['kibana.alert.workflow_status'])}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/empty_value', () => {
-      const mocked = {
-      getEmptyTagValue: vi.fn(() => <div data-test-subj="empty-tag">{'-'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEmptyTagValue: vi.fn(() => <div data-test-subj="empty-tag">{'-'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildHit = (
   overrides: Record<string, unknown> = {},

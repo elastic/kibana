@@ -20,51 +20,51 @@ import {
 } from './check_prod_native_modules';
 
 vi.mock('fs', () => {
-      const mocked = {
-      promises: {
-        readdir: vi.fn(),
-      },
-      existsSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    promises: {
+      readdir: vi.fn(),
+    },
+    existsSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mocked/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mocked/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/tooling-log', () => {
-      const mocked = {
-      ToolingLog: vi.fn().mockImplementation(() => ({
-        info: vi.fn(),
-        error: vi.fn(),
-        success: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolingLog: vi.fn().mockImplementation(() => ({
+      info: vi.fn(),
+      error: vi.fn(),
+      success: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/yarn-lock-validator', () => {
-      const mocked = {
-      findProductionDependencies: vi.fn(),
-      readPnpmLock: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findProductionDependencies: vi.fn(),
+    readPnpmLock: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
   '/test/node_modules/@elastic/test-package/package.json',
   () => {
-      const mocked = {
-        name: '@elastic/test-package',
-        version: '1.0.0',
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      name: '@elastic/test-package',
+      version: '1.0.0',
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
@@ -72,12 +72,12 @@ vi.mock(
   // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
   '/test/node_modules/@elastic/package/package.json',
   () => {
-      const mocked = {
-        name: '@elastic/package',
-        version: '1.0.0',
-      };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = {
+      name: '@elastic/package',
+      version: '1.0.0',
+    };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
 
@@ -100,9 +100,7 @@ describe('Check Prod Native Modules', () => {
     });
 
     it('should return true if .node file is found', async () => {
-      (fs.readdir as Mock).mockResolvedValueOnce([
-        { name: 'test.node', isDirectory: () => false },
-      ]);
+      (fs.readdir as Mock).mockResolvedValueOnce([{ name: 'test.node', isDirectory: () => false }]);
 
       const result = await isNativeModule('/test/path', mockLog);
       expect(result).toBe(true);

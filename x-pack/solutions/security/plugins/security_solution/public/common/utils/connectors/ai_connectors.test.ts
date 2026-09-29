@@ -16,18 +16,18 @@ import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/com
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/constants', () => {
-      const mocked = {
-      loadAllActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadAllActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-endpoint-ui-common', () => {
-      const mocked = {
-      isInferenceEndpointExists: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInferenceEndpointExists: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttp = {} as HttpSetup;
 const settings = {

@@ -12,11 +12,11 @@ import { act, renderHook } from '@testing-library/react';
 import type { KibanaAssetReference } from '@kbn/fleet-plugin/common';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {

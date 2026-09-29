@@ -20,48 +20,48 @@ import type { FilterItemProps } from './filter_item';
 const { uiSettings, docLinks } = coreMock.createStart();
 
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = {
-      getDisplayValueFromFilter: () => '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDisplayValueFromFilter: () => '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/css-utils/public/use_memo_css', () => {
-      const mocked = {
-      useMemoCss: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMemoCss: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../filter_view', () => {
-      const mocked = {
-      FilterView: ({ onClick }: { onClick: React.MouseEventHandler }) => (
-        <button data-test-subj="filter-badge" onClick={onClick} type="button">
-          filter
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterView: ({ onClick }: { onClick: React.MouseEventHandler }) => (
+      <button data-test-subj="filter-badge" onClick={onClick} type="button">
+        filter
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../filter_editor/filter_editor', () => {
-      const mocked = {
-      FilterEditor: () => <div data-test-subj="mock-filter-editor" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterEditor: () => <div data-test-subj="mock-filter-editor" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Prevent loading the barrel (which pulls in phrases_values_input → withEuiTheme)
 vi.mock('../filter_editor', () => {
-      const mocked = {
-      withCloseFilterEditorConfirmModal: (Component: React.ComponentType<any>) => Component,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withCloseFilterEditorConfirmModal: (Component: React.ComponentType<any>) => Component,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Override only the components that need test-harness behaviour; keep the rest from test-env
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiPopover: ({

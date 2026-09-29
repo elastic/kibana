@@ -746,37 +746,37 @@ describe('When calling package policy', () => {
           withAgentCount: true,
         },
       });
-      (
-        (await context.core).elasticsearch.client.asInternalUser.search as Mock
-      ).mockImplementation(() => {
-        return {
-          took: 3,
-          timed_out: false,
-          _shards: {
-            total: 2,
-            successful: 2,
-            skipped: 0,
-            failed: 0,
-          },
-          hits: {
-            total: 100,
-            max_score: 0,
-            hits: [],
-          },
-          aggregations: {
-            agent_counts: {
-              doc_count_error_upper_bound: 0,
-              sum_other_doc_count: 0,
-              buckets: [
-                {
-                  key: 'agent-policy-id-a',
-                  doc_count: 100,
-                },
-              ],
+      ((await context.core).elasticsearch.client.asInternalUser.search as Mock).mockImplementation(
+        () => {
+          return {
+            took: 3,
+            timed_out: false,
+            _shards: {
+              total: 2,
+              successful: 2,
+              skipped: 0,
+              failed: 0,
             },
-          },
-        };
-      });
+            hits: {
+              total: 100,
+              max_score: 0,
+              hits: [],
+            },
+            aggregations: {
+              agent_counts: {
+                doc_count_error_upper_bound: 0,
+                sum_other_doc_count: 0,
+                buckets: [
+                  {
+                    key: 'agent-policy-id-a',
+                    doc_count: 100,
+                  },
+                ],
+              },
+            },
+          };
+        }
+      );
 
       await getPackagePoliciesHandler(context, request, response);
       const responseBody: ListResult<PackagePolicy> = {
@@ -985,9 +985,7 @@ describe('When calling package policy', () => {
         (getPackageInfo as Mock).mockResolvedValue({
           policy_templates: [mixedTemplate],
         });
-        (agentPolicyService.getByIds as Mock).mockResolvedValue([
-          { supports_agentless: true },
-        ]);
+        (agentPolicyService.getByIds as Mock).mockResolvedValue([{ supports_agentless: true }]);
 
         const request = httpServerMock.createKibanaRequest({
           body: testPackagePolicy,
@@ -1003,8 +1001,7 @@ describe('When calling package policy', () => {
           policy_templates: [mixedTemplate],
         });
         (
-          (await context.fleet).packagePolicyService
-            .asCurrentUser as Mocked<PackagePolicyClient>
+          (await context.fleet).packagePolicyService.asCurrentUser as Mocked<PackagePolicyClient>
         ).create.mockResolvedValue(testPackagePolicy);
 
         const request = httpServerMock.createKibanaRequest({
@@ -1021,8 +1018,7 @@ describe('When calling package policy', () => {
           policy_templates: [mixedTemplate],
         });
         (
-          (await context.fleet).packagePolicyService
-            .asCurrentUser as Mocked<PackagePolicyClient>
+          (await context.fleet).packagePolicyService.asCurrentUser as Mocked<PackagePolicyClient>
         ).create.mockResolvedValue(testPackagePolicy);
 
         const request = httpServerMock.createKibanaRequest({ body: testPackagePolicy });

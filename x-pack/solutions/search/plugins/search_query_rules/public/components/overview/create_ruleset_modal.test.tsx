@@ -50,33 +50,33 @@ const mockOnClose = vi.fn();
 
 const mockUseFetchQueryRulesetExist = useFetchQueryRulesetExist as Mock;
 vi.mock('../../hooks/use_fetch_ruleset_exists', () => {
-      const mocked = {
-      useFetchQueryRulesetExist: vi.fn().mockImplementation(() => ({
-        data: undefined,
-        isLoading: false,
-        isError: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchQueryRulesetExist: vi.fn().mockImplementation(() => ({
+      data: undefined,
+      isLoading: false,
+      isError: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            basePath: {
-              prepend: (path: string) => path,
-            },
-          },
-          application: {
-            navigateToUrl: vi.fn(),
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          basePath: {
+            prepend: (path: string) => path,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          navigateToUrl: vi.fn(),
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CreateRulesetModal', () => {
   beforeEach(() => {

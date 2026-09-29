@@ -17,24 +17,24 @@ import type { RuleFormState } from '../types';
 import { RuleDashboards } from './rule_dashboards';
 
 vi.mock('@kbn/dashboards-selector', () => {
-      const mocked = {
-      DashboardsSelector: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardsSelector: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock<{
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock<{
   useRuleFormState: Mock<{ formData: Partial<RuleFormState['formData']> }>;
   useRuleFormDispatch: Mock;
-}>('../hooks'));
+}>('../hooks');
 
 const mockSelector = vi.mocked(DashboardsSelector);
 const dispatch = vi.fn();

@@ -16,46 +16,46 @@ import { useDateRangeRedirect } from './use_date_range_redirect';
 const mockReplace = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ replace: mockReplace }),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ replace: mockReplace }),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsInactiveHistoryError = vi.fn();
 
 vi.mock('../components/shared/links/url_helpers', () => {
-      const mocked = {
-      isInactiveHistoryError: (...args: unknown[]) => mockIsInactiveHistoryError(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInactiveHistoryError: (...args: unknown[]) => mockIsInactiveHistoryError(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          uiSettings: {
-            get: () => ({ from: 'now-15m', to: 'now' }),
-          },
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        uiSettings: {
+          get: () => ({ from: 'now-15m', to: 'now' }),
         },
-        plugins: {
-          data: {
-            query: {
+      },
+      plugins: {
+        data: {
+          query: {
+            timefilter: {
               timefilter: {
-                timefilter: {
-                  getTime: () => ({ from: 'now-15m', to: 'now' }),
-                },
+                getTime: () => ({ from: 'now-15m', to: 'now' }),
               },
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { useLocation } = (await vi.importMock('react-router-dom')) as {
   useLocation: Mock;

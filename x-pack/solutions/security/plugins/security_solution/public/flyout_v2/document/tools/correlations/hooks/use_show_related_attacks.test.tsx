@@ -21,11 +21,11 @@ import type {
 import { useShowRelatedAttacks } from './use_show_related_attacks';
 
 vi.mock('../../../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => {
-      const mocked = {
-      useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useShowRelatedAttacks', () => {
   let hookResult: RenderHookResult<UseShowRelatedAttacksResult, UseShowRelatedAttacksParams>;

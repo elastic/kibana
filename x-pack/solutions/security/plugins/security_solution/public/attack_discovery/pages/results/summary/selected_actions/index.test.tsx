@@ -17,63 +17,63 @@ import { getMockAttackDiscoveryAlerts } from '../../../mock/mock_attack_discover
 import * as i18n from './translations';
 
 vi.mock('../../../../../assistant/use_assistant_availability', () => {
-      const mocked = {
-      useAssistantAvailability: () => ({
-        hasSearchAILakeConfigurations: true, // This ensures direct call to onConfirm
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantAvailability: () => ({
+      hasSearchAILakeConfigurations: true, // This ensures direct call to onConfirm
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../use_attack_discovery_bulk', () => {
-      const mocked = {
-      useAttackDiscoveryBulk: () => ({
-        mutateAsync: vi.fn().mockResolvedValue({}),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryBulk: () => ({
+      mutateAsync: vi.fn().mockResolvedValue({}),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../take_action/use_update_alerts_status', () => {
-      const mocked = {
-      useUpdateAlertsStatus: () => ({
-        mutateAsync: vi.fn().mockResolvedValue({}),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateAlertsStatus: () => ({
+      mutateAsync: vi.fn().mockResolvedValue({}),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../take_action/use_add_to_case', () => {
-      const mocked = {
-      useAddToCase: () => ({
-        disabled: false,
-        onAddToCase: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddToCase: () => ({
+      disabled: false,
+      onAddToCase: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => {
-      const mocked = {
-      useViewInAiAssistant: () => ({
-        showAssistantOverlay: vi.fn(),
-        disabled: false,
-        isAssistantVisible: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useViewInAiAssistant: () => ({
+      showAssistantOverlay: vi.fn(),
+      disabled: false,
+      isAssistantVisible: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../../detections/containers/detection_engine/alerts/use_alerts_privileges',
   () => {
-      const mocked = {
-        useAlertsPrivileges: () => ({
-          hasAlertsUpdate: true,
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAlertsPrivileges: () => ({
+        hasAlertsUpdate: true,
+      }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('SelectedActions', () => {

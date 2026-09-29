@@ -14,11 +14,11 @@ import { mockOnboardingContext, onboardingContext } from '../../__mocks__/mocks'
 const topicId = 'topic-id';
 const mockUseTopicId = vi.fn(() => topicId);
 vi.mock('../../hooks/use_topic_id', () => {
-      const mocked = {
-      useTopicId: () => mockUseTopicId(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTopicId: () => mockUseTopicId(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultBodyConfig = [{ title: 'Default Group 1', cards: [] }];
 const bodyConfig = [{ title: 'Group 1', cards: [] }];

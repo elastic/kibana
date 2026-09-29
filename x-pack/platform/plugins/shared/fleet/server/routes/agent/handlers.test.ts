@@ -38,7 +38,7 @@ vi.mock('../../services/agents/versions', () => {
 });
 
 vi.mock('../../services/app_context', async () => {
-  const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
+  const { loggerMock } = await vi.importActual('@kbn/logging-mocks');
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),
@@ -49,43 +49,43 @@ vi.mock('../../services/app_context', async () => {
 });
 
 vi.mock('../../services/spaces/helpers', () => {
-      const mocked = {
-      isSpaceAwarenessEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSpaceAwarenessEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agents/status', () => {
-      const mocked = {
-      getAgentStatusForAgentPolicy: vi.fn(),
-      getIncomingDataByAgentsId: vi.fn(),
-      getIncomingDataByDataStreams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentStatusForAgentPolicy: vi.fn(),
+    getIncomingDataByAgentsId: vi.fn(),
+    getIncomingDataByDataStreams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        getByIds: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      getByIds: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agents/agent_metrics', () => {
-      const mocked = {
-      fetchAndAssignAgentMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAndAssignAgentMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/epm/packages', () => {
-      const mocked = {
-      getPackageInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageInfo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Handlers', () => {
   // Helper function to create mock Elasticsearch errors
@@ -421,9 +421,9 @@ describe('Handlers', () => {
         }),
         fleet: Promise.resolve({}),
       };
-      vi
-        .spyOn(appContextService, 'getInternalUserESClient')
-        .mockReturnValue(mockGetInternalUserESClient());
+      vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(
+        mockGetInternalUserESClient()
+      );
     });
 
     afterEach(() => {

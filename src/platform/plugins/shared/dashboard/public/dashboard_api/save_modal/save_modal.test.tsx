@@ -15,57 +15,62 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { DashboardSaveModal } from './save_modal';
 
 vi.mock('@kbn/content-management-access-control-public', () => {
-      const mocked = {
-      AccessModeContainer: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AccessModeContainer: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/saved-objects-plugin/public', () => {
-      const mocked = {
-      SavedObjectSaveModal: ({ options }: { children: React.ReactNode; options: React.ReactNode }) => (
-        <div data-test-subj="save-modal">
-          <div data-test-subj="save-modal-options">{options}</div>
-        </div>
-      ),
-      SavedObjectSaveModalWithSaveResult: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedObjectSaveModal: ({
+      options,
+    }: {
+      children: React.ReactNode;
+      options: React.ReactNode;
+    }) => (
+      <div data-test-subj="save-modal">
+        <div data-test-subj="save-modal-options">{options}</div>
+      </div>
+    ),
+    SavedObjectSaveModalWithSaveResult: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/kibana_services', () => {
-      const mocked = {
-      coreServices: {
-        userProfile: {
-          getCurrent: vi.fn(),
-        },
+  const mocked = {
+    coreServices: {
+      userProfile: {
+        getCurrent: vi.fn(),
       },
-      savedObjectsTaggingService: undefined,
-      spacesService: {
-        getActiveSpace: vi.fn().mockResolvedValue({
-          id: 'default',
-          name: 'Default',
-          disabledFeatures: [],
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+    savedObjectsTaggingService: undefined,
+    spacesService: {
+      getActiveSpace: vi.fn().mockResolvedValue({
+        id: 'default',
+        name: 'Default',
+        disabledFeatures: [],
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/access_control_service', () => {
-      const mocked = {
-      getAccessControlClient: vi.fn().mockReturnValue({
-        isInEditAccessMode: vi.fn().mockReturnValue(false),
-        getCapabilities: vi.fn().mockResolvedValue({
-          capabilities: {
-            createAccessMode: true,
-            createReadOnlyAccessMode: true,
-          },
-        }),
+  const mocked = {
+    getAccessControlClient: vi.fn().mockReturnValue({
+      isInEditAccessMode: vi.fn().mockReturnValue(false),
+      getCapabilities: vi.fn().mockResolvedValue({
+        capabilities: {
+          createAccessMode: true,
+          createReadOnlyAccessMode: true,
+        },
       }),
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSave = vi.fn();
 const mockClose = vi.fn();

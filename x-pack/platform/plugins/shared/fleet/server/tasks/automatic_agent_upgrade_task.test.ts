@@ -50,13 +50,10 @@ const mockedFetchAllAgentsByKuery = fetchAllAgentsByKuery as MockedFunction<
   typeof fetchAllAgentsByKuery
 >;
 const mockedGetAgentsByKuery = getAgentsByKuery as MockedFunction<typeof getAgentsByKuery>;
-const mockedSendAutomaticUpgradeAgentsActions =
-  sendAutomaticUpgradeAgentsActions as MockedFunction<
-    typeof sendAutomaticUpgradeAgentsActions
-  >;
-const mockedIsAgentUpgradeable = isAgentUpgradeable as MockedFunction<
-  typeof isAgentUpgradeable
+const mockedSendAutomaticUpgradeAgentsActions = sendAutomaticUpgradeAgentsActions as MockedFunction<
+  typeof sendAutomaticUpgradeAgentsActions
 >;
+const mockedIsAgentUpgradeable = isAgentUpgradeable as MockedFunction<typeof isAgentUpgradeable>;
 
 const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
   vi.fn().mockResolvedValue(
@@ -158,9 +155,9 @@ describe('AutomaticAgentUpgradeTask', () => {
     };
 
     beforeEach(() => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAutomaticAgentUpgrades: true } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableAutomaticAgentUpgrades: true,
+      } as any);
       mockDefaultAgentPolicy();
       mockedIsAgentUpgradeable.mockReturnValue(true);
       mockedSendAutomaticUpgradeAgentsActions.mockResolvedValue({ actionId: 'action-1' });
@@ -178,9 +175,9 @@ describe('AutomaticAgentUpgradeTask', () => {
     });
 
     it('Should exit if the enableAutomaticAgentUpgrades feature flag is disabled', async () => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAutomaticAgentUpgrades: false } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableAutomaticAgentUpgrades: false,
+      } as any);
 
       await runTask();
 

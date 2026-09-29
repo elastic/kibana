@@ -12,19 +12,19 @@ import { vi } from 'vitest';
 import { groupFilesByOwners } from './group_by_owners';
 
 vi.mock('./code_owners', () => {
-      const mocked = {
-      getPathsWithOwnersReversed: vi.fn(),
-      getCodeOwnersForFile: vi.fn((file: string) => {
-        const owners: Record<string, string[]> = {
-          '/src/file1.js': ['team_a'],
-          '/src/file2.js': ['team_b'],
-          '/src/file3.js': ['team_a', 'team_c'],
-        };
-        return owners[file];
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPathsWithOwnersReversed: vi.fn(),
+    getCodeOwnersForFile: vi.fn((file: string) => {
+      const owners: Record<string, string[]> = {
+        '/src/file1.js': ['team_a'],
+        '/src/file2.js': ['team_b'],
+        '/src/file3.js': ['team_a', 'team_c'],
+      };
+      return owners[file];
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('groupFilesByOwners', () => {
   it('should group files by single owners correctly', () => {

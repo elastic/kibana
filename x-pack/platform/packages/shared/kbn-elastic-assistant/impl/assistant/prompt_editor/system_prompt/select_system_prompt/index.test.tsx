@@ -79,7 +79,7 @@ const mockUseAssistantContext = {
   setAllSystemPrompts: vi.fn(),
 };
 vi.mock('../../../../assistant_context', async () => {
-  const original = (await vi.importActual('../../../../assistant_context'));
+  const original = await vi.importActual('../../../../assistant_context');
 
   return {
     ...original,

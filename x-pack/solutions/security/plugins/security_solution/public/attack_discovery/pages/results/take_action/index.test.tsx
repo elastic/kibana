@@ -12,7 +12,7 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
 vi.mock('@kbn/elastic-assistant-common', async () => {
-  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
+  const actual = await vi.importActual('@kbn/elastic-assistant-common');
   return {
     ...actual,
     // `TakeAction` always generates markdown; keep it cheap for unit tests.
@@ -39,95 +39,95 @@ const defaultAgentBuilderAvailability = {
 const mockMutateAsyncBulk = vi.fn().mockResolvedValue({});
 const mockMutateAsyncStatus = vi.fn().mockResolvedValue({});
 vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn().mockReturnValue(defaultAgentBuilderAvailability),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn().mockReturnValue(defaultAgentBuilderAvailability),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../assistant/use_assistant_availability', () => {
-      const mocked = {
-      useAssistantAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAssistantAvailability = useAssistantAvailability as Mock;
 const mockUseAgentBuilderAvailability = vi.mocked(useAgentBuilderAvailability);
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../use_attack_discovery_bulk', () => {
-      const mocked = {
-      useAttackDiscoveryBulk: vi.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryBulk: vi.fn(() => ({ mutateAsync: mockMutateAsyncBulk })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_add_to_case', () => {
-      const mocked = {
-      useAddToCase: vi.fn(() => ({ disabled: false, onAddToCase: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddToCase: vi.fn(() => ({ disabled: false, onAddToCase: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant', () => {
-      const mocked = {
-      useViewInAiAssistant: vi.fn(() => ({
-        showAssistantOverlay: vi.fn(),
-        disabled: false,
-        isAssistantVisible: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useViewInAiAssistant: vi.fn(() => ({
+      showAssistantOverlay: vi.fn(),
+      disabled: false,
+      isAssistantVisible: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_update_alerts_status', () => {
-      const mocked = {
-      useUpdateAlertsStatus: vi.fn(() => ({ mutateAsync: mockMutateAsyncStatus })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateAlertsStatus: vi.fn(() => ({ mutateAsync: mockMutateAsyncStatus })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/is_attack_discovery_alert', () => {
-      const mocked = {
-      isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
-        ad?.alertWorkflowStatus !== undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAttackDiscoveryAlert: (ad: { alertWorkflowStatus?: string }) =>
+      ad?.alertWorkflowStatus !== undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 vi.mock(
   '../../../../detections/hooks/attacks/bulk_actions/context_menu_items/use_attack_run_workflow_context_menu_items',
   () => {
-      const mocked = {
-        useAttackRunWorkflowContextMenuItems: vi.fn(() => ({ items: [], panels: [] })),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAttackRunWorkflowContextMenuItems: vi.fn(() => ({ items: [], panels: [] })),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
 vi.mock('../use_attack_discovery_attachment', () => {
-      const mocked = {
-      useAttackDiscoveryAttachment: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryAttachment: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => {
-      const mocked = {
-      useReportAddToChat: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReportAddToChat: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /** helper function to open the popover */
 const openPopover = () => fireEvent.click(screen.getAllByTestId('takeActionPopoverButton')[0]);
@@ -551,7 +551,7 @@ describe('TakeAction', () => {
     const mockOnAddToCase = vi.fn();
 
     beforeEach(async () => {
-      const { useAddToCase } = (await vi.importMock('./use_add_to_case'));
+      const { useAddToCase } = await vi.importMock('./use_add_to_case');
 
       useAddToCase.mockReturnValue({
         disabled: false,
@@ -590,7 +590,7 @@ describe('TakeAction', () => {
         </TestProviders>
       );
 
-      const { useAddToCase } = (await vi.importMock('./use_add_to_case'));
+      const { useAddToCase } = await vi.importMock('./use_add_to_case');
       expect(useAddToCase).toHaveBeenCalledWith(
         expect.objectContaining({
           onSuccess: refetchFindAttackDiscoveries,
@@ -635,7 +635,7 @@ describe('TakeAction', () => {
         },
       });
 
-      const { useAddToCase } = (await vi.importMock('./use_add_to_case'));
+      const { useAddToCase } = await vi.importMock('./use_add_to_case');
       useAddToCase.mockReturnValue({
         disabled: true,
         onAddToCase: vi.fn(),
@@ -659,7 +659,9 @@ describe('TakeAction', () => {
     const mockShowAssistantOverlay = vi.fn();
 
     beforeEach(async () => {
-      const { useViewInAiAssistant } = (await vi.importMock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'));
+      const { useViewInAiAssistant } = await vi.importMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,
@@ -668,7 +670,9 @@ describe('TakeAction', () => {
     });
 
     it('disables view in AI assistant when disabled', async () => {
-      const { useViewInAiAssistant } = (await vi.importMock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'));
+      const { useViewInAiAssistant } = await vi.importMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: true,
@@ -688,7 +692,9 @@ describe('TakeAction', () => {
     });
 
     it('does not render view in AI assistant when isAssistantVisible is false', async () => {
-      const { useViewInAiAssistant } = (await vi.importMock('../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'));
+      const { useViewInAiAssistant } = await vi.importMock(
+        '../attack_discovery_panel/view_in_ai_assistant/use_view_in_ai_assistant'
+      );
       useViewInAiAssistant.mockReturnValue({
         showAssistantOverlay: mockShowAssistantOverlay,
         disabled: false,

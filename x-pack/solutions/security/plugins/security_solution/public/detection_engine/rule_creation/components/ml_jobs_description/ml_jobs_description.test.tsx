@@ -16,17 +16,17 @@ import { hasMlAdminPermissions } from '../../../../../common/machine_learning/ha
 import { MlJobsDescription } from './ml_jobs_description';
 
 vi.mock('./admin/ml_admin_jobs_description', () => {
-      const mocked = {
-      MlAdminJobsDescription: () => <div data-test-subj="adminJobs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MlAdminJobsDescription: () => <div data-test-subj="adminJobs" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./user/ml_user_jobs_description', () => {
-      const mocked = {
-      MlUserJobsDescription: () => <div data-test-subj="userJobs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MlUserJobsDescription: () => <div data-test-subj="userJobs" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 vi.mock('../../../../../common/machine_learning/has_ml_admin_permissions');
 vi.mock('../../../../../common/machine_learning/has_ml_user_permissions');

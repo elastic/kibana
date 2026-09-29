@@ -17,7 +17,7 @@ import { parseMapParams } from '../../definitions/utils/maps';
 import { Settings } from '../../definitions/keywords';
 
 vi.mock('../../definitions/generated/settings', async () => {
-  const originalModule = (await vi.importActual('../../definitions/generated/settings'));
+  const originalModule = await vi.importActual('../../definitions/generated/settings');
   return {
     ...originalModule,
     settings: originalModule.settings.map((s: { name: string; ignoreAsSuggestion?: boolean }) =>

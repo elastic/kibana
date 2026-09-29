@@ -23,11 +23,11 @@ import type { AttackDiscoveryScheduleDataClient } from '@kbn/attack-discovery-sc
 import { performChecks } from '../../../../helpers';
 
 vi.mock('../../../../helpers', () => {
-      const mocked = {
-      performChecks: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performChecks: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { clients, context } = requestContextMock.createTools();
 const server: ReturnType<typeof serverMock.create> = serverMock.create();

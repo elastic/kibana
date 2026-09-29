@@ -19,28 +19,28 @@ const mockUrlSet = vi.fn();
 const mockUrlChange$ = vi.fn(() => ({ subscribe: vi.fn(() => ({ unsubscribe: vi.fn() })) }));
 
 vi.mock('@kbn/kibana-utils-plugin/public', () => {
-      const mocked = {
-      createKbnUrlStateStorage: vi.fn(() => ({
-        get: mockUrlGet,
-        set: mockUrlSet,
-        change$: mockUrlChange$,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createKbnUrlStateStorage: vi.fn(() => ({
+      get: mockUrlGet,
+      set: mockUrlSet,
+      change$: mockUrlChange$,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({
-        push: vi.fn(),
-        location: { pathname: '/management/templates', search: '', hash: '' },
-        listen: vi.fn(),
-        replace: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({
+      push: vi.fn(),
+      location: { pathname: '/management/templates', search: '', hash: '' },
+      listen: vi.fn(),
+      replace: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useTemplatesUrlSearchState', () => {
   beforeEach(() => {

@@ -15,14 +15,14 @@ const mockFetchWatchlists = vi.fn();
 const mockListWatchlistEntitySources = vi.fn();
 
 vi.mock('../../../../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchWatchlists: mockFetchWatchlists,
-        listWatchlistEntitySources: mockListWatchlistEntitySources,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchWatchlists: mockFetchWatchlists,
+      listWatchlistEntitySources: mockListWatchlistEntitySources,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useWatchlistsTableData', () => {
   beforeEach(() => {

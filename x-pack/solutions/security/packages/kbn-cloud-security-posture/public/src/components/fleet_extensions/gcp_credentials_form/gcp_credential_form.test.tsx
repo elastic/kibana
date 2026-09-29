@@ -37,51 +37,51 @@ import type { UpdatePolicy } from '../types';
 vi.mock('../hooks/use_cloud_setup_context');
 vi.mock('../utils');
 vi.mock('./gcp_input_var_fields', () => {
-      const mocked = {
-      GcpInputVarFields: ({
-        disabled,
-        onChange,
-        isOrganization,
-      }: {
-        disabled: boolean;
-        onChange: (key: string, value: string) => void;
-        isOrganization: boolean;
-      }) => (
-        <div data-test-subj="gcp-input-var-fields">
-          <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
-          <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
-          <button
-            data-test-subj="manual-field-change"
-            type="button"
-            onClick={() => onChange('test.field', 'test-value')}
-          >
-            {'Change Field'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GcpInputVarFields: ({
+      disabled,
+      onChange,
+      isOrganization,
+    }: {
+      disabled: boolean;
+      onChange: (key: string, value: string) => void;
+      isOrganization: boolean;
+    }) => (
+      <div data-test-subj="gcp-input-var-fields">
+        <span data-test-subj="disabled-state">{disabled ? 'true' : 'false'}</span>
+        <span data-test-subj="organization-state">{isOrganization ? 'true' : 'false'}</span>
+        <button
+          data-test-subj="manual-field-change"
+          type="button"
+          onClick={() => onChange('test.field', 'test-value')}
+        >
+          {'Change Field'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./gcp_setup_info', () => {
-      const mocked = {
-      GCPSetupInfoContent: ({ isAgentless }: { isAgentless: boolean }) => (
-        <div data-test-subj="gcp-setup-info">
-          <span data-test-subj="agentless-state">{isAgentless ? 'true' : 'false'}</span>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GCPSetupInfoContent: ({ isAgentless }: { isAgentless: boolean }) => (
+      <div data-test-subj="gcp-setup-info">
+        <span data-test-subj="agentless-state">{isAgentless ? 'true' : 'false'}</span>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common', () => {
-      const mocked = {
-      ReadDocumentation: ({ url }: { url: string }) => (
-        <div data-test-subj="read-documentation">
-          <span data-test-subj="doc-url">{url}</span>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReadDocumentation: ({ url }: { url: string }) => (
+      <div data-test-subj="read-documentation">
+        <span data-test-subj="doc-url">{url}</span>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;
 const mockGetCloudShellDefaultValue = getCloudShellDefaultValue as MockedFunction<

@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { mockHttpValues } from '../../../__mocks__/kea_logic';
+
 import { vi } from 'vitest';
 
 // write tests that checks cancelSync API logic calls correct endpoint
-import { mockHttpValues } from '../../../__mocks__/kea_logic';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 

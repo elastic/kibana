@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 
 import { resetContext } from 'kea';
+import { vi } from 'vitest';
 
 import { KibanaLogic, mountKibanaLogic } from './kibana_logic';
 

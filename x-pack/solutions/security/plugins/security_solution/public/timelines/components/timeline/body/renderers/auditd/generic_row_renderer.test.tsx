@@ -24,7 +24,7 @@ import {
 vi.mock('../../../../../../common/lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -34,17 +34,17 @@ vi.mock('@elastic/eui', async () => {
 vi.mock('../../../../../../common/components/link_to');
 vi.mock('../../../../../../overview/components/events_by_dataset');
 vi.mock('../../../../../../common/components/draggables', () => {
-      const mocked = {
-      DraggableBadge: ({ value }: { value?: string | number | null }) => <>{value}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DraggableBadge: ({ value }: { value?: string | number | null }) => <>{value}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../netflow', () => {
-      const mocked = {
-      NetflowRenderer: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NetflowRenderer: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();

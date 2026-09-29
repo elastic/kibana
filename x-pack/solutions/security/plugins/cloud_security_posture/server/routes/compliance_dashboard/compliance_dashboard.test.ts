@@ -12,18 +12,18 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { defineGetComplianceDashboardRoute } from './compliance_dashboard';
 
 vi.mock('./get_trends', () => {
-      const mocked = {
-      getTrends: vi.fn().mockResolvedValue({ trends: [], namespaces: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTrends: vi.fn().mockResolvedValue({ trends: [], namespaces: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../benchmark_rules/get_states/v1', () => {
-      const mocked = {
-      getMutedRulesFilterQuery: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMutedRulesFilterQuery: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('compliance dashboard route PIT refresh', () => {
   const setup = () => {

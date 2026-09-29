@@ -22,7 +22,7 @@ import { deleteItemIdx, findItem, getValues } from './helpers';
 vi.mock('../../../../../common/lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

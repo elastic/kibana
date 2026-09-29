@@ -20,15 +20,15 @@ import { createListConnectorsTool } from './list_connectors_tool';
 import { createGetConnectorSubActionsTool } from './get_connector_sub_actions_tool';
 
 vi.mock('@kbn/connector-specs', () => {
-      const mocked = {
-      getConnectorSpec: vi.fn(),
-      isToolAction: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorSpec: vi.fn(),
+    isToolAction: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-server', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-server'));
+  const actual = await vi.importActual('@kbn/agent-builder-server');
   return {
     ...actual,
     getToolResultId: vi.fn().mockReturnValue('test-id'),

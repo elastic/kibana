@@ -16,17 +16,17 @@ import { useBulkGetUserProfiles } from './use_bulk_get_user_profiles';
 const mockBulkGet = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'userProfile') {
-          return { bulkGet: mockBulkGet };
-        }
-        return undefined;
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'userProfile') {
+        return { bulkGet: mockBulkGet };
+      }
+      return undefined;
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ALICE_UID = 'u_alice_uid';
 const BOB_UID = 'u_bob_uid';

@@ -178,9 +178,9 @@ describe('RuleMigrationsDataMigrationClient', () => {
         },
       } as unknown as ReturnType<typeof esClient.asInternalUser.search>;
 
-      (esClient.asInternalUser.search as unknown as MockedFunction<SearchApi>).mockResolvedValueOnce(
-        response
-      );
+      (
+        esClient.asInternalUser.search as unknown as MockedFunction<SearchApi>
+      ).mockResolvedValueOnce(response);
 
       await ruleMigrationsDataMigrationClient.getAll();
       expect(esClient.asInternalUser.search).toHaveBeenCalledWith({

@@ -17,18 +17,18 @@ import { TestProviders } from '../../../../../common/mock/test_providers';
 const mockUseBulkGetUserProfiles = vi.fn();
 
 vi.mock('../../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
-      const mocked = {
-      useBulkGetUserProfiles: () => mockUseBulkGetUserProfiles(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetUserProfiles: () => mockUseBulkGetUserProfiles(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/user-profile-components', () => {
-      const mocked = {
-      UserAvatar: () => <div data-test-subj="user-avatar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserAvatar: () => <div data-test-subj="user-avatar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssigneesBadge', () => {
   beforeEach(() => {

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows/types/v1';
 import { useWorkflowsApi } from '@kbn/workflows-ui';
@@ -22,21 +22,21 @@ import {
 } from '../../../../shared/test_utils/query_client_wrapper';
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      isTerminalStatus: vi.fn((status: ExecutionStatus) =>
-        ['completed', 'failed', 'skipped'].includes(status)
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isTerminalStatus: vi.fn((status: ExecutionStatus) =>
+      ['completed', 'failed', 'skipped'].includes(status)
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useLazyStepExecutionFetcher', () => {
   let mockGetStepExecution: Mock;

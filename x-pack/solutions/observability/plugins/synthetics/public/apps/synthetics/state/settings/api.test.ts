@@ -13,11 +13,11 @@ import { apiService } from '../../../../utils/api_service';
 import { setDynamicSettings } from './api';
 
 vi.mock('../../../../utils/api_service', () => {
-      const mocked = {
-      apiService: { get: vi.fn(), put: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiService: { get: vi.fn(), put: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('setDynamicSettings', () => {
   const mockPut = apiService.put as Mock;

@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+
 import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsStringRareTermsBucketKeys,

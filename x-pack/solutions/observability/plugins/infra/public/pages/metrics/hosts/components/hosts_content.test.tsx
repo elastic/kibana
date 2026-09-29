@@ -19,47 +19,47 @@ import { HostsContent } from './hosts_content';
 vi.mock('../hooks/use_unified_search');
 vi.mock('../../../../hooks/use_kibana');
 vi.mock('../hooks/use_hosts_view', () => {
-      const mocked = {
-      HostsViewProvider: ({ children }: React.PropsWithChildren) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostsViewProvider: ({ children }: React.PropsWithChildren) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_hosts_table', () => {
-      const mocked = {
-      HostsTableProvider: ({ children }: React.PropsWithChildren) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostsTableProvider: ({ children }: React.PropsWithChildren) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_host_count', () => {
-      const mocked = {
-      HostCountProvider: ({ children }: React.PropsWithChildren) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostCountProvider: ({ children }: React.PropsWithChildren) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_alerts_query', () => {
-      const mocked = {
-      AlertsQueryProvider: ({ children }: React.PropsWithChildren) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsQueryProvider: ({ children }: React.PropsWithChildren) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./kpis/kpi_grid', () => {
-      const mocked = {
-      KPIGrid: () => <div data-test-subj="hostsKpiGrid" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KPIGrid: () => <div data-test-subj="hostsKpiGrid" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hosts_table', () => {
-      const mocked = {
-      HostsTable: () => <div data-test-subj="hostsTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostsTable: () => <div data-test-subj="hostsTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tabs/tabs', () => {
-      const mocked = {
-      Tabs: () => <div data-test-subj="hostsTabs" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Tabs: () => <div data-test-subj="hostsTabs" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext

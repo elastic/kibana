@@ -16,21 +16,21 @@ import type { RequestDocumentationAction } from './actions';
 import type { ResolvedResourceWithSampling } from '../utils/resources';
 
 vi.mock('../utils/resources', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils/resources')),
-      resolveResourceForEsqlWithSamplingStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils/resources')),
+    resolveResourceForEsqlWithSamplingStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/esql', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils/esql')),
-      validateEsqlQuery: vi.fn().mockResolvedValue(null),
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils/esql')),
+    validateEsqlQuery: vi.fn().mockResolvedValue(null),
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import { executeEsql } from '../utils/esql';

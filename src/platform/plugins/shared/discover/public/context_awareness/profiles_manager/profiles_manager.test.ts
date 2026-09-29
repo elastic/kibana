@@ -74,9 +74,9 @@ describe('ProfilesManager', () => {
   });
 
   it('should report a profile change on the first data source resolution even when it resolves to the default context', async () => {
-    vi
-      .spyOn(mocks.dataSourceProfileProviderMock, 'resolve')
-      .mockResolvedValueOnce({ isMatch: false });
+    vi.spyOn(mocks.dataSourceProfileProviderMock, 'resolve').mockResolvedValueOnce({
+      isMatch: false,
+    });
 
     const scopedProfilesManager = createScopedProfilesManager();
     const result = await scopedProfilesManager.resolveDataSourceProfile({});

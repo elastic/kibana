@@ -22,9 +22,7 @@ vi.mock('./library_fetcher');
 vi.mock('./library_bundle_reader');
 
 const MockedLibraryFetcher = LibraryFetcher as MockedClass<typeof LibraryFetcher>;
-const MockedLibraryBundleReader = LibraryBundleReader as MockedClass<
-  typeof LibraryBundleReader
->;
+const MockedLibraryBundleReader = LibraryBundleReader as MockedClass<typeof LibraryBundleReader>;
 
 const baseRow: Template = {
   slug: 'placeholder',

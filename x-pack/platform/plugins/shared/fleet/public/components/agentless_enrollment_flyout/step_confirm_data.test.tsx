@@ -24,35 +24,35 @@ import {
 import { AgentlessStepConfirmData } from './step_confirm_data';
 
 vi.mock('../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks')),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks')),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => {
-      const mocked = {
-      usePollingIncomingData: vi.fn(),
-      POLLING_TIMEOUT_MS: 300_000,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePollingIncomingData: vi.fn(),
+    POLLING_TIMEOUT_MS: 300_000,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/telemetry/aws_onboarding_events', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/telemetry/aws_onboarding_events')),
-      reportAwsOnboardingFirstDataArrived: vi.fn(),
-      reportAwsOnboardingFirstDataTimeout: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/telemetry/aws_onboarding_events')),
+    reportAwsOnboardingFirstDataArrived: vi.fn(),
+    reportAwsOnboardingFirstDataTimeout: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Avoid pulling in EUI/i18n dependencies from NextSteps
 vi.mock('./next_steps', () => {
-      const mocked = { NextSteps: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { NextSteps: () => null };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnalytics = { reportEvent: vi.fn() };
 

@@ -399,34 +399,35 @@ describe('useConversation', () => {
   describe('when the title is updated', () => {
     describe('without a stored conversation', () => {
       it('throws an error', () =>
-          new Promise<void>((resolve, reject) => {
-          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-                  try {
-                    const { result } = renderHook(useConversation, {
-                      initialProps: {
-                        chatService: mockChatService,
-                        connectorId: 'my-connector',
-                        initialMessages: [
-                          {
-                            '@timestamp': new Date().toISOString(),
-                            message: { content: '', role: MessageRole.User },
-                          },
-                        ],
-                        initialConversationId: 'foo',
-                        onConversationDuplicate: vi.fn(),
-                      },
-                      wrapper,
-                    });
+          try {
+            const { result } = renderHook(useConversation, {
+              initialProps: {
+                chatService: mockChatService,
+                connectorId: 'my-connector',
+                initialMessages: [
+                  {
+                    '@timestamp': new Date().toISOString(),
+                    message: { content: '', role: MessageRole.User },
+                  },
+                ],
+                initialConversationId: 'foo',
+                onConversationDuplicate: vi.fn(),
+              },
+              wrapper,
+            });
 
-                    result.current.saveTitle('my-new-title');
-                  } catch (e) {
-                    expect(e).toBeInstanceOf(Error);
-                    expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
-                    done();
-                  }
-                
-          }));
+            result.current.saveTitle('my-new-title');
+          } catch (e) {
+            expect(e).toBeInstanceOf(Error);
+            expect(e.message).toBe('Cannot set initialMessages if initialConversationId is set');
+            done();
+          }
+        }));
     });
 
     describe('with a stored conversation', () => {

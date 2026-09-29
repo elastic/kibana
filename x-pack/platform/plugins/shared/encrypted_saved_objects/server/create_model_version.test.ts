@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { logger } from 'elastic-apm-node';
+import { vi } from 'vitest';
 
 import type {
   SavedObjectModelTransformationContext,

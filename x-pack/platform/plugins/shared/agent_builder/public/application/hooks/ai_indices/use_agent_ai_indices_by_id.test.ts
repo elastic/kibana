@@ -14,40 +14,40 @@ const mockAddErrorToast = vi.fn();
 const mockGetAgentAiIndices = vi.fn();
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        agentService: {
-          getAgentAiIndices: mockGetAgentAiIndices,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      agentService: {
+        getAgentAiIndices: mockGetAgentAiIndices,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_toasts', () => {
-      const mocked = {
-      useToasts: () => ({
-        addErrorToast: mockAddErrorToast,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: () => ({
+      addErrorToast: mockAddErrorToast,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-browser', () => {
-      const mocked = {
-      formatAgentBuilderErrorMessage: (error: Error) => error.message,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatAgentBuilderErrorMessage: (error: Error) => error.message,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useQuery } = (await vi.importMock('@kbn/react-query'));
+const { useQuery } = await vi.importMock('@kbn/react-query');
 
 describe('useAgentAiIndicesById', () => {
   beforeEach(() => {

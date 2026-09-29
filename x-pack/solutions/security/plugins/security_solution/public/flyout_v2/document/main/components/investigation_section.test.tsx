@@ -36,59 +36,63 @@ import { createFlyoutApiMock } from '../../../use_flyout_api.mock';
 import * as useFlyoutApiModule from '../../../use_flyout_api';
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./investigation_guide', () => {
-      const mocked = {
-      InvestigationGuide: ({ onShowInvestigationGuide }: { onShowInvestigationGuide: () => void }) => (
-        <button
-          type="button"
-          data-test-subj="investigationGuideMock"
-          onClick={onShowInvestigationGuide}
-        >
-          {'InvestigationGuide'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InvestigationGuide: ({
+      onShowInvestigationGuide,
+    }: {
+      onShowInvestigationGuide: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="investigationGuideMock"
+        onClick={onShowInvestigationGuide}
+      >
+        {'InvestigationGuide'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./highlighted_fields', () => {
-      const mocked = {
-      HighlightedFields: vi.fn(() => <div data-test-subj="highlightedFieldsMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HighlightedFields: vi.fn(() => <div data-test-subj="highlightedFieldsMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
-      const mocked = {
-      useRuleWithFallback: vi.fn().mockReturnValue({ rule: null, loading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleWithFallback: vi.fn().mockReturnValue({ rule: null, loading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],

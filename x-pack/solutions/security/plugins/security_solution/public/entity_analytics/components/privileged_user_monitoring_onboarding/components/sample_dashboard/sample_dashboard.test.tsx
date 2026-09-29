@@ -13,13 +13,13 @@ import { PrivilegedUserMonitoringSampleDashboard } from './sample_dashboard';
 import { TestProviders } from '../../../../../common/mock';
 
 vi.mock('../esql_dashboard_panel/esql_dashboard_panel', () => {
-      const mocked = {
-      EsqlDashboardPanel: vi.fn(({ title }) => (
-        <div data-test-subj="esql-dashboard-panel">{title}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsqlDashboardPanel: vi.fn(({ title }) => (
+      <div data-test-subj="esql-dashboard-panel">{title}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PrivilegedUserMonitoringSampleDashboard', () => {
   beforeEach(() => {

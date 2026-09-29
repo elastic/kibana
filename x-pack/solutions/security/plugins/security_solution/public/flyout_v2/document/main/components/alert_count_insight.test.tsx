@@ -29,9 +29,7 @@ vi.mock('react-router-dom', () => {
   return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
-vi.mock(
-  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
-);
+vi.mock('../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status');
 
 const name = 'test host';
 const testId = 'test';

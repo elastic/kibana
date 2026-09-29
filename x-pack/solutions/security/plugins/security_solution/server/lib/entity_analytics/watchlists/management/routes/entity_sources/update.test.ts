@@ -18,7 +18,9 @@ import {
 
 vi.mock('../../../entity_sources/infra/entity_source_client');
 
-const { mockUpdateEntitySource } = (await vi.importMock('../../../entity_sources/infra/entity_source_client')) as {
+const { mockUpdateEntitySource } = (await vi.importMock(
+  '../../../entity_sources/infra/entity_source_client'
+)) as {
   mockUpdateEntitySource: Mock;
 };
 

@@ -22,19 +22,19 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => ({ checkGroupId: 'cg-from-url', stepIndex: '1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => ({ checkGroupId: 'cg-from-url', stepIndex: '1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useJourneySteps', () => {
   beforeEach(() => {

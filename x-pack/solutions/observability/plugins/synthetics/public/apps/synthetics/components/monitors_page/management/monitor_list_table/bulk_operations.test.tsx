@@ -22,36 +22,35 @@ import { useMonitorIntegrationHealth } from '../../../common/hooks/use_monitor_i
 import { BulkOperations } from './bulk_operations';
 
 vi.mock('../../../../../../hooks/use_capabilities', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks/use_capabilities')),
-      useCanEditSynthetics: vi.fn(),
-      useCanUsePublicLocationsPermission: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks/use_capabilities')),
+    useCanEditSynthetics: vi.fn(),
+    useCanUsePublicLocationsPermission: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useEnablement: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useEnablement: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_monitor_integration_health', () => {
-      const mocked = {
-      useMonitorIntegrationHealth: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMonitorIntegrationHealth: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useCanEditSyntheticsMock = useCanEditSynthetics as MockedFunction<
   typeof useCanEditSynthetics
 >;
-const useCanUsePublicLocationsPermissionMock =
-  useCanUsePublicLocationsPermission as MockedFunction<
-    typeof useCanUsePublicLocationsPermission
-  >;
+const useCanUsePublicLocationsPermissionMock = useCanUsePublicLocationsPermission as MockedFunction<
+  typeof useCanUsePublicLocationsPermission
+>;
 const useEnablementMock = useEnablement as MockedFunction<typeof useEnablement>;
 const useMonitorIntegrationHealthMock = useMonitorIntegrationHealth as MockedFunction<
   typeof useMonitorIntegrationHealth

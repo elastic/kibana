@@ -20,9 +20,9 @@ import { SolutionType } from '../profiles';
 
 const mockSolutionNavId$ = new BehaviorSubject<SolutionId>(SolutionType.Search);
 
-vi
-  .spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$')
-  .mockReturnValue(mockSolutionNavId$);
+vi.spyOn(discoverServiceMock.core.chrome, 'getActiveSolutionNavId$').mockReturnValue(
+  mockSolutionNavId$
+);
 
 const render = () => {
   return renderHook(() => useRootProfile(), {

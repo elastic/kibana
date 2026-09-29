@@ -27,25 +27,25 @@ vi.mock('../../../../../flyout_v2/use_flyout_api');
 vi.mock('./use_attacks_list_data');
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../../../../entity_analytics/components/severity/severity_bar', () => {
-      const mocked = {
-      SeverityBar: () => <div data-test-subj="severity-bar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SeverityBar: () => <div data-test-subj="severity-bar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useStore: () => ({ getState: vi.fn(), dispatch: vi.fn(), subscribe: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useStore: () => ({ getState: vi.fn(), dispatch: vi.fn(), subscribe: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttacksListPanel', () => {
   const mockDataView = {

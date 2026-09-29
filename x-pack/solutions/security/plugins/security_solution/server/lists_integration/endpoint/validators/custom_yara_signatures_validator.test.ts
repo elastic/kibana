@@ -23,18 +23,18 @@ import { validateYaraRule } from '../../../endpoint/lib/libyara';
 import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 vi.mock('../../../endpoint/lib/libyara', () => {
-      const mocked = {
-      validateYaraRule: vi.fn(async () => ({
-        errors: [],
-        warnings: [],
-        errorCount: 0,
-        warningCount: 0,
-        rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
-      })),
-      getYaraEngineVersion: vi.fn(async () => 'MOCKED_VERSION'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateYaraRule: vi.fn(async () => ({
+      errors: [],
+      warnings: [],
+      errorCount: 0,
+      warningCount: 0,
+      rules: [{ identifier: 'test', meta: {}, duplicateMeta: [] }],
+    })),
+    getYaraEngineVersion: vi.fn(async () => 'MOCKED_VERSION'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateYaraRule = validateYaraRule as MockedFunction<typeof validateYaraRule>;
 

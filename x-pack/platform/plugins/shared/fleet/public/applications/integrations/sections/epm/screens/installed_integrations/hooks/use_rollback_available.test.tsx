@@ -15,7 +15,7 @@ import type { InstalledPackageUIPackageListItem } from '../types';
 import { checkRollbackAvailability, useRollbackAvailablePackages } from './use_rollback_available';
 
 vi.mock('../../../../../../../hooks', async () => {
-  const originalModule = (await vi.importActual('../../../../../../../hooks'));
+  const originalModule = await vi.importActual('../../../../../../../hooks');
   return {
     ...originalModule,
     useLicense: vi.fn().mockReturnValue({

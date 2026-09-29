@@ -13,18 +13,18 @@ import type { NewSelectionIdBadgesProps } from './new_selection_id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 
 vi.mock('../../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => ({
-        services: {
-          share: {},
-          application: {
-            navigateToUrl: vi.fn(),
-          },
+  const mocked = {
+    useMlKibana: () => ({
+      services: {
+        share: {},
+        application: {
+          navigateToUrl: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const props: NewSelectionIdBadgesProps = {
   limit: 2,

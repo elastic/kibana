@@ -20,22 +20,22 @@ export const mockPackage = {
 };
 
 vi.doMock('fs', () => {
-      const mocked = {
-      ...realFs,
-      readFileSync: (filePath: string, options?: unknown) => {
-        if (filePath === kibanaPackagePath) {
-          return JSON.stringify(mockPackage.raw);
-        }
-        return realFs.readFileSync(filePath, options);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...realFs,
+    readFileSync: (filePath: string, options?: unknown) => {
+      if (filePath === kibanaPackagePath) {
+        return JSON.stringify(mockPackage.raw);
+      }
+      return realFs.readFileSync(filePath, options);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const mockDiscover = vi.fn();
 vi.mock('./discovery/plugins_discovery', () => {
-      const mocked = { discover: mockDiscover };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { discover: mockDiscover };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./plugins_system');

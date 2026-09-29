@@ -13,11 +13,11 @@ import { ALERTZERO_FEATURE_ID } from '../../common/constants';
 import { useCanWriteAlertZero } from './use_can_write_alertzero';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.mocked(useKibana);
 

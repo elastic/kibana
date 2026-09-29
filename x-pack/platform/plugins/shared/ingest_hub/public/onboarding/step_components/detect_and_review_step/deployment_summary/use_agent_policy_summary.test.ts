@@ -13,13 +13,13 @@ import { renderHook } from '@testing-library/react';
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      useGetEnrollmentAPIKeysQuery: vi.fn(),
-      useGetAgentStatusQuery: vi.fn(),
-      useBulkGetAgentPoliciesQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetEnrollmentAPIKeysQuery: vi.fn(),
+    useGetAgentStatusQuery: vi.fn(),
+    useBulkGetAgentPoliciesQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import {

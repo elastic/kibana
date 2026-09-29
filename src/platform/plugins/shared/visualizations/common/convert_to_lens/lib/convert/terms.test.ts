@@ -20,18 +20,18 @@ import type { AnyMetricColumnWithSourceFieldWithMeta } from '../../types';
 const mockConvertMetricToColumns = vi.fn();
 
 vi.mock('../metrics', () => {
-      const mocked = {
-      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../vis_schemas', () => {
-      const mocked = {
-      convertToSchemaConfig: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToSchemaConfig: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToDateHistogramColumn', () => {
   const visType = 'heatmap';

@@ -23,10 +23,7 @@ describe('GroupsFilterPopover', () => {
 
   test('renders correctly against snapshot', () => {
     const wrapper = shallow(
-      <GroupsFilterPopoverComponent
-        securityJobs={securityJobs}
-        onSelectedGroupsChanged={vi.fn()}
-      />
+      <GroupsFilterPopoverComponent securityJobs={securityJobs} onSelectedGroupsChanged={vi.fn()} />
     );
     expect(wrapper).toMatchSnapshot();
   });

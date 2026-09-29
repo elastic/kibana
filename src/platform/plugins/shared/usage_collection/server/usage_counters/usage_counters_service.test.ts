@@ -17,13 +17,13 @@ import { loggingSystemMock, coreMock } from '@kbn/core/server/mocks';
 import { UsageCountersService } from './usage_counters_service';
 
 vi.mock('./rollups', async () => {
-      const mocked = {
-      ...(await vi.importActual('./rollups')),
-      // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
-      registerUsageCountersRollups: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./rollups')),
+    // used by `rollUsageCountersIndices` to determine if a counter is beyond the retention period
+    registerUsageCountersRollups: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { registerUsageCountersRollups } from './rollups';
 

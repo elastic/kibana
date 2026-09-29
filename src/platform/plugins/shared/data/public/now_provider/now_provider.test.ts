@@ -16,13 +16,13 @@ let mockDateFromUrl: undefined | Date;
 let nowProvider: NowProviderInternalContract;
 
 vi.mock('./lib', async () => {
-      const mocked = {
-      // @ts-ignore
-      ...(await vi.importActual('./lib')),
-      getForceNowFromUrl: () => mockDateFromUrl,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    ...(await vi.importActual('./lib')),
+    getForceNowFromUrl: () => mockDateFromUrl,
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   nowProvider = new NowProvider();

@@ -19,22 +19,22 @@ import { FieldSelectionStep } from './field_selection';
 import { getLastSetStateValue, selectComboBoxOption } from './test_utils';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
-      CodeEditor: ({ value }: { value?: string }) => (
-        <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // A plain textarea stands in for Monaco; loading the real module drags in every Monaco language.
+    CodeEditor: ({ value }: { value?: string }) => (
+      <textarea data-test-subj="mockCodeEditor" value={value ?? ''} readOnly />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../services/api')),
-      getFieldsFromIndices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../services/api')),
+    getFieldsFromIndices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getFieldsFromIndicesMock = vi.mocked(getFieldsFromIndices);
 

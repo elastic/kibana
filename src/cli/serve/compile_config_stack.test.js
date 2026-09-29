@@ -13,11 +13,11 @@ import Path from 'path';
 
 vi.mock('fs');
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/some/imaginary/path',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/some/imaginary/path',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/config');
 
 import { statSync } from 'fs';

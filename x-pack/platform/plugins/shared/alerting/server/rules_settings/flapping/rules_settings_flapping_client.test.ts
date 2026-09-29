@@ -38,12 +38,11 @@ const getMockRulesSettings = (): RulesSettings => {
   };
 };
 
-const rulesSettingsFlappingClientParams: Mocked<RulesSettingsFlappingClientConstructorOptions> =
-  {
-    logger: loggingSystemMock.create().get(),
-    getModificationMetadata: vi.fn(),
-    savedObjectsClient,
-  };
+const rulesSettingsFlappingClientParams: Mocked<RulesSettingsFlappingClientConstructorOptions> = {
+  logger: loggingSystemMock.create().get(),
+  getModificationMetadata: vi.fn(),
+  savedObjectsClient,
+};
 
 const updatedMetadata = {
   createdAt: '2023-03-26T00:00:00.000Z',

@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, first, lastValueFrom, of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 

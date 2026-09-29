@@ -20,7 +20,7 @@ import { BarChartBaseComponent, BarChartComponent } from './barchart';
 import type { ChartSeriesData } from './common';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

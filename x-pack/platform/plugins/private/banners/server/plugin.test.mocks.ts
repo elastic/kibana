@@ -9,16 +9,16 @@ import { vi } from 'vitest';
 
 export const registerRoutesMock = vi.fn();
 vi.doMock('./routes', () => {
-      const mocked = {
-      registerRoutes: registerRoutesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: registerRoutesMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const registerSettingsMock = vi.fn();
 vi.doMock('./ui_settings', () => {
-      const mocked = {
-      registerSettings: registerSettingsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerSettings: registerSettingsMock,
+  };
+  return { ...mocked, default: mocked };
+});

@@ -15,7 +15,7 @@ import { RequestResultType } from './get_doc_count';
 
 vi.mock('react-use/lib/useObservable', () => vi.fn());
 
-const mockedUseObservable = (await vi.importMock('react-use/lib/useObservable'));
+const mockedUseObservable = await vi.importMock('react-use/lib/useObservable');
 
 describe('DocCountCell', () => {
   const docCountApi = {

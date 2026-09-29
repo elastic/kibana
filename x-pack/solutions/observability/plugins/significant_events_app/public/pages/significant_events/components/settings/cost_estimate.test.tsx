@@ -30,7 +30,7 @@ vi.mock('../../../../hooks/use_kibana');
 vi.mock('../../../../hooks/use_significant_events_cost');
 vi.mock('../../../../hooks/use_significant_events_run_quotas');
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const { useState } = require('react') as typeof import('react');
   const MockEuiIconTip = ({
     content,

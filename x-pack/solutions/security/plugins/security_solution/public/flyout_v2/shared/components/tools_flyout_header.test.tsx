@@ -15,13 +15,13 @@ import { ToolsFlyoutHeader } from './tools_flyout_header';
 import { TOOLS_FLYOUT_HEADER_TEST_ID, TOOLS_FLYOUT_HEADER_TIMESTAMP_TEST_ID } from './test_ids';
 
 vi.mock('./tools_flyout_title', () => {
-      const mocked = {
-      ToolsFlyoutTitle: ({ label }: { label: string }) => (
-        <div data-test-subj="mockToolsFlyoutTitle">{label}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolsFlyoutTitle: ({ label }: { label: string }) => (
+      <div data-test-subj="mockToolsFlyoutTitle">{label}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderHeader = (props: Partial<Parameters<typeof ToolsFlyoutHeader>[0]> = {}) =>
   render(

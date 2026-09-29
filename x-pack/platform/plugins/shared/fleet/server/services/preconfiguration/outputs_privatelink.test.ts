@@ -12,27 +12,27 @@ import { SERVERLESS_DEFAULT_OUTPUT_ID, SERVERLESS_PRIVATE_OUTPUT_ID } from '../.
 import { getPreconfiguredOutputFromConfig, SERVERLESS_MANAGED_OUTPUT_ALLOW_EDIT } from './outputs';
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getExperimentalFeatures: vi.fn().mockReturnValue({ useSpaceAwareness: false }),
-        getInternalUserSOClient: vi.fn(),
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-        getLogger: () =>
-          new Proxy(
-            {},
-            {
-              get() {
-                return vi.fn();
-              },
-            }
-          ),
-        getTaskManagerStart: vi.fn(),
-        getCloud: vi.fn().mockReturnValue(null),
-        getConfig: vi.fn().mockReturnValue({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getExperimentalFeatures: vi.fn().mockReturnValue({ useSpaceAwareness: false }),
+      getInternalUserSOClient: vi.fn(),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+      getLogger: () =>
+        new Proxy(
+          {},
+          {
+            get() {
+              return vi.fn();
+            },
+          }
+        ),
+      getTaskManagerStart: vi.fn(),
+      getCloud: vi.fn().mockReturnValue(null),
+      getConfig: vi.fn().mockReturnValue({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../agent_policy_update');
 vi.mock('../output');

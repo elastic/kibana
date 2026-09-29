@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import Boom from '@hapi/boom';
 
 import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';

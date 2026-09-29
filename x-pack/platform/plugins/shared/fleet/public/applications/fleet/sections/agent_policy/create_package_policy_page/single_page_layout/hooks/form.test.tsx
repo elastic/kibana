@@ -24,22 +24,22 @@ import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 type MockFn = MockedFunction<any>;
 
 vi.mock('./aws_onboarding_telemetry', () => {
-      const mocked = {
-      useAwsOnboardingTelemetry: vi.fn(() => ({
-        reportCredentialsAdded: vi.fn(),
-        reportDeployClicked: vi.fn(),
-        reportEnrollmentSucceeded: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAwsOnboardingTelemetry: vi.fn(() => ({
+      reportCredentialsAdded: vi.fn(),
+      reportDeployClicked: vi.fn(),
+      reportEnrollmentSucceeded: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/use_request/agentless_policy', () => {
-      const mocked = {
-      sendCreateAgentlessPolicy: vi.fn().mockRejectedValue(new Error('mocked agentless api')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendCreateAgentlessPolicy: vi.fn().mockRejectedValue(new Error('mocked agentless api')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks', async () => {
   return {
@@ -51,9 +51,7 @@ vi.mock('../../../../../hooks', async () => {
       isLoading: false,
     }),
     useFleetStatus: vi.fn().mockReturnValue({ isReady: true } as any),
-    sendGetStatus: vi
-      .fn()
-      .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
+    sendGetStatus: vi.fn().mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
     useConfig: vi.fn(),
   };
 });

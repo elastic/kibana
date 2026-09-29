@@ -89,8 +89,7 @@ describe('useTotalHits', () => {
       searchSessionId: '123',
       requestAdapter: adapter,
     });
-    vi
-      .spyOn(data.query.timefilter.timefilter, 'createFilter')
+    vi.spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
       .mockReturnValue(fetchParams.timeRange as any);
     const { rerender } = renderHook(() =>
@@ -199,8 +198,7 @@ describe('useTotalHits', () => {
   it('should call onTotalHitsChange with an error status if fetch fails', async () => {
     const onTotalHitsChange = vi.fn();
     const error = new Error('test error');
-    vi
-      .spyOn(searchSourceInstanceMock, 'fetch$')
+    vi.spyOn(searchSourceInstanceMock, 'fetch$')
       .mockClear()
       .mockReturnValue(throwError(() => error));
     const options = { ...getDeps(), onTotalHitsChange };
@@ -226,8 +224,7 @@ describe('useTotalHits', () => {
       } as any,
     });
     const data = dataPluginMock.createStartContract();
-    vi
-      .spyOn(data.query.timefilter.timefilter, 'createFilter')
+    vi.spyOn(data.query.timefilter.timefilter, 'createFilter')
       .mockClear()
       .mockReturnValue(fetchParams.timeRange as any);
     const filters: Filter[] = [{ meta: { index: 'test' }, query: { match_all: {} } }];

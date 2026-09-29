@@ -48,9 +48,9 @@ import { roundToEvents } from './rounds_to_events';
 import type { ConversationEventsServiceStart } from '../../conversation_events';
 
 vi.mock('../templates/registry', () => {
-      const mocked = { getTemplate: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getTemplate: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const getTemplateMock: Mock = require('../templates/registry').getTemplate;
 
@@ -86,14 +86,14 @@ const mockConversationEvents: ConversationEventsServiceStart = {
 };
 
 vi.mock('./storage', () => {
-      const mocked = {
-      createStorage: vi.fn(() => ({
-        getClient: vi.fn(() => mockEsClient),
-      })),
-      conversationIndexName: '.kibana_agent_builder_conversations',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createStorage: vi.fn(() => ({
+      getClient: vi.fn(() => mockEsClient),
+    })),
+    conversationIndexName: '.kibana_agent_builder_conversations',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ConversationClient', () => {
   let client: ConversationClient;

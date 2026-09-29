@@ -66,58 +66,58 @@ const mockUpdateContent = vi.fn(() => ({
 }));
 
 vi.mock('../services', () => {
-      const mocked = {
-      getSpaces: vi.fn(() => ({
-        getActiveSpace: () => ({
-          id: 'test',
-        }),
-      })),
-      getContentManagement: vi.fn(() => ({
-        client: {
-          create: mockCreateContent,
-          update: mockUpdateContent,
-          get: mockGetContent,
-          search: mockFindContent,
-          mSearch: mockFindContent,
-        },
-      })),
-      getEmbeddable: vi.fn(() => ({
-        getSavedObjects: mockFindContent,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpaces: vi.fn(() => ({
+      getActiveSpace: () => ({
+        id: 'test',
+      }),
+    })),
+    getContentManagement: vi.fn(() => ({
+      client: {
+        create: mockCreateContent,
+        update: mockUpdateContent,
+        get: mockGetContent,
+        search: mockFindContent,
+        mSearch: mockFindContent,
+      },
+    })),
+    getEmbeddable: vi.fn(() => ({
+      getSavedObjects: mockFindContent,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockParseSearchSourceJSON = vi.fn();
 const mockInjectSearchSourceReferences = vi.fn();
 const mockExtractSearchSourceReferences = vi.fn((..._args) => [{}, []]);
 
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = {
-      extractSearchSourceReferences: vi.fn((...args) => mockExtractSearchSourceReferences(...args)),
-      injectSearchSourceReferences: vi.fn((...args) => mockInjectSearchSourceReferences(...args)),
-      parseSearchSourceJSON: vi.fn((...args) => mockParseSearchSourceJSON(...args)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractSearchSourceReferences: vi.fn((...args) => mockExtractSearchSourceReferences(...args)),
+    injectSearchSourceReferences: vi.fn((...args) => mockInjectSearchSourceReferences(...args)),
+    parseSearchSourceJSON: vi.fn((...args) => mockParseSearchSourceJSON(...args)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInjectReferences = vi.fn();
 const mockExtractReferences = vi.fn((arg) => arg);
 vi.mock('./saved_visualization_references', () => {
-      const mocked = {
-      injectReferences: vi.fn((...args) => mockInjectReferences(...args)),
-      extractReferences: vi.fn((arg) => mockExtractReferences(arg)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    injectReferences: vi.fn((...args) => mockInjectReferences(...args)),
+    extractReferences: vi.fn((arg) => mockExtractReferences(arg)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSaveWithConfirmation = vi.fn(() => ({ item: { id: 'test-after-confirm' } }));
 vi.mock('./saved_objects_utils/save_with_confirmation', () => {
-      const mocked = {
-      saveWithConfirmation: vi.fn(() => mockSaveWithConfirmation()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    saveWithConfirmation: vi.fn(() => mockSaveWithConfirmation()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('saved_visualize_utils', () => {
   const coreStart = coreMock.createStart();

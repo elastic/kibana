@@ -14,7 +14,7 @@ import { MOCK_EUI_THEME_FOR_USE_THEME } from '../../components/shared/service_ma
 import { AgentServiceMap, formatEdgeLabel } from './agent_service_map';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
@@ -25,18 +25,18 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      getSpanIcon: vi.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpanIcon: vi.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/shared/service_map/layout', () => {
-      const mocked = {
-      applyDagreLayout: (nodes: unknown[]) => nodes,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyDagreLayout: (nodes: unknown[]) => nodes,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createConnections(
   overrides: Partial<ServiceMapAttachmentData['connections'][0]>[] = []

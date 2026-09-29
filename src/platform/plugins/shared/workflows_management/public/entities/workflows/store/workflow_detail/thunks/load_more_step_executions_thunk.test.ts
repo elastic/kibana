@@ -25,14 +25,14 @@ const mockGetExecutionSteps = vi.fn();
 const mockGetExecution = vi.fn();
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => ({
-        getExecutionSteps: mockGetExecutionSteps,
-        getExecution: mockGetExecution,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => ({
+      getExecutionSteps: mockGetExecutionSteps,
+      getExecution: mockGetExecution,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecution: WorkflowExecutionDto = {
   spaceId: 'default',

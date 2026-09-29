@@ -20,17 +20,17 @@ vi.mock('../../../hooks/use_metrics_charts');
 vi.mock('../../../hooks/use_unified_search');
 vi.mock('../../../../../../containers/metrics_source');
 vi.mock('../../../../../../components/lens', () => {
-      const mocked = {
-      HostMetricsExplanationContent: () => <div data-test-subj="hostMetricsExplanation" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostMetricsExplanationContent: () => <div data-test-subj="hostMetricsExplanation" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./chart', () => {
-      const mocked = {
-      Chart: ({ id }: { id: string }) => <div data-test-subj={`hostsView-metricChart-${id}`} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: ({ id }: { id: string }) => <div data-test-subj={`hostsView-metricChart-${id}`} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMetricsCharts = useMetricsCharts as MockedFunction<typeof useMetricsCharts>;
 const mockUseMetricsDataViewContext = useMetricsDataViewContext as MockedFunction<

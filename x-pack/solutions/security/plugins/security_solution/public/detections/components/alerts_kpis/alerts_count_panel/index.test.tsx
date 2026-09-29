@@ -25,12 +25,10 @@ import { VisualizationEmbeddable } from '../../../../common/components/visualiza
 const from = '2022-07-28T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
 vi.mock('../../../../common/containers/use_global_time', async () => {
-  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
+  const actual = await vi.importActual('../../../../common/containers/use_global_time');
   return {
     ...actual,
-    useGlobalTime: vi
-      .fn()
-      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
+    useGlobalTime: vi.fn().mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
@@ -44,12 +42,12 @@ vi.mock('../../../../common/components/page/use_refetch_by_session');
 vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 vi.mock('../../../../common/components/page/use_refetch_by_session');
 vi.mock('../common/hooks', () => {
-      const mocked = {
-      useInspectButton: vi.fn(),
-      useStackByFields: vi.fn().mockReturnValue(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInspectButton: vi.fn(),
+    useStackByFields: vi.fn().mockReturnValue(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetIsExpanded = vi.fn();
 const defaultProps = {

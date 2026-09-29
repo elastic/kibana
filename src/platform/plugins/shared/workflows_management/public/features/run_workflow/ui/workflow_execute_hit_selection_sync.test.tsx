@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { UnifiedDataTableContext } from '@kbn/unified-data-table/src/table_context';
 import type { DataTableContext } from '@kbn/unified-data-table/src/table_context';

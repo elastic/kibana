@@ -39,13 +39,13 @@ vi.mock('../../../rule/main/hooks/use_rule_details');
 
 const mockAddSuccess = vi.fn();
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addSuccess: mockAddSuccess,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addSuccess: mockAddSuccess,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetIsEditLoading = vi.fn();
 const mockSetIsModalVisible = vi.fn();

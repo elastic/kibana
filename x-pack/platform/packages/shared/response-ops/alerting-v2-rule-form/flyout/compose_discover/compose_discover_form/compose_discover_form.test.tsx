@@ -30,18 +30,18 @@ import type { ComposeDiscoverState } from '../types';
 import { createInitialState } from '../use_compose_discover_state';
 
 vi.mock('./alert_condition_step', () => {
-      const mocked = {
-      AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertConditionStep: () => <div data-test-subj="mockAlertConditionStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: () => ({ mgetWorkflows: vi.fn().mockResolvedValue([]) }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: () => ({ mgetWorkflows: vi.fn().mockResolvedValue([]) }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createState = (overrides: Partial<ComposeDiscoverState> = {}): ComposeDiscoverState => ({
   ...createInitialState({ mode: 'create' }),

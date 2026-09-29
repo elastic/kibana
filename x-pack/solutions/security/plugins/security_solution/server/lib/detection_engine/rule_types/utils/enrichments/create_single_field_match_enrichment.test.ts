@@ -17,11 +17,11 @@ import type { PersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/s
 import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/server/utils/create_persistence_rule_type_wrapper.mock';
 
 vi.mock('./search_enrichments', () => {
-      const mocked = {
-      searchEnrichments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    searchEnrichments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockSearchEnrichments = searchEnrichments as Mock;
 
 describe('createSingleFieldMatchEnrichment', () => {

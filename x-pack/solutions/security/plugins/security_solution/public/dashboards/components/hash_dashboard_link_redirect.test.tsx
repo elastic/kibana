@@ -18,7 +18,7 @@ import { useNavigateTo } from '../../common/lib/kibana';
 import { HashDashboardLinkRedirect } from './hash_dashboard_link_redirect';
 
 vi.mock('../../common/components/link_to', async () => {
-  const actual = (await vi.importActual('../../common/components/link_to'));
+  const actual = await vi.importActual('../../common/components/link_to');
   return {
     ...actual,
     useGetSecuritySolutionUrl: vi.fn(),
@@ -26,7 +26,7 @@ vi.mock('../../common/components/link_to', async () => {
 });
 
 vi.mock('../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../common/lib/kibana'));
+  const actual = await vi.importActual('../../common/lib/kibana');
   return {
     ...actual,
     useNavigateTo: vi.fn(),

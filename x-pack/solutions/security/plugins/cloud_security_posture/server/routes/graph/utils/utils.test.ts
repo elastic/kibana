@@ -16,11 +16,11 @@ import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './util
 import { resolveEntitiesIndexName } from './enrichment_utils';
 
 vi.mock('@kbn/entity-store/server', () => {
-      const mocked = {
-      resolveLatestEntitiesIndexName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveLatestEntitiesIndexName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('utils', () => {
   describe('transformEntityTypeToIconAndShape', () => {
@@ -114,9 +114,7 @@ describe('utils', () => {
     it('should return the resolved index name when the index exists', async () => {
       const indexName = getEntitiesLatestIndexName('default');
       (resolveLatestEntitiesIndexName as Mock).mockResolvedValueOnce(indexName);
-      (esClient.asInternalUser.indices as Mocked<any>).exists = vi
-        .fn()
-        .mockResolvedValueOnce(true);
+      (esClient.asInternalUser.indices as Mocked<any>).exists = vi.fn().mockResolvedValueOnce(true);
 
       const result = await resolveEntitiesIndexName(esClient, logger, 'default');
       expect(result).toBe(indexName);
@@ -139,9 +137,7 @@ describe('utils', () => {
     });
 
     it('should return null and log error on unexpected errors', async () => {
-      (resolveLatestEntitiesIndexName as Mock).mockRejectedValueOnce(
-        new Error('Network error')
-      );
+      (resolveLatestEntitiesIndexName as Mock).mockRejectedValueOnce(new Error('Network error'));
 
       const result = await resolveEntitiesIndexName(esClient, logger, 'default');
       expect(result).toBeNull();

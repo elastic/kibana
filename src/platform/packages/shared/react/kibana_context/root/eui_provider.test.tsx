@@ -25,7 +25,7 @@ import { KibanaEuiProvider } from './eui_provider';
 
 // Mock the EuiProvider component to capture its props
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiProvider: vi.fn(original.EuiProvider),

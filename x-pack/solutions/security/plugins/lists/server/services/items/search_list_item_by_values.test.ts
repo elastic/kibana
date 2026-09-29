@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 

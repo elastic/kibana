@@ -16,12 +16,12 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { extractWorkflowMetadata } from './extract_workflow_metadata';
 
 vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
-      getInputsFromDefinition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+    getInputsFromDefinition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition

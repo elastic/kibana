@@ -22,9 +22,7 @@ const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 
 describe('health check', () => {
   test('renders spinner while health is loading', async () => {
-    useKibanaMock().services.http.get = vi
-      .fn()
-      .mockImplementationOnce(() => new Promise(() => {}));
+    useKibanaMock().services.http.get = vi.fn().mockImplementationOnce(() => new Promise(() => {}));
     const { queryByText, container } = render(
       <I18nProvider>
         <HealthContextProvider>
@@ -43,9 +41,7 @@ describe('health check', () => {
   });
 
   it('renders children immediately if waitForCheck is false', async () => {
-    useKibanaMock().services.http.get = vi
-      .fn()
-      .mockImplementationOnce(() => new Promise(() => {}));
+    useKibanaMock().services.http.get = vi.fn().mockImplementationOnce(() => new Promise(() => {}));
 
     const { queryByText, container } = render(
       <I18nProvider>

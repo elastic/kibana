@@ -26,12 +26,12 @@ import {
 import { reportStringLengthViolation } from '@kbn/schema-string-helpers';
 
 vi.mock('@kbn/schema-string-helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/schema-string-helpers')),
-      reportStringLengthViolation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/schema-string-helpers')),
+    reportStringLengthViolation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => vi.clearAllMocks());
 

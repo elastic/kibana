@@ -17,43 +17,43 @@ import type { TestFailure } from './get_failures';
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 
 vi.mock('./test_report', () => {
-      const mocked = { readTestReport: vi.fn(), getRootMetadata: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { readTestReport: vi.fn(), getRootMetadata: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get_failures', () => {
-      const mocked = { getFailures: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getFailures: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./report_metadata', () => {
-      const mocked = { getReportMessageIter: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getReportMessageIter: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./report_failure', () => {
-      const mocked = {
-      createFailureIssue: vi.fn(),
-      updateFailureIssue: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailureIssue: vi.fn(),
+    updateFailureIssue: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./report_failures_to_es', () => {
-      const mocked = { reportFailuresToEs: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { reportFailuresToEs: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./report_failures_to_file', () => {
-      const mocked = { reportFailuresToFile: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { reportFailuresToFile: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./add_messages_to_report', () => {
-      const mocked = { addMessagesToReport: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { addMessagesToReport: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
-const { readTestReport, getRootMetadata } = (await vi.importMock('./test_report'));
-const { getFailures } = (await vi.importMock('./get_failures'));
-const { getReportMessageIter } = (await vi.importMock('./report_metadata'));
-const { createFailureIssue, updateFailureIssue } = (await vi.importMock('./report_failure'));
-const { reportFailuresToEs } = (await vi.importMock('./report_failures_to_es'));
-const { reportFailuresToFile } = (await vi.importMock('./report_failures_to_file'));
+const { readTestReport, getRootMetadata } = await vi.importMock('./test_report');
+const { getFailures } = await vi.importMock('./get_failures');
+const { getReportMessageIter } = await vi.importMock('./report_metadata');
+const { createFailureIssue, updateFailureIssue } = await vi.importMock('./report_failure');
+const { reportFailuresToEs } = await vi.importMock('./report_failures_to_es');
+const { reportFailuresToFile } = await vi.importMock('./report_failures_to_file');
 
 const makeFailure = (i: number): TestFailure => ({
   classname: `suite ${i}`,

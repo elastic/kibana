@@ -16,11 +16,11 @@ import {
 import { sendUpdateCloudConnector } from './cloud_connector';
 
 vi.mock('./cloud_connector', () => {
-      const mocked = {
-      sendUpdateCloudConnector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendUpdateCloudConnector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedSendUpdateCloudConnector = vi.mocked(sendUpdateCloudConnector);
 

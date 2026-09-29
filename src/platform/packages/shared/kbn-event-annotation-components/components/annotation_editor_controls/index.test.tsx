@@ -27,13 +27,13 @@ import { EuiButtonGroup, EuiThemeProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
 vi.mock('@kbn/kql/public', () => {
-      const mocked = {
-      QueryStringInput: () => {
-        return 'QueryStringInput';
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryStringInput: () => {
+      return 'QueryStringInput';
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const customLineStaticAnnotation: EventAnnotationConfig = {
   id: 'ann1',

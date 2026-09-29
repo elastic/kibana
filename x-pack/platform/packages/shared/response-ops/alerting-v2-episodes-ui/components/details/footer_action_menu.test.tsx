@@ -18,7 +18,7 @@ import { EpisodeFooterActionMenu } from './footer_action_menu';
 // teardown errors in jsdom and leaks content between tests. Mock it as a simple
 // conditional renderer so the menu logic is tested without portal side-effects.
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const MockWrappingPopover = ({
     isOpen,
     children,

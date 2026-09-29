@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 import { processNodeStackMonitoring } from './process_node_stack_monitoring';
 
 vi.mock('../cancel_workflow_if_requested', () => {
-      const mocked = {
-      cancelWorkflowIfRequested: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cancelWorkflowIfRequested: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { cancelWorkflowIfRequested } = require('../cancel_workflow_if_requested');

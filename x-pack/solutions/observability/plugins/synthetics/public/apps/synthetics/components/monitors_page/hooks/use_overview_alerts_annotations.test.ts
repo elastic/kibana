@@ -20,34 +20,34 @@ import * as spaceHook from '../../../../../hooks/use_kibana_space';
 const mockAlertsDataView = { id: 'alerts-data-view', title: '.alerts-observability*' };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({ services: { dataViews: {} } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { dataViews: {} } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = vi.fn();
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/exploratory-view-plugin/public', () => {
-      const mocked = {
-      ObservabilityDataViews: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ObservabilityDataViews: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({ euiTheme: { colors: { accent: '#F04E98' } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({ euiTheme: { colors: { accent: '#F04E98' } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useOverviewAlertsAnnotations', () => {
   const paramSpy = vi.spyOn(paramHook, 'useGetUrlParams');

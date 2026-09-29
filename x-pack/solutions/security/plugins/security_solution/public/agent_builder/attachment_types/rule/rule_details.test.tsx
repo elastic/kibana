@@ -30,19 +30,21 @@ import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useRule } from '../../../detection_engine/rule_management/logic/use_rule';
 
 vi.mock('../../../common/components/user_privileges/user_privileges_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/components/user_privileges/user_privileges_context')),
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '../../../common/components/user_privileges/user_privileges_context'
+    )),
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../detection_engine/rule_management/logic/use_rule', () => {
-      const mocked = {
-      useRule: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRule: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule = {
   name: 'Test Rule',

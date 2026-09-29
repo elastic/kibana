@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { createHmac } from 'crypto';
+import { vi } from 'vitest';
 
 import {
   MOCK_IDP_ATTRIBUTE_EMAIL,
@@ -37,12 +36,12 @@ import {
 } from './utils';
 
 vi.mock('./cosmos_db_seeder', () => {
-      const mocked = {
-      seedTestApiKey: vi.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
-      seedTestUser: vi.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    seedTestApiKey: vi.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+    seedTestUser: vi.fn().mockResolvedValue({ success: true, message: `✓ `, response: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('mock-idp-utils', () => {
   describe('createMockIdpMetadata', () => {

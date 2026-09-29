@@ -13,17 +13,17 @@ import { reassignAgentsToVersionSpecificPolicies } from './reassign_agents_to_ve
 
 vi.mock('../agents');
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({
-          debug: vi.fn(),
-        }),
-        getInternalUserESClient: vi.fn(),
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
+      }),
+      getInternalUserESClient: vi.fn(),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ReassignAgentsToVersionSpecificPoliciesTask', () => {
   it('should do nothing if there are no agents to reassign', async () => {

@@ -14,11 +14,11 @@ import { runRetrievalStep } from '.';
 const mockLogHealthCheck = vi.fn();
 
 vi.mock('../../../../../lib/log_health_check', () => {
-      const mocked = {
-      logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateDefaultRetrievalPromise = vi.fn();
 const mockInvokeCustomAlertRetrievalWorkflows = vi.fn();
@@ -28,47 +28,48 @@ const mockValidateRetrievalResults = vi.fn();
 const mockCombineAlertRetrievalResults = vi.fn();
 
 vi.mock('./helpers/create_default_retrieval_promise', () => {
-      const mocked = {
-      createDefaultRetrievalPromise: (...args: unknown[]) => mockCreateDefaultRetrievalPromise(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createDefaultRetrievalPromise: (...args: unknown[]) =>
+      mockCreateDefaultRetrievalPromise(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../invoke_custom_alert_retrieval_workflows', () => {
-      const mocked = {
-      invokeCustomAlertRetrievalWorkflows: (...args: unknown[]) =>
-        mockInvokeCustomAlertRetrievalWorkflows(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invokeCustomAlertRetrievalWorkflows: (...args: unknown[]) =>
+      mockInvokeCustomAlertRetrievalWorkflows(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/resolve_default_settled_result', () => {
-      const mocked = {
-      resolveLegacySettledResult: (...args: unknown[]) => mockResolveLegacySettledResult(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveLegacySettledResult: (...args: unknown[]) => mockResolveLegacySettledResult(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/resolve_custom_settled_results', () => {
-      const mocked = {
-      resolveCustomSettledResults: (...args: unknown[]) => mockResolveCustomSettledResults(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveCustomSettledResults: (...args: unknown[]) => mockResolveCustomSettledResults(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./helpers/validate_retrieval_results', () => {
-      const mocked = {
-      validateRetrievalResults: (...args: unknown[]) => mockValidateRetrievalResults(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateRetrievalResults: (...args: unknown[]) => mockValidateRetrievalResults(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../combine_alert_retrieval_results', () => {
-      const mocked = {
-      combineAlertRetrievalResults: (...args: unknown[]) => mockCombineAlertRetrievalResults(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    combineAlertRetrievalResults: (...args: unknown[]) => mockCombineAlertRetrievalResults(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = {
   debug: vi.fn(),

@@ -20,11 +20,11 @@ import { TestProvider } from '../../test_utils/test_providers';
 import { ChangeHistoryItem } from './change_history_item';
 
 vi.mock('../../provider/use_change_history_config', () => {
-      const mocked = {
-      useChangeHistoryConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeHistoryConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseChangeHistoryConfig = useChangeHistoryConfig as Mock;
 

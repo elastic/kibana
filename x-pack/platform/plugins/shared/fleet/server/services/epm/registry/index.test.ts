@@ -47,59 +47,59 @@ vi.mock('../streams');
 vi.mock('../packages/cache');
 
 vi.mock('../..', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: () => mockLogger,
-        getKibanaBranch: () => 'main',
-        getKibanaVersion: () => '99.0.0',
-        getConfig: () => mockGetConfig(),
-        getIsProductionMode: () => false,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: () => mockLogger,
+      getKibanaBranch: () => 'main',
+      getKibanaVersion: () => '99.0.0',
+      getConfig: () => mockGetConfig(),
+      getIsProductionMode: () => false,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./requests', () => {
-      const mocked = {
-      fetchUrl: (url: string) => mockFetchUrl(url),
-      getResponseStreamWithSize: (url: string) => mockGetResponseStreamWithSize(url),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchUrl: (url: string) => mockFetchUrl(url),
+    getResponseStreamWithSize: (url: string) => mockGetResponseStreamWithSize(url),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../streams', () => {
-      const mocked = {
-      streamToBuffer: (stream: NodeJS.ReadableStream, size?: number) =>
-        mockStreamToBuffer(stream, size),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    streamToBuffer: (stream: NodeJS.ReadableStream, size?: number) =>
+      mockStreamToBuffer(stream, size),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../packages/bundled_packages', () => {
-      const mocked = {
-      getBundledPackageByName: (name: string) => mockGetBundledPackageByName(name),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBundledPackageByName: (name: string) => mockGetBundledPackageByName(name),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../packages/package_verification', () => {
-      const mocked = {
-      verifyPackageArchiveSignature: (
-        pkgName: string,
-        pkgVersion: string,
-        pkgArchiveBuffer: Buffer | undefined,
-        logger: Logger
-      ) => mockVerifyPackageArchiveSignature(pkgName, pkgVersion, pkgArchiveBuffer, logger),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyPackageArchiveSignature: (
+      pkgName: string,
+      pkgVersion: string,
+      pkgArchiveBuffer: Buffer | undefined,
+      logger: Logger
+    ) => mockVerifyPackageArchiveSignature(pkgName, pkgVersion, pkgArchiveBuffer, logger),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../packages/cache', () => {
-      const mocked = {
-      getPackageAssetsMapCache: () => mockGetPackageAssetsMapCache(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageAssetsMapCache: () => mockGetPackageAssetsMapCache(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('splitPkgKey', () => {
   it('throws an error if there is nothing before the delimiter', () => {

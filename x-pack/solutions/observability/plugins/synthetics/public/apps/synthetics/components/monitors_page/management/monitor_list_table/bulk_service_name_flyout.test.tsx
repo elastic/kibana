@@ -20,41 +20,40 @@ import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkServiceNameFlyout } from './bulk_service_name_flyout';
 
 vi.mock('../../../../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks/use_capabilities', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../hooks/use_capabilities')),
-      useCanUsePublicLocationsPermission: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../hooks/use_capabilities')),
+    useCanUsePublicLocationsPermission: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../state')),
-      fetchBulkUpdateMonitors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../state')),
+    fetchBulkUpdateMonitors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaSpaceMock = useKibanaSpace as MockedFunction<typeof useKibanaSpace>;
-const useCanUsePublicLocationsPermissionMock =
-  useCanUsePublicLocationsPermission as MockedFunction<
-    typeof useCanUsePublicLocationsPermission
-  >;
+const useCanUsePublicLocationsPermissionMock = useCanUsePublicLocationsPermission as MockedFunction<
+  typeof useCanUsePublicLocationsPermission
+>;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as MockedFunction<
   typeof fetchBulkUpdateMonitors
 >;

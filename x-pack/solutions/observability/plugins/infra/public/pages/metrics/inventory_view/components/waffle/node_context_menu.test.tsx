@@ -48,49 +48,49 @@ const mockUseLinkProps = vi.fn(
 );
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          application: {
-            capabilities: {
-              logs: { show: true },
-              apm: { show: true },
-              infrastructure: { save: true },
-            },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        application: {
+          capabilities: {
+            logs: { show: true },
+            apm: { show: true },
+            infrastructure: { save: true },
           },
-          share: {
-            url: {
-              locators: {
-                get: (id: string) =>
-                  id === 'LOGS_LOCATOR' ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
-              },
+        },
+        share: {
+          url: {
+            locators: {
+              get: (id: string) =>
+                id === 'LOGS_LOCATOR' ? { getRedirectUrl: mockGetRedirectUrl } : undefined,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_waffle_options');
 vi.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => {
-      const mocked = {
-      useIsPodSchemaSelectorEnabled: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsPodSchemaSelectorEnabled: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/metrics-data-access-plugin/public', () => {
-      const mocked = {
-      useAssetDetailsRedirect: () => ({
-        getAssetDetailUrl: mockGetAssetDetailUrl,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetDetailsRedirect: () => ({
+      getAssetDetailUrl: mockGetAssetDetailUrl,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/observability-shared-plugin/public'));
+  const actual = await vi.importActual('@kbn/observability-shared-plugin/public');
   return {
     ...actual,
     useLinkProps: (descriptor: { app: string; hash?: string; search?: { kuery?: string } }) =>
@@ -99,11 +99,11 @@ vi.mock('@kbn/observability-shared-plugin/public', async () => {
 });
 
 vi.mock('../../../../../alerting/inventory/components/alert_flyout', () => {
-      const mocked = {
-      AlertFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';

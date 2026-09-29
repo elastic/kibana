@@ -14,17 +14,17 @@ import { useAwsIdentityFederationEnabled } from './use_aws_identity_federation_e
 const mockUseBooleanValue = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          featureFlags: {
-            useBooleanValue: mockUseBooleanValue,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        featureFlags: {
+          useBooleanValue: mockUseBooleanValue,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAwsIdentityFederationEnabled', () => {
   beforeEach(() => {

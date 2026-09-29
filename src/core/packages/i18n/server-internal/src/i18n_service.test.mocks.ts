@@ -13,26 +13,26 @@ export const getAllKibanaTranslationFilesMock = vi.fn();
 export const groupFilesByLocaleMock = vi.fn().mockReturnValue({});
 export const computeLocaleFileHashMock = vi.fn().mockResolvedValue('mock-file-hash');
 vi.doMock('./get_kibana_translation_files', () => {
-      const mocked = {
-      getAllKibanaTranslationFiles: getAllKibanaTranslationFilesMock,
-      groupFilesByLocale: groupFilesByLocaleMock,
-      computeLocaleFileHash: computeLocaleFileHashMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllKibanaTranslationFiles: getAllKibanaTranslationFilesMock,
+    groupFilesByLocale: groupFilesByLocaleMock,
+    computeLocaleFileHash: computeLocaleFileHashMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const initTranslationsMock = vi.fn();
 vi.doMock('./init_translations', () => {
-      const mocked = {
-      initTranslations: initTranslationsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initTranslations: initTranslationsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const registerRoutesMock = vi.fn();
 vi.doMock('./routes', () => {
-      const mocked = {
-      registerRoutes: registerRoutesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: registerRoutesMock,
+  };
+  return { ...mocked, default: mocked };
+});

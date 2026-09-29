@@ -14,18 +14,18 @@ import type { AnalysisTarget } from '../../../shared/analysis_target';
 import { logPatternsGenerator, selectLogPatternsForLlm } from './log_patterns';
 
 vi.mock('@kbn/ai-tools', () => {
-      const mocked = {
-      getSigEventsLogPatternsEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSigEventsLogPatternsEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/traced-es-client', () => {
-      const mocked = {
-      createTracedEsClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTracedEsClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getSigEventsLogPatternsEsqlMock = vi.mocked(getSigEventsLogPatternsEsql);
 const createTracedEsClientMock = vi.mocked(createTracedEsClient);

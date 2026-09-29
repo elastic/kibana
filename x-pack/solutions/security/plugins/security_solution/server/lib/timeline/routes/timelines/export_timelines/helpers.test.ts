@@ -16,25 +16,25 @@ import * as noteLib from '../../../saved_object/notes';
 import * as pinnedEventLib from '../../../saved_object/pinned_events';
 
 vi.mock('../../../saved_object/timelines', () => {
-      const mocked = {
-      getSelectedTimelines: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSelectedTimelines: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_object/notes', () => {
-      const mocked = {
-      getNotesByTimelineId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNotesByTimelineId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_object/pinned_events', () => {
-      const mocked = {
-      getAllPinnedEventsByTimelineId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllPinnedEventsByTimelineId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('export timelines helpers', () => {
   beforeEach(() => {

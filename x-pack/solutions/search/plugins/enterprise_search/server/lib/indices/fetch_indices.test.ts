@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import {
   getIndexReturnValue,
   mockMultiIndexResponse,
   mockMultiStatsResponse,
   mockPrivilegesResponse,
 } from '../../__mocks__/fetch_indices.mock';
+
+import { vi } from 'vitest';
 
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IScopedClusterClient } from '@kbn/core/server';

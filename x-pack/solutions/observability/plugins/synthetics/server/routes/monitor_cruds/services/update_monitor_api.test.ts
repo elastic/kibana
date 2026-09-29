@@ -17,64 +17,64 @@ import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { UpdateMonitorAPI } from './update_monitor_api';
 
 vi.mock('../../../synthetics_service/get_private_locations', () => {
-      const mocked = {
-      getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPrivateLocationsForNamespaces: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../edit_monitor', () => {
-      const mocked = {
-      validateLocationPermissions: vi
-        .fn()
-        .mockResolvedValue({ elasticManagedLocationsEnabled: true, canManagePrivateLocations: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateLocationPermissions: vi
+      .fn()
+      .mockResolvedValue({ elasticManagedLocationsEnabled: true, canManagePrivateLocations: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../project_monitor/add_monitor_project', () => {
-      const mocked = {
-      ELASTIC_MANAGED_LOCATIONS_DISABLED: 'Elastic managed locations are disabled',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ELASTIC_MANAGED_LOCATIONS_DISABLED: 'Elastic managed locations are disabled',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../monitor_locations_utils', () => {
-      const mocked = {
-      assertCanPerformMonitorBulkActionInAllSpaces: vi.fn().mockResolvedValue(undefined),
-      validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanPerformMonitorBulkActionInAllSpaces: vi.fn().mockResolvedValue(undefined),
+    validateMonitorPrivateLocationSpaces: vi.fn().mockReturnValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../monitor_validation', () => {
-      const mocked = {
-      validateMonitor: vi.fn(),
-      normalizeAPIConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateMonitor: vi.fn(),
+    normalizeAPIConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../synthetics_service/utils/secrets', () => {
-      const mocked = {
-      /*
-       * Pass-through mocks: tests assert structural changes (revision bump, hash
-       * reset, AAD attribute carry-over) on the output of `formatSecrets`, so we
-       * keep the input shape intact rather than wrap secrets into JSON. The real
-       * functions are exercised in `edit_monitor_bulk.test.ts`.
-       */
-      formatSecrets: vi.fn((monitor: any) => ({ ...monitor })),
-      normalizeSecrets: vi.fn((so: any) => ({ ...so, attributes: { ...so.attributes } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    /*
+     * Pass-through mocks: tests assert structural changes (revision bump, hash
+     * reset, AAD attribute carry-over) on the output of `formatSecrets`, so we
+     * keep the input shape intact rather than wrap secrets into JSON. The real
+     * functions are exercised in `edit_monitor_bulk.test.ts`.
+     */
+    formatSecrets: vi.fn((monitor: any) => ({ ...monitor })),
+    normalizeSecrets: vi.fn((so: any) => ({ ...so, attributes: { ...so.attributes } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common', () => {
-      const mocked = {
-      getSavedObjectKqlFilter: vi.fn(() => 'mock-filter'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSavedObjectKqlFilter: vi.fn(() => 'mock-filter'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Build the `{ updates: [{ id, attributes }] }` shape from an id list and a
@@ -168,23 +168,25 @@ describe('UpdateMonitorAPI', () => {
      */
     vi.clearAllMocks();
 
-    const { validateMonitor, normalizeAPIConfig } = (await vi.importMock('../monitor_validation'));
+    const { validateMonitor, normalizeAPIConfig } = await vi.importMock('../monitor_validation');
     validateMonitor.mockImplementation((m: Record<string, unknown>) => mockValidationResultFor(m));
     // Default: no unsupported keys. Tests that care override this.
     normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => ({ formattedConfig: m }));
 
-    const { validateLocationPermissions } = (await vi.importMock('../edit_monitor'));
+    const { validateLocationPermissions } = await vi.importMock('../edit_monitor');
     validateLocationPermissions.mockResolvedValue({
       elasticManagedLocationsEnabled: true,
       canManagePrivateLocations: true,
     });
 
     const { assertCanPerformMonitorBulkActionInAllSpaces, validateMonitorPrivateLocationSpaces } =
-      (await vi.importMock('../monitor_locations_utils'));
+      await vi.importMock('../monitor_locations_utils');
     assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue(undefined);
     validateMonitorPrivateLocationSpaces.mockReturnValue(null);
 
-    const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+    const { getPrivateLocationsForNamespaces } = await vi.importMock(
+      '../../../synthetics_service/get_private_locations'
+    );
     getPrivateLocationsForNamespaces.mockResolvedValue([]);
   });
 
@@ -303,7 +305,7 @@ describe('UpdateMonitorAPI', () => {
     );
 
     it('uses the normalized API config before validation and persistence', async () => {
-      const { normalizeAPIConfig, validateMonitor } = (await vi.importMock('../monitor_validation'));
+      const { normalizeAPIConfig, validateMonitor } = await vi.importMock('../monitor_validation');
       normalizeAPIConfig.mockImplementation((m: Record<string, unknown>) => {
         const { url, ...rest } = m;
         return { formattedConfig: { ...rest, [ConfigKey.URLS]: url } };
@@ -407,7 +409,7 @@ describe('UpdateMonitorAPI', () => {
     );
 
     it('does not call validateMonitor for rejected origins (short-circuit)', async () => {
-      const { validateMonitor } = (await vi.importMock('../monitor_validation'));
+      const { validateMonitor } = await vi.importMock('../monitor_validation');
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
         mockDecryptedMonitor({ attributes: { [ConfigKey.MONITOR_SOURCE_TYPE]: 'project' } }),
@@ -422,7 +424,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('validation_failed', () => {
     it('records the io-ts failure reason and details', async () => {
-      const { validateMonitor } = (await vi.importMock('../monitor_validation'));
+      const { validateMonitor } = await vi.importMock('../monitor_validation');
       validateMonitor.mockReturnValue({
         valid: false,
         reason: 'Monitor schedule is invalid',
@@ -528,7 +530,7 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('rejects a rename onto a name whose swap counterpart fails for an unrelated reason', async () => {
-      const { validateMonitor } = (await vi.importMock('../monitor_validation'));
+      const { validateMonitor } = await vi.importMock('../monitor_validation');
       validateMonitor.mockImplementation((m: Record<string, unknown>) =>
         m.id === 'mon-2'
           ? { valid: false, reason: 'Monitor schedule is invalid', details: '', payload: m }
@@ -627,7 +629,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('forbidden', () => {
     it('records elastic-managed-locations permission failures', async () => {
-      const { validateLocationPermissions } = (await vi.importMock('../edit_monitor'));
+      const { validateLocationPermissions } = await vi.importMock('../edit_monitor');
       validateLocationPermissions.mockResolvedValue({ elasticManagedLocationsEnabled: false });
 
       const { routeContext, mocks } = createMockRouteContext();
@@ -644,7 +646,9 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('records multi-space privilege failures (without leaking the response object)', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       assertCanPerformMonitorBulkActionInAllSpaces.mockResolvedValue({ status: 403 });
 
       const { routeContext, mocks } = createMockRouteContext();
@@ -663,13 +667,17 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('records private-location-space coverage failures', async () => {
-      const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+      const { getPrivateLocationsForNamespaces } = await vi.importMock(
+        '../../../synthetics_service/get_private_locations'
+      );
       const privateLocations = [
         { id: 'pl-1', label: 'PL', spaces: ['default'], isServiceManaged: false },
       ];
       getPrivateLocationsForNamespaces.mockResolvedValue(privateLocations);
 
-      const { validateMonitorPrivateLocationSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { validateMonitorPrivateLocationSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
       validateMonitorPrivateLocationSpaces.mockReturnValue({
         message: 'PL is not available in space "team-b"',
         attributes: { errors: [] },
@@ -701,7 +709,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('mixed batch', () => {
     it('routes each id to the correct slot and lets survivors through', async () => {
-      const { validateMonitor } = (await vi.importMock('../monitor_validation'));
+      const { validateMonitor } = await vi.importMock('../monitor_validation');
       validateMonitor.mockImplementation((m: Record<string, unknown>) => {
         if ((m.id as string) === 'mon-bad') {
           return { valid: false, reason: 'bad', details: 'bad', payload: m };
@@ -741,7 +749,7 @@ describe('UpdateMonitorAPI', () => {
 
   describe('permission checks resolve once per request', () => {
     it('resolves the elastic-managed-locations capability once for N public-location monitors', async () => {
-      const { validateLocationPermissions } = (await vi.importMock('../edit_monitor'));
+      const { validateLocationPermissions } = await vi.importMock('../edit_monitor');
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
@@ -760,7 +768,7 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('skips the location-capability check when no monitor has a public location', async () => {
-      const { validateLocationPermissions } = (await vi.importMock('../edit_monitor'));
+      const { validateLocationPermissions } = await vi.importMock('../edit_monitor');
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
@@ -777,7 +785,9 @@ describe('UpdateMonitorAPI', () => {
     });
 
     it('checks bulk_update space privileges once per unique space set', async () => {
-      const { assertCanPerformMonitorBulkActionInAllSpaces } = (await vi.importMock('../monitor_locations_utils'));
+      const { assertCanPerformMonitorBulkActionInAllSpaces } = await vi.importMock(
+        '../monitor_locations_utils'
+      );
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([
@@ -811,7 +821,9 @@ describe('UpdateMonitorAPI', () => {
     it('does not fetch private locations for a public-only monitor', async () => {
       // A public-location monitor has no private locations to validate, so the
       // per-monitor `normalizeMonitor` resolution must not hit the SO store.
-      const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+      const { getPrivateLocationsForNamespaces } = await vi.importMock(
+        '../../../synthetics_service/get_private_locations'
+      );
 
       const { routeContext, mocks } = createMockRouteContext();
       mocks.findDecryptedMonitors.mockResolvedValue([mockDecryptedMonitor()]);
@@ -832,7 +844,9 @@ describe('UpdateMonitorAPI', () => {
        * `normalizeMonitor` already performs (and caches) this lookup per
        * monitor, just like `editSyntheticsMonitorRoute`.
        */
-      const { getPrivateLocationsForNamespaces } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+      const { getPrivateLocationsForNamespaces } = await vi.importMock(
+        '../../../synthetics_service/get_private_locations'
+      );
       getPrivateLocationsForNamespaces.mockResolvedValue([
         { id: 'pl-1', label: 'PL', spaces: ['default', 'team-a'], isServiceManaged: false },
       ]);
@@ -909,9 +923,9 @@ describe('UpdateMonitorAPI', () => {
    */
   describe('real validation gate (end-to-end)', () => {
     beforeEach(async () => {
-      const { validateMonitor, normalizeAPIConfig } = (await vi.importMock('../monitor_validation'));
+      const { validateMonitor, normalizeAPIConfig } = await vi.importMock('../monitor_validation');
       const { validateMonitor: realValidateMonitor, normalizeAPIConfig: realNormalizeAPIConfig } =
-        (await vi.importActual('../monitor_validation'));
+        await vi.importActual('../monitor_validation');
       validateMonitor.mockImplementation(realValidateMonitor);
       normalizeAPIConfig.mockImplementation(realNormalizeAPIConfig);
     });

@@ -37,14 +37,14 @@ interface CapturedWaterfallProps {
 const mockWaterfallWithSummarySpy = vi.fn<void, [CapturedWaterfallProps]>();
 
 vi.mock('../waterfall_with_summary', () => {
-      const mocked = {
-      WaterfallWithSummary: (props: CapturedWaterfallProps) => {
-        mockWaterfallWithSummarySpy(props);
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WaterfallWithSummary: (props: CapturedWaterfallProps) => {
+      mockWaterfallWithSummarySpy(props);
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const coreMock = {
   settings: { client: { get: () => {} } },
@@ -138,8 +138,7 @@ describe('transaction_details/distribution', () => {
     });
 
     it("doesn't show loading indicator when the service isn't running", async () => {
-      vi
-        .spyOn(useFetcherModule, 'useFetcher')
+      vi.spyOn(useFetcherModule, 'useFetcher')
         .mockImplementationOnce(() => ({
           data: {
             traceItems: {},

@@ -32,13 +32,12 @@ const mockUseGetIntegrationsStats = vi.fn((_: Function) => ({
   getIntegrationsStats: vi.fn(),
   isLoading: false,
 }));
-vi.mock(
-  '../../../../../../siem_migrations/rules/service/hooks/use_get_integrations_stats',
-  () => {
-      const mocked = { useGetIntegrationsStats: (params: Function) => mockUseGetIntegrationsStats(params) };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../../siem_migrations/rules/service/hooks/use_get_integrations_stats', () => {
+  const mocked = {
+    useGetIntegrationsStats: (params: Function) => mockUseGetIntegrationsStats(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IntegrationsCard', () => {
   beforeEach(() => {

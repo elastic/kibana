@@ -5,26 +5,25 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockTelemetryActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 // EnterpriseSearchContentPageTemplate is mocked to capture the pageChrome prop —
 // breadcrumbs are set via kea side-effects and don't appear in the DOM directly.
 vi.mock('../layout', () => {
-      const mocked = {
-      EnterpriseSearchContentPageTemplate: vi.fn(({ children }: { children: React.ReactNode }) => (
-        <div>{children}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EnterpriseSearchContentPageTemplate: vi.fn(({ children }: { children: React.ReactNode }) => (
+      <div>{children}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { EnterpriseSearchContentPageTemplate } from '../layout';
 

@@ -13,11 +13,11 @@ import { render, screen } from '@testing-library/react';
 import { AIValueUpsellingPageESS } from '.';
 
 vi.mock('../attack_discovery/upgrade_actions', () => {
-      const mocked = {
-      UpgradeActions: () => <button type="button">{'Upgrade'}</button>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UpgradeActions: () => <button type="button">{'Upgrade'}</button>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-page-kibana-template', () => {
   const KibanaPageTemplate = ({ children }: { children: React.ReactNode }) => <div>{children}</div>;

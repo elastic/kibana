@@ -14,43 +14,43 @@ import type { RuleResponse } from '@kbn/alerting-v2-schemas';
 import { SourceRuleSummaryFlyout } from './source_rule_summary_flyout';
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: () => ({
-        get: () => 'YYYY-MM-DD',
-      }),
-      CoreStart: (key: string) => `CoreStart(${key})`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: () => ({
+      get: () => 'YYYY-MM-DD',
+    }),
+    CoreStart: (key: string) => `CoreStart(${key})`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/actions/tags_overflow_badge_row', () => {
-      const mocked = {
-      getTagsOverflowLimits: () => ({ overflowSize: 3, maxVisible: 2 }),
-      TagsOverflowBadgeRow: ({ tags }: { tags: string[] }) => (
-        <span data-test-subj="mockTagsOverflow">{tags.join(', ')}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTagsOverflowLimits: () => ({ overflowSize: 3, maxVisible: 2 }),
+    TagsOverflowBadgeRow: ({ tags }: { tags: string[] }) => (
+      <span data-test-subj="mockTagsOverflow">{tags.join(', ')}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rule_details_table', () => {
-      const mocked = {
-      RuleDetailsTable: ({
-        items,
-      }: {
-        items: Array<{ title: string; description: string; 'data-test-subj'?: string }>;
-      }) => (
-        <div data-test-subj="mockRuleDetailsTable">
-          {items.map((item) => (
-            <div key={item.title} data-test-subj={item['data-test-subj']}>
-              <strong>{item.title}</strong>: {item.description}
-            </div>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDetailsTable: ({
+      items,
+    }: {
+      items: Array<{ title: string; description: string; 'data-test-subj'?: string }>;
+    }) => (
+      <div data-test-subj="mockRuleDetailsTable">
+        {items.map((item) => (
+          <div key={item.title} data-test-subj={item['data-test-subj']}>
+            <strong>{item.title}</strong>: {item.description}
+          </div>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeRule = (overrides: Partial<RuleResponse> = {}): RuleResponse =>
   ({

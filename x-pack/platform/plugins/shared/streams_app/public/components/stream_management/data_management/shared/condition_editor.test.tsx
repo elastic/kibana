@@ -19,49 +19,49 @@ import { ConditionEditor } from './condition_editor';
 import type { Suggestion } from './autocomplete_selector';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      CodeEditor: ({ value, onChange, onBlur, dataTestSubj }: any) => (
-        <textarea
-          data-test-subj={dataTestSubj}
-          value={value}
-          onChange={(e) => onChange?.(e.target.value)}
-          onBlur={() => onBlur?.()}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CodeEditor: ({ value, onChange, onBlur, dataTestSubj }: any) => (
+      <textarea
+        data-test-subj={dataTestSubj}
+        value={value}
+        onChange={(e) => onChange?.(e.target.value)}
+        onBlur={() => onBlur?.()}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the useKibana hook
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          docLinks: {
-            links: {
-              date: {
-                dateMath:
-                  'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math',
-              },
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        docLinks: {
+          links: {
+            date: {
+              dateMath:
+                'https://www.elastic.co/guide/en/elasticsearch/reference/current/common-options.html#date-math',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the condition YAML service
 vi.mock('./condition_yaml_service', () => {
-      const mocked = {
-      conditionYamlService: {
-        register: vi.fn().mockResolvedValue(undefined),
-        release: vi.fn().mockResolvedValue(undefined),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    conditionYamlService: {
+      register: vi.fn().mockResolvedValue(undefined),
+      release: vi.fn().mockResolvedValue(undefined),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);

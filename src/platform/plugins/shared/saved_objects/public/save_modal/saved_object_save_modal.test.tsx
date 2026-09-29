@@ -18,7 +18,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { EuiProvider } from '@elastic/eui';
 
 vi.mock('@elastic/eui', async () => {
-  const actualEui = (await vi.importActual('@elastic/eui'));
+  const actualEui = await vi.importActual('@elastic/eui');
   return {
     ...actualEui,
     withEuiTheme: (Component: any) => (props: any) =>

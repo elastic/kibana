@@ -13,9 +13,9 @@ import { createCasesRoute } from '../create_cases_route';
 import './get_alerts';
 
 vi.mock('../create_cases_route', () => {
-      const mocked = { createCasesRoute: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { createCasesRoute: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 describe('GET alerts attached to case', () => {
   let routeHandler: Function;

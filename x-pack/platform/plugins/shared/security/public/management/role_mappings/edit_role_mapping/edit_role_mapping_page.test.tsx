@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { Mocked } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import React from 'react';
+import type { Mocked } from 'vitest';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';

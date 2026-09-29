@@ -15,15 +15,15 @@ import { TaskTypeDictionary } from '../../task_type_dictionary';
 import { mockLogger } from '../../test_utils';
 
 vi.mock('../../constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-        'limitedTaskType',
-        'sampleTaskSharedConcurrencyType1',
-        'sampleTaskSharedConcurrencyType2',
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+      'limitedTaskType',
+      'sampleTaskSharedConcurrencyType1',
+      'sampleTaskSharedConcurrencyType2',
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const taskManagerLogger = mockLogger();
 function mockInstance(instance: Partial<ConcreteTaskInstance> = {}) {

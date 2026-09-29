@@ -19,11 +19,7 @@ const mockTabs: EntityPanelTabType[] = [
 describe('EntityPanelHeaderTabs', () => {
   it('renders all tabs', () => {
     const { getByTestId } = render(
-      <EntityPanelHeaderTabs
-        tabs={mockTabs}
-        selectedTabId="overview"
-        setSelectedTabId={vi.fn()}
-      />
+      <EntityPanelHeaderTabs tabs={mockTabs} selectedTabId="overview" setSelectedTabId={vi.fn()} />
     );
 
     expect(getByTestId('overviewTab')).toBeInTheDocument();
@@ -32,11 +28,7 @@ describe('EntityPanelHeaderTabs', () => {
 
   it('marks the selected tab', () => {
     const { getByTestId } = render(
-      <EntityPanelHeaderTabs
-        tabs={mockTabs}
-        selectedTabId="overview"
-        setSelectedTabId={vi.fn()}
-      />
+      <EntityPanelHeaderTabs tabs={mockTabs} selectedTabId="overview" setSelectedTabId={vi.fn()} />
     );
 
     expect(getByTestId('overviewTab')).toHaveAttribute('aria-selected', 'true');

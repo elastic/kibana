@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act, render, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import {
   httpServiceMock,

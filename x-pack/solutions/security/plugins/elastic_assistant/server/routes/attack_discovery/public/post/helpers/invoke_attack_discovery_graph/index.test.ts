@@ -22,44 +22,44 @@ import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { throwIfInvalidAnonymization } from '../throw_if_invalid_anonymization';
 
 vi.mock('@kbn/langchain/server', () => {
-      const mocked = {
-      ActionsClientLlm: vi.fn(),
-      InferenceClientLlm: vi.fn(),
-      getLangSmithTracer: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionsClientLlm: vi.fn(),
+    InferenceClientLlm: vi.fn(),
+    getLangSmithTracer: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph', () => {
-      const mocked = {
-      getDefaultAttackDiscoveryGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultAttackDiscoveryGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/prompts',
   () => {
-      const mocked = {
-        getAttackDiscoveryPrompts: vi.fn().mockResolvedValue({}),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getAttackDiscoveryPrompts: vi.fn().mockResolvedValue({}),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../throw_if_error_counts_exceeded', () => {
-      const mocked = {
-      throwIfErrorCountsExceeded: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    throwIfErrorCountsExceeded: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../throw_if_invalid_anonymization', () => {
-      const mocked = {
-      throwIfInvalidAnonymization: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    throwIfInvalidAnonymization: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('invokeAttackDiscoveryGraph', () => {
   let actionsClient: PublicMethodsOf<ActionsClient>;

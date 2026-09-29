@@ -23,26 +23,26 @@ vi.mock('../../../../hooks/use_kibana');
 vi.mock('../../../../hooks/use_stream_detail');
 vi.mock('../../../../hooks/use_discard_confirm');
 vi.mock('../schema_editor/hooks/use_schema_fields', async () => {
-  const actual = (await vi.importActual('../schema_editor/hooks/use_schema_fields'));
+  const actual = await vi.importActual('../schema_editor/hooks/use_schema_fields');
   return {
     ...actual,
     useSchemaFields: vi.fn(),
   };
 });
 vi.mock('@kbn/unsaved-changes-prompt', () => {
-      const mocked = {
-      useUnsavedChangesPrompt: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnsavedChangesPrompt: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: vi.fn(() => ({
-        onPageReady: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: vi.fn(() => ({
+      onPageReady: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamDetail } from '../../../../hooks/use_stream_detail';

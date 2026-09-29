@@ -28,11 +28,11 @@ import { renderIacTemplateHandler } from './handlers';
 
 vi.mock('../../services/app_context');
 vi.mock('../../services', () => {
-      const mocked = {
-      iacProvisionerService: { renderTemplate: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    iacProvisionerService: { renderTemplate: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../services/epm/packages');
 vi.mock('../../services/utils/iac_provisioner');
 vi.mock('../../services/telemetry/iac_provisioner_telemetry');

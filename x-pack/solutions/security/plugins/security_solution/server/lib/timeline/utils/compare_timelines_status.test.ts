@@ -56,7 +56,8 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -129,7 +130,8 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -187,16 +189,17 @@ describe('CompareTimelinesStatus', () => {
 
       beforeEach(async () => {
         vi.doMock('../saved_object/timelines', () => {
-              const mocked = {
-                      getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
-                      getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
-                        mockGetTemplateTimelineValue
-                      ),
-                    };
-              return { ...mocked, default: mocked };
-            });
+          const mocked = {
+            getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+            getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
+              mockGetTemplateTimelineValue
+            ),
+          };
+          return { ...mocked, default: mocked };
+        });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -275,14 +278,15 @@ describe('CompareTimelinesStatus', () => {
 
       beforeEach(async () => {
         vi.doMock('../saved_object/timelines', () => {
-              const mocked = {
-                      getTimelineOrNull: mockGetTimeline,
-                      getTimelineTemplateOrNull: mockGetTemplateTimeline,
-                    };
-              return { ...mocked, default: mocked };
-            });
+          const mocked = {
+            getTimelineOrNull: mockGetTimeline,
+            getTimelineTemplateOrNull: mockGetTemplateTimeline,
+          };
+          return { ...mocked, default: mocked };
+        });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -374,7 +378,8 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -452,7 +457,8 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -540,7 +546,8 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -614,7 +621,8 @@ describe('CompareTimelinesStatus', () => {
           };
         });
 
-        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+        const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+          .CompareTimelinesStatus;
 
         timelineObj = new CompareTimelinesStatus({
           timelineInput: {
@@ -676,14 +684,15 @@ describe('CompareTimelinesStatus', () => {
 
     beforeEach(async () => {
       vi.doMock('../saved_object/timelines', () => {
-            const mocked = {
-                  getTimelineOrNull: mockGetTimeline,
-                  getTimelineTemplateOrNull: mockGetTemplateTimeline,
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          getTimelineOrNull: mockGetTimeline,
+          getTimelineTemplateOrNull: mockGetTemplateTimeline,
+        };
+        return { ...mocked, default: mocked };
+      });
 
-      const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+      const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+        .CompareTimelinesStatus;
 
       timelineObj = new CompareTimelinesStatus({
         timelineInput: {
@@ -740,16 +749,17 @@ describe('CompareTimelinesStatus', () => {
 
     beforeEach(async () => {
       vi.doMock('../saved_object/timelines', () => {
-            const mocked = {
-                  getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
-                  getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
-                    mockGetTemplateTimelineValue
-                  ),
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          getTimelineOrNull: mockGetTimeline.mockReturnValue(mockGetTemplateTimelineValue),
+          getTimelineTemplateOrNull: mockGetTemplateTimeline.mockReturnValue(
+            mockGetTemplateTimelineValue
+          ),
+        };
+        return { ...mocked, default: mocked };
+      });
 
-      const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status')).CompareTimelinesStatus;
+      const CompareTimelinesStatus = (await vi.importActual('./compare_timelines_status'))
+        .CompareTimelinesStatus;
 
       timelineObj = new CompareTimelinesStatus({
         timelineInput: {

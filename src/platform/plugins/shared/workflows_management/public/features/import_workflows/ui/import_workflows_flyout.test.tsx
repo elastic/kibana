@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ImportWorkflowsFlyout } from './import_workflows_flyout';
@@ -25,15 +25,15 @@ vi.mock('../lib/parse_import_file');
 vi.mock('../../../hooks/use_kibana');
 vi.mock('../../../hooks/use_telemetry');
 vi.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => {
-      const mocked = {
-      WorkflowsTriggersList: ({ triggers }: { triggers: Array<{ type: string }> }) => (
-        <span data-test-subj="mock-triggers-list">
-          {triggers.map((t) => t.type).join(', ') || 'No triggers'}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowsTriggersList: ({ triggers }: { triggers: Array<{ type: string }> }) => (
+      <span data-test-subj="mock-triggers-list">
+        {triggers.map((t) => t.type).join(', ') || 'No triggers'}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockParseImportFile = parseImportFile as MockedFunction<typeof parseImportFile>;
 

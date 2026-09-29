@@ -19,28 +19,28 @@ import { setDynamicSettingsEffect } from './effects';
 import { selectDynamicSettings } from './selectors';
 
 vi.mock('./api', async () => {
-      const mocked = {
-      ...(await vi.importActual('./api')),
-      setDynamicSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./api')),
+    setDynamicSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../utils/kibana_service', () => {
-      const mocked = {
-      kibanaService: {
-        coreSetup: {
-          notifications: {
-            toasts: {
-              addSuccess: vi.fn(),
-              addError: vi.fn(),
-            },
+  const mocked = {
+    kibanaService: {
+      coreSetup: {
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getSetDynamicSettingsWorker() {
   const gen = setDynamicSettingsEffect();

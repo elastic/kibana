@@ -15,7 +15,7 @@ const mockAddDanger = vi.fn();
 const mockAddSuccess = vi.fn();
 
 vi.mock('../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: () => {
@@ -30,20 +30,22 @@ vi.mock('../../common/lib/kibana', async () => {
   };
 });
 vi.mock('../lib/rule_api/update_query_delay_settings', () => {
-      const mocked = {
-      updateQueryDelaySettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateQueryDelaySettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/rule_api/update_flapping_settings', () => {
-      const mocked = {
-      updateFlappingSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateFlappingSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { updateQueryDelaySettings } = (await vi.importMock('../lib/rule_api/update_query_delay_settings'));
-const { updateFlappingSettings } = (await vi.importMock('../lib/rule_api/update_flapping_settings'));
+const { updateQueryDelaySettings } = await vi.importMock(
+  '../lib/rule_api/update_query_delay_settings'
+);
+const { updateFlappingSettings } = await vi.importMock('../lib/rule_api/update_flapping_settings');
 
 const queryClient = new QueryClient({
   defaultOptions: {

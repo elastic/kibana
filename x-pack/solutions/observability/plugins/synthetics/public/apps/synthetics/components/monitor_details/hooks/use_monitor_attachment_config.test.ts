@@ -21,18 +21,18 @@ const mockAgentBuilder = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_selected_monitor', () => {
-      const mocked = {
-      useSelectedMonitor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedMonitor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useSelectedMonitor } from './use_selected_monitor';

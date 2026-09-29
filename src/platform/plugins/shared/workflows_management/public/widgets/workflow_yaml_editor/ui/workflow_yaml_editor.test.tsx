@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
@@ -70,42 +70,42 @@ vi.mock('../../../shared/ui/yaml_editor', () => {
 
 // Mock the validation hook
 vi.mock('../../../features/validate_workflow_yaml/lib/use_yaml_validation', () => {
-      const mocked = {
-      useYamlValidation: () => ({
-        error: null,
-        isLoading: false,
-        validationResults: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useYamlValidation: () => ({
+      error: null,
+      isLoading: false,
+      validationResults: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the UnsavedChangesPrompt
 vi.mock('../../../shared/ui/unsaved_changes_prompt', () => {
-      const mocked = {
-      UnsavedChangesPrompt: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UnsavedChangesPrompt: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the validation errors component
 vi.mock('./workflow_yaml_validation_accordion', () => {
-      const mocked = {
-      WorkflowYamlValidationAccordion: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYamlValidationAccordion: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the useAvailableConnectors hook
 vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
-      const mocked = {
-      useAvailableConnectors: vi.fn().mockReturnValue({
-        connectorTypes: {},
-        totalConnectors: 0,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAvailableConnectors: vi.fn().mockReturnValue({
+      connectorTypes: {},
+      totalConnectors: 0,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSaveYaml = vi.fn();
 const mockUseSaveYaml = useSaveYaml as MockedFunction<typeof useSaveYaml>;
@@ -113,41 +113,41 @@ const mockUseParams = vi.fn();
 
 // Mock the useSaveYaml hook - now returns just the function, not an array
 vi.mock('../../../entities/workflows/model/use_save_yaml', () => {
-      const mocked = {
-      useSaveYaml: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSaveYaml: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => mockUseParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => mockUseParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKqlStart = kqlPluginMock.createStartContract();
 const mockFieldFormatsStart = fieldFormatsServiceMock.createStartContract();
 
 // Mock the useKibana hook
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          http: {},
-          notifications: {
-            toasts: {
-              addSuccess: vi.fn(),
-              addError: vi.fn(),
-            },
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        http: {},
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
           },
-          kql: mockKqlStart,
-          fieldFormats: mockFieldFormatsStart,
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+        kql: mockKqlStart,
+        fieldFormats: mockFieldFormatsStart,
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRegisterKeyboardCommands = vi.fn();
 const mockUnregisterKeyboardCommands = vi.fn();
@@ -158,138 +158,138 @@ let capturedKeyboardHandlers: {
 } = {};
 
 vi.mock('../lib/use_register_keyboard_commands', () => {
-      const mocked = {
-      useRegisterKeyboardCommands: vi.fn(() => ({
-        registerKeyboardCommands: (params: any) => {
-          capturedKeyboardHandlers = {
-            save: params.save,
-            run: params.run,
-            saveAndRun: params.saveAndRun,
-          };
-          mockRegisterKeyboardCommands(params);
-        },
-        unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRegisterKeyboardCommands: vi.fn(() => ({
+      registerKeyboardCommands: (params: any) => {
+        capturedKeyboardHandlers = {
+          save: params.save,
+          run: params.run,
+          saveAndRun: params.saveAndRun,
+        };
+        mockRegisterKeyboardCommands(params);
+      },
+      unregisterKeyboardCommands: mockUnregisterKeyboardCommands,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRegisterHoverCommands = vi.fn();
 const mockUnregisterHoverCommands = vi.fn();
 vi.mock('../lib/use_register_hover_commands', () => {
-      const mocked = {
-      useRegisterHoverCommands: vi.fn(() => ({
-        registerHoverCommands: (params: any) => {
-          mockRegisterHoverCommands(params);
-        },
-        unregisterHoverCommands: mockUnregisterHoverCommands,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRegisterHoverCommands: vi.fn(() => ({
+      registerHoverCommands: (params: any) => {
+        mockRegisterHoverCommands(params);
+      },
+      unregisterHoverCommands: mockUnregisterHoverCommands,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./step_actions', () => {
-      const mocked = {
-      StepActions: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepActions: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./actions_menu_button', () => {
-      const mocked = {
-      ActionsMenuButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionsMenuButton: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./decorations', () => {
-      const mocked = {
-      useAlertTriggerDecorations: vi.fn(),
-      useConnectorTypeDecorations: vi.fn(),
-      useFocusedStepDecoration: vi.fn(),
-      useLineDifferencesDecorations: vi.fn(),
-      useStepDecorationsInExecution: vi.fn(() => ({ styles: {} })),
-      useTriggerTypeDecorations: vi.fn(),
-      useWorkflowEventsOnDecorations: vi.fn(),
-      useWorkflowIdDecorations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertTriggerDecorations: vi.fn(),
+    useConnectorTypeDecorations: vi.fn(),
+    useFocusedStepDecoration: vi.fn(),
+    useLineDifferencesDecorations: vi.fn(),
+    useStepDecorationsInExecution: vi.fn(() => ({ styles: {} })),
+    useTriggerTypeDecorations: vi.fn(),
+    useWorkflowEventsOnDecorations: vi.fn(),
+    useWorkflowIdDecorations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../styles/use_workflow_editor_styles', () => {
-      const mocked = {
-      useWorkflowEditorStyles: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowEditorStyles: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-      useWorkflowsMonacoTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+    useWorkflowsMonacoTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
 vi.mock('../styles/use_dynamic_type_icons', () => {
-      const mocked = {
-      useDynamicTypeIcons: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDynamicTypeIcons: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../styles/global_workflow_editor_styles', () => {
-      const mocked = {
-      GlobalWorkflowEditorStyles: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GlobalWorkflowEditorStyles: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockCloseActionsPopover: (() => void) | undefined;
 vi.mock('../../../features/actions_menu_popover', () => {
-      const mocked = {
-      ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
-        mockCloseActionsPopover = closePopover;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionsMenuPopover: ({ closePopover }: { closePopover: () => void }) => {
+      mockCloseActionsPopover = closePopover;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/utils', () => {
-      const mocked = {
-      navigateToErrorPosition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    navigateToErrorPosition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../features/validate_workflow_yaml/model/use_workflow_json_schema', () => {
-      const mocked = {
-      useWorkflowJsonSchema: vi.fn(() => ({
-        jsonSchema: null,
-        uri: null,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowJsonSchema: vi.fn(() => ({
+      jsonSchema: null,
+      uri: null,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../features/validate_workflow_yaml/lib/use_monaco_markers_changed_interceptor',
   () => {
-      const mocked = {
-        useMonacoMarkersChangedInterceptor: vi.fn(() => ({
-          validationErrors: [],
-          transformMonacoMarkers: vi.fn(),
-          handleMarkersChanged: vi.fn(),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useMonacoMarkersChangedInterceptor: vi.fn(() => ({
+        validationErrors: [],
+        transformMonacoMarkers: vi.fn(),
+        handleMarkersChanged: vi.fn(),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockCompletionProvider = {
@@ -298,60 +298,60 @@ const mockCompletionProvider = {
 };
 
 vi.mock('../lib/esql_validation/use_workflow_esql_callbacks', () => {
-      const mocked = {
-      useWorkflowEsqlCallbacks: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowEsqlCallbacks: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/autocomplete/get_completion_item_provider', () => {
-      const mocked = {
-      getCompletionItemProvider: vi.fn(() => mockCompletionProvider),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCompletionItemProvider: vi.fn(() => mockCompletionProvider),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock interceptMonacoYamlProvider to be a no-op so the original mock remains
 vi.mock('../lib/autocomplete/intercept_monaco_yaml_provider', () => {
-      const mocked = {
-      interceptMonacoYamlProvider: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    interceptMonacoYamlProvider: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_agent_builder_integration', () => {
-      const mocked = {
-      useAgentBuilderIntegration: vi.fn(() => ({
-        openAgentChat: vi.fn(),
-        isAgentBuilderAvailable: false,
-        proposalManager: null,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderIntegration: vi.fn(() => ({
+      openAgentChat: vi.fn(),
+      isAgentBuilderAvailable: false,
+      proposalManager: null,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        editor: {
-          setModelMarkers: vi.fn(),
-          registerCommand: vi.fn().mockReturnValue({
-            dispose: vi.fn(),
-          }),
-        },
-        languages: {
-          registerCompletionItemProvider: vi.fn().mockReturnValue({
-            dispose: vi.fn(),
-          }),
-          registerCodeActionProvider: vi.fn().mockReturnValue({
-            dispose: vi.fn(),
-          }),
-        },
+  const mocked = {
+    monaco: {
+      editor: {
+        setModelMarkers: vi.fn(),
+        registerCommand: vi.fn().mockReturnValue({
+          dispose: vi.fn(),
+        }),
       },
-      YAML_LANG_ID: 'yaml',
-    };
-      return { ...mocked, default: mocked };
-    });
+      languages: {
+        registerCompletionItemProvider: vi.fn().mockReturnValue({
+          dispose: vi.fn(),
+        }),
+        registerCodeActionProvider: vi.fn().mockReturnValue({
+          dispose: vi.fn(),
+        }),
+      },
+    },
+    YAML_LANG_ID: 'yaml',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowYAMLEditor', () => {
   const defaultProps: WorkflowYAMLEditorProps = {

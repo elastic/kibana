@@ -28,7 +28,7 @@ import { JOBS } from './helpers/constants';
 import { coreMock, docLinksServiceMock } from '@kbn/core/public/mocks';
 
 vi.mock('../../crud_app/services', async () => {
-  const services = (await vi.importActual('../../crud_app/services'));
+  const services = await vi.importActual('../../crud_app/services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),
@@ -36,7 +36,7 @@ vi.mock('../../crud_app/services', async () => {
 });
 
 vi.mock('../../kibana_services', async () => {
-  const services = (await vi.importActual('../../kibana_services'));
+  const services = await vi.importActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: vi.fn(() => () => {}),

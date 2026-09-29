@@ -16,58 +16,58 @@ const mockListEntities = vi.fn();
 const mockPrepareLeadCandidates = vi.fn();
 const mockSynthesizeLeads = vi.fn();
 vi.mock('./engine/lead_generation_engine', () => {
-      const mocked = {
-      createLeadGenerationEngine: () => ({
-        prepareLeadCandidates: mockPrepareLeadCandidates,
-        synthesizeLeads: mockSynthesizeLeads,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadGenerationEngine: () => ({
+      prepareLeadCandidates: mockPrepareLeadCandidates,
+      synthesizeLeads: mockSynthesizeLeads,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRegisterObservationModules = vi.fn();
 vi.mock('./observation_modules/register_modules', () => {
-      const mocked = {
-      registerObservationModules: (...args: unknown[]) => mockRegisterObservationModules(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerObservationModules: (...args: unknown[]) => mockRegisterObservationModules(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBuildEntityLookupMap = vi.fn();
 vi.mock('./entities_relationships', () => {
-      const mocked = {
-      buildEntityLookupMap: (...args: unknown[]) => mockBuildEntityLookupMap(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEntityLookupMap: (...args: unknown[]) => mockBuildEntityLookupMap(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttachRelatedEntities = vi.fn();
 vi.mock('./attach_related_entities', () => {
-      const mocked = {
-      attachRelatedEntities: (...args: unknown[]) => mockAttachRelatedEntities(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    attachRelatedEntities: (...args: unknown[]) => mockAttachRelatedEntities(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockClassifyLeadCandidates = vi.fn();
 const mockPersistLeads = vi.fn();
 vi.mock('./lead_data_client', () => {
-      const mocked = {
-      createLeadDataClient: () => ({
-        classifyLeadCandidates: mockClassifyLeadCandidates,
-        persistLeads: mockPersistLeads,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadDataClient: () => ({
+      classifyLeadCandidates: mockClassifyLeadCandidates,
+      persistLeads: mockPersistLeads,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBuildExploratoryLeads = vi.fn();
 vi.mock('./exploratory_leads', () => {
-      const mocked = {
-      buildExploratoryLeads: (...args: unknown[]) => mockBuildExploratoryLeads(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildExploratoryLeads: (...args: unknown[]) => mockBuildExploratoryLeads(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 import { runLeadGenerationPipeline } from './run_pipeline';

@@ -12,53 +12,53 @@ import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { NoData } from '.';
 
 vi.mock('@elastic/eui-illustrations', () => {
-      const mocked = {
-      megaphone: {
-        id: 'megaphone',
-        title: 'Megaphone',
-        light: '<svg></svg>',
-        dark: '<svg></svg>',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    megaphone: {
+      id: 'megaphone',
+      title: 'Megaphone',
+      light: '<svg></svg>',
+      dark: '<svg></svg>',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          isAirGapped: false,
-          useCloudConnectStatus: () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
-        },
+  const mocked = {
+    Legacy: {
+      shims: {
+        isAirGapped: false,
+        useCloudConnectStatus: () => ({ isCloudConnectAutoopsEnabled: false, isLoading: false }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: vi.fn(() => '/app/cloud_connect'),
-            navigateToApp: vi.fn(),
-            capabilities: {
-              cloudConnect: {
-                show: true,
-                configure: true,
-              },
-            },
-          },
-          notifications: {
-            tours: {
-              isEnabled: vi.fn(() => true),
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: vi.fn(() => '/app/cloud_connect'),
+          navigateToApp: vi.fn(),
+          capabilities: {
+            cloudConnect: {
+              show: true,
+              configure: true,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: {
+          tours: {
+            isEnabled: vi.fn(() => true),
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const enabler = {};
 

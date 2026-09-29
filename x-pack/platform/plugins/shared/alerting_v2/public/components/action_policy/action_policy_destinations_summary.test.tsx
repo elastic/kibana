@@ -18,25 +18,25 @@ const mockApplicationService = { getUrlForApp: mockGetUrlForApp };
 const mockUseFetchWorkflow = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return mockApplicationService;
-        }
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return mockApplicationService;
+      }
 
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_fetch_workflow', () => {
-      const mocked = {
-      useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = (destinations: ActionPolicyDestination[]) =>
   render(

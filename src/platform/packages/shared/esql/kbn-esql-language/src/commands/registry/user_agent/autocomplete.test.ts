@@ -73,9 +73,7 @@ describe('USER_AGENT Autocomplete', () => {
 
   it('suggests string fields and string functions after the assignment operator', async () => {
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as Mock).mockResolvedValue([
-      { label: 'uaString', text: 'uaString ' },
-    ]);
+    (mockCallbacks.getByType as Mock).mockResolvedValue([{ label: 'uaString', text: 'uaString ' }]);
 
     await expectUserAgentSuggestionsContains(
       'FROM a | USER_AGENT ua = ',
@@ -89,9 +87,7 @@ describe('USER_AGENT Autocomplete', () => {
 
   it('suggests string fields and string functions when expression is an incomplete function call', async () => {
     const mockCallbacks = getMockCallbacks();
-    (mockCallbacks.getByType as Mock).mockResolvedValue([
-      { label: 'uaString', text: 'uaString ' },
-    ]);
+    (mockCallbacks.getByType as Mock).mockResolvedValue([{ label: 'uaString', text: 'uaString ' }]);
 
     // e.g. CONCAT()
     // CONCAT( — cursor inside an incomplete call. Functions have trailing commas because

@@ -14,25 +14,25 @@ import { LocationAgentDetails } from './location_agent_details';
 import type { AgentStat, LocationAgentStats } from '../../../../../../common/types';
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => ({ basePath: '' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => ({ basePath: '' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFleetPermissions: () => ({ canReadAgentPolicies: true, canReadAgents: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({ createHref: () => '/monitors' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({ createHref: () => '/monitors' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const agent = (overrides: Partial<AgentStat> = {}): AgentStat => ({
   host: 'agent-a',

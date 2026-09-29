@@ -26,40 +26,40 @@ import { createThreatIntelRuntime, setupThreatIntel, startThreatIntel } from './
 // Explicit factories rather than automock: these are barrels, and automock does not
 // reliably produce callables for their re-exports.
 vi.mock('./routes', () => {
-      const mocked = { registerRoutes: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerRoutes: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./setup/bootstrap_threat_intel', () => {
-      const mocked = { ensureThreatIntelBootstrap: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ensureThreatIntelBootstrap: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tasks', () => {
-      const mocked = {
-      PROMOTE_THREAT_INDICATORS_TASK_ID: 'threat_intel:promote_threat_indicators:default',
-      SCRUB_REPORT_CONTENT_TASK_ID: 'threat_intel:scrub_report_content:default',
-      registerPromoteThreatIndicatorsTask: vi.fn(),
-      registerScrubReportContentTask: vi.fn(),
-      schedulePromoteThreatIndicatorsTask: vi.fn(),
-      scheduleScrubReportContentTask: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PROMOTE_THREAT_INDICATORS_TASK_ID: 'threat_intel:promote_threat_indicators:default',
+    SCRUB_REPORT_CONTENT_TASK_ID: 'threat_intel:scrub_report_content:default',
+    registerPromoteThreatIndicatorsTask: vi.fn(),
+    registerScrubReportContentTask: vi.fn(),
+    schedulePromoteThreatIndicatorsTask: vi.fn(),
+    scheduleScrubReportContentTask: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflows/step_types', () => {
-      const mocked = { registerThreatIntelWorkflowSteps: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerThreatIntelWorkflowSteps: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./setup/indicator_alias', () => {
-      const mocked = {
-      ensureIndicatorAliasForSpace: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ensureIndicatorAliasForSpace: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../workflows/security_managed_workflows', () => {
-      const mocked = {
-      reconcileThreatIntelAttributeWorkflowsForSpaces: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reconcileThreatIntelAttributeWorkflowsForSpaces: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Everything the pipeline registers. The alertzero-off case asserts every one of these is

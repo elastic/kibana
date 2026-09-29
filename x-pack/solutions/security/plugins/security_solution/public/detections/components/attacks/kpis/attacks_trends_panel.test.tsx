@@ -16,39 +16,39 @@ import { useEuiComboBoxReset } from '../../../../common/components/use_combo_box
 
 // Mock dependencies
 vi.mock('./common/use_attacks_kpi_state', () => {
-      const mocked = {
-      useAttacksKpiState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttacksKpiState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/use_combo_box_reset', () => {
-      const mocked = {
-      useEuiComboBoxReset: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiComboBoxReset: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../alerts_kpis/alerts_histogram_panel', () => {
-      const mocked = {
-      AlertsHistogramPanel: vi.fn(() => <div data-test-subj="alerts-histogram-panel" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsHistogramPanel: vi.fn(() => <div data-test-subj="alerts-histogram-panel" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../user_info', () => {
-      const mocked = {
-      useUserData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useUserData } from '../../user_info';
 import { useDispatch } from 'react-redux-v7';

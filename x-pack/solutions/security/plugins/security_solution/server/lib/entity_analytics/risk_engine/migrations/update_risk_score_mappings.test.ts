@@ -17,38 +17,38 @@ const mockCreateOrUpdateIndex = vi.fn();
 const mockRolloverDataStream = vi.fn();
 
 vi.mock('@kbn/alerting-plugin/server', () => {
-      const mocked = {
-      createOrUpdateComponentTemplate: (...params: unknown[]) =>
-        mockCreateOrUpdateComponentTemplate(...params),
-      createOrUpdateIndexTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateComponentTemplate: (...params: unknown[]) =>
+      mockCreateOrUpdateComponentTemplate(...params),
+    createOrUpdateIndexTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/create_or_update_index', () => {
-      const mocked = {
-      createOrUpdateIndex: (...params: unknown[]) => mockCreateOrUpdateIndex(...params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateIndex: (...params: unknown[]) => mockCreateOrUpdateIndex(...params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/create_datastream', () => {
-      const mocked = {
-      rolloverDataStream: (...params: unknown[]) => mockRolloverDataStream(...params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    rolloverDataStream: (...params: unknown[]) => mockRolloverDataStream(...params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetDefaultRiskEngineConfiguration = vi.fn();
 const mockUpdateSavedObjectAttribute = vi.fn();
 vi.mock('../utils/saved_object_configuration', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils/saved_object_configuration')),
-      getDefaultRiskEngineConfiguration: () => mockGetDefaultRiskEngineConfiguration(),
-      updateSavedObjectAttribute: (...params: unknown[]) => mockUpdateSavedObjectAttribute(...params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils/saved_object_configuration')),
+    getDefaultRiskEngineConfiguration: () => mockGetDefaultRiskEngineConfiguration(),
+    updateSavedObjectAttribute: (...params: unknown[]) => mockUpdateSavedObjectAttribute(...params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('updateRiskScoreMappings', () => {
   const logger = loggingSystemMock.createLogger();

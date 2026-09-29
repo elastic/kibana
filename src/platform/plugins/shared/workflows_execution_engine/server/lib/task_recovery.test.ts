@@ -683,9 +683,7 @@ describe('markScheduledExecutionFailedAfterTaskError', () => {
       vi.clearAllMocks();
       vi.spyOn(logger, 'warn').mockImplementation(() => {});
       vi.spyOn(logger, 'error').mockImplementation(() => {});
-      vi
-        .spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed')
-        .mockResolvedValue(undefined);
+      vi.spyOn(stepExecutionRepository, 'markNonTerminalStepsFailed').mockResolvedValue(undefined);
     }
   });
 

@@ -16,11 +16,11 @@ import { checkNamespaceConflict } from './namespace_template_utils';
 
 vi.mock('../../app_context');
 vi.mock('../elasticsearch/retry', () => {
-      const mocked = {
-      retryTransientEsErrors: vi.fn((fn: () => Promise<unknown>) => fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retryTransientEsErrors: vi.fn((fn: () => Promise<unknown>) => fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 

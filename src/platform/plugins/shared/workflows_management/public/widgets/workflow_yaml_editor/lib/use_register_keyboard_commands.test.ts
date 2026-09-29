@@ -7,40 +7,40 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { act, renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/monaco';
 import { useRegisterKeyboardCommands } from './use_register_keyboard_commands';
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        KeyMod: { CtrlCmd: 2048, Shift: 1024 },
-        KeyCode: {
-          Slash: 85,
-          Digit7: 38,
-          KeyK: 46,
-          KeyS: 54,
-          KeyF: 36,
-          Enter: 3,
-        },
-        editor: {
-          EditorOption: { readOnly: 81 },
-        },
+  const mocked = {
+    monaco: {
+      KeyMod: { CtrlCmd: 2048, Shift: 1024 },
+      KeyCode: {
+        Slash: 85,
+        Digit7: 38,
+        KeyK: 46,
+        KeyS: 54,
+        KeyF: 36,
+        Enter: 3,
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      editor: {
+        EditorOption: { readOnly: 81 },
+      },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: (_id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockDisposable = (): monaco.IDisposable => ({
   dispose: vi.fn(),

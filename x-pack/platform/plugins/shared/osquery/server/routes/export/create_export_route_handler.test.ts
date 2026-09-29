@@ -24,28 +24,31 @@ import { createExportRouteHandler, type ExportRouteParams } from './create_expor
 import { OsqueryQueries } from '../../../common/search_strategy/osquery';
 
 vi.mock('../../lib/export_results_to_stream', () => {
-      const mocked = {
-      exportResultsToStream: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    exportResultsToStream: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/get_user_info', () => {
-      const mocked = {
-      getUserInfo: vi.fn().mockResolvedValue({ username: 'test-user' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUserInfo: vi.fn().mockResolvedValue({ username: 'test-user' }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/ccs_utils', async () => {
-  const actual = (await vi.importActual('../../utils/ccs_utils'));
+  const actual = await vi.importActual('../../utils/ccs_utils');
 
   return {
     ...actual,
@@ -54,7 +57,7 @@ vi.mock('../../utils/ccs_utils', async () => {
 });
 
 vi.mock('../../lib/format_results', async () => {
-  const actual = (await vi.importActual('../../lib/format_results'));
+  const actual = await vi.importActual('../../lib/format_results');
 
   return {
     ...actual,

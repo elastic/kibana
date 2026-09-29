@@ -13,11 +13,11 @@ import { transformMetricsApiResponseToSnapshotResponse } from './transform_metri
 import type { MetricsAPIRequest } from '@kbn/metrics-data-access-plugin/common';
 
 vi.mock('./apply_metadata_to_last_path', () => {
-      const mocked = {
-      applyMetadataToLastPath: (series: any) => [{ label: series.id }],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyMetadataToLastPath: (series: any) => [{ label: series.id }],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const now = moment('2020-01-01T00:00:00Z').add(5, 'minute').valueOf();
 

@@ -18,7 +18,7 @@ const mockEuiFlyout = vi.fn();
 // `onKeyDown`, so a prop the root forwards is not observable in the DOM. Record the props and
 // delegate to that stub: forwarding is the template's half of the contract, rendering is EUI's.
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const react = require('react');
   return {
     ...actual,

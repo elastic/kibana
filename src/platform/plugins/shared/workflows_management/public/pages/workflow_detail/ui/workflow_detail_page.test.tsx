@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { act, fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import type { MemoryRouter } from 'react-router-dom';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { WorkflowDetailPage } from './workflow_detail_page';
 import { PLUGIN_ID } from '../../../../common';
@@ -48,155 +47,155 @@ let mockAsyncThunkState: { isLoading: boolean; error: unknown | null } = {
 };
 
 vi.mock('../../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
-      const mocked = {
-      useWorkflowsBreadcrumbs: () => mockUseWorkflowsBreadcrumbs(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsBreadcrumbs: () => mockUseWorkflowsBreadcrumbs(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_global_executions_view_enabled', () => {
-      const mocked = {
-      useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalExecutionsViewEnabled: () => mockUseGlobalExecutionsViewEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
 vi.mock('../../../entities/workflows/store/workflow_detail/thunks/load_connectors_thunk', () => {
-      const mocked = {
-      loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadConnectorsThunk: (...args: unknown[]) => mockLoadConnectors(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../entities/workflows/store/workflow_detail/thunks/load_workflow_thunk', () => {
-      const mocked = {
-      loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadWorkflowThunk: (...args: unknown[]) => mockLoadWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_not_found_page', () => {
-      const mocked = {
-      WorkflowNotFoundPage: ({ onBackToWorkflows }: { onBackToWorkflows: () => void }) => (
-        <div data-test-subj="workflow-not-found-page">
-          <button
-            type="button"
-            data-test-subj="workflowDetailBackToWorkflowsButton"
-            onClick={onBackToWorkflows}
-          >
-            {'Back to Workflows'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowNotFoundPage: ({ onBackToWorkflows }: { onBackToWorkflows: () => void }) => (
+      <div data-test-subj="workflow-not-found-page">
+        <button
+          type="button"
+          data-test-subj="workflowDetailBackToWorkflowsButton"
+          onClick={onBackToWorkflows}
+        >
+          {'Back to Workflows'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_detail_header', () => {
-      const mocked = {
-      WorkflowDetailHeader: ({ onOpenExecutionList }: { onOpenExecutionList?: () => void }) => (
-        <div data-test-subj="workflow-detail-header">
-          <button
-            type="button"
-            data-test-subj="workflowDetailExecutionsButton"
-            onClick={onOpenExecutionList}
-          >
-            {'Executions'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowDetailHeader: ({ onOpenExecutionList }: { onOpenExecutionList?: () => void }) => (
+      <div data-test-subj="workflow-detail-header">
+        <button
+          type="button"
+          data-test-subj="workflowDetailExecutionsButton"
+          onClick={onOpenExecutionList}
+        >
+          {'Executions'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow_detail_editor', () => {
-      const mocked = {
-      WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowDetailEditor: () => <div data-test-subj="workflow-detail-editor">{'Editor'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow_detail_layout', () => {
-      const mocked = {
-      WorkflowEditorLayout: ({ editor, executionList, executionDetail }: any) => (
-        <div data-test-subj="workflow-editor-layout">
-          {editor}
-          {executionList}
-          {executionDetail}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowEditorLayout: ({ editor, executionList, executionDetail }: any) => (
+      <div data-test-subj="workflow-editor-layout">
+        {editor}
+        {executionList}
+        {executionDetail}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow_detail_test_modal', () => {
-      const mocked = {
-      WorkflowDetailTestModal: () => (
-        <div data-test-subj="workflow-detail-test-modal">{'Test Modal'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowDetailTestModal: () => (
+      <div data-test-subj="workflow-detail-test-modal">{'Test Modal'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow_detail_test_step_modal', () => {
-      const mocked = {
-      WorkflowDetailTestStepModal: () => (
-        <div data-test-subj="workflow-detail-test-step-modal">{'Test Step Modal'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowDetailTestStepModal: () => (
+      <div data-test-subj="workflow-detail-test-step-modal">{'Test Step Modal'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../features/workflow_execution_detail', () => {
-      const mocked = {
-      WorkflowExecutionFlyout: ({ executionId }: { executionId: string }) => (
-        <div data-test-subj="workflow-execution-flyout">{executionId}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionFlyout: ({ executionId }: { executionId: string }) => (
+      <div data-test-subj="workflow-execution-flyout">{executionId}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../features/workflow_execution_detail_old', () => {
-      const mocked = {
-      WorkflowExecutionDetail: ({ executionId }: { executionId: string }) => (
-        <div data-test-subj="workflow-execution-detail">{executionId}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionDetail: ({ executionId }: { executionId: string }) => (
+      <div data-test-subj="workflow-execution-detail">{executionId}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../features/workflow_execution_list_old', () => {
-      const mocked = {
-      WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
-        <div data-test-subj="workflow-execution-list">{workflowId}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionList: ({ workflowId }: { workflowId: string }) => (
+      <div data-test-subj="workflow-execution-list">{workflowId}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../features/workflow_execution_list/ui/workflow_execution_list_flyout', () => {
-      const mocked = {
-      WorkflowExecutionListFlyout: ({ workflowId }: { workflowId: string }) => (
-        <div data-test-subj="workflow-execution-list-flyout">{workflowId}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionListFlyout: ({ workflowId }: { workflowId: string }) => (
+      <div data-test-subj="workflow-execution-list-flyout">{workflowId}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_async_thunk', () => {
-      const mocked = {
-      useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAsyncThunkState: (mockedThunk: Function) => [mockedThunk, mockAsyncThunkState],
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowDetailPage', () => {
   const mockWorkflow = {

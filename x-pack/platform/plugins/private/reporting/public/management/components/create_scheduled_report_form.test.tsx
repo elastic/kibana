@@ -33,19 +33,19 @@ import { transformScheduledReport } from '../utils';
 
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('@kbn/reporting-public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      ReportingAPIClient: vi.fn().mockImplementation(() => ({
-        getDecoratedJobParams: vi.fn().mockResolvedValue({
-          browserTimezone: 'UTC',
-          version: 'x.x.x',
-          title: 'Scheduled report 2',
-          objectType: 'dashboard',
-        }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    ReportingAPIClient: vi.fn().mockImplementation(() => ({
+      getDecoratedJobParams: vi.fn().mockResolvedValue({
+        browserTimezone: 'UTC',
+        version: 'x.x.x',
+        title: 'Scheduled report 2',
+        objectType: 'dashboard',
+      }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_get_user_profile_query');
 vi.mock('../apis/get_reporting_health');

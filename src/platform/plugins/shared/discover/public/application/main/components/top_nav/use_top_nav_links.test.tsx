@@ -28,28 +28,28 @@ import { useProfileAccessor } from '../../../../context_awareness/hooks/use_prof
 import * as getAlerts from './app_menu_actions/get_alerts';
 
 vi.mock('@kbn/alerts-ui-shared', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared')),
-      useGetRuleTypesPermissions: vi.fn(() => ({
-        authorizedRuleTypes: [
-          {
-            id: '.es-query',
-            authorizedConsumers: {
-              discover: { all: true, read: true },
-            },
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared')),
+    useGetRuleTypesPermissions: vi.fn(() => ({
+      authorizedRuleTypes: [
+        {
+          id: '.es-query',
+          authorizedConsumers: {
+            discover: { all: true, read: true },
           },
-        ],
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+        },
+      ],
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../context_awareness/hooks/use_profile_accessor', () => {
-      const mocked = {
-      useProfileAccessor: vi.fn((accessorId: string) => vi.fn((baseImpl) => baseImpl)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfileAccessor: vi.fn((accessorId: string) => vi.fn((baseImpl) => baseImpl)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseProfileAccessor = vi.mocked(useProfileAccessor);
 
@@ -209,9 +209,8 @@ describe('useTopNavLinks', () => {
     it('should include the export menu item', async () => {
       const services = createTestServices();
 
-      vi
-        .spyOn(services.share!, 'availableIntegrations')
-        .mockImplementation((_objectType, groupId) => {
+      vi.spyOn(services.share!, 'availableIntegrations').mockImplementation(
+        (_objectType, groupId) => {
           if (groupId === 'export') {
             return [
               {
@@ -223,7 +222,8 @@ describe('useTopNavLinks', () => {
             ];
           }
           return [];
-        });
+        }
+      );
 
       const appMenuConfig = await setup({ services });
 
@@ -250,9 +250,8 @@ describe('useTopNavLinks', () => {
     it('should include unknown export integrations with fallback presentation', async () => {
       const services = createTestServices();
 
-      vi
-        .spyOn(services.share!, 'availableIntegrations')
-        .mockImplementation((_objectType, groupId) => {
+      vi.spyOn(services.share!, 'availableIntegrations').mockImplementation(
+        (_objectType, groupId) => {
           if (groupId === 'exportDerivatives') {
             return [
               {
@@ -264,7 +263,8 @@ describe('useTopNavLinks', () => {
             ];
           }
           return [];
-        });
+        }
+      );
 
       const appMenuConfig = await setup({ services });
 
@@ -280,9 +280,8 @@ describe('useTopNavLinks', () => {
     it('includes Schedule export when CSV reporting is available', async () => {
       const services = createTestServices();
 
-      vi
-        .spyOn(services.share!, 'availableIntegrations')
-        .mockImplementation((_objectType, groupId) => {
+      vi.spyOn(services.share!, 'availableIntegrations').mockImplementation(
+        (_objectType, groupId) => {
           if (groupId === 'export') {
             return [
               {
@@ -304,7 +303,8 @@ describe('useTopNavLinks', () => {
             ];
           }
           return [];
-        });
+        }
+      );
 
       const appMenuConfig = await setup({ services });
 
@@ -317,9 +317,8 @@ describe('useTopNavLinks', () => {
     it('hides Schedule export when CSV reporting is not available', async () => {
       const services = createTestServices();
 
-      vi
-        .spyOn(services.share!, 'availableIntegrations')
-        .mockImplementation((_objectType, groupId) => {
+      vi.spyOn(services.share!, 'availableIntegrations').mockImplementation(
+        (_objectType, groupId) => {
           if (groupId === 'exportDerivatives') {
             return [
               {
@@ -331,7 +330,8 @@ describe('useTopNavLinks', () => {
             ];
           }
           return [];
-        });
+        }
+      );
 
       const appMenuConfig = await setup({ services });
 

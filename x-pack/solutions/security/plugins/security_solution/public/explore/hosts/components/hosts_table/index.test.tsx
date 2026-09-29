@@ -20,78 +20,78 @@ import { mockData } from './mock';
 vi.mock('../../../../common/lib/kibana');
 
 vi.mock('../../../../common/lib/kibana/hooks', () => {
-      const mocked = {
-      useNavigateTo: () => ({
-        navigateTo: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateTo: () => ({
+      navigateTo: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 vi.mock('../../../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/link_to');
 
 const mockUseMlCapabilities = vi.fn().mockReturnValue({ isPlatinumOrTrialLicense: true });
 
 vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities', () => {
-      const mocked = {
-      useMlCapabilities: () => mockUseMlCapabilities(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlCapabilities: () => mockUseMlCapabilities(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
 vi.mock('../../../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenHostFlyout = vi.fn();
 const mockOpenFlyout = vi.fn();
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout, closeFlyout: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: () => ({
-        openHostFlyout: mockOpenHostFlyout,
-        openUserFlyout: vi.fn(),
-        openServiceFlyout: vi.fn(),
-        openGenericEntityFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: () => ({
+      openHostFlyout: mockOpenHostFlyout,
+      openUserFlyout: vi.fn(),
+      openServiceFlyout: vi.fn(),
+      openGenericEntityFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUiSetting = vi.fn().mockReturnValue([false]);
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),

@@ -17,11 +17,11 @@ import { GET_DEFAULT_ESQL_QUERY_TOOL_ID, getDefaultEsqlQueryTool } from '.';
 const mockBuildDefaultEsqlQuery = vi.fn();
 
 vi.mock('@kbn/discoveries/impl/lib/build_default_esql_query', () => {
-      const mocked = {
-      buildDefaultEsqlQuery: (...args: unknown[]) => mockBuildDefaultEsqlQuery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildDefaultEsqlQuery: (...args: unknown[]) => mockBuildDefaultEsqlQuery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GET_DEFAULT_ESQL_QUERY_TOOL_ID', () => {
   it('has the expected value', () => {

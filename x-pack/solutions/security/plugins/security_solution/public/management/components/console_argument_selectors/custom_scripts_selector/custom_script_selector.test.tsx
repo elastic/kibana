@@ -35,36 +35,32 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 vi.mock('../../../hooks/custom_scripts/use_get_custom_scripts');
 vi.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
 vi.mock('../shared/hooks', () => {
-      const mocked = {
-      useGenericErrorToast: vi.fn(),
-      useBaseSelectorHandlers: vi.fn(() => ({
-        handleOpenPopover: vi.fn(),
-        handleClosePopover: vi.fn(),
-        setIsPopoverOpen: vi.fn(),
-      })),
-      useBaseSelectorState: vi.fn((store, value) => store ?? { isPopoverOpen: !value }),
-      useRenderDelay: vi.fn(() => false),
-      useFocusManagement: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGenericErrorToast: vi.fn(),
+    useBaseSelectorHandlers: vi.fn(() => ({
+      handleOpenPopover: vi.fn(),
+      handleClosePopover: vi.fn(),
+      setIsPopoverOpen: vi.fn(),
+    })),
+    useBaseSelectorState: vi.fn((store, value) => store ?? { isPopoverOpen: !value }),
+    useRenderDelay: vi.fn(() => false),
+    useFocusManagement: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 
 vi.useFakeTimers();
 
 describe('CustomScriptSelector', () => {
-  const mockUseGetCustomScripts = useGetCustomScripts as MockedFunction<
-    typeof useGetCustomScripts
-  >;
+  const mockUseGetCustomScripts = useGetCustomScripts as MockedFunction<typeof useGetCustomScripts>;
   const mockUseGenericErrorToast = useGenericErrorToast as MockedFunction<
     typeof useGenericErrorToast
   >;
   const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as MockedFunction<
     typeof useBaseSelectorHandlers
   >;
-  const mockUseFocusManagement = useFocusManagement as MockedFunction<
-    typeof useFocusManagement
-  >;
+  const mockUseFocusManagement = useFocusManagement as MockedFunction<typeof useFocusManagement>;
   const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
   const mockUseRenderDelay = useRenderDelay as MockedFunction<typeof useRenderDelay>;
   const mockOnChange = vi.fn();

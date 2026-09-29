@@ -19,7 +19,7 @@ export const checkIndexCurrentAlgorithmMock = vi.fn();
 export const getCreationAliasesMock = vi.fn();
 
 vi.doMock('../../utils', async () => {
-  const realModule = (await vi.importActual('../../utils'));
+  const realModule = await vi.importActual('../../utils');
   return {
     ...realModule,
     getCurrentIndex: getCurrentIndexMock,
@@ -35,7 +35,7 @@ vi.doMock('../../utils', async () => {
 export const getAliasesMock = vi.fn();
 
 vi.doMock('../../../model/helpers', async () => {
-  const realModule = (await vi.importActual('../../../model/helpers'));
+  const realModule = await vi.importActual('../../../model/helpers');
   return {
     ...realModule,
     getAliases: getAliasesMock,

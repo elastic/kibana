@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('./toc_entry', () => {
-      const mocked = {
-      TOCEntry: () => {
-        return <div>mockTOCEntry</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TOCEntry: () => {
+      return <div>mockTOCEntry</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

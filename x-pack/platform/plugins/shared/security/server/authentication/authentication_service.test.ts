@@ -6,7 +6,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock, MockInstance, Mocked } from 'vitest';
+import type { Mock, Mocked, MockInstance } from 'vitest';
 
 vi.mock('./authenticator');
 
@@ -270,8 +270,8 @@ describe('AuthenticationService', () => {
         service.start(mockStartAuthenticationParams);
 
         authHandler = mockSetupAuthenticationParams.http.registerAuth.mock.calls[0][0];
-        authenticate =
-          (await vi.importMock('./authenticator')).Authenticator.mock.instances[0].authenticate;
+        authenticate = (await vi.importMock('./authenticator')).Authenticator.mock.instances[0]
+          .authenticate;
       });
 
       it('returns error if license is not available.', async () => {
@@ -488,8 +488,8 @@ describe('AuthenticationService', () => {
 
         unauthorizedErrorHandler =
           mockSetupAuthenticationParams.elasticsearch.setUnauthorizedErrorHandler.mock.calls[0][0];
-        reauthenticate =
-          (await vi.importMock('./authenticator')).Authenticator.mock.instances[0].reauthenticate;
+        reauthenticate = (await vi.importMock('./authenticator')).Authenticator.mock.instances[0]
+          .reauthenticate;
       });
 
       describe('service-account-bound fake requests', () => {
@@ -930,8 +930,8 @@ describe('AuthenticationService', () => {
         service.setup(mockSetupAuthenticationParams);
         service.start(mockStartAuthenticationParams);
 
-        getServerBaseURL =
-          (await vi.importMock('./authenticator')).Authenticator.mock.calls[0][0].getServerBaseURL;
+        getServerBaseURL = (await vi.importMock('./authenticator')).Authenticator.mock.calls[0][0]
+          .getServerBaseURL;
       });
 
       it('falls back to legacy server config if `public` config is not specified', async () => {

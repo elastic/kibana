@@ -15,7 +15,7 @@ import type { SolutionNavProps } from './solution_nav';
 import { SolutionNav } from './solution_nav';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useIsWithinBreakpoints: (args: string[]) => {

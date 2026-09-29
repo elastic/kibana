@@ -15,17 +15,17 @@ import { useUserProfiles } from './use_user_profiles';
 const mockBulkGet = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          userProfile: {
-            bulkGet: mockBulkGet,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        userProfile: {
+          bulkGet: mockBulkGet,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const memberProfile = {
   uid: 'member-1',

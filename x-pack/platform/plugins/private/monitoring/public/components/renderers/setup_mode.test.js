@@ -24,18 +24,18 @@ describe('SetupModeRenderer', () => {
 
   it('should render with setup mode disabled', () => {
     vi.doMock('../../lib/setup_mode', () => {
-          const mocked = {
-              getSetupModeState: () => ({
-                supported: true,
-                enabled: false,
-              }),
-              initSetupModeState: () => {},
-              updateSetupModeData: () => {},
-              markSetupModeSupported: () => {},
-              markSetupModeUnsupported: () => {},
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getSetupModeState: () => ({
+          supported: true,
+          enabled: false,
+        }),
+        initSetupModeState: () => {},
+        updateSetupModeData: () => {},
+        markSetupModeSupported: () => {},
+        markSetupModeUnsupported: () => {},
+      };
+      return { ...mocked, default: mocked };
+    });
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
@@ -59,22 +59,22 @@ describe('SetupModeRenderer', () => {
 
   it('should render with setup mode enabled', () => {
     vi.doMock('../../lib/setup_mode', () => {
-          const mocked = {
-              getSetupModeState: () => ({
-                supported: true,
-                enabled: true,
-                data: {
-                  elasticsearch: {},
-                  _meta: {},
-                },
-              }),
-              initSetupModeState: () => {},
-              updateSetupModeData: () => {},
-              markSetupModeSupported: () => {},
-              markSetupModeUnsupported: () => {},
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getSetupModeState: () => ({
+          supported: true,
+          enabled: true,
+          data: {
+            elasticsearch: {},
+            _meta: {},
+          },
+        }),
+        initSetupModeState: () => {},
+        updateSetupModeData: () => {},
+        markSetupModeSupported: () => {},
+        markSetupModeUnsupported: () => {},
+      };
+      return { ...mocked, default: mocked };
+    });
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
@@ -98,24 +98,24 @@ describe('SetupModeRenderer', () => {
 
   it('should render the flyout open', () => {
     vi.doMock('../../lib/setup_mode', () => {
-          const mocked = {
-              getSetupModeState: () => ({
-                supported: true,
-                enabled: true,
-                data: {
-                  elasticsearch: {
-                    byUuid: {},
-                  },
-                  _meta: {},
-                },
-              }),
-              initSetupModeState: () => {},
-              updateSetupModeData: () => {},
-              markSetupModeSupported: () => {},
-              markSetupModeUnsupported: () => {},
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getSetupModeState: () => ({
+          supported: true,
+          enabled: true,
+          data: {
+            elasticsearch: {
+              byUuid: {},
+            },
+            _meta: {},
+          },
+        }),
+        initSetupModeState: () => {},
+        updateSetupModeData: () => {},
+        markSetupModeSupported: () => {},
+        markSetupModeUnsupported: () => {},
+      };
+      return { ...mocked, default: mocked };
+    });
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
@@ -141,24 +141,24 @@ describe('SetupModeRenderer', () => {
 
   it('should handle a new node/instance scenario', () => {
     vi.doMock('../../lib/setup_mode', () => {
-          const mocked = {
-              getSetupModeState: () => ({
-                supported: true,
-                enabled: true,
-                data: {
-                  elasticsearch: {
-                    byUuid: {},
-                  },
-                  _meta: {},
-                },
-              }),
-              initSetupModeState: () => {},
-              updateSetupModeData: () => {},
-              markSetupModeSupported: () => {},
-              markSetupModeUnsupported: () => {},
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getSetupModeState: () => ({
+          supported: true,
+          enabled: true,
+          data: {
+            elasticsearch: {
+              byUuid: {},
+            },
+            _meta: {},
+          },
+        }),
+        initSetupModeState: () => {},
+        updateSetupModeData: () => {},
+        markSetupModeSupported: () => {},
+        markSetupModeUnsupported: () => {},
+      };
+      return { ...mocked, default: mocked };
+    });
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
@@ -187,36 +187,36 @@ describe('SetupModeRenderer', () => {
 
     vi.useFakeTimers({ legacyFakeTimers: true });
     vi.doMock('../../lib/setup_mode', () => {
-          const mocked = {
-              getSetupModeState: () => ({
-                supported: true,
-                enabled: true,
-                data: {
-                  elasticsearch: {
-                    byUuid: {
-                      2: newProduct,
-                    },
-                  },
-                  _meta: {},
-                },
-              }),
-              initSetupModeState: (_globalState, _httpService, _onError, cb) => {
-                setTimeout(() => {
-                  cb({
-                    elasticsearch: {
-                      byUuid: {
-                        1: {},
-                      },
-                    },
-                  });
-                }, 500);
+      const mocked = {
+        getSetupModeState: () => ({
+          supported: true,
+          enabled: true,
+          data: {
+            elasticsearch: {
+              byUuid: {
+                2: newProduct,
               },
-              updateSetupModeData: () => {},
-              markSetupModeSupported: () => {},
-              markSetupModeUnsupported: () => {},
-            };
-          return { ...mocked, default: mocked };
-        });
+            },
+            _meta: {},
+          },
+        }),
+        initSetupModeState: (_globalState, _httpService, _onError, cb) => {
+          setTimeout(() => {
+            cb({
+              elasticsearch: {
+                byUuid: {
+                  1: {},
+                },
+              },
+            });
+          }, 500);
+        },
+        updateSetupModeData: () => {},
+        markSetupModeSupported: () => {},
+        markSetupModeUnsupported: () => {},
+      };
+      return { ...mocked, default: mocked };
+    });
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
@@ -248,36 +248,36 @@ describe('SetupModeRenderer', () => {
     const newProduct = { id: 1 };
 
     vi.doMock('../../lib/setup_mode', () => {
-          const mocked = {
-              getSetupModeState: () => ({
-                supported: true,
-                enabled: true,
-                data: {
-                  elasticsearch: {
-                    byUuid: {
-                      2: newProduct,
-                    },
-                  },
-                  _meta: {},
-                },
-              }),
-              initSetupModeState: (_globalState, _httpService, _onError, cb) => {
-                setTimeout(() => {
-                  cb({
-                    elasticsearch: {
-                      byUuid: {
-                        1: {},
-                      },
-                    },
-                  });
-                }, 500);
+      const mocked = {
+        getSetupModeState: () => ({
+          supported: true,
+          enabled: true,
+          data: {
+            elasticsearch: {
+              byUuid: {
+                2: newProduct,
               },
-              updateSetupModeData: () => {},
-              markSetupModeSupported: () => {},
-              markSetupModeUnsupported: () => {},
-            };
-          return { ...mocked, default: mocked };
-        });
+            },
+            _meta: {},
+          },
+        }),
+        initSetupModeState: (_globalState, _httpService, _onError, cb) => {
+          setTimeout(() => {
+            cb({
+              elasticsearch: {
+                byUuid: {
+                  1: {},
+                },
+              },
+            });
+          }, 500);
+        },
+        updateSetupModeData: () => {},
+        markSetupModeSupported: () => {},
+        markSetupModeUnsupported: () => {},
+      };
+      return { ...mocked, default: mocked };
+    });
     const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;

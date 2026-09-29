@@ -15,11 +15,11 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { getMcpToolType, listMcpTools, getNamedMcpTools } from './tool_type';
 
 vi.mock('@kbn/zod/v4/from_json_schema', () => {
-      const mocked = {
-      fromJSONSchema: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fromJSONSchema: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { fromJSONSchema } from '@kbn/zod/v4/from_json_schema';
 

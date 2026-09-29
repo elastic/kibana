@@ -102,9 +102,7 @@ describe('buildResolveConnector', () => {
 
   describe('when inference plugin is not available', () => {
     it('falls back to actionsClient.get', async () => {
-      const mockActionsClientGet = vi
-        .fn()
-        .mockResolvedValue({ id: 'conn-1', name: 'Connector 1' });
+      const mockActionsClientGet = vi.fn().mockResolvedValue({ id: 'conn-1', name: 'Connector 1' });
       const mockGetActionsClientWithRequest = vi
         .fn()
         .mockResolvedValue({ get: mockActionsClientGet });
@@ -127,9 +125,7 @@ describe('buildResolveConnector', () => {
     });
 
     it('calls getActionsClientWithRequest with request', async () => {
-      const mockActionsClientGet = vi
-        .fn()
-        .mockResolvedValue({ id: 'conn-1', name: 'Connector 1' });
+      const mockActionsClientGet = vi.fn().mockResolvedValue({ id: 'conn-1', name: 'Connector 1' });
       const mockGetActionsClientWithRequest = vi
         .fn()
         .mockResolvedValue({ get: mockActionsClientGet });

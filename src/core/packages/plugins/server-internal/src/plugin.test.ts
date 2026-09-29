@@ -46,29 +46,41 @@ const logger = loggingSystemMock.create();
 vi.doMock(
   join('plugin-with-initializer-path', 'server'),
   () => {
-      const mocked = { plugin: mockPluginInitializer };
-      return { ...mocked, default: mocked };
-    },
+    const mocked = { plugin: mockPluginInitializer };
+    return { ...mocked, default: mocked };
+  },
   { virtual: true }
 );
-vi.doMock(join('plugin-without-initializer-path', 'server'), () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    }, {
-  virtual: true,
-});
-vi.doMock(join('plugin-with-wrong-initializer-path', 'server'), () => {
-      const mocked = { plugin: {} };
-      return { ...mocked, default: mocked };
-    }, {
-  virtual: true,
-});
-vi.doMock(join('plugin-with-module', 'server'), () => {
-      const mocked = { module: pluginModule };
-      return { ...mocked, default: mocked };
-    }, {
-  virtual: true,
-});
+vi.doMock(
+  join('plugin-without-initializer-path', 'server'),
+  () => {
+    const mocked = {};
+    return { ...mocked, default: mocked };
+  },
+  {
+    virtual: true,
+  }
+);
+vi.doMock(
+  join('plugin-with-wrong-initializer-path', 'server'),
+  () => {
+    const mocked = { plugin: {} };
+    return { ...mocked, default: mocked };
+  },
+  {
+    virtual: true,
+  }
+);
+vi.doMock(
+  join('plugin-with-module', 'server'),
+  () => {
+    const mocked = { module: pluginModule };
+    return { ...mocked, default: mocked };
+  },
+  {
+    virtual: true,
+  }
+);
 
 const OSS_PLUGIN_PATH_POSIX = '/kibana/src/plugins/ossPlugin';
 const OSS_PLUGIN_PATH_WINDOWS = 'C:\\kibana\\src\\plugins\\ossPlugin';
@@ -657,11 +669,11 @@ describe('#getConfigSchema()', () => {
     vi.doMock(
       join('plugin-with-schema', 'server'),
       () => {
-          const mocked = {
-                config: configDescriptor,
-              };
-          return { ...mocked, default: mocked };
-        },
+        const mocked = {
+          config: configDescriptor,
+        };
+        return { ...mocked, default: mocked };
+      },
       { virtual: true }
     );
     const manifest = createPluginManifest();
@@ -683,10 +695,14 @@ describe('#getConfigSchema()', () => {
   });
 
   it('returns null if config definition not specified', async () => {
-    vi.doMock(join('plugin-with-no-definition', 'server'), () => {
-          const mocked = {};
-          return { ...mocked, default: mocked };
-        }, { virtual: true });
+    vi.doMock(
+      join('plugin-with-no-definition', 'server'),
+      () => {
+        const mocked = {};
+        return { ...mocked, default: mocked };
+      },
+      { virtual: true }
+    );
     const manifest = createPluginManifest();
     const opaqueId = Symbol();
     const plugin = new PluginWrapper({
@@ -726,15 +742,15 @@ describe('#getConfigSchema()', () => {
     vi.doMock(
       join('plugin-invalid-schema', 'server'),
       () => {
-          const mocked = {
-                config: {
-                  schema: {
-                    validate: () => null,
-                  },
-                },
-              };
-          return { ...mocked, default: mocked };
-        },
+        const mocked = {
+          config: {
+            schema: {
+              validate: () => null,
+            },
+          },
+        };
+        return { ...mocked, default: mocked };
+      },
       { virtual: true }
     );
     const manifest = createPluginManifest();

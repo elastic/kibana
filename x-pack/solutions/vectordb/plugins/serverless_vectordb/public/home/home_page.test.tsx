@@ -18,49 +18,49 @@ import { HomePageBanner } from './home_page_banner';
 import { HomePage } from './home_page';
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_authenticated_user', () => {
-      const mocked = { useAuthenticatedUser: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAuthenticatedUser: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_deployment_stats', () => {
-      const mocked = { useDeploymentStats: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useDeploymentStats: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/vectordb-onboarding', () => {
-      const mocked = {
-      ConnectToProject: () => <div data-test-subj="connectToProject" />,
-      useOnboardingCredentials: () => ({ elasticsearchUrl: null, apiKey: null, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectToProject: () => <div data-test-subj="connectToProject" />,
+    useOnboardingCredentials: () => ({ elasticsearchUrl: null, apiKey: null, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-components', () => {
-      const mocked = {
-      TrialUsageBadge: () => <div data-test-subj="trialUsageBadge" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TrialUsageBadge: () => <div data-test-subj="trialUsageBadge" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./home_page_banner', () => {
-      const mocked = { HomePageBanner: vi.fn(() => null) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { HomePageBanner: vi.fn(() => null) };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./add_data_section', () => {
-      const mocked = {
-      AddDataSection: () => <div data-test-subj="addDataSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddDataSection: () => <div data-test-subj="addDataSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./chat_with_data_section', () => {
-      const mocked = {
-      ChatWithYourDataSection: () => <div data-test-subj="chatWithDataSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChatWithYourDataSection: () => <div data-test-subj="chatWithDataSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseAuthenticatedUser = useAuthenticatedUser as Mock;

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock, Mocked, MockedFunction } from 'vitest';
-
 import { context, trace, TraceFlags } from '@opentelemetry/api';
 import type { Span, SpanContext } from '@opentelemetry/api';
 import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import agent from 'elastic-apm-node';
+import type { Mock, Mocked, MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 import * as apmUtils from '@kbn/apm-utils';
 import type { CoreStart } from '@kbn/core/server';
 import type {
@@ -44,7 +43,7 @@ vi.mock('../build_workflow_context', () => {
 });
 
 vi.mock('@kbn/apm-utils', async () => {
-  const actual = (await vi.importActual('@kbn/apm-utils'));
+  const actual = await vi.importActual('@kbn/apm-utils');
   return {
     ...actual,
     addTransactionLabels: vi.fn(actual.addTransactionLabels),

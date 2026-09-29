@@ -294,9 +294,7 @@ describe('templates_v2 api bulk actions', () => {
       // stable filename
       dateNowSpy = vi.spyOn(Date, 'now').mockReturnValue(123);
 
-      anchorClickSpy = vi
-        .spyOn(HTMLAnchorElement.prototype, 'click')
-        .mockImplementation(() => {});
+      anchorClickSpy = vi.spyOn(HTMLAnchorElement.prototype, 'click').mockImplementation(() => {});
     });
 
     afterEach(() => {

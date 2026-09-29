@@ -13,25 +13,25 @@ import type { EpisodeTrendRow } from '../../queries/episode_trend_query';
 import { mapEventDataToSeries, deriveTrendThresholds } from './trend_data';
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: vi.fn(
-          (
-            id: string,
-            {
-              defaultMessage,
-              values = {},
-            }: { defaultMessage: string; values?: Record<string, number | string> }
-          ) =>
-            Object.entries(values).reduce(
-              (message, [key, value]) => message.replace(`{${key}}`, String(value)),
-              defaultMessage
-            )
-        ),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: vi.fn(
+        (
+          id: string,
+          {
+            defaultMessage,
+            values = {},
+          }: { defaultMessage: string; values?: Record<string, number | string> }
+        ) =>
+          Object.entries(values).reduce(
+            (message, [key, value]) => message.replace(`{${key}}`, String(value)),
+            defaultMessage
+          )
+      ),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTranslate = vi.mocked(i18n.translate);
 

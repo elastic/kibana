@@ -18,37 +18,37 @@ import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 import { useAccessibleSpaces } from '../../hooks/use_spaces';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_evals_api');
 vi.mock('../../hooks/use_evals_permissions');
 vi.mock('../../hooks/use_spaces');
 vi.mock('../../components/copy_dataset_flyout', () => {
-      const mocked = {
-      CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
-        <div data-test-subj="copyDatasetFlyoutMock">
-          {datasetId}: {datasetName}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
+      <div data-test-subj="copyDatasetFlyoutMock">
+        {datasetId}: {datasetName}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/import_dataset_flyout', () => {
-      const mocked = {
-      ImportDatasetFlyout: ({ onClose }: { onClose: () => void }) => (
-        <div data-test-subj="importDatasetFlyoutMock">
-          <button type="button" onClick={onClose}>
-            Close import
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ImportDatasetFlyout: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="importDatasetFlyoutMock">
+        <button type="button" onClick={onClose}>
+          Close import
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseKibana = vi.mocked(useKibana);
 const mockedUseDatasets = vi.mocked(useDatasets);

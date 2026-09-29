@@ -12,11 +12,12 @@ import type { ToolRegistry } from '@kbn/agent-builder-server';
 import { createSkillService } from './skill_service';
 
 const mockPersistedSkillNotFoundError = async () =>
-  (await vi.importActual<typeof import('@kbn/agent-builder-common')>('@kbn/agent-builder-common'))
-    .createSkillNotFoundError({ skillId: 'missing' });
+  (
+    await vi.importActual<typeof import('@kbn/agent-builder-common')>('@kbn/agent-builder-common')
+  ).createSkillNotFoundError({ skillId: 'missing' });
 
 vi.mock('@kbn/agent-builder-server/skills', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-server/skills'));
+  const actual = await vi.importActual('@kbn/agent-builder-server/skills');
   return {
     ...actual,
     validateSkillDefinition: vi.fn(async (skill) => skill),
@@ -24,42 +25,42 @@ vi.mock('@kbn/agent-builder-server/skills', async () => {
 });
 
 vi.mock('@kbn/agent-builder-server/allow_lists', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-server/allow_lists')),
-      isAllowedSkillRegistration: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-server/allow_lists')),
+    isAllowedSkillRegistration: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../execution/runner/store/volumes/skills/utils', () => {
-      const mocked = {
-      getSkillEntryPath: vi.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSkillEntryPath: vi.fn(({ skill }) => `${skill.basePath}/${skill.name}/SKILL.md`),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./persisted/client', () => {
-      const mocked = {
-      createClient: vi.fn(() => ({
-        has: vi.fn().mockResolvedValue(false),
-        get: vi.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
-        list: vi.fn().mockResolvedValue([]),
-        create: vi.fn(),
-        bulkCreate: vi.fn(),
-        update: vi.fn(),
-        delete: vi.fn(),
-        deleteByPluginId: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createClient: vi.fn(() => ({
+      has: vi.fn().mockResolvedValue(false),
+      get: vi.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
+      list: vi.fn().mockResolvedValue([]),
+      create: vi.fn(),
+      bulkCreate: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+      deleteByPluginId: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/spaces', () => {
-      const mocked = {
-      getCurrentSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockSkillDefinition = (overrides: Partial<SkillDefinition> = {}): SkillDefinition => ({
   id: 'test-skill-1',
@@ -91,7 +92,9 @@ describe('createSkillService', () => {
     });
 
     it('throws when registering a skill id not in the allow-list', async () => {
-      const { isAllowedSkillRegistration } = (await vi.importMock('@kbn/agent-builder-server/allow_lists'));
+      const { isAllowedSkillRegistration } = await vi.importMock(
+        '@kbn/agent-builder-server/allow_lists'
+      );
       isAllowedSkillRegistration.mockReturnValueOnce(false);
 
       const service = createSkillService();
@@ -153,7 +156,7 @@ describe('createSkillService', () => {
 
   describe('start().getRegistry', () => {
     it('returns a registry that includes registered built-in skills', async () => {
-      const { createClient: mockCreateClient } = (await vi.importMock('./persisted/client/client'));
+      const { createClient: mockCreateClient } = await vi.importMock('./persisted/client/client');
       mockCreateClient.mockReturnValue({
         has: vi.fn().mockResolvedValue(false),
         get: vi.fn().mockRejectedValue(mockPersistedSkillNotFoundError()),
@@ -173,9 +176,7 @@ describe('createSkillService', () => {
       const mockSoClient = { get: vi.fn() } as any;
       const mockUiSettings = {
         asScopedToClient: vi.fn().mockReturnValue({ get: vi.fn().mockResolvedValue(false) }),
-        globalAsScopedToClient: vi
-          .fn()
-          .mockReturnValue({ get: vi.fn().mockResolvedValue(false) }),
+        globalAsScopedToClient: vi.fn().mockReturnValue({ get: vi.fn().mockResolvedValue(false) }),
       } as any;
       const mockSavedObjects = { getScopedClient: vi.fn().mockReturnValue(mockSoClient) } as any;
 

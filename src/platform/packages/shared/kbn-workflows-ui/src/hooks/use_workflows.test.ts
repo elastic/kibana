@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowListDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { useWorkflows } from './use_workflows';
@@ -18,19 +17,19 @@ import { createMockWorkflowApi } from '../api/workflows_api.mock';
 import { testQueryClientConfig } from '../test_utils';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('../api/use_workflows_api', () => {
-      const mocked = {
-      useWorkflowsApi: () => mockWorkflowApi,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => mockWorkflowApi,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient(testQueryClientConfig);
 

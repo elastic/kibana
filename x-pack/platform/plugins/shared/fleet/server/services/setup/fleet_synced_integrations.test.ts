@@ -15,35 +15,35 @@ import {
 } from './fleet_synced_integrations';
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getExperimentalFeatures: vi.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
-        getLogger: vi.fn().mockReturnValue({
-          error: vi.fn(),
-          debug: vi.fn(),
-          warn: vi.fn(),
-        }),
-        getConfig: vi.fn().mockReturnValue({
-          enableManagedLogsAndMetricsDataviews: true,
-        }),
-        getCloud: vi.fn().mockReturnValue({
-          isServerlessEnabled: false,
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getExperimentalFeatures: vi.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
+      getLogger: vi.fn().mockReturnValue({
+        error: vi.fn(),
+        debug: vi.fn(),
+        warn: vi.fn(),
+      }),
+      getConfig: vi.fn().mockReturnValue({
+        enableManagedLogsAndMetricsDataviews: true,
+      }),
+      getCloud: vi.fn().mockReturnValue({
+        isServerlessEnabled: false,
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/utils', () => {
-      const mocked = {
-      createListStream: vi
-        .fn()
-        .mockImplementation((indexPatterns) =>
-          indexPatterns.map((indexPattern: any) => indexPattern.id)
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createListStream: vi
+      .fn()
+      .mockImplementation((indexPatterns) =>
+        indexPatterns.map((indexPattern: any) => indexPattern.id)
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fleet_synced_integrations', () => {
   let esClientMock: any;

@@ -51,9 +51,7 @@ const createMockFieldDefinitionsClient = () => ({
   getFieldDefinition: vi.fn(async () => toSavedObject(makeFieldDef())),
   createFieldDefinition: vi.fn(async () => toSavedObject(makeFieldDef())),
   validateCreateFieldDefinition: vi.fn(async () => undefined),
-  updateFieldDefinition: vi.fn(async () =>
-    toSavedObject(makeFieldDef({ description: 'Updated' }))
-  ),
+  updateFieldDefinition: vi.fn(async () => toSavedObject(makeFieldDef({ description: 'Updated' }))),
   validateUpdateFieldDefinition: vi.fn(async () => undefined),
   deleteFieldDefinition: vi.fn(async () => undefined),
 });

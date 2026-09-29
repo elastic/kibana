@@ -22,22 +22,22 @@ vi.mock('../../utils/run_esql_async_search');
 
 // Mock the heavy heatmap building blocks since the section dynamically imports them.
 vi.mock('./lifecycle_heatmap', () => {
-      const mocked = {
-      AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-        <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeLifecycleHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
+      <div data-test-subj="alertingV2EpisodeLifecycleHeatmapMock">{eventRows.length}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./severity_heatmap', () => {
-      const mocked = {
-      AlertEpisodeSeverityHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
-        <div data-test-subj="alertingV2EpisodeSeverityHeatmapMock">{eventRows.length}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeSeverityHeatmap: ({ eventRows }: { eventRows: unknown[] }) => (
+      <div data-test-subj="alertingV2EpisodeSeverityHeatmapMock">{eventRows.length}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runEsqlAsyncSearchMock = vi.mocked(runEsqlAsyncSearch);
 

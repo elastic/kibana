@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { useContextOverrideData } from './use_context_override_data';
 
 const mockSelectWorkflowGraph = vi.fn();
@@ -19,42 +19,42 @@ const mockUseSpaceId = vi.fn();
 const mockBuildContextOverride = vi.fn();
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: (selector: any) => selector(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: (selector: any) => selector(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entities/workflows/store/workflow_detail/selectors', () => {
-      const mocked = {
-      selectWorkflowGraph: () => mockSelectWorkflowGraph(),
-      selectWorkflowDefinition: () => mockSelectWorkflowDefinition(),
-      selectYamlString: () => mockSelectYamlString(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    selectWorkflowGraph: () => mockSelectWorkflowGraph(),
+    selectWorkflowDefinition: () => mockSelectWorkflowDefinition(),
+    selectYamlString: () => mockSelectYamlString(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => mockUseSpaceId(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => mockUseSpaceId(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/utils/build_step_context_override/build_step_context_override', () => {
-      const mocked = {
-      buildContextOverride: (...args: unknown[]) => mockBuildContextOverride(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildContextOverride: (...args: unknown[]) => mockBuildContextOverride(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'mock-uuid-1234',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'mock-uuid-1234',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useContextOverrideData', () => {
   beforeEach(() => {

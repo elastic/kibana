@@ -13,13 +13,13 @@ import { useStartDashboardsMigrationModal } from './use_start_dashboard_migratio
 import type { StartMigrationModalProps } from '../../common/components/start_migration_modal';
 
 vi.mock('../../common/components/start_migration_modal', () => {
-      const mocked = {
-      StartMigrationModal: (props: StartMigrationModalProps) => (
-        <div data-test-subj="start-migration-modal" {...props} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StartMigrationModal: (props: StartMigrationModalProps) => (
+      <div data-test-subj="start-migration-modal" {...props} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useStartDashboardsMigrationModal', () => {
   const onStartMigrationWithSettings = vi.fn();

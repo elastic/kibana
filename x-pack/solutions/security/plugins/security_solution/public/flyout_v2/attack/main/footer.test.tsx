@@ -16,43 +16,46 @@ import { Footer } from './footer';
 import { FOOTER_TEST_ID, FOOTER_TAKE_ACTION_BUTTON_TEST_ID } from './constants/test_ids';
 
 vi.mock('@kbn/es-query', () => {
-      const mocked = {
-      isNonLocalIndexName: vi.fn((indexName: string) => indexName.includes('::')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isNonLocalIndexName: vi.fn((indexName: string) => indexName.includes('::')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../detections/components/attacks/table/attacks_group_take_action_items', () => {
-      const mocked = {
-      AttacksGroupTakeActionItems: ({
-        onActionSuccess,
-        isRemoteDocument,
-      }: {
-        onActionSuccess?: () => void;
-        isRemoteDocument: boolean;
-      }) => (
-        <div data-test-subj="mockAttacksGroupTakeActionItems" data-is-remote={String(isRemoteDocument)}>
-          <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
-            {'Action'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksGroupTakeActionItems: ({
+      onActionSuccess,
+      isRemoteDocument,
+    }: {
+      onActionSuccess?: () => void;
+      isRemoteDocument: boolean;
+    }) => (
+      <div
+        data-test-subj="mockAttacksGroupTakeActionItems"
+        data-is-remote={String(isRemoteDocument)}
+      >
+        <button type="button" data-test-subj="mockActionButton" onClick={onActionSuccess}>
+          {'Action'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../detections/components/attacks/table/attack_details/attack_ai_assistant_button',
   () => {
-      const mocked = {
-        AttackAiAssistantButton: ({ attack }: { attack: AttackDiscoveryAlert }) => (
-          <button type="button" data-test-subj="mockAiAssistantButton" data-attack-id={attack.id}>
-            {'AI Assistant'}
-          </button>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AttackAiAssistantButton: ({ attack }: { attack: AttackDiscoveryAlert }) => (
+        <button type="button" data-test-subj="mockAiAssistantButton" data-attack-id={attack.id}>
+          {'AI Assistant'}
+        </button>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const createMockHit = (overrides: Partial<DataTableRecord> = {}): DataTableRecord =>

@@ -79,27 +79,27 @@ for (let i = 1; i < TOTAL_POLICIES; i++) {
 }
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({
-        createHref: vi.fn(),
-        push: vi.fn(),
-        location: {
-          search: '',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({
+      createHref: vi.fn(),
+      push: vi.fn(),
+      location: {
+        search: '',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReactRouterNavigate = vi.fn();
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      reactRouterNavigate: () => mockReactRouterNavigate(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    reactRouterNavigate: () => mockReactRouterNavigate(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getPolicyLinks = () => screen.queryAllByTestId('policyTablePolicyNameLink');
 

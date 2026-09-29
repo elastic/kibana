@@ -25,32 +25,32 @@ vi.mock('./hooks/use_link_entities');
 vi.mock('./hooks/use_unlink_entities');
 vi.mock('./hooks/use_search_entities');
 vi.mock('../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_app_toasts');
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openFlyout: vi.fn(), closeFlyout: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openFlyout: vi.fn(), closeFlyout: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: () => ({
-        openEntityFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: () => ({
+      openEntityFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResolutionGroup = useResolutionGroup as Mock;
 const mockUseLinkEntities = useLinkEntities as Mock;

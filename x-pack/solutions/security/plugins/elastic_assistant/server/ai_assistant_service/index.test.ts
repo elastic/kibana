@@ -35,11 +35,11 @@ import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 
 vi.mock('../ai_assistant_data_clients/conversations', () => {
-      const mocked = {
-      AIAssistantConversationsDataClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AIAssistantConversationsDataClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const licensing = Promise.resolve(
   licensingMock.createRequestHandlerContext({

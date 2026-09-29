@@ -13,18 +13,18 @@ import type { RouteContext } from '../../types';
 import { deleteSyntheticsMonitorProjectRoute } from './delete_monitor_project';
 
 vi.mock('../services/delete_monitor_api', () => {
-      const mocked = {
-      DeleteMonitorAPI: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeleteMonitorAPI: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services/validate_space_id', () => {
-      const mocked = {
-      validateSpaceId: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateSpaceId: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const monitor = {
   id: 'config-id',
@@ -49,7 +49,7 @@ const createRouteContext = () =>
   >);
 
 const installExecuteResult = async (executeResult: object) => {
-  const { DeleteMonitorAPI } = (await vi.importMock('../services/delete_monitor_api'));
+  const { DeleteMonitorAPI } = await vi.importMock('../services/delete_monitor_api');
   const execute = vi.fn().mockResolvedValue(executeResult);
   DeleteMonitorAPI.mockImplementation(() => ({ execute }));
   return { execute };

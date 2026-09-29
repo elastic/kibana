@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -39,7 +38,7 @@ import { indicesAPIClientMock, privilegesAPIClientMock, rolesAPIClientMock } fro
 
 const MockedElasticsearchPrivileges = vi.fn();
 vi.mock('./privileges', async () => {
-  const actual = (await vi.importActual('./privileges'));
+  const actual = await vi.importActual('./privileges');
   return {
     ...actual,
     ElasticsearchPrivileges: (props: any) => {
@@ -55,29 +54,29 @@ vi.mock('./privileges', async () => {
 });
 
 vi.mock('./privileges/kibana/simple_privilege_section', () => {
-      const mocked = {
-      SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSectionMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SimplePrivilegeSection: () => <div data-test-subj="simplePrivilegeSectionMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./privileges/kibana/space_aware_privilege_section', () => {
-      const mocked = {
-      SpaceAwarePrivilegeSection: ({ uiCapabilities }: any) => (
-        <div data-test-subj="spaceAwarePrivilegeSectionMock">
-          {!uiCapabilities?.spaces?.manage && <div data-test-subj="userCannotManageSpacesCallout" />}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpaceAwarePrivilegeSection: ({ uiCapabilities }: any) => (
+      <div data-test-subj="spaceAwarePrivilegeSectionMock">
+        {!uiCapabilities?.spaces?.manage && <div data-test-subj="userCannotManageSpacesCallout" />}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./privileges/kibana/transform_error_section', () => {
-      const mocked = {
-      TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransformErrorSection: () => <div data-test-subj="transformErrorSectionMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const spacesManager = spacesManagerMock.create();
 const { getStartServices } = coreMock.createSetup();

@@ -20,11 +20,11 @@ import { ClientError, RuleConcurrencyError } from '../../../logic/detection_rule
 import { restoreRuleFromHistoryRoute } from './route';
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSpan: vi.fn((_opts: unknown, cb: () => Promise<unknown>) => cb()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 

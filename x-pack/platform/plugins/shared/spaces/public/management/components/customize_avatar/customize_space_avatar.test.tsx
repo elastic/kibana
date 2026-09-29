@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiColorPicker, EuiFieldText, EuiLink } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 

@@ -7,28 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 import { TriggerIcon, WorkflowsTriggersList } from './worflows_triggers_list';
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      isTriggerType: vi.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isTriggerType: vi.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getTriggerDefinition: vi.fn(() => undefined),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getTriggerDefinition: vi.fn(() => undefined),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowsTriggersList', () => {
   it('renders the empty state when triggers array is empty', () => {

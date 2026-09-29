@@ -15,56 +15,56 @@ import { EventLogListStatus } from './event_log_list_status';
 import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({
-        location: {
-          pathname: '/logs',
-        },
-        push: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({
+      location: {
+        pathname: '/logs',
+      },
+      push: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useSpacesData: () => ({
-        spacesMap: new Map([
-          ['space1', { id: 'space1', name: 'Space 1' }],
-          ['space2', { id: 'space2', name: 'Space 2' }],
-        ]),
-        activeSpaceId: 'space1',
-      }),
-      useKibana: () => ({
-        services: {
-          http: {
-            basePath: {
-              get: () => '/basePath',
-            },
+  const mocked = {
+    useSpacesData: () => ({
+      spacesMap: new Map([
+        ['space1', { id: 'space1', name: 'Space 1' }],
+        ['space2', { id: 'space2', name: 'Space 2' }],
+      ]),
+      activeSpaceId: 'space1',
+    }),
+    useKibana: () => ({
+      services: {
+        http: {
+          basePath: {
+            get: () => '/basePath',
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../rules_list/components/rule_duration_format', () => {
-      const mocked = {
-      RuleDurationFormat: vi.fn(({ duration }) => (
-        <span data-test-subj="rule-duration">{duration}</span>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDurationFormat: vi.fn(({ duration }) => (
+      <span data-test-subj="rule-duration">{duration}</span>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./event_log_list_status', () => {
-      const mocked = {
-      EventLogListStatus: vi.fn((props) => (
-        <span data-test-subj="event-log-status">{props.status}</span>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventLogListStatus: vi.fn((props) => (
+      <span data-test-subj="event-log-status">{props.status}</span>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EventLogListCellRenderer', () => {
   let originalLocation: Location;

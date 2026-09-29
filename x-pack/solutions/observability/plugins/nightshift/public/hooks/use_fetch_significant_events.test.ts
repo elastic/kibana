@@ -36,24 +36,24 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   } as SignificantEvent);
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              nightshift: {
-                show: true,
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: {
+            nightshift: {
+              show: true,
             },
           },
-          significantEvents: {
-            significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
-          },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        significantEvents: {
+          significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
 let capturedRefetchInterval:
@@ -61,22 +61,22 @@ let capturedRefetchInterval:
   | undefined;
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: (params: {
-        queryKey: readonly string[];
-        queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
-        refetchInterval: (data: NightshiftSignificantEventsQueryData | undefined) => number | false;
-      }) => {
-        capturedQueryFn = params.queryFn;
-        capturedRefetchInterval = params.refetchInterval;
-        return {
-          data: undefined,
-          isLoading: true,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: (params: {
+      queryKey: readonly string[];
+      queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
+      refetchInterval: (data: NightshiftSignificantEventsQueryData | undefined) => number | false;
+    }) => {
+      capturedQueryFn = params.queryFn;
+      capturedRefetchInterval = params.refetchInterval;
+      return {
+        data: undefined,
+        isLoading: true,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFetchSignificantEvents', () => {
   beforeEach(() => {

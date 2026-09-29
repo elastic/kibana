@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
@@ -39,18 +39,18 @@ const mockStorage = {
 
 vi.mock('../../../hooks/use_kibana');
 vi.mock('../../workflow_list/ui/use_event_driven_execution_status', () => {
-      const mocked = {
-      useEventDrivenExecutionStatus: () => ({
-        eventDrivenExecutionEnabled: true,
-        isLoading: false,
-        error: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEventDrivenExecutionStatus: () => ({
+      eventDrivenExecutionEnabled: true,
+      isLoading: false,
+      error: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useQueryTriggerEvents: vi.fn(),
@@ -58,7 +58,7 @@ vi.mock('@kbn/workflows-ui', async () => {
 });
 
 vi.mock('@kbn/unified-data-table', async () => {
-  const actual = (await vi.importActual('@kbn/unified-data-table'));
+  const actual = await vi.importActual('@kbn/unified-data-table');
   return {
     ...actual,
     UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,

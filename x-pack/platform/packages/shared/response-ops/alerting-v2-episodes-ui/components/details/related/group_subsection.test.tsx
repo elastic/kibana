@@ -18,38 +18,38 @@ import { useFetchSameGroupEpisodesQuery } from '../../../hooks/use_fetch_same_gr
 vi.mock('../../../hooks/use_fetch_same_group_episodes_query');
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          notifications: { toasts: { addDanger: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        notifications: { toasts: { addDanger: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_episode_actions', () => {
-      const mocked = {
-      useFetchEpisodeActions: () => ({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEpisodeActions: () => ({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_group_actions', () => {
-      const mocked = {
-      useFetchGroupActions: () => ({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGroupActions: () => ({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./related_list', () => {
-      const mocked = {
-      RelatedAlertEpisodesList: ({ rows }: { rows: AlertEpisode[] }) => (
-        <div data-test-subj="mockEpisodesList">{rows.length} episodes</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RelatedAlertEpisodesList: ({ rows }: { rows: AlertEpisode[] }) => (
+      <div data-test-subj="mockEpisodesList">{rows.length} episodes</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetch = vi.mocked(useFetchSameGroupEpisodesQuery);
 

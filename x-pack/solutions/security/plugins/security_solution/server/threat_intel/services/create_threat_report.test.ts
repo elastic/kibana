@@ -139,8 +139,7 @@ describe('createThreatReport', () => {
     // service only ever talks to Elasticsearch (search for dedup, then create).
     const esMethodsCalled = Object.entries(esClient)
       .filter(
-        ([, value]) =>
-          typeof value === 'function' && (value as unknown as Mock).mock?.calls.length
+        ([, value]) => typeof value === 'function' && (value as unknown as Mock).mock?.calls.length
       )
       .map(([name]) => name);
     expect(esMethodsCalled.sort()).toEqual(['create', 'search']);

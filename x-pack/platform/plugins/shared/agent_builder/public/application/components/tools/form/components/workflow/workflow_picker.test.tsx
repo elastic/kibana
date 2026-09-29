@@ -17,11 +17,11 @@ import { WorkflowPicker } from './workflow_picker';
 const mockUseListWorkflows = vi.fn();
 
 vi.mock('../../../../../hooks/tools/use_list_workflows', () => {
-      const mocked = {
-      useListWorkflows: () => mockUseListWorkflows(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useListWorkflows: () => mockUseListWorkflows(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflows = [
   { id: 'wf-1', name: 'Workflow One', description: 'First workflow' },

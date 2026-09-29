@@ -15,11 +15,11 @@ import { useCreateMigration } from '../../../../../../service/hooks/use_create_m
 import { MigrationSource } from '../../../../../../../common/types';
 
 vi.mock('../../../../../../service/hooks/use_create_migration', () => {
-      const mocked = {
-      useCreateMigration: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateMigration: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRulesFileUploadStep', () => {
   const mockUseCreateMigration = useCreateMigration as Mock;

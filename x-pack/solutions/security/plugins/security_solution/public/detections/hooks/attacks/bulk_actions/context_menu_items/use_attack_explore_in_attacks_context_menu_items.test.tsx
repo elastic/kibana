@@ -22,20 +22,20 @@ const mockGetUrlForApp = vi.fn(
 );
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: { application: { getUrlForApp: mockGetUrlForApp } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: { application: { getUrlForApp: mockGetUrlForApp } },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAttack = (overrides: Partial<AttackDiscoveryAlert> = {}): AttackDiscoveryAlert =>
   ({

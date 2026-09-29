@@ -16,49 +16,49 @@ import type { Edge, Node, ReactFlowInstance, ReactFlowProps } from '@xyflow/reac
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 vi.mock('../constants', async () => {
-      const mocked = {
-      ...(await vi.importActual('../constants')),
-      ONLY_RENDER_VISIBLE_ELEMENTS: false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../constants')),
+    ONLY_RENDER_VISIBLE_ELEMENTS: false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock ReactFlow's fitView function
 let mockFitView = vi.fn();
 
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      ...require('@xyflow/react'),
-      ReactFlow: (props: ReactFlowProps & RefAttributes<HTMLDivElement>) => {
-        const OriginalReactFlow = require('@xyflow/react').ReactFlow;
-        const OriginalReact = require('react');
+  const mocked = {
+    ...require('@xyflow/react'),
+    ReactFlow: (props: ReactFlowProps & RefAttributes<HTMLDivElement>) => {
+      const OriginalReactFlow = require('@xyflow/react').ReactFlow;
+      const OriginalReact = require('react');
 
-        function onInitMocked(xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) {
-          // Store the original fitView function
-          const mockOriginalFitView = xyflow.fitView;
+      function onInitMocked(xyflow: ReactFlowInstance<Node<NodeViewModel>, Edge<EdgeViewModel>>) {
+        // Store the original fitView function
+        const mockOriginalFitView = xyflow.fitView;
 
-          // Create a wrapper that tracks calls but still calls the original
-          xyflow.fitView = (options?) => {
-            // Only track calls with specific options (from our centering logic)
-            if (options && typeof options === 'object' && options !== null) {
-              const opts = options as Record<string, unknown>;
-              if (opts.nodes || opts.duration === 200) {
-                mockFitView(options);
-              }
+        // Create a wrapper that tracks calls but still calls the original
+        xyflow.fitView = (options?) => {
+          // Only track calls with specific options (from our centering logic)
+          if (options && typeof options === 'object' && options !== null) {
+            const opts = options as Record<string, unknown>;
+            if (opts.nodes || opts.duration === 200) {
+              mockFitView(options);
             }
-            // Always call the original for actual ReactFlow functionality
-            return mockOriginalFitView(options);
-          };
+          }
+          // Always call the original for actual ReactFlow functionality
+          return mockOriginalFitView(options);
+        };
 
-          // @ts-ignore
-          props.onInit?.(xyflow);
-        }
+        // @ts-ignore
+        props.onInit?.(xyflow);
+      }
 
-        return OriginalReact.createElement(OriginalReactFlow, { ...props, onInit: onInitMocked });
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return OriginalReact.createElement(OriginalReactFlow, { ...props, onInit: onInitMocked });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderGraphPreview = (props: GraphProps) =>
   render(

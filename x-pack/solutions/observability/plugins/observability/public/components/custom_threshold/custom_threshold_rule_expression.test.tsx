@@ -26,11 +26,11 @@ import type { AlertParams, CustomThresholdPrefillOptions } from './types';
 
 vi.mock('../../utils/kibana_react');
 vi.mock('../rule_condition_chart/rule_condition_chart', () => {
-      const mocked = {
-      RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 

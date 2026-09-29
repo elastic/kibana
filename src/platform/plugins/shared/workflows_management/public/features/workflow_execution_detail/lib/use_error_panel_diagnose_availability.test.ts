@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { act, renderHook } from '@testing-library/react';
 import type { DiagnosisContextPackage } from './build_diagnosis_context_package';
 import {
   clearPendingDiagnoseHandoff,
@@ -29,39 +29,39 @@ const mockAgentBuilder = {
 };
 
 vi.mock('./open_failure_diagnosis_chat', () => {
-      const mocked = {
-      openFailureDiagnosisChat: (...args: unknown[]) => mockOpenFailureDiagnosisChat(...args),
-      diagnoseHandoffErrorToastTitle: () => 'Unable to start AI diagnosis',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openFailureDiagnosisChat: (...args: unknown[]) => mockOpenFailureDiagnosisChat(...args),
+    diagnoseHandoffErrorToastTitle: () => 'Unable to start AI diagnosis',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { get: mockHttpGet, post: vi.fn() },
-          notifications: { toasts: { addError: mockAddError } },
-          application: {
-            capabilities: { agentBuilder: { show: true } },
-            navigateToApp: vi.fn(),
-            getUrlForApp: () => '/app/management/license_management',
-          },
-          workflowsManagement: {
-            agentBuilder: mockAgentBuilder,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { get: mockHttpGet, post: vi.fn() },
+        notifications: { toasts: { addError: mockAddError } },
+        application: {
+          capabilities: { agentBuilder: { show: true } },
+          navigateToApp: vi.fn(),
+          getUrlForApp: () => '/app/management/license_management',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        workflowsManagement: {
+          agentBuilder: mockAgentBuilder,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const contextPackage: DiagnosisContextPackage = {
   error: { type: 'Error', message: 'ECONNREFUSED' },

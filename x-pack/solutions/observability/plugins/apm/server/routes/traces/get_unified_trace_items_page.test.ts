@@ -21,9 +21,9 @@ import { getUnifiedTraceItemsPaginated } from './get_unified_trace_items_page';
 
 // Use a small page size so tests don't need thousands of hits
 vi.mock('./trace_constants', () => {
-      const mocked = { MAX_ITEMS_PER_PAGE: 2 };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { MAX_ITEMS_PER_PAGE: 2 };
+  return { ...mocked, default: mocked };
+});
 
 const makeHit = (id: string, sort = [0, 0, id]) => ({
   fields: { [SPAN_ID]: [id] },

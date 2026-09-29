@@ -16,13 +16,13 @@ import type { AzureCredentialsType } from '../types';
 
 // Mock the TechnicalPreviewText component
 vi.mock('../common', () => {
-      const mocked = {
-      TechnicalPreviewText: () => (
-        <span data-test-subj="technical-preview-text">{'Technical preview'}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TechnicalPreviewText: () => (
+      <span data-test-subj="technical-preview-text">{'Technical preview'}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);

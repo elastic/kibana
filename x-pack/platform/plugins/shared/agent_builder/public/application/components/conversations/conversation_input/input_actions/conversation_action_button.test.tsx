@@ -13,15 +13,15 @@ import { ConversationActionButton } from './conversation_action_button';
 import { useConversationStream } from '../../../../hooks/use_conversation_stream';
 
 vi.mock('../../../../hooks/use_conversation_stream', () => {
-      const mocked = {
-      useConversationStream: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationStream: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ebt-click', () => {
-      const mocked = { getEbtProps: () => ({}) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getEbtProps: () => ({}) };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseConversationStream = vi.mocked(useConversationStream);
 

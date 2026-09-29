@@ -19,7 +19,7 @@ import type { LegendItem } from './draggable_legend_item';
 vi.mock('../../lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

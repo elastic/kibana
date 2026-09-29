@@ -21,8 +21,7 @@ vi.mock('../../utils');
 const getAllSpacesWithCasesMock = getAllSpacesWithCases as Mock;
 
 vi.mock('../..');
-const createCasesAnalyticsIndexesForSpaceIdMock =
-  createCasesAnalyticsIndexesForSpaceId as Mock;
+const createCasesAnalyticsIndexesForSpaceIdMock = createCasesAnalyticsIndexesForSpaceId as Mock;
 const scheduleCasesAnalyticsSyncTasksMock = scheduleCasesAnalyticsSyncTasks as Mock;
 
 describe('SchedulerTaskRunner', () => {

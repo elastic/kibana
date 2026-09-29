@@ -23,11 +23,11 @@ export const createServerMock = vi.fn().mockImplementation(() => ({
 export const getServerOptionsMock = vi.fn().mockImplementation(getServerOptions);
 
 vi.doMock('@kbn/server-http-tools', () => {
-      const mocked = {
-      createServer: createServerMock,
-      getServerOptions: getServerOptionsMock,
-      sslSchema,
-      SslConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createServer: createServerMock,
+    getServerOptions: getServerOptionsMock,
+    sslSchema,
+    SslConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});

@@ -33,14 +33,14 @@ import { WithAppDependencies } from './helpers/setup_environment';
  * would be shown as url=/api/snapshot_restore/snapshots is sinon server
  */
 vi.mock('../../public/application/services/http', () => {
-      const mocked = {
-      useLoadSnapshots: vi.fn(),
-      useLoadRepositories: vi.fn(),
-      setUiMetricServiceSnapshot: () => {},
-      setUiMetricService: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadSnapshots: vi.fn(),
+    useLoadRepositories: vi.fn(),
+    setUiMetricServiceSnapshot: () => {},
+    setUiMetricService: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 /*
  * Mocking EuiSearchBar because its onChange is not firing during tests

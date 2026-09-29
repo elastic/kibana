@@ -27,7 +27,7 @@ vi.mock('../../hooks', async () => {
 });
 
 vi.mock('../../hooks/use_request', async () => {
-  const module = (await vi.importActual('../../hooks/use_request'));
+  const module = await vi.importActual('../../hooks/use_request');
   return {
     ...module,
     useGetFleetProxies: vi.fn().mockReturnValue({
@@ -56,7 +56,9 @@ vi.mock('../../hooks/use_request', async () => {
 });
 
 vi.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy', async () => {
-  const module = (await vi.importActual('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'));
+  const module = await vi.importActual(
+    '../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealthy'
+  );
   return {
     ...module,
     useFleetServerUnhealthy: vi.fn(),
@@ -66,7 +68,9 @@ vi.mock('../../applications/fleet/sections/agents/hooks/use_fleet_server_unhealt
 vi.mock(
   '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form',
   async () => {
-    const module = (await vi.importActual('../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form'));
+    const module = await vi.importActual(
+      '../../applications/fleet/components/fleet_server_instructions/hooks/use_advanced_form'
+    );
     return {
       ...module,
       useAdvancedForm: vi.fn(),
@@ -77,7 +81,9 @@ vi.mock(
 vi.mock(
   '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page',
   async () => {
-    const module = (await vi.importActual('../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'));
+    const module = await vi.importActual(
+      '../../applications/fleet/sections/agents/agent_requirements_page/fleet_server_requirement_page'
+    );
     return {
       ...module,
       FleetServerRequirementPage: vi.fn(),
@@ -95,7 +101,7 @@ vi.mock('../../applications/fleet/components/fleet_server_instructions/advanced_
  * These steps functions use hooks inside useMemo which is not compatible with jest currently
  */
 vi.mock('./steps', async () => {
-  const module = (await vi.importActual('./steps'));
+  const module = await vi.importActual('./steps');
   return {
     ...module,
     AgentPolicySelectionStep: vi.fn().mockReturnValue({

@@ -15,12 +15,12 @@ const mockGetInstalledPackages = vi.fn();
 const mockGetAllIntegrationNames = vi.fn();
 
 vi.mock('./api', () => {
-      const mocked = {
-      getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
-      getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstalledPackages: (...args: unknown[]) => mockGetInstalledPackages(...args),
+    getAllIntegrationNames: (...args: unknown[]) => mockGetAllIntegrationNames(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const uploadedPackage = (
   id: string,

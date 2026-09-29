@@ -15,8 +15,8 @@ export const createRequestEncryptor = vi.fn().mockResolvedValue({
 });
 
 vi.doMock('@elastic/request-crypto', () => {
-      const mocked = {
-      createRequestEncryptor,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRequestEncryptor,
+  };
+  return { ...mocked, default: mocked };
+});

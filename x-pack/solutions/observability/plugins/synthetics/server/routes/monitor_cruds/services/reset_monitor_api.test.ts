@@ -11,18 +11,18 @@ import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ResetMonitorAPI } from './reset_monitor_api';
 
 vi.mock('../../../synthetics_service/get_private_locations', () => {
-      const mocked = {
-      getPrivateLocations: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPrivateLocations: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../edit_monitor', () => {
-      const mocked = {
-      validatePermissions: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validatePermissions: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMonitorPairWithLocations = (
   id: string,
@@ -220,7 +220,7 @@ describe('ResetMonitorAPI', () => {
 
   describe('authorization', () => {
     it('skips unauthorized monitors and records per-item errors', async () => {
-      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
+      const { validatePermissions } = await vi.importMock('../edit_monitor');
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted
         .mockResolvedValueOnce(mockMonitorPair('allowed'))
@@ -242,7 +242,7 @@ describe('ResetMonitorAPI', () => {
     });
 
     it('returns empty results when all monitors are unauthorized', async () => {
-      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
+      const { validatePermissions } = await vi.importMock('../edit_monitor');
       const { routeContext, mocks } = createMockRouteContext();
       mocks.getDecrypted.mockResolvedValue(mockMonitorPair('blocked'));
       validatePermissions.mockResolvedValue('Insufficient permissions');
@@ -257,10 +257,12 @@ describe('ResetMonitorAPI', () => {
   });
 
   describe('location filtering — getLocationIdsWithExistingAgentPolicy', async () => {
-    const { getPrivateLocations } = (await vi.importMock('../../../synthetics_service/get_private_locations'));
+    const { getPrivateLocations } = await vi.importMock(
+      '../../../synthetics_service/get_private_locations'
+    );
 
     beforeEach(async () => {
-      const { validatePermissions } = (await vi.importMock('../edit_monitor'));
+      const { validatePermissions } = await vi.importMock('../edit_monitor');
       validatePermissions.mockResolvedValue(null);
     });
 

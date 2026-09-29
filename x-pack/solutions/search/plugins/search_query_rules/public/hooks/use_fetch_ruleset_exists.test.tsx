@@ -15,17 +15,17 @@ import { renderHook, waitFor } from '@testing-library/react';
 const mockHttpGet = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          http: {
-            get: mockHttpGet,
-          },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        http: {
+          get: mockHttpGet,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFetchQueryRulesetExist Hook', () => {
   beforeEach(() => {
@@ -38,7 +38,7 @@ describe('useFetchQueryRulesetExist Hook', () => {
   };
 
   it('should run onNoConflict when ruleset does not exist', async () => {
-    const { useFetchQueryRulesetExist } = (await vi.importActual('./use_fetch_ruleset_exists'));
+    const { useFetchQueryRulesetExist } = await vi.importActual('./use_fetch_ruleset_exists');
     const onNoConflict = vi.fn();
     const onConflict = vi.fn();
 
@@ -60,7 +60,7 @@ describe('useFetchQueryRulesetExist Hook', () => {
   });
 
   it('should run onConflict when ruleset exists', async () => {
-    const { useFetchQueryRulesetExist } = (await vi.importActual('./use_fetch_ruleset_exists'));
+    const { useFetchQueryRulesetExist } = await vi.importActual('./use_fetch_ruleset_exists');
     const onNoConflict = vi.fn();
     const onConflict = vi.fn();
 

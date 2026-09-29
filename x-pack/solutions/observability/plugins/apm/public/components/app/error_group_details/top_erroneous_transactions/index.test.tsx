@@ -22,49 +22,49 @@ const mockUseApmRouter = vi.fn();
 const mockUseTimeRange = vi.fn();
 
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-      isPending: vi.fn((status) => status === 'loading'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+    isPending: vi.fn((status) => status === 'loading'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => mockUseApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => mockUseApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => mockUseApmRouter(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => mockUseApmRouter(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => mockUseTimeRange(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => mockUseTimeRange(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock SparkPlot to simplify testing
 vi.mock('../../../shared/charts/spark_plot', () => {
-      const mocked = {
-      SparkPlot: ({ valueLabel }: { valueLabel: string }) => (
-        <div data-test-subj="spark-plot">{valueLabel}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SparkPlot: ({ valueLabel }: { valueLabel: string }) => (
+      <div data-test-subj="spark-plot">{valueLabel}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

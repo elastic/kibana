@@ -40,14 +40,16 @@ let mockAlertingV2ExperimentalFeaturesEnabled = true;
 let mockIsLicenseValid = true;
 
 vi.mock('../../../hooks/use_is_action_policies_license_valid', () => {
-      const mocked = {
-      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -92,137 +94,137 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('../../../hooks/use_create_action_policy', () => {
-      const mocked = {
-      useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateActionPolicy: () => ({ mutate: mockCreateActionPolicy }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_delete_action_policy', () => {
-      const mocked = {
-      useDeleteActionPolicy: () => ({ mutate: mockDeleteActionPolicy, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteActionPolicy: () => ({ mutate: mockDeleteActionPolicy, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_enable_action_policy', () => {
-      const mocked = {
-      useEnableActionPolicy: () => ({
-        mutate: mockEnableActionPolicy,
-        isLoading: false,
-        variables: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnableActionPolicy: () => ({
+      mutate: mockEnableActionPolicy,
+      isLoading: false,
+      variables: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_disable_action_policy', () => {
-      const mocked = {
-      useDisableActionPolicy: () => ({
-        mutate: mockDisableActionPolicy,
-        isLoading: false,
-        variables: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDisableActionPolicy: () => ({
+      mutate: mockDisableActionPolicy,
+      isLoading: false,
+      variables: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_snooze_action_policy', () => {
-      const mocked = {
-      useSnoozeActionPolicy: () => ({
-        mutate: mockSnoozeActionPolicy,
-        isLoading: false,
-        variables: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSnoozeActionPolicy: () => ({
+      mutate: mockSnoozeActionPolicy,
+      isLoading: false,
+      variables: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_unsnooze_action_policy', () => {
-      const mocked = {
-      useUnsnoozeActionPolicy: () => ({
-        mutate: mockUnsnoozeActionPolicy,
-        isLoading: false,
-        variables: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnsnoozeActionPolicy: () => ({
+      mutate: mockUnsnoozeActionPolicy,
+      isLoading: false,
+      variables: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpdateActionPolicyApiKey = vi.fn();
 vi.mock('../../../hooks/use_update_action_policy_api_key', () => {
-      const mocked = {
-      useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateActionPolicyApiKey }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateActionPolicyApiKey: () => ({ mutate: mockUpdateActionPolicyApiKey }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBulkAction = vi.fn();
 vi.mock('../../../hooks/use_bulk_action_action_policies', () => {
-      const mocked = {
-      useBulkActionActionPolicies: () => ({ mutate: mockBulkAction, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkActionActionPolicies: () => ({ mutate: mockBulkAction, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_workflow', () => {
-      const mocked = {
-      useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchWorkflow: (...args: unknown[]) => mockUseFetchWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_bulk_get_user_profiles', () => {
-      const mocked = {
-      useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetUserProfiles: () => ({ data: undefined, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../action_policies_data_source', async () => {
-      const mocked = {
-      ...(await vi.importActual('../action_policies_data_source')),
-      useActionPoliciesDataSource: () => ({ findItems: mockFindItems, debounceMs: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../action_policies_data_source')),
+    useActionPoliciesDataSource: () => ({ findItems: mockFindItems, debounceMs: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/action_policy/delete_confirmation_modal', () => {
-      const mocked = {
-      DeleteActionPolicyConfirmModal: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeleteActionPolicyConfirmModal: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/action_policy/action_policy_snooze_button', () => {
-      const mocked = {
-      ActionPolicySnoozeButton: () => <span>Snooze button</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicySnoozeButton: () => <span>Snooze button</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/action_policy/action_policy_state_badge', () => {
-      const mocked = {
-      ActionPolicyStateBadge: () => <span>State badge</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyStateBadge: () => <span>State badge</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./action_policy_actions_cell', () => {
-      const mocked = {
-      ActionPolicyActionsCell: () => <span>Actions cell</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyActionsCell: () => <span>Actions cell</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/action_policy/details_flyout/action_policy_details_flyout', () => {
-      const mocked = {
-      ActionPolicyDetailsFlyout: ({ policy }: { policy: ActionPolicyResponse }) => (
-        <div data-test-subj="mockedDetailsFlyout">Details flyout for {policy.id}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyDetailsFlyout: ({ policy }: { policy: ActionPolicyResponse }) => (
+      <div data-test-subj="mockedDetailsFlyout">Details flyout for {policy.id}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createPolicy = (overrides: Partial<ActionPolicyResponse> = {}): ActionPolicyResponse => ({
   id: 'policy-1',

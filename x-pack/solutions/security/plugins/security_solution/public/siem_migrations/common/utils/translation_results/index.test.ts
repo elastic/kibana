@@ -19,11 +19,11 @@ import {
 import * as i18n from './translations';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('translation_results index', () => {
   describe('useResultVisColors', () => {

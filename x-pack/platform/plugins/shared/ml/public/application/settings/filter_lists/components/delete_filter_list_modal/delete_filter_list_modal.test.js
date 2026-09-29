@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 // with 'mock' so it can be used lazily.
 const mockCheckPermission = vi.fn(() => true);
 vi.mock('../../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: (privilege) => mockCheckPermission(privilege),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: (privilege) => mockCheckPermission(privilege),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../services/ml_api_service', () => 'ml');
 
 import React from 'react';

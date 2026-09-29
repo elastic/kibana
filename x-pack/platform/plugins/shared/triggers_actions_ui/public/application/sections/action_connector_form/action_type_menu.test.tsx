@@ -22,13 +22,13 @@ import { createAppMockRenderer } from '../test_utils';
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('../../lib/action_connector_api', async () => {
-      const mocked = {
-      ...((await vi.importActual('../../lib/action_connector_api')) as any),
-      loadActionTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { loadActionTypes } = (await vi.importMock('../../lib/action_connector_api'));
+  const mocked = {
+    ...((await vi.importActual('../../lib/action_connector_api')) as any),
+    loadActionTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { loadActionTypes } = await vi.importMock('../../lib/action_connector_api');
 
 const actionTypeRegistry = actionTypeRegistryMock.create();
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;

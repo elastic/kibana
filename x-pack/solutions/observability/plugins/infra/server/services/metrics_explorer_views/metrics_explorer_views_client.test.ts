@@ -20,9 +20,7 @@ import { createMetricsExplorerViewMock } from '../../../common/metrics_explorer_
 import type { UpdateMetricsExplorerViewAttributesRequestPayload } from '../../../common/http_api/latest';
 
 describe('MetricsExplorerViewsClient class', () => {
-  const mockFindMetricsExplorerList = (
-    savedObjectsClient: Mocked<SavedObjectsClientContract>
-  ) => {
+  const mockFindMetricsExplorerList = (savedObjectsClient: Mocked<SavedObjectsClientContract>) => {
     const metricsExplorerViewListMock = [
       createMetricsExplorerViewMock('0', {
         isDefault: true,

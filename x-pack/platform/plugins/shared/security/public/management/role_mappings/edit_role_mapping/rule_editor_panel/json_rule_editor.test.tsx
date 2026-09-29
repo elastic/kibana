@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import { vi } from 'vitest';
 import '@kbn/code-editor-mock/jest_helper';
 
 import { CodeEditorField } from '@kbn/code-editor';
@@ -19,15 +18,15 @@ import { JSONRuleEditor } from './json_rule_editor';
 import { AllRule, AnyRule, ExceptAllRule, ExceptAnyRule, FieldRule } from '../../model';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: vi.fn().mockReturnValue({
-        services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
-      }),
-      useDarkMode: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: vi.fn().mockReturnValue({
+      services: { docLinks: { links: { apis: { createRoleMapping: 'createRoleMappingLink' } } } },
+    }),
+    useDarkMode: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('JSONRuleEditor', () => {
   const mockChangeEvent = {} as monaco.editor.IModelContentChangedEvent;

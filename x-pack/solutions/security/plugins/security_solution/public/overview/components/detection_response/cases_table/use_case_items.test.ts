@@ -36,11 +36,11 @@ const mockKibana = {
 };
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => mockKibana,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockKibana,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';

@@ -19,8 +19,9 @@ import { useAttacksPrivileges } from '../use_attacks_privileges';
 vi.mock('../bulk_action_items/use_bulk_attack_workflow_status_items');
 vi.mock('../use_attacks_privileges');
 
-const mockUseBulkAttackWorkflowStatusItems =
-  useBulkAttackWorkflowStatusItems as MockedFunction<typeof useBulkAttackWorkflowStatusItems>;
+const mockUseBulkAttackWorkflowStatusItems = useBulkAttackWorkflowStatusItems as MockedFunction<
+  typeof useBulkAttackWorkflowStatusItems
+>;
 const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;

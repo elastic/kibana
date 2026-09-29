@@ -15,11 +15,11 @@ import type { MonitorLocationAssignment } from '../../../../../../../common/type
 
 vi.mock('../../../../state/agent_stats/api');
 vi.mock('../../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetch = fetchMonitorAgentAssignments as MockedFunction<
   typeof fetchMonitorAgentAssignments

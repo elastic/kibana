@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import { Status } from '../../../../../../../common/types/api';
 import { GenerateSearchApplicationApiKeyLogic } from '../../../../api/search_applications/generate_search_application_api_key_logic';

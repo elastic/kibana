@@ -13,43 +13,43 @@ import { useNavigateVulnerabilities, useNavigateFindings } from './use_navigate_
 import { useHistory } from 'react-router-dom';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn().mockReturnValue({ push: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn().mockReturnValue({ push: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          data: {
-            query: {
-              queryString: {
-                getDefaultQuery: vi.fn().mockReturnValue({
-                  language: 'kuery',
-                  query: '',
-                }),
-              },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        data: {
+          query: {
+            queryString: {
+              getDefaultQuery: vi.fn().mockReturnValue({
+                language: 'kuery',
+                query: '',
+              }),
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn().mockReturnValue({
-        status: 'success',
-        data: {
-          id: 'data-view-id',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn().mockReturnValue({
+      status: 'success',
+      data: {
+        id: 'data-view-id',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useNavigateFindings', () => {
   it('creates a URL to findings page with correct path, filter and dataViewId', () => {

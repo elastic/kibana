@@ -24,42 +24,42 @@ import { timeBucketsMock } from '../../util/__mocks__/time_buckets';
 import { timefilterMock } from '../../contexts/kibana/__mocks__/use_timefilter';
 
 vi.mock('../../contexts/kibana', () => {
-      const mocked = {
-      useMlKibana: () => {
-        return {
-          services: {
-            chrome: { recentlyAccessed: { add: vi.fn() } },
-            share: {
-              url: {
-                locators: {
-                  get: vi.fn(() => {
-                    return {
-                      getLocation: vi.fn(() => ({ path: '/#maps' })),
-                    };
+  const mocked = {
+    useMlKibana: () => {
+      return {
+        services: {
+          chrome: { recentlyAccessed: { add: vi.fn() } },
+          share: {
+            url: {
+              locators: {
+                get: vi.fn(() => {
+                  return {
+                    getLocation: vi.fn(() => ({ path: '/#maps' })),
+                  };
+                }),
+              },
+            },
+          },
+          data: {
+            query: {
+              timefilter: {
+                timefilter: {
+                  getTime: vi.fn(() => {
+                    return { from: '', to: '' };
                   }),
                 },
               },
             },
-            data: {
-              query: {
-                timefilter: {
-                  timefilter: {
-                    getTime: vi.fn(() => {
-                      return { from: '', to: '' };
-                    }),
-                  },
-                },
-              },
-            },
-            application: {
-              navigateToApp: vi.fn(),
-            },
           },
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          application: {
+            navigateToApp: vi.fn(),
+          },
+        },
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getUtilityProps = () => {
   const mlUrlGenerator = {

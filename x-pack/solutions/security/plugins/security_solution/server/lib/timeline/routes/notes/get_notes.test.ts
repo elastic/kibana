@@ -65,11 +65,11 @@ describe('get notes route', () => {
 
     mockGetAllSavedNote = vi.fn();
     vi.doMock('../../saved_object/notes', () => {
-          const mocked = {
-              getAllSavedNote: mockGetAllSavedNote,
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getAllSavedNote: mockGetAllSavedNote,
+      };
+      return { ...mocked, default: mocked };
+    });
 
     const getNotesRoute = (await vi.importActual('.')).getNotesRoute;
     getNotesRoute(server.router, createMockConfig(), securitySetup);

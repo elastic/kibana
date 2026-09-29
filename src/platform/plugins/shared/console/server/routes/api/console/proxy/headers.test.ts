@@ -11,7 +11,7 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('@kbn/core-http-router-server-internal', async () => {
-  const realModule = (await vi.importActual('@kbn/core-http-router-server-internal'));
+  const realModule = await vi.importActual('@kbn/core-http-router-server-internal');
   return {
     ...realModule,
     ensureRawRequest: vi.fn(),

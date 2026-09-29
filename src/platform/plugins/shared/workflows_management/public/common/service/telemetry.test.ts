@@ -23,7 +23,7 @@ import {
 import type { TelemetryServiceClient } from '../lib/telemetry/types';
 
 vi.mock('../lib/telemetry/utils/extract_workflow_metadata', async () => {
-  const actual = (await vi.importActual('../lib/telemetry/utils/extract_workflow_metadata'));
+  const actual = await vi.importActual('../lib/telemetry/utils/extract_workflow_metadata');
   return {
     ...actual,
     extractWorkflowMetadata: vi.fn(actual.extractWorkflowMetadata),
@@ -38,7 +38,9 @@ import {
 
 const extractWorkflowMetadataMock = vi.mocked(extractWorkflowMetadata);
 const extractStepInfoFromWorkflowYamlMock = vi.mocked(extractStepInfoFromWorkflowYaml);
-const { extractWorkflowMetadata: extractWorkflowMetadataActual } = (await vi.importActual('../lib/telemetry/utils/extract_workflow_metadata')) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
+const { extractWorkflowMetadata: extractWorkflowMetadataActual } = (await vi.importActual(
+  '../lib/telemetry/utils/extract_workflow_metadata'
+)) as typeof import('../lib/telemetry/utils/extract_workflow_metadata');
 
 const createMockTelemetryClient = (): TelemetryServiceClient => ({
   reportEvent: vi.fn(),

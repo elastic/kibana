@@ -90,9 +90,7 @@ describe('setupDependencies', () => {
 
     mockStepExecutionRepository = {} as unknown as Mocked<StepExecutionRepository>;
 
-    (WorkflowExecutionRepository as Mock).mockImplementation(
-      () => mockWorkflowExecutionRepository
-    );
+    (WorkflowExecutionRepository as Mock).mockImplementation(() => mockWorkflowExecutionRepository);
 
     const mockWorkflowGraph = {
       fromWorkflowDefinition: vi.fn().mockReturnThis(),
@@ -105,9 +103,7 @@ describe('setupDependencies', () => {
       getInnerStepIds: vi.fn().mockReturnValue(new Set()),
       getWorkflowLevelTimeout: vi.fn(),
     };
-    (WorkflowGraph.fromWorkflowDefinition as Mock) = vi
-      .fn()
-      .mockReturnValue(mockWorkflowGraph);
+    (WorkflowGraph.fromWorkflowDefinition as Mock) = vi.fn().mockReturnValue(mockWorkflowGraph);
   });
 
   it('should use user-scoped ES client from coreStart', async () => {

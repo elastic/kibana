@@ -14,11 +14,11 @@ import * as useApmRouterModule from '../../../../hooks/use_apm_router';
 import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      EuiLink: ({ children, ...props }: any) => <a {...props}>{children || 'Link'}</a>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EuiLink: ({ children, ...props }: any) => <a {...props}>{children || 'Link'}</a>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('HomeLink', () => {
   const mockLink = vi.fn();

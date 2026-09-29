@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 import { WorkflowAccessControlModal } from './workflow_access_control_modal';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import {
@@ -26,11 +25,11 @@ const mockHttp = { put: vi.fn(), get: vi.fn() };
 const mockUserProfile = { getCurrent: vi.fn(), bulkGet: vi.fn(), suggest: vi.fn() };
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { http: mockHttp, userProfile: mockUserProfile } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowAccessControlModal', () => {
   beforeEach(() => {

@@ -27,13 +27,13 @@ const mockHistoryReplace = vi.fn();
 const mockUseHistory = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-      useHistory: () => mockUseHistory(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+    useHistory: () => mockUseHistory(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public');
 vi.mock('../../hooks/use_kibana');
@@ -43,16 +43,16 @@ vi.mock('../../hooks/use_permissions');
 vi.mock('../../hooks/use_fetch_slo_templates');
 vi.mock('../../hooks/use_fetch_slo_template_tags');
 vi.mock('@elastic/eui-illustrations', () => {
-      const mocked = {
-      monitoringLogs: {
-        id: 'monitoringLogs',
-        title: 'Monitoring logs',
-        light: '<svg></svg>',
-        dark: '<svg></svg>',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    monitoringLogs: {
+      id: 'monitoringLogs',
+      title: 'Monitoring logs',
+      light: '<svg></svg>',
+      dark: '<svg></svg>',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const HeaderMenuPortalMock = HeaderMenuPortal as Mock;
 HeaderMenuPortalMock.mockReturnValue(<div>Portal node</div>);
@@ -116,9 +116,12 @@ describe('SLOs Welcome Page', () => {
       isLoading: false,
       isError: false,
     });
-    vi
-      .spyOn(Router, 'useLocation')
-      .mockReturnValue({ pathname: '/slos/welcome', search: '', state: '', hash: '' });
+    vi.spyOn(Router, 'useLocation').mockReturnValue({
+      pathname: '/slos/welcome',
+      search: '',
+      state: '',
+      hash: '',
+    });
   });
 
   describe('when the incorrect license is found', () => {

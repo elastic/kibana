@@ -22,12 +22,12 @@ import { renderHook } from '@testing-library/react';
 import { createMetricsClientMock } from '../test_helpers';
 
 vi.mock('../shared', async () => {
-      const mocked = {
-      ...(await vi.importActual('../shared')),
-      useInfrastructureNodeMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../shared')),
+    useInfrastructureNodeMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePodMetricsTable hook', () => {
   const useInfrastructureNodeMetricsMock = useInfrastructureNodeMetrics as MockedFunction<

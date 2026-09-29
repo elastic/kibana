@@ -24,14 +24,14 @@ const mockMigrateEcsData = vi.fn().mockResolvedValue({
   failures: [],
 });
 vi.mock('../asset_criticality_migration_client', () => {
-      const mocked = {
-      AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
-        isEcsDataMigrationRequired: mockIsEcsDataMigrationRequired,
-        migrateEcsData: mockMigrateEcsData,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
+      isEcsDataMigrationRequired: mockIsEcsDataMigrationRequired,
+      migrateEcsData: mockMigrateEcsData,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockTaskManagerStart = taskManagerMock.createStart();
 const logger = loggerMock.create();
 const auditLogger = auditLoggerMock.create();

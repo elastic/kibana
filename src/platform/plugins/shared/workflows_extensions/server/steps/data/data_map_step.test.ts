@@ -109,9 +109,9 @@ describe('dataMapStepDefinition', () => {
         },
       };
       const context = createMockContext(config, input);
-      vi
-        .mocked(context.contextManager.getContext)
-        .mockReturnValue({ workflow: { name: 'cached workflow' } } as any);
+      vi.mocked(context.contextManager.getContext).mockReturnValue({
+        workflow: { name: 'cached workflow' },
+      } as any);
 
       const result = await dataMapStepDefinition.handler(context);
 

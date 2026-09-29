@@ -39,9 +39,7 @@ describe('NoVulnerabilitiesStates', () => {
 
   beforeAll(() => {
     (useCspIntegrationLink.useCspIntegrationLink as Mock).mockReturnValue(cnvmintegrationLink);
-    (useAddIntegrationRoute.useAddIntegrationRoute as Mock).mockReturnValue(
-      integrationRouteLink
-    );
+    (useAddIntegrationRoute.useAddIntegrationRoute as Mock).mockReturnValue(integrationRouteLink);
   });
 
   beforeEach(() => {

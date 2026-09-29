@@ -11,21 +11,20 @@ import type { MockedFunction } from 'vitest';
 import { getSupportedSchemas } from './supported_schemas';
 import * as securityModules from './security_modules';
 
-const actualSecurityModules = (await vi.importActual('./security_modules'));
+const actualSecurityModules = await vi.importActual('./security_modules');
 
 vi.mock('./security_modules', async () => {
-      const mocked = {
-      ...(await vi.importActual('./security_modules')),
-      getSecurityModuleDatasets: vi.fn(),
-      getAllSecurityModules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./security_modules')),
+    getSecurityModuleDatasets: vi.fn(),
+    getAllSecurityModules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockGetSecurityModuleDatasets =
-  securityModules.getSecurityModuleDatasets as MockedFunction<
-    typeof securityModules.getSecurityModuleDatasets
-  >;
+const mockGetSecurityModuleDatasets = securityModules.getSecurityModuleDatasets as MockedFunction<
+  typeof securityModules.getSecurityModuleDatasets
+>;
 
 describe('getSupportedSchemas', () => {
   beforeEach(() => {

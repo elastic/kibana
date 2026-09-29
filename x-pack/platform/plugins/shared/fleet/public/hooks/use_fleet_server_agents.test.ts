@@ -12,12 +12,12 @@ import { sendGetAllFleetServerAgents } from './use_fleet_server_agents';
 import { sendGetAgents, sendGetPackagePolicies } from './use_request';
 
 vi.mock('./use_request', () => {
-      const mocked = {
-      sendGetAgents: vi.fn(),
-      sendGetPackagePolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetAgents: vi.fn(),
+    sendGetPackagePolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('sendGetAllFleetServerAgents', () => {
   beforeEach(() => {

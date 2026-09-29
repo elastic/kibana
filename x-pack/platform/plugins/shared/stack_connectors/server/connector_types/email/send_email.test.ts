@@ -21,23 +21,23 @@ import { getOAuthClientCredentialsAccessToken } from '@kbn/actions-plugin/server
 import { connectorTokenClientMock } from '@kbn/actions-plugin/server/lib/connector_token_client.mock';
 
 vi.mock('nodemailer', () => {
-      const mocked = {
-      createTransport: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTransport: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./send_email_graph_api', () => {
-      const mocked = {
-      sendEmailGraphApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendEmailGraphApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/actions-plugin/server/lib/get_oauth_client_credentials_access_token', () => {
-      const mocked = {
-      getOAuthClientCredentialsAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthClientCredentialsAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('axios');
 const mockAxiosInstanceInterceptor = {
@@ -233,8 +233,7 @@ describe('send_email module', () => {
 
   test('uses OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as Mock;
+    const getOAuthClientCredentialsAccessTokenMock = getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -328,8 +327,7 @@ describe('send_email module', () => {
 
   test('uses custom graph API scope if configured for OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as Mock;
+    const getOAuthClientCredentialsAccessTokenMock = getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -367,8 +365,7 @@ describe('send_email module', () => {
 
   test('uses custom exchange URL if configured for OAuth 2.0 Client Credentials authentication for email using "exchange_server" service', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as Mock;
+    const getOAuthClientCredentialsAccessTokenMock = getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',
@@ -406,8 +403,7 @@ describe('send_email module', () => {
 
   test('throws error if null access token returned when using OAuth 2.0 Client Credentials authentication', async () => {
     const sendEmailGraphApiMock = sendEmailGraphApi as Mock;
-    const getOAuthClientCredentialsAccessTokenMock =
-      getOAuthClientCredentialsAccessToken as Mock;
+    const getOAuthClientCredentialsAccessTokenMock = getOAuthClientCredentialsAccessToken as Mock;
     const sendEmailOptions = getSendEmailOptions({
       transport: {
         service: 'exchange_server',

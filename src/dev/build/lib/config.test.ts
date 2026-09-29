@@ -17,16 +17,16 @@ import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { Config } from './config';
 
 vi.mock('./version_info', () => {
-      const mocked = {
-      getVersionInfo: () => ({
-        buildSha: 'abc1234',
-        buildVersion: '8.0.0',
-        buildNumber: 1234,
-        buildDate: '2023-05-15T23:12:09+0000',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getVersionInfo: () => ({
+      buildSha: 'abc1234',
+      buildVersion: '8.0.0',
+      buildNumber: 1234,
+      buildDate: '2023-05-15T23:12:09+0000',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const versionInfo = (await vi.importMock('./version_info')).getVersionInfo();
 

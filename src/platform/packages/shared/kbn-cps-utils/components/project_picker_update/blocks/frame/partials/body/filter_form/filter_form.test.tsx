@@ -60,13 +60,13 @@ const mockUseProjectPickerActions = vi.fn();
 const mockFetchProjectsByRouting = vi.fn();
 
 vi.mock('../../../../../state', () => {
-      const mocked = {
-      useProjectPickerState: () => mockUseProjectPickerState(),
-      useProjectPickerActions: () => mockUseProjectPickerActions(),
-      useFetchProjectsByRouting: () => mockFetchProjectsByRouting,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProjectPickerState: () => mockUseProjectPickerState(),
+    useProjectPickerActions: () => mockUseProjectPickerActions(),
+    useFetchProjectsByRouting: () => mockFetchProjectsByRouting,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createFilterExpressions = (
   entries: Array<[FilterExpressionValue, boolean?]>

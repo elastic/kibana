@@ -22,24 +22,24 @@ import {
 const mockValidateIndexPermissions = vi.fn();
 
 vi.mock('../../../watchlists/entity_sources/entity_source_api_key', () => {
-      const mocked = {
-      validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockScheduleNow = vi.fn();
 const mockGetEngineStatus = vi.fn();
 
 vi.mock('../../engine/status_service', () => {
-      const mocked = {
-      createEngineStatusService: () => ({
-        get: mockGetEngineStatus,
-        scheduleNow: mockScheduleNow,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEngineStatusService: () => ({
+      get: mockGetEngineStatus,
+      scheduleNow: mockScheduleNow,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Import after mocks are set up
 import { createMonitoringEntitySourceRoute } from './create';

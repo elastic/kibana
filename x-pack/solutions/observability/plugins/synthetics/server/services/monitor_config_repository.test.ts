@@ -27,20 +27,20 @@ import { MONITOR_SEARCH_FIELDS } from '../routes/common';
 
 // Mock the utils functions
 vi.mock('../synthetics_service/utils', () => {
-      const mocked = {
-      formatSecrets: vi.fn((data) => ({ ...data, formattedSecrets: true })),
-      normalizeSecrets: vi.fn((data) => ({ ...data, normalizedSecrets: true })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatSecrets: vi.fn((data) => ({ ...data, formattedSecrets: true })),
+    normalizeSecrets: vi.fn((data) => ({ ...data, normalizedSecrets: true })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the AMP span
 vi.mock('@kbn/apm-data-access-plugin/server/utils/with_apm_span', () => {
-      const mocked = {
-      withApmSpan: vi.fn((spanName, fn) => fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withApmSpan: vi.fn((spanName, fn) => fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MonitorConfigRepository', () => {
   let soClient: Mocked<SavedObjectsClientContract>;

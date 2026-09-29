@@ -17,17 +17,17 @@ import { useServiceFlyoutTransactionData } from './use_service_flyout_transactio
 import { usePreferredTransactionDataSource } from './use_preferred_transaction_data_source';
 
 vi.mock('./use_preferred_transaction_data_source', async () => {
-      const mocked = {
-      usePreferredTransactionDataSource: vi.fn().mockReturnValue({
-        dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
-        isLoading: false,
-        error: undefined,
-      }),
-      parseIntervalSeconds: (await vi.importActual('./use_preferred_transaction_data_source'))
-        .parseIntervalSeconds,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePreferredTransactionDataSource: vi.fn().mockReturnValue({
+      dataSource: { documentType: 'transactionMetric', rollupInterval: '1m' },
+      isLoading: false,
+      error: undefined,
+    }),
+    parseIntervalSeconds: (await vi.importActual('./use_preferred_transaction_data_source'))
+      .parseIntervalSeconds,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const START = '2024-01-01T00:00:00.000Z';
 const END = '2024-01-01T01:00:00.000Z';

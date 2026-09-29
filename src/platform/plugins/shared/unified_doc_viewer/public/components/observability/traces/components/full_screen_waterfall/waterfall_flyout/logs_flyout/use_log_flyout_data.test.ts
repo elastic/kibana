@@ -17,18 +17,18 @@ const mockUseFetchLog = vi.fn();
 const mockUseAdhocDataView = vi.fn();
 
 vi.mock('../../hooks/use_fetch_log', () => {
-      const mocked = {
-      useFetchLog: (params: { id: string; index?: string }) => mockUseFetchLog(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchLog: (params: { id: string; index?: string }) => mockUseFetchLog(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_adhoc_data_view', () => {
-      const mocked = {
-      useAdhocDataView: (params: { index: string | null }) => mockUseAdhocDataView(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAdhocDataView: (params: { index: string | null }) => mockUseAdhocDataView(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useLogFlyoutData', () => {
   const id = 'test-log-id';

@@ -22,11 +22,11 @@ vi.mock('../../common/auth/auth_config', () => ({
 }));
 
 vi.mock('../../common/auth/use_secret_query_params', () => {
-      const mocked = {
-      useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSecretQueryParams: () => ({ isLoading: false, isFetching: false, data: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('HttpActionConnectorFields', () => {
   const connector = {

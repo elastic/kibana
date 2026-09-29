@@ -14,13 +14,13 @@ import type { RuleApiResponse } from '../../../../services/rules_api';
 import { SignalArtifactsSection } from './signal_artifacts_section';
 
 vi.mock('./dashboard_artifacts_subsection', () => {
-      const mocked = {
-      DashboardArtifactsSubsection: () => (
-        <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardArtifactsSubsection: () => (
+      <div data-test-subj="dashboardArtifactsSubsectionMock">dashboards</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rule: RuleApiResponse = {
   id: 'rule-1',

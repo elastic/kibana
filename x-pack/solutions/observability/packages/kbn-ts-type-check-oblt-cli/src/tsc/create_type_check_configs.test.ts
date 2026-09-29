@@ -14,16 +14,16 @@ import type { TsProject } from '@kbn/ts-projects';
 import { createTypeCheckConfigs } from './create_type_check_configs';
 
 vi.mock('@kbn/std', () => {
-      const mocked = {
-      asyncMapWithLimit: vi
-        .fn()
-        .mockImplementation(
-          async <T, R>(items: T[], _limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> =>
-            Promise.all(items.map(mapper))
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    asyncMapWithLimit: vi
+      .fn()
+      .mockImplementation(
+        async <T, R>(items: T[], _limit: number, mapper: (item: T) => Promise<R>): Promise<R[]> =>
+          Promise.all(items.map(mapper))
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeProject = (dir: string): TsProject =>
   ({
@@ -37,8 +37,7 @@ const makeProject = (dir: string): TsProject =>
     isTypeCheckDisabled: () => false,
   } as unknown as TsProject);
 
-const makeLog = (): SomeDevLog =>
-  ({ verbose: vi.fn(), info: vi.fn() } as unknown as SomeDevLog);
+const makeLog = (): SomeDevLog => ({ verbose: vi.fn(), info: vi.fn() } as unknown as SomeDevLog);
 
 // Content that createTypeCheckConfigs generates for a project with empty config and no refs.
 const expectedContent = JSON.stringify(

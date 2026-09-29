@@ -16,19 +16,19 @@ const mockGetState = vi.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-      useSelector: (selector: any) => selector(mockGetState()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+    useSelector: (selector: any) => selector(mockGetState()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => mockGetParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => mockGetParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePageSync', () => {
   beforeEach(() => {

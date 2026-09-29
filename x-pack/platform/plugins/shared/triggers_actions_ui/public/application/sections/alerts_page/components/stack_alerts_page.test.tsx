@@ -70,11 +70,11 @@ const mockAlertsTable = vi.fn(({ ruleTypeIds }: { ruleTypeIds?: string[] }) => (
   </div>
 ));
 vi.mock('@kbn/response-ops-alerts-table/components/alerts_table', () => {
-      const mocked = {
-      AlertsTable: (props: { ruleTypeIds?: string[] }) => mockAlertsTable(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTable: (props: { ruleTypeIds?: string[] }) => mockAlertsTable(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/get_experimental_features');
 vi.mocked(getIsExperimentalFeatureEnabled).mockReturnValue(false);

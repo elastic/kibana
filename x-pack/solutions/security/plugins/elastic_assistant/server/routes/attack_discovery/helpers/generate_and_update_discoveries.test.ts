@@ -28,47 +28,51 @@ import { handleGraphError } from '../public/post/helpers/handle_graph_error';
 import { reportAttackDiscoveryGenerationSuccess } from './telemetry';
 
 vi.mock('./generate_discoveries', async () => {
-      const mocked = {
-      ...(await vi.importActual('./generate_discoveries')),
-      generateAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./generate_discoveries')),
+    generateAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./report_attack_discovery_success_telemetry', async () => {
-      const mocked = {
-      ...(await vi.importActual('./report_attack_discovery_success_telemetry')),
-      reportAttackDiscoverySuccessTelemetry: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./report_attack_discovery_success_telemetry')),
+    reportAttackDiscoverySuccessTelemetry: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./filter_hallucinated_alerts', () => {
-      const mocked = {
-      filterHallucinatedAlerts: vi.fn().mockImplementation(({ attackDiscoveries }) => {
-        // By default, pass through all discoveries (no filtering)
-        return Promise.resolve(attackDiscoveries);
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterHallucinatedAlerts: vi.fn().mockImplementation(({ attackDiscoveries }) => {
+      // By default, pass through all discoveries (no filtering)
+      return Promise.resolve(attackDiscoveries);
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/attack_discovery/persistence/deduplication', async () => {
-      const mocked = {
-      deduplicateAttackDiscoveries: vi
-        .fn()
-        .mockResolvedValue(
-          (await vi.importActual('../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries')).mockAttackDiscoveries
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deduplicateAttackDiscoveries: vi
+      .fn()
+      .mockResolvedValue(
+        (
+          await vi.importActual(
+            '../../../lib/attack_discovery/evaluation/__mocks__/mock_attack_discoveries'
+          )
+        ).mockAttackDiscoveries
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../public/post/helpers/handle_graph_error', async () => {
-      const mocked = {
-      ...(await vi.importActual('../public/post/helpers/handle_graph_error')),
-      handleGraphError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../public/post/helpers/handle_graph_error')),
+    handleGraphError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./telemetry', async () => {
-  const actual = (await vi.importActual('./telemetry'));
+  const actual = await vi.importActual('./telemetry');
   return {
     ...actual,
     reportAttackDiscoveryGenerationSuccess: vi.fn(actual.reportAttackDiscoveryGenerationSuccess),
@@ -320,7 +324,7 @@ describe('generateAndUpdateAttackDiscoveries', () => {
     );
 
     it('calls filterHallucinatedAlerts with the expected parameters', async () => {
-      const { filterHallucinatedAlerts } = (await vi.importMock('./filter_hallucinated_alerts'));
+      const { filterHallucinatedAlerts } = await vi.importMock('./filter_hallucinated_alerts');
       const executionUuid = 'test-1';
 
       await generateAndUpdateAttackDiscoveries({

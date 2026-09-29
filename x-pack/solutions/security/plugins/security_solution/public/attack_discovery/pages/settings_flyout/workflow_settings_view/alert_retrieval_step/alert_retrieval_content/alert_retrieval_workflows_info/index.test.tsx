@@ -17,20 +17,20 @@ const mockGetActiveSpace = vi.fn();
 const mockGetUrlForApp = vi.fn();
 
 vi.mock('../../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            getUrlForApp: mockGetUrlForApp,
-          },
-          spaces: {
-            getActiveSpace: mockGetActiveSpace,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          getUrlForApp: mockGetUrlForApp,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        spaces: {
+          getActiveSpace: mockGetActiveSpace,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetchDefaultEsqlQuery = vi.fn();
 

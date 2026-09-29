@@ -16,16 +16,16 @@ import { serializeAsESLifecycle } from '../../../../../../common/lib';
 let mockWizardData: any;
 
 vi.mock('../../component_templates_context', () => {
-      const mocked = {
-      useComponentTemplatesContext: () => ({
-        documentation: { esDocsBase: 'https://example.test' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useComponentTemplatesContext: () => ({
+      documentation: { esDocsBase: 'https://example.test' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/es-ui-shared-plugin/public'));
+  const actual = await vi.importActual('@kbn/es-ui-shared-plugin/public');
   return {
     ...actual,
     Forms: {

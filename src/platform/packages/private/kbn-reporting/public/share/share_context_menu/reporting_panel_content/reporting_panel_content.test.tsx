@@ -23,16 +23,16 @@ import { ReportingAPIClient } from '../../..';
 import * as constants from './constants';
 
 vi.mock('./constants', () => {
-      const mocked = {
-      getMaxUrlLength: vi.fn(() => 9999999),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMaxUrlLength: vi.fn(() => 9999999),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Capture the textToCopy prop passed to EuiCopy without executing execCommand (not available in jsdom)
 let capturedTextToCopy = '';
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiCopy: ({

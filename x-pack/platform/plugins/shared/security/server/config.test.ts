@@ -8,20 +8,20 @@
 import { vi } from 'vitest';
 
 vi.mock('crypto', () => {
-      const mocked = {
-      randomBytes: vi.fn(),
-      constants: require('crypto').constants,
-      createHash: require('crypto').createHash,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    randomBytes: vi.fn(),
+    constants: require('crypto').constants,
+    createHash: require('crypto').createHash,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/utils', () => {
-      const mocked = {
-      getLogsPath: () => '/mock/kibana/logs/path',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLogsPath: () => '/mock/kibana/logs/path',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 

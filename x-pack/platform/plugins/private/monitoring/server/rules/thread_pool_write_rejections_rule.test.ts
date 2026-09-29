@@ -18,36 +18,36 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 const RealDate = Date;
 
 vi.mock('../lib/alerts/fetch_thread_pool_rejections_stats', () => {
-      const mocked = {
-      fetchThreadPoolRejectionStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchThreadPoolRejectionStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/alerts/fetch_clusters', () => {
-      const mocked = {
-      fetchClusters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: () => ({ debug: vi.fn() }),
-          url: 'http://localhost:5601',
-          config: {
-            ui: {
-              show_license_expiration: true,
-              ccs: { enabled: true },
-              container: { elasticsearch: { enabled: false } },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: () => ({ debug: vi.fn() }),
+        url: 'http://localhost:5601',
+        config: {
+          ui: {
+            show_license_expiration: true,
+            ccs: { enabled: true },
+            container: { elasticsearch: { enabled: false } },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ThreadpoolWriteRejectionsAlert', () => {
   it('should have defaults', () => {

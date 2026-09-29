@@ -38,40 +38,40 @@ const INLINE_DEFS = [
 ];
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'uiSettings') {
-          return { get: () => mockWorkflowsEnabled };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'uiSettings') {
+        return { get: () => mockWorkflowsEnabled };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
-      getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-      InlineWorkflowEditor: ({
-        value,
-        connectorCreationConfig,
-      }: {
-        value: { id: string };
-        connectorCreationConfig?: ConnectorCreationConfig;
-      }) => (
-        <div
-          data-test-subj={`inlineWorkflowEditor-${value.id}`}
-          data-connector-creation-mode={connectorCreationConfig?.mode}
-          data-connector-creation-href={
-            connectorCreationConfig?.mode === 'new-tab' ? connectorCreationConfig.href : undefined
-          }
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+    getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+    InlineWorkflowEditor: ({
+      value,
+      connectorCreationConfig,
+    }: {
+      value: { id: string };
+      connectorCreationConfig?: ConnectorCreationConfig;
+    }) => (
+      <div
+        data-test-subj={`inlineWorkflowEditor-${value.id}`}
+        data-connector-creation-mode={connectorCreationConfig?.mode}
+        data-connector-creation-href={
+          connectorCreationConfig?.mode === 'new-tab' ? connectorCreationConfig.href : undefined
+        }
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderBuilder = (
   defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,

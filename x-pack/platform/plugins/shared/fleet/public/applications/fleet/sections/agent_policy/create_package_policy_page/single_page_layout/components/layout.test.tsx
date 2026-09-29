@@ -14,43 +14,43 @@ import { render, screen } from '@testing-library/react';
 import { CreatePackagePolicySinglePageLayout } from './layout';
 
 vi.mock('../hooks/setup_technology', () => {
-      const mocked = {
-      useAgentless: () => ({
-        isAgentlessAgentPolicy: () => false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentless: () => ({
+      isAgentlessAgentPolicy: () => false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../layouts', () => {
-      const mocked = {
-      WithHeaderLayout: ({
-        restrictWidth,
-        restrictHeaderWidth,
-        children,
-      }: {
-        restrictWidth?: number;
-        restrictHeaderWidth?: number;
-        children?: React.ReactNode;
-      }) => (
-        <div
-          data-test-subj="withHeaderLayout"
-          data-restrict-width={String(restrictWidth)}
-          data-restrict-header-width={String(restrictHeaderWidth)}
-        >
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WithHeaderLayout: ({
+      restrictWidth,
+      restrictHeaderWidth,
+      children,
+    }: {
+      restrictWidth?: number;
+      restrictHeaderWidth?: number;
+      children?: React.ReactNode;
+    }) => (
+      <div
+        data-test-subj="withHeaderLayout"
+        data-restrict-width={String(restrictWidth)}
+        data-restrict-header-width={String(restrictHeaderWidth)}
+      >
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../components', () => {
-      const mocked = {
-      PackageIcon: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageIcon: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderLayout = (useWidePageLayout?: boolean) =>
   render(

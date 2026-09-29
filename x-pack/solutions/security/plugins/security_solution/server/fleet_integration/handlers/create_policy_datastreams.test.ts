@@ -24,9 +24,9 @@ describe('createPolicyDataStreamsIfNeeded()', () => {
     esClientMock.indices.exists.mockResolvedValue(false);
 
     policyNamespacesMock = { integrationPolicy: { '123': ['foo1', 'foo2'] } };
-    (
-      endpointServicesMock.getInternalFleetServices().getPolicyNamespace as Mock
-    ).mockResolvedValue(policyNamespacesMock);
+    (endpointServicesMock.getInternalFleetServices().getPolicyNamespace as Mock).mockResolvedValue(
+      policyNamespacesMock
+    );
   });
 
   afterEach(() => {

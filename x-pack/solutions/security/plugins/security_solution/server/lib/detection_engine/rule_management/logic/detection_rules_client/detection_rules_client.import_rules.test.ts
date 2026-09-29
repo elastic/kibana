@@ -510,9 +510,7 @@ describe('detectionRulesClient.importRules', () => {
       { ...getImportRulesSchemaMock(), rule_id: 'rule-1' },
       { ...getImportRulesSchemaMock(), rule_id: 'rule-2' },
     ];
-    (findInstalledRulesBySignatureIds as Mock).mockRejectedValueOnce(
-      new Error('find exploded')
-    );
+    (findInstalledRulesBySignatureIds as Mock).mockRejectedValueOnce(new Error('find exploded'));
 
     const { successes, errors } = await subject.importRules({
       allowMissingConnectorSecrets: false,

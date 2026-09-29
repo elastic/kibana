@@ -23,54 +23,54 @@ import { useGlobalTime } from '../../../../common/containers/use_global_time';
 import { useInstalledSecurityJobsIds } from '../../../../common/components/ml/hooks/use_installed_security_jobs';
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = { useQuery: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useQuery: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      prettifyQuery: vi.fn((q) => q),
-      getESQLResults: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prettifyQuery: vi.fn((q) => q),
+    getESQLResults: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/entity-store/common', () => {
-      const mocked = {
-      getEntitiesAlias: vi.fn(),
-      ENTITY_LATEST: 'latest',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEntitiesAlias: vi.fn(),
+    ENTITY_LATEST: 'latest',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./recent_anomalies_esql_source_query_hooks', () => {
-      const mocked = {
-      useRecentAnomaliesTopRowsEsqlSource: vi.fn(),
-      useRecentAnomaliesDataEsqlSource: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRecentAnomaliesTopRowsEsqlSource: vi.fn(),
+    useRecentAnomaliesDataEsqlSource: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_global_filter_query', () => {
-      const mocked = {
-      useGlobalFilterQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFilterQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/containers/use_global_time', () => {
-      const mocked = { useGlobalTime: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useGlobalTime: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/ml/hooks/use_installed_security_jobs', () => {
-      const mocked = {
-      useInstalledSecurityJobsIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInstalledSecurityJobsIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_error_toast', () => {
-      const mocked = { useErrorToast: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useErrorToast: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuery = useQuery as Mock;
 const mockGetESQLResults = getESQLResults as Mock;

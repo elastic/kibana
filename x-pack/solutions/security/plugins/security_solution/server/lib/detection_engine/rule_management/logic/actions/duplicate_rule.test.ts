@@ -15,11 +15,11 @@ import type { RuleParams } from '../../../rule_schema';
 import { duplicateRule } from './duplicate_rule';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('duplicateRule', () => {
   const createTestRule = (): SanitizedRule<RuleParams> => ({

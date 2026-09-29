@@ -17,7 +17,7 @@ import { DataIngestStatus, type ActionLink } from './data_ingest_status';
 
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('../../../hooks/use_fetcher', async () => {
-  const actual = (await vi.importActual('../../../hooks/use_fetcher'));
+  const actual = await vi.importActual('../../../hooks/use_fetcher');
   return {
     ...actual,
     useFetcher: vi.fn(),

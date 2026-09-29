@@ -53,21 +53,21 @@ qPDlGRlOgVTd9xUfHFkzB52c70E=
 const testGpgKeyFileContent = Buffer.from(testGpgKey);
 const mockGetConfig = vi.fn();
 vi.mock('../../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getConfig: () => mockGetConfig(),
-        getLogger: () => mockLogger,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getConfig: () => mockGetConfig(),
+      getLogger: () => mockLogger,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      readFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedReadFile = readFile as MockedFunction<typeof readFile>;
 

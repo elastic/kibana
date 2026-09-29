@@ -11,11 +11,11 @@ import type { Mock } from 'vitest';
 import { performChecks } from '../../../../helpers';
 
 vi.mock('../../../../helpers', () => {
-      const mocked = {
-      performChecks: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performChecks: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 

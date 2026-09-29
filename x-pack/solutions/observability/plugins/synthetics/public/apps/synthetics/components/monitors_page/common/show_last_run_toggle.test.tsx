@@ -16,11 +16,11 @@ import { useOverviewStatusState } from '../hooks/use_overview_status';
 import { SHOW_LAST_RUN_STORAGE_KEY } from '../../../state/utils/get_initial_show_last_run';
 
 vi.mock('../hooks/use_overview_status', () => {
-      const mocked = {
-      useOverviewStatusState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOverviewStatusState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseOverviewStatusState = useOverviewStatusState as Mock;
 

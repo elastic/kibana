@@ -13,7 +13,7 @@ import type { ActionContext } from '../../connector_spec';
 import { GcpCloudFunctionsConnector } from './gcp_cloud_functions';
 
 vi.mock('../../auth_types/gcp_jwt_helpers', async () => {
-  const actual = (await vi.importActual('../../auth_types/gcp_jwt_helpers'));
+  const actual = await vi.importActual('../../auth_types/gcp_jwt_helpers');
   return {
     ...actual,
     getGcpIdToken: vi.fn().mockResolvedValue('mock-id-token'),

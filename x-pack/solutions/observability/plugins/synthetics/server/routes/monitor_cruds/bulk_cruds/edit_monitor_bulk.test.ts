@@ -12,19 +12,19 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { ConfigKey } from '../../../../common/runtime_types';
 
 vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
-      const mocked = {
-      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../telemetry/monitor_upgrade_sender', () => {
-      const mocked = {
-      formatTelemetryUpdateEvent: vi.fn(),
-      sendTelemetryEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatTelemetryUpdateEvent: vi.fn(),
+    sendTelemetryEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('syncEditedMonitorBulk', () => {
   const mockMonitorConfigRepository = {

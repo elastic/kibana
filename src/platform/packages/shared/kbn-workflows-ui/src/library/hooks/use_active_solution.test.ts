@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useActiveSolution } from './use_active_solution';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.mocked(useKibana);
 

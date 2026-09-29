@@ -15,17 +15,17 @@ import { AlertsCount } from './alerts_count';
 import { HEADER_ALERTS_BLOCK_TEST_ID } from '../constants/test_ids';
 
 vi.mock('../../../shared/components/flyout_header_block', () => {
-      const mocked = {
-      FlyoutHeaderBlock: ({
-        children,
-        'data-test-subj': dataTestSubj,
-      }: {
-        children: React.ReactNode;
-        'data-test-subj'?: string;
-      }) => <div data-test-subj={dataTestSubj}>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutHeaderBlock: ({
+      children,
+      'data-test-subj': dataTestSubj,
+    }: {
+      children: React.ReactNode;
+      'data-test-subj'?: string;
+    }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildHit = (alertIds: unknown): DataTableRecord =>
   ({

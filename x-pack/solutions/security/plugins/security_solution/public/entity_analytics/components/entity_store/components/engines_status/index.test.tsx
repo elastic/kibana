@@ -16,23 +16,23 @@ import { EntityType } from '../../../../../../common/entity_analytics/types';
 const mockUseEntityStore = vi.fn();
 const mockInstallMutate = vi.fn();
 vi.mock('../../hooks/use_entity_store', () => {
-      const mocked = {
-      useEntityStoreStatus: () => mockUseEntityStore(),
-      useInstallEntityStoreMutation: () => ({
-        mutate: mockInstallMutate,
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreStatus: () => mockUseEntityStore(),
+    useInstallEntityStoreMutation: () => ({
+      mutate: mockInstallMutate,
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDownloadBlob = vi.fn();
 vi.mock('../../../../../common/utils/download_blob', () => {
-      const mocked = {
-      downloadBlob: () => mockDownloadBlob(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadBlob: () => mockDownloadBlob(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EngineStatus', () => {
   beforeEach(() => {

@@ -23,9 +23,10 @@ describe('reportOptimizerTimings', () => {
 
   beforeEach(() => {
     timings.mockReset();
-    vi
-      .mocked(CiStatsReporter.fromEnv)
-      .mockReturnValue({ isEnabled: () => true, timings } as unknown as CiStatsReporter);
+    vi.mocked(CiStatsReporter.fromEnv).mockReturnValue({
+      isEnabled: () => true,
+      timings,
+    } as unknown as CiStatsReporter);
   });
 
   const meta = () => timings.mock.calls[0][0].timings[0].meta;
@@ -67,9 +68,10 @@ describe('reportOptimizerTimings', () => {
   });
 
   it('does nothing when ci-stats is not configured', async () => {
-    vi
-      .mocked(CiStatsReporter.fromEnv)
-      .mockReturnValue({ isEnabled: () => false, timings } as unknown as CiStatsReporter);
+    vi.mocked(CiStatsReporter.fromEnv).mockReturnValue({
+      isEnabled: () => false,
+      timings,
+    } as unknown as CiStatsReporter);
 
     await reportOptimizerTimings(log, { repoRoot: '/repo' }, { success: true }, 1);
     expect(timings).not.toHaveBeenCalled();

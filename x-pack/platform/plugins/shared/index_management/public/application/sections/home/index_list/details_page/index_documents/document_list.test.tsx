@@ -14,24 +14,24 @@ import type { SearchHit, MappingProperty } from '@elastic/elasticsearch/lib/api/
 import { DocumentList } from './document_list';
 
 vi.mock('@kbn/search-index-documents', () => {
-      const mocked = {
-      Result: ({ metaData, compactCard }: { metaData: { id: string }; compactCard: boolean }) => (
-        <div data-test-subj={`result-${metaData.id}`} data-compact-card={String(compactCard)}>
-          Result {metaData.id}
-        </div>
-      ),
-      resultMetaData: vi.fn((doc: SearchHit) => ({
-        id: doc._id,
-        title: undefined,
-        score: undefined,
-      })),
-      resultToField: vi.fn(() => []),
-      reorderFieldsInImportance: vi.fn((fields: unknown[]) => fields),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Result: ({ metaData, compactCard }: { metaData: { id: string }; compactCard: boolean }) => (
+      <div data-test-subj={`result-${metaData.id}`} data-compact-card={String(compactCard)}>
+        Result {metaData.id}
+      </div>
+    ),
+    resultMetaData: vi.fn((doc: SearchHit) => ({
+      id: doc._id,
+      title: undefined,
+      score: undefined,
+    })),
+    resultToField: vi.fn(() => []),
+    reorderFieldsInImportance: vi.fn((fields: unknown[]) => fields),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { resultMetaData, resultToField } = (await vi.importMock('@kbn/search-index-documents'));
+const { resultMetaData, resultToField } = await vi.importMock('@kbn/search-index-documents');
 
 const mockDocs: SearchHit[] = [
   { _index: 'test-index', _id: 'doc-1', _source: { title: 'First' } },

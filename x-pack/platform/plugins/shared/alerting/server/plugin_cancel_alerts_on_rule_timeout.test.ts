@@ -30,11 +30,11 @@ import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 
 const mockAlertService = alertsServiceMock.create();
 vi.mock('./alerts_service/alerts_service', () => {
-      const mocked = {
-      AlertsService: vi.fn().mockImplementation(() => mockAlertService),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsService: vi.fn().mockImplementation(() => mockAlertService),
+  };
+  return { ...mocked, default: mocked };
+});
 import { generateAlertingConfig } from './test_utils';
 
 const sampleRuleType: RuleType<never, never, {}, never, never, 'default', 'recovered', {}> = {

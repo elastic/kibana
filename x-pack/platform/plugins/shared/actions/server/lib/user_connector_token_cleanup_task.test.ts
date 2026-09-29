@@ -76,8 +76,9 @@ describe('scheduleUserConnectorTokenCleanupTask()', () => {
 });
 
 describe('task runner', () => {
-  const mockCleanupStaleUserConnectorTokens =
-    cleanupStaleUserConnectorTokens as MockedFunction<typeof cleanupStaleUserConnectorTokens>;
+  const mockCleanupStaleUserConnectorTokens = cleanupStaleUserConnectorTokens as MockedFunction<
+    typeof cleanupStaleUserConnectorTokens
+  >;
 
   beforeEach(() => {
     vi.clearAllMocks();

@@ -23,11 +23,11 @@ import {
 import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 
 vi.mock('@kbn/agent-builder-genai-utils/tools', () => {
-      const mocked = {
-      runSearchTool: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runSearchTool: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('alertsTool', () => {
   const { mockCore, mockLogger, mockEsClient, mockRequest } = createToolTestMocks();

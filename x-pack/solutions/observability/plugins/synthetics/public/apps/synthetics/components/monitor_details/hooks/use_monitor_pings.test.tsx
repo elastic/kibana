@@ -14,27 +14,27 @@ import { getMonitorRecentPingsAction } from '../../../state';
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelectedMonitor = vi.fn();
 vi.mock('./use_selected_monitor', () => {
-      const mocked = {
-      useSelectedMonitor: () => mockUseSelectedMonitor(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedMonitor: () => mockUseSelectedMonitor(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelectedLocation = vi.fn();
 vi.mock('./use_selected_location', () => {
-      const mocked = {
-      useSelectedLocation: () => mockUseSelectedLocation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedLocation: () => mockUseSelectedLocation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 const mockPingsState = vi.fn();

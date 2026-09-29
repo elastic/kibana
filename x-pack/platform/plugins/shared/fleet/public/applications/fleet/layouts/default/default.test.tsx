@@ -15,50 +15,50 @@ import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { DefaultLayout, FLEET_TAB_IDS } from './default';
 
 vi.mock('../../../../layouts', () => {
-      const mocked = {
-      WithoutHeaderLayout: ({
-        header,
-        children,
-      }: {
-        header?: React.ReactNode;
-        children: React.ReactNode;
-      }) => (
-        <div>
-          {header}
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WithoutHeaderLayout: ({
+      header,
+      children,
+    }: {
+      header?: React.ReactNode;
+      children: React.ReactNode;
+    }) => (
+      <div>
+        {header}
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_dismissable_tour', () => {
-      const mocked = {
-      useDismissableTour: () => ({ isOpen: false, isHidden: true, dismiss: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDismissableTour: () => ({ isOpen: false, isHidden: true, dismiss: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_tour_manager', () => {
-      const mocked = {
-      TourManagerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TourManagerProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_can_enable_auto_upgrades', () => {
-      const mocked = {
-      useCanEnableAutomaticAgentUpgrades: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanEnableAutomaticAgentUpgrades: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services', () => {
-      const mocked = {
-      ExperimentalFeaturesService: { get: () => ({ enableOtelUI: false }) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: { get: () => ({ enableOtelUI: false }) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAuthz = vi.fn();
 const mockUseConfig = vi.fn();
@@ -66,14 +66,14 @@ const mockUseLink = vi.fn();
 const mockUseStartServices = vi.fn();
 
 vi.mock('../../hooks', () => {
-      const mocked = {
-      useAuthz: () => mockUseAuthz(),
-      useConfig: () => mockUseConfig(),
-      useLink: () => mockUseLink(),
-      useStartServices: () => mockUseStartServices(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAuthz: () => mockUseAuthz(),
+    useConfig: () => mockUseConfig(),
+    useLink: () => mockUseLink(),
+    useStartServices: () => mockUseStartServices(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultAuthz = {
   fleet: {

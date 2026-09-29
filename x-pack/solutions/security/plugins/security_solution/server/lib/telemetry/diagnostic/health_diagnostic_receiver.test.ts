@@ -65,133 +65,137 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should run DSL query successfully', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreakers = [createMockCircuitBreaker(true)];
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreakers = [createMockCircuitBreaker(true)];
 
-              mockEsClient.search
-                .mockResolvedValueOnce(createMockSearchResponse([mockDocument]))
-                .mockResolvedValueOnce(createMockSearchResponse([]));
+        mockEsClient.search
+          .mockResolvedValueOnce(createMockSearchResponse([mockDocument]))
+          .mockResolvedValueOnce(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers }),
-                (results, completed) => {
-                  expect(results).toHaveLength(1);
-                  expect(results[0]).toEqual(mockDocument);
-                  expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
-                    index: ['test-index'],
-                    keep_alive: '1m',
-                  });
-                  expect(mockEsClient.search).toHaveBeenCalledTimes(2);
-                  // small delay for finalize to execute
-                  setTimeout(() => {
-                    expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
-                    completed();
-                  }, 10);
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers }),
+          (results, completed) => {
+            expect(results).toHaveLength(1);
+            expect(results[0]).toEqual(mockDocument);
+            expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+              index: ['test-index'],
+              keep_alive: '1m',
+            });
+            expect(mockEsClient.search).toHaveBeenCalledTimes(2);
+            // small delay for finalize to execute
+            setTimeout(() => {
+              expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id' });
+              completed();
+            }, 10);
+          },
+          done
+        );
+      }));
 
     test('should handle DSL query with aggregations', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
-              const aggregations = { bucket_count: { value: 42 } };
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
+        const aggregations = { bucket_count: { value: 42 } };
 
-              mockEsClient.search.mockResolvedValueOnce(createMockSearchResponse([], aggregations));
+        mockEsClient.search.mockResolvedValueOnce(createMockSearchResponse([], aggregations));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                (results) => {
-                  expect(results).toHaveLength(1);
-                  expect(results[0]).toEqual(aggregations);
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          (results) => {
+            expect(results).toHaveLength(1);
+            expect(results[0]).toEqual(aggregations);
+            done();
+          },
+          done
+        );
+      }));
 
     test('should handle multiple pages of DSL results', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
-              const doc1 = { ...mockDocument, id: 1 };
-              const doc2 = { ...mockDocument, id: 2 };
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
+        const doc1 = { ...mockDocument, id: 1 };
+        const doc2 = { ...mockDocument, id: 2 };
 
-              mockEsClient.search
-                .mockResolvedValueOnce(createMockSearchResponse([doc1], undefined, 'test-pit-id-1'))
-                .mockResolvedValueOnce(createMockSearchResponse([doc2], undefined, 'test-pit-id-2'))
-                .mockResolvedValueOnce(createMockSearchResponse([], undefined, 'test-pit-id-3'));
+        mockEsClient.search
+          .mockResolvedValueOnce(createMockSearchResponse([doc1], undefined, 'test-pit-id-1'))
+          .mockResolvedValueOnce(createMockSearchResponse([doc2], undefined, 'test-pit-id-2'))
+          .mockResolvedValueOnce(createMockSearchResponse([], undefined, 'test-pit-id-3'));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                (results) => {
-                  expect(results).toHaveLength(2);
-                  expect(results[0]).toEqual(doc1);
-                  expect(results[1]).toEqual(doc2);
-                  expect(mockEsClient.search).toHaveBeenCalledTimes(3);
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          (results) => {
+            expect(results).toHaveLength(2);
+            expect(results[0]).toEqual(doc1);
+            expect(results[1]).toEqual(doc2);
+            expect(mockEsClient.search).toHaveBeenCalledTimes(3);
 
-                  expect(mockEsClient.search.mock.calls[0][0]).toMatchObject({
-                    pit: { id: 'test-pit-id' },
-                  });
-                  expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
-                    pit: { id: 'test-pit-id-1' },
-                  });
-                  expect(mockEsClient.search.mock.calls[2][0]).toMatchObject({
-                    pit: { id: 'test-pit-id-2' },
-                  });
+            expect(mockEsClient.search.mock.calls[0][0]).toMatchObject({
+              pit: { id: 'test-pit-id' },
+            });
+            expect(mockEsClient.search.mock.calls[1][0]).toMatchObject({
+              pit: { id: 'test-pit-id-1' },
+            });
+            expect(mockEsClient.search.mock.calls[2][0]).toMatchObject({
+              pit: { id: 'test-pit-id-2' },
+            });
 
-                  // small delay for finalize to execute
-                  setTimeout(() => {
-                    expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id-3' });
-                    done();
-                  }, 10);
-                },
-                done
-              );
-            
-        }));
+            // small delay for finalize to execute
+            setTimeout(() => {
+              expect(mockEsClient.closePointInTime).toHaveBeenCalledWith({ id: 'test-pit-id-3' });
+              done();
+            }, 10);
+          },
+          done
+        );
+      }));
 
     test('should handle queries with tiers filtering', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.ilm.explainLifecycle.mockResolvedValue({
-                indices: {
-                  'test-index-000001': { phase: 'hot' },
-                  'test-index-000002': { phase: 'warm' },
-                  'test-index-000003': { phase: 'cold' },
-                },
-              });
+        mockEsClient.ilm.explainLifecycle.mockResolvedValue({
+          indices: {
+            'test-index-000001': { phase: 'hot' },
+            'test-index-000002': { phase: 'warm' },
+            'test-index-000003': { phase: 'cold' },
+          },
+        });
 
-              mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+        mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                () => {
-                  expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
-                    index: 'test-index',
-                    only_managed: false,
-                    filter_path: ['indices.*.phase'],
-                  });
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          () => {
+            expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
+              index: 'test-index',
+              only_managed: false,
+              filter_path: ['indices.*.phase'],
+            });
+            done();
+          },
+          done
+        );
+      }));
 
     it('streamDSL uses resolved indices from v2 ExecutableQuery', async () => {
       const execQuery = mkExecV2(QueryType.DSL, {}, ['logs-endpoint.events.process-default']);
@@ -222,89 +226,92 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should run EQL query with events successfully', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.EQL, {
+        const execQuery = mkExecV1(QueryType.EQL, {
+          query: 'process where process.name == "cmd.exe"',
+        });
+        const circuitBreaker = createMockCircuitBreaker(true);
+        const eventSources = mockEvents.map((e) => e._source);
+
+        mockEsClient.eql.search.mockResolvedValue(createMockEqlResponse(eventSources));
+
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          (results) => {
+            expect(results).toHaveLength(2);
+            expect(results[0]).toEqual(eventSources[0]);
+            expect(results[1]).toEqual(eventSources[1]);
+            expect(mockEsClient.eql.search).toHaveBeenCalledWith(
+              {
+                index: ['test-index'],
                 query: 'process where process.name == "cmd.exe"',
-              });
-              const circuitBreaker = createMockCircuitBreaker(true);
-              const eventSources = mockEvents.map((e) => e._source);
-
-              mockEsClient.eql.search.mockResolvedValue(createMockEqlResponse(eventSources));
-
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                (results) => {
-                  expect(results).toHaveLength(2);
-                  expect(results[0]).toEqual(eventSources[0]);
-                  expect(results[1]).toEqual(eventSources[1]);
-                  expect(mockEsClient.eql.search).toHaveBeenCalledWith(
-                    {
-                      index: ['test-index'],
-                      query: 'process where process.name == "cmd.exe"',
-                      size: 100,
-                    },
-                    { signal: expect.any(AbortSignal) }
-                  );
-                  done();
-                },
-                done
-              );
-            
-        }));
+                size: 100,
+              },
+              { signal: expect.any(AbortSignal) }
+            );
+            done();
+          },
+          done
+        );
+      }));
 
     test('should run EQL query with sequences successfully', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.EQL, {
-                query: 'sequence [process where true] [network where true]',
-              });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.EQL, {
+          query: 'sequence [process where true] [network where true]',
+        });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              const mockSequences = [
-                {
-                  events: [
-                    { _source: { '@timestamp': '2023-01-01T00:00:00Z', process: { name: 'cmd.exe' } } },
-                    { _source: { '@timestamp': '2023-01-01T00:01:00Z', network: { protocol: 'tcp' } } },
-                  ],
-                },
-              ];
+        const mockSequences = [
+          {
+            events: [
+              { _source: { '@timestamp': '2023-01-01T00:00:00Z', process: { name: 'cmd.exe' } } },
+              { _source: { '@timestamp': '2023-01-01T00:01:00Z', network: { protocol: 'tcp' } } },
+            ],
+          },
+        ];
 
-              mockEsClient.eql.search.mockResolvedValue(createMockEqlResponse(undefined, mockSequences));
+        mockEsClient.eql.search.mockResolvedValue(createMockEqlResponse(undefined, mockSequences));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                (results) => {
-                  expect(results).toHaveLength(1);
-                  expect(results[0]).toEqual(mockSequences[0].events.map((e) => e._source));
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          (results) => {
+            expect(results).toHaveLength(1);
+            expect(results[0]).toEqual(mockSequences[0].events.map((e) => e._source));
+            done();
+          },
+          done
+        );
+      }));
 
     test('should handle EQL query with no results', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.EQL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.EQL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.eql.search.mockResolvedValue({ hits: {} });
+        mockEsClient.eql.search.mockResolvedValue({ hits: {} });
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                (results) => {
-                  expect(results).toHaveLength(0);
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          (results) => {
+            expect(results).toHaveLength(0);
+            done();
+          },
+          done
+        );
+      }));
   });
 
   describe('ES|QL queries', () => {
@@ -313,184 +320,190 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should run ES|QL query successfully', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              const mockRecords = [
-                { 'user.name': 'john', 'count()': 5 },
-                { 'user.name': 'jane', 'count()': 3 },
-              ];
+        const mockRecords = [
+          { 'user.name': 'john', 'count()': 5 },
+          { 'user.name': 'jane', 'count()': 3 },
+        ];
 
-              const mockToRecords = vi.fn().mockResolvedValue({ records: mockRecords });
-              mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
+        const mockToRecords = vi.fn().mockResolvedValue({ records: mockRecords });
+        mockEsClient.helpers.esql.mockReturnValue({ toRecords: mockToRecords });
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                (results) => {
-                  expect(results).toHaveLength(2);
-                  expect(results[0]).toEqual(mockRecords[0]);
-                  expect(results[1]).toEqual(mockRecords[1]);
-                  expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
-                    { query: 'FROM test-index | stats count() by user.name' },
-                    { signal: expect.any(AbortSignal) }
-                  );
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          (results) => {
+            expect(results).toHaveLength(2);
+            expect(results[0]).toEqual(mockRecords[0]);
+            expect(results[1]).toEqual(mockRecords[1]);
+            expect(mockEsClient.helpers.esql).toHaveBeenCalledWith(
+              { query: 'FROM test-index | stats count() by user.name' },
+              { signal: expect.any(AbortSignal) }
+            );
+            done();
+          },
+          done
+        );
+      }));
 
     test('v2 ESQL query with FROM clause errors without calling esql', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV2(QueryType.ESQL, {
-                query: 'FROM logs-* | stats count() by user.name',
-              });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV2(QueryType.ESQL, {
+          query: 'FROM logs-* | stats count() by user.name',
+        });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => done(new Error('Should not emit')),
-                error: (error) => {
-                  try {
-                    expect(error.message).toContain('FROM clause');
-                    expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
-                    done();
-                  } catch (e) {
-                    done(e);
-                  }
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => done(new Error('Should not emit')),
+          error: (error) => {
+            try {
+              expect(error.message).toContain('FROM clause');
+              expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+              done();
+            } catch (e) {
+              done(e);
+            }
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('ESQL query with lowercase FROM clause is blocked', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.ESQL, {
-                query: 'from logs-* | stats count() by user.name',
-              });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.ESQL, {
+          query: 'from logs-* | stats count() by user.name',
+        });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => done(new Error('Should not emit')),
-                error: (error) => {
-                  try {
-                    expect(error.message).toContain('FROM clause');
-                    expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
-                    done();
-                  } catch (e) {
-                    done(e);
-                  }
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => done(new Error('Should not emit')),
+          error: (error) => {
+            try {
+              expect(error.message).toContain('FROM clause');
+              expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+              done();
+            } catch (e) {
+              done(e);
+            }
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('ESQL query with uppercase FROM clause is blocked', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.ESQL, {
-                query: 'FROM logs-* | stats count() by user.name',
-              });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.ESQL, {
+          query: 'FROM logs-* | stats count() by user.name',
+        });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => done(new Error('Should not emit')),
-                error: (error) => {
-                  try {
-                    expect(error.message).toContain('FROM clause');
-                    expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
-                    done();
-                  } catch (e) {
-                    done(e);
-                  }
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => done(new Error('Should not emit')),
+          error: (error) => {
+            try {
+              expect(error.message).toContain('FROM clause');
+              expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+              done();
+            } catch (e) {
+              done(e);
+            }
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
   });
 
   describe('Circuit breaker functionality', () => {
     test('should trigger circuit breaker and abort query', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(false, 10);
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(false, 10);
 
-              setupPointInTime(mockEsClient);
-              mockEsClient.search.mockImplementation(
+        setupPointInTime(mockEsClient);
+        mockEsClient.search.mockImplementation(
+          () =>
+            new Promise((resolve) =>
+              setTimeout(
                 () =>
-                  new Promise((resolve) =>
-                    setTimeout(
-                      () =>
-                        resolve({
-                          took: 1,
-                          timed_out: false,
-                          _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-                          hits: {
-                            hits: [],
-                            total: { value: 0, relation: 'eq' },
-                            max_score: null,
-                          },
-                        }),
-                      100
-                    )
-                  )
-              );
+                  resolve({
+                    took: 1,
+                    timed_out: false,
+                    _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+                    hits: {
+                      hits: [],
+                      total: { value: 0, relation: 'eq' },
+                      max_score: null,
+                    },
+                  }),
+                100
+              )
+            )
+        );
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: (error) => {
-                  try {
-                    expect(error).toBeInstanceOf(ValidationError);
-                    expect(error.result.message).toBe('Circuit breaker triggered');
-                    expect(error.result.circuitBreaker).toBe('TestCircuitBreaker');
-                    done();
-                  } catch (e) {
-                    done(e);
-                  }
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: (error) => {
+            try {
+              expect(error).toBeInstanceOf(ValidationError);
+              expect(error.result.message).toBe('Circuit breaker triggered');
+              expect(error.result.circuitBreaker).toBe('TestCircuitBreaker');
+              done();
+            } catch (e) {
+              done(e);
+            }
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
   });
 
   describe('Error handling', () => {
     test('should handle Elasticsearch search errors', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              setupPointInTime(mockEsClient);
-              mockEsClient.ilm.explainLifecycle.mockResolvedValue({
-                indices: { 'test-index-000001': { phase: 'hot' } },
-              });
-              mockEsClient.search.mockRejectedValue(new Error('Elasticsearch error'));
+        setupPointInTime(mockEsClient);
+        mockEsClient.ilm.explainLifecycle.mockResolvedValue({
+          indices: { 'test-index-000001': { phase: 'hot' } },
+        });
+        mockEsClient.search.mockRejectedValue(new Error('Elasticsearch error'));
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: (error) => {
-                  expect(error.message).toBe('Elasticsearch error');
-                  done();
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: (error) => {
+            expect(error.message).toBe('Elasticsearch error');
+            done();
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('should handle unsupported query type', () => {
       const execQuery = mkExecV1('INVALID' as QueryType);
@@ -502,250 +515,260 @@ describe('Security Solution - Health Diagnostic Queries - CircuitBreakingQueryEx
     });
 
     test('should handle ILM explain lifecycle errors gracefully', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.ilm.explainLifecycle.mockResolvedValue({ indices: undefined });
-              setupPointInTime(mockEsClient);
-              mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+        mockEsClient.ilm.explainLifecycle.mockResolvedValue({ indices: undefined });
+        setupPointInTime(mockEsClient);
+        mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                () => {
-                  expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
-                    index: ['test-index'],
-                    keep_alive: '1m',
-                  });
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          () => {
+            expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+              index: ['test-index'],
+              keep_alive: '1m',
+            });
+            done();
+          },
+          done
+        );
+      }));
 
     test('should handle ILM API errors and assume serverless', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot', 'warm'] });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              const ilmError = new Error(
-                'no handler found for uri [/.alerts-security.alerts*/_ilm/explain?only_managed=false&filter_path=indices.*.phase] and method [GET]'
-              );
-              mockEsClient.ilm.explainLifecycle.mockRejectedValue(ilmError);
-              setupPointInTime(mockEsClient);
-              mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+        const ilmError = new Error(
+          'no handler found for uri [/.alerts-security.alerts*/_ilm/explain?only_managed=false&filter_path=indices.*.phase] and method [GET]'
+        );
+        mockEsClient.ilm.explainLifecycle.mockRejectedValue(ilmError);
+        setupPointInTime(mockEsClient);
+        mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                () => {
-                  expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
-                    index: 'test-index',
-                    only_managed: false,
-                    filter_path: ['indices.*.phase'],
-                  });
-                  expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
-                    index: ['test-index'],
-                    keep_alive: '1m',
-                  });
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          () => {
+            expect(mockEsClient.ilm.explainLifecycle).toHaveBeenCalledWith({
+              index: 'test-index',
+              only_managed: false,
+              filter_path: ['indices.*.phase'],
+            });
+            expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+              index: ['test-index'],
+              keep_alive: '1m',
+            });
+            done();
+          },
+          done
+        );
+      }));
 
     test('should handle network errors during ILM checks', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              const networkError = new Error('ECONNREFUSED');
-              mockEsClient.ilm.explainLifecycle.mockRejectedValue(networkError);
-              setupPointInTime(mockEsClient);
-              mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+        const networkError = new Error('ECONNREFUSED');
+        mockEsClient.ilm.explainLifecycle.mockRejectedValue(networkError);
+        setupPointInTime(mockEsClient);
+        mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                () => {
-                  expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
-                    index: ['test-index'],
-                    keep_alive: '1m',
-                  });
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          () => {
+            expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+              index: ['test-index'],
+              keep_alive: '1m',
+            });
+            done();
+          },
+          done
+        );
+      }));
 
     test('should handle malformed ILM responses', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL, { tiers: ['hot'] });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.ilm.explainLifecycle.mockResolvedValue({});
-              setupPointInTime(mockEsClient);
-              mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+        mockEsClient.ilm.explainLifecycle.mockResolvedValue({});
+        setupPointInTime(mockEsClient);
+        mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                () => {
-                  expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
-                    index: ['test-index'],
-                    keep_alive: '1m',
-                  });
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          () => {
+            expect(mockEsClient.openPointInTime).toHaveBeenCalledWith({
+              index: ['test-index'],
+              keep_alive: '1m',
+            });
+            done();
+          },
+          done
+        );
+      }));
   });
 
   describe('Permission checking', () => {
     test('should proceed when has read privileges', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              setupPointInTime(mockEsClient);
-              mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
+        setupPointInTime(mockEsClient);
+        mockEsClient.search.mockResolvedValue(createMockSearchResponse([]));
 
-              executeObservableTest(
-                queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
-                () => {
-                  expect(mockEsClient.security.hasPrivileges).toHaveBeenCalledWith({
-                    index: [{ names: ['test-index'], privileges: ['read'] }],
-                  });
-                  expect(mockEsClient.openPointInTime).toHaveBeenCalled();
-                  done();
-                },
-                done
-              );
-            
-        }));
+        executeObservableTest(
+          queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }),
+          () => {
+            expect(mockEsClient.security.hasPrivileges).toHaveBeenCalledWith({
+              index: [{ names: ['test-index'], privileges: ['read'] }],
+            });
+            expect(mockEsClient.openPointInTime).toHaveBeenCalled();
+            done();
+          },
+          done
+        );
+      }));
 
     test('should throw PermissionError when missing read privileges', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
+        mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: (error) => {
-                  expect(error).toBeInstanceOf(PermissionError);
-                  expect(error.message).toContain('Error checking privileges');
-                  expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-                  done();
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: (error) => {
+            expect(error).toBeInstanceOf(PermissionError);
+            expect(error.message).toContain('Error checking privileges');
+            expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
+            done();
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('should throw PermissionError when security.hasPrivileges throws', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('security_exception'));
+        mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('security_exception'));
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: (error) => {
-                  expect(error).toBeInstanceOf(PermissionError);
-                  expect(error.message).toContain('Error checking privileges');
-                  expect(error.message).toContain('security_exception');
-                  expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
-                  done();
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: (error) => {
+            expect(error).toBeInstanceOf(PermissionError);
+            expect(error.message).toContain('Error checking privileges');
+            expect(error.message).toContain('security_exception');
+            expect(mockEsClient.openPointInTime).not.toHaveBeenCalled();
+            done();
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('should not call closePointInTime when permission check fails', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.DSL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.DSL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('no access'));
+        mockEsClient.security.hasPrivileges.mockRejectedValue(new Error('no access'));
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: () => {
-                  setTimeout(() => {
-                    expect(mockEsClient.closePointInTime).not.toHaveBeenCalled();
-                    done();
-                  }, 10);
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: () => {
+            setTimeout(() => {
+              expect(mockEsClient.closePointInTime).not.toHaveBeenCalled();
+              done();
+            }, 10);
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('should throw PermissionError for EQL when missing read privileges', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.EQL);
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.EQL);
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
+        mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: (error) => {
-                  expect(error).toBeInstanceOf(PermissionError);
-                  expect(error.message).toContain('Error checking privileges');
-                  expect(mockEsClient.eql.search).not.toHaveBeenCalled();
-                  done();
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: (error) => {
+            expect(error).toBeInstanceOf(PermissionError);
+            expect(error.message).toContain('Error checking privileges');
+            expect(mockEsClient.eql.search).not.toHaveBeenCalled();
+            done();
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
 
     test('should throw PermissionError for ESQL when missing read privileges', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
-              const circuitBreaker = createMockCircuitBreaker(true);
+        const execQuery = mkExecV1(QueryType.ESQL, { query: 'stats count() by user.name' });
+        const circuitBreaker = createMockCircuitBreaker(true);
 
-              mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
+        mockEsClient.security.hasPrivileges.mockResolvedValue({ has_all_requested: false });
 
-              queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
-                next: () => {},
-                error: (error) => {
-                  expect(error).toBeInstanceOf(PermissionError);
-                  expect(error.message).toContain('Error checking privileges');
-                  expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
-                  done();
-                },
-                complete: () => done(new Error('Should not complete successfully')),
-              });
-            
-        }));
+        queryExecutor.search({ query: execQuery, circuitBreakers: [circuitBreaker] }).subscribe({
+          next: () => {},
+          error: (error) => {
+            expect(error).toBeInstanceOf(PermissionError);
+            expect(error.message).toContain('Error checking privileges');
+            expect(mockEsClient.helpers.esql).not.toHaveBeenCalled();
+            done();
+          },
+          complete: () => done(new Error('Should not complete successfully')),
+        });
+      }));
   });
 
   describe('indicesFor method', () => {

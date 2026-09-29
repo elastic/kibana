@@ -61,21 +61,21 @@ vi.mock('./queries/task_claiming', () => {
 });
 
 vi.mock('./constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: ['report', 'quickReport'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lib/task_reconciliation', () => {
-      const mocked = {
-      resetInFlightTasksOwnedByThisNode: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resetInFlightTasksOwnedByThisNode: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./task_running', async () => {
-  const actual = (await vi.importActual('./task_running'));
+  const actual = await vi.importActual('./task_running');
   return {
     ...actual,
     TaskManagerRunner: vi.fn(),
@@ -283,8 +283,8 @@ describe('TaskPollingLifecycle', () => {
         startingCapacity: 40,
       });
 
-      const taskClaimingGetCapacity = (TaskClaiming as Mock<TaskClaimingClass>).mock
-        .calls[0][0].getAvailableCapacity;
+      const taskClaimingGetCapacity = (TaskClaiming as Mock<TaskClaimingClass>).mock.calls[0][0]
+        .getAvailableCapacity;
 
       expect(taskClaimingGetCapacity()).toEqual(80);
       expect(taskClaimingGetCapacity('report')).toEqual(10);

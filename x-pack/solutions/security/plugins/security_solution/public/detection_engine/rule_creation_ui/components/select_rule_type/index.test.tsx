@@ -16,11 +16,11 @@ import { TestProviders, useFormFieldMock } from '../../../../common/mock';
 import { useEsqlAvailability } from '../../../../common/hooks/esql/use_esql_availability';
 
 vi.mock('../../../../common/hooks/esql/use_esql_availability', () => {
-      const mocked = {
-      useEsqlAvailability: vi.fn().mockReturnValue({ isEsqlRuleTypeEnabled: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlAvailability: vi.fn().mockReturnValue({ isEsqlRuleTypeEnabled: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 const useEsqlAvailabilityMock = useEsqlAvailability as Mock;
 
 describe('SelectRuleType', () => {

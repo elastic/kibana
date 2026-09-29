@@ -28,21 +28,19 @@ const TEST_ID = 'test';
 
 vi.mock('../../../../common/utils/timeline_capabilities');
 vi.mock('../../../hooks/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon />', () => {
   beforeEach(() => {
     (extractTimelineCapabilities as Mock).mockReturnValue({ read: true });
 
-    vi
-      .mocked(useInvestigateInTimeline)
-      .mockReturnValue({ investigateInTimelineFn: vi.fn() } as ReturnType<
-        typeof useInvestigateInTimeline
-      >);
+    vi.mocked(useInvestigateInTimeline).mockReturnValue({
+      investigateInTimelineFn: vi.fn(),
+    } as ReturnType<typeof useInvestigateInTimeline>);
   });
 
   it('should render EuiContextMenuItem when Indicator data is correct', () => {

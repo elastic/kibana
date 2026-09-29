@@ -18,19 +18,19 @@ vi.mock('react-use/lib/useLocalStorage', () => ({
 
 const mockGetDataTypeIndices = vi.fn();
 vi.mock('../../../../utils/observability_data_views', () => {
-      const mocked = {
-      getDataTypeIndices: (...args: unknown[]) => mockGetDataTypeIndices(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataTypeIndices: (...args: unknown[]) => mockGetDataTypeIndices(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = vi.fn();
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useFetcher: (fn: () => unknown, deps: unknown[]) => mockUseFetcher(fn, deps),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: (fn: () => unknown, deps: unknown[]) => mockUseFetcher(fn, deps),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useLocalDataView', () => {
   const setDataViewTitle = vi.fn();

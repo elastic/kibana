@@ -11,35 +11,35 @@ import { vi } from 'vitest';
 
 export const getConfigurationFilePathsMock = vi.fn();
 vi.doMock('./utils/get_config_file_paths', () => {
-      const mocked = {
-      getConfigurationFilePaths: getConfigurationFilePathsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigurationFilePaths: getConfigurationFilePathsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getConfigFromFilesMock = vi.fn();
 vi.doMock('./utils/read_config', () => {
-      const mocked = {
-      getConfigFromFiles: getConfigFromFilesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigFromFiles: getConfigFromFilesMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const applyConfigOverridesMock = vi.fn();
 vi.doMock('./utils/apply_config_overrides', () => {
-      const mocked = {
-      applyConfigOverrides: applyConfigOverridesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyConfigOverrides: applyConfigOverridesMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const ApmConfigurationMock = vi.fn();
 vi.doMock('./config', () => {
-      const mocked = {
-      ApmConfiguration: ApmConfigurationMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmConfiguration: ApmConfigurationMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const resetAllMocks = () => {
   getConfigurationFilePathsMock.mockReset();

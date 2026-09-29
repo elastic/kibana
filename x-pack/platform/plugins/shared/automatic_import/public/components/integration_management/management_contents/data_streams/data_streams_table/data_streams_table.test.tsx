@@ -16,24 +16,24 @@ import { UIStateProvider } from '../../../contexts';
 
 // Components are further tested in their own files. We just want to test if it renders.
 vi.mock('./input_types_badges', () => {
-      const mocked = {
-      InputTypesBadges: vi.fn(({ inputTypes }) => (
-        <div data-test-subj="mock-input-types-badges">
-          {inputTypes?.map((t: { name: string }) => t.name).join(', ')}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InputTypesBadges: vi.fn(({ inputTypes }) => (
+      <div data-test-subj="mock-input-types-badges">
+        {inputTypes?.map((t: { name: string }) => t.name).join(', ')}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./status', () => {
-      const mocked = {
-      Status: vi.fn(({ status, isDeleting }) => (
-        <div data-test-subj="mock-status">{isDeleting ? 'Deleting...' : status}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Status: vi.fn(({ status, isDeleting }) => (
+      <div data-test-subj="mock-status">{isDeleting ? 'Deleting...' : status}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useDeleteDataStream hook
 const mockMutate = vi.fn();
@@ -55,44 +55,44 @@ const mockReanalyzeDataStreamMutation = {
 };
 
 vi.mock('../../../../../common', () => {
-      const mocked = {
-      useDeleteDataStream: () => ({
-        deleteDataStreamMutation: mockDeleteDataStreamMutation,
-      }),
-      useReanalyzeDataStream: () => ({
-        reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteDataStream: () => ({
+      deleteDataStreamMutation: mockDeleteDataStreamMutation,
+    }),
+    useReanalyzeDataStream: () => ({
+      reanalyzeDataStreamMutation: mockReanalyzeDataStreamMutation,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportEditDataStreamFlyoutOpened = vi.fn();
 const mockReportDataStreamDeleteConfirmed = vi.fn();
 const mockReportDataStreamRefreshConfirmed = vi.fn();
 vi.mock('../../../../telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportEditDataStreamFlyoutOpened: mockReportEditDataStreamFlyoutOpened,
-        reportDataStreamDeleteConfirmed: mockReportDataStreamDeleteConfirmed,
-        reportDataStreamRefreshConfirmed: mockReportDataStreamRefreshConfirmed,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportEditDataStreamFlyoutOpened: mockReportEditDataStreamFlyoutOpened,
+      reportDataStreamDeleteConfirmed: mockReportDataStreamDeleteConfirmed,
+      reportDataStreamRefreshConfirmed: mockReportDataStreamRefreshConfirmed,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useIntegrationForm hook
 vi.mock('../../../forms/integration_form', () => {
-      const mocked = {
-      useIntegrationForm: () => ({
-        formData: { connectorId: 'test-connector-id' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIntegrationForm: () => ({
+      formData: { connectorId: 'test-connector-id' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock EUI theme provider
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({

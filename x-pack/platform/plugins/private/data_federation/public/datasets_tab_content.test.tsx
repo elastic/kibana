@@ -19,112 +19,112 @@ import type { DataFederationKibanaServices } from './types';
 type MockDatasetsClient = Pick<DataFederationKibanaServices['datasetsClient'], 'add' | 'delete'>;
 
 vi.mock('./datasets_table', () => {
-      const mocked = {
-      DatasetsTable: (props: Record<string, unknown>) => {
-        const items = (props.items as any[]) ?? [];
-        const selectedItems = (props.selectedItems as any[]) ?? [];
+  const mocked = {
+    DatasetsTable: (props: Record<string, unknown>) => {
+      const items = (props.items as any[]) ?? [];
+      const selectedItems = (props.selectedItems as any[]) ?? [];
 
-        return (
-          <div data-test-subj="mockDatasetsTable">
-            <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
-            <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
+      return (
+        <div data-test-subj="mockDatasetsTable">
+          <div data-test-subj="mockSelectedCount">{String(selectedItems.length)}</div>
+          <div data-test-subj="mockCreateDisabled">{String(props.isCreateDisabled)}</div>
 
-            <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
-            <button
-              data-test-subj="mockSelectFirst"
-              onClick={() => (props.onSelectionChange as any)([items[0]])}
-            />
-            <button
-              data-test-subj="mockDeleteFirst"
-              onClick={() => (props.onDelete as any)(items[0])}
-            />
-            <button
-              data-test-subj="mockDeleteSelected"
-              onClick={() => (props.onDeleteSelected as any)(selectedItems)}
-            />
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          <button data-test-subj="mockCreate" onClick={() => (props.onCreate as any)()} />
+          <button
+            data-test-subj="mockSelectFirst"
+            onClick={() => (props.onSelectionChange as any)([items[0]])}
+          />
+          <button
+            data-test-subj="mockDeleteFirst"
+            onClick={() => (props.onDelete as any)(items[0])}
+          />
+          <button
+            data-test-subj="mockDeleteSelected"
+            onClick={() => (props.onDeleteSelected as any)(selectedItems)}
+          />
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./create_dataset_flyout', () => {
-      const mocked = {
-      CreateDatasetFlyout: (props: {
-        onClose: () => void;
-        onSave: (dataSet: unknown, previousId?: string) => Promise<string | null>;
-      }) => (
-        <div data-test-subj="mockCreateDatasetFlyout">
-          <button data-test-subj="mockFlyoutClose" onClick={props.onClose} />
-          <button
-            data-test-subj="mockFlyoutSave"
-            onClick={() =>
-              void props.onSave({
-                name: 'my-dataset',
+  const mocked = {
+    CreateDatasetFlyout: (props: {
+      onClose: () => void;
+      onSave: (dataSet: unknown, previousId?: string) => Promise<string | null>;
+    }) => (
+      <div data-test-subj="mockCreateDatasetFlyout">
+        <button data-test-subj="mockFlyoutClose" onClick={props.onClose} />
+        <button
+          data-test-subj="mockFlyoutSave"
+          onClick={() =>
+            void props.onSave({
+              name: 'my-dataset',
+              data_source: 'ds1',
+              resource: 'bucket/*',
+              description: '',
+            })
+          }
+        />
+        <button
+          data-test-subj="mockFlyoutSaveRename"
+          onClick={() =>
+            void props.onSave(
+              {
+                name: 'renamed-dataset',
                 data_source: 'ds1',
                 resource: 'bucket/*',
                 description: '',
-              })
-            }
-          />
-          <button
-            data-test-subj="mockFlyoutSaveRename"
-            onClick={() =>
-              void props.onSave(
-                {
-                  name: 'renamed-dataset',
-                  data_source: 'ds1',
-                  resource: 'bucket/*',
-                  description: '',
-                },
-                'previous-dataset'
-              )
-            }
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+              },
+              'previous-dataset'
+            )
+          }
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./confirm_delete_data_set_modal', () => {
-      const mocked = {
-      ConfirmDeleteDataSetModal: (props: {
-        dataSetName: string;
-        error?: string | null;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => (
-        <div data-test-subj="mockConfirmDeleteDataSetModal">
-          <div data-test-subj="mockDeleteName">{props.dataSetName}</div>
-          {props.error ? <div data-test-subj="mockDeleteError">{props.error}</div> : null}
-          <button data-test-subj="mockConfirmDelete" onClick={props.onConfirm} />
-          <button data-test-subj="mockCancelDelete" onClick={props.onCancel} />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConfirmDeleteDataSetModal: (props: {
+      dataSetName: string;
+      error?: string | null;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => (
+      <div data-test-subj="mockConfirmDeleteDataSetModal">
+        <div data-test-subj="mockDeleteName">{props.dataSetName}</div>
+        {props.error ? <div data-test-subj="mockDeleteError">{props.error}</div> : null}
+        <button data-test-subj="mockConfirmDelete" onClick={props.onConfirm} />
+        <button data-test-subj="mockCancelDelete" onClick={props.onCancel} />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./confirm_delete_data_sets_modal', () => {
-      const mocked = {
-      ConfirmDeleteDataSetsModal: (props: {
-        dataSetNames: string[];
-        error?: string | null;
-        onConfirm: () => void;
-        onCancel: () => void;
-      }) => (
-        <div data-test-subj="mockConfirmDeleteDataSetsModal">
-          <div data-test-subj="mockDeleteNames">{props.dataSetNames.join(',')}</div>
-          {props.error ? <div data-test-subj="mockDeleteManyError">{props.error}</div> : null}
-          <button data-test-subj="mockConfirmDeleteMany" onClick={props.onConfirm} />
-          <button data-test-subj="mockCancelDeleteMany" onClick={props.onCancel} />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConfirmDeleteDataSetsModal: (props: {
+      dataSetNames: string[];
+      error?: string | null;
+      onConfirm: () => void;
+      onCancel: () => void;
+    }) => (
+      <div data-test-subj="mockConfirmDeleteDataSetsModal">
+        <div data-test-subj="mockDeleteNames">{props.dataSetNames.join(',')}</div>
+        {props.error ? <div data-test-subj="mockDeleteManyError">{props.error}</div> : null}
+        <button data-test-subj="mockConfirmDeleteMany" onClick={props.onConfirm} />
+        <button data-test-subj="mockCancelDeleteMany" onClick={props.onCancel} />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDataSource = (name: string): DataSource => ({
   name,

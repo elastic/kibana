@@ -20,12 +20,12 @@ import type { ILicense, LicenseType } from '@kbn/licensing-types';
 import type { UpsellingService } from '@kbn/security-solution-upselling/service';
 
 vi.mock('../../common/lib/capabilities', () => {
-      const mocked = {
-      hasCapabilities: vi.fn(),
-      existCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasCapabilities: vi.fn(),
+    existCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHasCapabilities = hasCapabilities as Mock;
 const mockExistCapabilities = existCapabilities as Mock;

@@ -13,62 +13,62 @@ import type { Mock } from 'vitest';
 import { collectTechPreviewSuggestAriaPrefixes } from './collect_tech_preview_suggest_aria_prefixes';
 
 vi.mock('../../connectors_cache', () => {
-      const mocked = {
-      getCachedAllConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getTriggerDefinitions: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getTriggerDefinitions: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      builtInStepDefinitions: [
-        { id: 'workflow.execute' },
-        { id: 'workflow.executeAsync' },
-        { id: 'wait' },
-      ],
-      getBuiltInStepStability: vi.fn((type: string) => {
-        if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
-          return 'tech_preview';
-        }
-        return undefined;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    builtInStepDefinitions: [
+      { id: 'workflow.execute' },
+      { id: 'workflow.executeAsync' },
+      { id: 'wait' },
+    ],
+    getBuiltInStepStability: vi.fn((type: string) => {
+      if (type === 'workflow.execute' || type === 'workflow.executeAsync') {
+        return 'tech_preview';
+      }
+      return undefined;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../get_stability_note', async () => {
-  const actual = (await vi.importActual('../../get_stability_note'));
+  const actual = await vi.importActual('../../get_stability_note');
   return {
     getExtensionStability: actual.getExtensionStability,
   };
 });
 
 vi.mock('../../../../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getAllRegisteredStepDefinitions: vi.fn(() => []),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getAllRegisteredStepDefinitions: vi.fn(() => []),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getAllRegisteredStepDefinitions: vi.fn(() => []),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getAllRegisteredStepDefinitions: vi.fn(() => []),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { stepSchemas } from '../../../../../../common/step_schemas';
 import { triggerSchemas } from '../../../../../trigger_schemas';

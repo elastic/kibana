@@ -56,11 +56,11 @@ vi.mock('./get');
 vi.mock('./install_index_template_pipeline');
 vi.mock('./es_assets_reference');
 vi.mock('./exclude_datastreams_helper', () => {
-      const mocked = {
-      shouldIncludePackageWithDatastreamTypes: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldIncludePackageWithDatastreamTypes: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../app_context', () => {
   const logger = { error: vi.fn(), debug: vi.fn(), warn: vi.fn(), info: vi.fn() };
   const mockedSavedObjectTagging = {
@@ -103,13 +103,13 @@ vi.mock('./cleanup');
 vi.mock('fs/promises');
 vi.mock('./bundled_packages');
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      getLastUploadInstallCache: vi.fn(),
-      setLastUploadInstallCache: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    getLastUploadInstallCache: vi.fn(),
+    setLastUploadInstallCache: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./install_state_machine/_state_machine_package_install', () => {
   return {
     _stateMachineInstallPackage: vi.fn(() => Promise.resolve()),
@@ -133,17 +133,17 @@ vi.mock('../archive', () => {
   };
 });
 vi.mock('./upload_preflight_authz', () => {
-      const mocked = {
-      parsePackageAndCollectSignals: vi.fn(() =>
-        Promise.resolve({
-          packageInfo: { name: 'apache', version: '1.3.0' },
-          archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
-        })
-      ),
-      checkUploadPackageAssetPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parsePackageAndCollectSignals: vi.fn(() =>
+      Promise.resolve({
+        packageInfo: { name: 'apache', version: '1.3.0' },
+        archiveSignals: { gatedTypesFound: new Set(), hasMlSecurityRules: false },
+      })
+    ),
+    checkUploadPackageAssetPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../audit_logging');
 
 vi.mock('../../utils/agentless', () => {
@@ -311,9 +311,9 @@ describe('createInstallation', () => {
 
 describe('install', () => {
   beforeEach(() => {
-    vi
-      .mocked(Registry.fetchFindLatestPackageOrThrow)
-      .mockImplementation(() => Promise.resolve({ version: '1.3.0' } as any));
+    vi.mocked(Registry.fetchFindLatestPackageOrThrow).mockImplementation(() =>
+      Promise.resolve({ version: '1.3.0' } as any)
+    );
     vi.mocked(Registry.getPackage).mockImplementation(() =>
       Promise.resolve({
         packageInfo: { license: 'basic', conditions: { elastic: { subscription: 'basic' } } },
@@ -478,9 +478,9 @@ describe('install', () => {
     });
 
     it('should send telemetry on update success', async () => {
-      vi
-        .mocked(getInstallationObject)
-        .mockResolvedValueOnce({ attributes: { version: '1.2.0', installed_kibana: [] } } as any);
+      vi.mocked(getInstallationObject).mockResolvedValueOnce({
+        attributes: { version: '1.2.0', installed_kibana: [] },
+      } as any);
 
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
@@ -504,9 +504,9 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('error')
+      );
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
 
       await installPackage({
@@ -557,9 +557,9 @@ describe('install', () => {
     it('skips upload validation for bundled installs', async () => {
       (installStateMachine._stateMachineInstallPackage as Mock).mockResolvedValue({});
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      vi
-        .mocked(parsePackageAndCollectSignals)
-        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
+      vi.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+        parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' })
+      );
       mockGetBundledPackageByPkgKey.mockResolvedValue({
         name: 'test_package',
         version: '1.0.0',
@@ -581,7 +581,7 @@ describe('install', () => {
     });
 
     describe('name-only install when registry is reachable', async () => {
-      const actualBundledPackages = (await vi.importActual('./bundled_packages'));
+      const actualBundledPackages = await vi.importActual('./bundled_packages');
 
       beforeEach(() => {
         // Use the REAL getBundledPackageByPkgKey for this block so the
@@ -607,11 +607,9 @@ describe('install', () => {
       it('should resolve via registry and not short-circuit to bundled when bundled is present', async () => {
         (installStateMachine._stateMachineInstallPackage as Mock).mockResolvedValue({});
         vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-        vi
-          .mocked(Registry.fetchFindLatestPackageOrThrow)
-          .mockImplementation(() =>
-            Promise.resolve({ name: 'test_package', version: '1.3.0' } as any)
-          );
+        vi.mocked(Registry.fetchFindLatestPackageOrThrow).mockImplementation(() =>
+          Promise.resolve({ name: 'test_package', version: '1.3.0' } as any)
+        );
 
         const response = await installPackage({
           spaceId: DEFAULT_SPACE_ID,
@@ -777,9 +775,9 @@ describe('install', () => {
       beforeEach(() => {
         vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
         mockRunSoon = vi.fn().mockResolvedValue({});
-        vi
-          .mocked(appContextService.getTaskManagerStart)
-          .mockReturnValue({ runSoon: mockRunSoon } as any);
+        vi.mocked(appContextService.getTaskManagerStart).mockReturnValue({
+          runSoon: mockRunSoon,
+        } as any);
       });
 
       it('should trigger runSoon after a successful user-initiated install', async () => {
@@ -829,9 +827,9 @@ describe('install', () => {
       });
 
       it('should not trigger runSoon when the install fails', async () => {
-        vi
-          .mocked(installStateMachine._stateMachineInstallPackage)
-          .mockRejectedValueOnce(new Error('install failed'));
+        vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValueOnce(
+          new Error('install failed')
+        );
 
         await installPackage({
           spaceId: DEFAULT_SPACE_ID,
@@ -848,9 +846,9 @@ describe('install', () => {
 
   describe('upload', () => {
     beforeEach(() => {
-      vi
-        .mocked(Registry.fetchFindLatestPackageOrThrow)
-        .mockRejectedValue(new PackageNotFoundError('not found'));
+      vi.mocked(Registry.fetchFindLatestPackageOrThrow).mockRejectedValue(
+        new PackageNotFoundError('not found')
+      );
       vi.mocked(getPackageSavedObjects).mockResolvedValue(emptyPackageSavedObjects);
       vi.mocked(getBundledPackageByName).mockResolvedValue(undefined);
       vi.mocked(setPackageInfo).mockClear();
@@ -858,9 +856,9 @@ describe('install', () => {
     });
 
     it('validates real uploads and skips the install when validation fails', async () => {
-      vi
-        .mocked(parsePackageAndCollectSignals)
-        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' }));
+      vi.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+        parsedArchiveFixture({ name: 'bad.name', version: '1.0.0' })
+      );
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -1007,9 +1005,9 @@ describe('install', () => {
     it('does not query the registry when re-uploading an existing upload package', async () => {
       vi.mocked(getInstallationObject).mockResolvedValueOnce(uploadedInstallationSO('1.2.0'));
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      vi
-        .mocked(Registry.fetchFindLatestPackageOrThrow)
-        .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
+      vi.mocked(Registry.fetchFindLatestPackageOrThrow).mockResolvedValue(
+        registryPackageFixture({ name: 'apache', version: '1.3.0' })
+      );
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -1032,9 +1030,9 @@ describe('install', () => {
     });
 
     it('rejects a registry package name when skipUploadPackageValidation is unset', async () => {
-      vi
-        .mocked(Registry.fetchFindLatestPackageOrThrow)
-        .mockResolvedValue(registryPackageFixture({ name: 'apache', version: '1.3.0' }));
+      vi.mocked(Registry.fetchFindLatestPackageOrThrow).mockResolvedValue(
+        registryPackageFixture({ name: 'apache', version: '1.3.0' })
+      );
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -1087,16 +1085,14 @@ describe('install', () => {
         version: '1.0.0',
         getBuffer: async () => Buffer.from('test_package'),
       });
-      vi
-        .mocked(getInstallationObject)
-        .mockImplementationOnce(async ({ failOnUnexpectedError }) => {
-          const error = new Error('so unavailable');
-          if (failOnUnexpectedError) {
-            throw error;
-          }
-          appContextService.getLogger().error(error);
-          return undefined;
-        });
+      vi.mocked(getInstallationObject).mockImplementationOnce(async ({ failOnUnexpectedError }) => {
+        const error = new Error('so unavailable');
+        if (failOnUnexpectedError) {
+          throw error;
+        }
+        appContextService.getLogger().error(error);
+        return undefined;
+      });
 
       const response = await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -1146,9 +1142,9 @@ describe('install', () => {
 
     it('allows a first upload in air-gapped mode when the name has no bundled match', async () => {
       vi.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
-      vi
-        .mocked(parsePackageAndCollectSignals)
-        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'custom_probe', version: '1.0.0' }));
+      vi.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+        parsedArchiveFixture({ name: 'custom_probe', version: '1.0.0' })
+      );
 
       try {
         const response = await installPackage({
@@ -1178,9 +1174,9 @@ describe('install', () => {
 
     it('rejects a first upload in air-gapped mode when the name matches a bundled package', async () => {
       vi.mocked(appContextService.getConfig).mockReturnValue({ isAirGapped: true } as any);
-      vi
-        .mocked(parsePackageAndCollectSignals)
-        .mockResolvedValueOnce(parsedArchiveFixture({ name: 'apache', version: '1.0.0' }));
+      vi.mocked(parsePackageAndCollectSignals).mockResolvedValueOnce(
+        parsedArchiveFixture({ name: 'apache', version: '1.0.0' })
+      );
       vi.mocked(getBundledPackageByName).mockResolvedValue({
         name: 'apache',
         version: '1.2.0',
@@ -1258,9 +1254,9 @@ describe('install', () => {
     });
 
     it('should send telemetry on install failure, async error', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('error')
+      );
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
       await installPackage({
         spaceId: DEFAULT_SPACE_ID,
@@ -1303,14 +1299,14 @@ describe('handleInstallPackageFailure', () => {
       const [pkgName, pkgVersion] = pkgKey.split('-');
       return { pkgName, pkgVersion };
     });
-    vi
-      .spyOn(Registry, 'pkgToPkgKey')
-      .mockImplementation((pkg: { name: string; version: string }) => {
+    vi.spyOn(Registry, 'pkgToPkgKey').mockImplementation(
+      (pkg: { name: string; version: string }) => {
         return `${pkg.name}-${pkg.version}`;
-      });
-    vi
-      .spyOn(Registry, 'fetchFindLatestPackageOrThrow')
-      .mockImplementation(() => Promise.resolve({ version: '2.0.0' } as any));
+      }
+    );
+    vi.spyOn(Registry, 'fetchFindLatestPackageOrThrow').mockImplementation(() =>
+      Promise.resolve({ version: '2.0.0' } as any)
+    );
     vi.spyOn(Registry, 'getPackage').mockImplementation((pkgName: string, pkgVersion: string) =>
       Promise.resolve({
         packageInfo: { name: pkgName, version: pkgVersion },
@@ -1393,9 +1389,9 @@ describe('handleInstallPackageFailure', () => {
 
   describe('when installtype is update', () => {
     it('should update the installation status to: install_failed on rollback error', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('test error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('test error')
+      );
 
       const installedPkg: SavedObject<Installation> = {
         id: 'test-package',
@@ -1445,9 +1441,9 @@ describe('handleInstallPackageFailure', () => {
 
   describe('when installtype is install', () => {
     it('should do nothing when installedPkg is not present', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('test error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('test error')
+      );
 
       await handleInstallPackageFailure({
         savedObjectsClient,
@@ -1469,9 +1465,9 @@ describe('handleInstallPackageFailure', () => {
 
   describe('when installtype is reinstall', () => {
     it('should retry install from previous failed state', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('test error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('test error')
+      );
 
       const installedPkg: SavedObject<Installation> = {
         id: 'test-package',
@@ -1524,9 +1520,9 @@ describe('handleInstallPackageFailure', () => {
     });
 
     it('should retry install from previous failed state when MAX_REINSTALL_RETRIES is not reached', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('test error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('test error')
+      );
 
       const installedPkg: SavedObject<Installation> = {
         id: 'test-package',
@@ -1576,9 +1572,9 @@ describe('handleInstallPackageFailure', () => {
     });
 
     it('should not retry install from previous failed state and when 3 attempts have been done', async () => {
-      vi
-        .mocked(installStateMachine._stateMachineInstallPackage)
-        .mockRejectedValue(new Error('test error'));
+      vi.mocked(installStateMachine._stateMachineInstallPackage).mockRejectedValue(
+        new Error('test error')
+      );
 
       const installedPkg: SavedObject<Installation> = {
         id: 'test-package',

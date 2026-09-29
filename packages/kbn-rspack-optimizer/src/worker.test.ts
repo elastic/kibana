@@ -10,7 +10,7 @@
 import { vi } from 'vitest';
 
 vi.mock('./run_build', async () => {
-  const actual = (await vi.importActual<typeof import('./run_build')>('./run_build'));
+  const actual = await vi.importActual<typeof import('./run_build')>('./run_build');
   return {
     ...actual,
     runBuild: vi.fn(),

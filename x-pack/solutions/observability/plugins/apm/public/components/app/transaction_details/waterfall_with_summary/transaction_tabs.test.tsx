@@ -25,48 +25,48 @@ const mockUseGenAiData = vi.fn();
 const mockReportEvent = vi.fn();
 
 vi.mock('../../../../context/kibana_context/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { analytics: { reportEvent: mockReportEvent } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { analytics: { reportEvent: mockReportEvent } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/genai_tab/use_genai_data', () => {
-      const mocked = {
-      useGenAiData: (params: unknown) => mockUseGenAiData(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGenAiData: (params: unknown) => mockUseGenAiData(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./waterfall_container/unified_waterfall_container', () => {
-      const mocked = {
-      UnifiedWaterfallContainer: () => <div data-test-subj="unifiedWaterfallContainer" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UnifiedWaterfallContainer: () => <div data-test-subj="unifiedWaterfallContainer" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/links/discover_links/use_discover_href', () => {
-      const mocked = {
-      useDiscoverHref: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoverHref: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-markdown', () => {
-      const mocked = {
-      Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const transaction = {
   '@timestamp': '2024-01-01T00:00:00.000Z',

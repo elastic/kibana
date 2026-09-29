@@ -20,19 +20,19 @@ import { CASES_FEATURE_ID, SECURITY_FEATURE_ID } from '../../common/constants';
 
 const mockNotFoundPage = vi.fn(() => null);
 vi.mock('./404', () => {
-      const mocked = {
-      NotFoundPage: () => mockNotFoundPage(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotFoundPage: () => mockNotFoundPage(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRedirect = vi.fn((_: unknown) => null);
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      Redirect: (params: unknown) => mockRedirect(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Redirect: (params: unknown) => mockRedirect(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RedirectRoute', () => {
   beforeEach(() => {

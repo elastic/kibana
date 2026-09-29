@@ -19,30 +19,30 @@ import type { AuthenticatedUser } from '@kbn/security-plugin/common';
 import { getDisplayedConversation } from '../hooks/use_conversations_by_date.test';
 
 vi.mock('../hooks/use_conversations_by_date', () => {
-      const mocked = {
-      useConversationsByDate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationsByDate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_confirm_modal', () => {
-      const mocked = {
-      useConfirmModal: vi.fn(() => ({
-        element: <div data-test-subj="confirmModal" />,
-        confirm: vi.fn(() => Promise.resolve(true)),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConfirmModal: vi.fn(() => ({
+      element: <div data-test-subj="confirmModal" />,
+      confirm: vi.fn(() => Promise.resolve(true)),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_conversation_context_menu', () => {
-      const mocked = {
-      useConversationContextMenu: vi.fn().mockReturnValue({
-        deleteConversation: vi.fn(() => Promise.resolve(true)),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContextMenu: vi.fn().mockReturnValue({
+      deleteConversation: vi.fn(() => Promise.resolve(true)),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConversations: UseConversationListResult['conversations'] = {
   value: {

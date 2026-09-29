@@ -13,11 +13,11 @@ import type { Field } from '../../../../common/types/domain/template/fields';
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('./use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const inlineField: Field = {
   name: 'inline',

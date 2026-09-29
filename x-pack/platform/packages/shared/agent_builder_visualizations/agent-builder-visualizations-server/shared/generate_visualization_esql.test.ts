@@ -14,18 +14,18 @@ import { generateEsql } from '@kbn/agent-builder-genai-utils';
 import { buildEsqlEditContext, generateVisualizationEsql } from './generate_visualization_esql';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./esql_instructions', () => {
-      const mocked = {
-      buildEsqlAdditionalInstructions: () => 'esql-instructions',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEsqlAdditionalInstructions: () => 'esql-instructions',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGenerateEsql = vi.mocked(generateEsql);
 

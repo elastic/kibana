@@ -7,19 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { renderHook } from '@testing-library/react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useLibraryEnabled } from './use_library_enabled';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useLibraryEnabled', () => {
   it('returns true when the global setting observable emits true', () => {
@@ -40,9 +39,9 @@ describe('useLibraryEnabled', () => {
   });
 
   it('defaults to false when the global settings client is unavailable', () => {
-    vi
-      .mocked(useKibana)
-      .mockReturnValue({ services: {} } as unknown as ReturnType<typeof useKibana>);
+    vi.mocked(useKibana).mockReturnValue({ services: {} } as unknown as ReturnType<
+      typeof useKibana
+    >);
 
     const { result } = renderHook(() => useLibraryEnabled());
 

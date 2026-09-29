@@ -46,7 +46,7 @@ describe('useDeleteSynonymRule hook', () => {
   };
 
   it('should delete the synonym rule', async () => {
-    const { useDeleteSynonymRule } = (await vi.importActual('./use_delete_synonym_rule'));
+    const { useDeleteSynonymRule } = await vi.importActual('./use_delete_synonym_rule');
 
     const { result } = renderHook(() => useDeleteSynonymRule(), { wrapper });
 
@@ -61,7 +61,7 @@ describe('useDeleteSynonymRule hook', () => {
       body: { message: 'An error occurred' },
     };
     mockDelete.mockRejectedValue(error);
-    const { useDeleteSynonymRule } = (await vi.importActual('./use_delete_synonym_rule'));
+    const { useDeleteSynonymRule } = await vi.importActual('./use_delete_synonym_rule');
 
     const { result } = renderHook(() => useDeleteSynonymRule(), { wrapper });
 

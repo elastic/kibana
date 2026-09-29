@@ -13,13 +13,13 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { WorkflowsExtensionsPublicPlugin } from './plugin';
 
 vi.mock('./steps', () => {
-      const mocked = {
-      registerInternalStepDefinitions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerInternalStepDefinitions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { registerInternalStepDefinitions } = (await vi.importMock('./steps'));
+const { registerInternalStepDefinitions } = await vi.importMock('./steps');
 
 const createPlugin = () => {
   const initContext = coreMock.createPluginInitializerContext();

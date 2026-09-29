@@ -15,17 +15,17 @@ import { makeAnomaly } from './test_helpers';
 import type { JobConfig } from './get_job_config';
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        dsl: {
-          getEuidFilterBasedOnEntityRecord: vi
-            .fn()
-            .mockReturnValue({ bool: { filter: [{ term: { 'user.name': 'alice' } }] } }),
-        },
+  const mocked = {
+    euid: {
+      dsl: {
+        getEuidFilterBasedOnEntityRecord: vi
+          .fn()
+          .mockReturnValue({ bool: { filter: [{ term: { 'user.name': 'alice' } }] } }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEntityRecord = { entity: { id: 'user:alice' }, user: { name: 'alice' } };
 

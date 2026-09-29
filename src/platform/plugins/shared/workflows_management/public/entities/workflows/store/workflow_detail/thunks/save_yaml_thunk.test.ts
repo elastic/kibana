@@ -21,48 +21,48 @@ import { setWorkflow, setYamlString } from '../slice';
 
 // Need to mock the loading states to avoid import issues with other mocks
 vi.mock('../utils/loading_states', () => {
-      const mocked = {
-      addLoadingStateReducers: vi.fn(),
-      initialLoadingState: { isSavingYaml: false },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addLoadingStateReducers: vi.fn(),
+    initialLoadingState: { isSavingYaml: false },
+  };
+  return { ...mocked, default: mocked };
+});
 // Mock the loadWorkflowThunk
 vi.mock('./load_workflow_thunk');
 const mockLoadWorkflowThunk = loadWorkflowThunk as MockedFunction<typeof loadWorkflowThunk>;
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the query client
 vi.mock('../../../../../shared/lib/query_client', () => {
-      const mocked = {
-      queryClient: {
-        invalidateQueries: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
-const { queryClient } = (await vi.importMock('../../../../../shared/lib/query_client'));
+  const mocked = {
+    queryClient: {
+      invalidateQueries: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
+const { queryClient } = await vi.importMock('../../../../../shared/lib/query_client');
 
 // Mock AI integration side-effects — the thunk resolves pending diff decorations,
 // carries the create-time conversation onto the saved workflow's session tag,
 // and requests the sidebar to re-open on the destination if it was open at
 // save time (since navigateToApp remounts the app).
 vi.mock('../../../../../features/ai_integration', () => {
-      const mocked = {
-      acceptAllActiveProposals: vi.fn(),
-      carryConversationToWorkflow: vi.fn(),
-      isSidebarOpen: vi.fn().mockReturnValue(false),
-      requestSidebarRestore: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    acceptAllActiveProposals: vi.fn(),
+    carryConversationToWorkflow: vi.fn(),
+    isSidebarOpen: vi.fn().mockReturnValue(false),
+    requestSidebarRestore: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type AiIntegrationModule = typeof import('../../../../../features/ai_integration');
 const {
@@ -72,9 +72,7 @@ const {
   requestSidebarRestore: mockRequestSidebarRestore,
 } = (await vi.importMock('../../../../../features/ai_integration')) as {
   acceptAllActiveProposals: MockedFunction<AiIntegrationModule['acceptAllActiveProposals']>;
-  carryConversationToWorkflow: MockedFunction<
-    AiIntegrationModule['carryConversationToWorkflow']
-  >;
+  carryConversationToWorkflow: MockedFunction<AiIntegrationModule['carryConversationToWorkflow']>;
   isSidebarOpen: MockedFunction<AiIntegrationModule['isSidebarOpen']>;
   requestSidebarRestore: MockedFunction<AiIntegrationModule['requestSidebarRestore']>;
 };

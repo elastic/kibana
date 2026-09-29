@@ -14,18 +14,18 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useKibanaSpace } from '../../../hooks/use_kibana_space';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLocator = {
   getRedirectUrl: vi.fn(),

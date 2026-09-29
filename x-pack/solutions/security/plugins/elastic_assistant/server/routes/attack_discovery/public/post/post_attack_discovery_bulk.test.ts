@@ -19,7 +19,7 @@ import { requestContextMock } from '../../../../__mocks__/request_context';
 import { postAttackDiscoveryBulkRoute } from './post_attack_discovery_bulk';
 
 vi.mock('../../helpers/index_privileges', async () => {
-  const original = (await vi.importActual('../../helpers/index_privileges'));
+  const original = await vi.importActual('../../helpers/index_privileges');
 
   return {
     ...original,
@@ -28,7 +28,7 @@ vi.mock('../../helpers/index_privileges', async () => {
 });
 
 vi.mock('../../../helpers', async () => {
-  const original = (await vi.importActual('../../../helpers'));
+  const original = await vi.importActual('../../../helpers');
 
   return {
     ...original,
@@ -88,9 +88,10 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
 
     mockResponse = httpServerMock.createResponseFactory();
 
-    vi
-      .spyOn(helpers, 'performChecks')
-      .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
+    vi.spyOn(helpers, 'performChecks').mockResolvedValue({
+      isSuccess: true,
+      currentUser: mockAuthenticatedUser,
+    });
 
     addVersionMock = vi.fn();
     (router.versioned.post as Mock).mockReturnValue({ addVersion: addVersionMock });
@@ -167,14 +168,12 @@ describe('postAttackDiscoveryBulkRoute (public)', () => {
   });
 
   it('returns an error when hasReadWriteAttackDiscoveryAlertsPrivileges fails', async () => {
-    (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(
-      ({ response }) => {
-        return Promise.resolve({
-          isSuccess: false,
-          response: { status: 403, payload: { message: 'no privileges' } },
-        });
-      }
-    );
+    (hasReadWriteAttackDiscoveryAlertsPrivileges as Mock).mockImplementation(({ response }) => {
+      return Promise.resolve({
+        isSuccess: false,
+        response: { status: 403, payload: { message: 'no privileges' } },
+      });
+    });
 
     const result = await getHandler(mockContext, mockRequest, mockResponse);
 

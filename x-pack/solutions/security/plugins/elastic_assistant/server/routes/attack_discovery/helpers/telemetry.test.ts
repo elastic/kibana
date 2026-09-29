@@ -15,11 +15,11 @@ import { mockAttackDiscoveries } from '../../../lib/attack_discovery/evaluation/
 import { coreMock } from '@kbn/core/server/mocks';
 
 vi.mock('lodash/fp', () => {
-      const mocked = {
-      uniq: vi.fn((arr) => Array.from(new Set(arr))),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uniq: vi.fn((arr) => Array.from(new Set(arr))),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('telemetry', () => {
   beforeEach(() => {

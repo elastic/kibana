@@ -30,31 +30,29 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
-      actual.connectorTypeIsDual(actionTypeId)
-    ),
+    connectorTypeIsDual: vi.fn((actionTypeId: string) => actual.connectorTypeIsDual(actionTypeId)),
   };
 });
 
 vi.mock('../../../../data/connector', () => {
-      const mocked = {
-      getConnectorSo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorSo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/connector_from_in_memory_connector', () => {
-      const mocked = {
-      connectorFromInMemoryConnector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    connectorFromInMemoryConnector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getConnectorSoMock = getConnectorSo as Mock;
 const connectorFromInMemoryConnectorMock = connectorFromInMemoryConnector as Mock;

@@ -37,27 +37,27 @@ vi.mock('../../../../../services/routing', () => {
 
 // getIndexListUri mock
 vi.mock('@kbn/index-management-plugin/public', () => {
-      const mocked = {
-      getIndexListUri: vi.fn((filter) => `/index-list?${filter}`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIndexListUri: vi.fn((filter) => `/index-list?${filter}`),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ContextMenu mock
 vi.mock('../context_menu', () => {
-      const mocked = {
-      ContextMenu: ({ followerIndices, label, testSubj, isPollingStatus }: any) => (
-        <div data-test-subj={testSubj}>
-          <span>{label}</span>
-          <span data-test-subj="contextMenuFollowerIndices">
-            {JSON.stringify(followerIndices.map((fi: any) => fi.name))}
-          </span>
-          <span data-test-subj="contextMenuIsPollingStatus">{String(isPollingStatus)}</span>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContextMenu: ({ followerIndices, label, testSubj, isPollingStatus }: any) => (
+      <div data-test-subj={testSubj}>
+        <span>{label}</span>
+        <span data-test-subj="contextMenuFollowerIndices">
+          {JSON.stringify(followerIndices.map((fi: any) => fi.name))}
+        </span>
+        <span data-test-subj="contextMenuIsPollingStatus">{String(isPollingStatus)}</span>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // window.location.search mock
 const mockLocationSearch = vi.fn();

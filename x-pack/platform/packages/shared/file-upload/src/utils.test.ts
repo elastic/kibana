@@ -21,12 +21,12 @@ import {
 
 // Keep UPLOAD_SIZE_MB * MB small so truncate tests do not need multi-MB buffers.
 vi.mock('@kbn/file-upload-common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/file-upload-common')),
-      MB: 20,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/file-upload-common')),
+    MB: 20,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const UPLOAD_SIZE_BYTES = 5 * 20;
 

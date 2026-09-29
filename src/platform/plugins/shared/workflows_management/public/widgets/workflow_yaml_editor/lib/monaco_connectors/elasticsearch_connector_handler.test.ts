@@ -19,26 +19,26 @@ import {
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      getAllConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      buildElasticsearchRequest: vi.fn().mockReturnValue({
-        method: 'GET',
-        path: '/my-index/_search',
-        body: undefined,
-      }),
-      isInternalConnector: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildElasticsearchRequest: vi.fn().mockReturnValue({
+      method: 'GET',
+      path: '/my-index/_search',
+      body: undefined,
+    }),
+    isInternalConnector: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getAllConnectors } = (await vi.importMock('../../../../../common/schema'));
-const { buildElasticsearchRequest, isInternalConnector } = (await vi.importMock('@kbn/workflows'));
+const { getAllConnectors } = await vi.importMock('../../../../../common/schema');
+const { buildElasticsearchRequest, isInternalConnector } = await vi.importMock('@kbn/workflows');
 
 describe('ElasticsearchMonacoConnectorHandler', () => {
   let handler: ElasticsearchMonacoConnectorHandler;

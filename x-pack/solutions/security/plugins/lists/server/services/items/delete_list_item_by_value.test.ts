@@ -15,11 +15,11 @@ import { deleteListItemByValue } from './delete_list_item_by_value';
 import { getDeleteListItemByValueOptionsMock } from './delete_list_item_by_value.mock';
 
 vi.mock('./get_list_item_by_values', () => {
-      const mocked = {
-      getListItemByValues: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListItemByValues: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('delete_list_item_by_value', () => {
   beforeEach(() => {

@@ -31,51 +31,51 @@ vi.mock('../../../hooks/use_apm_params');
 // settings; we mock it as a pass-through and rely on the
 // `useApmIndexSettingsContext` mock above to drive the consumed values.
 vi.mock('../../../context/apm_index_settings/apm_index_settings_context', () => {
-      const mocked = {
-      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise menu-building without the template's own dependencies).
 // MockAppHeaderComponent is aliased to start with "Mock" so Jest's factory out-of-scope check permits it.
 vi.mock('../../routing/templates/apm_main_template', () => {
-      const mocked = {
-      ApmMainTemplate: ({
-        header,
-        searchBar,
-        children,
-      }: {
-        header?: ApmMainTemplateHeaderProps;
-        searchBar?: React.ReactNode;
-        children: React.ReactNode;
-      }) => (
-        <div data-test-subj="apmMainTemplateMock">
-          {header ? <MockAppHeaderComponent {...header} /> : null}
-          {searchBar}
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmMainTemplate: ({
+      header,
+      searchBar,
+      children,
+    }: {
+      header?: ApmMainTemplateHeaderProps;
+      searchBar?: React.ReactNode;
+      children: React.ReactNode;
+    }) => (
+      <div data-test-subj="apmMainTemplateMock">
+        {header ? <MockAppHeaderComponent {...header} /> : null}
+        {searchBar}
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../breadcrumb', () => {
-      const mocked = {
-      Breadcrumb: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Breadcrumb: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TRACES_INDEX = 'traces-apm-*';
 
 const mockUseApmIndexSettingsContext = useApmIndexSettingsContext as MockedFunction<
   typeof useApmIndexSettingsContext
 >;
-const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
-  typeof useApmPluginContext
->;
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 const mockUseApmParams = useApmParams as MockedFunction<typeof useApmParams>;
 
 const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();

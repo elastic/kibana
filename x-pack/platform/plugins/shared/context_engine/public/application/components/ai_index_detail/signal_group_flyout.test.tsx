@@ -20,17 +20,17 @@ import { SignalGroupFlyout } from './signal_group_flyout';
 import { buildSignal } from './signal_test_fixtures';
 
 vi.mock('../../hooks/use_signals', () => {
-      const mocked = { useSignals: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useSignals: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/llm-trace-waterfall', () => {
-      const mocked = {
-      TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
-      createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
-      useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
+    createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
+    useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSignals = vi.mocked(useSignals);
 

@@ -56,13 +56,11 @@ describe('getListHandler', () => {
       internal: { useMeteringApi: true },
     } as any);
 
-    vi
-      .mocked(dataStreamService.getAllFleetDataStreams)
-      .mockResolvedValue([
-        createDataStreamInfo('logs-nginx.access-default'),
-        createDataStreamInfo('.ds-logs-system-default'),
-        createDataStreamInfo('.workflows-events'),
-      ] as any);
+    vi.mocked(dataStreamService.getAllFleetDataStreams).mockResolvedValue([
+      createDataStreamInfo('logs-nginx.access-default'),
+      createDataStreamInfo('.ds-logs-system-default'),
+      createDataStreamInfo('.workflows-events'),
+    ] as any);
 
     vi.mocked(dataStreamService.getAllFleetMeteringStats).mockResolvedValue([
       { name: 'logs-nginx.access-default', num_docs: 1, size_in_bytes: 100 },

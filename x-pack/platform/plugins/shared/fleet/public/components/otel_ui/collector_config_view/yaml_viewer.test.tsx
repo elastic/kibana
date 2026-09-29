@@ -16,11 +16,11 @@ import type { OTelCollectorConfig } from '../../../../common/types';
 import { YamlViewer } from './yaml_viewer';
 
 vi.mock('../../../services/use_yaml', () => {
-      const mocked = {
-      useYaml: () => require('yaml'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useYaml: () => require('yaml'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const config: OTelCollectorConfig = {
   receivers: {

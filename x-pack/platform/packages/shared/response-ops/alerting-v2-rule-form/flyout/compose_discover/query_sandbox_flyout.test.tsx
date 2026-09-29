@@ -20,52 +20,52 @@ import { QuerySandboxFlyout, type QuerySandboxFlyoutProps } from './query_sandbo
 import type { QueryTab } from './types';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLTimeField: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLTimeField: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockFieldMap: DataViewFieldMap = {};
 vi.mock('../../form/hooks/use_data_fields', () => {
-      const mocked = {
-      useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataFields: () => ({ data: mockFieldMap, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-browser-shared', () => {
-      const mocked = {
-      AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/contexts/rule_form_context', () => {
-      const mocked = {
-      useRuleFormServices: () => ({
-        http: {},
-        data: { search: { search: vi.fn() } },
-        dataViews: {},
-        application: {},
-        notifications: { toasts: { addDanger: vi.fn(), addWarning: vi.fn() } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormServices: () => ({
+      http: {},
+      data: { search: { search: vi.fn() } },
+      dataViews: {},
+      application: {},
+      notifications: { toasts: { addDanger: vi.fn(), addWarning: vi.fn() } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateTabQueries = vi.fn(
   async (_queries: unknown, _callbacks: unknown) =>
     [] as Array<{ tab: QueryTab; messages: string[] }>
 );
 vi.mock('./validate_tab_queries', () => {
-      const mocked = {
-      validateTabQueries: (queries: unknown, callbacks: unknown) =>
-        mockValidateTabQueries(queries, callbacks),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateTabQueries: (queries: unknown, callbacks: unknown) =>
+      mockValidateTabQueries(queries, callbacks),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockColumns: never[] = [];
 const mockRows: never[] = [];
@@ -82,41 +82,41 @@ const mockUseQueryExecution = vi.fn((_params: unknown) => ({
   lastExecutedQuery: null,
 }));
 vi.mock('./use_query_execution', () => {
-      const mocked = {
-      useQueryExecution: (params: unknown) => mockUseQueryExecution(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryExecution: (params: unknown) => mockUseQueryExecution(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_chart', () => {
-      const mocked = {
-      ComposeDiscoverChart: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComposeDiscoverChart: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-      ESQL_LANG_ID: 'esql',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => <div data-test-subj="codeEditorMock" />,
+    ESQL_LANG_ID: 'esql',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_tabs', () => {
-      const mocked = {
-      ComposeDiscoverTabs: () => null,
-      QueryTabButton: () => null,
-      TAB_DEFINITIONS: [
-        { id: 'base', label: 'Base query' },
-        { id: 'alert', label: 'Alert query' },
-        { id: 'recovery', label: 'Recovery query' },
-      ],
-      visibleTabIds: () => [],
-      isAlertTabDisabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComposeDiscoverTabs: () => null,
+    QueryTabButton: () => null,
+    TAB_DEFINITIONS: [
+      { id: 'base', label: 'Base query' },
+      { id: 'alert', label: 'Alert query' },
+      { id: 'recovery', label: 'Recovery query' },
+    ],
+    visibleTabIds: () => [],
+    isAlertTabDisabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockField = (name: string, type: string) =>
   ({ name, type, searchable: true, aggregatable: true } as DataViewFieldMap[string]);

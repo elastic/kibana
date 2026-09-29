@@ -34,12 +34,12 @@ const mockVisualizationEmbeddable = vi
   .mockReturnValue(<div data-test-subj="visualization-embeddable" />);
 
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
-      const mocked = {
-      VisualizationEmbeddable: (props: VisualizationEmbeddableProps) =>
-        mockVisualizationEmbeddable(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationEmbeddable: (props: VisualizationEmbeddableProps) =>
+      mockVisualizationEmbeddable(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FlyoutRiskSummary', () => {
   beforeEach(() => {

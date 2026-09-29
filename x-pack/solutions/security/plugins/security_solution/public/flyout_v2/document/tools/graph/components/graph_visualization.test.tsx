@@ -30,7 +30,9 @@ const mockInvestigateInTimeline = {
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityPostureGraphGraphInvestigation';
 
 vi.mock('@kbn/cloud-security-posture-graph', async () => {
-  const { getNodeDocumentMode, getSingleDocumentData } = (await vi.importActual('@kbn/cloud-security-posture-graph/src/components/utils'));
+  const { getNodeDocumentMode, getSingleDocumentData } = await vi.importActual(
+    '@kbn/cloud-security-posture-graph/src/components/utils'
+  );
 
   return {
     GraphInvestigation: vi.fn(),
@@ -47,45 +49,45 @@ const mockCapabilities = {
 };
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useToasts: () => mockToasts,
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: mockCapabilities,
-          },
+  const mocked = {
+    useToasts: () => mockToasts,
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: mockCapabilities,
+        },
+      },
+    }),
+    KibanaServices: {
+      get: () => ({
+        uiSettings: {
+          get: vi.fn().mockReturnValue(true),
         },
       }),
-      KibanaServices: {
-        get: () => ({
-          uiSettings: {
-            get: vi.fn().mockReturnValue(true),
-          },
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/timeline/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: () => mockInvestigateInTimeline,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: () => mockInvestigateInTimeline,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: () => ({
-        dataView: {
-          id: 'experimental-data-view',
-          getIndexPattern: vi.fn().mockReturnValue('experimental-data-view-pattern'),
-        },
-        status: 'ready',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: () => ({
+      dataView: {
+        id: 'experimental-data-view',
+        getIndexPattern: vi.fn().mockReturnValue('experimental-data-view-pattern'),
+      },
+      status: 'ready',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const callbacks = {
   onShowDocument: vi.fn(),
@@ -217,15 +219,15 @@ describe('GraphVisualization', () => {
         expect(GraphInvestigation).toHaveBeenCalledTimes(1);
       });
 
-      expect(vi.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(
-        false
-      );
+      expect(vi.mocked(GraphInvestigation).mock.calls[0][0].showInvestigateInTimeline).toBe(false);
     });
   });
 
   describe('node dispatch', () => {
     it('routes a single-event node to onShowDocument', async () => {
-      const { getNodeDocumentMode, getSingleDocumentData } = (await vi.importMock('@kbn/cloud-security-posture-graph'));
+      const { getNodeDocumentMode, getSingleDocumentData } = await vi.importMock(
+        '@kbn/cloud-security-posture-graph'
+      );
       getNodeDocumentMode.mockReturnValueOnce('single-event');
       getSingleDocumentData.mockReturnValueOnce({ id: 'doc-id', index: 'logs-*' });
 

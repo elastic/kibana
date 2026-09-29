@@ -18,41 +18,41 @@ const mockRefetchStatus = vi.fn();
 const mockShowOnboardingSuccessCallout = vi.fn();
 
 vi.mock('../../../../entity_analytics/components/entity_store/hooks/use_entity_store', () => {
-      const mocked = {
-      useInstallEntityStoreMutation: () => ({
-        mutateAsync: mockInstallEntityStore,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInstallEntityStoreMutation: () => ({
+      mutateAsync: mockInstallEntityStore,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_asset_inventory_routes', () => {
-      const mocked = {
-      useAssetInventoryRoutes: () => ({
-        postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetInventoryRoutes: () => ({
+      postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_asset_inventory_status', () => {
-      const mocked = {
-      useAssetInventoryStatus: () => ({
-        refetch: mockRefetchStatus,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetInventoryStatus: () => ({
+      refetch: mockRefetchStatus,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_onboarding_success_callout', () => {
-      const mocked = {
-      useOnboardingSuccessCallout: () =>
-        mockUseOnboardingSuccessCallout({
-          showOnboardingSuccessCallout: mockShowOnboardingSuccessCallout,
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingSuccessCallout: () =>
+      mockUseOnboardingSuccessCallout({
+        showOnboardingSuccessCallout: mockShowOnboardingSuccessCallout,
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderHookWithWrapper = () =>
   renderHook(() => useEnableAssetInventory(), {

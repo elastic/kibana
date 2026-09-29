@@ -21,19 +21,19 @@ import { ThreatEuiFlexGroup } from './threat_description';
 // Warning icons are gated behind the mitreAttackUpdatesUIEnabled feature flag,
 // which is off by default. Force it on for this test suite.
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMitreConfiguration = vi.fn();
 vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
-      const mocked = {
-      useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const BASE = {
   framework: 'enterprise' as const,

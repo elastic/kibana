@@ -27,7 +27,7 @@ import { fetchTotalDocsFailedNotifier } from './notifications';
 // Mock only the notification that has a known issue accessing meta._event.origin
 // when called from the provided action with `{}` as meta.
 vi.mock('./notifications', async () => {
-  const actual = (await vi.importActual('./notifications'));
+  const actual = await vi.importActual('./notifications');
   return {
     ...actual,
     fetchTotalDocsFailedNotifier: vi.fn(),

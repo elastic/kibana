@@ -20,11 +20,11 @@ import {
 import { executeKIQueryGenerationAgent } from './identify_ki_queries_via_agent';
 
 vi.mock('./identify_ki_queries_via_agent', () => {
-      const mocked = {
-      executeKIQueryGenerationAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeKIQueryGenerationAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as MockedFunction<
   typeof executeKIQueryGenerationAgent

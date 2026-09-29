@@ -29,7 +29,7 @@ let mockAgentBuilderSkillsRequirements = {
 const MOCK_BASE_PATH = '/mock-base';
 
 vi.mock('@kbn/content-list-provider', async () => {
-  const actual = (await vi.importActual('@kbn/content-list-provider'));
+  const actual = await vi.importActual('@kbn/content-list-provider');
   return {
     ...actual,
     useContentListPhase: () => mockPhase,
@@ -37,7 +37,7 @@ vi.mock('@kbn/content-list-provider', async () => {
 });
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const actual = (await vi.importActual('@kbn/core-di-browser'));
+  const actual = await vi.importActual('@kbn/core-di-browser');
   return {
     ...actual,
     useService: (token: symbol) => {
@@ -61,19 +61,19 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('../../hooks/use_alerting_v2_experimental_features', () => {
-      const mocked = {
-      useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_are_agent_builder_skills_available', () => {
-      const mocked = {
-      useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-      useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+    useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onCreateRule = vi.fn();
 const onCreateEsqlRule = vi.fn();

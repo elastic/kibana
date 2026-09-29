@@ -17,18 +17,18 @@ import { TimelineId } from '../../../../../common/types';
 import { getEmptyValue } from '../../../../common/components/empty_value';
 
 vi.mock('../../../containers/kpis', () => {
-      const mocked = {
-      useTimelineKpis: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineKpis: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana');
 
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
   const FormattedRelative = vi.fn().mockImplementation(() => '20 hours ago');
 
   return {

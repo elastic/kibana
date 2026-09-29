@@ -25,22 +25,22 @@ import type { CodeEditorProps } from './code_editor';
 const name = 'test';
 
 vi.mock('./code_editor', () => {
-      const mocked = {
-      CodeEditor: ({ value, onChange }: CodeEditorProps) => (
-        <input
-          data-test-subj={`management-settings-editField-test`}
-          type="text"
-          value={String(value)}
-          onChange={(e) => {
-            if (onChange) {
-              onChange(e.target.value, e as any);
-            }
-          }}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({ value, onChange }: CodeEditorProps) => (
+      <input
+        data-test-subj={`management-settings-editField-test`}
+        type="text"
+        value={String(value)}
+        onChange={(e) => {
+          if (onChange) {
+            onChange(e.target.value, e as any);
+          }
+        }}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FieldInput', () => {
   const getDefaultProps = (type: SettingType): FieldInputProps<typeof type> => {

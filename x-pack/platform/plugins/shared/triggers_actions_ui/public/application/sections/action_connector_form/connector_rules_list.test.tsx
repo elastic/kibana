@@ -23,26 +23,26 @@ import { mockedRulesData, ruleTypeFromApi } from '../rules_list/components/test_
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../lib/rule_api/rules_kuery_filter', () => {
-      const mocked = {
-      loadRulesWithKueryFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRulesWithKueryFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
-      const mocked = {
-      getRuleTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRuleTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
-const { loadRulesWithKueryFilter } = (await vi.importMock('../../lib/rule_api/rules_kuery_filter'));
+const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const { loadRulesWithKueryFilter } = await vi.importMock('../../lib/rule_api/rules_kuery_filter');
 
 const getUrlForAppMock = vi.fn();
 const addSuccessMock = vi.fn();

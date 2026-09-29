@@ -15,14 +15,14 @@ import { AlertDefaultsForm } from './alert_defaults_form';
 import type { DynamicSettings } from '../../../../../../common/runtime_types';
 
 vi.mock('./hooks/use_alerting_defaults', () => {
-      const mocked = {
-      useAlertingDefaults: () => ({
-        connectors: [],
-        options: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertingDefaults: () => ({
+      connectors: [],
+      options: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const savedSettings: DynamicSettings = {
   ...DYNAMIC_SETTINGS_DEFAULTS,

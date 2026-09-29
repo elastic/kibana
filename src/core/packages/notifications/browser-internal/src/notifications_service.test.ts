@@ -16,12 +16,12 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { NotificationsService } from './notifications_service';
 
 vi.mock('react-dom', () => {
-      const mocked = {
-      render: vi.fn(),
-      unmountComponentAtNode: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    render: vi.fn(),
+    unmountComponentAtNode: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('NotificationsService', () => {
   const setupAndStart = (targetDomElement: HTMLElement) => {

@@ -20,32 +20,32 @@ import { useToasts } from '../../../../hooks/use_toasts';
 vi.mock('copy-to-clipboard');
 
 vi.mock('../../../../hooks/use_toasts', () => {
-      const mocked = {
-      useToasts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_tracing_enabled', () => {
-      const mocked = {
-      useTracingEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTracingEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const copyMock = copy as MockedFunction<typeof copy>;
 const useToastsMock = useToasts as MockedFunction<typeof useToasts>;

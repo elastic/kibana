@@ -409,8 +409,7 @@ describe('metric_visualization', () => {
 
       const getCustomPaletteToExpression = (palette: PaletteOutput<CustomPaletteParams>) => {
         const paletteService = chartPluginMock.createPaletteRegistry();
-        const customPaletteToExpression = paletteService.get(CUSTOM_PALETTE)
-          .toExpression as Mock;
+        const customPaletteToExpression = paletteService.get(CUSTOM_PALETTE).toExpression as Mock;
         const visualization = getLegacyMetricVisualization({ paletteService });
 
         visualization.toExpression(

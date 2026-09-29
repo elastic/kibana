@@ -14,7 +14,7 @@ import { AnomaliesSection } from './anomalies_section';
 import type { GetAnomalyOverviewResponse } from '../../../../common/api/entity_analytics';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -28,13 +28,13 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./anomalies_overview', () => {
-      const mocked = {
-      AnomaliesOverview: (props: Record<string, unknown>) => (
-        <div data-test-subj="mock-anomalies-overview" data-props={JSON.stringify(props)} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomaliesOverview: (props: Record<string, unknown>) => (
+      <div data-test-subj="mock-anomalies-overview" data-props={JSON.stringify(props)} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeData = (
   overrides: Partial<GetAnomalyOverviewResponse> = {}

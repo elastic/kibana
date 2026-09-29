@@ -103,7 +103,7 @@ const mockFileUpload = vi
   );
 
 vi.mock('@kbn/shared-ux-file-upload', async () => {
-  const original = (await vi.importActual('@kbn/shared-ux-file-upload'));
+  const original = await vi.importActual('@kbn/shared-ux-file-upload');
   return {
     ...original,
     FileUpload: (props: unknown) => mockFileUpload(props),

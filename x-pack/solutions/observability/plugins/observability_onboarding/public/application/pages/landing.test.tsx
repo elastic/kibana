@@ -27,57 +27,57 @@ import { LandingPage } from './landing';
 expect.extend(matchers);
 
 vi.mock('../onboarding_flow_form/onboarding_flow_form', () => {
-      const mocked = {
-      OnboardingFlowForm: () => <div data-test-subj="onboardingFlowFormStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OnboardingFlowForm: () => <div data-test-subj="onboardingFlowFormStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./host', () => {
-      const mocked = {
-      HostLinuxOtelPage: () => <div data-test-subj="hostLinuxOtelPageStub" />,
-      HostLinuxAutoDetectPage: () => null,
-      HostMacosOtelPage: () => null,
-      HostMacosAutoDetectPage: () => null,
-      HostWindowsOtelPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostLinuxOtelPage: () => <div data-test-subj="hostLinuxOtelPageStub" />,
+    HostLinuxAutoDetectPage: () => null,
+    HostMacosOtelPage: () => null,
+    HostMacosAutoDetectPage: () => null,
+    HostWindowsOtelPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./auto_detect', () => {
-      const mocked = { AutoDetectPage: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { AutoDetectPage: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./otel_logs', () => {
-      const mocked = { OtelLogsPage: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { OtelLogsPage: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./firehose', () => {
-      const mocked = { FirehosePage: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { FirehosePage: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./otel_apm', () => {
-      const mocked = { OtelApmPage: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { OtelApmPage: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./cloudforwarder', () => {
-      const mocked = { CloudForwarderPage: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { CloudForwarderPage: () => null };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/use_flow_breadcrumbs', () => {
-      const mocked = {
-      useFlowBreadcrumb: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlowBreadcrumb: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/use_managed_otlp_service_availability', () => {
-      const mocked = {
-      useManagedOtlpServiceAvailability: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedOtlpServiceAvailability: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui-illustrations', () => {
   const stub = (id: string, title: string) => ({
@@ -97,34 +97,34 @@ vi.mock('@elastic/eui-illustrations', () => {
 const mockOpenCollectionCallbacks: Array<(groupId: string) => void> = [];
 
 vi.mock('../add_data_page/observability_search_results', () => {
-      const mocked = {
-      ObservabilitySearchResults: ({
-        onOpenCollection,
-      }: {
-        onOpenCollection: (groupId: string) => void;
-      }) => {
-        mockOpenCollectionCallbacks.push(onOpenCollection);
-        return (
-          <div data-test-subj="observabilitySearchResultsStub">
-            <button
-              type="button"
-              data-test-subj="stubOpenCollection"
-              onClick={() => onOpenCollection('nginx')}
-            >
-              open chooser
-            </button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ObservabilitySearchResults: ({
+      onOpenCollection,
+    }: {
+      onOpenCollection: (groupId: string) => void;
+    }) => {
+      mockOpenCollectionCallbacks.push(onOpenCollection);
+      return (
+        <div data-test-subj="observabilitySearchResultsStub">
+          <button
+            type="button"
+            data-test-subj="stubOpenCollection"
+            onClick={() => onOpenCollection('nginx')}
+          >
+            open chooser
+          </button>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Only Fleet's data hook and icon renderer are stubbed; the provider's module load
 // and package query stay real code paths.
 const mockUseAvailablePackages = vi.fn();
 vi.mock('@kbn/fleet-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/fleet-plugin/public'));
+  const actual = await vi.importActual('@kbn/fleet-plugin/public');
   const ReactActual = require('react');
   return {
     ...actual,

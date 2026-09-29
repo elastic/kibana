@@ -11,19 +11,19 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { fetchNodesFromClusterStats } from './fetch_nodes_from_cluster_stats';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 import { Globals } from '../../static_globals';
 
 describe('fetchNodesFromClusterStats', () => {

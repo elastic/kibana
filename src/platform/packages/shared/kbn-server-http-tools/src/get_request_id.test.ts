@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 import { getRequestId } from './get_request_id';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getRequestId', () => {
   describe('when allowFromAnyIp is true', () => {

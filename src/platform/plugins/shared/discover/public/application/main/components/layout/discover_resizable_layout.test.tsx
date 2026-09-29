@@ -41,7 +41,7 @@ services.storage.get = vi.fn((key: string) => {
 });
 
 vi.mock('@kbn/resizable-layout', async () => {
-  const actual = (await vi.importActual('@kbn/resizable-layout'));
+  const actual = await vi.importActual('@kbn/resizable-layout');
   const ActualResizableLayout = actual.ResizableLayout;
 
   return {
@@ -54,7 +54,7 @@ vi.mock('@kbn/resizable-layout', async () => {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

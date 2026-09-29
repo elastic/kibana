@@ -33,33 +33,33 @@ import { useEntityAnalyticsAgentNavigation } from '../entity_analytics_agent_nav
  */
 
 vi.mock('../../components/security_redux_embedded_provider', () => {
-      const mocked = {
-      SecurityReduxEmbeddedProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="securityReduxEmbeddedProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecurityReduxEmbeddedProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="securityReduxEmbeddedProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/entity_card_flyout_overview_canvas', () => {
-      const mocked = {
-      EntityCardFlyoutOverviewCanvas: (props: Record<string, unknown>) => (
-        <div data-test-subj="entityCardFlyoutOverviewCanvasMock">{JSON.stringify(props)}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityCardFlyoutOverviewCanvas: (props: Record<string, unknown>) => (
+      <div data-test-subj="entityCardFlyoutOverviewCanvasMock">{JSON.stringify(props)}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../entity_analytics_agent_navigation_context');
 
 vi.mock('./entity_card/entity_card', () => {
-      const mocked = {
-      EntityCard: (props: Record<string, unknown>) => (
-        <div data-test-subj="entityCardMock">{JSON.stringify(props.identifier)}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityCard: (props: Record<string, unknown>) => (
+      <div data-test-subj="entityCardMock">{JSON.stringify(props.identifier)}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const experimentalFeatures = {
   entityAnalyticsWatchlistEnabled: false,

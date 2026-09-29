@@ -13,32 +13,32 @@ import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { useInfrastructureAttributes } from './use_infrastructure_attributes';
 
 vi.mock('../../../context/apm_service/use_apm_service_context', () => {
-      const mocked = {
-      useApmServiceContext: () => ({
-        agentName: 'nodejs',
-        serviceName: 'opbeans-node',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmServiceContext: () => ({
+      agentName: 'nodejs',
+      serviceName: 'opbeans-node',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => ({
-        query: {
-          detailTab: undefined,
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => ({
+      query: {
+        detailTab: undefined,
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetcher', async () => {
-  const actual = (await vi.importActual('../../../hooks/use_fetcher'));
+  const actual = await vi.importActual('../../../hooks/use_fetcher');
 
   return {
     ...actual,
@@ -47,14 +47,14 @@ vi.mock('../../../hooks/use_fetcher', async () => {
 });
 
 vi.mock('../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        end: '2021-10-10T00:15:00.000Z',
-        start: '2021-10-10T00:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      end: '2021-10-10T00:15:00.000Z',
+      start: '2021-10-10T00:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = useFetcher as Mock;
 

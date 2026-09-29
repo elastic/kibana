@@ -13,33 +13,33 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 const mockUseReduxEsSearch = vi.fn();
 vi.mock('../../../hooks/use_redux_es_search', () => {
-      const mocked = {
-      useReduxEsSearch: (...args: any[]) => mockUseReduxEsSearch(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReduxEsSearch: (...args: any[]) => mockUseReduxEsSearch(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => ({ errorStateId: 'state-1', monitorId: 'monitor-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => ({ errorStateId: 'state-1', monitorId: 'monitor-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useErrorFailedTests', () => {
   beforeEach(() => {

@@ -20,19 +20,19 @@ import { TestProviders } from '../../../common/mock';
 
 vi.mock('../../hooks/use_list_with_search');
 vi.mock('../../hooks/use_endpoint_exceptions_capability', () => {
-      const mocked = {
-      useEndpointExceptionsCapability: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEndpointExceptionsCapability: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: vi.fn().mockReturnValue({
-        rulesPrivileges: { exceptions: { edit: true, read: true } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserPrivileges: vi.fn().mockReturnValue({
+      rulesPrivileges: { exceptions: { edit: true, read: true } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockUseListWithSearchComponent = () => ({
   exceptionViewerStatus: '',

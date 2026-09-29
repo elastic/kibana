@@ -11,8 +11,8 @@ import { vi } from 'vitest';
 
 export const registerBundleRoutesMock = vi.fn();
 vi.doMock('./bundle_routes', () => {
-      const mocked = {
-      registerBundleRoutes: registerBundleRoutesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerBundleRoutes: registerBundleRoutesMock,
+  };
+  return { ...mocked, default: mocked };
+});

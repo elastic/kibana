@@ -16,11 +16,11 @@ import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
 
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      useEntityStoreEuidApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreEuidApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useEntityEuidFromAlerts', () => {
   const searchMock: Mock = vi.fn();

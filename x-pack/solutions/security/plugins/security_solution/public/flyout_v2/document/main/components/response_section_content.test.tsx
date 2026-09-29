@@ -20,11 +20,11 @@ import { ResponseSectionContent } from './response_section_content';
 import { useExpandSection } from '../../../shared/hooks/use_expand_section';
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const PREVIEW_MESSAGE = 'Response is not available in alert preview.';
 const onShowResponseDetails = vi.fn();

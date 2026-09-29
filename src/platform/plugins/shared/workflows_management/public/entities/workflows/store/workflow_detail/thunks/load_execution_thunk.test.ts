@@ -23,26 +23,26 @@ const mockGetExecutionSteps = vi.fn();
 
 // Mock the WorkflowApi class so loadExecutionThunk uses our mock
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => ({
-        getExecution: mockGetExecution,
-        getExecutionSteps: mockGetExecutionSteps,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => ({
+      getExecution: mockGetExecution,
+      getExecutionSteps: mockGetExecutionSteps,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the computation utility
 vi.mock('../utils/computation', () => {
-      const mocked = {
-      performComputation: vi.fn(() => ({
-        yamlDocument: {},
-        yamlLineCounter: {},
-        workflowLookup: { steps: {} },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    performComputation: vi.fn(() => ({
+      yamlDocument: {},
+      yamlLineCounter: {},
+      workflowLookup: { steps: {} },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecution: WorkflowExecutionDto = {
   spaceId: 'default',
@@ -115,7 +115,7 @@ describe('loadExecutionThunk', () => {
   });
 
   it('should compute execution data for a new execution id', async () => {
-    const { performComputation } = (await vi.importMock('../utils/computation'));
+    const { performComputation } = await vi.importMock('../utils/computation');
     mockGetExecution.mockResolvedValue(mockExecution);
 
     await store.dispatch(loadExecutionThunk({ id: 'exec-1' }));

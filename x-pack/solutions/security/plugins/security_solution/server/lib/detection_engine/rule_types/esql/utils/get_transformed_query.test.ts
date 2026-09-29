@@ -14,17 +14,17 @@ import { validateEsqlQuery } from './validate_esql_query';
 import { getTransformedQuery } from './get_transformed_query';
 
 vi.mock('./validate_esql_query', () => {
-      const mocked = {
-      validateEsqlQuery: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlQuery: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/securitysolution-utils', () => {
-      const mocked = {
-      injectMetadataId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    injectMetadataId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ORIGINAL_QUERY = 'FROM logs*';
 const TRANSFORMED_QUERY = 'FROM logs* METADATA _id';

@@ -20,8 +20,7 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   describe('when localStorage is empty', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      vi
-        .spyOn(ReactUse, 'default')
+      vi.spyOn(ReactUse, 'default')
         .mockReturnValueOnce([undefined, vi.fn(), vi.fn()])
         .mockReturnValueOnce([undefined, vi.fn(), vi.fn()]);
     });
@@ -40,8 +39,7 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   });
 
   it('returns a custom start value from localStorage', () => {
-    vi
-      .spyOn(ReactUse, 'default')
+    vi.spyOn(ReactUse, 'default')
       .mockReturnValueOnce([customStart, vi.fn(), vi.fn()])
       .mockReturnValueOnce([undefined, vi.fn(), vi.fn()]);
 
@@ -51,8 +49,7 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
   });
 
   it('returns custom end value from localStorage', () => {
-    vi
-      .spyOn(ReactUse, 'default')
+    vi.spyOn(ReactUse, 'default')
       .mockReturnValueOnce([undefined, vi.fn(), vi.fn()])
       .mockReturnValueOnce([customEnd, vi.fn(), vi.fn()]);
 
@@ -63,8 +60,7 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
 
   it('setHistoryStart updates the value', () => {
     const setHistoryStart = vi.fn();
-    vi
-      .spyOn(ReactUse, 'default')
+    vi.spyOn(ReactUse, 'default')
       .mockReturnValueOnce([customStart, setHistoryStart, vi.fn()])
       .mockReturnValueOnce([customEnd, vi.fn(), vi.fn()]);
 
@@ -79,8 +75,7 @@ describe('useAttackDiscoveryHistoryTimerange', () => {
 
   it('setHistoryEnd updates the value', () => {
     const setHistoryEnd = vi.fn();
-    vi
-      .spyOn(ReactUse, 'default')
+    vi.spyOn(ReactUse, 'default')
       .mockReturnValueOnce([customStart, vi.fn(), vi.fn()])
       .mockReturnValueOnce([customEnd, setHistoryEnd, vi.fn()]);
 

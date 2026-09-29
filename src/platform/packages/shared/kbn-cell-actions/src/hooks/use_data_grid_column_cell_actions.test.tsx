@@ -32,11 +32,11 @@ const actions = [action1, action2];
 const mockGetActions = vi.fn(async () => actions);
 
 vi.mock('../context/cell_actions_context', () => {
-      const mocked = {
-      useCellActionsContext: () => ({ getActions: mockGetActions }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCellActionsContext: () => ({ getActions: mockGetActions }),
+  };
+  return { ...mocked, default: mocked };
+});
 const fieldValues: Record<string, string[]> = {
   column1: ['0.0', '0.1', '0.2', '0.3'],
   column2: ['1.0', '1.1', '1.2', '1.3'],

@@ -27,25 +27,25 @@ const mockUseCasesAddToExistingCaseModal = vi.fn(() => ({
 }));
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          cases: {
-            helpers: {
-              canUseCases: mockCanUseCases,
-            },
-            ui: {
-              getCasesContext: mockGetCasesContext,
-            },
-            hooks: {
-              useCasesAddToExistingCaseModal: mockUseCasesAddToExistingCaseModal,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        cases: {
+          helpers: {
+            canUseCases: mockCanUseCases,
+          },
+          ui: {
+            getCasesContext: mockGetCasesContext,
+          },
+          hooks: {
+            useCasesAddToExistingCaseModal: mockUseCasesAddToExistingCaseModal,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useBulkAddEventsToCaseActions', () => {
   const clearSelection = vi.fn();

@@ -26,47 +26,47 @@ let mockLastPageTemplateProps: {
 const mockGetRedirectUrl = vi.fn().mockReturnValue(ONBOARDING_HREF);
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          observabilityAIAssistant: undefined,
-          observabilityShared: {
-            navigation: {
-              PageTemplate: (props: {
-                'data-test-subj'?: string;
-                isEmptyState?: boolean;
-                noDataConfig?: NoDataConfig;
-                children?: React.ReactNode;
-              }) => {
-                mockLastPageTemplateProps = {
-                  'data-test-subj': props['data-test-subj'],
-                  isEmptyState: props.isEmptyState,
-                  noDataConfig: props.noDataConfig,
-                };
-                return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
-              },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        observabilityAIAssistant: undefined,
+        observabilityShared: {
+          navigation: {
+            PageTemplate: (props: {
+              'data-test-subj'?: string;
+              isEmptyState?: boolean;
+              noDataConfig?: NoDataConfig;
+              children?: React.ReactNode;
+            }) => {
+              mockLastPageTemplateProps = {
+                'data-test-subj': props['data-test-subj'],
+                isEmptyState: props.isEmptyState,
+                noDataConfig: props.noDataConfig,
+              };
+              return <div data-test-subj={props['data-test-subj']}>{props.children}</div>;
             },
           },
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-              },
-            },
-          },
-          docLinks: { links: { observability: { guide: 'https://docs.example' } } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
+        },
+        docLinks: { links: { observability: { guide: 'https://docs.example' } } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-page-no-data', () => {
-      const mocked = {
-      NoDataPage: () => <div data-test-subj="logsOnboardingPage">onboarding</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoDataPage: () => <div data-test-subj="logsOnboardingPage">onboarding</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(

@@ -38,20 +38,18 @@ import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../../../../inbound/event_identity/encode_api_key';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
-      actual.connectorTypeIsDual(actionTypeId)
-    ),
+    connectorTypeIsDual: vi.fn((actionTypeId: string) => actual.connectorTypeIsDual(actionTypeId)),
   };
 });
 
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {

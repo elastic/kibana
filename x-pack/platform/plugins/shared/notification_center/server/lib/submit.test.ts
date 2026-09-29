@@ -95,12 +95,12 @@ describe('buildForType', () => {
     // shared registry-derived flag map (which would leak across tests).
     await jest.isolateModulesAsync(async () => {
       vi.doMock('../../common/feature_flags', () => {
-            const mocked = {
-                  NOTIFICATION_TYPE_FLAGS: {},
-                  NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          NOTIFICATION_TYPE_FLAGS: {},
+          NOTIFICATION_TYPE_ENABLED_DEFAULT: false,
+        };
+        return { ...mocked, default: mocked };
+      });
       const { buildForType: buildIsolated } = await import('./submit');
       const { core, create, getBooleanValue$ } = createCoreMock();
 

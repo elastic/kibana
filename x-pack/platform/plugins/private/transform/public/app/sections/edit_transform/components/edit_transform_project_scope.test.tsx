@@ -25,11 +25,11 @@ const mockUseGetTransformCpsEnabled = vi.fn(
 
 vi.mock('../../../app_dependencies');
 vi.mock('../../../hooks/use_get_transform_cps_enabled', () => {
-      const mocked = {
-      useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTransformCpsEnabled: (args: { enabled: boolean }) => mockUseGetTransformCpsEnabled(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const originProject = {
   _id: 'origin-id',

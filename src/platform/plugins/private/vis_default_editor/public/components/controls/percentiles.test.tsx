@@ -19,7 +19,7 @@ import type { EditorVisState } from '../sidebar/state/reducers';
 
 // mocking random id generator function
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

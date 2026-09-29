@@ -28,14 +28,14 @@ vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/get_experimental_features');
 vi.mock('../../lib/capabilities');
 vi.mock('../../locator_context', () => {
-      const mocked = {
-      useLocators: () => ({
-        rules: { useUrl: () => '/bound-rules' },
-        ruleDetails: { useUrl: () => '/bound-rules' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocators: () => ({
+      rules: { useUrl: () => '/bound-rules' },
+      ruleDetails: { useUrl: () => '/bound-rules' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rules_list/components/rules_list', () => {
   return () => <div data-test-subj="rulesListComponents">{'Render Rule list component'}</div>;
@@ -46,40 +46,42 @@ vi.mock('../rule_details/components/global_rule_event_log_list', () => {
 });
 
 vi.mock('../../components/rules_setting/rules_settings_flyout', () => {
-      const mocked = {
-      RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
-        isVisible ? (
-          <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
-        ) : null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesSettingsFlyout: ({ isVisible }: { isVisible: boolean }) =>
+      isVisible ? (
+        <div data-test-subj="rulesSettingsFlyout">{'Render Rules Settings Flyout component'}</div>
+      ) : null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rule-form', () => {
-      const mocked = {
-      RuleTypeModal: () => <div data-test-subj="ruleTypeModal">{'Render Rule Type Modal'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleTypeModal: () => <div data-test-subj="ruleTypeModal">{'Render Rule Type Modal'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions', () => {
-      const mocked = {
-      useGetRuleTypesPermissions: vi.fn().mockReturnValue({
-        authorizedToReadAnyRules: true,
-        authorizedToCreateAnyRules: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetRuleTypesPermissions: vi.fn().mockReturnValue({
+      authorizedToReadAnyRules: true,
+      authorizedToCreateAnyRules: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 

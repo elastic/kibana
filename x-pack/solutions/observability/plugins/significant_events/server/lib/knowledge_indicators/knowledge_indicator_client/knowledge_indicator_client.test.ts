@@ -25,7 +25,7 @@ import { ALERTS_READER_V2 } from '../../significant_events/alerting/alerts_reade
 import { KI_TYPE_FEATURE, KI_TYPE_QUERY } from '../fields';
 
 vi.mock('../../significant_events/latest_source_query', async () => {
-  const actual = (await vi.importActual('../../significant_events/latest_source_query'));
+  const actual = await vi.importActual('../../significant_events/latest_source_query');
   return {
     ...actual,
     executeAndDecodeSource: vi.fn(),
@@ -36,7 +36,7 @@ vi.mock('../../significant_events/latest_source_query', async () => {
 vi.mock('../../significant_events/run_esql_query');
 
 vi.mock('./bulk_with_inference_fallback', async () => {
-  const actual = (await vi.importActual('./bulk_with_inference_fallback'));
+  const actual = await vi.importActual('./bulk_with_inference_fallback');
   return {
     ...actual,
     bulkCreateWithInferenceFallback: vi.fn(async (_logger, attempt) =>

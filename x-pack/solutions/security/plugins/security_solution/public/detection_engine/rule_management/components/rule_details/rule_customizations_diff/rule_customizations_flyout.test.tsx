@@ -15,13 +15,13 @@ import { getRulesSchemaMock } from '../../../../../../common/api/detection_engin
 import { KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 
 vi.mock('../../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addWarning: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addWarning: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RuleCustomizationsFlyout', () => {
   describe('concurrency control', () => {

@@ -14,30 +14,30 @@ import { resolveMitreBuckets, resetResolveMitreBucketsCache } from './resolve_mi
 // Minimal fixture that satisfies the legacy blob shape so the real
 // transformLegacyMitreData adapter can be exercised without loading the full blob.
 vi.mock('../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
-      const mocked = {
-      tactics: [
-        {
-          id: 'TA0001',
-          name: 'Initial Access',
-          reference: 'https://attack.mitre.org/tactics/TA0001/',
-          value: 'initialAccess',
-          label: 'Initial Access (TA0001)',
-        },
-      ],
-      techniques: [
-        {
-          id: 'T1078',
-          name: 'Valid Accounts',
-          reference: 'https://attack.mitre.org/techniques/T1078/',
-          value: 'validAccounts',
-          label: 'Valid Accounts (T1078)',
-          tactics: ['initial-access'],
-        },
-      ],
-      subtechniques: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    tactics: [
+      {
+        id: 'TA0001',
+        name: 'Initial Access',
+        reference: 'https://attack.mitre.org/tactics/TA0001/',
+        value: 'initialAccess',
+        label: 'Initial Access (TA0001)',
+      },
+    ],
+    techniques: [
+      {
+        id: 'T1078',
+        name: 'Valid Accounts',
+        reference: 'https://attack.mitre.org/techniques/T1078/',
+        value: 'validAccounts',
+        label: 'Valid Accounts (T1078)',
+        tactics: ['initial-access'],
+      },
+    ],
+    subtechniques: [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeClient = (empty = false): { client: MitreAttackDataClient; mockList: Mock } => {
   const mockList = vi.fn().mockResolvedValue({

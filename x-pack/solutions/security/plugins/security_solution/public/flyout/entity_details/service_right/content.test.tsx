@@ -17,50 +17,47 @@ import { ServicePanelContent } from './content';
 import { mockServiceEntityRiskScores } from '../mocks';
 
 vi.mock('../../../entity_analytics/components/entity_resolution/resolution_section', () => {
-      const mocked = {
-      ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResolutionSection: () => <div data-test-subj="securitySolutionFlyoutResolutionSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_has_entity_resolution_license', () => {
-      const mocked = {
-      useHasEntityResolutionLicense: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityResolutionLicense: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => {
-      const mocked = {
-      FlyoutRiskSummary: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutRiskSummary: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../shared/components/right/visualizations_section', () => {
-      const mocked = {
-      VisualizationsSection: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock(
-  '../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
-  () => {
-      const mocked = {
-        AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+  const mocked = {
+    VisualizationsSection: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../../entity_analytics/components/asset_criticality/asset_criticality_selector', () => {
+  const mocked = {
+    AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../flyout_v2/entity/shared/components/observed_entity', () => {
-      const mocked = {
-      ObservedEntity: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ObservedEntity: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_observed_service_items', () => {
-      const mocked = {
-      useObservedServiceItems: () => [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useObservedServiceItems: () => [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   serviceName: 'nginx',

@@ -113,17 +113,17 @@ vi.mock('../lib/rule_gaps/update/update_gaps');
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => UUID,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => UUID,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/wrap_scoped_cluster_client', () => {
-      const mocked = {
-      createWrappedScopedClusterClientFactory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createWrappedScopedClusterClientFactory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/alerting_event_logger/alerting_event_logger');
 vi.mock('../lib/rule_run_metrics_store');
 vi.mock('../lib/validate_rule_type_params');
@@ -370,18 +370,17 @@ describe('Ad Hoc Task Runner', () => {
       },
     };
     vi.resetAllMocks();
-    (await vi.importMock('../lib/wrap_scoped_cluster_client'))
-      .createWrappedScopedClusterClientFactory.mockReturnValue({
-        client: () => services.scopedClusterClient,
-        getMetrics: () => ({
-          numSearches: 3,
-          esSearchDurationMs: 33,
-          totalSearchDurationMs: 23423,
-        }),
-      });
-    vi
-      .spyOn(alertsService, 'getContextInitializationPromise')
-      .mockResolvedValue({ result: true });
+    (
+      await vi.importMock('../lib/wrap_scoped_cluster_client')
+    ).createWrappedScopedClusterClientFactory.mockReturnValue({
+      client: () => services.scopedClusterClient,
+      getMetrics: () => ({
+        numSearches: 3,
+        esSearchDurationMs: 33,
+        totalSearchDurationMs: 23423,
+      }),
+    });
+    vi.spyOn(alertsService, 'getContextInitializationPromise').mockResolvedValue({ result: true });
     elasticsearchService.client.asScoped.mockReturnValue(services.scopedClusterClient);
     alertingEventLogger.getStartAndDuration.mockImplementation(() => ({ start: new Date() }));
     (AlertingEventLogger as Mock).mockImplementation(() => alertingEventLogger);
@@ -434,10 +433,7 @@ describe('Ad Hoc Task Runner', () => {
   afterAll(() => fakeTimer.restore());
 
   test('successfully executes the task', async () => {
-    const addFrameworkMetricsSpy = vi.spyOn(
-      RuleMonitoringService.prototype,
-      'addFrameworkMetrics'
-    );
+    const addFrameworkMetricsSpy = vi.spyOn(RuleMonitoringService.prototype, 'addFrameworkMetrics');
     ruleTypeWithAlerts.executor.mockImplementation(
       async ({
         services: executorServices,

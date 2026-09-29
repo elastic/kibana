@@ -17,19 +17,19 @@ import type { ToolHandlerContext } from '@kbn/agent-builder-server';
 import type { EntityAnalyticsSkillsContext } from '../../entity_analytics_skill';
 
 vi.mock('../common', () => {
-      const mocked = {
-      bootstrapCommonServices: vi.fn(),
-      entityAnalyticsInlineToolSchema: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bootstrapCommonServices: vi.fn(),
+    entityAnalyticsInlineToolSchema: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBootstrapCommonServices = (await vi.importMock('../common'))
   .bootstrapCommonServices as Mock;

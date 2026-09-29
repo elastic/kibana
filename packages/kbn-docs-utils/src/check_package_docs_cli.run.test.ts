@@ -29,22 +29,22 @@ vi.mock('elastic-apm-node', () => {
 });
 
 vi.mock('@kbn/apm-config-loader', () => {
-      const mocked = {
-      initApm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initApm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cli', () => {
-      const mocked = {
-      parseCliFlags: vi.fn(),
-      setupProject: vi.fn(),
-      buildApiMap: vi.fn(),
-      collectStats: vi.fn(),
-      reportMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseCliFlags: vi.fn(),
+    setupProject: vi.fn(),
+    buildApiMap: vi.fn(),
+    collectStats: vi.fn(),
+    reportMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTx = (apm as any).__tx;
 

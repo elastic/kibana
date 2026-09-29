@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import fs from 'fs';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-import fs from 'fs';
 
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
@@ -19,11 +18,11 @@ import { VerificationService } from './verification_service';
 
 vi.mock('fs');
 vi.mock('@kbn/utils', () => {
-      const mocked = {
-      getDataPath: vi.fn().mockReturnValue('/data/'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataPath: vi.fn().mockReturnValue('/data/'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const loggerMock = loggingSystemMock.createLogger();
 

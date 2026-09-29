@@ -54,11 +54,11 @@ import {
 } from './create_policy_tool';
 
 vi.mock('../services/endpoint_policy_management_service', () => {
-      const mocked = {
-      createEndpointPolicyManagementService: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEndpointPolicyManagementService: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SPACE_ID = 'space-marketing';
 const TOOL_ID = 'security.policy_management.test_policy_tool';

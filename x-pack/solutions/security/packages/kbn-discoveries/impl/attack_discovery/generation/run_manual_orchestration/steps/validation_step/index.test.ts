@@ -14,20 +14,20 @@ import { runValidationStep } from '.';
 const mockLogHealthCheck = vi.fn();
 
 vi.mock('../../../../../lib/log_health_check', () => {
-      const mocked = {
-      logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logHealthCheck: (...args: unknown[]) => mockLogHealthCheck(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvokeValidationWorkflow = vi.fn();
 
 vi.mock('../../../invoke_validation_workflow', () => {
-      const mocked = {
-      invokeValidationWorkflow: (...args: unknown[]) => mockInvokeValidationWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invokeValidationWorkflow: (...args: unknown[]) => mockInvokeValidationWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = {
   debug: vi.fn(),

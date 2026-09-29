@@ -233,9 +233,7 @@ describe('replaySnapshot', () => {
       },
       indices: {
         delete: vi.fn().mockResolvedValue({}),
-        getDataStream: vi
-          .fn()
-          .mockResolvedValue({ data_streams: [{ name: 'logs-app-default' }] }),
+        getDataStream: vi.fn().mockResolvedValue({ data_streams: [{ name: 'logs-app-default' }] }),
       },
     } as unknown as Client);
 
@@ -337,8 +335,7 @@ describe('replaySnapshot', () => {
       })
     );
 
-    const restoreOrder = (esClient.snapshot.restore as unknown as Mock).mock
-      .invocationCallOrder[0];
+    const restoreOrder = (esClient.snapshot.restore as unknown as Mock).mock.invocationCallOrder[0];
     const reindexOrder = (esClient.reindex as unknown as Mock).mock.invocationCallOrder[0];
     expect(restoreOrder).toBeLessThan(reindexOrder);
   });

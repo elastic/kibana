@@ -27,34 +27,34 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('./hooks/use_url_detail', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks/use_url_detail')),
-      useSyncUrlDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks/use_url_detail')),
+    useSyncUrlDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./onboarding_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('./onboarding_context')),
-      useOnboardingContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./onboarding_context')),
+    useOnboardingContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./onboarding_header', () => {
-      const mocked = {
-      OnboardingHeader: () => <div data-test-subj="onboardingHeader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OnboardingHeader: () => <div data-test-subj="onboardingHeader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./onboarding_body', () => {
-      const mocked = {
-      OnboardingBody: () => <div data-test-subj="onboardingBody" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OnboardingBody: () => <div data-test-subj="onboardingBody" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OnboardingRouter', () => {
   beforeEach(() => {

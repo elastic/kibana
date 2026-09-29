@@ -13,30 +13,30 @@ import type { ServiceFlyoutService } from '.';
 import { ServiceFlyout } from '.';
 
 vi.mock('../../../plugin', () => {
-      const mocked = {
-      getApmInternalServices: () => ({ callApmApi: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApmInternalServices: () => ({ callApmApi: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_apm_indices', () => {
-      const mocked = {
-      useApmIndices: () => ({ indices: undefined, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmIndices: () => ({ indices: undefined, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/time_range_metadata/time_range_metadata_context', () => {
-      const mocked = {
-      TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeRangeMetadataContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -45,70 +45,70 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../responsive_flyout', () => {
-      const mocked = {
-      ResponsiveFlyout: ({
-        children,
-        onClose,
-        historyKey,
-      }: {
-        children: React.ReactNode;
-        onClose: () => void;
-        historyKey?: symbol;
-      }) => (
-        <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
-          <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
-            close
-          </button>
-          {children}
-        </section>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponsiveFlyout: ({
+      children,
+      onClose,
+      historyKey,
+    }: {
+      children: React.ReactNode;
+      onClose: () => void;
+      historyKey?: symbol;
+    }) => (
+      <section data-test-subj="responsiveFlyoutMock" data-history-key={historyKey?.toString()}>
+        <button data-test-subj="responsiveFlyoutCloseButton" onClick={onClose}>
+          close
+        </button>
+        {children}
+      </section>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_service_flyout_capabilities', () => {
-      const mocked = {
-      useServiceFlyoutCapabilities: () => ({
-        loading: false,
-        error: undefined,
-        schema: 'ecs',
-        header: { serviceNameLink: true, badges: true },
-        overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
-        footer: { alerts: true, slos: true },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutCapabilities: () => ({
+      loading: false,
+      error: undefined,
+      schema: 'ecs',
+      header: { serviceNameLink: true, badges: true },
+      overview: { transactions: true, transactionTypeFilter: true, infraMetrics: true },
+      footer: { alerts: true, slos: true },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({ start: '2024-01-01T00:00:00.000Z', end: '2024-01-01T01:00:00.000Z' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./header', () => {
-      const mocked = {
-      ServiceFlyoutHeader: ({
-        title,
-        onSelectedTabIdChange,
-      }: {
-        title: string;
-        onSelectedTabIdChange: (tabId: string) => void;
-      }) => (
-        <div>
-          <h2>{title}</h2>
-          <button data-test-subj="mockTabChange" onClick={() => onSelectedTabIdChange('alerts')}>
-            change tab
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceFlyoutHeader: ({
+      title,
+      onSelectedTabIdChange,
+    }: {
+      title: string;
+      onSelectedTabIdChange: (tabId: string) => void;
+    }) => (
+      <div>
+        <h2>{title}</h2>
+        <button data-test-subj="mockTabChange" onClick={() => onSelectedTabIdChange('alerts')}>
+          change tab
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The overview reads environment/transactionType from context and calls the context setters.
 vi.mock('./overview', async () => {
-  const { useServiceFlyoutContext } = (await vi.importActual('./service_flyout_context'));
+  const { useServiceFlyoutContext } = await vi.importActual('./service_flyout_context');
   return {
     ServiceFlyoutOverview: () => {
       const {
@@ -139,7 +139,7 @@ vi.mock('./overview', async () => {
 
 // The footer reads environment/transactionType from context to display them.
 vi.mock('./footer', async () => {
-  const { useServiceFlyoutContext } = (await vi.importActual('./service_flyout_context'));
+  const { useServiceFlyoutContext } = await vi.importActual('./service_flyout_context');
   return {
     ServiceFlyoutFooter: () => {
       const {

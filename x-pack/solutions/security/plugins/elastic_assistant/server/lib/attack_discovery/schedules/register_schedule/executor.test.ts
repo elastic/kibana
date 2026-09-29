@@ -41,71 +41,71 @@ import * as transforms from '../../persistence/transforms/transform_to_alert_doc
 import { isInvalidAnonymizationError } from '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization';
 
 vi.mock('../../../../ai_assistant_data_clients/find', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../ai_assistant_data_clients/find')),
-      findDocuments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../ai_assistant_data_clients/find')),
+    findDocuments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../routes/attack_discovery/helpers/generate_discoveries', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../routes/attack_discovery/helpers/generate_discoveries')),
-      generateAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../routes/attack_discovery/helpers/generate_discoveries')),
+    generateAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts', () => {
-      const mocked = {
-      filterHallucinatedAlerts: vi.fn().mockImplementation(({ attackDiscoveries }) => {
-        // By default, pass through all discoveries (no filtering)
-        return Promise.resolve(attackDiscoveries);
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterHallucinatedAlerts: vi.fn().mockImplementation(({ attackDiscoveries }) => {
+      // By default, pass through all discoveries (no filtering)
+      return Promise.resolve(attackDiscoveries);
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../routes/attack_discovery/helpers/telemetry', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../routes/attack_discovery/helpers/telemetry')),
-      reportAttackDiscoveryGenerationFailure: vi.fn(),
-      reportAttackDiscoveryGenerationSuccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../routes/attack_discovery/helpers/telemetry')),
+    reportAttackDiscoveryGenerationFailure: vi.fn(),
+    reportAttackDiscoveryGenerationSuccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../persistence/deduplication', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../persistence/deduplication')),
-      deduplicateAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../persistence/deduplication')),
+    deduplicateAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../persistence/transforms/transform_to_alert_documents', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../persistence/transforms/transform_to_alert_documents')),
-      transformToBaseAlertDocument: vi.fn(
-        (await vi.importActual('../../persistence/transforms/transform_to_alert_documents'))
-          .transformToBaseAlertDocument
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../persistence/transforms/transform_to_alert_documents')),
+    transformToBaseAlertDocument: vi.fn(
+      (await vi.importActual('../../persistence/transforms/transform_to_alert_documents'))
+        .transformToBaseAlertDocument
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../routes/attack_discovery/public/post/helpers/throw_if_invalid_anonymization',
   () => {
-      const mocked = {
-        isInvalidAnonymizationError: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      isInvalidAnonymizationError: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('@kbn/task-manager-plugin/server', () => {
-      const mocked = {
-      createTaskRunError: vi.fn((error, source) => ({ message: error.message, source })),
-      TaskErrorSource: { USER: 'USER' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTaskRunError: vi.fn((error, source) => ({ message: error.message, source })),
+    TaskErrorSource: { USER: 'USER' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('attackDiscoveryScheduleExecutor', () => {
   const date = '2025-05-20T15:18:21.000Z';
@@ -376,7 +376,9 @@ describe('attackDiscoveryScheduleExecutor', () => {
   });
 
   it('calls filterHallucinatedAlerts with the expected parameters', async () => {
-    const { filterHallucinatedAlerts } = (await vi.importMock('../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'));
+    const { filterHallucinatedAlerts } = await vi.importMock(
+      '../../../../routes/attack_discovery/helpers/filter_hallucinated_alerts'
+    );
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
 
     await attackDiscoveryScheduleExecutor({
@@ -581,9 +583,7 @@ describe('attackDiscoveryScheduleExecutor', () => {
 
   it('should report only non-duplicate attack discoveries as alerts and log correct duplicate count', async () => {
     const options = { ...executorOptions } as unknown as RuleExecutorOptions;
-    (deduplicateAttackDiscoveries as Mock).mockResolvedValue([
-      ...mockAttackDiscoveries.slice(1),
-    ]);
+    (deduplicateAttackDiscoveries as Mock).mockResolvedValue([...mockAttackDiscoveries.slice(1)]);
 
     await attackDiscoveryScheduleExecutor({
       getInference: () => mockInference,

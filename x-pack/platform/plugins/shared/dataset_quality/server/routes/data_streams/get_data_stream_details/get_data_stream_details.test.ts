@@ -19,7 +19,7 @@ import { getDataStreamDetails } from '.';
 
 vi.mock('../../../services');
 vi.mock('../../../utils', async () => {
-  const actual = (await vi.importActual('../../../utils'));
+  const actual = await vi.importActual('../../../utils');
   return {
     ...actual,
     createDatasetQualityESClient: vi.fn(),

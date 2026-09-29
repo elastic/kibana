@@ -70,46 +70,46 @@ const testProps = {
 vi.mock('../../assistant_context');
 
 vi.mock('../../connectorland/connector_settings_management', () => {
-      const mocked = {
-      ConnectorsSettingsManagement: () => <span data-test-subj="connectors-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorsSettingsManagement: () => <span data-test-subj="connectors-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../conversations/conversation_settings_management', () => {
-      const mocked = {
-      ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConversationSettingsManagement: () => <span data-test-subj="conversations-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../quick_prompts/quick_prompt_settings_management', () => {
-      const mocked = {
-      QuickPromptSettingsManagement: () => <span data-test-subj="quick_prompts-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QuickPromptSettingsManagement: () => <span data-test-subj="quick_prompts-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../prompt_editor/system_prompt/system_prompt_settings_management', () => {
-      const mocked = {
-      SystemPromptSettingsManagement: () => <span data-test-subj="system_prompts-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SystemPromptSettingsManagement: () => <span data-test-subj="system_prompts-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../knowledge_base/knowledge_base_settings_management', () => {
-      const mocked = {
-      KnowledgeBaseSettingsManagement: () => <span data-test-subj="knowledge_base-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KnowledgeBaseSettingsManagement: () => <span data-test-subj="knowledge_base-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../data_anonymization/settings/anonymization_settings_management', () => {
-      const mocked = {
-      AnonymizationSettingsManagement: () => <span data-test-subj="anonymization-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnonymizationSettingsManagement: () => <span data-test-subj="anonymization-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('.', () => {
   return {
@@ -118,11 +118,11 @@ vi.mock('.', () => {
 });
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn().mockReturnValue({ data: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn().mockReturnValue({ data: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient();
 

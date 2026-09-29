@@ -13,19 +13,19 @@ import { MonitorAlertsIcon } from './alerts_icon';
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchActiveAlerts = vi.fn();
 vi.mock('../hooks/use_fetch_active_alerts', () => {
-      const mocked = {
-      useFetchActiveAlerts: () => mockUseFetchActiveAlerts(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchActiveAlerts: () => mockUseFetchActiveAlerts(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MonitorAlertsIcon', () => {
   beforeEach(() => {

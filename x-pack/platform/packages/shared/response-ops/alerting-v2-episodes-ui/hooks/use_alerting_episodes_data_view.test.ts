@@ -31,13 +31,13 @@ const mockSpaces = createMockSpaces();
 const mockDefaultQuery = 'FROM .rule-events | WHERE type == "alert"';
 
 vi.mock('@kbn/alerting-v2-common-queries', () => {
-      const mocked = {
-      buildEpisodesBaseQuery: vi.fn().mockReturnValue({
-        print: vi.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEpisodesBaseQuery: vi.fn().mockReturnValue({
+      print: vi.fn().mockReturnValue('FROM .rule-events | WHERE type == "alert"'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = {
   fields: [
@@ -204,7 +204,9 @@ describe('useAlertingEpisodesDataView', () => {
     });
 
     it('only declares fields returned by the episodes query', async () => {
-      const { ALERT_EPISODE_FIELDS } = (await vi.importActual<typeof import('@kbn/alerting-v2-common-queries')>('@kbn/alerting-v2-common-queries'));
+      const { ALERT_EPISODE_FIELDS } = await vi.importActual<
+        typeof import('@kbn/alerting-v2-common-queries')
+      >('@kbn/alerting-v2-common-queries');
 
       const { result } = renderHook(() => useAlertingEpisodesDataView({ services }), { wrapper });
 

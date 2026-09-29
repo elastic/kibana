@@ -18,11 +18,11 @@ import { ElasticAgentField } from './elastic_agent_field';
 const mockUseAgentBuilderAgents = vi.fn();
 
 vi.mock('../../hooks/use_agent_builder_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderField = (props: React.ComponentProps<typeof ElasticAgentField>) => {
   const services = coreMock.createStart();

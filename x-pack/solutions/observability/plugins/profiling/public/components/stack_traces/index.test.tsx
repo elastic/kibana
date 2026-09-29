@@ -17,68 +17,70 @@ import type { TopNSubchart } from '../../../common/topn';
 
 // Mock child components
 vi.mock('../stacked_bar_chart', () => {
-      const mocked = {
-      StackedBarChart: ({ onClick }: { onClick?: (chart: TopNSubchart) => void }) => (
-        <div data-test-subj="stackedBarChart">
-          <button
-            data-test-subj="mockChartClick"
-            onClick={() =>
-              onClick?.({
-                Category: 'test-category',
-                Label: 'Test Label',
-                Percentage: 50,
-                Series: [],
-                Color: '#000000',
-                Index: 0,
-                Metadata: [],
-              })
-            }
-          >
-            Click Chart
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StackedBarChart: ({ onClick }: { onClick?: (chart: TopNSubchart) => void }) => (
+      <div data-test-subj="stackedBarChart">
+        <button
+          data-test-subj="mockChartClick"
+          onClick={() =>
+            onClick?.({
+              Category: 'test-category',
+              Label: 'Test Label',
+              Percentage: 50,
+              Series: [],
+              Color: '#000000',
+              Index: 0,
+              Metadata: [],
+            })
+          }
+        >
+          Click Chart
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../chart_grid', () => {
-      const mocked = {
-      ChartGrid: ({ onChartClick }: { onChartClick?: (chart: TopNSubchart) => void }) => (
-        <div data-test-subj="chartGrid">
-          <button
-            data-test-subj="mockGridChartClick"
-            onClick={() =>
-              onChartClick?.({
-                Category: 'grid-category',
-                Label: 'Grid Label',
-                Percentage: 30,
-                Series: [],
-                Color: '#FF0000',
-                Index: 1,
-                Metadata: [],
-              })
-            }
-          >
-            Click Grid Chart
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChartGrid: ({ onChartClick }: { onChartClick?: (chart: TopNSubchart) => void }) => (
+      <div data-test-subj="chartGrid">
+        <button
+          data-test-subj="mockGridChartClick"
+          onClick={() =>
+            onChartClick?.({
+              Category: 'grid-category',
+              Label: 'Grid Label',
+              Percentage: 30,
+              Series: [],
+              Color: '#FF0000',
+              Index: 1,
+              Metadata: [],
+            })
+          }
+        >
+          Click Grid Chart
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../subchart', () => {
-      const mocked = {
-      SubChart: ({ category }: { category: string }) => (
-        <div data-test-subj="subChart">SubChart: {category}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SubChart: ({ category }: { category: string }) => (
+      <div data-test-subj="subChart">SubChart: {category}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../async_component', async () => {
-  const { AsyncStatus: AsyncStatusEnum } = (await vi.importActual<{ AsyncStatus: any }>('../../hooks/use_async'));
+  const { AsyncStatus: AsyncStatusEnum } = await vi.importActual<{ AsyncStatus: any }>(
+    '../../hooks/use_async'
+  );
   return {
     AsyncComponent: ({
       children,

@@ -159,7 +159,7 @@ vi.mock('../helpers/repo_source_classifier', () => {
 });
 
 vi.mock('@kbn/repo-packages', async () => {
-  const original = (await vi.importActual('@kbn/repo-packages'));
+  const original = await vi.importActual('@kbn/repo-packages');
 
   return {
     ...original,

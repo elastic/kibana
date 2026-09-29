@@ -27,7 +27,7 @@ vi.mock('./react_monaco_editor', () => {
 
 // Mock the htmlIdGenerator to generate predictable ids for snapshot tests
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -122,9 +122,7 @@ describe('<CodeEditor />', () => {
 
     // Verify our language features have been registered
     expect((monaco.languages.onLanguage as Mock).mock.calls.length).toBe(1);
-    expect((monaco.languages.registerCompletionItemProvider as Mock).mock.calls.length).toBe(
-      1
-    );
+    expect((monaco.languages.registerCompletionItemProvider as Mock).mock.calls.length).toBe(1);
     expect((monaco.languages.registerHoverProvider as Mock).mock.calls.length).toBe(1);
   });
 

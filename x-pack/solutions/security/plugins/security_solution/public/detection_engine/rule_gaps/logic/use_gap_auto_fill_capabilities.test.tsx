@@ -17,32 +17,32 @@ const mockUseIsExperimentalFeatureEnabled = vi.fn();
 const mockUseProductFeatureKeys = vi.fn();
 
 vi.mock('../../../common/hooks/use_license', () => {
-      const mocked = {
-      useLicense: () => mockUseLicense(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: () => mockUseLicense(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: () => mockUseUserPrivileges(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserPrivileges: () => mockUseUserPrivileges(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_product_feature_keys', () => {
-      const mocked = {
-      useProductFeatureKeys: () => mockUseProductFeatureKeys(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProductFeatureKeys: () => mockUseProductFeatureKeys(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useGapAutoFillCapabilities', () => {
   beforeEach(() => {

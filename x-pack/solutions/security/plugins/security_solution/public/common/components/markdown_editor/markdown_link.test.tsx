@@ -15,20 +15,20 @@ const mockPrepend = vi.fn((path: string) => `/kbn${path}`);
 const mockGet = vi.fn(() => '/kbn');
 
 vi.mock('../../lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            basePath: {
-              prepend: (path: string) => mockPrepend(path),
-              get: () => mockGet(),
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          basePath: {
+            prepend: (path: string) => mockPrepend(path),
+            get: () => mockGet(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MarkdownLink', () => {
   const defaultProps = { children: 'link text' };

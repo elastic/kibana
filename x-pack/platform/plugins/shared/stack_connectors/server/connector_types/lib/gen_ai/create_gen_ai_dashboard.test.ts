@@ -15,11 +15,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { Logger } from '@kbn/logging';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const dashboardId = 'test-dashboard-id';

@@ -25,11 +25,11 @@ import { useEvalsTraceFetcher } from '../../hooks/use_evals_api';
 import { useModelConnectors } from '../../hooks/use_model_connectors';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_online_eval_workflows');
 vi.mock('../../hooks/use_evals_permissions');
@@ -37,28 +37,28 @@ vi.mock('../../hooks/use_evals_api');
 vi.mock('../../hooks/use_model_connectors');
 
 vi.mock('@kbn/lens-embeddable-utils', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn().mockImplementation(() => ({
-        fromAPIFormat: (config: unknown) => config,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
+      fromAPIFormat: (config: unknown) => config,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/llm-trace-waterfall', () => {
-      const mocked = {
-      TraceWaterfall: ({ traceId }: { traceId: string }) => (
-        <div data-test-subj="mockTraceWaterfall">{`Trace waterfall ${traceId}`}</div>
-      ),
-      useTraceSpans: () => ({
-        spans: [],
-        durationMs: 0,
-        isLoading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: ({ traceId }: { traceId: string }) => (
+      <div data-test-subj="mockTraceWaterfall">{`Trace waterfall ${traceId}`}</div>
+    ),
+    useTraceSpans: () => ({
+      spans: [],
+      durationMs: 0,
+      isLoading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseKibana = vi.mocked(useKibana);
 const mockedUseOnlineEvalWorkflow = vi.mocked(useOnlineEvalWorkflow);

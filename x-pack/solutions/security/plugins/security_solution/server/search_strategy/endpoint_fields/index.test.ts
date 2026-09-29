@@ -21,11 +21,11 @@ import type { IndexFieldsStrategyRequestByIndices } from '@kbn/timelines-plugin/
 import { buildIndexNameWithNamespace } from '../../../common/endpoint/utils/index_name_utilities';
 
 vi.mock('../../../common/endpoint/utils/index_name_utilities', () => {
-      const mocked = {
-      buildIndexNameWithNamespace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildIndexNameWithNamespace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildIndexNameWithNamespaceMock = buildIndexNameWithNamespace as Mock;
 

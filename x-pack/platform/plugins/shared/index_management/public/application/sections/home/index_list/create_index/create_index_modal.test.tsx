@@ -20,25 +20,25 @@ import { NotificationService } from '../../../../services/notification';
 
 const mockCreateIndex = vi.fn();
 vi.mock('../../../../services', () => {
-      const mocked = {
-      createIndex: (...args: unknown[]) => mockCreateIndex(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createIndex: (...args: unknown[]) => mockCreateIndex(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let notificationService: NotificationService;
 let showSuccessToastSpy: MockInstance;
 
 vi.mock('./utils', () => {
-      const mocked = {
-      generateRandomIndexName: () => 'search-abcd',
-      isValidIndexName: (name: string) => {
-        if (!name || name !== name.toLowerCase() || name.length === 0) return false;
-        return true;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateRandomIndexName: () => 'search-abcd',
+    isValidIndexName: (name: string) => {
+      if (!name || name !== name.toLowerCase() || name.length === 0) return false;
+      return true;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderModal = (props: Partial<React.ComponentProps<typeof CreateIndexModal>> = {}) => {
   const defaultProps = {

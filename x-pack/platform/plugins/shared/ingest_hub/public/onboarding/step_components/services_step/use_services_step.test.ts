@@ -11,11 +11,11 @@ import type { Mock } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { useServicesStep } from './use_services_step';

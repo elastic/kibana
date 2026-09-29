@@ -15,14 +15,14 @@ import { useManagedContextFlyoutZIndex } from './use_managed_context_flyout_z_in
 const mockGetState = vi.fn(() => ({ currentZIndex: 0 }));
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      getFlyoutManagerStore: vi.fn(() => ({ getState: mockGetState })),
-      useIsInManagedFlyout: vi.fn(),
-      useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    getFlyoutManagerStore: vi.fn(() => ({ getState: mockGetState })),
+    useIsInManagedFlyout: vi.fn(),
+    useEuiTheme: () => ({ euiTheme: { levels: { flyout: 1000 } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useManagedContextFlyoutZIndex', () => {
   beforeEach(() => {

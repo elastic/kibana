@@ -16,44 +16,44 @@ const mockHistogramBarSeries = vi.fn();
 const mockAxis = vi.fn();
 
 vi.mock('@elastic/charts', () => {
-      const mocked = {
-      Chart: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="signalFiringsChart">{children}</div>
-      ),
-      Settings: (props: Record<string, unknown>) => {
-        mockSettings(props);
-        return null;
-      },
-      HistogramBarSeries: (props: Record<string, unknown>) => {
-        mockHistogramBarSeries(props);
-        return null;
-      },
-      Axis: (props: Record<string, unknown>) => {
-        mockAxis(props);
-        return null;
-      },
-      Position: { Left: 'left', Bottom: 'bottom' },
-      ScaleType: { Time: 'time', Linear: 'linear' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="signalFiringsChart">{children}</div>
+    ),
+    Settings: (props: Record<string, unknown>) => {
+      mockSettings(props);
+      return null;
+    },
+    HistogramBarSeries: (props: Record<string, unknown>) => {
+      mockHistogramBarSeries(props);
+      return null;
+    },
+    Axis: (props: Record<string, unknown>) => {
+      mockAxis(props);
+      return null;
+    },
+    Position: { Left: 'left', Bottom: 'bottom' },
+    ScaleType: { Time: 'time', Linear: 'linear' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBaseTheme = { lineSeriesStyle: {} };
 const mockUseChartsBaseTheme = vi.fn(() => mockBaseTheme);
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: () => ({ theme: { useChartsBaseTheme: mockUseChartsBaseTheme } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: () => ({ theme: { useChartsBaseTheme: mockUseChartsBaseTheme } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di', () => {
-      const mocked = {
-      PluginStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const BASE_GTE_MS = 1_700_000_000_000;
 const BASE_LTE_MS = BASE_GTE_MS + 24 * 60 * 60 * 1000;

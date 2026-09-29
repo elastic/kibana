@@ -27,22 +27,22 @@ interface PrivilegesCheckResult {
 }
 
 vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/es-ui-shared-plugin/public')),
-      SectionLoading: ({ children }: { children: ReactNode }) => (
-        <div data-test-subj="sectionLoading">{children}</div>
-      ),
-      GlobalFlyout: {
-        useGlobalFlyout: () => ({
-          addContent: mockAddContent,
-          removeContent: mockRemoveContent,
-        }),
-      },
-      WithPrivileges: ({ children }: { children: (result: PrivilegesCheckResult) => ReactNode }) =>
-        children({ hasPrivileges: true, isLoading: false, privilegesMissing: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/es-ui-shared-plugin/public')),
+    SectionLoading: ({ children }: { children: ReactNode }) => (
+      <div data-test-subj="sectionLoading">{children}</div>
+    ),
+    GlobalFlyout: {
+      useGlobalFlyout: () => ({
+        addContent: mockAddContent,
+        removeContent: mockRemoveContent,
+      }),
+    },
+    WithPrivileges: ({ children }: { children: (result: PrivilegesCheckResult) => ReactNode }) =>
+      children({ hasPrivileges: true, isLoading: false, privilegesMissing: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = {
   core: {
@@ -57,14 +57,14 @@ const mockServices = {
 };
 
 vi.mock('../../app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../app_context')),
-      useAppContext: () => ({
-        services: mockServices,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../app_context')),
+    useAppContext: () => ({
+      services: mockServices,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { KibanaDeprecationsList } from './kibana_deprecations';
 

@@ -35,12 +35,12 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const license$ = new BehaviorSubject(
@@ -88,14 +88,14 @@ vi.mock('@kbn/kibana-react-plugin/public', () => ({
 }));
 vi.mock('@kbn/observability-shared-plugin/public');
 vi.mock('../../hooks/create_use_rules_link', () => {
-      const mocked = {
-      createUseRulesLink: vi.fn(() => () => ({
-        href: '/app/rules',
-        onClick: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createUseRulesLink: vi.fn(() => () => ({
+      href: '/app/rules',
+      onClick: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
   appMountParameters: {
     setHeaderActionMenu: () => {},
@@ -133,44 +133,44 @@ vi.spyOn(dataContext, 'useHasData').mockImplementation(() => ({
 }));
 
 vi.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => {
-      const mocked = {
-      fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
+  };
+  return { ...mocked, default: mocked };
+});
 const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as Mock;
 
 vi.mock('../../hooks/use_time_buckets', () => {
-      const mocked = {
-      useTimeBuckets: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeBuckets: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_has_data', () => {
-      const mocked = {
-      useHasData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useTimeBuckets } = (await vi.importMock('../../hooks/use_time_buckets'));
-const { useHasData } = (await vi.importMock('../../hooks/use_has_data'));
+const { useTimeBuckets } = await vi.importMock('../../hooks/use_time_buckets');
+const { useHasData } = await vi.importMock('../../hooks/use_has_data');
 
 vi.mock('../../hooks/use_get_available_rules_with_descriptions');
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public');
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
-      useGetRuleTypesPermissions: vi.fn(() => ({
-        authorizedToReadAnyRules: true,
-        authorizedToReadRuleType: () => true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+    useGetRuleTypesPermissions: vi.fn(() => ({
+      authorizedToReadAnyRules: true,
+      authorizedToReadRuleType: () => true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleDescriptions = [
   {

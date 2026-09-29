@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { LogicMounter } from '../../../__mocks__/kea_logic';
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-import { LogicMounter } from '../../../__mocks__/kea_logic';
 
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -21,19 +21,19 @@ import { ExploreTableColumns, ExploreTables } from './analytics_collection_explo
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 vi.mock('../../../shared/kibana/kibana_logic', () => {
-      const mocked = {
-      KibanaLogic: {
-        values: {
-          data: {
-            search: {
-              search: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
-            },
+  const mocked = {
+    KibanaLogic: {
+      values: {
+        data: {
+          search: {
+            search: vi.fn().mockReturnValue({ subscribe: vi.fn() }),
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnalyticsCollectionExplorerTablesLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionExploreTableLogic);

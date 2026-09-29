@@ -16,27 +16,27 @@ import { THUMBNAIL_SCREENSHOT_SIZE } from '../screenshot/screenshot_size';
 
 let dialogProps: Record<string, unknown> = {};
 vi.mock('../screenshot/journey_screenshot_dialog', async () => {
-      const mocked = {
-      ...(await vi.importActual('../screenshot/journey_screenshot_dialog')),
-      JourneyScreenshotDialog: (props: {
-        checkGroup: string | undefined;
-        initialImgSrc: string | undefined;
-        initialStepNumber: number;
-        maxSteps: number | undefined;
-        isOpen: boolean;
-        onClose: () => void;
-      }) => {
-        dialogProps = props;
-        return (
-          <div>
-            {props.isOpen ? <img alt="img-in-dialog" src={props.initialImgSrc} /> : null}
-            <button onClick={props.onClose}>Close dialog</button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../screenshot/journey_screenshot_dialog')),
+    JourneyScreenshotDialog: (props: {
+      checkGroup: string | undefined;
+      initialImgSrc: string | undefined;
+      initialStepNumber: number;
+      maxSteps: number | undefined;
+      isOpen: boolean;
+      onClose: () => void;
+    }) => {
+      dialogProps = props;
+      return (
+        <div>
+          {props.isOpen ? <img alt="img-in-dialog" src={props.initialImgSrc} /> : null}
+          <button onClick={props.onClose}>Close dialog</button>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('JourneyScreenshotPreview', () => {
   const testCheckGroup = 'test-check-group';

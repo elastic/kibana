@@ -17,11 +17,11 @@ import type { Logger } from '@kbn/core/server';
 import type { ProfilesRepository } from '../repository';
 
 vi.mock('./global_profile_initializer', () => {
-      const mocked = {
-      ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ensureGlobalAnonymizationProfile: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('legacy_ui_settings_migration', () => {
   const logger = {

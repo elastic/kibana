@@ -10,12 +10,12 @@
 import { vi } from 'vitest';
 
 vi.mock('@kbn/moon', () => {
-      const mocked = {
-      getMoonChangedFiles: vi.fn(),
-      getAffectedMoonProjectsFromChangedFiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMoonChangedFiles: vi.fn(),
+    getAffectedMoonProjectsFromChangedFiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import fs from 'fs';
 import os from 'os';

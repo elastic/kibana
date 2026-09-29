@@ -15,28 +15,28 @@ import { MobileServiceOverviewServiceMapSection } from '.';
 
 const mockUseApmParams = vi.fn();
 vi.mock('../../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => mockUseApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => mockUseApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseApmServiceContext = vi.fn();
 vi.mock('../../../../../context/apm_service/use_apm_service_context', () => {
-      const mocked = {
-      useApmServiceContext: () => mockUseApmServiceContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmServiceContext: () => mockUseApmServiceContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockContextualServiceMapSection = vi.fn((_props: ContextualServiceMapSectionProps) => null);
 vi.mock('../../../service_map/contextual_map/contextual_service_map_section', () => {
-      const mocked = {
-      ContextualServiceMapSection: (props: ContextualServiceMapSectionProps) =>
-        mockContextualServiceMapSection(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContextualServiceMapSection: (props: ContextualServiceMapSectionProps) =>
+      mockContextualServiceMapSection(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseQuery = {
   environment: 'ENVIRONMENT_ALL',

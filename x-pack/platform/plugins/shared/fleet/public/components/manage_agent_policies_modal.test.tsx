@@ -22,54 +22,58 @@ import { useGetAgentPolicies } from '../hooks';
 import { ManageAgentPoliciesModal } from './manage_agent_policies_modal';
 
 vi.mock('../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks')),
-      usePackagePolicyWithRelatedData: vi.fn().mockReturnValue({
-        packageInfo: {},
-        packagePolicy: { name: 'Integration 1' },
-        savePackagePolicy: vi.fn().mockResolvedValue({ error: undefined }),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '../applications/fleet/sections/agent_policy/edit_package_policy_page/hooks'
+    )),
+    usePackagePolicyWithRelatedData: vi.fn().mockReturnValue({
+      packageInfo: {},
+      packagePolicy: { name: 'Integration 1' },
+      savePackagePolicy: vi.fn().mockResolvedValue({ error: undefined }),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: vi.fn(),
-            addError: vi.fn(),
+  const mocked = {
+    ...(await vi.importActual('../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
+        },
+      },
+    }),
+    useGetAgentPolicies: vi.fn().mockReturnValue({
+      data: {
+        items: [] as AgentPolicy[],
+      },
+      isLoading: false,
+    }),
+    useGetPackagePolicies: vi.fn().mockReturnValue({
+      data: {
+        items: [
+          { name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] },
+        ],
+      },
+      isLoading: false,
+    }),
+    useGetOutputs: vi.fn().mockReturnValue({
+      data: {
+        items: [
+          {
+            id: 'logstash-1',
+            type: 'logstash',
           },
-        },
-      }),
-      useGetAgentPolicies: vi.fn().mockReturnValue({
-        data: {
-          items: [] as AgentPolicy[],
-        },
-        isLoading: false,
-      }),
-      useGetPackagePolicies: vi.fn().mockReturnValue({
-        data: {
-          items: [{ name: 'Integration 1', revision: 2, id: 'integration1', policy_ids: ['policy1'] }],
-        },
-        isLoading: false,
-      }),
-      useGetOutputs: vi.fn().mockReturnValue({
-        data: {
-          items: [
-            {
-              id: 'logstash-1',
-              type: 'logstash',
-            },
-          ],
-        },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        ],
+      },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ManageAgentPoliciesModal', () => {
   let testRenderer: TestRenderer;

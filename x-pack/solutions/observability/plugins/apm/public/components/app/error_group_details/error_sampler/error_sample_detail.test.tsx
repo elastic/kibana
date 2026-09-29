@@ -17,75 +17,75 @@ import { MockApmPluginContextWrapper } from '../../../../context/apm_plugin/mock
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      isPending: vi.fn((status: string) => status === 'loading'),
-      isSuccess: vi.fn((status: string) => status === 'success'),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isPending: vi.fn((status: string) => status === 'loading'),
+    isSuccess: vi.fn((status: string) => status === 'success'),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        path: { groupId: 'test-group-id' },
-        query: {
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
-          errorId: 'error-id-1',
-          comparisonEnabled: false,
-          offset: undefined,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      path: { groupId: 'test-group-id' },
+      query: {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
+        errorId: 'error-id-1',
+        comparisonEnabled: false,
+        offset: undefined,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({
-        link: vi.fn(() => '/test-link'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({
+      link: vi.fn(() => '/test-link'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start: '2025-01-01T00:00:00.000Z',
-        end: '2025-01-02T00:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start: '2025-01-01T00:00:00.000Z',
+      end: '2025-01-02T00:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../context/url_params_context/use_url_params', () => {
-      const mocked = {
-      useLegacyUrlParams: () => ({
-        urlParams: {
-          detailTab: undefined,
-          offset: undefined,
-          comparisonEnabled: false,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLegacyUrlParams: () => ({
+      urlParams: {
+        detailTab: undefined,
+        offset: undefined,
+        comparisonEnabled: false,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./error_sample_contextual_insight', () => {
-      const mocked = {
-      ErrorSampleContextualInsight: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ErrorSampleContextualInsight: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

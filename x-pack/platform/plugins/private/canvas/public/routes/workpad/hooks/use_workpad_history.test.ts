@@ -16,18 +16,18 @@ const mockGetHistory = vi.fn();
 
 // Mock the hooks and actions used by the UseWorkpad hook
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => mockGetHistory(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => mockGetHistory(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: (selector: any) => selector(mockGetState()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: (selector: any) => selector(mockGetState()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRestoreHistory', () => {
   beforeEach(() => {

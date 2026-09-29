@@ -82,8 +82,8 @@ describe('ui settings global client', () => {
         await uiSettingsClient.set('settingD', 'cde');
       };
       await expect(setUnregisteredSetting).rejects.toThrow(
-                'Global setting settingD is not registered. Global settings need to be registered before they can be set'
-              );
+        'Global setting settingD is not registered. Global settings need to be registered before they can be set'
+      );
     });
 
     it('sets a value of a registered setting', async () => {
@@ -108,8 +108,8 @@ describe('ui settings global client', () => {
         await uiSettingsClient.setMany({ settingZ: 'cde', settingC: true });
       };
       await expect(setSettings).rejects.toThrow(
-                'Global setting settingZ is not registered. Global settings need to be registered before they can be set'
-              );
+        'Global setting settingZ is not registered. Global settings need to be registered before they can be set'
+      );
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
 
@@ -134,8 +134,8 @@ describe('ui settings global client', () => {
         await uiSettingsClient.removeMany(['foo']);
       };
       await expect(setSettings).rejects.toThrow(
-                'Global setting foo is not registered. Global settings need to be registered before they can be set'
-              );
+        'Global setting foo is not registered. Global settings need to be registered before they can be set'
+      );
       expect(savedObjectsClient.update).not.toHaveBeenCalled();
     });
 

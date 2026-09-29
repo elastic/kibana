@@ -626,9 +626,9 @@ describe('stepCreateAlertingAssets', () => {
       create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    vi
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
-      .mockResolvedValue(rulesClient);
+    vi.mocked(
+      appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace
+    ).mockResolvedValue(rulesClient);
 
     const context = {
       savedObjectsClient,
@@ -689,9 +689,9 @@ describe('stepCreateAlertingAssets', () => {
       create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    vi
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
-      .mockResolvedValue(rulesClient);
+    vi.mocked(
+      appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace
+    ).mockResolvedValue(rulesClient);
 
     const context = {
       savedObjectsClient,
@@ -750,9 +750,9 @@ describe('stepCreateAlertingAssets', () => {
       create: vi.fn().mockResolvedValue({ id: 'new-rule-id' }),
     } as unknown as RulesClientApi;
 
-    vi
-      .mocked(appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace)
-      .mockResolvedValue(rulesClient);
+    vi.mocked(
+      appContextService.getAlertingStart()!.getRulesClientWithRequestInSpace
+    ).mockResolvedValue(rulesClient);
 
     // No installAsAdditionalSpace — the function must derive it from installedPkg
     const context = {

@@ -20,18 +20,18 @@ const mockUseAgentBuilderAgents = vi.fn();
 const mockUseIndices = vi.fn();
 
 vi.mock('../../hooks/use_agent_builder_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => mockUseAgentBuilderAgents(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_indices', () => {
-      const mocked = {
-      useIndices: () => mockUseIndices(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIndices: () => mockUseIndices(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultEbtElement = CONTEXT_ENGINE_UI_EBT.element.aiIndexCreatePageTraceSelector;
 

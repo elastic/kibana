@@ -16,20 +16,20 @@ const mockGetUrlForApp = vi.fn((appId: string, { path }: { path?: string } = {})
 });
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          chrome: {
-            setBreadcrumbs: mockSetBreadcrumbs,
-          },
-          application: {
-            getUrlForApp: mockGetUrlForApp,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        chrome: {
+          setBreadcrumbs: mockSetBreadcrumbs,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          getUrlForApp: mockGetUrlForApp,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useBreadcrumb', () => {
   beforeEach(() => {

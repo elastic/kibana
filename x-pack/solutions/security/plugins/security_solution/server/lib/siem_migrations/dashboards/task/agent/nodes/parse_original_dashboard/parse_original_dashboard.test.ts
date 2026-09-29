@@ -72,9 +72,9 @@ describe('getParseOriginalDashboardNode', () => {
       getPanelQuery: vi.fn(),
       getVersion: vi.fn().mockResolvedValue('1.1'),
     };
-    vi
-      .mocked(mockSplunkXmlDashboardParser)
-      .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
+    vi.mocked(mockSplunkXmlDashboardParser).mockImplementation(
+      () => mockParserInstance as unknown as SplunkXmlDashboardParser
+    );
 
     const node = getTestNode();
     const result = await node(mockState, mockConfig);
@@ -202,9 +202,9 @@ describe('getParseOriginalDashboardNode', () => {
       getVersion: vi.fn().mockResolvedValue('1.1'),
       extractPanels: vi.fn().mockRejectedValue(new Error('Parser error')),
     };
-    vi
-      .mocked(mockSplunkXmlDashboardParser)
-      .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
+    vi.mocked(mockSplunkXmlDashboardParser).mockImplementation(
+      () => mockParserInstance as unknown as SplunkXmlDashboardParser
+    );
 
     const node = getTestNode();
 
@@ -223,9 +223,9 @@ describe('getParseOriginalDashboardNode', () => {
       getVersion: vi.fn().mockResolvedValue('1.1'),
       extractPanels: vi.fn().mockResolvedValue([]),
     };
-    vi
-      .mocked(mockSplunkXmlDashboardParser)
-      .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
+    vi.mocked(mockSplunkXmlDashboardParser).mockImplementation(
+      () => mockParserInstance as unknown as SplunkXmlDashboardParser
+    );
 
     const node = getTestNode();
     const result = await node(mockState, mockConfig);
@@ -267,9 +267,9 @@ describe('getParseOriginalDashboardNode', () => {
       getVersion: vi.fn().mockResolvedValue('1.1'),
       extractPanels: vi.fn().mockResolvedValue(mockPanels),
     };
-    vi
-      .mocked(mockSplunkXmlDashboardParser)
-      .mockImplementation(() => mockParserInstance as unknown as SplunkXmlDashboardParser);
+    vi.mocked(mockSplunkXmlDashboardParser).mockImplementation(
+      () => mockParserInstance as unknown as SplunkXmlDashboardParser
+    );
 
     const node = getTestNode();
     const result = await node(mockState, mockConfig);

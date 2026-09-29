@@ -18,26 +18,26 @@ import { SuperTimelineQueryTabHeader } from './super_timeline_query_tab_header';
 import { useQueryTabHeaderData } from './use_query_tab_header_data';
 
 vi.mock('./use_query_tab_header_data', () => {
-      const mocked = {
-      useQueryTabHeaderData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryTabHeaderData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../search_or_filter', () => {
-      const mocked = {
-      StatefulSearchOrFilter: () => <div data-test-subj="mock-search-or-filter" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StatefulSearchOrFilter: () => <div data-test-subj="mock-search-or-filter" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // InPortal renders its children but needs a node — render children directly in tests.
 vi.mock('react-reverse-portal', () => {
-      const mocked = {
-      InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQueryTabHeaderData = useQueryTabHeaderData as MockedFunction<
   typeof useQueryTabHeaderData

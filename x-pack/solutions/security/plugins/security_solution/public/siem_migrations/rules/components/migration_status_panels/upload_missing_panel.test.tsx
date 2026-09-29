@@ -20,11 +20,11 @@ import { MigrationSource } from '../../../common/types';
 
 vi.mock('../../../common/hooks/use_get_missing_resources');
 vi.mock('../../../common/components/migration_data_input_flyout_context', () => {
-      const mocked = {
-      useMigrationDataInputContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMigrationDataInputContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetMissingResources = useGetMissingResources as Mock;
 const mockUseMigrationDataInputContext = useMigrationDataInputContext as Mock;

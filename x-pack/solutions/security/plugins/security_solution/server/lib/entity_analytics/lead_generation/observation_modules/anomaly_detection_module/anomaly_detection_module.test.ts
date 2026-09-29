@@ -14,11 +14,11 @@ import type { LeadEntity } from '../../types';
 
 const mockGetSecurityMlJobIds = vi.fn();
 vi.mock('../../../ml_anomaly_detection/get_security_ml_job_ids', () => {
-      const mocked = {
-      getSecurityMlJobIds: (...args: unknown[]) => mockGetSecurityMlJobIds(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSecurityMlJobIds: (...args: unknown[]) => mockGetSecurityMlJobIds(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { createAnomalyDetectionModule } from './module';
 import { buildAnomalyObservation } from './observations';

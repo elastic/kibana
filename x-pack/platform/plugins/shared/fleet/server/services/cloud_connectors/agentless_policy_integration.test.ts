@@ -21,11 +21,11 @@ import { cloudConnectorService } from '../cloud_connector';
 import { createAndIntegrateCloudConnector } from './agentless_policy_integration';
 
 vi.mock('../secrets/cloud_connector', () => {
-      const mocked = {
-      extractAndCreateCloudConnectorSecrets: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractAndCreateCloudConnectorSecrets: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createAndIntegrateCloudConnector — policy group enforcement on reuse', () => {
   const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;

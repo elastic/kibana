@@ -19,19 +19,19 @@ import {
 } from '../../../../common/hooks/mitre/use_mitre_configuration.mock';
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMitreConfiguration = vi.fn();
 vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
-      const mocked = {
-      useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AddMitreThreat', () => {
   beforeEach(() => {

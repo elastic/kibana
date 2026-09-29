@@ -61,7 +61,7 @@ import { securityServiceMock } from '@kbn/core/server/mocks';
 import { encodeApiKey } from '../inbound/event_identity/encode_api_key';
 
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -71,24 +71,24 @@ vi.mock('@kbn/core-saved-objects-utils-server', async () => {
 });
 
 vi.mock('../lib/get_oauth_jwt_access_token', () => {
-      const mocked = {
-      getOAuthJwtAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthJwtAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/get_oauth_client_credentials_access_token', () => {
-      const mocked = {
-      getOAuthClientCredentialsAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthClientCredentialsAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'uuidv4',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'uuidv4',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -174,9 +174,7 @@ beforeEach(() => {
     securityService,
   });
   (getOAuthJwtAccessToken as Mock).mockResolvedValue(`Bearer jwttokentokentoken`);
-  (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValue(
-    `Bearer clienttokentokentoken`
-  );
+  (getOAuthClientCredentialsAccessToken as Mock).mockResolvedValue(`Bearer clienttokentokentoken`);
   getEventLogClient.mockResolvedValue(eventLogClient);
 });
 

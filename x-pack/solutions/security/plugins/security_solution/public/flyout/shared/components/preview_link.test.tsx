@@ -39,27 +39,27 @@ vi.mock('../../../common/lib/kibana', () => {
 });
 
 vi.mock('../../entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: vi.fn().mockReturnValue({
-        entity: null,
-        entityRecord: null,
-        firstSeen: null,
-        lastSeen: null,
-        isLoading: false,
-        error: null,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: vi.fn().mockReturnValue({
+      entity: null,
+      entityRecord: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/user_privileges');
 

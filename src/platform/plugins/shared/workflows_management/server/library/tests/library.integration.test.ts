@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { readFile } from 'fs/promises';
 import http, { type Server } from 'http';
 import path from 'path';
+import { vi } from 'vitest';
 
 import { parse } from 'yaml';
 import { loggerMock } from '@kbn/logging-mocks';

@@ -15,11 +15,11 @@ import { actionsClientMock } from '../actions_client/actions_client.mock';
 import { verifyAccessAndContext } from './verify_access_and_context';
 
 vi.mock('../lib/verify_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

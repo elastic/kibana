@@ -23,13 +23,13 @@ import { useTimelineUnifiedDataTableContext } from '../../unified_components/dat
 import { BUTTON_TEST_ID } from '../../../../../common/components/header_actions/pin_event_action';
 
 vi.mock('../../../../../common/hooks/use_license', () => {
-      const mocked = {
-      useLicense: vi.fn().mockReturnValue({
-        isEnterprise: () => true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: vi.fn().mockReturnValue({
+      isEnterprise: () => true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const useLicenseMock = useLicense as Mock;
 
 vi.mock('../../unified_components/data_table/use_timeline_unified_data_table_context');

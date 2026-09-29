@@ -19,11 +19,11 @@ import { useAgentBuilderMcpUrl } from '../../hooks/use_mcp_url';
 vi.mock('../../hooks/use_elasticsearch_url');
 vi.mock('../../hooks/use_mcp_url');
 vi.mock('@kbn/search-api-keys-components', () => {
-      const mocked = {
-      ApiKeyForm: () => <div data-test-subj="apiKeyForm" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApiKeyForm: () => <div data-test-subj="apiKeyForm" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseElasticsearchUrl = useElasticsearchUrl as Mock;
 const mockUseAgentBuilderMcpUrl = useAgentBuilderMcpUrl as Mock;

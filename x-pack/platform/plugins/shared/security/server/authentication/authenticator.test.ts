@@ -61,15 +61,15 @@ import { sessionMock } from '../session_management/index.mock';
 import type { UserProfileGrant } from '../user_profile';
 import { userProfileServiceMock } from '../user_profile/user_profile_service.mock';
 vi.mock('../otel/instrumentation', () => {
-      const mocked = {
-      securityTelemetry: {
-        recordLoginDuration: vi.fn(),
-        recordSessionCreationDuration: vi.fn(),
-        recordUserProfileActivationDuration: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityTelemetry: {
+      recordLoginDuration: vi.fn(),
+      recordSessionCreationDuration: vi.fn(),
+      recordUserProfileActivationDuration: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let auditLogger: AuditLogger;
 function getMockOptions({
@@ -175,10 +175,12 @@ describe('Authenticator', () => {
       ...mockHTTPAuthenticationProvider,
     }));
 
-    (await vi.importMock('./providers/basic')).BasicAuthenticationProvider.mockImplementation(() => ({
-      type: 'basic',
-      ...mockBasicAuthenticationProvider,
-    }));
+    (await vi.importMock('./providers/basic')).BasicAuthenticationProvider.mockImplementation(
+      () => ({
+        type: 'basic',
+        ...mockBasicAuthenticationProvider,
+      })
+    );
 
     (await vi.importMock('./providers/saml')).SAMLAuthenticationProvider.mockImplementation(() => ({
       type: 'saml',
@@ -212,8 +214,8 @@ describe('Authenticator', () => {
 
     describe('#options.urls.loggedOut', () => {
       it('points to /login if provider requires login form', async () => {
-        const authenticationProviderMock =
-          (await vi.importMock(`./providers/basic`)).BasicAuthenticationProvider;
+        const authenticationProviderMock = (await vi.importMock(`./providers/basic`))
+          .BasicAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(getMockOptions());
         const getLoggedOutURL = authenticationProviderMock.mock.calls[0][0].urls.loggedOut;
@@ -232,8 +234,8 @@ describe('Authenticator', () => {
       });
 
       it('points to /login if login selector is enabled', async () => {
-        const authenticationProviderMock =
-          (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
+        const authenticationProviderMock = (await vi.importMock(`./providers/saml`))
+          .SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -257,8 +259,8 @@ describe('Authenticator', () => {
       });
 
       it('points to /security/logged_out if login selector is NOT enabled', async () => {
-        const authenticationProviderMock =
-          (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
+        const authenticationProviderMock = (await vi.importMock(`./providers/saml`))
+          .SAMLAuthenticationProvider;
         authenticationProviderMock.mockClear();
         new Authenticator(
           getMockOptions({
@@ -285,8 +287,8 @@ describe('Authenticator', () => {
 
       describe('custom URL', () => {
         it('points to a custom URL if `customLogoutURL` is specified and logout reason is not SESSION_EXPIRED', async () => {
-          const authenticationProviderMock =
-            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
+          const authenticationProviderMock = (await vi.importMock(`./providers/saml`))
+            .SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -312,8 +314,8 @@ describe('Authenticator', () => {
         });
 
         it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_EXPIRED', async () => {
-          const authenticationProviderMock =
-            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
+          const authenticationProviderMock = (await vi.importMock(`./providers/saml`))
+            .SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -332,8 +334,8 @@ describe('Authenticator', () => {
         });
 
         it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_IDLE_TIMEOUT', async () => {
-          const authenticationProviderMock =
-            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
+          const authenticationProviderMock = (await vi.importMock(`./providers/saml`))
+            .SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -354,8 +356,8 @@ describe('Authenticator', () => {
         });
 
         it('does not point to a custom URL if `customLogoutURL` is specified and logout reason is SESSION_LIFESPAN_TIMEOUT', async () => {
-          const authenticationProviderMock =
-            (await vi.importMock(`./providers/saml`)).SAMLAuthenticationProvider;
+          const authenticationProviderMock = (await vi.importMock(`./providers/saml`))
+            .SAMLAuthenticationProvider;
           authenticationProviderMock.mockClear();
           new Authenticator(
             getMockOptions({
@@ -379,11 +381,12 @@ describe('Authenticator', () => {
 
     describe('HTTP authentication provider', () => {
       beforeEach(async () => {
-        (await vi.importMock('./providers/basic'))
-          .BasicAuthenticationProvider.mockImplementation(() => ({
+        (await vi.importMock('./providers/basic')).BasicAuthenticationProvider.mockImplementation(
+          () => ({
             type: 'basic',
             getHTTPAuthenticationScheme: vi.fn().mockReturnValue('basic'),
-          }));
+          })
+        );
       });
 
       afterEach(() => vi.resetAllMocks());
@@ -950,15 +953,15 @@ describe('Authenticator', () => {
           shouldInvalidateIntermediateSessionAfterLogin: vi.fn().mockReturnValue(true),
         };
 
-        (await vi.importMock('./providers/saml'))
-          .SAMLAuthenticationProvider.mockImplementationOnce(() => ({
+        (await vi.importMock('./providers/saml')).SAMLAuthenticationProvider.mockImplementationOnce(
+          () => ({
             type: 'saml',
             ...mockSAMLAuthenticationProvider1,
-          }))
-          .mockImplementationOnce(() => ({
-            type: 'saml',
-            ...mockSAMLAuthenticationProvider2,
-          }));
+          })
+        ).mockImplementationOnce(() => ({
+          type: 'saml',
+          ...mockSAMLAuthenticationProvider2,
+        }));
 
         mockOptions = getMockOptions({
           providers: {
@@ -1154,11 +1157,13 @@ describe('Authenticator', () => {
 
       // Re-configure authenticator with `token` provider that uses the name of `basic`.
       const loginMock = vi.fn().mockResolvedValue(AuthenticationResult.succeeded(user));
-      (await vi.importMock('./providers/token')).TokenAuthenticationProvider.mockImplementation(() => ({
-        type: 'token',
-        login: loginMock,
-        getHTTPAuthenticationScheme: vi.fn(),
-      }));
+      (await vi.importMock('./providers/token')).TokenAuthenticationProvider.mockImplementation(
+        () => ({
+          type: 'token',
+          login: loginMock,
+          getHTTPAuthenticationScheme: vi.fn(),
+        })
+      );
       mockOptions = getMockOptions({ providers: { token: { basic1: { order: 0 } } } });
       authenticator = new Authenticator(mockOptions);
 

@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ServiceAccountEditorWidgets } from './service_account_editor_widgets';
@@ -188,11 +187,9 @@ describe('ServiceAccountEditorWidgets', () => {
         if (movement === 'leave editor') {
           vi.mocked(editor.onMouseLeave).mock.calls[0][0](mouseEvent(null));
         } else {
-          vi
-            .mocked(editor.onMouseMove)
-            .mock.calls[0][0](
-              mouseEvent(new monaco.Position(movement === 'over value' ? 2 : 1, 12))
-            );
+          vi.mocked(editor.onMouseMove).mock.calls[0][0](
+            mouseEvent(new monaco.Position(movement === 'over value' ? 2 : 1, 12))
+          );
         }
       });
       await act(async () => {

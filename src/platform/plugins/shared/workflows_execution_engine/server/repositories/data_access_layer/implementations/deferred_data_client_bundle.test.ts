@@ -18,9 +18,7 @@ import { createMockStepDataClient, createMockWorkflowDataClient } from '../mocks
 
 vi.mock('./plain_index/plain_index_data_client_bundle');
 
-const MockBundle = PlainIndexDataClientBundle as MockedClass<
-  typeof PlainIndexDataClientBundle
->;
+const MockBundle = PlainIndexDataClientBundle as MockedClass<typeof PlainIndexDataClientBundle>;
 
 describe('DeferredDataClientBundle', () => {
   let innerBundle: {

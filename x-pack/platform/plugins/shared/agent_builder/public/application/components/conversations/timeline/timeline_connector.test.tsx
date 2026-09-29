@@ -28,81 +28,81 @@ import type { TimelineItem } from './types';
 import { TimelineConnector } from './timeline_connector';
 
 vi.mock('../../../hooks/use_conversation', () => {
-      const mocked = {
-      useConversation: vi.fn(),
-      useAgentId: () => 'agent-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: vi.fn(),
+    useAgentId: () => 'agent-1',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/agents/use_agent_by_id', () => {
-      const mocked = {
-      useAgentBuilderAgentById: () => ({ agent: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgentById: () => ({ agent: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../context/streaming/streaming_context', () => {
-      const mocked = {
-      useStreamRecord: vi.fn(),
-      useConversationStreamService: () => mockStreamService,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamRecord: vi.fn(),
+    useConversationStreamService: () => mockStreamService,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./screen_reader_status', () => {
-      const mocked = {
-      TimelineScreenReaderStatus: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimelineScreenReaderStatus: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_conversation_stream', () => {
-      const mocked = {
-      useConversationStream: () => ({ isResuming: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationStream: () => ({ isResuming: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        attachmentsService: {
-          hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
-        },
-        conversationEventsService: {
-          getUiDefinition: (type: string) =>
-            registeredEventTypes.has(type) ? { type, render: () => null } : undefined,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      attachmentsService: {
+        hasAttachmentType: (type: string) => registeredAttachmentTypes.has(type),
+      },
+      conversationEventsService: {
+        getUiDefinition: (type: string) =>
+          registeredEventTypes.has(type) ? { type, render: () => null } : undefined,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /** Attachment types with a UI in this test's Kibana; empty unless a test registers one. */
 const registeredAttachmentTypes = new Set<string>();
 /** Custom event types with a UI in this test's Kibana; empty unless a test registers one. */
 const registeredEventTypes = new Set<string>();
 vi.mock('./timeline', () => {
-      const mocked = {
-      Timeline: ({ items }: { items: TimelineItem[] }) => (
-        <ul>
-          {items.map((item) => (
-            <li key={item.key} data-test-subj="item">
-              {item.kind}:{item.key}:
-              {item.kind === 'agentTurn'
-                ? item.status
-                : item.kind === 'userMessage'
-                ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
-                : ''}
-            </li>
-          ))}
-        </ul>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Timeline: ({ items }: { items: TimelineItem[] }) => (
+      <ul>
+        {items.map((item) => (
+          <li key={item.key} data-test-subj="item">
+            {item.kind}:{item.key}:
+            {item.kind === 'agentTurn'
+              ? item.status
+              : item.kind === 'userMessage'
+              ? (item.event.data.attachment_refs ?? []).map((ref) => ref.attachment_id).join(',')
+              : ''}
+          </li>
+        ))}
+      </ul>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const conversationId = 'conv-1';
 const chatEvents$ = new Subject<ChatEvent>();
@@ -127,9 +127,9 @@ const setState = ({
   withAttachments?: boolean;
 }) => {
   vi.mocked(useConversationId).mockReturnValue(conversationId);
-  vi
-    .mocked(useConversation)
-    .mockReturnValue({ conversation } as ReturnType<typeof useConversation>);
+  vi.mocked(useConversation).mockReturnValue({ conversation } as ReturnType<
+    typeof useConversation
+  >);
   vi.mocked(useStreamRecord).mockReturnValue({
     pendingMessage,
     pendingAttachments: withAttachments ? pendingAttachments : undefined,

@@ -16,14 +16,14 @@ import { Form, useForm, useFormData } from '../../../shared_imports';
 import { ReferenceFieldSelects } from './reference_field_selects';
 
 vi.mock('../../../mappings_state_context', () => {
-      const mocked = {
-      useMappingsState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMappingsState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,

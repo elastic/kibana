@@ -17,11 +17,11 @@ import { Readable } from 'stream';
 
 import { ToolingLog } from '@kbn/tooling-log';
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('node-fetch');
 import fetch from 'node-fetch';
 const { Headers, Response } = require('node-fetch');

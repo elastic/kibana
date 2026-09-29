@@ -20,11 +20,11 @@ import { RULE_SAVED_OBJECT_TYPE } from './saved_objects';
 import { getRulesClientMockParams } from './test_utils';
 
 vi.mock('./application/rule/methods/get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let rulesClient: RulesClient;
 

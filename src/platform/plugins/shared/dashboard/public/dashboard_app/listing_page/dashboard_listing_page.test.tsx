@@ -21,20 +21,20 @@ import { coreServices } from '../../services/kibana_services';
 
 const mockUseParams = vi.fn().mockReturnValue({});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => mockUseParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => mockUseParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetListingTabs = vi.fn().mockReturnValue([]);
 vi.mock('../hooks/dashboard_mount_context', () => {
-      const mocked = {
-      useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDashboardMountContext: () => ({ getListingTabs: mockGetListingTabs }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
@@ -50,7 +50,7 @@ import { dataService } from '../../services/kibana_services';
 
 const mockIsDashboardAppInNoDataState = vi.fn().mockResolvedValue(false);
 vi.mock('../no_data/dashboard_app_no_data', async () => {
-  const originalModule = (await vi.importActual('../no_data/dashboard_app_no_data'));
+  const originalModule = await vi.importActual('../no_data/dashboard_app_no_data');
   return {
     __esModule: true,
     ...originalModule,
@@ -61,13 +61,13 @@ vi.mock('../no_data/dashboard_app_no_data', async () => {
 
 const mockFindByTitle = vi.fn();
 vi.mock('../../dashboard_client', () => {
-      const mocked = {
-      findService: {
-        findByTitle: () => mockFindByTitle(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findService: {
+      findByTitle: () => mockFindByTitle(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = {}) =>
   render(

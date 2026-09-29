@@ -14,11 +14,11 @@ import { shallow } from 'enzyme';
 import { Sparkline } from '.';
 
 vi.mock('./sparkline_flot_chart', () => {
-      const mocked = {
-      SparklineFlotChart: () => 'SparklineFlotChart',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SparklineFlotChart: () => 'SparklineFlotChart',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getComponent = () => (
   <Sparkline

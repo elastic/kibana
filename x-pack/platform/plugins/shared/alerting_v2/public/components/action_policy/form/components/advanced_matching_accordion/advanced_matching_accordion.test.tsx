@@ -14,21 +14,21 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AdvancedMatchingAccordion } from './advanced_matching_accordion';
 
 vi.mock('../matcher_input', () => {
-      const mocked = {
-      MatcherInput: (props: {
-        value: string;
-        onChange: (v: string) => void;
-        'data-test-subj'?: string;
-      }) => (
-        <input
-          data-test-subj={props['data-test-subj'] ?? 'matcherInput'}
-          value={props.value}
-          onChange={(e) => props.onChange(e.target.value)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MatcherInput: (props: {
+      value: string;
+      onChange: (v: string) => void;
+      'data-test-subj'?: string;
+    }) => (
+      <input
+        data-test-subj={props['data-test-subj'] ?? 'matcherInput'}
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -43,9 +43,7 @@ describe('AdvancedMatchingAccordion', () => {
   });
 
   it('starts collapsed when matcher.expression is null', () => {
-    renderWithI18n(
-      <AdvancedMatchingAccordion matcher={{ expression: null }} onChange={vi.fn()} />
-    );
+    renderWithI18n(<AdvancedMatchingAccordion matcher={{ expression: null }} onChange={vi.fn()} />);
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'false');
   });
@@ -66,10 +64,7 @@ describe('AdvancedMatchingAccordion', () => {
 
   it('starts expanded when matcher.expression is a non-empty trimmed string', () => {
     renderWithI18n(
-      <AdvancedMatchingAccordion
-        matcher={{ expression: '  rule.id:"abc"  ' }}
-        onChange={vi.fn()}
-      />
+      <AdvancedMatchingAccordion matcher={{ expression: '  rule.id:"abc"  ' }} onChange={vi.fn()} />
     );
 
     expect(getAccordionButton()).toHaveAttribute('aria-expanded', 'true');

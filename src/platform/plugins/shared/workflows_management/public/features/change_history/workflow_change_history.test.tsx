@@ -103,85 +103,85 @@ beforeAll(() => {
 });
 
 vi.mock('./use_workflow_change_history', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_workflow_change_history')),
-      useWorkflowChangeHistoryEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_workflow_change_history')),
+    useWorkflowChangeHistoryEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_workflow_change_history_preview_validation', () => {
-      const mocked = {
-      useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
-        validationResults: [],
-        isValidationLoading: false,
-        validationError: null,
-        handleValidationErrorClick: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowChangeHistoryPreviewValidation: vi.fn(() => ({
+      validationResults: [],
+      isValidationLoading: false,
+      validationError: null,
+      handleValidationErrorClick: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        MarkerSeverity: { Error: 8 },
-        editor: {
-          createModel: vi.fn(() => ({ dispose: vi.fn() })),
-          create: vi.fn(() => ({
-            dispose: vi.fn(),
-            layout: vi.fn(),
-            getModel: vi.fn(() => ({ dispose: vi.fn() })),
+  const mocked = {
+    monaco: {
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        createModel: vi.fn(() => ({ dispose: vi.fn() })),
+        create: vi.fn(() => ({
+          dispose: vi.fn(),
+          layout: vi.fn(),
+          getModel: vi.fn(() => ({ dispose: vi.fn() })),
+          updateOptions: vi.fn(),
+          createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
+        })),
+        createDiffEditor: vi.fn(() => ({
+          setModel: vi.fn(),
+          dispose: vi.fn(),
+          layout: vi.fn(),
+          updateOptions: vi.fn(),
+          getLineChanges: vi.fn(() => [
+            {
+              originalStartLineNumber: 1,
+              originalEndLineNumber: 1,
+              modifiedStartLineNumber: 1,
+              modifiedEndLineNumber: 1,
+            },
+          ]),
+          onDidUpdateDiff: vi.fn(() => ({ dispose: vi.fn() })),
+          getOriginalEditor: vi.fn(() => ({ updateOptions: vi.fn() })),
+          getModifiedEditor: vi.fn(() => ({
             updateOptions: vi.fn(),
+            revealLineInCenter: vi.fn(),
+            getModel: vi.fn(() => ({ dispose: vi.fn() })),
             createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
           })),
-          createDiffEditor: vi.fn(() => ({
-            setModel: vi.fn(),
-            dispose: vi.fn(),
-            layout: vi.fn(),
-            updateOptions: vi.fn(),
-            getLineChanges: vi.fn(() => [
-              {
-                originalStartLineNumber: 1,
-                originalEndLineNumber: 1,
-                modifiedStartLineNumber: 1,
-                modifiedEndLineNumber: 1,
-              },
-            ]),
-            onDidUpdateDiff: vi.fn(() => ({ dispose: vi.fn() })),
-            getOriginalEditor: vi.fn(() => ({ updateOptions: vi.fn() })),
-            getModifiedEditor: vi.fn(() => ({
-              updateOptions: vi.fn(),
-              revealLineInCenter: vi.fn(),
-              getModel: vi.fn(() => ({ dispose: vi.fn() })),
-              createDecorationsCollection: vi.fn(() => ({ clear: vi.fn() })),
-            })),
-          })),
-          setModelMarkers: vi.fn(),
-          onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
-        },
+        })),
+        setModelMarkers: vi.fn(),
+        onDidChangeMarkers: vi.fn(() => ({ dispose: vi.fn() })),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useDefineWorkflowsMonacoTheme: vi.fn(),
-      WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefineWorkflowsMonacoTheme: vi.fn(),
+    WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflowsCapabilities: vi.fn(() => ({
@@ -206,9 +206,9 @@ vi.mock('../../entities/workflows/store/workflow_detail/thunks/load_workflow_thu
   };
 });
 
-const { useWorkflowChangeHistoryEnabled } = (await vi.importMock('./use_workflow_change_history'));
-const { useKibana } = (await vi.importMock('../../hooks/use_kibana'));
-const { useWorkflowsCapabilities } = (await vi.importMock('@kbn/workflows-ui'));
+const { useWorkflowChangeHistoryEnabled } = await vi.importMock('./use_workflow_change_history');
+const { useKibana } = await vi.importMock('../../hooks/use_kibana');
+const { useWorkflowsCapabilities } = await vi.importMock('@kbn/workflows-ui');
 
 const mockWorkflowChangeHistoryKibanaServices = ({
   configureHttp,

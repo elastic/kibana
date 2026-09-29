@@ -23,9 +23,7 @@ describe('useIndicatorsTotalCount()', () => {
       services: { data: { search: mockedSearchService } },
     } as unknown as ReturnType<typeof useKibana>);
 
-    vi
-      .mocked(mockedSearchService.search)
-      .mockReturnValue(new BehaviorSubject(indicatorsResponse));
+    vi.mocked(mockedSearchService.search).mockReturnValue(new BehaviorSubject(indicatorsResponse));
     vi.clearAllMocks();
   });
 

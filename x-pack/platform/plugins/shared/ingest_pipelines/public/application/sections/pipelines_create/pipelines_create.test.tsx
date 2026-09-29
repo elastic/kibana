@@ -36,28 +36,28 @@ const createMockServices = (overrides: DeepPartialMockServices = {}): DeepPartia
 });
 
 vi.mock('../../../shared_imports', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../shared_imports')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../shared_imports')),
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the PipelineForm to easily assert props passed from PipelinesCreate
 vi.mock('../../components', () => {
-      const mocked = {
-      PipelineForm: (props: { defaultValue?: { name: string }; canEditName: boolean }) => (
-        <div data-test-subj="pipelineForm">
-          <div data-test-subj="formDefaultValue">
-            {props.defaultValue ? props.defaultValue.name : 'no-default'}
-          </div>
-          <div data-test-subj="canEditName">{String(props.canEditName)}</div>
+  const mocked = {
+    PipelineForm: (props: { defaultValue?: { name: string }; canEditName: boolean }) => (
+      <div data-test-subj="pipelineForm">
+        <div data-test-subj="formDefaultValue">
+          {props.defaultValue ? props.defaultValue.name : 'no-default'}
         </div>
-      ),
-      PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+        <div data-test-subj="canEditName">{String(props.canEditName)}</div>
+      </div>
+    ),
+    PipelineAppHeader: () => <div data-test-subj="pipelineAppHeader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithPath = (path: string, services: DeepPartialMockServices) => {
   mockUseKibana.mockReturnValue({ services });

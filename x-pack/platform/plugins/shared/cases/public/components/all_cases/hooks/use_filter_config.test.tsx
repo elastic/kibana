@@ -182,10 +182,7 @@ describe('useFilterConfig', () => {
   it('should activate global toggle filters when extendedFieldFilters has a value', () => {
     const efKey = `${EXTENDED_FIELD_KEY_PREFIX}requires_postmortem_as_boolean`;
 
-    useCasesLocalStorageMock.mockImplementation(() => [
-      [{ key: efKey, isActive: false }],
-      vi.fn(),
-    ]);
+    useCasesLocalStorageMock.mockImplementation(() => [[{ key: efKey, isActive: false }], vi.fn()]);
 
     const { result } = renderHook(useFilterConfig, {
       initialProps: {

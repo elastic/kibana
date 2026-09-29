@@ -20,22 +20,22 @@ const mockCreateWatchlistEntitySource = vi.fn().mockResolvedValue({});
 const mockDeleteWatchlistEntitySource = vi.fn().mockResolvedValue({});
 
 vi.mock('../../../../entity_analytics/api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        updateWatchlist: mockUpdateWatchlist,
-        updateWatchlistEntitySource: mockUpdateWatchlistEntitySource,
-        createWatchlistEntitySource: mockCreateWatchlistEntitySource,
-        deleteWatchlistEntitySource: mockDeleteWatchlistEntitySource,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      updateWatchlist: mockUpdateWatchlist,
+      updateWatchlistEntitySource: mockUpdateWatchlistEntitySource,
+      createWatchlistEntitySource: mockCreateWatchlistEntitySource,
+      deleteWatchlistEntitySource: mockDeleteWatchlistEntitySource,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...original,
     useKibana: () => ({

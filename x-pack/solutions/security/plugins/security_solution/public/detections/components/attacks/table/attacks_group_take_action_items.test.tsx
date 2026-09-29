@@ -56,11 +56,11 @@ vi.mock(
   '../../../hooks/attacks/bulk_actions/context_menu_items/use_attack_case_context_menu_items'
 );
 vi.mock('../../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseAttackViewInAiAssistantContextMenuItems =
   useAttackViewInAiAssistantContextMenuItems as MockedFunction<
     typeof useAttackViewInAiAssistantContextMenuItems
@@ -69,10 +69,9 @@ const mockUseAttackWorkflowStatusContextMenuItems =
   useAttackWorkflowStatusContextMenuItems as MockedFunction<
     typeof useAttackWorkflowStatusContextMenuItems
   >;
-const mockUseAttackAssigneesContextMenuItems =
-  useAttackAssigneesContextMenuItems as MockedFunction<
-    typeof useAttackAssigneesContextMenuItems
-  >;
+const mockUseAttackAssigneesContextMenuItems = useAttackAssigneesContextMenuItems as MockedFunction<
+  typeof useAttackAssigneesContextMenuItems
+>;
 const mockUseAttackTagsContextMenuItems = useAttackTagsContextMenuItems as MockedFunction<
   typeof useAttackTagsContextMenuItems
 >;

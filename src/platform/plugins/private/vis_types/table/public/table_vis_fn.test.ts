@@ -18,13 +18,13 @@ import { functionWrapper } from '@kbn/expressions-plugin/common/expression_funct
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 
 vi.mock('./utils', () => {
-      const mocked = {
-      tableVisResponseHandler: vi.fn().mockReturnValue({
-        tables: [{ columns: [], rows: [] }],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    tableVisResponseHandler: vi.fn().mockReturnValue({
+      tables: [{ columns: [], rows: [] }],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('interpreter/functions#table', () => {
   const fn = functionWrapper(createTableVisFn());

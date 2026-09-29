@@ -20,11 +20,11 @@ import { NotesButton } from '../../../timelines/components/timeline/notes/notes_
 import { useUserPrivileges } from '../user_privileges';
 
 vi.mock('../../../timelines/components/timeline/notes/notes_button', () => {
-      const mocked = {
-      NotesButton: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesButton: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as Mock;

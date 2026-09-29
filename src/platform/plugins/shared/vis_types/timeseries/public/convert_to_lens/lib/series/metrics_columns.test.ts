@@ -30,24 +30,24 @@ const mockConvertMetricAggregationColumnWithoutSpecialParams = vi.fn();
 const mockConvertVarianceToFormulaColumn = vi.fn();
 
 vi.mock('../convert', () => {
-      const mocked = {
-      convertMathToFormulaColumn: vi.fn(() => mockConvertMathToFormulaColumn()),
-      convertParentPipelineAggToColumns: vi.fn(() => mockConvertParentPipelineAggToColumns()),
-      convertToCumulativeSumColumns: vi.fn(() => mockConvertToCumulativeSumColumns()),
-      convertFilterRatioToFormulaColumn: vi.fn(() => mockConvertFilterRatioToFormulaColumn()),
-      convertToCounterRateColumn: vi.fn(() => mockConvertToCounterRateColumn()),
-      convertOtherAggsToFormulaColumn: vi.fn(() => mockConvertOtherAggsToFormulaColumn()),
-      convertToLastValueColumn: vi.fn(() => mockConvertToLastValueColumn()),
-      convertToStaticValueColumn: vi.fn(() => mockConvertToStaticValueColumn()),
-      convertStaticValueToFormulaColumn: vi.fn(() => mockConvertStaticValueToFormulaColumn()),
-      convertToStandartDeviationColumn: vi.fn(() => mockConvertToStandartDeviationColumn()),
-      convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
-        mockConvertMetricAggregationColumnWithoutSpecialParams()
-      ),
-      convertVarianceToFormulaColumn: vi.fn(() => mockConvertVarianceToFormulaColumn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertMathToFormulaColumn: vi.fn(() => mockConvertMathToFormulaColumn()),
+    convertParentPipelineAggToColumns: vi.fn(() => mockConvertParentPipelineAggToColumns()),
+    convertToCumulativeSumColumns: vi.fn(() => mockConvertToCumulativeSumColumns()),
+    convertFilterRatioToFormulaColumn: vi.fn(() => mockConvertFilterRatioToFormulaColumn()),
+    convertToCounterRateColumn: vi.fn(() => mockConvertToCounterRateColumn()),
+    convertOtherAggsToFormulaColumn: vi.fn(() => mockConvertOtherAggsToFormulaColumn()),
+    convertToLastValueColumn: vi.fn(() => mockConvertToLastValueColumn()),
+    convertToStaticValueColumn: vi.fn(() => mockConvertToStaticValueColumn()),
+    convertStaticValueToFormulaColumn: vi.fn(() => mockConvertStaticValueToFormulaColumn()),
+    convertToStandartDeviationColumn: vi.fn(() => mockConvertToStandartDeviationColumn()),
+    convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
+      mockConvertMetricAggregationColumnWithoutSpecialParams()
+    ),
+    convertVarianceToFormulaColumn: vi.fn(() => mockConvertVarianceToFormulaColumn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getMetricsColumns', () => {
   const dataView = stubLogstashDataView;

@@ -21,11 +21,11 @@ vi.mock('./coverage_overview_dashboard_context');
 
 const mockUseMitreConfiguration = vi.fn();
 vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
-      const mocked = {
-      useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMitreConfiguration: (...args: unknown[]) => mockUseMitreConfiguration(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const emptyInvalidlyMappedRules: CoverageOverviewDashboard['invalidlyMappedRules'] = {
   enabledRules: [],

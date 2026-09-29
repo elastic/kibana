@@ -15,12 +15,12 @@ import { writePidFile } from './write_pid_file';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 
 vi.mock('./fs', () => {
-      const mocked = {
-      writeFile: vi.fn(),
-      exists: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    writeFile: vi.fn(),
+    exists: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const writeFileMock = writeFile as MockedFunction<typeof writeFile>;
 const existsMock = exists as MockedFunction<typeof exists>;

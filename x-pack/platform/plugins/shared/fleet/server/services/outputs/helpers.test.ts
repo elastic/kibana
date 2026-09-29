@@ -23,9 +23,7 @@ vi.mock('../app_context');
 vi.mock('../fleet_server/version_requirements');
 
 const mockedIsFleetServerVersionRequirementMet =
-  isFleetServerVersionRequirementMet as MockedFunction<
-    typeof isFleetServerVersionRequirementMet
-  >;
+  isFleetServerVersionRequirementMet as MockedFunction<typeof isFleetServerVersionRequirementMet>;
 
 describe('checkOtlpOutputAllowed', () => {
   const esClientMock = elasticsearchServiceMock.createElasticsearchClient();

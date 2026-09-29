@@ -14,9 +14,9 @@ import { useKibana } from './use_kibana';
 import { useAuthenticatedUser } from './use_authenticated_user';
 
 vi.mock('./use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 

@@ -19,18 +19,18 @@ import type { ConnectorExamples, HoverContext } from '../monaco_providers/provid
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 vi.mock('../connectors_cache', () => {
-      const mocked = {
-      getCachedAllConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      getCachedAllConnectorsMap: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectorsMap: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Concrete subclass to test the abstract BaseMonacoConnectorHandler

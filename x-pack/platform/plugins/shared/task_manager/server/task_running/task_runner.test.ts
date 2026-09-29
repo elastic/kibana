@@ -54,11 +54,11 @@ const dateRegExp = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d{1,3})?Z$/;
 
 const TASK_EXECUTION_UUID = 'NEW_UUID';
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => TASK_EXECUTION_UUID,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => TASK_EXECUTION_UUID,
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeAll(() => {
   vi.useFakeTimers();
@@ -114,8 +114,7 @@ describe('TaskManagerRunner', () => {
   describe('Pending Stage', () => {
     beforeEach(() => {
       vi.clearAllMocks();
-      vi
-        .spyOn(apm, 'startTransaction')
+      vi.spyOn(apm, 'startTransaction')
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         .mockImplementation(() => mockApmTrans as any);

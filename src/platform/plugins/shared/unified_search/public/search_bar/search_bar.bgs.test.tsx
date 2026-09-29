@@ -28,11 +28,11 @@ const INITIAL_SESSION_ID = '12345';
 const NEW_SESSION_ID = '67890';
 
 vi.mock('../query_string_input/query_bar_top_row', () => {
-      const mocked = {
-      QueryBarTopRow: vi.fn(() => <div />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBarTopRow: vi.fn(() => <div />),
+  };
+  return { ...mocked, default: mocked };
+});
 const QueryBarTopRowMock = vi.mocked(QueryBarTopRow);
 
 const setup = ({

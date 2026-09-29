@@ -14,21 +14,21 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { welcomeConvo } from '../../mock/conversation';
 import type { UserProfile } from '@kbn/core-user-profile-common';
 vi.mock('./user_profiles_search', () => {
-      const mocked = {
-      UserProfilesSearch: ({ onUsersSelect }: { onUsersSelect: (users: UserProfile[]) => void }) => (
-        <button
-          data-test-subj="UserProfilesSearch"
-          type="button"
-          onClick={() =>
-            onUsersSelect([{ uid: 'user1', user: { username: 'User One' }, enabled: true, data: {} }])
-          }
-        >
-          {'UserProfilesSearch'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserProfilesSearch: ({ onUsersSelect }: { onUsersSelect: (users: UserProfile[]) => void }) => (
+      <button
+        data-test-subj="UserProfilesSearch"
+        type="button"
+        onClick={() =>
+          onUsersSelect([{ uid: 'user1', user: { username: 'User One' }, enabled: true, data: {} }])
+        }
+      >
+        {'UserProfilesSearch'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('ShareUserSelect', () => {
   const mockOnUsersUpdate = vi.fn();
   const testProps = {

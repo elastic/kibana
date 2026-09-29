@@ -30,7 +30,7 @@ import { AnomaliesQueryTabBody } from '../../../../common/containers/anomalies/a
 import { EventsQueryTabBody } from '../../../../common/components/events_tab';
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -47,38 +47,38 @@ vi.mock('../../../../common/lib/kibana', async () => {
 vi.mock('../../../../common/utils/normalize_time_range');
 
 vi.mock('../../../../common/containers/source', () => {
-      const mocked = {
-      useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchIndex: () => [false, { indicesExist: true, indexPatterns: mockIndexPattern }],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({
-        from: '2020-07-07T08:20:18.966Z',
-        isInitializing: false,
-        to: '2020-07-08T08:20:18.966Z',
-        setQuery: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({
+      from: '2020-07-07T08:20:18.966Z',
+      isInitializing: false,
+      to: '2020-07-08T08:20:18.966Z',
+      setQuery: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 vi.mock('../../../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResizeObserver: Mock = useResizeObserver as Mock;
 vi.mock('use-resize-observer/polyfilled');
@@ -87,7 +87,7 @@ vi.mock('../../../../common/components/visualization_actions/actions');
 vi.mock('../../../../common/components/visualization_actions/lens_embeddable');
 
 vi.mock('../navigation/authentications_query_tab_body', async () => {
-  const original = (await vi.importActual('../navigation/authentications_query_tab_body'));
+  const original = await vi.importActual('../navigation/authentications_query_tab_body');
   return {
     ...original,
     AuthenticationsQueryTabBody: vi.fn(() => (
@@ -96,7 +96,7 @@ vi.mock('../navigation/authentications_query_tab_body', async () => {
   };
 });
 vi.mock('../navigation/uncommon_process_query_tab_body', async () => {
-  const original = (await vi.importActual('../navigation/uncommon_process_query_tab_body'));
+  const original = await vi.importActual('../navigation/uncommon_process_query_tab_body');
   return {
     ...original,
     UncommonProcessQueryTabBody: vi.fn(() => (
@@ -105,7 +105,9 @@ vi.mock('../navigation/uncommon_process_query_tab_body', async () => {
   };
 });
 vi.mock('../../../../common/containers/anomalies/anomalies_query_tab_body', async () => {
-  const original = (await vi.importActual('../../../../common/containers/anomalies/anomalies_query_tab_body'));
+  const original = await vi.importActual(
+    '../../../../common/containers/anomalies/anomalies_query_tab_body'
+  );
   return {
     ...original,
     AnomaliesQueryTabBody: vi.fn(() => (
@@ -114,7 +116,7 @@ vi.mock('../../../../common/containers/anomalies/anomalies_query_tab_body', asyn
   };
 });
 vi.mock('../../../../common/components/events_tab', async () => {
-  const original = (await vi.importActual('../../../../common/components/events_tab'));
+  const original = await vi.importActual('../../../../common/components/events_tab');
   return {
     ...original,
     EventsQueryTabBody: vi.fn(() => (
@@ -141,9 +143,7 @@ const UncommonProcessQueryTabBodyMocked = UncommonProcessQueryTabBody as MockedF
 const AnomaliesQueryTabBodyMocked = AnomaliesQueryTabBody as MockedFunction<
   typeof AnomaliesQueryTabBody
 >;
-const EventsQueryTabBodyMocked = EventsQueryTabBody as MockedFunction<
-  typeof EventsQueryTabBody
->;
+const EventsQueryTabBodyMocked = EventsQueryTabBody as MockedFunction<typeof EventsQueryTabBody>;
 
 describe('body', () => {
   const scenariosMap = {

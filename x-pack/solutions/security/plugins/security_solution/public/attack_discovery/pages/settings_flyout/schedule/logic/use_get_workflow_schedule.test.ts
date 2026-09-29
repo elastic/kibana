@@ -19,9 +19,7 @@ import { getWorkflowSchedule } from '../api/internal';
 vi.mock('../api/internal');
 vi.mock('../../../../../common/hooks/use_app_toasts');
 
-const getWorkflowScheduleMock = getWorkflowSchedule as MockedFunction<
-  typeof getWorkflowSchedule
->;
+const getWorkflowScheduleMock = getWorkflowSchedule as MockedFunction<typeof getWorkflowSchedule>;
 
 const mockApiResponse: AttackDiscoverySchedule = {
   id: 'schedule-1',

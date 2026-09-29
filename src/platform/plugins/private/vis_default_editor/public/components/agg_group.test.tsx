@@ -25,7 +25,7 @@ import type { EditorVisState } from './sidebar/state/reducers';
 import { EuiThemeProvider } from '@elastic/eui';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -39,18 +39,18 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./agg', () => {
-      const mocked = {
-      DefaultEditorAgg: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultEditorAgg: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agg_add', () => {
-      const mocked = {
-      DefaultEditorAggAdd: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultEditorAggAdd: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DefaultEditorAgg component', () => {
   let defaultProps: DefaultEditorAggGroupProps;

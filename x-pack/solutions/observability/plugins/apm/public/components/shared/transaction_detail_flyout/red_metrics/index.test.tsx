@@ -18,68 +18,70 @@ import { useTransactionDetailFlyoutRedMetricsCharts } from './use_transaction_de
 vi.mock('../transaction_detail_flyout_context');
 vi.mock('./use_transaction_detail_flyout_red_metrics_charts');
 vi.mock('../../../../context/chart_pointer_event/chart_pointer_event_context', () => {
-      const mocked = {
-      ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChartPointerEventContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../charts/timeseries_chart', () => {
-      const mocked = {
-      TimeseriesChart: ({ id }: { id: string }) => <div data-test-subj={id} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeseriesChart: ({ id }: { id: string }) => <div data-test-subj={id} />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../service_flyout/hooks/use_project_routing', () => {
-      const mocked = {
-      useProjectRouting: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProjectRouting: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../service_flyout/overview/chart_configs', () => {
-      const mocked = {
-      getEsqlKeyMetricCharts: vi.fn(() => [
-        { id: 'latency', title: 'Latency', config: { dataset: { esql: 'FROM traces' } } },
-        {
-          id: 'failedTransactionRate',
-          title: 'Failed transaction rate',
-          config: { dataset: { esql: 'FROM traces' } },
-        },
-        { id: 'throughput', title: 'Throughput', config: { dataset: { esql: 'FROM traces' } } },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsqlKeyMetricCharts: vi.fn(() => [
+      { id: 'latency', title: 'Latency', config: { dataset: { esql: 'FROM traces' } } },
+      {
+        id: 'failedTransactionRate',
+        title: 'Failed transaction rate',
+        config: { dataset: { esql: 'FROM traces' } },
+      },
+      { id: 'throughput', title: 'Throughput', config: { dataset: { esql: 'FROM traces' } } },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../service_flyout/overview/lens_chart', () => {
-      const mocked = {
-      FlyoutLensChart: ({
-        id,
-        refreshToken,
-        rangeFrom,
-        rangeTo,
-      }: {
-        id: string;
-        refreshToken?: number;
-        rangeFrom: string;
-        rangeTo: string;
-      }) => (
-        <div
-          data-test-subj={`transactionDetailFlyoutLensChart-${id}`}
-          data-refresh-token={refreshToken}
-          data-range-from={rangeFrom}
-          data-range-to={rangeTo}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutLensChart: ({
+      id,
+      refreshToken,
+      rangeFrom,
+      rangeTo,
+    }: {
+      id: string;
+      refreshToken?: number;
+      rangeFrom: string;
+      rangeTo: string;
+    }) => (
+      <div
+        data-test-subj={`transactionDetailFlyoutLensChart-${id}`}
+        data-refresh-token={refreshToken}
+        data-range-from={rangeFrom}
+        data-range-to={rangeTo}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseTransactionDetailFlyoutContext = useTransactionDetailFlyoutContext as Mock;
 const mockedUseTransactionDetailFlyoutRedMetricsCharts =
   useTransactionDetailFlyoutRedMetricsCharts as Mock;
 
-const { getEsqlKeyMetricCharts } = (await vi.importMock('../../service_flyout/overview/chart_configs'));
+const { getEsqlKeyMetricCharts } = await vi.importMock(
+  '../../service_flyout/overview/chart_configs'
+);
 
 const FILTERS = {
   serviceName: 'checkout',

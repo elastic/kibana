@@ -12,15 +12,13 @@ import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
 import { mountObservabilityAlertingApp } from './mount';
 
-const mockCreateAlertingV2HostApp: Mock = vi.fn(
-  (appId: string, paths: Record<string, string>) => ({
-    rules: { app: appId, pathPrefix: paths.rules },
-    ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
-    episodes: { app: appId, pathPrefix: paths.episodes },
-    actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
-    executionHistory: { app: appId, pathPrefix: paths.executionHistory },
-  })
-);
+const mockCreateAlertingV2HostApp: Mock = vi.fn((appId: string, paths: Record<string, string>) => ({
+  rules: { app: appId, pathPrefix: paths.rules },
+  ruleLibrary: { app: appId, pathPrefix: paths.ruleLibrary },
+  episodes: { app: appId, pathPrefix: paths.episodes },
+  actionPolicies: { app: appId, pathPrefix: paths.actionPolicies },
+  executionHistory: { app: appId, pathPrefix: paths.executionHistory },
+}));
 
 describe('mountObservabilityAlertingApp', () => {
   it('renders into the mount element and unmounts', () => {

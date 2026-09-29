@@ -29,11 +29,11 @@ export const mockApplyDeprecations = vi.fn<
 >((config, deprecations, createAddDeprecation) => ({ config, changedPaths }));
 
 vi.mock('./deprecation/apply_deprecations', () => {
-      const mocked = {
-      applyDeprecations: mockApplyDeprecations,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyDeprecations: mockApplyDeprecations,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const docLinksMock = {
   settings: 'settings',
@@ -41,8 +41,8 @@ export const docLinksMock = {
 export const getDocLinksMock = vi.fn().mockReturnValue(docLinksMock);
 
 vi.doMock('@kbn/doc-links', () => {
-      const mocked = {
-      getDocLinks: getDocLinksMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDocLinks: getDocLinksMock,
+  };
+  return { ...mocked, default: mocked };
+});

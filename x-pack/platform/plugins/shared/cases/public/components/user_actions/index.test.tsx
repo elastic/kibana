@@ -33,12 +33,12 @@ vi.mock('../../containers/configure/use_get_case_configuration');
 vi.mock('../../containers/user_profiles/use_get_current_user_profile');
 vi.mock('../../common/lib/kibana');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ detailName: 'case-id' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ detailName: 'case-id' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useInfiniteFindCaseUserActionsMock = useInfiniteFindCaseUserActions as Mock;
 const useFindCaseUserActionsMock = useFindCaseUserActions as Mock;

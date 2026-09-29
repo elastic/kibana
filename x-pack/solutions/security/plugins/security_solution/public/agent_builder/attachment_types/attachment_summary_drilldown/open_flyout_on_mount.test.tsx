@@ -21,25 +21,25 @@ vi.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
 
 // The real bundle mounts the whole Security provider stack; the opener only needs to be inside it.
 vi.mock('../../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 const initDataViewManager = vi.fn();
 let dataViewStatus = 'ready';
 vi.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => {
-      const mocked = {
-      useInitDataViewManager: () => initDataViewManager,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInitDataViewManager: () => initDataViewManager,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../data_view_manager/hooks/use_data_view_manager_status', () => {
-      const mocked = {
-      useDataViewManagerStatus: () => dataViewStatus,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataViewManagerStatus: () => dataViewStatus,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const descriptor: FlyoutDescriptor = {
   kind: 'document',

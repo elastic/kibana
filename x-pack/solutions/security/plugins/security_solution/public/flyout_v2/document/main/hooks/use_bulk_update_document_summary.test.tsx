@@ -12,11 +12,11 @@ import { useBulkUpdateDocumentSummary } from './use_bulk_update_document_summary
 import { useAssistantContext } from '@kbn/elastic-assistant';
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useBulkUpdateDocumentSummary', () => {
   const mockHttp = {

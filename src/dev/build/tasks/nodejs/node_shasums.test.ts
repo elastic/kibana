@@ -51,16 +51,16 @@ c4edece2c0aa68e816c4e067f397eb12e9d0c81bb37b3d349dbaf47cf246b0b7  win-x86/node.l
 1b44176d888c1bc6a6b05fcc6234031b3b8a58da9de8b99661088f998ac5e269  win-x86/node_pdb.zip`;
 
 vi.mock('../../lib/download', () => {
-      const mocked = {
-      async downloadToString({ url }: { url: string }) {
-        expect(url).toBe(
-          'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v8.9.4/SHASUMS256.txt'
-        );
-        return mockResponse;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    async downloadToString({ url }: { url: string }) {
+      expect(url).toBe(
+        'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v8.9.4/SHASUMS256.txt'
+      );
+      return mockResponse;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { getNodeShasums } from './node_shasums';

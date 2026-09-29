@@ -15,18 +15,18 @@ import * as i18n from '../translations';
 import { TestProviders } from '../../../../../common/mock';
 
 vi.mock('./line_tool_tip_content', () => {
-      const mocked = {
-      LineToolTipContent: vi.fn(() => <div data-test-subj="line-tool-tip-content" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LineToolTipContent: vi.fn(() => <div data-test-subj="line-tool-tip-content" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./point_tool_tip_content', () => {
-      const mocked = {
-      PointToolTipContent: vi.fn(() => <div data-test-subj="point-tool-tip-content" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PointToolTipContent: vi.fn(() => <div data-test-subj="point-tool-tip-content" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MapToolTipComponent', () => {
   const mockCloseTooltip = vi.fn();

@@ -19,90 +19,90 @@ import type { RuleActionsAlertsFilterProps } from './rule_actions_alerts_filter'
 import type { RuleActionsAlertsFilterTimeframeProps } from './rule_actions_alerts_filter_timeframe';
 
 vi.mock('./rule_actions_notify_when', () => {
-      const mocked = {
-      RuleActionsNotifyWhen: ({
-        showMinimumThrottleUnitWarning,
-        showMinimumThrottleWarning,
-        isRecoveredActionGroup,
-        onChange,
-        onUseDefaultMessage,
-      }: RuleActionsNotifyWhenProps) => (
-        <div>
-          RuleActionsNotifyWhen
-          {showMinimumThrottleUnitWarning && <div>showMinimumThrottleUnitWarning</div>}
-          {showMinimumThrottleWarning && <div>showMinimumThrottleWarning</div>}
-          {isRecoveredActionGroup && <div>isRecoveredActionGroup</div>}
-          <button
-            onClick={() =>
-              onChange({
-                summary: true,
-                notifyWhen: 'onActionGroupChange',
-                throttle: '5m',
-              })
-            }
-          >
-            RuleActionsNotifyWhenOnChange
-          </button>
-          <button onClick={onUseDefaultMessage}>RuleActionsNotifyWhenOnUseDefaultMessage</button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsNotifyWhen: ({
+      showMinimumThrottleUnitWarning,
+      showMinimumThrottleWarning,
+      isRecoveredActionGroup,
+      onChange,
+      onUseDefaultMessage,
+    }: RuleActionsNotifyWhenProps) => (
+      <div>
+        RuleActionsNotifyWhen
+        {showMinimumThrottleUnitWarning && <div>showMinimumThrottleUnitWarning</div>}
+        {showMinimumThrottleWarning && <div>showMinimumThrottleWarning</div>}
+        {isRecoveredActionGroup && <div>isRecoveredActionGroup</div>}
+        <button
+          onClick={() =>
+            onChange({
+              summary: true,
+              notifyWhen: 'onActionGroupChange',
+              throttle: '5m',
+            })
+          }
+        >
+          RuleActionsNotifyWhenOnChange
+        </button>
+        <button onClick={onUseDefaultMessage}>RuleActionsNotifyWhenOnUseDefaultMessage</button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_alerts_filter', () => {
-      const mocked = {
-      RuleActionsAlertsFilter: ({ onChange }: RuleActionsAlertsFilterProps) => (
-        <div>
-          RuleActionsAlertsFilter
-          <button
-            onClick={() =>
-              onChange({
-                kql: 'test',
-                filters: [],
-              })
-            }
-          >
-            RuleActionsAlertsFilterButton
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsAlertsFilter: ({ onChange }: RuleActionsAlertsFilterProps) => (
+      <div>
+        RuleActionsAlertsFilter
+        <button
+          onClick={() =>
+            onChange({
+              kql: 'test',
+              filters: [],
+            })
+          }
+        >
+          RuleActionsAlertsFilterButton
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_alerts_filter_timeframe', () => {
-      const mocked = {
-      RuleActionsAlertsFilterTimeframe: ({ onChange }: RuleActionsAlertsFilterTimeframeProps) => (
-        <div>
-          RuleActionsAlertsFilterTimeframe
-          <button
-            onClick={() =>
-              onChange({
-                days: [1],
-                timezone: 'utc',
-                hours: {
-                  start: 'now',
-                  end: 'now',
-                },
-              })
-            }
-          >
-            RuleActionsAlertsFilterTimeframeButton
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsAlertsFilterTimeframe: ({ onChange }: RuleActionsAlertsFilterTimeframeProps) => (
+      <div>
+        RuleActionsAlertsFilterTimeframe
+        <button
+          onClick={() =>
+            onChange({
+              days: [1],
+              timezone: 'utc',
+              hours: {
+                start: 'now',
+                end: 'now',
+              },
+            })
+          }
+        >
+          RuleActionsAlertsFilterTimeframeButton
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleType = {
   id: '.es-query',
@@ -154,7 +154,7 @@ const mockOnTimeframeChange = vi.fn();
 
 const mockDispatch = vi.fn();
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
 describe('ruleActionsSettings', () => {
   beforeEach(() => {

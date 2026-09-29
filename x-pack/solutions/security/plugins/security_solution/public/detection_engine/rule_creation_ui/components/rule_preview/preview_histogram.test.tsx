@@ -28,47 +28,56 @@ import type { UseVisualizationResponseMock } from '../../../../common/components
 import { useVisualizationResponseMock } from '../../../../common/components/visualization_actions/use_visualization_response.mock';
 
 vi.mock('../../../../common/components/control_columns', () => {
-      const mocked = {
-      transformControlColumns: (props: TransformColumnsProps) => [],
-      checkBoxControlColumn: {
-        id: 'checkbox-control-column',
-        width: 32,
-        headerCellRender: vi.fn(),
-        rowCellRender: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformControlColumns: (props: TransformColumnsProps) => [],
+    checkBoxControlColumn: {
+      id: 'checkbox-control-column',
+      width: 32,
+      headerCellRender: vi.fn(),
+      rowCellRender: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/containers/use_global_time');
 vi.mock('../../../../common/utils/normalize_time_range');
 vi.mock('../../../../common/components/events_viewer/use_timelines_events');
 vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
-vi.mock('../../../../common/components/visualization_actions/use_visualization_response', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response')),
-      useVisualizationResponse: (await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response.mock'))
-        .useVisualizationResponseMock.create(),
+vi.mock(
+  '../../../../common/components/visualization_actions/use_visualization_response',
+  async () => {
+    const mocked = {
+      ...(await vi.importActual(
+        '../../../../common/components/visualization_actions/use_visualization_response'
+      )),
+      useVisualizationResponse: (
+        await vi.importActual(
+          '../../../../common/components/visualization_actions/use_visualization_response.mock'
+        )
+      ).useVisualizationResponseMock.create(),
     };
-      return { ...mocked, default: mocked };
-    });
+    return { ...mocked, default: mocked };
+  }
+);
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockVisualizationEmbeddable = VisualizationEmbeddable as unknown as Mock;
 const mockUseVisualizationResponse = useVisualizationResponse as UseVisualizationResponseMock;
 
 const mockUseFieldBrowserOptions = vi.fn();
 vi.mock('../../../../timelines/components/fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) =>
+      mockUseFieldBrowserOptions(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockIndexPattern = (): DataViewBase => ({
   fields,

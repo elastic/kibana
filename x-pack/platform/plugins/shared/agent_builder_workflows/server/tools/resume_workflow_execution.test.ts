@@ -15,14 +15,14 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { resumeWorkflowExecutionTool } from './resume_workflow_execution';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-tools-base/workflows')),
-      getExecutionState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-tools-base/workflows')),
+    getExecutionState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getExecutionState } = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
+const { getExecutionState } = await vi.importMock('@kbn/agent-builder-tools-base/workflows');
 
 describe('resumeWorkflowExecutionTool', () => {
   const createWorkflowsManagement = () => ({

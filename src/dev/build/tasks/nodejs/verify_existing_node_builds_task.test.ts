@@ -25,9 +25,9 @@ vi.mock('./node_download_info');
 vi.mock('../../lib/fs');
 vi.mock('../../lib/get_build_number');
 
-const { getNodeShasums } = (await vi.importMock('./node_shasums'));
-const { getNodeDownloadInfo } = (await vi.importMock('./node_download_info'));
-const { getFileHash } = (await vi.importMock('../../lib/fs'));
+const { getNodeShasums } = await vi.importMock('./node_shasums');
+const { getNodeDownloadInfo } = await vi.importMock('./node_download_info');
+const { getFileHash } = await vi.importMock('../../lib/fs');
 
 const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();

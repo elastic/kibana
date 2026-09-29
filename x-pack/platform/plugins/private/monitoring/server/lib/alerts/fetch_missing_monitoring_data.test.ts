@@ -11,19 +11,19 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import { fetchMissingMonitoringData } from './fetch_missing_monitoring_data';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 import { Globals } from '../../static_globals';
 
 function getResponse(

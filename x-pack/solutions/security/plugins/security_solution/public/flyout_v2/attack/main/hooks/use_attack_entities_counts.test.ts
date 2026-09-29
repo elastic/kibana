@@ -12,11 +12,11 @@ import { useAttackEntitiesCounts } from './use_attack_entities_counts';
 import { useQueryAlerts } from '../../../../detections/containers/detection_engine/alerts/use_query';
 
 vi.mock('../../../../detections/containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAttackEntitiesCounts', () => {
   const mockUseQueryAlerts = vi.mocked(useQueryAlerts);

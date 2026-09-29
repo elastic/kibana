@@ -23,15 +23,15 @@ import type { AppDependencies } from '../../app_context';
 vi.mock('@kbn/code-editor');
 
 vi.mock('../../services/documentation', () => {
-      const mocked = {
-      documentationService: {
-        getEsDocsBase: () => 'https://es-docs',
-        getTemplatesDocumentationLink: () => 'https://es-docs/templates',
-        getDataStreamsDocumentationLink: () => 'https://es-docs/data-streams',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    documentationService: {
+      getEsDocsBase: () => 'https://es-docs',
+      getTemplatesDocumentationLink: () => 'https://es-docs/templates',
+      getDataStreamsDocumentationLink: () => 'https://es-docs/data-streams',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Lightweight step mocks that interact with the wizard's Forms.useContent() hook
@@ -139,37 +139,37 @@ let mockAliasesData: WizardContent['aliases'];
 let mockIsEditing: boolean | undefined;
 
 vi.mock('./steps', () => {
-      const mocked = {
-      StepLogisticsContainer: (props: { isEditing?: boolean; isLegacy?: boolean }) => (
-        <MockStepLogistics
-          isEditing={props.isEditing ?? mockIsEditing}
-          isLegacy={props.isLegacy}
-          logisticsData={mockLogisticsData}
-        />
-      ),
-      StepComponentContainer: () => <MockStepComponents componentsData={mockComponentsData} />,
-      StepReviewContainer: () => <MockStepReview />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepLogisticsContainer: (props: { isEditing?: boolean; isLegacy?: boolean }) => (
+      <MockStepLogistics
+        isEditing={props.isEditing ?? mockIsEditing}
+        isLegacy={props.isLegacy}
+        logisticsData={mockLogisticsData}
+      />
+    ),
+    StepComponentContainer: () => <MockStepComponents componentsData={mockComponentsData} />,
+    StepReviewContainer: () => <MockStepReview />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared', () => {
-      const mocked = {
-      StepSettingsContainer: () => <MockStepSettings settingsData={mockSettingsData} />,
-      StepMappingsContainer: () => <MockStepMappings mappingsData={mockMappingsData} />,
-      StepAliasesContainer: () => <MockStepAliases aliasesData={mockAliasesData} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepSettingsContainer: () => <MockStepSettings settingsData={mockSettingsData} />,
+    StepMappingsContainer: () => <MockStepMappings mappingsData={mockMappingsData} />,
+    StepAliasesContainer: () => <MockStepAliases aliasesData={mockAliasesData} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../index_templates', () => {
-      const mocked = {
-      SimulateTemplateFlyoutContent: () => <div />,
-      simulateTemplateFlyoutProps: {},
-      LegacyIndexTemplatesDeprecation: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SimulateTemplateFlyoutContent: () => <div />,
+    simulateTemplateFlyoutProps: {},
+    LegacyIndexTemplatesDeprecation: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 

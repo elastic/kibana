@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { of } from 'rxjs';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { WorkflowsAvailabilityWrapper } from './workflows_availability_wrapper';
 import {
@@ -23,17 +22,17 @@ import { createStartServicesMock } from '../../mocks';
 
 const mockUseKibanaServices = createStartServicesMock();
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: mockUseKibanaServices }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: mockUseKibanaServices }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs', () => {
-      const mocked = {
-      useWorkflowsBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock helper
 const mockAvailabilityService = mockUseKibanaServices.workflowsManagement.availability;

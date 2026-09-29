@@ -27,7 +27,9 @@ let mockAlertingV2ExperimentalFeaturesEnabled = true;
 
 vi.mock('@kbn/core-di-browser', async () => {
   const actual = require('react');
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../services/user_capabilities'
+  );
   return {
     Context: actual.createContext(undefined),
     useService: (token: unknown) => {
@@ -44,81 +46,81 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('../pages/rules_list_page/rules_list_page', () => {
-      const mocked = {
-      RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesListPage: () => <div data-test-subj="rulesListPage">rules</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../routes/rule_details_route', () => {
-      const mocked = {
-      RuleDetailsRoute: () => <div data-test-subj="ruleDetailsRoute">rule detail</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDetailsRoute: () => <div data-test-subj="ruleDetailsRoute">rule detail</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/sequence_builder_page', () => {
-      const mocked = {
-      SequenceBuilderPage: () => <div data-test-subj="sequenceBuilderPage">sequence</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SequenceBuilderPage: () => <div data-test-subj="sequenceBuilderPage">sequence</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/rule_library_page/rule_library_page', () => {
-      const mocked = {
-      RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleLibraryPage: () => <div data-test-subj="ruleLibraryPage">library</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/alert_episodes_list_page/alert_episodes_list_page', () => {
-      const mocked = {
-      AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodesListPage: () => <div data-test-subj="episodesListPage">episodes</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/episode_details_page/episode_details_page', () => {
-      const mocked = {
-      EpisodeDetailsPage: () => <div data-test-subj="episodeDetailsPage">episode detail</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EpisodeDetailsPage: () => <div data-test-subj="episodeDetailsPage">episode detail</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/list_action_policies_page/list_action_policies_page', () => {
-      const mocked = {
-      ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">policies</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ListActionPoliciesPage: () => <div data-test-subj="listActionPoliciesPage">policies</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/action_policy_form_page/action_policy_form_page', () => {
-      const mocked = {
-      ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyFormPage: () => <div data-test-subj="actionPolicyFormPage">form</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/execution_history_page/execution_history_page', () => {
-      const mocked = {
-      ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExecutionHistoryPage: () => <div data-test-subj="executionHistoryPage">history</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-link-redirect-app', () => {
-      const mocked = {
-      RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectAppLinks: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockLocator = () => ({
   useUrl: vi.fn().mockReturnValue(''),

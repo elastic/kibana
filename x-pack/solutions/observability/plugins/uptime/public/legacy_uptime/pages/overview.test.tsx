@@ -12,11 +12,11 @@ import { OverviewPageComponent } from './overview';
 import { render } from '../lib/helper/rtl_helpers';
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePageReady: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePageReady: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MonitorPage', () => {
   it('renders expected elements for valid props', async () => {

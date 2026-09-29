@@ -159,9 +159,7 @@ describe('getConnectorById', () => {
     });
     getConnectorListMock.mockResolvedValue([inferenceEndpoint]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as Mock).mockRejectedValue(
-      Boom.forbidden('Unauthorized to get actions')
-    );
+    (actionsClient.getAll as Mock).mockRejectedValue(Boom.forbidden('Unauthorized to get actions'));
 
     const result = await getConnectorById({
       actions,
@@ -177,9 +175,7 @@ describe('getConnectorById', () => {
   it('throws not found instead of the authorization error when alias lookup is forbidden', async () => {
     getConnectorListMock.mockResolvedValue([]);
     const actionsClient = await actions.getActionsClientWithRequest(request);
-    (actionsClient.getAll as Mock).mockRejectedValue(
-      Boom.forbidden('Unauthorized to get actions')
-    );
+    (actionsClient.getAll as Mock).mockRejectedValue(Boom.forbidden('Unauthorized to get actions'));
 
     await expect(
       getConnectorById({ actions, request, connectorId, esClient, logger })

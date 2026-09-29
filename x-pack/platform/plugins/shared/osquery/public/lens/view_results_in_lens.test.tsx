@@ -17,23 +17,25 @@ import { TestProvidersWithServices } from '../__test_helpers__/create_mock_kiban
 const mockNavigateToPrefilledEditor = vi.fn();
 
 vi.mock('../common/hooks/use_logs_data_view', () => {
-      const mocked = {
-      useLogsDataView: vi.fn(() => ({
-        data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLogsDataView: vi.fn(() => ({
+      data: { id: 'logs-osquery-data-view-id', title: 'logs-osquery_manager.result*' },
+    })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 
 vi.mock('../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const setupKibana = (lensAvailable = true) => {
   mockUseKibana.mockReturnValue({

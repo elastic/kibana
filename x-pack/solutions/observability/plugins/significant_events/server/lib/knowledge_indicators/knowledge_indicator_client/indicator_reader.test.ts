@@ -9,7 +9,7 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('../../significant_events/latest_source_query', async () => {
-  const actual = (await vi.importActual('../../significant_events/latest_source_query'));
+  const actual = await vi.importActual('../../significant_events/latest_source_query');
   return {
     ...actual,
     executeAndDecodeSource: vi.fn(),

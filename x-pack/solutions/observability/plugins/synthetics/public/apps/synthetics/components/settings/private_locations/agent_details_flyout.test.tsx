@@ -13,18 +13,18 @@ import { AgentDetailsFlyout } from './agent_details_flyout';
 import type { AgentStat } from '../../../../../../common/types';
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFleetPermissions: () => ({ canReadAgents: true, canReadAgentPolicies: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const agent: AgentStat = {
   host: 'host-a',

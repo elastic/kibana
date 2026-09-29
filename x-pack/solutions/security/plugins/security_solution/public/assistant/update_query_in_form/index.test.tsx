@@ -15,11 +15,11 @@ import { UpdateQueryInFormButton } from '.';
 
 const mockUseAssistantContext = { codeBlockRef: { current: vi.fn() } };
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: () => mockUseAssistantContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => mockUseAssistantContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UpdateQueryInFormButton', () => {
   afterEach(() => {

@@ -14,51 +14,51 @@ import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm
 
 const mockUseApmServiceContext = vi.fn();
 vi.mock('../../../../context/apm_service/use_apm_service_context', () => {
-      const mocked = {
-      useApmServiceContext: () => mockUseApmServiceContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmServiceContext: () => mockUseApmServiceContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAnyOfApmParams = vi.fn();
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => mockUseAnyOfApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => mockUseAnyOfApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseShouldShowAnomalyUi = vi.fn();
 vi.mock('../../../../hooks/use_should_show_anomaly_ui', () => {
-      const mocked = {
-      useShouldShowAnomalyUi: () => mockUseShouldShowAnomalyUi(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShouldShowAnomalyUi: () => mockUseShouldShowAnomalyUi(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./mlsingle_metric_link', () => {
-      const mocked = {
-      MLSingleMetricLink: ({
-        children,
-        jobId,
-        detectorIndex,
-      }: {
-        children: React.ReactNode;
-        jobId: string;
-        detectorIndex?: number;
-        serviceName?: string;
-        transactionType?: string;
-      }) => (
-        <a
-          data-test-subj="apmMLSingleMetricLinkLink"
-          href={`/ml/${jobId}${detectorIndex !== undefined ? `?detectorIndex=${detectorIndex}` : ''}`}
-        >
-          {children}
-        </a>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MLSingleMetricLink: ({
+      children,
+      jobId,
+      detectorIndex,
+    }: {
+      children: React.ReactNode;
+      jobId: string;
+      detectorIndex?: number;
+      serviceName?: string;
+      transactionType?: string;
+    }) => (
+      <a
+        data-test-subj="apmMLSingleMetricLinkLink"
+        href={`/ml/${jobId}${detectorIndex !== undefined ? `?detectorIndex=${detectorIndex}` : ''}`}
+      >
+        {children}
+      </a>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OpenAnomalies', () => {
   beforeEach(() => {

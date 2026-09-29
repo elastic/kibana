@@ -11,17 +11,17 @@ import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
 vi.mock('../utils/with_availability_check', () => {
-      const mocked = {
-      withAvailabilityCheck: (handler: any) => handler,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withAvailabilityCheck: (handler: any) => handler,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/route_error_handlers', () => {
-      const mocked = {
-      handleRouteError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handleRouteError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../services/workflow_change_history_service');
 
 import { errors } from '@elastic/elasticsearch';

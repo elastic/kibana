@@ -590,9 +590,7 @@ describe('fetchUrl DNS pinning', () => {
 describe('fetchUrl body cap', () => {
   it('enforces the cap on a streaming body', async () => {
     const controller = new AbortController();
-    const fetchFn = vi.fn(async () =>
-      makeStreamingResponse(200, ['a'.repeat(64), 'b'.repeat(64)])
-    );
+    const fetchFn = vi.fn(async () => makeStreamingResponse(200, ['a'.repeat(64), 'b'.repeat(64)]));
 
     await expect(
       createFetchUrl({

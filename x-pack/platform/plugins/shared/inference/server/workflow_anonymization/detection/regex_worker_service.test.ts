@@ -187,18 +187,18 @@ describe('PiiRegexWorkerService', () => {
   describe('worker queue at capacity', () => {
     it('throws a distinct "queue at capacity" error distinguishable from rule errors', async () => {
       service = new PiiRegexWorkerService(createTestConfig(), logger);
-      vi
-        .spyOn((service as any).worker, 'run')
-        .mockRejectedValueOnce(new Error('Task queue is at limit'));
+      vi.spyOn((service as any).worker, 'run').mockRejectedValueOnce(
+        new Error('Task queue is at limit')
+      );
 
       await expect(service.run(IP_PAYLOAD)).rejects.toThrow('queue at capacity');
     });
 
     it('logs and returns [] in allow_unsafe mode when queue is at capacity', async () => {
       service = new PiiRegexWorkerService(createTestConfig(), logger);
-      vi
-        .spyOn((service as any).worker, 'run')
-        .mockRejectedValueOnce(new Error('Task queue is at limit'));
+      vi.spyOn((service as any).worker, 'run').mockRejectedValueOnce(
+        new Error('Task queue is at limit')
+      );
 
       const results = await service.run(IP_PAYLOAD, 'allow_unsafe');
 

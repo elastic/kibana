@@ -26,10 +26,9 @@ vi.mock('../api');
 vi.mock('../../../../../common/hooks/use_app_toasts');
 vi.mock('../../../../../common/lib/kibana');
 
-const bulkDeleteAttackDiscoverySchedulesMock =
-  bulkDeleteAttackDiscoverySchedules as MockedFunction<
-    typeof bulkDeleteAttackDiscoverySchedules
-  >;
+const bulkDeleteAttackDiscoverySchedulesMock = bulkDeleteAttackDiscoverySchedules as MockedFunction<
+  typeof bulkDeleteAttackDiscoverySchedules
+>;
 
 const invalidateFindAttackDiscoveryScheduleMock = vi.fn();
 const mockUseInvalidateFindAttackDiscoverySchedule =

@@ -14,11 +14,11 @@ import { useHostRelatedUsers } from '.';
 import { useSearchStrategy } from '../../use_search_strategy';
 
 vi.mock('../../use_search_strategy', () => {
-      const mocked = {
-      useSearchStrategy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchStrategy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSearchStrategy = useSearchStrategy as Mock;
 const mockSearch = vi.fn();

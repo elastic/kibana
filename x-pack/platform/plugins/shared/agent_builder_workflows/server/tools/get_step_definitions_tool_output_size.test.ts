@@ -11,17 +11,17 @@ import { builtInStepDefinitions, getElasticsearchConnectors } from '@kbn/workflo
 import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 
 vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
-      const mocked = {
-      getAllConnectors: async () => {
-        const { getElasticsearchConnectors: getEs } = (await vi.importActual('@kbn/workflows'));
-        return getEs();
-      },
-      addDynamicConnectorsToCache: vi.fn(),
-      getCachedAllConnectorsMap: () => null,
-      getDeprecatedStepMetadata: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: async () => {
+      const { getElasticsearchConnectors: getEs } = await vi.importActual('@kbn/workflows');
+      return getEs();
+    },
+    addDynamicConnectorsToCache: vi.fn(),
+    getCachedAllConnectorsMap: () => null,
+    getDeprecatedStepMetadata: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MAX_CHARS_PER_STEP = 5000;
 
@@ -37,9 +37,7 @@ describe('get_step_definitions output size', () => {
       },
     } as any;
     registerGetStepDefinitionsTool(agentBuilder, {
-      getAvailableConnectors: vi
-        .fn()
-        .mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
+      getAvailableConnectors: vi.fn().mockResolvedValue({ connectorTypes: {}, totalConnectors: 0 }),
     } as any);
   });
 

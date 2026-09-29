@@ -19,11 +19,11 @@ import { getServices } from '../../kibana_services';
 import type { InstructionVariantType } from '../../../services/tutorials/types';
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const instructions = [
   {

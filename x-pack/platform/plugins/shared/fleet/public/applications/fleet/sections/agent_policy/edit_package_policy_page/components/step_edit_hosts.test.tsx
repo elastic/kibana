@@ -25,7 +25,9 @@ import { StepEditHosts } from './step_edit_hosts';
 
 vi.mock('../../create_package_policy_page/components/steps/components/use_policies', async () => {
   return {
-    ...(await vi.importActual('../../create_package_policy_page/components/steps/components/use_policies')),
+    ...(await vi.importActual(
+      '../../create_package_policy_page/components/steps/components/use_policies'
+    )),
     useAllNonManagedAgentPolicies: vi.fn(),
   };
 });

@@ -17,7 +17,7 @@ import { createRollupJobsStore } from '../../../store';
 import { JobTable } from './job_table';
 
 vi.mock('../../../../kibana_services', async () => {
-  const services = (await vi.importActual('../../../../kibana_services'));
+  const services = await vi.importActual('../../../../kibana_services');
   return {
     ...services,
     trackUiMetric: vi.fn(),
@@ -25,7 +25,7 @@ vi.mock('../../../../kibana_services', async () => {
 });
 
 vi.mock('../../../services', async () => {
-  const services = (await vi.importActual('../../../services'));
+  const services = await vi.importActual('../../../services');
   return {
     ...services,
     getRouterLinkProps: (link) => ({ href: link }),

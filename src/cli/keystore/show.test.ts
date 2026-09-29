@@ -21,19 +21,19 @@ const mockKeystoreData =
   'OeaKxvLjTjczwoxiy34kM6CzlnJhjwnALAMiBvbehMUaCVzxf3Fu/3Gk2qeux0OPhidJ4Pn/RPjdMA==';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
-      existsSync: vi.fn().mockImplementation((fileName) => {
-        if (fileName === 'non-existent-file.txt') {
-          return false;
-        } else {
-          return true;
-        }
-      }),
-      writeFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
+    existsSync: vi.fn().mockImplementation((fileName) => {
+      if (fileName === 'non-existent-file.txt') {
+        return false;
+      } else {
+        return true;
+      }
+    }),
+    writeFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../logger');
 

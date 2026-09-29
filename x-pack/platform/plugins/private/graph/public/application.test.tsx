@@ -15,20 +15,20 @@ import type { GraphDependencies } from './application';
 import { renderApp } from './application';
 
 vi.mock('react-dom', () => {
-      const mocked = {
-      render: vi.fn(),
-      unmountComponentAtNode: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    render: vi.fn(),
+    unmountComponentAtNode: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Skip the licensing redirect branch — it is not what this test exercises.
 vi.mock('../common/check_license', () => {
-      const mocked = {
-      checkLicense: () => ({ showAppLink: true, enableAppLink: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkLicense: () => ({ showAppLink: true, enableAppLink: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildDeps = ({ canSave }: { canSave: boolean }): GraphDependencies => {
   const core = coreMock.createStart();

@@ -21,25 +21,25 @@ import {
 import { buildProfileFormContextValue } from '../../test_fixtures/profile_form_context_value';
 
 vi.mock('../../profile_form_context', () => {
-      const mocked = {
-      useProfileFormContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfileFormContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_preview_panel_state', () => {
-      const mocked = {
-      usePreviewPanelState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePreviewPanelState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_resolve_anonymized_values', () => {
-      const mocked = {
-      useResolveAnonymizedValues: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolveAnonymizedValues: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setContext = (overrides = {}) =>
   vi.mocked(useProfileFormContext).mockReturnValue(

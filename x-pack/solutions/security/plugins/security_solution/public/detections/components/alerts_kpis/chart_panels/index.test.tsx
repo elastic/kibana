@@ -23,19 +23,19 @@ vi.mock('./alerts_local_storage');
 
 vi.mock('../../../../common/components/visualization_actions/lens_embeddable');
 vi.mock('../../../../common/components/page/use_refetch_by_session', () => {
-      const mocked = {
-      useRefetchByRestartingSession: vi.fn().mockReturnValue({
-        session: {
-          current: {
-            start: vi.fn(),
-          },
+  const mocked = {
+    useRefetchByRestartingSession: vi.fn().mockReturnValue({
+      session: {
+        current: {
+          start: vi.fn(),
         },
-        searchSessionId: 'mockSearchSessionId',
-        refetchByRestartingSession: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      searchSessionId: 'mockSearchSessionId',
+      refetchByRestartingSession: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
   const originalModule = require('react-router-dom');
@@ -49,7 +49,7 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -269,9 +269,9 @@ describe('ChartPanels', () => {
             expect(
               (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions.length
             ).toEqual(1);
-            expect(
-              (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions[0].id
-            ).toEqual('resetGroupByField');
+            expect((LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions[0].id).toEqual(
+              'resetGroupByField'
+            );
           });
         });
       });
@@ -305,9 +305,9 @@ describe('ChartPanels', () => {
             expect(
               (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions.length
             ).toEqual(1);
-            expect(
-              (LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions[0].id
-            ).toEqual('resetGroupByField');
+            expect((LensEmbeddable as unknown as Mock).mock.calls[0][0].extraActions[0].id).toEqual(
+              'resetGroupByField'
+            );
             expect((LensEmbeddable as unknown as Mock).mock.calls[0][0].stackByField).toEqual(
               defaultGroupBy
             );

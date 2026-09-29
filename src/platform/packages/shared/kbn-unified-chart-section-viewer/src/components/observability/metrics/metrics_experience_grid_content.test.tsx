@@ -30,30 +30,30 @@ import type { MappingTimeSeriesMetricType } from '@elastic/elasticsearch/lib/api
 vi.mock('./context/metrics_experience_state_provider');
 vi.mock('./hooks');
 vi.mock('../../chart', () => {
-      const mocked = {
-      Chart: vi.fn(() => <div data-test-subj="metric-chart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: vi.fn(() => <div data-test-subj="metric-chart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./metrics_grid', () => {
-      const mocked = {
-      MetricsGrid: vi.fn((props: { metricItems: any[] }) =>
-        props.metricItems.length === 0 ? (
-          <div data-test-subj="metricsExperienceNoData" />
-        ) : (
-          <div data-test-subj="unifiedMetricsExperienceGrid" />
-        )
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsGrid: vi.fn((props: { metricItems: any[] }) =>
+      props.metricItems.length === 0 ? (
+        <div data-test-subj="metricsExperienceNoData" />
+      ) : (
+        <div data-test-subj="unifiedMetricsExperienceGrid" />
+      )
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Mock EuiDelayRender to render immediately in tests.
  */
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiDelayRender: ({ children }: { children: React.ReactNode }) => <>{children}</>,
@@ -251,7 +251,7 @@ describe('MetricsExperienceGridContent', () => {
   });
 
   it('passes activeDimensions prop to MetricsGrid', async () => {
-    const { MetricsGrid } = (await vi.importMock('./metrics_grid'));
+    const { MetricsGrid } = await vi.importMock('./metrics_grid');
 
     render(<MetricsExperienceGridContent {...defaultProps} activeDimensions={[dimensions[0]]} />, {
       wrapper: IntlProvider,

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ActionsMenu } from './actions_menu';
 import type { ActionGroup, ActionOption, ActionOptionData } from '../types';
@@ -19,11 +19,11 @@ import type { ActionGroup, ActionOption, ActionOptionData } from '../types';
 vi.mock('../../../hooks/use_kibana');
 
 vi.mock('../../validate_workflow_yaml/model/use_workflow_json_schema', () => {
-      const mocked = {
-      useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowJsonSchema: () => ({ jsonSchema: {}, uri: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLeafOption: ActionOption = {
   id: 'manual',
@@ -61,32 +61,32 @@ const mockFlowControlOption: ActionOption = {
 const mockOptions: ActionOptionData[] = [mockGroup, mockFlowControlOption];
 
 vi.mock('../lib/get_action_options', () => {
-      const mocked = {
-      getActionOptions: vi.fn(() => mockOptions),
-      getIconGlyphColor: vi.fn(() => undefined),
-      flattenOptions: vi.fn((options: ActionOptionData[]) => {
-        const flat: ActionOptionData[] = [];
-        const flatten = (items: ActionOptionData[]) => {
-          for (const item of items) {
-            flat.push(item);
-            if ('options' in item) {
-              flatten(item.options);
-            }
+  const mocked = {
+    getActionOptions: vi.fn(() => mockOptions),
+    getIconGlyphColor: vi.fn(() => undefined),
+    flattenOptions: vi.fn((options: ActionOptionData[]) => {
+      const flat: ActionOptionData[] = [];
+      const flatten = (items: ActionOptionData[]) => {
+        for (const item of items) {
+          flat.push(item);
+          if ('options' in item) {
+            flatten(item.options);
           }
-        };
-        flatten(options);
-        return flat;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        }
+      };
+      flatten(options);
+      return flat;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui/step_icons/step_icon', () => {
-      const mocked = {
-      StepIcon: () => <span data-test-subj="mocked-step-icon" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepIcon: () => <span data-test-subj="mocked-step-icon" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = (props = {}) =>
   render(

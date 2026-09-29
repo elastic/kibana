@@ -19,19 +19,19 @@ import { requestHandler } from './utils';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 
 vi.mock('@kbn/as-code-shared-telemetry', () => {
-      const mocked = {
-      telemetryHandler: vi.fn(async (_request, _usageCounter, handler) => handler()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    telemetryHandler: vi.fn(async (_request, _usageCounter, handler) => handler()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/as-code-utils', () => {
-      const mocked = {
-      logRequest: vi.fn(),
-      writeErrorHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logRequest: vi.fn(),
+    writeErrorHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('requestHandler', () => {
   const logger = loggerMock.create();

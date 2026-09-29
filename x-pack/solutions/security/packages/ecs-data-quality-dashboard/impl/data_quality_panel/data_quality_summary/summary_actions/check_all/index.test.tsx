@@ -38,7 +38,7 @@ const mockFetchMappings = vi.fn(() =>
 );
 
 vi.mock('../../../utils/fetch_mappings', async () => {
-  const original = (await vi.importActual('../../../utils/fetch_mappings'));
+  const original = await vi.importActual('../../../utils/fetch_mappings');
   return {
     ...original,
     fetchMappings: (_: { abortController: AbortController; patternOrIndexName: string }) =>
@@ -49,7 +49,7 @@ vi.mock('../../../utils/fetch_mappings', async () => {
 const mockFetchUnallowedValues = vi.fn(() => Promise.resolve(mockUnallowedValuesResponse));
 
 vi.mock('../../../utils/fetch_unallowed_values', async () => {
-  const original = (await vi.importActual('../../../utils/fetch_unallowed_values'));
+  const original = await vi.importActual('../../../utils/fetch_unallowed_values');
   return {
     ...original,
     fetchUnallowedValues: (_: {

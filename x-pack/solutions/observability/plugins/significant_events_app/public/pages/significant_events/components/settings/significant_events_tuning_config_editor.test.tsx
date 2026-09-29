@@ -17,30 +17,30 @@ import {
 } from './significant_events_tuning_config_editor';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({
-        height,
-        fitToContent,
-        options,
-        value,
-      }: {
-        height?: string | number;
-        fitToContent?: { minLines?: number; maxLines?: number };
-        options?: { scrollbar?: { vertical?: string } };
-        value: string;
-      }) => (
-        <div
-          data-test-subj="tuning-yaml-code-editor"
-          data-height={height === undefined ? '' : String(height)}
-          data-fit-to-content={JSON.stringify(fitToContent ?? null)}
-          data-vertical-scrollbar={options?.scrollbar?.vertical ?? ''}
-        >
-          {value}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({
+      height,
+      fitToContent,
+      options,
+      value,
+    }: {
+      height?: string | number;
+      fitToContent?: { minLines?: number; maxLines?: number };
+      options?: { scrollbar?: { vertical?: string } };
+      value: string;
+    }) => (
+      <div
+        data-test-subj="tuning-yaml-code-editor"
+        data-height={height === undefined ? '' : String(height)}
+        data-fit-to-content={JSON.stringify(fitToContent ?? null)}
+        data-vertical-scrollbar={options?.scrollbar?.vertical ?? ''}
+      >
+        {value}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SignificantEventsTuningConfigEditor', () => {
   it('grows to show the full YAML without a nested vertical scrollbar', () => {

@@ -16,54 +16,54 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { SiemReadinessEventTypes } from '../../../../common/lib/telemetry/events/siem_readiness/types';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      useBasePath: vi.fn(() => '/test/base/path'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    useBasePath: vi.fn(() => '/test/base/path'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_siem_readiness_cases', () => {
-      const mocked = {
-      useSiemReadinessCases: () => ({ openNewCaseFlyout: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSiemReadinessCases: () => ({ openNewCaseFlyout: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_siem_readiness_api', () => {
-      const mocked = {
-      useSiemReadinessApi: () => ({
-        getDetectionRules: { data: { data: [] }, isLoading: false },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSiemReadinessApi: () => ({
+      getDetectionRules: { data: { data: [] }, isLoading: false },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_get_detection_rules_by_integration', () => {
-      const mocked = {
-      useDetectionRulesByIntegration: () => ({
-        ruleIntegrationCoverage: { coveredRules: [], missingIntegrations: [] },
-        enabledPackagesSet: new Set(),
-        disabledPackagesSet: new Set(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDetectionRulesByIntegration: () => ({
+      ruleIntegrationCoverage: { coveredRules: [], missingIntegrations: [] },
+      enabledPackagesSet: new Set(),
+      disabledPackagesSet: new Set(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./rule_coverage_panels/all_rules', () => {
-      const mocked = {
-      AllRuleCoveragePanel: () => <div data-testid="all-rules-panel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AllRuleCoveragePanel: () => <div data-testid="all-rules-panel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./rule_coverage_panels/mitre_attack_rules', () => {
-      const mocked = {
-      MitreAttackRuleCoveragePanel: () => <div data-testid="mitre-panel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MitreAttackRuleCoveragePanel: () => <div data-testid="mitre-panel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/view_cases_button', () => {
-      const mocked = {
-      ViewCasesButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ViewCasesButton: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportEvent = vi.fn();
 

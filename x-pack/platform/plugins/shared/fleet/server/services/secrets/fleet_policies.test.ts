@@ -15,18 +15,18 @@ const mockWarn = vi.fn();
 const mockDebug = vi.fn();
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({
-          warn: (...args: unknown[]) => mockWarn(...args),
-          debug: (...args: unknown[]) => mockDebug(...args),
-          info: vi.fn(),
-          error: vi.fn(),
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({
+        warn: (...args: unknown[]) => mockWarn(...args),
+        debug: (...args: unknown[]) => mockDebug(...args),
+        info: vi.fn(),
+        error: vi.fn(),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface PolicyEntry {
   policyId: string;

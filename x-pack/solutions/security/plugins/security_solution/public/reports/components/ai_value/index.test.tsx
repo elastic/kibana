@@ -26,72 +26,70 @@ import { useIsAlertsAndAttacksAlignmentEnabled } from '../../../common/hooks/use
 import { useSecuritySolutionLinkProps } from '../../../common/components/links';
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_value_metrics', () => {
-      const mocked = {
-      useValueMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useValueMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_has_ever_used_attack_discovery', () => {
-      const mocked = {
-      useHasEverUsedAttackDiscovery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEverUsedAttackDiscovery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./ai_value_report_layout', () => {
-      const mocked = {
-      AIValueReportLayout: vi.fn(() => <div data-test-subj="mock-ai-value-report-layout" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AIValueReportLayout: vi.fn(() => <div data-test-subj="mock-ai-value-report-layout" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/page_loader', () => {
-      const mocked = {
-      PageLoader: () => <div data-test-subj="mock-page-loader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageLoader: () => <div data-test-subj="mock-page-loader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../providers/ai_value/export_provider', () => {
-      const mocked = {
-      useAIValueExportContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAIValueExportContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/links', () => {
-      const mocked = {
-      useSecuritySolutionLinkProps: vi.fn(() => ({
-        href: '/mock-attack-discovery',
-        onClick: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSecuritySolutionLinkProps: vi.fn(() => ({
+      href: '/mock-attack-discovery',
+      onClick: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_is_alerts_and_attacks_alignment_enabled', () => {
-      const mocked = {
-      useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsAlertsAndAttacksAlignmentEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseValueMetrics = useValueMetrics as MockedFunction<typeof useValueMetrics>;
 const mockuseHasEverUsedAttackDiscovery = useHasEverUsedAttackDiscovery as MockedFunction<
   typeof useHasEverUsedAttackDiscovery
 >;
-const mockAIValueReportLayout = AIValueReportLayout as MockedFunction<
-  typeof AIValueReportLayout
->;
+const mockAIValueReportLayout = AIValueReportLayout as MockedFunction<typeof AIValueReportLayout>;
 const useAIValueExportContextMock = useAIValueExportContext as Mock;
 
 const defaultProps = {

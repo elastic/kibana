@@ -19,18 +19,18 @@ const mockConvertMetricToColumns = vi.fn();
 const mockConvertToSchemaConfig = vi.fn();
 
 vi.mock('../metrics', () => {
-      const mocked = {
-      convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertMetricToColumns: vi.fn(() => mockConvertMetricToColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../vis_schemas', () => {
-      const mocked = {
-      convertToSchemaConfig: vi.fn(() => mockConvertToSchemaConfig()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToSchemaConfig: vi.fn(() => mockConvertToSchemaConfig()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToSiblingPipelineColumns', () => {
   const visType = 'heatmap';

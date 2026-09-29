@@ -21,11 +21,11 @@ import type { FetchResult, NewsfeedItem } from '../types';
 import { NewsfeedSidebar } from './newsfeed_sidebar';
 
 vi.mock('@kbn/react-env', () => {
-      const mocked = {
-      useIsServerless: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsServerless: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useIsServerless } from '@kbn/react-env';
 

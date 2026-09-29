@@ -26,11 +26,11 @@ vi.mock('../../../../hooks/use_permissions');
 vi.mock('../../../../hooks/use_fetch_active_alerts');
 vi.mock('../../../../hooks/use_fetch_composite_historical_summary');
 vi.mock('../slo_sparkline', () => {
-      const mocked = {
-      SloSparkline: () => <div data-test-subj="sloSparkline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloSparkline: () => <div data-test-subj="sloSparkline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const usePermissionsMock = usePermissions as Mock;

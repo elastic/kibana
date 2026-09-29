@@ -11,11 +11,11 @@ import { act, renderHook } from '@testing-library/react';
 import { useOverviewDisplayOptions } from './use_overview_display_options';
 
 vi.mock('../../../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: () => ({ space: { id: 'default' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: () => ({ space: { id: 'default' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const STORAGE_KEY = 'synthetics.overview.displayOptions.v1.default';
 

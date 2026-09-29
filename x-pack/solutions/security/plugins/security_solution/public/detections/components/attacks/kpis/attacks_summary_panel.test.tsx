@@ -14,18 +14,18 @@ import { AttacksSummaryPanel } from './attacks_summary_panel';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('./attacks_volume_panel/attacks_volume_panel', () => {
-      const mocked = {
-      AttacksVolumePanel: () => <div data-test-subj="mock-attacks-volume-panel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksVolumePanel: () => <div data-test-subj="mock-attacks-volume-panel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./attacks_list_panel/attacks_list_panel', () => {
-      const mocked = {
-      AttacksListPanel: () => <div data-test-subj="mock-attacks-list-panel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksListPanel: () => <div data-test-subj="mock-attacks-list-panel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<AttacksSummaryPanel />', () => {
   const defaultProps = {

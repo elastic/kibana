@@ -12,10 +12,10 @@ export const validateTagColorMock = vi.fn();
 export const validateTagDescriptionMock = vi.fn();
 
 vi.doMock('../../../common/validation', () => {
-      const mocked = {
-      validateTagName: validateTagNameMock,
-      validateTagColor: validateTagColorMock,
-      validateTagDescription: validateTagDescriptionMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateTagName: validateTagNameMock,
+    validateTagColor: validateTagColorMock,
+    validateTagDescription: validateTagDescriptionMock,
+  };
+  return { ...mocked, default: mocked };
+});

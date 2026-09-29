@@ -18,11 +18,11 @@ import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import type { HttpSetup } from '@kbn/core-http-browser';
 
 vi.mock('../apis/get_reporting_health', () => {
-      const mocked = {
-      getReportingHealth: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getReportingHealth: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttpService = httpServiceMock.create() as unknown as HttpSetup;
 

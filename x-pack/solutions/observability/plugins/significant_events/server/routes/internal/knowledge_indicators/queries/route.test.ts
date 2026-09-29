@@ -13,11 +13,11 @@ import type { SignificantEventsMaintenanceState } from '../../../../../common/ma
 import { internalKIQueriesRoutes } from './route';
 
 vi.mock('../../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchQueryLinks = vi.fn();
 const mockComputeOccurrences = vi.fn();
@@ -26,41 +26,41 @@ const mockGenerateKIQueries = vi.fn();
 const mockCleanupStaleEvents = vi.fn();
 
 vi.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => {
-      const mocked = {
-      fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
-      computeOccurrences: (...args: unknown[]) => mockComputeOccurrences(...args),
-      getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
-      toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
-        ...queryLink.query,
-        stream_name: queryLink.stream_name,
-        rule_backed: queryLink.rule_backed,
-        occurrences: [],
-        change_points: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
+    computeOccurrences: (...args: unknown[]) => mockComputeOccurrences(...args),
+    getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
+    toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
+      ...queryLink.query,
+      stream_name: queryLink.stream_name,
+      rule_backed: queryLink.rule_backed,
+      occurrences: [],
+      change_points: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/significant_events/ki_queries_generation_service', () => {
-      const mocked = {
-      generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateKIQueries: (...args: unknown[]) => mockGenerateKIQueries(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/significant_events/events/cleanup_stale_events', () => {
-      const mocked = {
-      cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/significant_events/create_significant_events_traced_es_client', () => {
-      const mocked = {
-      createSignificantEventsTracedEsClient: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSignificantEventsTracedEsClient: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
 const discoveryQueriesRoute = internalKIQueriesRoutes['GET /internal/streams/_queries'];
@@ -130,11 +130,9 @@ describe('reconcileQueriesRoute', () => {
 
   it('replays current stream queries through replaceStreamQueries', async () => {
     const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
-    const replaceStreamQueries = vi
-      .fn()
-      .mockImplementation(async (_definition, getNextQueries) => {
-        expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
-      });
+    const replaceStreamQueries = vi.fn().mockImplementation(async (_definition, getNextQueries) => {
+      expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
+    });
     const handlerParams = {
       params: { body: { streamNames: ['logs.test'] } },
       request: {},

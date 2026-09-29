@@ -17,11 +17,11 @@ import { StepReview } from './step_review';
 import { useAppContext } from '../../../app_context';
 
 vi.mock('../../../app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = useAppContext as MockedFunction<typeof useAppContext>;
 

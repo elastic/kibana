@@ -16,11 +16,11 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import { updateAlertStatus } from '../../../common/components/toolbar/bulk_actions/update_alerts';
 
 vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges', () => {
-      const mocked = {
-      useAlertsPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/toolbar/bulk_actions/update_alerts');
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;

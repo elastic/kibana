@@ -81,9 +81,7 @@ describe('StatusHandler', () => {
     `(
       "should return '$status' with $code when Kibana host returns $config.status",
       async ({ config, status, code }) => {
-        (fetch as MockedFunction<typeof fetch>).mockResolvedValueOnce(
-          new Response('', config)
-        );
+        (fetch as MockedFunction<typeof fetch>).mockResolvedValueOnce(new Response('', config));
 
         const response = server.inject({
           method: 'get',
@@ -132,17 +130,15 @@ describe('StatusHandler', () => {
     });
 
     it("should return 'timeout' with 504 when `fetch` timeouts", async () => {
-      (fetch as MockedFunction<typeof fetch>).mockImplementationOnce(
-        (url, { signal } = {}) => {
-          return new Promise((resolve, reject) => {
-            signal?.addEventListener('abort', () => {
-              reject(new DOMException('Fetch Aborted', 'AbortError'));
-            });
-
-            vi.advanceTimersByTime(60000);
+      (fetch as MockedFunction<typeof fetch>).mockImplementationOnce((url, { signal } = {}) => {
+        return new Promise((resolve, reject) => {
+          signal?.addEventListener('abort', () => {
+            reject(new DOMException('Fetch Aborted', 'AbortError'));
           });
-        }
-      );
+
+          vi.advanceTimersByTime(60000);
+        });
+      });
 
       vi.useFakeTimers({ doNotFake: ['nextTick'] });
 

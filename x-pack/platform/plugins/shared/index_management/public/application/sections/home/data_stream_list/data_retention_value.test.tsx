@@ -16,18 +16,18 @@ import { useIlmLocator } from '../../../services/use_ilm_locator';
 import { DataRetentionValue } from './data_retention_value';
 
 vi.mock('../../../app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/use_ilm_locator', () => {
-      const mocked = {
-      useIlmLocator: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmLocator: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = vi.mocked(useAppContext);
 const mockUseIlmLocator = vi.mocked(useIlmLocator);

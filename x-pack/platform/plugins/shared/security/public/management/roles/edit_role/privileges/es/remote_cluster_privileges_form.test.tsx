@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiButtonIcon } from '@elastic/eui';
 import type { EuiComboBoxProps } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import '@kbn/code-editor-mock/jest_helper';
 import type { RemoteClusterPrivilege } from '@kbn/security-plugin-types-common';

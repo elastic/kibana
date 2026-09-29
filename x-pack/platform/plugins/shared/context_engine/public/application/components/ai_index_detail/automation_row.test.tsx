@@ -15,27 +15,27 @@ import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { AutomationRow } from './automation_row';
 
 vi.mock('./workflow_yaml_preview_flyout', () => {
-      const mocked = {
-      WorkflowYamlPreviewFlyout: ({
-        workflowId,
-        workflowName,
-        onClose,
-      }: {
-        workflowId: string;
-        workflowName: string;
-        onClose: () => void;
-      }) => (
-        <div data-test-subj="contextWorkflowYamlPreviewFlyout">
-          <span>{workflowName}</span>
-          <span>{workflowId}</span>
-          <button type="button" onClick={onClose}>
-            Close preview
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYamlPreviewFlyout: ({
+      workflowId,
+      workflowName,
+      onClose,
+    }: {
+      workflowId: string;
+      workflowName: string;
+      onClose: () => void;
+    }) => (
+      <div data-test-subj="contextWorkflowYamlPreviewFlyout">
+        <span>{workflowName}</span>
+        <span>{workflowId}</span>
+        <button type="button" onClick={onClose}>
+          Close preview
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(

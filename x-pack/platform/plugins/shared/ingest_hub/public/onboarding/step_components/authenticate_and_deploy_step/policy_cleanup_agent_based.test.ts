@@ -9,14 +9,14 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      sendDeletePackagePolicy: vi.fn(),
-      sendUpdatePackagePolicy: vi.fn(),
-      sendGetPackageInfoByKey: vi.fn(),
-      sendGetOnePackagePolicy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendDeletePackagePolicy: vi.fn(),
+    sendUpdatePackagePolicy: vi.fn(),
+    sendGetPackageInfoByKey: vi.fn(),
+    sendGetOnePackagePolicy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   sendDeletePackagePolicy,

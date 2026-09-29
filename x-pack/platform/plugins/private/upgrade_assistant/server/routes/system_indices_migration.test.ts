@@ -15,11 +15,11 @@ import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
-      const mocked = {
-      versionCheckHandlerWrapper: () => (a: any) => a,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    versionCheckHandlerWrapper: () => (a: any) => a,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { registerSystemIndicesMigrationRoutes } from './system_indices_migration';
 
@@ -76,8 +76,7 @@ describe('Migrate system indices API', () => {
   describe('GET /api/upgrade_assistant/system_indices_migration', () => {
     it('returns system indices migration status', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
@@ -102,8 +101,7 @@ describe('Migrate system indices API', () => {
 
     it('returns an error if it throws', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({
@@ -117,8 +115,7 @@ describe('Migrate system indices API', () => {
   describe('POST /api/upgrade_assistant/system_indices_migration', () => {
     it('returns system indices migration status', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockResolvedValue(mockedResponse);
 
       const resp = await routeDependencies.router.getHandler({
@@ -138,8 +135,7 @@ describe('Migrate system indices API', () => {
 
     it('returns an error if it throws', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport
-          .request as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.transport.request as Mock
       ).mockRejectedValue(new Error('scary error!'));
       await expect(
         routeDependencies.router.getHandler({

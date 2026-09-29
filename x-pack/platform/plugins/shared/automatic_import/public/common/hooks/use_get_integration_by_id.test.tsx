@@ -18,15 +18,15 @@ vi.mock('../lib/api');
 const mockGetIntegrationById = api.getIntegrationById as Mock;
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {},
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {},
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

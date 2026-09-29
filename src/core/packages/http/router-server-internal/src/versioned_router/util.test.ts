@@ -94,9 +94,7 @@ describe('prepareVersionedRouteValidation', () => {
         request: { body: schema.string() },
         response: { 200: { body: () => schema.string() } },
       };
-      const factory = vi.fn(
-        (): VersionedRouteValidation<unknown, unknown, unknown> => validation
-      );
+      const factory = vi.fn((): VersionedRouteValidation<unknown, unknown, unknown> => validation);
 
       const prepared = prepareVersionedRouteValidation({
         version: '1',

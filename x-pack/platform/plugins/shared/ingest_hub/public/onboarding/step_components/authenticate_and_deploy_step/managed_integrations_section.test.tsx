@@ -15,43 +15,43 @@ import { I18nProvider } from '@kbn/i18n-react';
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      useGetPackageInfoByKeyQuery: vi.fn(),
-      getAnyCloudConnectorIacTemplateUrl: vi.fn(),
-      // Render as a simple div so we can fire onReadyChange without real fleet internals
-      LazyAwsIdentityFederationSetup: vi.fn(),
-      LazyAwsStaticKeysForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetPackageInfoByKeyQuery: vi.fn(),
+    getAnyCloudConnectorIacTemplateUrl: vi.fn(),
+    // Render as a simple div so we can fire onReadyChange without real fleet internals
+    LazyAwsIdentityFederationSetup: vi.fn(),
+    LazyAwsStaticKeysForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./static_keys_replace_view', () => {
-      const mocked = {
-      StaticKeysReplaceView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StaticKeysReplaceView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {

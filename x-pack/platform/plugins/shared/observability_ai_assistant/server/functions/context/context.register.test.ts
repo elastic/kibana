@@ -17,11 +17,11 @@ import { registerContextFunction } from './context';
 import { recallAndScore } from './utils/recall_and_score';
 
 vi.mock('./utils/recall_and_score', () => {
-      const mocked = {
-      recallAndScore: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    recallAndScore: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const recallAndScoreMock = recallAndScore as MockedFunction<typeof recallAndScore>;
 

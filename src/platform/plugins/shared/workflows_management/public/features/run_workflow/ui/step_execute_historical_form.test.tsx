@@ -7,83 +7,82 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { NOT_READY_SENTINEL, StepExecuteHistoricalForm } from './step_execute_historical_form';
 import { selectWorkflowId } from '../../../entities/workflows/store';
 
 const mockUseWorkflowStepExecutions = vi.fn();
 vi.mock('../../../entities/workflows/model/use_workflow_step_executions', () => {
-      const mocked = {
-      useWorkflowStepExecutions: (...args: unknown[]) => mockUseWorkflowStepExecutions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowStepExecutions: (...args: unknown[]) => mockUseWorkflowStepExecutions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStepExecution = vi.fn();
 vi.mock('../../workflow_execution_detail/model/use_step_execution', () => {
-      const mocked = {
-      useStepExecution: (...args: unknown[]) => mockUseStepExecution(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepExecution: (...args: unknown[]) => mockUseStepExecution(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowExecution = vi.fn();
 vi.mock('../../../entities/workflows/model/use_workflow_execution', () => {
-      const mocked = {
-      useWorkflowExecution: (...args: unknown[]) => mockUseWorkflowExecution(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowExecution: (...args: unknown[]) => mockUseWorkflowExecution(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBuildContextOverrideFromExecution = vi.fn();
 vi.mock('../../../shared/utils/build_step_context_override/build_step_context_override', () => {
-      const mocked = {
-      buildContextOverrideFromExecution: (...args: unknown[]) =>
-        mockBuildContextOverrideFromExecution(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildContextOverrideFromExecution: (...args: unknown[]) =>
+      mockBuildContextOverrideFromExecution(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui/use_formatted_date', () => {
-      const mocked = {
-      useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelector = vi.fn();
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: (selector: unknown) => mockUseSelector(selector),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: (selector: unknown) => mockUseSelector(selector),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({
-        value,
-        onChange,
-        dataTestSubj,
-      }: {
-        value: string;
-        onChange: (v: string) => void;
-        dataTestSubj: string;
-      }) => (
-        <textarea
-          data-test-subj={dataTestSubj}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({
+      value,
+      onChange,
+      dataTestSubj,
+    }: {
+      value: string;
+      onChange: (v: string) => void;
+      dataTestSubj: string;
+    }) => (
+      <textarea
+        data-test-subj={dataTestSubj}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (component: React.ReactElement) => {
   return render(component, { wrapper: I18nProvider });

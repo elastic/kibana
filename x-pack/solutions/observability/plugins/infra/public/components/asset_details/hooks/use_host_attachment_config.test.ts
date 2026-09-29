@@ -21,10 +21,9 @@ vi.mock('./use_date_picker');
 const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin
 >;
-const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as MockedFunction<
-    typeof useAssetDetailsRenderPropsContext
-  >;
+const useAssetDetailsRenderPropsContextMock = useAssetDetailsRenderPropsContext as MockedFunction<
+  typeof useAssetDetailsRenderPropsContext
+>;
 const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext
 >;

@@ -21,9 +21,9 @@ import { getThreatRuleParams } from '../../../rule_schema/mocks';
 import { DEFAULT_INDICATOR_SOURCE_PATH } from '../../../../../../common/constants';
 
 vi.mock('./get_threat_list', () => {
-      const mocked = { getThreatList: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getThreatList: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const getThreatListMock = getThreatList as Mock;
 

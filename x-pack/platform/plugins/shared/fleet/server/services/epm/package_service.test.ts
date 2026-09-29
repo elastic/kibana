@@ -304,9 +304,9 @@ describe('PackageService', () => {
         );
         spy.mockResolvedValue(spyResponse);
         if (testKey === 'reinstallEsAssets') {
-          vi
-            .mocked(epmPackagesGet.getInstallation)
-            .mockResolvedValue({ name: 'package name' } as any);
+          vi.mocked(epmPackagesGet.getInstallation).mockResolvedValue({
+            name: 'package name',
+          } as any);
           vi.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
         }
         await expect(method(...args)).resolves.toEqual(expectedReturnValue);
@@ -329,9 +329,9 @@ describe('PackageService', () => {
       );
       spy.mockResolvedValue(spyResponse);
       if (testKey === 'reinstallEsAssets') {
-        vi
-          .mocked(epmPackagesGet.getInstallation)
-          .mockResolvedValue({ name: 'package name' } as any);
+        vi.mocked(epmPackagesGet.getInstallation).mockResolvedValue({
+          name: 'package name',
+        } as any);
         vi.mocked(getEsPackage).mockResolvedValue({ name: 'package name' } as any);
       }
       if (testKey === 'getPackage') {
@@ -350,9 +350,10 @@ describe('PackageService', () => {
     const paths = ['/some/bundled/path'];
 
     it('calls getPackageFromSource without installedPkg', async () => {
-      vi
-        .spyOn(epmPackagesGet, 'getPackageFromSource')
-        .mockResolvedValue({ packageInfo: packageInfo as any, paths });
+      vi.spyOn(epmPackagesGet, 'getPackageFromSource').mockResolvedValue({
+        packageInfo: packageInfo as any,
+        paths,
+      });
 
       const result = await mockPackageService.asInternalUser.getPackage(pkgName, pkgVersion);
 
@@ -365,12 +366,10 @@ describe('PackageService', () => {
     });
 
     it('propagates PackageNotFoundError when package cannot be found anywhere', async () => {
-      const { PackageNotFoundError } = (await vi.importActual('../../errors'));
-      vi
-        .spyOn(epmPackagesGet, 'getPackageFromSource')
-        .mockRejectedValue(
-          new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`)
-        );
+      const { PackageNotFoundError } = await vi.importActual('../../errors');
+      vi.spyOn(epmPackagesGet, 'getPackageFromSource').mockRejectedValue(
+        new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`)
+      );
 
       await expect(
         mockPackageService.asInternalUser.getPackage(pkgName, pkgVersion)

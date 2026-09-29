@@ -14,27 +14,27 @@ import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 import { useMetricsDataView } from './metrics_view';
 
 vi.mock('../../hooks/use_project_routing', () => {
-      const mocked = {
-      useProjectRouting: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProjectRouting: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./source', () => {
-      const mocked = {
-      useSourceContext: vi.fn(() => ({
-        source: { configuration: { metricAlias: 'metrics-*' } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSourceContext: vi.fn(() => ({
+      source: { configuration: { metricAlias: 'metrics-*' } },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useProjectRoutingMock = useProjectRouting as Mock;
 const useKibanaContextForPluginMock = useKibanaContextForPlugin as Mock;

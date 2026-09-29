@@ -11,18 +11,18 @@ import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
 
 vi.mock('@kbn/generate-csv', () => {
-      const mocked = {
-      CsvGenerator: class CsvGeneratorMock {
-        generateData() {
-          return {
-            size: 123,
-            content_type: 'text/csv',
-          };
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CsvGenerator: class CsvGeneratorMock {
+      generateData() {
+        return {
+          size: 123,
+          content_type: 'text/csv',
+        };
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';

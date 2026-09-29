@@ -23,74 +23,74 @@ import { useAgentlessPolicies } from './use_agentless_policies';
 import { PackagePoliciesPage } from './package_policies';
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useConfirmForceInstall: vi.fn(),
-      useGetPackageInstallStatus: vi.fn().mockReturnValue(() => ({
-        status: 'installed',
-        version: '1.0.0',
-      })),
-      useGetPackageInfoByKeyQuery: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
-      useIsPackagePolicyUpgradable: vi.fn().mockReturnValue({
-        isPackagePolicyUpgradable: vi.fn().mockReturnValue(false),
-        getPackagePolicyUpgradeReview: vi.fn().mockReturnValue(undefined),
-        getKeepPoliciesUpToDate: vi.fn().mockReturnValue(false),
-        getUpgradeVersion: vi.fn().mockReturnValue(undefined),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useConfirmForceInstall: vi.fn(),
+    useGetPackageInstallStatus: vi.fn().mockReturnValue(() => ({
+      status: 'installed',
+      version: '1.0.0',
+    })),
+    useGetPackageInfoByKeyQuery: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
+    useIsPackagePolicyUpgradable: vi.fn().mockReturnValue({
+      isPackagePolicyUpgradable: vi.fn().mockReturnValue(false),
+      getPackagePolicyUpgradeReview: vi.fn().mockReturnValue(undefined),
+      getKeepPoliciesUpToDate: vi.fn().mockReturnValue(false),
+      getUpgradeVersion: vi.fn().mockReturnValue(undefined),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
   () => {
-      const mocked = {
-        useAgentless: vi.fn().mockReturnValue({
-          getAgentlessStatusForPackage: vi.fn().mockReturnValue({ isAgentless: true }),
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAgentless: vi.fn().mockReturnValue({
+        getAgentlessStatusForPackage: vi.fn().mockReturnValue({ isAgentless: true }),
+      }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('./use_package_policies_with_agent_policy', () => {
-      const mocked = {
-      usePackagePoliciesWithAgentPolicy: vi.fn().mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        error: null,
-        resendRequest: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePackagePoliciesWithAgentPolicy: vi.fn().mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      resendRequest: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_agentless_policies', () => {
-      const mocked = {
-      useAgentlessPolicies: vi.fn().mockReturnValue({
-        data: undefined,
-        isLoading: false,
-        error: null,
-        resendRequest: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentlessPolicies: vi.fn().mockReturnValue({
+      data: undefined,
+      isLoading: false,
+      error: null,
+      resendRequest: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/agent_based_table', () => {
-      const mocked = {
-      AgentBasedPackagePoliciesTable: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentBasedPackagePoliciesTable: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAgentlessTable = vi.fn().mockReturnValue(null);
 vi.mock('./components/agentless_table', () => {
-      const mocked = {
-      AgentlessPackagePoliciesTable: (props: unknown) => mockAgentlessTable(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentlessPackagePoliciesTable: (props: unknown) => mockAgentlessTable(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const packageInfo = {
   name: 'cspm',

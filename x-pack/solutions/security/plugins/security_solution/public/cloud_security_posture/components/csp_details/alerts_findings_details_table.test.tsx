@@ -20,95 +20,95 @@ import {
 } from '../../../entity_analytics/components/home/constants';
 
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: { trackUiMetric: vi.fn() },
-      ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS: 'visit',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: { trackUiMetric: vi.fn() },
+    ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS: 'visit',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/entity-store/public')),
-      useEntityStoreEuidApi: vi.fn().mockReturnValue({ euid: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/entity-store/public')),
+    useEntityStoreEuidApi: vi.fn().mockReturnValue({ euid: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useUiSetting: vi.fn().mockReturnValue(false),
-      useKibana: vi.fn().mockReturnValue({ services: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn().mockReturnValue(false),
+    useKibana: vi.fn().mockReturnValue({ services: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../detections/containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: vi.fn().mockReturnValue({
-        loading: false,
-        data: {
-          hits: {
-            hits: [
-              {
-                fields: {
-                  _id: ['alert-1'],
-                  _index: ['index-1'],
-                  'kibana.alert.rule.name': ['Rule'],
-                  'kibana.alert.severity': ['high'],
-                  'kibana.alert.workflow_status': ['open'],
-                },
+  const mocked = {
+    useQueryAlerts: vi.fn().mockReturnValue({
+      loading: false,
+      data: {
+        hits: {
+          hits: [
+            {
+              fields: {
+                _id: ['alert-1'],
+                _index: ['index-1'],
+                'kibana.alert.rule.name': ['Rule'],
+                'kibana.alert.severity': ['high'],
+                'kibana.alert.workflow_status': ['open'],
               },
-            ],
-          },
+            },
+          ],
         },
-        setQuery: vi.fn(),
-        response: '',
-        request: '',
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      setQuery: vi.fn(),
+      response: '',
+      request: '',
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => {
-      const mocked = {
-      useSignalIndex: vi
-        .fn()
-        .mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndex: vi
+      .fn()
+      .mockReturnValue({ loading: false, signalIndexName: '.alerts-security' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: vi.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: vi.fn().mockReturnValue({ entityRecord: null, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_non_closed_alerts', () => {
-      const mocked = {
-      useNonClosedAlerts: vi
-        .fn()
-        .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNonClosedAlerts: vi
+      .fn()
+      .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_navigate_to_alerts_page_with_filters', () => {
-      const mocked = {
-      useNavigateToAlertsPageWithFilters: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToAlertsPageWithFilters: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderTable = (
   onShowAlert: (eventId: string, indexName: string, ruleName?: string) => void

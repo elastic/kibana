@@ -54,20 +54,20 @@ const mockDataView = {
 } as Mocked<DataView>;
 
 vi.mock('../../../../containers/metrics_source', () => {
-      const mocked = {
-      useMetricsDataViewContext: () => ({
-        metricsView: {
-          indices: 'metricbeat-*',
-          timeFieldName: mockDataView.timeFieldName,
-          fields: mockDataView.fields,
-          dataViewReference: mockDataView,
-        } as ResolvedDataView,
-        loading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsDataViewContext: () => ({
+      metricsView: {
+        indices: 'metricbeat-*',
+        timeFieldName: mockDataView.timeFieldName,
+        fields: mockDataView.fields,
+        dataViewReference: mockDataView,
+      } as ResolvedDataView,
+      loading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseMetricsExplorerDataHook = () => {
   const wrapper: FC<PropsWithChildren<any>> = ({ children }) => {

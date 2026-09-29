@@ -27,11 +27,11 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 vi.mock('../../../data_view_manager/hooks/use_data_view');
 vi.mock('../../../common/hooks/use_is_cps_linked_search_space');
 vi.mock('./content', () => {
-      const mocked = {
-      AttacksPageContent: () => <div data-test-subj={'attacks-page-content'} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttacksPageContent: () => <div data-test-subj={'attacks-page-content'} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const mockUseIsCpsLinkedSearchSpace = useIsCpsLinkedSearchSpace as Mock;

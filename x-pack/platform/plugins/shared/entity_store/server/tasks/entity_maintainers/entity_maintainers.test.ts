@@ -29,21 +29,21 @@ const mockLicenseCheck = vi.fn();
 const mockGetLicense = vi.fn();
 
 vi.mock('./entity_maintainers_registry', () => {
-      const mocked = {
-      entityMaintainersRegistry: {
-        getAll: vi.fn(),
-        register: vi.fn(),
-        hasId: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    entityMaintainersRegistry: {
+      getAll: vi.fn(),
+      register: vi.fn(),
+      hasId: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../should_delete_orphaned_task', () => {
-      const mocked = {
-      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const registryMock = (await vi.importMock('./entity_maintainers_registry'))
   .entityMaintainersRegistry as {

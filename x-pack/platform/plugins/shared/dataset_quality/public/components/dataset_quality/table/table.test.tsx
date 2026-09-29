@@ -16,11 +16,11 @@ import { Table } from './table';
 import { useDatasetQualityTable } from '../../../hooks';
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useDatasetQualityTable: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDatasetQualityTable: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useDatasetQualityTableMock = useDatasetQualityTable as MockedFunction<
   typeof useDatasetQualityTable

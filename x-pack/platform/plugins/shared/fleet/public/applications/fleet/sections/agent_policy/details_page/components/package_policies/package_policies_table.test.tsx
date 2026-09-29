@@ -16,32 +16,32 @@ import { useIsPackagePolicyUpgradable } from '../../../../../hooks';
 import { PackagePoliciesTable } from './package_policies_table';
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useAuthz: vi.fn().mockReturnValue({
-        fleet: { readAgentPolicies: true, allAgentPolicies: true },
-        integrations: {
-          writeIntegrationPolicies: true,
-          readIntegrationPolicies: true,
-          installPackages: true,
-        },
-      }),
-      useIsPackagePolicyUpgradable: vi.fn(),
-      usePermissionCheck: vi.fn().mockReturnValue({ data: { success: true } }),
-      useMultipleAgentPolicies: vi.fn().mockReturnValue({ canUseMultipleAgentPolicies: false }),
-      useGetOutputs: vi.fn().mockReturnValue({ data: { items: [] }, isLoading: false }),
-      useDefaultOutput: vi.fn().mockReturnValue({ output: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useAuthz: vi.fn().mockReturnValue({
+      fleet: { readAgentPolicies: true, allAgentPolicies: true },
+      integrations: {
+        writeIntegrationPolicies: true,
+        readIntegrationPolicies: true,
+        installPackages: true,
+      },
+    }),
+    useIsPackagePolicyUpgradable: vi.fn(),
+    usePermissionCheck: vi.fn().mockReturnValue({ data: { success: true } }),
+    useMultipleAgentPolicies: vi.fn().mockReturnValue({ canUseMultipleAgentPolicies: false }),
+    useGetOutputs: vi.fn().mockReturnValue({ data: { items: [] }, isLoading: false }),
+    useDefaultOutput: vi.fn().mockReturnValue({ output: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../services')),
-      ExperimentalFeaturesService: { get: vi.fn().mockReturnValue({}) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../services')),
+    ExperimentalFeaturesService: { get: vi.fn().mockReturnValue({}) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const basePackagePolicy = {
   id: 'pkg1',

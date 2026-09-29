@@ -33,47 +33,47 @@ const defaultExecutionResult: QueryExecutionResult = {
 let mockExecutionResult = { ...defaultExecutionResult };
 
 vi.mock('./use_query_execution', () => {
-      const mocked = {
-      useQueryExecution: () => mockExecutionResult,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryExecution: () => mockExecutionResult,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLTimeField: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLTimeField: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/hooks/use_data_fields', () => {
-      const mocked = {
-      useDataFields: () => ({
-        data: {
-          '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
-        },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataFields: () => ({
+      data: {
+        '@timestamp': { name: '@timestamp', type: 'date', searchable: true, aggregatable: true },
+      },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-browser-shared', () => {
-      const mocked = {
-      AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingDateRangePicker: () => <div data-test-subj="querySandboxDatePicker" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockRuleFormServices: Record<string, unknown> = {};
 
 vi.mock('../../form/contexts/rule_form_context', () => {
-      const mocked = {
-      useRuleFormServices: () => mockRuleFormServices,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormServices: () => mockRuleFormServices,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildBaseServices = () => ({
   http: {},
@@ -84,14 +84,14 @@ const buildBaseServices = () => ({
 });
 
 vi.mock('./compose_discover_chart', () => {
-      const mocked = {
-      ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComposeDiscoverChart: () => <div data-test-subj="mockComposeDiscoverChart" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_tabs', async () => {
-  const actual = (await vi.importActual('./compose_discover_tabs'));
+  const actual = await vi.importActual('./compose_discover_tabs');
   return {
     ...actual,
     ComposeDiscoverTabs: () => <div data-test-subj="mockComposeDiscoverTabs" />,
@@ -99,16 +99,16 @@ vi.mock('./compose_discover_tabs', async () => {
 });
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
-        <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
-          {value}
-        </pre>
-      ),
-      ESQL_LANG_ID: 'esql',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({ value, options }: { value: string; options?: { theme?: string } }) => (
+      <pre data-test-subj="mockCodeEditor" data-theme={options?.theme}>
+        {value}
+      </pre>
+    ),
+    ESQL_LANG_ID: 'esql',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: QuerySandboxProps = {
   query: 'FROM logs-* | STATS count() BY host.name',

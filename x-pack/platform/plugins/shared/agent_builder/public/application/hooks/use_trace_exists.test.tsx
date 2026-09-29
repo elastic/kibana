@@ -18,25 +18,25 @@ const mockSearch = vi.fn();
 let mockSpaceId: string | undefined = 'test-space';
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          plugins: {
-            data: { search: { search: mockSearch } },
-            spaces: {},
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        plugins: {
+          data: { search: { search: mockSearch } },
+          spaces: {},
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => mockSpaceId,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => mockSpaceId,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

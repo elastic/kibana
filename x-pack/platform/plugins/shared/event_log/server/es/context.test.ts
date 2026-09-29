@@ -34,12 +34,12 @@ export const GetDataStreamsResponse: estypes.IndicesGetDataStreamResponse = {
 };
 
 vi.mock('../../../../../../package.json', () => {
-      const mocked = { version: '1.2.3' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { version: '1.2.3' };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./init');
 vi.mock('../lib/ready_signal', async () => {
-  const createReadySignalActual = (await vi.importActual('../lib/ready_signal'));
+  const createReadySignalActual = await vi.importActual('../lib/ready_signal');
   return {
     createReadySignal: vi.fn(createReadySignalActual.createReadySignal),
   };

@@ -28,95 +28,95 @@ import { licenseService } from '../../services/license';
 import { SyncIntegrationsTask, TYPE, VERSION } from './sync_integrations_task';
 
 vi.mock('../../services/output', () => {
-      const mocked = {
-      outputService: {
-        list: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    outputService: {
+      list: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/package_policy', () => {
-      const mocked = {
-      packagePolicyService: {
-        list: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    packagePolicyService: {
+      list: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/app_context', () => {
-      const mocked = {
-      appContextService: {
-        getExperimentalFeatures: vi.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
-        start: vi.fn(),
-        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false }),
-        getLogger: vi.fn().mockReturnValue({
-          debug: vi.fn(),
-        }),
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getExperimentalFeatures: vi.fn().mockReturnValue({ enableSyncIntegrationsOnRemote: true }),
+      start: vi.fn(),
+      getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false }),
+      getLogger: vi.fn().mockReturnValue({
+        debug: vi.fn(),
+      }),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOutputService = outputService as Mocked<typeof outputService>;
 const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
 vi.mock('../../services/epm/packages/get', () => {
-      const mocked = {
-      getInstalledPackageSavedObjects: vi.fn().mockResolvedValue({
-        saved_objects: [
-          {
-            attributes: {
-              name: 'system',
-              version: '0.1.0',
-              updated_at: new Date().toISOString(),
-              install_status: 'installed',
-              install_source: 'registry',
-            },
+  const mocked = {
+    getInstalledPackageSavedObjects: vi.fn().mockResolvedValue({
+      saved_objects: [
+        {
+          attributes: {
+            name: 'system',
+            version: '0.1.0',
+            updated_at: new Date().toISOString(),
+            install_status: 'installed',
+            install_source: 'registry',
           },
-          {
-            attributes: {
-              name: 'package-2',
-              version: '0.2.0',
-              updated_at: new Date().toISOString(),
-              install_status: 'installed',
-              install_source: 'registry',
-            },
+        },
+        {
+          attributes: {
+            name: 'package-2',
+            version: '0.2.0',
+            updated_at: new Date().toISOString(),
+            install_status: 'installed',
+            install_source: 'registry',
           },
-          {
-            attributes: {
-              name: 'bundled-package',
-              version: '0.1.0',
-              updated_at: new Date().toISOString(),
-              install_status: 'installed',
-              install_source: 'bundled',
-            },
+        },
+        {
+          attributes: {
+            name: 'bundled-package',
+            version: '0.1.0',
+            updated_at: new Date().toISOString(),
+            install_status: 'installed',
+            install_source: 'bundled',
           },
-          {
-            attributes: {
-              name: 'custom-package-1',
-              version: '0.1.0',
-              updated_at: new Date().toISOString(),
-              install_status: 'installed',
-              install_source: 'upload',
-            },
+        },
+        {
+          attributes: {
+            name: 'custom-package-1',
+            version: '0.1.0',
+            updated_at: new Date().toISOString(),
+            install_status: 'installed',
+            install_source: 'upload',
           },
-          {
-            attributes: {
-              name: 'custom-package-2',
-              version: '0.1.0',
-              updated_at: new Date().toISOString(),
-              install_status: 'installed',
-              install_source: 'custom',
-            },
+        },
+        {
+          attributes: {
+            name: 'custom-package-2',
+            version: '0.1.0',
+            updated_at: new Date().toISOString(),
+            install_status: 'installed',
+            install_source: 'custom',
           },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sync_integrations_on_remote');
 

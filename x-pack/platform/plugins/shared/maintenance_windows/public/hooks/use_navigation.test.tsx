@@ -22,7 +22,7 @@ const mockNavigateTo = vi.fn();
 const mockGetAppUrl = vi.fn();
 
 vi.mock('../utils/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../utils/kibana_react'));
+  const originalModule = await vi.importActual('../utils/kibana_react');
   return {
     ...originalModule,
     useKibana: () => {

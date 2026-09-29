@@ -19,21 +19,21 @@ const mockUseFetchMonitoredIndices = vi.fn().mockImplementation(() => ({
 }));
 
 vi.mock('../privileged_user_monitoring_onboarding/hooks/use_fetch_monitored_indices', () => {
-      const mocked = {
-      useFetchMonitoredIndices: () => mockUseFetchMonitoredIndices(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchMonitoredIndices: () => mockUseFetchMonitoredIndices(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        updatePrivMonMonitoredIndices: vi.fn(),
-        registerPrivMonMonitoredIndices: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      updatePrivMonMonitoredIndices: vi.fn(),
+      registerPrivMonMonitoredIndices: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IndexImportManageDataSource', () => {
   const setAddDataSourceResult = vi.fn();

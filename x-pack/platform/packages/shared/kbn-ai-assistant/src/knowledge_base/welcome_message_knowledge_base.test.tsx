@@ -14,14 +14,14 @@ import { WelcomeMessageKnowledgeBase } from './welcome_message_knowledge_base';
 import type { UseKnowledgeBaseResult } from '../hooks/use_knowledge_base';
 
 vi.mock('../hooks/use_inference_endpoints', () => {
-      const mocked = {
-      useInferenceEndpoints: () => ({
-        inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInferenceEndpoints: () => ({
+      inferenceEndpoints: [{ inference_id: 'id1' }, { inference_id: 'id2' }],
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createMockKnowledgeBase(
   partial: Partial<UseKnowledgeBaseResult> = {}

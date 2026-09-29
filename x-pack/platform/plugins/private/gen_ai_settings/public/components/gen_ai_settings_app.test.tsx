@@ -107,9 +107,9 @@ describe('GenAiSettingsApp', () => {
     };
 
     // Mock feature flags to enable AI Agents by default
-    vi
-      .spyOn(coreStart.featureFlags, 'getBooleanValue')
-      .mockImplementation((_flagName: string, _fallbackValue: boolean) => true as boolean);
+    vi.spyOn(coreStart.featureFlags, 'getBooleanValue').mockImplementation(
+      (_flagName: string, _fallbackValue: boolean) => true as boolean
+    );
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
@@ -286,9 +286,9 @@ describe('GenAiSettingsApp', () => {
         }
         return fallback;
       });
-      vi
-        .spyOn(coreStart.featureFlags, 'getBooleanValue')
-        .mockImplementation((_flagName, _fallbackValue) => true);
+      vi.spyOn(coreStart.featureFlags, 'getBooleanValue').mockImplementation(
+        (_flagName, _fallbackValue) => true
+      );
 
       renderComponent();
 

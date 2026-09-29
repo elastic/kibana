@@ -17,21 +17,21 @@ import { CTI_TAG_NAME, useCtiDashboardLinks } from '.';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/lib/apm/use_track_http_request', () => {
-      const mocked = {
-      useTrackHttpRequest: vi.fn(() => ({
-        startTracking: vi.fn(() => ({ endTracking: vi.fn() })),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTrackHttpRequest: vi.fn(() => ({
+      startTracking: vi.fn(() => ({ endTracking: vi.fn() })),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl: vi.fn(() =>
-        vi.fn(({ path }: { path: string }) => `/security/dashboards/${path}`)
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl: vi.fn(() =>
+      vi.fn(({ path }: { path: string }) => `/security/dashboards/${path}`)
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttpPost = vi.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;

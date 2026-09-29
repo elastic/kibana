@@ -42,14 +42,14 @@ import type { ApplyPolicyChangeInput } from './apply_policy_change';
 import { PolicyVersionConflictError, PolicyWriteRejectedError } from '../services/policy_errors';
 
 vi.mock('../services/endpoint_policy_management_service', () => {
-      const mocked = {
-      createEndpointPolicyManagementService: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEndpointPolicyManagementService: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./apply_policy_change_confirmation', async () => {
-  const actual = (await vi.importActual('./apply_policy_change_confirmation'));
+  const actual = await vi.importActual('./apply_policy_change_confirmation');
   return {
     ...actual,
     renderApplyPolicyChangeConfirmation: vi.fn(actual.renderApplyPolicyChangeConfirmation),

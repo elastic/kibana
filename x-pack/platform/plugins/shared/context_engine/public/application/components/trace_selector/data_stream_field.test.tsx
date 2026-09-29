@@ -24,11 +24,11 @@ interface UseIndicesArgs {
 const mockUseIndices = vi.fn();
 
 vi.mock('../../hooks/use_indices', () => {
-      const mocked = {
-      useIndices: (args: UseIndicesArgs) => mockUseIndices(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIndices: (args: UseIndicesArgs) => mockUseIndices(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultHookResult = {
   indexNames: ['logs-genai-default'],

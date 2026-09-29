@@ -304,9 +304,7 @@ describe('ActionsClientLlm', () => {
       });
 
       it('logs the error at debug when inferenceClient.chatComplete rejects', async () => {
-        (mockInferenceClient.chatComplete as Mock).mockRejectedValue(
-          new Error('quota exceeded')
-        );
+        (mockInferenceClient.chatComplete as Mock).mockRejectedValue(new Error('quota exceeded'));
         const actionsClientLlm = new ActionsClientLlm({
           actionsClient,
           connectorId,
@@ -334,9 +332,7 @@ describe('ActionsClientLlm', () => {
       });
 
       it('propagates errors from inferenceClient.chatComplete', async () => {
-        (mockInferenceClient.chatComplete as Mock).mockRejectedValue(
-          new Error('quota exceeded')
-        );
+        (mockInferenceClient.chatComplete as Mock).mockRejectedValue(new Error('quota exceeded'));
 
         const actionsClientLlm = new ActionsClientLlm({
           actionsClient,

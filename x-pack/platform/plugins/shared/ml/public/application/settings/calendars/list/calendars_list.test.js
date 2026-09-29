@@ -16,62 +16,62 @@ import { CalendarsList } from './calendars_list';
 // Mocking the child components to just assert that they get the data
 // received via the async call using mlApi in the main component.
 vi.mock('../../../components/help_menu', () => {
-      const mocked = {
-      HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HelpMenu: ({ docLink }) => <div data-test-subj="mockHelpMenu" data-link={docLink} />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./header', () => {
-      const mocked = {
-      CalendarsListHeader: ({ totalCount }) => (
-        <div data-test-subj="mockCalendarsListHeader">{totalCount}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CalendarsListHeader: ({ totalCount }) => (
+      <div data-test-subj="mockCalendarsListHeader">{totalCount}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./table', () => {
-      const mocked = {
-      CalendarsListTable: ({ calendarsList }) => (
-        <div
-          data-test-subj="mockCalendarsListTable"
-          data-calendar-list={JSON.stringify(calendarsList)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CalendarsListTable: ({ calendarsList }) => (
+      <div
+        data-test-subj="mockCalendarsListTable"
+        data-calendar-list={JSON.stringify(calendarsList)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../license', () => {
-      const mocked = {
-      hasLicenseExpired: () => false,
-      isFullLicense: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasLicenseExpired: () => false,
+    isFullLicense: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../capabilities/get_capabilities', () => {
-      const mocked = {
-      getCapabilities: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCapabilities: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../ml_nodes_check/check_ml_nodes', () => {
-      const mocked = {
-      mlNodesAvailable: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mlNodesAvailable: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCalendars = [
   {
@@ -129,19 +129,19 @@ const mockKibanaProp = {
 
 const mockReact = React;
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      withKibana: (type) => {
-        const EnhancedType = (props) => {
-          return mockReact.createElement(type, {
-            ...props,
-            kibana: mockKibanaProp,
-          });
-        };
-        return EnhancedType;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withKibana: (type) => {
+      const EnhancedType = (props) => {
+        return mockReact.createElement(type, {
+          ...props,
+          kibana: mockKibanaProp,
+        });
+      };
+      return EnhancedType;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const props = {
   canCreateCalendar: true,

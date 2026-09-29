@@ -28,14 +28,14 @@ import { EsqlStarredQueriesService } from './esql_starred_queries_service';
 import type { StarredQueryItem } from './esql_starred_queries_service';
 
 vi.mock('../history_local_storage', () => {
-      const mocked = {
-      getHistoryItems: vi.fn(),
-      getStorageStats: vi.fn(() => ({ queryCount: 0, storageSizeKB: 0 })),
-      getTrimmedQuery: vi.fn((query: string) => query.trim()),
-      dateFormat: 'MMM. DD, YY HH:mm:ss',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getHistoryItems: vi.fn(),
+    getStorageStats: vi.fn(() => ({ queryCount: 0, storageSizeKB: 0 })),
+    getTrimmedQuery: vi.fn((query: string) => query.trim()),
+    dateFormat: 'MMM. DD, YY HH:mm:ss',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetHistoryItems = getHistoryItems as MockedFunction<typeof getHistoryItems>;
 const mockGetStorageStats = getStorageStats as MockedFunction<typeof getStorageStats>;

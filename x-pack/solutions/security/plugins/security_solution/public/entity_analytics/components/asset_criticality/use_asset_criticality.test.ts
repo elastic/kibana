@@ -25,25 +25,25 @@ const mockFetchAssetCriticality = vi.fn().mockResolvedValue({});
 const mockDeleteAssetCriticality = vi.fn().mockResolvedValue({});
 const mockCreateAssetCriticality = vi.fn().mockResolvedValue({});
 vi.mock('../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
-        fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
-        fetchAssetCriticality: mockFetchAssetCriticality,
-        deleteAssetCriticality: mockDeleteAssetCriticality,
-        createAssetCriticality: mockCreateAssetCriticality,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchAssetCriticalityPrivileges: mockFetchAssetCriticalityPrivileges,
+      fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
+      fetchAssetCriticality: mockFetchAssetCriticality,
+      deleteAssetCriticality: mockDeleteAssetCriticality,
+      createAssetCriticality: mockCreateAssetCriticality,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseHasSecurityCapability = vi.fn().mockReturnValue(false);
 vi.mock('../../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: () => mockUseHasSecurityCapability(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: () => mockUseHasSecurityCapability(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAssetCriticality', () => {
   beforeEach(() => {

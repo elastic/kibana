@@ -30,90 +30,90 @@ const mockUseHasEntityHighlightsLicense = vi.fn();
 const mockUseInferenceConnectorAccess = vi.fn();
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: () => mockUseAssistantContext(),
-      useMaybeAssistantContext: () => mockUseMaybeAssistantContext(),
-      useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-      AssistantProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="assistant-provider">{children}</div>
-      ),
-      ConnectorSelectorInline: () => <div data-test-subj="connector-selector-inline" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => mockUseAssistantContext(),
+    useMaybeAssistantContext: () => mockUseMaybeAssistantContext(),
+    useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
+    AssistantProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="assistant-provider">{children}</div>
+    ),
+    ConnectorSelectorInline: () => <div data-test-subj="connector-selector-inline" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant/impl/assistant_context', () => {
-      const mocked = {
-      useAssistantContextValue: vi.fn(() => ({
-        http: { post: vi.fn() },
-        settings: { client: { get: vi.fn() } },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContextValue: vi.fn(() => ({
+      http: { post: vi.fn() },
+      settings: { client: { get: vi.fn() } },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../assistant/use_assistant_availability', () => {
-      const mocked = {
-      useAssistantAvailability: () => mockUseAssistantAvailability(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantAvailability: () => mockUseAssistantAvailability(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../onboarding/components/hooks/use_stored_state', () => {
-      const mocked = {
-      useStoredAssistantConnectorId: () => mockUseStoredAssistantConnectorId(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStoredAssistantConnectorId: () => mockUseStoredAssistantConnectorId(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => mockUseSpaceId(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => mockUseSpaceId(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_entity_details_highlights', () => {
-      const mocked = {
-      useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEntityDetailsHighlights: () => mockUseFetchEntityDetailsHighlights(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_fetch_persisted_ai_summary', () => {
-      const mocked = {
-      useFetchPersistedAiSummary: () => mockUseFetchPersistedAiSummary(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchPersistedAiSummary: () => mockUseFetchPersistedAiSummary(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_has_entity_highlights_license', () => {
-      const mocked = {
-      useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityHighlightsLicense: () => mockUseHasEntityHighlightsLicense(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_inference_connector_access', () => {
-      const mocked = {
-      useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInferenceConnectorAccess: (params: unknown) => mockUseInferenceConnectorAccess(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: () => mockUseLoadConnectors(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: () => mockUseLoadConnectors(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EntityHighlights', () => {
   const defaultProps = {

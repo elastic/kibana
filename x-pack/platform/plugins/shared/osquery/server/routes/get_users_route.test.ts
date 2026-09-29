@@ -16,11 +16,12 @@ import { getPackUsersRoute } from './get_users_route';
 import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_internal_saved_object_client';
 
 vi.mock('../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const TEST_PATH = '/internal/osquery/packs/users';
 
@@ -61,9 +62,7 @@ describe('getPackUsersRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
   });
 
   const setupRoute = () => {

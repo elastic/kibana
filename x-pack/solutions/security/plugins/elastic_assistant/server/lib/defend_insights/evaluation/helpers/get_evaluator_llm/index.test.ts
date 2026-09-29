@@ -16,29 +16,29 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 import { getEvaluatorLlm } from '.';
 
 vi.mock('@kbn/langchain/server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/langchain/server')),
-      ActionsClientLlm: vi.fn(),
-      getLangSmithTracer: vi.fn().mockReturnValue(['mock-tracer']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/langchain/server')),
+    ActionsClientLlm: vi.fn(),
+    getLangSmithTracer: vi.fn().mockReturnValue(['mock-tracer']),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../routes/utils', () => {
-      const mocked = {
-      getLlmType: (actionTypeId: string) => {
-        switch (actionTypeId) {
-          case '.gen-ai':
-            return 'openai';
-          case '.gemini':
-            return 'gemini';
-          default:
-            return 'unknown';
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLlmType: (actionTypeId: string) => {
+      switch (actionTypeId) {
+        case '.gen-ai':
+          return 'openai';
+        case '.gemini':
+          return 'gemini';
+        default:
+          return 'unknown';
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const connectorTimeout = 1500;
 const evaluatorConnectorId = 'evaluator-connector-id';

@@ -15,12 +15,12 @@ import type { MlDataSourcePickerServices } from './ml_data_source_picker';
 
 const mockHistoryReplace = vi.fn();
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(() => ({ replace: mockHistoryReplace })),
-      useLocation: vi.fn(() => ({ pathname: '/jobs/new_job/step/data_view', search: '' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(() => ({ replace: mockHistoryReplace })),
+    useLocation: vi.fn(() => ({ pathname: '/jobs/new_job/step/data_view', search: '' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedDataViewPickerProps: Record<string, any> = {};
 const MockDataViewPicker = (props: any) => {
@@ -33,25 +33,25 @@ const MockDataViewPicker = (props: any) => {
 };
 
 vi.mock('./ml_open_session_flyout', () => {
-      const mocked = {
-      MlOpenSessionFlyout: (props: any) => {
-        return (
-          <div data-test-subj="mockOpenSessionFlyout">
-            <button onClick={props.onClose} data-test-subj="closeSessionPanel">
-              Close
-            </button>
-            <button
-              onClick={() => props.onOpenSavedSearch('saved-search-id-1')}
-              data-test-subj="openSavedSearch"
-            >
-              Open Saved Search
-            </button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MlOpenSessionFlyout: (props: any) => {
+      return (
+        <div data-test-subj="mockOpenSessionFlyout">
+          <button onClick={props.onClose} data-test-subj="closeSessionPanel">
+            Close
+          </button>
+          <button
+            onClick={() => props.onOpenSavedSearch('saved-search-id-1')}
+            data-test-subj="openSavedSearch"
+          >
+            Open Saved Search
+          </button>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetIdsWithTitle = vi.fn().mockResolvedValue([]);
 const mockOpenEditor = vi.fn().mockResolvedValue(() => {});

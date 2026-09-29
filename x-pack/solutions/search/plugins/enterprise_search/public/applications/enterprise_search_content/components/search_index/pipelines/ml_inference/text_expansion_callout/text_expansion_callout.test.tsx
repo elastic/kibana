@@ -10,17 +10,17 @@ import { vi } from 'vitest';
 import { setMockActions, setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 vi.mock('./text_expansion_callout_data', () => {
-      const mocked = {
-      useTextExpansionCallOutData: vi.fn(() => ({
-        dismiss: vi.fn(),
-        isCreateButtonDisabled: false,
-        isDismissable: false,
-        isStartButtonDisabled: false,
-        show: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTextExpansionCallOutData: vi.fn(() => ({
+      dismiss: vi.fn(),
+      isCreateButtonDisabled: false,
+      isDismissable: false,
+      isStartButtonDisabled: false,
+      show: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

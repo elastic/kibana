@@ -14,18 +14,18 @@ import { useOriginalAlertIds } from './use_original_alert_ids';
 import { useAttackDetailsContext } from '../context';
 
 vi.mock('../context', () => {
-      const mocked = {
-      useAttackDetailsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDetailsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant-common', () => {
-      const mocked = {
-      getOriginalAlertIds: vi.fn(({ alertIds }: { alertIds: string[] }) => alertIds),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOriginalAlertIds: vi.fn(({ alertIds }: { alertIds: string[] }) => alertIds),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useOriginalAlertIds', () => {
   const getFieldsDataMock = vi.fn();

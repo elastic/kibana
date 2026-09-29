@@ -19,15 +19,15 @@ import type { QueryRuleEditorForm, SearchQueryRulesQueryRule } from '../../../..
 import type { DropResult, ResponderProvided } from '@elastic/eui';
 
 vi.mock('../../../hooks/use_fetch_index_names', () => {
-      const mocked = {
-      useFetchIndexNames: vi.fn().mockReturnValue({
-        data: [],
-        isLoading: false,
-        isError: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchIndexNames: vi.fn().mockReturnValue({
+      data: [],
+      isLoading: false,
+      isError: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchIndexNames = useFetchIndexNames as Mock;
 let mockFlyoutState: ReturnType<typeof useQueryRuleFlyoutState>;

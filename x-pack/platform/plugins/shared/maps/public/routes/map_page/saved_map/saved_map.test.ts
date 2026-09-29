@@ -8,28 +8,28 @@
 import { vi } from 'vitest';
 
 vi.mock('../../../kibana_services', () => {
-      const mocked = {
-      getMapsCapabilities: () => ({ save: true }),
-      getEMSSettings: () => ({ isEMSEnabled: () => false, isEMSUrlSet: () => false }),
-      getMapsEmsStart: () => ({ config: {} }),
-      getShowMapsInspectorAdapter: () => false,
-      getTimeFilter: () => ({
-        getTime: () => ({ from: 'now-15m', to: 'now' }),
-        getRefreshInterval: () => undefined,
-      }),
-      getUsageCollection: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMapsCapabilities: () => ({ save: true }),
+    getEMSSettings: () => ({ isEMSEnabled: () => false, isEMSUrlSet: () => false }),
+    getMapsEmsStart: () => ({ config: {} }),
+    getShowMapsInspectorAdapter: () => false,
+    getTimeFilter: () => ({
+      getTime: () => ({ from: 'now-15m', to: 'now' }),
+      getRefreshInterval: () => undefined,
+    }),
+    getUsageCollection: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../licensed_features', () => {
-      const mocked = {
-      whenLicenseInitialized: vi.fn().mockResolvedValue(undefined),
-      notifyLicensedFeatureUsage: vi.fn(),
-      getLicenseId: vi.fn().mockReturnValue('basic'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    whenLicenseInitialized: vi.fn().mockResolvedValue(undefined),
+    notifyLicensedFeatureUsage: vi.fn(),
+    getLicenseId: vi.fn().mockReturnValue('basic'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { SavedMap } from './saved_map';
 import { getMapCenter, getMapZoom } from '../../../selectors/map_selectors';

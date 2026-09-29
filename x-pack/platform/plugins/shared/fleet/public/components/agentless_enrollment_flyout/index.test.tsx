@@ -21,21 +21,21 @@ import { AGENTS_PREFIX, FLEET_CONNECTORS_PACKAGE } from '../../constants';
 import { AgentlessEnrollmentFlyout } from '.';
 
 vi.mock('../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks')),
-      useGetPackageInfoByKeyQuery: vi.fn(),
-      useGetAgentsQuery: vi.fn(),
-      useFleetStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks')),
+    useGetPackageInfoByKeyQuery: vi.fn(),
+    useGetAgentsQuery: vi.fn(),
+    useFleetStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../agent_enrollment_flyout/use_get_agent_incoming_data', () => {
-      const mocked = {
-      usePollingIncomingData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePollingIncomingData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetAgentsQuery = useGetAgentsQuery as Mock;
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as Mock;

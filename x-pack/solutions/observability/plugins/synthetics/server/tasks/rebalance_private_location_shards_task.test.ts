@@ -363,9 +363,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
     it('skips the data-plane liveness query when every agent is fresh', async () => {
       vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      vi
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
-        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));
+      vi.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([['agent-1', agentInfo(NOW)]])
+      );
       const getActive = vi.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds');
 
       await run();
@@ -376,9 +376,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
     it('keeps a stale-check-in agent that the liveness query proves active', async () => {
       vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      vi
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
-        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      vi.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]])
+      );
       const getActive = vi
         .spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds')
         .mockResolvedValue(new Set(['agent-1']));
@@ -394,9 +394,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
     it('warns and skips the rebalance when a location has no healthy agents', async () => {
       vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([location()]);
-      vi
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
-        .mockResolvedValue(new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]]));
+      vi.spyOn(getAgentInfoModule, 'getAgentInfo').mockResolvedValue(
+        new Map([['agent-1', agentInfo(NOW - STALE_CHECKIN_MS - 1)]])
+      );
       vi.spyOn(getActiveAgentIdsModule, 'getRecentlyActiveAgentIds').mockResolvedValue(new Set());
 
       await run();
@@ -406,14 +406,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('isolates a failing location and still processes the others', async () => {
-      vi
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue([
-          location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
-          location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
-        ]);
-      vi
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
+        location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
+      ]);
+      vi.spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockRejectedValueOnce(new Error('fleet boom'))
         .mockResolvedValueOnce(new Map([['agent-1', agentInfo(NOW)]]));
 
@@ -428,14 +425,11 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('keeps processing later locations (and persists streaks) when rebalanceShards throws', async () => {
-      vi
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue([
-          location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
-          location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
-        ]);
-      vi
-        .spyOn(getAgentInfoModule, 'getAgentInfo')
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
+        location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
+      ]);
+      vi.spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValueOnce(new Map([['agent-a', agentInfo(NOW)]]))
         .mockResolvedValueOnce(new Map([['agent-b', agentInfo(NOW)]]));
       // The first location's write fails; the second must still be rebalanced.
@@ -460,9 +454,9 @@ describe('RebalancePrivateLocationShardsTask', () => {
     });
 
     it('does not throw when getPrivateLocations fails; returns the prior state', async () => {
-      vi
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockRejectedValue(new Error('so boom'));
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockRejectedValue(
+        new Error('so boom')
+      );
 
       const result = await run({ keep: 1 });
 
@@ -483,12 +477,10 @@ describe('RebalancePrivateLocationShardsTask', () => {
 
     it('stops after the current location when the task is cancelled and does not treat abort as a location failure', async () => {
       const abortController = new AbortController();
-      vi
-        .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-        .mockResolvedValue([
-          location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
-          location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
-        ]);
+      vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+        location({ id: 'loc-a', agentPolicyId: 'ap-a' }),
+        location({ id: 'loc-b', agentPolicyId: 'ap-b' }),
+      ]);
       const getAgentInfo = vi
         .spyOn(getAgentInfoModule, 'getAgentInfo')
         .mockResolvedValue(new Map([['agent-1', agentInfo(NOW)]]));

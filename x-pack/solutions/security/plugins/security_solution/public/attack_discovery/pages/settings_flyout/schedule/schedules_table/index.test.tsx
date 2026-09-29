@@ -35,16 +35,17 @@ const mockUseFindAttackDiscoverySchedules = useFindAttackDiscoverySchedules as M
 const mockUseScheduleApi = useScheduleApi as MockedFunction<typeof useScheduleApi>;
 
 const enableAttackDiscoveryScheduleMock = vi.fn();
-const mockUseEnableAttackDiscoverySchedule =
-  useEnableAttackDiscoverySchedule as MockedFunction<typeof useEnableAttackDiscoverySchedule>;
+const mockUseEnableAttackDiscoverySchedule = useEnableAttackDiscoverySchedule as MockedFunction<
+  typeof useEnableAttackDiscoverySchedule
+>;
 const disableAttackDiscoveryScheduleMock = vi.fn();
-const mockUseDisableAttackDiscoverySchedule =
-  useDisableAttackDiscoverySchedule as MockedFunction<
-    typeof useDisableAttackDiscoverySchedule
-  >;
+const mockUseDisableAttackDiscoverySchedule = useDisableAttackDiscoverySchedule as MockedFunction<
+  typeof useDisableAttackDiscoverySchedule
+>;
 const deleteAttackDiscoveryScheduleMock = vi.fn();
-const mockUseDeleteAttackDiscoverySchedule =
-  useDeleteAttackDiscoverySchedule as MockedFunction<typeof useDeleteAttackDiscoverySchedule>;
+const mockUseDeleteAttackDiscoverySchedule = useDeleteAttackDiscoverySchedule as MockedFunction<
+  typeof useDeleteAttackDiscoverySchedule
+>;
 const refetchSchedulesMock = vi.fn();
 const bulkEnableAttackDiscoverySchedulesMock = vi.fn();
 const bulkDisableAttackDiscoverySchedulesMock = vi.fn();
@@ -382,15 +383,11 @@ describe('SchedulesTable', () => {
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowBulkEnableMutateAsync }),
         useCreateSchedule: vi.fn(),
-        useDeleteSchedule: vi
-          .fn()
-          .mockReturnValue({ mutateAsync: mockWorkflowDeleteMutateAsync }),
+        useDeleteSchedule: vi.fn().mockReturnValue({ mutateAsync: mockWorkflowDeleteMutateAsync }),
         useDisableSchedule: vi
           .fn()
           .mockReturnValue({ mutateAsync: mockWorkflowDisableMutateAsync }),
-        useEnableSchedule: vi
-          .fn()
-          .mockReturnValue({ mutateAsync: mockWorkflowEnableMutateAsync }),
+        useEnableSchedule: vi.fn().mockReturnValue({ mutateAsync: mockWorkflowEnableMutateAsync }),
         useFindSchedules: mockUseFindWorkflowSchedules,
         useGetSchedule: vi.fn(),
         useUpdateSchedule: vi.fn(),

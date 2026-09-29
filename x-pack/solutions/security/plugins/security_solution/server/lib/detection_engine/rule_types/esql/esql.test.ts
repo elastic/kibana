@@ -24,22 +24,22 @@ import { getMvExpandFields } from '@kbn/securitysolution-utils';
 
 vi.mock('../../routes/index/get_index_version');
 vi.mock('../utils/get_data_tier_filter', () => {
-      const mocked = { getDataTierFilter: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getDataTierFilter: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./utils/validate_esql_query', () => {
-      const mocked = {
-      validateEsqlQuery: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlQuery: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/securitysolution-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/securitysolution-utils')),
-      getMvExpandFields: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/securitysolution-utils')),
+    getMvExpandFields: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getDataTierFilterMock = getDataTierFilter as Mock;
 

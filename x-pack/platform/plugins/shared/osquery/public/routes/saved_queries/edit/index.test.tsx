@@ -22,89 +22,96 @@ import {
 import { useSavedQuery } from '../../../saved_queries';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ savedQueryId: 'test-saved-query-id' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ savedQueryId: 'test-saved-query-id' }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 const mockUseRouterNavigate = vi.fn();
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-      useRouterNavigate: (path: string) => {
-        mockUseRouterNavigate(path);
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+    useRouterNavigate: (path: string) => {
+      mockUseRouterNavigate(path);
 
-        return { onClick: vi.fn(), href: path };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return { onClick: vi.fn(), href: path };
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockMutateAsync = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('../../../saved_queries', () => {
-      const mocked = {
-      useSavedQuery: vi.fn(() => ({
-        isLoading: false,
-        data: {
-          id: 'test-saved-query-id',
-          saved_object_id: 'test-saved-query-id',
-          description: '',
-          query: 'SELECT * FROM uptime',
-          prebuilt: false,
-        },
-        error: null,
-      })),
-      useDeleteSavedQuery: vi.fn(() => ({ mutateAsync: vi.fn() })),
-      useUpdateSavedQuery: vi.fn(() => ({ mutateAsync: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSavedQuery: vi.fn(() => ({
+      isLoading: false,
+      data: {
+        id: 'test-saved-query-id',
+        saved_object_id: 'test-saved-query-id',
+        description: '',
+        query: 'SELECT * FROM uptime',
+        prebuilt: false,
+      },
+      error: null,
+    })),
+    useDeleteSavedQuery: vi.fn(() => ({ mutateAsync: vi.fn() })),
+    useUpdateSavedQuery: vi.fn(() => ({ mutateAsync: vi.fn() })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_queries/use_copy_saved_query', () => {
-      const mocked = {
-      useCopySavedQuery: vi.fn(() => ({
-        mutateAsync: mockMutateAsync,
-        isLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCopySavedQuery: vi.fn(() => ({
+      mutateAsync: mockMutateAsync,
+      isLoading: false,
+    })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./form', () => {
-      const mocked = {
-      EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => (
-        <div data-test-subj="edit-saved-query-form">
-          <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
-            Make form dirty
-          </button>
-          <button data-test-subj="make-form-clean" onClick={() => props.onDirtyStateChange?.(false)}>
-            Make form clean
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditSavedQueryForm: (props: { onDirtyStateChange?: (isDirty: boolean) => void }) => (
+      <div data-test-subj="edit-saved-query-form">
+        <button data-test-subj="make-form-dirty" onClick={() => props.onDirtyStateChange?.(true)}>
+          Make form dirty
+        </button>
+        <button data-test-subj="make-form-clean" onClick={() => props.onDirtyStateChange?.(false)}>
+          Make form clean
+        </button>
+      </div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/layouts', () => {
-      const mocked = {
-      fullWidthFormContentCss: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fullWidthFormContentCss: {},
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({

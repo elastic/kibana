@@ -14,13 +14,13 @@ import { VISUALIZATION_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-ty
 import { visualizationSmlType } from './visualization';
 
 vi.mock('@kbn/lens-embeddable-utils', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn().mockImplementation(() => ({
-        toAPIFormat: vi.fn().mockReturnValue({ type: 'xy', layers: [] }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
+      toAPIFormat: vi.fn().mockReturnValue({ type: 'xy', layers: [] }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSavedObjectsClient = {
   createPointInTimeFinder: vi.fn(),
@@ -354,7 +354,7 @@ describe('visualizationSmlType', () => {
     });
 
     it('omits chart_type when the Lens API type is outside the supported vocabulary', async () => {
-      const { LensConfigBuilder } = (await vi.importMock('@kbn/lens-embeddable-utils'));
+      const { LensConfigBuilder } = await vi.importMock('@kbn/lens-embeddable-utils');
       (LensConfigBuilder as Mock).mockImplementation(() => ({
         // A raw Lens `visualizationType` (not the API vocabulary) must not leak
         // through as chart_type.
@@ -409,7 +409,7 @@ describe('visualizationSmlType', () => {
     });
 
     it('uses LensConfigBuilder to convert attributes', async () => {
-      const { LensConfigBuilder } = (await vi.importMock('@kbn/lens-embeddable-utils'));
+      const { LensConfigBuilder } = await vi.importMock('@kbn/lens-embeddable-utils');
       const toAPIFormatMock = vi.fn().mockReturnValue({
         type: 'pie',
         layers: [{ id: 'layer1' }],

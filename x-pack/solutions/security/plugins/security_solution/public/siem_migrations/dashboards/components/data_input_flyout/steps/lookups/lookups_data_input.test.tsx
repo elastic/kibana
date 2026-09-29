@@ -20,25 +20,25 @@ const mockAddError = vi.fn();
 const mockAddSuccess = vi.fn();
 
 vi.mock('../../../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            dashboards: {
-              api: {},
-            },
-          },
-          notifications: {
-            toasts: {
-              addError: mockAddError,
-              addSuccess: mockAddSuccess,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          dashboards: {
+            api: {},
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: {
+          toasts: {
+            addError: mockAddError,
+            addSuccess: mockAddSuccess,
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('LookupsDataInput', () => {
   const defaultProps = {

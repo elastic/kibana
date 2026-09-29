@@ -26,11 +26,11 @@ const postRequest = (body: Record<string, unknown>) =>
   });
 
 vi.mock('../../../saved_object/timelines', () => {
-      const mocked = {
-      getAllTimelineByIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllTimelineByIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('POST /internal/timelines/_by_ids', () => {
   let server: ReturnType<typeof serverMock.create>;

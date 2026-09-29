@@ -30,11 +30,11 @@ const mockUseGraphPopoverState = vi.fn(() => ({
 }));
 
 vi.mock('../primitives/use_graph_popover_state', () => {
-      const mocked = {
-      useGraphPopoverState: () => mockUseGraphPopoverState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGraphPopoverState: () => mockUseGraphPopoverState(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createTestItems = (count: number): GenericPopoverItem[] => {
   return Array.from({ length: count }, (_, index) => ({

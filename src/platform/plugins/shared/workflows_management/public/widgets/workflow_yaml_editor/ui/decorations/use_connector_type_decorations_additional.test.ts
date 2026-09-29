@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { useConnectorTypeDecorations } from './use_connector_type_decorations';
@@ -23,46 +23,46 @@ const mockConnectorsMap = new Map<string, { stability?: string }>([
 ]);
 
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
-      getBuiltInStepStability: (type: string) => {
-        if (type === 'if') return 'tech_preview';
-        return undefined;
-      },
-      resolveKibanaStepTypeAlias: (type: string) =>
-        type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    isBuiltInStepType: (type: string) => mockBuiltInStepTypes.has(type),
+    getBuiltInStepStability: (type: string) => {
+      if (type === 'if') return 'tech_preview';
+      return undefined;
+    },
+    resolveKibanaStepTypeAlias: (type: string) =>
+      type === 'kibana.createCaseDefaultSpace' ? 'kibana.createCase' : type,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getStepDefinition: vi.fn(() => undefined),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getStepDefinition: vi.fn(() => undefined),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      getCachedAllConnectorsMap: () => mockConnectorsMap,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCachedAllConnectorsMap: () => mockConnectorsMap,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      getBaseConnectorType: (type: string) => {
-        if (type.startsWith('elasticsearch.')) return 'elasticsearch';
-        if (type.startsWith('kibana.')) return 'kibana';
-        const normalized = type.startsWith('.') ? type.slice(1) : type;
-        return normalized.includes('.') ? normalized.split('.')[0] : normalized;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBaseConnectorType: (type: string) => {
+      if (type.startsWith('elasticsearch.')) return 'elasticsearch';
+      if (type.startsWith('kibana.')) return 'kibana';
+      const normalized = type.startsWith('.') ? type.slice(1) : type;
+      return normalized.includes('.') ? normalized.split('.')[0] : normalized;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * The mock cannot reuse the factory one as jest.mock is hoisted to the top of the file before imports are resolved,
@@ -71,20 +71,20 @@ vi.mock('@kbn/workflows-ui', () => {
  * The mock need to be inlined to work here.
  */
 vi.mock('@kbn/monaco', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/monaco')),
-      monaco: {
-        ...(await vi.importActual<typeof import('@kbn/monaco')>('@kbn/monaco')).monaco,
-        Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
-          startLineNumber: startLine,
-          startColumn: startCol,
-          endLineNumber: endLine,
-          endColumn: endCol,
-        })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/monaco')),
+    monaco: {
+      ...(await vi.importActual<typeof import('@kbn/monaco')>('@kbn/monaco')).monaco,
+      Range: vi.fn((startLine: number, startCol: number, endLine: number, endCol: number) => ({
+        startLineNumber: startLine,
+        startColumn: startCol,
+        endLineNumber: endLine,
+        endColumn: endCol,
+      })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.useFakeTimers();
 

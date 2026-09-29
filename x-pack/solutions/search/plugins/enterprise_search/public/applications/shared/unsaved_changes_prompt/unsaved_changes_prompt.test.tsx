@@ -5,18 +5,18 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 
-import React from 'react';
-
 const MockPrompt = vi.fn<null, [object]>(() => null);
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      Prompt: (props: object) => MockPrompt(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Prompt: (props: object) => MockPrompt(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { render } from '@testing-library/react';
 
@@ -28,9 +28,7 @@ describe('UnsavedChangesPrompt', () => {
 
   beforeAll(() => {
     addEventListenerSpy = vi.spyOn(window, 'addEventListener').mockImplementation(() => true);
-    removeEventListenerSpy = vi
-      .spyOn(window, 'removeEventListener')
-      .mockImplementation(() => true);
+    removeEventListenerSpy = vi.spyOn(window, 'removeEventListener').mockImplementation(() => true);
   });
 
   beforeEach(() => {

@@ -17,36 +17,36 @@ import { IngestChartStatistics } from './ingest_chart_statistics';
 const mockUseStreamsAppFetch = vi.fn();
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: { uiSettings: {} },
-        isServerless: false,
-        dependencies: {
-          start: {
-            data: { search: { search: vi.fn() } },
-            streams: { streamsRepositoryClient: { fetch: vi.fn() } },
-          },
+  const mocked = {
+    useKibana: () => ({
+      core: { uiSettings: {} },
+      isServerless: false,
+      dependencies: {
+        start: {
+          data: { search: { search: vi.fn() } },
+          streams: { streamsRepositoryClient: { fetch: vi.fn() } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // executeEsqlQuery is called inside useStreamsAppFetch which we mock entirely,
 // so this import only needs to exist to prevent module-not-found errors.
 vi.mock('../../hooks/use_execute_esql_query', () => {
-      const mocked = {
-      executeEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

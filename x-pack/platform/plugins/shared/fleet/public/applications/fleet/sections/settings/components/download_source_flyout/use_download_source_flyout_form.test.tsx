@@ -19,15 +19,15 @@ import {
 } from './use_download_source_flyout_form';
 
 vi.mock('../../../../../../hooks/use_authz', () => {
-      const mocked = {
-      useAuthz: () => ({
-        fleet: {
-          allSettings: true,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAuthz: () => ({
+      fleet: {
+        allSettings: true,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDowloadSourceFlyoutForm SSL certificate path validation', () => {
   it('should block submission when certificate path contains spaces', async () => {

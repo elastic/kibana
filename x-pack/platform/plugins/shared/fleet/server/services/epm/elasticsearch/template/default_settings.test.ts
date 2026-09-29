@@ -18,16 +18,16 @@ import { buildDefaultSettings, saveILMMigrationChanges } from './default_setting
 
 vi.mock('../../../app_context');
 vi.mock('../../../settings', () => {
-      const mocked = {
-      getSettingsOrUndefined: vi.fn().mockResolvedValue({
-        ilm_migration_status: {
-          metrics: 'success',
-        },
-      }),
-      saveSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSettingsOrUndefined: vi.fn().mockResolvedValue({
+      ilm_migration_status: {
+        metrics: 'success',
+      },
+    }),
+    saveSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({

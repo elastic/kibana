@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues, setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { screen, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
@@ -20,11 +19,11 @@ import type { AnalyticsCollection } from '../../../../../common/types/analytics'
 import { AnalyticsOverview } from './analytics_overview';
 
 vi.mock('../../utils/find_or_create_data_view', () => {
-      const mocked = {
-      findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findOrCreateDataView: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValues = {
   analyticsCollections: [

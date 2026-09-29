@@ -23,63 +23,63 @@ const mockUseApmParams = vi.fn();
 const mockUseTimeRange = vi.fn();
 
 vi.mock('../../../../../hooks/use_progressive_fetcher', () => {
-      const mocked = {
-      useProgressiveFetcher: () => mockUseProgressiveFetcher(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProgressiveFetcher: () => mockUseProgressiveFetcher(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => mockUseApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => mockUseApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => mockUseTimeRange(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => mockUseTimeRange(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('./agent_contextual_information', () => {
-      const mocked = {
-      AgentContextualInformation: ({ agentName, serviceName }: any) => (
-        <div data-test-subj="agent-contextual-information">
-          Agent: {agentName}, Service: {serviceName}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentContextualInformation: ({ agentName, serviceName }: any) => (
+      <div data-test-subj="agent-contextual-information">
+        Agent: {agentName}, Service: {serviceName}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_instances_details', () => {
-      const mocked = {
-      AgentInstancesDetails: ({ serviceName, isLoading, items }: any) => (
-        <div data-test-subj="agent-instances-details">
-          Service: {serviceName}, Loading: {isLoading.toString()}, Items: {items.length}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentInstancesDetails: ({ serviceName, isLoading, items }: any) => (
+      <div data-test-subj="agent-instances-details">
+        Service: {serviceName}, Loading: {isLoading.toString()}, Items: {items.length}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock ResponsiveFlyout
 vi.mock('../../../../shared/responsive_flyout', () => {
-      const mocked = {
-      ResponsiveFlyout: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
-        <div data-test-subj="responsive-flyout">
-          <button data-test-subj="close-flyout" onClick={onClose}>
-            Close
-          </button>
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponsiveFlyout: ({ children, onClose }: { children: ReactNode; onClose: () => void }) => (
+      <div data-test-subj="responsive-flyout">
+        <button data-test-subj="close-flyout" onClick={onClose}>
+          Close
+        </button>
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

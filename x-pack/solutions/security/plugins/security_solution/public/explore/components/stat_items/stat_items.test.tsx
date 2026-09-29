@@ -17,11 +17,11 @@ import { useToggleStatus } from './use_toggle_status';
 
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable');
 vi.mock('./use_toggle_status', () => {
-      const mocked = {
-      useToggleStatus: vi.fn().mockReturnValue({ isToggleExpanded: true, onToggle: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToggleStatus: vi.fn().mockReturnValue({ isToggleExpanded: true, onToggle: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('StatItemsComponent', () => {
   const mockStatItems = {

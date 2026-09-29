@@ -7,53 +7,52 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { WorkflowExecutionStatsBar } from './workflow_executions_stats_bar';
 
 // Mock useWorkflowStats
 const mockUseWorkflowStats = vi.fn();
 vi.mock('../../../entities/workflows/model/use_workflow_stats', () => {
-      const mocked = {
-      useWorkflowStats: () => mockUseWorkflowStats(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowStats: () => mockUseWorkflowStats(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock @elastic/charts to avoid rendering issues in tests
 vi.mock('@elastic/charts', () => {
-      const mocked = {
-      Chart: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="mock-chart">{children}</div>
-      ),
-      Axis: ({ id, title }: { id: string; title: string }) => (
-        <div data-test-subj={`mock-axis-${id}`}>{title}</div>
-      ),
-      BarSeries: ({ id }: { id: string }) => <div data-test-subj={`mock-bar-series-${id}`} />,
-      Settings: () => <div data-test-subj="mock-settings" />,
-      Tooltip: () => <div data-test-subj="mock-tooltip" />,
-      niceTimeFormatter: () => vi.fn(),
-      Position: {
-        Right: 'right',
-        Bottom: 'bottom',
-        Left: 'left',
-      },
-      ScaleType: {
-        Time: 'time',
-        Linear: 'linear',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Chart: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="mock-chart">{children}</div>
+    ),
+    Axis: ({ id, title }: { id: string; title: string }) => (
+      <div data-test-subj={`mock-axis-${id}`}>{title}</div>
+    ),
+    BarSeries: ({ id }: { id: string }) => <div data-test-subj={`mock-bar-series-${id}`} />,
+    Settings: () => <div data-test-subj="mock-settings" />,
+    Tooltip: () => <div data-test-subj="mock-tooltip" />,
+    niceTimeFormatter: () => vi.fn(),
+    Position: {
+      Right: 'right',
+      Bottom: 'bottom',
+      Left: 'left',
+    },
+    ScaleType: {
+      Time: 'time',
+      Linear: 'linear',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/charts/dist/utils/data/formatters', () => {
-      const mocked = {
-      timeFormatter: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timeFormatter: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowExecutionStatsBar', () => {
   beforeEach(() => {

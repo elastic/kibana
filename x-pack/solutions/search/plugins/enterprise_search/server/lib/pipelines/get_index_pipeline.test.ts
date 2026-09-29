@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { DEFAULT_PIPELINE_VALUES } from '../../../common/constants';

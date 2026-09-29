@@ -25,69 +25,69 @@ import type { SyntheticsParams } from '../../../../../../common/runtime_types';
 import type { ListParamItem } from './params_list';
 
 vi.mock('../../common/components/permissions', () => {
-      const mocked = {
-      NoPermissionsTooltip: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoPermissionsTooltip: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/utils/fetch_effect', () => {
-      const mocked = {
-      fetchEffectFactory: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEffectFactory: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/global_params/api', () => {
-      const mocked = {
-      addGlobalParam: vi.fn(),
-      deleteGlobalParams: vi.fn(),
-      editGlobalParam: vi.fn(),
-      getGlobalParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addGlobalParam: vi.fn(),
+    deleteGlobalParams: vi.fn(),
+    editGlobalParam: vi.fn(),
+    getGlobalParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./add_param_form', () => {
-      const mocked = {
-      AddParamForm: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddParamForm: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/kibana_service', () => {
-      const mocked = {
-      kibanaService: {
-        toasts: {
-          addSuccess: vi.fn(),
-          addError: vi.fn(),
-        },
+  const mocked = {
+    kibanaService: {
+      toasts: {
+        addSuccess: vi.fn(),
+        addError: vi.fn(),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              uptime: { save: true, show: true, configureSettings: true },
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: {
+            uptime: { save: true, show: true, configureSettings: true },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/security-plugin/public', () => {
-      const mocked = {
-      ALL_SPACES_ID: '*',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ALL_SPACES_ID: '*',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const savedParam: SyntheticsParams = {
   id: 'param-1',

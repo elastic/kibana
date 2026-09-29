@@ -27,43 +27,43 @@ import { TASK_STATS_POLLING_SLEEP_SECONDS } from '../constants';
 // --- Mocks for external modules ---
 
 vi.mock('./capabilities', () => {
-      const mocked = {
-      getMissingCapabilitiesChecker: vi.fn(() => () => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMissingCapabilitiesChecker: vi.fn(() => () => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: vi.fn(() => ({ siemMigrationsDisabled: false })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: vi.fn(() => ({ siemMigrationsDisabled: false })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_license', () => {
-      const mocked = {
-      licenseService: {
-        isEnterprise: vi.fn(() => true),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    licenseService: {
+      isEnterprise: vi.fn(() => true),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./notifications/no_connector_notification', () => {
-      const mocked = {
-      getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNoConnectorToast: vi.fn().mockReturnValue({ title: 'No Connector' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./notifications/missing_capabilities_notification', () => {
-      const mocked = {
-      getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMissingCapabilitiesToast: vi.fn().mockReturnValue({ title: 'Missing Capabilities' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetMissingCapabilitiesChecker = getMissingCapabilitiesChecker as Mock;
 

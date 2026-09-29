@@ -21,11 +21,11 @@ import { autocompleteStartMock } from '../autocomplete/index.mock';
 
 vi.mock('../hooks/use_field_value_autocomplete');
 vi.mock('../translations', () => {
-      const mocked = {
-      FIELD_SPACE_WARNING: 'Warning: there is a space',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FIELD_SPACE_WARNING: 'Warning: there is a space',
+  };
+  return { ...mocked, default: mocked };
+});
 describe('AutocompleteFieldMatchComponent', () => {
   let wrapper: ReactWrapper;
 
@@ -459,12 +459,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     const valueSuggestionsMock = vi.fn().mockResolvedValue([false, false, [], vi.fn()]);
 
     beforeEach(() => {
-      (useFieldValueAutocomplete as Mock).mockReturnValue([
-        false,
-        false,
-        [],
-        valueSuggestionsMock,
-      ]);
+      (useFieldValueAutocomplete as Mock).mockReturnValue([false, false, [], valueSuggestionsMock]);
     });
 
     test('it displays only two options - "true" or "false"', () => {
@@ -568,12 +563,7 @@ describe('AutocompleteFieldMatchComponent', () => {
     const valueSuggestionsMock = vi.fn().mockResolvedValue([false, false, [], vi.fn()]);
 
     beforeEach(() => {
-      (useFieldValueAutocomplete as Mock).mockReturnValue([
-        false,
-        false,
-        [],
-        valueSuggestionsMock,
-      ]);
+      (useFieldValueAutocomplete as Mock).mockReturnValue([false, false, [], valueSuggestionsMock]);
     });
 
     test('it number input when field type is number', () => {

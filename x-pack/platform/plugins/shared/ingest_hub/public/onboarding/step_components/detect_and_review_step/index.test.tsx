@@ -13,78 +13,78 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      useGetPackageInfoByKeyQuery: vi.fn(),
-      pagePathGetters: {
-        integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
-          '/app/integrations',
-          `/detail/${pkgkey}/policies`,
-        ],
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetPackageInfoByKeyQuery: vi.fn(),
+    pagePathGetters: {
+      integration_details_policies: ({ pkgkey }: { pkgkey: string }) => [
+        '/app/integrations',
+        `/detail/${pkgkey}/policies`,
+      ],
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_service_data_detection', () => {
-      const mocked = {
-      useServiceDataDetection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceDataDetection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./deployment_summary', () => {
-      const mocked = {
-      DeploymentSummary: ({ totalCount }: { totalCount: number }) => (
-        <div data-test-subj="mock-deployment-summary">{totalCount} services</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeploymentSummary: ({ totalCount }: { totalCount: number }) => (
+      <div data-test-subj="mock-deployment-summary">{totalCount} services</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./installed_content', () => {
-      const mocked = {
-      InstalledContent: () => <div data-test-subj="mock-installed-content" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InstalledContent: () => <div data-test-subj="mock-installed-content" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_aws_overview_dashboard_url', () => {
-      const mocked = {
-      useAwsOverviewDashboardUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAwsOverviewDashboardUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_setup_callout', () => {
-      const mocked = {
-      AgentSetupCallout: () => (
-        <div data-test-subj="mock-agent-callout">
-          <button data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss" onClick={() => {}}>
-            Dismiss
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentSetupCallout: () => (
+      <div data-test-subj="mock-agent-callout">
+        <button data-test-subj="detectAndReviewStep-agentSetupCallout-dismiss" onClick={() => {}}>
+          Dismiss
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { http: { basePath: { prepend: (path: string) => `/base${path}` } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import useSessionStorage from 'react-use/lib/useSessionStorage';

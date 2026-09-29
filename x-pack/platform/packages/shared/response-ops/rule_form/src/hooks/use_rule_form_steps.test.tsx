@@ -21,34 +21,34 @@ import type { RuleFormData } from '../types';
 import { EuiSteps, EuiStepsHorizontal } from '@elastic/eui';
 
 vi.mock('../rule_definition', () => {
-      const mocked = {
-      RuleDefinition: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDefinition: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rule_actions', () => {
-      const mocked = {
-      RuleActions: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActions: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../rule_details', () => {
-      const mocked = {
-      RuleDetails: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDetails: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_rule_form_state', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState } = (await vi.importMock('./use_rule_form_state'));
+const { useRuleFormState } = await vi.importMock('./use_rule_form_state');
 
 const navigateToUrl = vi.fn();
 

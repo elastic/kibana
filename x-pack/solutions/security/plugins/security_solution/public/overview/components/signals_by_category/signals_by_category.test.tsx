@@ -25,11 +25,11 @@ vi.mock('react-router-dom', () => {
 
 const mockUseFiltersForSignals = vi.fn(() => []);
 vi.mock('./use_filters_for_signals_by_category', () => {
-      const mocked = {
-      useFiltersForSignalsByCategory: () => mockUseFiltersForSignals(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFiltersForSignalsByCategory: () => mockUseFiltersForSignals(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const props = {
   query: {

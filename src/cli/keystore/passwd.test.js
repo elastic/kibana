@@ -13,13 +13,13 @@ const mockKeystoreWithOldPassword =
   '1:9OsRzJI+gyDEH1ZjAHuKZFfYH7nEguzFRJwxWgj5WTJm5w+mzwKUzIdy65/lBW+XxY4wa1qYf0RSGJmfJKPz/er7pt58RJ8OgpicM2nCOMrqjPuovQr0QoMPbx736YlHEEIsuAaGAGItW7rlAQ==';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreWithOldPassword)),
-      existsSync: vi.fn().mockImplementation(() => true),
-      writeFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreWithOldPassword)),
+    existsSync: vi.fn().mockImplementation(() => true),
+    writeFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import * as prompt from './lib/utils/prompt';
 

@@ -22,25 +22,25 @@ import { AskUserQuestionPrompt } from './ask_user_question_prompt';
 const mockReportEvent = vi.fn();
 
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: { analytics: { reportEvent: mockReportEvent } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { analytics: { reportEvent: mockReportEvent } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: () => 'agent-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: () => 'agent-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: () => 'conv-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: () => 'conv-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(

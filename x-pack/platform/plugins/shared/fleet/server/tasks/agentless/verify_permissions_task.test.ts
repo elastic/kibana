@@ -23,40 +23,40 @@ import {
 } from './verify_permissions_task';
 
 vi.mock('../../services/agent_policy_update', () => {
-      const mocked = {
-      agentPolicyUpdateEventHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyUpdateEventHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        list: vi.fn(),
-        createVerifierPolicy: vi.fn(),
-        deleteVerifierPolicy: vi.fn(),
-      },
-      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      list: vi.fn(),
+      createVerifierPolicy: vi.fn(),
+      deleteVerifierPolicy: vi.fn(),
+    },
+    getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/epm/packages', () => {
-      const mocked = {
-      getPackageInfo: vi.fn().mockResolvedValue({ name: 'aws', title: 'AWS', version: '2.0.0' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageInfo: vi.fn().mockResolvedValue({ name: 'aws', title: 'AWS', version: '2.0.0' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/epm/packages/install', () => {
-      const mocked = {
-      ensureInstalledPackage: vi.fn().mockResolvedValue({
-        status: 'already_installed',
-        package: { name: 'aws', version: '2.0.0' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ensureInstalledPackage: vi.fn().mockResolvedValue({
+      status: 'already_installed',
+      package: { name: 'aws', version: '2.0.0' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
@@ -112,9 +112,9 @@ describe('verify_permissions_task', () => {
     appContextService.start(mockContext);
 
     vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    vi
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue(mockSoClient);
+    vi.spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension').mockReturnValue(
+      mockSoClient
+    );
     vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(mockEsClient);
     vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOTelVerifier: true,

@@ -28,7 +28,7 @@ import { groupEndpointIdsByOS } from '../helpers';
 import { buildIncompatibleAntivirusWorkflowInsights } from './incompatible_antivirus';
 
 vi.mock('../helpers', async () => {
-  const actualHelpers = (await vi.importActual('../helpers'));
+  const actualHelpers = await vi.importActual('../helpers');
   return {
     ...actualHelpers,
     groupEndpointIdsByOS: vi.fn(),

@@ -25,9 +25,7 @@ describe('registerAnalytics', () => {
     registerAnalytics({ analyticsService });
 
     expect(
-      (analyticsService.registerEventType as Mock).mock.calls.map(
-        ([options]) => options.eventType
-      )
+      (analyticsService.registerEventType as Mock).mock.calls.map(([options]) => options.eventType)
     ).toEqual(
       expect.arrayContaining([
         CASES_FIELD_DEFINITION_CREATED_EVENT_TYPE,

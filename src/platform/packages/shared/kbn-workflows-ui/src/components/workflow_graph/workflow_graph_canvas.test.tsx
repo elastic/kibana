@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { MockInstance } from 'vitest';
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { WorkflowGraphCanvasWithoutProvider } from './workflow_graph_canvas';
 
 // Mutable state driving the mocked React Flow store.
@@ -36,40 +36,40 @@ const mockNodes = [
 ];
 
 vi.mock('./use_workflow_layout', () => {
-      const mocked = {
-      useWorkflowLayout: () => ({ nodes: mockNodes, edges: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowLayout: () => ({ nodes: mockNodes, edges: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Replace React Flow with light stand-ins: `ReactFlow` captures the `onInit`
 // and `onMoveEnd` callbacks; the store hooks return our controllable dimensions.
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      ...require('@xyflow/react'),
-      ReactFlow: ({
-        onInit,
-        onMoveEnd,
-        children,
-      }: {
-        onInit?: (i: unknown) => void;
-        onMoveEnd?: (event: MouseEvent | TouchEvent | null, viewport: unknown) => void;
-        children?: React.ReactNode;
-      }) => {
-        mockCapturedOnInit = onInit;
-        mockCapturedOnMoveEnd = onMoveEnd;
-        return <div data-test-subj="reactflow-mock">{children}</div>;
-      },
-      Background: () => null,
-      MiniMap: () => null,
-      Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-      Handle: () => null,
-      useReactFlow: () => ({ zoomIn: vi.fn(), zoomOut: vi.fn() }),
-      useStore: (selector: (s: { width: number; height: number }) => unknown) =>
-        selector({ width: mockStoreWidth, height: mockStoreHeight }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('@xyflow/react'),
+    ReactFlow: ({
+      onInit,
+      onMoveEnd,
+      children,
+    }: {
+      onInit?: (i: unknown) => void;
+      onMoveEnd?: (event: MouseEvent | TouchEvent | null, viewport: unknown) => void;
+      children?: React.ReactNode;
+    }) => {
+      mockCapturedOnInit = onInit;
+      mockCapturedOnMoveEnd = onMoveEnd;
+      return <div data-test-subj="reactflow-mock">{children}</div>;
+    },
+    Background: () => null,
+    MiniMap: () => null,
+    Panel: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    Handle: () => null,
+    useReactFlow: () => ({ zoomIn: vi.fn(), zoomOut: vi.fn() }),
+    useStore: (selector: (s: { width: number; height: number }) => unknown) =>
+      selector({ width: mockStoreWidth, height: mockStoreHeight }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Simulate the React Flow store transforms so assertions can check the
 // *resulting screen position* rather than raw call arguments. This is the

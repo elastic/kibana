@@ -49,11 +49,11 @@ beforeEach(() => {
 setGlobalDate();
 
 vi.mock('../../../../rules_client/common/map_sort_field', () => {
-      const mocked = {
-      mapSortField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mapSortField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('find()', () => {
   const listedTypes = new Map<string, RegistryRuleType>([

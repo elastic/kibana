@@ -17,18 +17,18 @@ import { RuleTagsSelector } from './rule_tags_selector';
 const mockRefetch = vi.fn();
 const mockUseFetchRuleTags = vi.fn();
 vi.mock('../../../../../hooks/use_fetch_rule_tags', () => {
-      const mocked = {
-      useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleTags: (...args: unknown[]) => mockUseFetchRuleTags(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebouncedValue: (value: unknown) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebouncedValue: (value: unknown) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MOCK_TAGS = ['production', 'staging', 'critical'];
 

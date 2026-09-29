@@ -30,12 +30,12 @@ const mockRoutingSnapshot = {
 };
 
 vi.mock('../state_management/stream_routing_state_machine', () => {
-      const mocked = {
-      useStreamsRoutingSelector: vi.fn((selector) => selector(mockRoutingSnapshot)),
-      selectCurrentRule: vi.fn((context) => context.routing[0]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsRoutingSelector: vi.fn((selector) => selector(mockRoutingSnapshot)),
+    selectCurrentRule: vi.fn((context) => context.routing[0]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('buildCellActions', () => {
   let mockOnCreate: Mock;

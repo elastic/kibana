@@ -187,35 +187,36 @@ describe('PersistedLog', () => {
     });
 
     test('should update items when storage event is received', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              storage.get.mockReturnValue(payload.slice(0));
-              const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
+        storage.get.mockReturnValue(payload.slice(0));
+        const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
 
-              const newItem = { animal: 'capybara' };
-              const updatedPayload = [newItem, ...payload];
+        const newItem = { animal: 'capybara' };
+        const updatedPayload = [newItem, ...payload];
 
-              // Subscribe to changes
-              const subscription = log.get$().subscribe((items: any) => {
-                if (items.length === updatedPayload.length) {
-                  expect(items).toEqual(updatedPayload);
-                  subscription.unsubscribe();
-                  done();
-                }
-              });
+        // Subscribe to changes
+        const subscription = log.get$().subscribe((items: any) => {
+          if (items.length === updatedPayload.length) {
+            expect(items).toEqual(updatedPayload);
+            subscription.unsubscribe();
+            done();
+          }
+        });
 
-              // Simulate storage event from another tab
-              const storageEvent = new StorageEvent('storage', {
-                key: historyName,
-                newValue: JSON.stringify(updatedPayload),
-                oldValue: JSON.stringify(payload),
-                storageArea: window.localStorage,
-                url: window.location.href,
-              });
+        // Simulate storage event from another tab
+        const storageEvent = new StorageEvent('storage', {
+          key: historyName,
+          newValue: JSON.stringify(updatedPayload),
+          oldValue: JSON.stringify(payload),
+          storageArea: window.localStorage,
+          url: window.location.href,
+        });
 
-              window.dispatchEvent(storageEvent);
-            
-        }));
+        window.dispatchEvent(storageEvent);
+      }));
   });
 });

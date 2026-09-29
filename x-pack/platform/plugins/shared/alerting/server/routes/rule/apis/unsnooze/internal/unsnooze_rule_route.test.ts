@@ -17,11 +17,11 @@ import type { SanitizedRule } from '../../../../../types';
 
 const rulesClient = rulesClientMock.create();
 vi.mock('../../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('unsnoozeAlertRoute', () => {
   const mockedRule: SanitizedRule<{

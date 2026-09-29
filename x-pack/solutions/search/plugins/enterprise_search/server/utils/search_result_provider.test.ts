@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { NEVER, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
+import { vi } from 'vitest';
 
 import type { GlobalSearchProviderContext } from '@kbn/global-search-plugin/server';
 

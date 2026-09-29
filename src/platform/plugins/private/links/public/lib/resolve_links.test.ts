@@ -17,28 +17,28 @@ import type { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE } from '../../common/constants';
 
 vi.mock('../components/dashboard_link/dashboard_link_tools', () => {
-      const mocked = {
-      fetchDashboard: async (id: string) => {
-        if (id === '404') {
-          const error = new Error('Dashboard not found');
-          throw error;
-        }
-        return {
-          id,
-          title: `Dashboard ${id}`,
-          description: 'Some descriptive text.',
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchDashboard: async (id: string) => {
+      if (id === '404') {
+        const error = new Error('Dashboard not found');
+        throw error;
+      }
+      return {
+        id,
+        title: `Dashboard ${id}`,
+        description: 'Some descriptive text.',
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValueOnce('generated-id-1').mockReturnValueOnce('generated-id-2'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValueOnce('generated-id-1').mockReturnValueOnce('generated-id-2'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resolveLinkInfo', () => {
   it('resolves a dashboard link with no label', async () => {

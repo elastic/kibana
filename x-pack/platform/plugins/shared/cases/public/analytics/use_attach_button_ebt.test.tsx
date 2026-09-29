@@ -19,18 +19,18 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useAttachButtonClickedEBT, useAttachMenuItemClickedEBT } from './use_attach_button_ebt';
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockServices = (reportEvent: Mock) => ({
   services: {

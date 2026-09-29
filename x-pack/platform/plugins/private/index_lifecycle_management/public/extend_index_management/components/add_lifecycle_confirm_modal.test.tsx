@@ -17,26 +17,26 @@ import { loadPolicies } from '../../application/services/api';
 import { AddLifecyclePolicyConfirmModal } from './add_lifecycle_confirm_modal';
 
 vi.mock('../../application/services/api', () => {
-      const mocked = {
-      loadPolicies: vi.fn(),
-      addLifecyclePolicyToIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadPolicies: vi.fn(),
+    addLifecyclePolicyToIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../application/services/api_errors', () => {
-      const mocked = {
-      showApiError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    showApiError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../application/services/notification', () => {
-      const mocked = {
-      toasts: { addSuccess: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toasts: { addSuccess: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rolloverPolicy: PolicyFromES = {
   name: 'rollover-policy',

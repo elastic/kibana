@@ -27,9 +27,7 @@ describe('getSpaceAwareSaveobjectsClients', () => {
     };
 
     const scoppedSoClient = savedObjectsClientMock.create();
-    vi
-      .mocked(appContextService.getInternalUserSOClientForSpaceId)
-      .mockReturnValue(scoppedSoClient);
+    vi.mocked(appContextService.getInternalUserSOClientForSpaceId).mockReturnValue(scoppedSoClient);
 
     vi.mocked(appContextService.getSavedObjects).mockReturnValue(soStartMock);
     vi.mocked(appContextService.getSavedObjectsTagging).mockReturnValue(mockedSavedObjectTagging);

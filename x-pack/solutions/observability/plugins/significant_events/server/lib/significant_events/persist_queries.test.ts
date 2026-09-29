@@ -19,9 +19,9 @@ import type { KnowledgeIndicatorClient } from '../knowledge_indicators';
 import type { StreamsClient } from '@kbn/streams-plugin/server';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'generated-uuid' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'generated-uuid' };
+  return { ...mocked, default: mocked };
+});
 
 const definition = { name: 'logs.test' } as Streams.all.Definition;
 

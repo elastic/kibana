@@ -26,30 +26,24 @@ vi.mock('../hooks/use_integrations_page_link');
 vi.mock('../hooks/use_documentation_link');
 vi.mock('../hooks/use_integrations');
 vi.mock('../../app/home/template_wrapper', () => {
-      const mocked = {
-      SecuritySolutionTemplateWrapper: ({
-        'data-test-subj': dataTestSubj,
-      }: {
-        'data-test-subj'?: string;
-      }) => <div data-test-subj={dataTestSubj} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecuritySolutionTemplateWrapper: ({
+      'data-test-subj': dataTestSubj,
+    }: {
+      'data-test-subj'?: string;
+    }) => <div data-test-subj={dataTestSubj} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IntegrationsGuard', () => {
   it('should render loading when indicator count and integrations are being loaded', async () => {
-    (
-      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
+    (useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>).mockReturnValue({
       count: 0,
       isLoading: true,
     });
-    (
-      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
-    ).mockReturnValue('');
-    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
-      ''
-    );
+    (useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>).mockReturnValue('');
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue('');
     (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: true,
       data: [],
@@ -66,18 +60,12 @@ describe('IntegrationsGuard', () => {
   });
 
   it('should render loading when indicator only is loading', async () => {
-    (
-      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
+    (useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>).mockReturnValue({
       count: 0,
       isLoading: true,
     });
-    (
-      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
-    ).mockReturnValue('');
-    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
-      ''
-    );
+    (useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>).mockReturnValue('');
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue('');
     (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: false,
       data: [],
@@ -94,16 +82,10 @@ describe('IntegrationsGuard', () => {
   });
 
   it('should render loading when integrations only are loading', async () => {
-    (
-      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
-    ).mockReturnValue('');
-    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
-      ''
-    );
+    (useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>).mockReturnValue('');
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue('');
 
-    (
-      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
+    (useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>).mockReturnValue({
       count: 0,
       isLoading: true,
     });
@@ -123,18 +105,12 @@ describe('IntegrationsGuard', () => {
   });
 
   it('should render empty page when no indicators are found and no ti integrations are installed', async () => {
-    (
-      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
+    (useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>).mockReturnValue({
       count: 0,
       isLoading: false,
     });
-    (
-      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
-    ).mockReturnValue('');
-    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
-      ''
-    );
+    (useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>).mockReturnValue('');
+    (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue('');
     (useIntegrations as MockedFunction<typeof useIntegrations>).mockReturnValue({
       isLoading: false,
       data: [],
@@ -150,9 +126,7 @@ describe('IntegrationsGuard', () => {
   });
 
   it('should render indicators table when we have some indicators', async () => {
-    (
-      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
+    (useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>).mockReturnValue({
       count: 7,
       isLoading: false,
     });
@@ -172,9 +146,7 @@ describe('IntegrationsGuard', () => {
   });
 
   it('should render indicators page when we have some ti integrations installed', async () => {
-    (
-      useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>
-    ).mockReturnValue({
+    (useIndicatorsTotalCount as MockedFunction<typeof useIndicatorsTotalCount>).mockReturnValue({
       count: 0,
       isLoading: false,
     });

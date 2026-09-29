@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { useQueryClient } from '@kbn/react-query';
 import { ExecutionStatus } from '@kbn/workflows';
 import { useStepExecution } from './use_step_execution';
@@ -21,19 +21,19 @@ import {
 } from '../../../shared/test_utils';
 
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_step_execution', () => {
-      const mocked = {
-      useStepExecution: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepExecution: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQueryClient = useQueryClient as MockedFunction<typeof useQueryClient>;
 const mockUseStepExecution = useStepExecution as MockedFunction<typeof useStepExecution>;

@@ -11,24 +11,24 @@ import { vi } from 'vitest';
 
 export const renderTemplateMock = vi.fn();
 vi.doMock('./render_template', () => {
-      const mocked = {
-      renderTemplate: renderTemplateMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    renderTemplate: renderTemplateMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getPluginsBundlePathsMock = vi.fn();
 vi.doMock('./get_plugin_bundle_paths', () => {
-      const mocked = {
-      getPluginsBundlePaths: getPluginsBundlePathsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPluginsBundlePaths: getPluginsBundlePathsMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getRspackDependencyPathsMock = vi.fn();
 vi.doMock('./get_js_dependency_paths', () => {
-      const mocked = {
-      getRspackDependencyPaths: getRspackDependencyPathsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRspackDependencyPaths: getRspackDependencyPathsMock,
+  };
+  return { ...mocked, default: mocked };
+});

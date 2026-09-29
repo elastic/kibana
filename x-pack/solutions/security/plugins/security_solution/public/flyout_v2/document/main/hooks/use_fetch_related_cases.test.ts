@@ -12,19 +12,19 @@ import { createReactQueryWrapper } from '../../../../common/mock';
 import { useFetchRelatedCases } from './use_fetch_related_cases';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          cases: {
-            api: {
-              getRelatedCases: vi.fn().mockResolvedValue([]),
-            },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        cases: {
+          api: {
+            getRelatedCases: vi.fn().mockResolvedValue([]),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const eventId = 'eventId';
 

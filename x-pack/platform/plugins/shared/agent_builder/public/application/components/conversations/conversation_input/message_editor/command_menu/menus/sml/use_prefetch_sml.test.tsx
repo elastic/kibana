@@ -17,30 +17,30 @@ const mockPrefetchQuery = vi.fn();
 const mockAutocomplete = vi.fn();
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQueryClient: () => ({
-        prefetchQuery: mockPrefetchQuery,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryClient: () => ({
+      prefetchQuery: mockPrefetchQuery,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        smlService: { autocomplete: mockAutocomplete },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      smlService: { autocomplete: mockAutocomplete },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockExperimentalEnabled = true;
 vi.mock('../../../../../../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useExperimentalFeatures: () => mockExperimentalEnabled,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExperimentalFeatures: () => mockExperimentalEnabled,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePrefetchSml', () => {
   beforeEach(() => {

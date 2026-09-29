@@ -12,27 +12,27 @@ import { vi } from 'vitest';
 const mockExeca = vi.fn();
 
 vi.mock('fs', () => {
-      const mocked = {
-      ...require('fs'),
-      existsSync: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('fs'),
+    existsSync: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-utils', () => {
-      const mocked = {
-      getRemoteDefaultBranchRefs: vi.fn(),
-      resolveNearestMergeBase: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRemoteDefaultBranchRefs: vi.fn(),
+    resolveNearestMergeBase: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('execa', () => ({
   __esModule: true,

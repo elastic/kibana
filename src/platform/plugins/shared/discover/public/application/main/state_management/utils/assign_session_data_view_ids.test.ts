@@ -19,9 +19,9 @@ import { getTabStateMock } from '../redux/__mocks__/internal_state.mocks';
 import { assignSessionDataViewIds } from './assign_session_data_view_ids';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: vi.fn(() => 'runtime-inline-id') };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: vi.fn(() => 'runtime-inline-id') };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUuidv4 = vi.mocked<() => string>(uuidv4);
 

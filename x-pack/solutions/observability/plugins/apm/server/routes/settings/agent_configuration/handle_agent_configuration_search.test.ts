@@ -15,11 +15,11 @@ import { handleAgentConfigurationSearch } from './handle_agent_configuration_sea
 import { searchConfigurations } from './search_configurations';
 
 vi.mock('./search_configurations', () => {
-      const mocked = {
-      searchConfigurations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    searchConfigurations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInternalESClient = {
   search: vi.fn(),

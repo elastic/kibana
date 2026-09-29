@@ -25,7 +25,7 @@ vi.mock('../../../../hooks/use_kibana');
 const mockProjectScopePickerSpy = vi.fn();
 
 vi.mock('@kbn/cps-utils', async () => {
-  const actual = (await vi.importActual('@kbn/cps-utils'));
+  const actual = await vi.importActual('@kbn/cps-utils');
   const mockReact = require('react');
   return {
     ...actual,

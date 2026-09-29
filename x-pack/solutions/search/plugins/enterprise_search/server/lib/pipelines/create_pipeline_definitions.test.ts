@@ -6,6 +6,7 @@
  */
 
 import { vi } from 'vitest';
+
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import { createIndexPipelineDefinitions } from './create_pipeline_definitions';

@@ -17,26 +17,26 @@ import { getTimeRangeAsDays, formatThousands } from './metrics';
 
 // Mock dependencies
 vi.mock('./time_saved_metric', () => {
-      const mocked = {
-      TimeSavedMetric: vi.fn(() => <div data-test-subj="mock-time-saved-metric" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeSavedMetric: vi.fn(() => <div data-test-subj="mock-time-saved-metric" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compare_percentage', () => {
-      const mocked = {
-      ComparePercentage: vi.fn(() => <div data-test-subj="mock-compare-percentage" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComparePercentage: vi.fn(() => <div data-test-subj="mock-compare-percentage" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./metrics', () => {
-      const mocked = {
-      getTimeRangeAsDays: vi.fn(),
-      formatThousands: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimeRangeAsDays: vi.fn(),
+    formatThousands: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetTimeRangeAsDays = getTimeRangeAsDays as MockedFunction<typeof getTimeRangeAsDays>;
 const mockFormatThousands = formatThousands as MockedFunction<typeof formatThousands>;

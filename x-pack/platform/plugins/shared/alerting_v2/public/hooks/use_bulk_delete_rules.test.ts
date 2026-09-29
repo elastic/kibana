@@ -19,27 +19,27 @@ const mockAddWarning = vi.fn();
 const mockAddDanger = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'notifications') {
-          return {
-            toasts: {
-              addSuccess: mockAddSuccess,
-              addWarning: mockAddWarning,
-              addDanger: mockAddDanger,
-            },
-          };
-        }
-        // RulesApi
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'notifications') {
         return {
-          bulkDeleteRules: mockBulkDeleteRules,
-          deleteRulesByQuery: mockDeleteRulesByQuery,
+          toasts: {
+            addSuccess: mockAddSuccess,
+            addWarning: mockAddWarning,
+            addDanger: mockAddDanger,
+          },
         };
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+      }
+      // RulesApi
+      return {
+        bulkDeleteRules: mockBulkDeleteRules,
+        deleteRulesByQuery: mockDeleteRulesByQuery,
+      };
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

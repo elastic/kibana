@@ -15,9 +15,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 
 vi.mock('../../../../context/apm_plugin/use_apm_plugin_context');
 
-const mockUseApmPluginContext = useApmPluginContext as MockedFunction<
-  typeof useApmPluginContext
->;
+const mockUseApmPluginContext = useApmPluginContext as MockedFunction<typeof useApmPluginContext>;
 
 describe('ErrorSampleContextualInsight', () => {
   beforeEach(() => {

@@ -5,25 +5,24 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import React from 'react';
 
 import { MemoryRouter } from 'react-router-dom';
 
 import { render, waitFor } from '@testing-library/react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 import { ApplicationRedirect } from '.';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RedirectWithReplace', () => {
   const navigateToUrlMock = vi.fn();

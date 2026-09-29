@@ -39,7 +39,7 @@ const mockAddContent = vi.fn<
 const mockRemoveContent = vi.fn<void, [id: string]>();
 
 vi.mock('../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../app_context'));
+  const actual = await vi.importActual('../../../../app_context');
 
   return {
     ...actual,
@@ -55,7 +55,7 @@ vi.mock('../../../../app_context', async () => {
 });
 
 vi.mock('../../../../../shared_imports', async () => {
-  const actual = (await vi.importActual('../../../../../shared_imports'));
+  const actual = await vi.importActual('../../../../../shared_imports');
 
   return {
     ...actual,

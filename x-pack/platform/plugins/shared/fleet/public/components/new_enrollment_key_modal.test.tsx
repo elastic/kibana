@@ -18,20 +18,20 @@ import { NewEnrollmentTokenModal } from './new_enrollment_key_modal';
 const mockSendCreateEnrollmentAPIKey = vi.fn().mockResolvedValue({ data: { item: {} } });
 
 vi.mock('../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: vi.fn(),
-            addError: vi.fn(),
-          },
+  const mocked = {
+    ...(await vi.importActual('../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
-      }),
-      sendCreateEnrollmentAPIKey: (...args: unknown[]) => mockSendCreateEnrollmentAPIKey(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    sendCreateEnrollmentAPIKey: (...args: unknown[]) => mockSendCreateEnrollmentAPIKey(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MOCK_POLICIES = [
   { id: 'normal-policy', name: 'Normal Policy', revision: 1 },

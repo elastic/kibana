@@ -16,11 +16,11 @@ import { useFetchIntegrations } from '../../../detections/hooks/alert_summary/us
 import { useCreateEaseAlertsDataView } from '../../../detections/hooks/alert_summary/use_create_data_view';
 
 vi.mock('./table', () => {
-      const mocked = {
-      Table: () => <div />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Table: () => <div />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../detections/hooks/alert_summary/use_fetch_integrations');
 vi.mock('../../../detections/hooks/alert_summary/use_create_data_view');
 
@@ -73,12 +73,12 @@ describe('<EaseAlertsTab />', () => {
     });
 
     vi.doMock('react', () => {
-          const mocked = {
-              ...require('react'),
-              useEffect: vi.fn((f) => f()),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        ...require('react'),
+        useEffect: vi.fn((f) => f()),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     render(<EaseAlertsTable id={id} onLoaded={onLoaded} query={query} />);
 
@@ -94,12 +94,12 @@ describe('<EaseAlertsTab />', () => {
     });
 
     vi.doMock('react', () => {
-          const mocked = {
-              ...require('react'),
-              useEffect: vi.fn((f) => f()),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        ...require('react'),
+        useEffect: vi.fn((f) => f()),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     render(
       <TestProviders>

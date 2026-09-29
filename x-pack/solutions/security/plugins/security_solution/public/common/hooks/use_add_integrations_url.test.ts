@@ -21,39 +21,39 @@ import {
 } from '../../../common/constants';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/security-solution-navigation', () => {
-      const mocked = {
-      useNavigateTo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateTo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers', () => {
-      const mocked = {
-      isThreatIntelligencePath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isThreatIntelligencePath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/capabilities', () => {
-      const mocked = {
-      hasCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { hasCapabilities } from '../lib/capabilities';
 

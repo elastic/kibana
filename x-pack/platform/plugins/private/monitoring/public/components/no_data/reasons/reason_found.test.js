@@ -12,17 +12,17 @@ import { renderWithI18nProvider } from '@kbn/test-jest-helpers';
 import { ReasonFound } from '.';
 
 vi.mock('../../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          docLinks: {
-            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-          },
+  const mocked = {
+    Legacy: {
+      shims: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const enabler = {};
 

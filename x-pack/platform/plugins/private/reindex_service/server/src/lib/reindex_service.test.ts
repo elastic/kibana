@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server/src/es_indices_state_check', () => {
-      const mocked = {
-      esIndicesStateCheck: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    esIndicesStateCheck: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 import { BehaviorSubject } from 'rxjs';
 import type { TransportResult } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/core/server';

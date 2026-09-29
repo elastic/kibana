@@ -59,9 +59,10 @@ describe('createUnresolveAction', () => {
 
   it('execute: POSTs per-episode ACTIVATE items with reason, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    vi
-      .spyOn(bulk, 'bulkActivateEpisodeActions')
-      .mockResolvedValue({ affected_count: 2, errors: [] });
+    vi.spyOn(bulk, 'bulkActivateEpisodeActions').mockResolvedValue({
+      affected_count: 2,
+      errors: [],
+    });
     const onSuccess = vi.fn();
     await createUnresolveAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],
@@ -77,9 +78,10 @@ describe('createUnresolveAction', () => {
 
   it('execute: on a mixed selection only POSTs items for the INACTIVE episodes', async () => {
     const deps = makeDeps();
-    vi
-      .spyOn(bulk, 'bulkActivateEpisodeActions')
-      .mockResolvedValue({ affected_count: 1, errors: [] });
+    vi.spyOn(bulk, 'bulkActivateEpisodeActions').mockResolvedValue({
+      affected_count: 1,
+      errors: [],
+    });
     const onSuccess = vi.fn();
     await createUnresolveAction(deps).execute({
       episodes: [

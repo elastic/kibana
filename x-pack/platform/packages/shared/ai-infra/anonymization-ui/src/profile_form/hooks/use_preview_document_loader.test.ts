@@ -13,11 +13,11 @@ import { TARGET_TYPE_INDEX, TARGET_TYPE_INDEX_PATTERN } from '../../common/targe
 import { usePreviewDocumentLoader } from './use_preview_document_loader';
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createQueryResult = (overrides: Record<string, unknown> = {}) =>
   ({

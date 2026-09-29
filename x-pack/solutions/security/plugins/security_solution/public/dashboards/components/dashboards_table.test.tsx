@@ -14,9 +14,9 @@ import { TestProviders } from '../../common/mock';
 
 // mock lodash debounce to speed up the test
 vi.mock('lodash', () => {
-      const mocked = { ...require('lodash'), debounce: (fn: () => void) => fn };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ...require('lodash'), debounce: (fn: () => void) => fn };
+  return { ...mocked, default: mocked };
+});
 
 const DASHBOARD_TABLE_ITEMS = [
   {
@@ -41,7 +41,7 @@ const mockUseSecurityDashboardsTableItems = vi.fn(() => ({
   isLoading: false,
 }));
 vi.mock('../hooks/use_security_dashboards_table', async () => {
-  const actual = (await vi.importActual('../hooks/use_security_dashboards_table'));
+  const actual = await vi.importActual('../hooks/use_security_dashboards_table');
   return {
     ...actual,
     useSecurityDashboardsTableItems: () => mockUseSecurityDashboardsTableItems(),

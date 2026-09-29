@@ -14,22 +14,24 @@ import { ServiceMapDiagnosticButton } from './service_map_diagnostic_button';
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context');
 vi.mock('./diagnostic_tool/diagnostic_flyout', () => {
-      const mocked = {
-      DiagnosticFlyout: ({ isOpen, selection }: { isOpen: boolean; selection?: { id: string } }) =>
-        isOpen ? (
-          <div data-test-subj="diagnosticFlyout" data-selection-id={selection?.id ?? ''} />
-        ) : null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiagnosticFlyout: ({ isOpen, selection }: { isOpen: boolean; selection?: { id: string } }) =>
+      isOpen ? (
+        <div data-test-subj="diagnosticFlyout" data-selection-id={selection?.id ?? ''} />
+      ) : null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Panel: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockUseApmPluginContext = (await vi.importMock('../../../context/apm_plugin/use_apm_plugin_context')).useApmPluginContext;
+const mockUseApmPluginContext = (
+  await vi.importMock('../../../context/apm_plugin/use_apm_plugin_context')
+).useApmPluginContext;
 
 function buildContext(enabled: boolean | undefined) {
   return {

@@ -52,7 +52,7 @@ import {
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 
 vi.mock('../../action_details_by_id', async () => {
-  const original = (await vi.importActual('../../action_details_by_id'));
+  const original = await vi.importActual('../../action_details_by_id');
 
   return {
     ...original,
@@ -63,7 +63,9 @@ vi.mock('../../action_details_by_id', async () => {
 vi.mock(
   '../../../../../../common/endpoint/service/response_actions/is_response_action_supported',
   async () => {
-    const original = (await vi.importActual('../../../../../../common/endpoint/service/response_actions/is_response_action_supported'));
+    const original = await vi.importActual(
+      '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
+    );
 
     return {
       ...original,
@@ -97,7 +99,11 @@ describe('ResponseActionsClientImpl base class', () => {
     getActionDetailsByIdMock.mockClear();
     isActionSupportedByAgentTypeMock.mockReset();
     isActionSupportedByAgentTypeMock.mockImplementation(
-      (await vi.importActual('../../../../../../common/endpoint/service/response_actions/is_response_action_supported')).isActionSupportedByAgentType
+      (
+        await vi.importActual(
+          '../../../../../../common/endpoint/service/response_actions/is_response_action_supported'
+        )
+      ).isActionSupportedByAgentType
     );
   });
 

@@ -97,9 +97,7 @@ describe('Action List Handler', () => {
     });
 
     it('should skip the index check under CPS, where the origin may hold no actions of its own', async () => {
-      (apiTestSetup.endpointAppContextMock.service.isCpsActive as Mock).mockResolvedValue(
-        true
-      );
+      (apiTestSetup.endpointAppContextMock.service.isCpsActive as Mock).mockResolvedValue(true);
       mockDoesLogsEndpointActionsIndexExist.mockClear();
       mockDoesLogsEndpointActionsIndexExist.mockResolvedValue(false);
 

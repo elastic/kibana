@@ -15,18 +15,18 @@ import { execFileSync } from 'child_process';
 import { runOasdiffStructural } from './run_oasdiff_structural';
 
 vi.mock('node:fs', () => {
-      const mocked = {
-      existsSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    existsSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('child_process', () => {
-      const mocked = {
-      execFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    execFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExistsSync = existsSync as MockedFunction<typeof existsSync>;
 const mockExecFileSync = execFileSync as MockedFunction<typeof execFileSync>;

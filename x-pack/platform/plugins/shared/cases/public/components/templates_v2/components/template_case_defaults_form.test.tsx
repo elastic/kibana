@@ -16,64 +16,64 @@ import type { ParsedTemplateDefinition } from '../../../../common/types/domain/t
 import { TemplateCaseDefaultsForm } from './template_case_defaults_form';
 
 vi.mock('../../cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: () => ({ owner: ['securitySolution'] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: () => ({ owner: ['securitySolution'] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../app/use_available_owners', () => {
-      const mocked = {
-      useAvailableCasesOwners: () => ['securitySolution'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAvailableCasesOwners: () => ['securitySolution'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/use_is_user_typing', () => {
-      const mocked = {
-      useIsUserTyping: () => ({
-        isUserTyping: false,
-        onContentChange: vi.fn(),
-        onDebounce: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsUserTyping: () => ({
+      isUserTyping: false,
+      onContentChange: vi.fn(),
+      onDebounce: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/user_profiles/use_suggest_user_profiles', () => {
-      const mocked = {
-      useSuggestUserProfiles: () => ({
-        data: [],
-        isLoading: false,
-        isFetching: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSuggestUserProfiles: () => ({
+      data: [],
+      isLoading: false,
+      isFetching: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/user_profiles/use_bulk_get_user_profiles', () => {
-      const mocked = {
-      useBulkGetUserProfiles: () => ({
-        data: new Map(),
-        isFetching: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetUserProfiles: () => ({
+      data: new Map(),
+      isFetching: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_get_template_tags', () => {
-      const mocked = {
-      useGetTemplateTags: () => ({ data: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplateTags: () => ({ data: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/use_get_categories', () => {
-      const mocked = {
-      useGetCategories: () => ({ data: [], isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetCategories: () => ({ data: [], isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplateCaseDefaultsForm', () => {
   const baseTemplate: ParsedTemplateDefinition = {

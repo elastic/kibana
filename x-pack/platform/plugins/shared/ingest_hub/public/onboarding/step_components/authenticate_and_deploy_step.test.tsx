@@ -15,84 +15,84 @@ import { I18nProvider } from '@kbn/i18n-react';
 // ─── Mocks ──────────────────────────────────────────────────────────────────
 
 vi.mock('../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/use_deploy', () => {
-      const mocked = {
-      useDeploy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeploy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/deployment_method_card', () => {
-      const mocked = {
-      DeploymentMethodCard: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeploymentMethodCard: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/managed_integrations_section', () => {
-      const mocked = {
-      ManagedIntegrationsSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ManagedIntegrationsSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./ecf_deployment_section', () => {
-      const mocked = {
-      useEcfDeployment: vi.fn(),
-      EcfDeploymentSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEcfDeployment: vi.fn(),
+    EcfDeploymentSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/use_agent_based_deploy', () => {
-      const mocked = {
-      useAgentBasedDeploy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBasedDeploy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/agent_based_section', () => {
-      const mocked = {
-      AgentBasedSection: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentBasedSection: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({ services: { cloud: undefined } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(() => ({ services: { cloud: undefined } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/use_onboarding_so', () => {
-      const mocked = {
-      useOnboardingSO: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingSO: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./authenticate_and_deploy_step/package_inputs', () => {
-      const mocked = {
-      buildIacIntegrations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildIacIntegrations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_aws_identity_federation_enabled', () => {
-      const mocked = {
-      useAwsIdentityFederationEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAwsIdentityFederationEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';

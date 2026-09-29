@@ -16,9 +16,9 @@ import { validateRequiredVersions } from './required_versions';
 
 describe('validateRequiredVersions', () => {
   it('should throw error if feature flag is disabled', () => {
-    vi
-      .spyOn(appContextService, 'getExperimentalFeatures')
-      .mockReturnValue({ enableAutomaticAgentUpgrades: false } as any);
+    vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+      enableAutomaticAgentUpgrades: false,
+    } as any);
 
     expect(() => {
       validateRequiredVersions('test policy', [{ version: '9.0.0', percentage: 100 }]);
@@ -31,9 +31,9 @@ describe('validateRequiredVersions', () => {
 
   describe('feature flag enabled', () => {
     beforeEach(() => {
-      vi
-        .spyOn(appContextService, 'getExperimentalFeatures')
-        .mockReturnValue({ enableAutomaticAgentUpgrades: true } as any);
+      vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
+        enableAutomaticAgentUpgrades: true,
+      } as any);
       vi.spyOn(licenseService, 'isEnterprise').mockReturnValue(true);
     });
     afterEach(() => {

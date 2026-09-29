@@ -57,8 +57,8 @@ describe('FeatureCatalogueRegistry', () => {
         await firstValueFrom(service.getFeatures$());
       };
       await expect(getFeaturesBeforeStart).rejects.toEqual(
-                new Error(`Catalogue entries are only available after start phase`)
-              );
+        new Error(`Catalogue entries are only available after start phase`)
+      );
     });
   });
 

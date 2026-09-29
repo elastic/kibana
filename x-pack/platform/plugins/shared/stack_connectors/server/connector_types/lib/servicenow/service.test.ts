@@ -26,14 +26,14 @@ import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 vi.mock('axios', () => {
-      const mocked = {
-      create: vi.fn(),
-      AxiosError: require('axios').AxiosError,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    create: vi.fn(),
+    AxiosError: require('axios').AxiosError,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
-  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
+  const originalUtils = await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: vi.fn(),

@@ -15,7 +15,7 @@ import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
 vi.mock('@kbn/inference-connectors', async () => {
-  const actual = (await vi.importActual('@kbn/inference-connectors'));
+  const actual = await vi.importActual('@kbn/inference-connectors');
   return {
     ...actual,
     useLoadConnectors: vi.fn(),

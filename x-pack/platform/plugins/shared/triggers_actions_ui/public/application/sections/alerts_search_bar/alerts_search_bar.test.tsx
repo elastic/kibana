@@ -22,12 +22,12 @@ const mockDataPlugin = dataPluginMock.createStartContract();
 vi.mock('@kbn/kibana-utils-plugin/public');
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view');
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mocked(useAlertsDataView).mockReturnValue({
   isLoading: false,

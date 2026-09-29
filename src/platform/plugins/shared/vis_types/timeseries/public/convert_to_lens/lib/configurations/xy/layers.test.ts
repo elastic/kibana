@@ -26,18 +26,18 @@ import type { XYLayerConfig } from '@kbn/lens-common';
 const mockExtractOrGenerateDatasourceInfo = vi.fn();
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'test-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'test-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../datasource', () => {
-      const mocked = {
-      extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedIndices = [
   {

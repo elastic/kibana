@@ -20,12 +20,12 @@ import { useAssistantContext, useFetchCurrentUserConversations } from '@kbn/elas
 
 // Mock the custom hooks
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useFetchCurrentUserConversations: vi.fn(),
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchCurrentUserConversations: vi.fn(),
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Conversations', () => {
   const mockShowAssistantOverlay = vi.fn();

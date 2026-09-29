@@ -24,7 +24,7 @@ import { useSendRunScriptEndpoint } from './use_send_run_script_endpoint_request
 const useMutationMock = _useMutation as Mock;
 
 vi.mock('@kbn/react-query', async () => {
-  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
+  const actualReactQueryModule = await vi.importActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

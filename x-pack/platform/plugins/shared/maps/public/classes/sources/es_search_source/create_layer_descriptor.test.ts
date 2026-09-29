@@ -25,11 +25,11 @@ vi.mock('../../../licensed_features', () => {
   };
 });
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 test('Should create layer descriptor', () => {
   const layerDescriptor = createLayerDescriptor({

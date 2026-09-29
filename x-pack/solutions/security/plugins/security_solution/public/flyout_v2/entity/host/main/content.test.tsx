@@ -22,63 +22,60 @@ const mockResolutionSection = vi.fn((_props: { openDetailsPanel?: unknown }) => 
 const mockVisualizationsSection = vi.fn((_props: { openDetailsPanel?: unknown }) => null);
 
 vi.mock('../../../../entity_analytics/components/entity_resolution/resolution_section', () => {
-      const mocked = {
-      ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResolutionSection: (props: { openDetailsPanel?: unknown }) => mockResolutionSection(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_has_entity_resolution_license', () => {
-      const mocked = {
-      useHasEntityResolutionLicense: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityResolutionLicense: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../entity_analytics/components/risk_summary_flyout/risk_summary', () => {
-      const mocked = {
-      FlyoutRiskSummary: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock(
-  '../../../../flyout/entity_details/shared/components/right/visualizations_section',
-  () => {
-      const mocked = {
-        VisualizationsSection: (props: { openDetailsPanel?: unknown }) =>
-          mockVisualizationsSection(props),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+  const mocked = {
+    FlyoutRiskSummary: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../../../flyout/entity_details/shared/components/right/visualizations_section', () => {
+  const mocked = {
+    VisualizationsSection: (props: { openDetailsPanel?: unknown }) =>
+      mockVisualizationsSection(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock(
   '../../../../entity_analytics/components/asset_criticality/asset_criticality_selector',
   () => {
-      const mocked = {
-        AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AssetCriticalityAccordion: () => <div data-test-subj="assetCriticalityAccordionMock" />,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock(
   '../../../../entity_analytics/components/entity_details_flyout/components/entity_highlights',
   () => {
-      const mocked = {
-        EntityHighlightsAccordion: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      EntityHighlightsAccordion: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock('../../../../cloud_security_posture/components/entity_insight', () => {
-      const mocked = {
-      EntityInsight: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityInsight: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../shared/components/observed_data_section', () => {
-      const mocked = {
-      ObservedDataSection: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ObservedDataSection: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   identityFields: { 'host.name': 'host-1' },

@@ -20,87 +20,95 @@ import {
 } from '../../../components/osquery_page_header_context';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ packId: 'test-pack-id' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ packId: 'test-pack-id' }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 let capturedOnDirtyStateChange: ((isDirty: boolean) => void) | undefined;
 let capturedIsReadOnly: boolean | undefined;
 let capturedIsPrebuilt: boolean | undefined;
 
 vi.mock('../../../packs/form', () => {
-      const mocked = {
-      PackForm: ({
-        onDirtyStateChange,
-        isReadOnly,
-        isPrebuilt,
-      }: {
-        onDirtyStateChange?: (isDirty: boolean) => void;
-        isReadOnly?: boolean;
-        isPrebuilt?: boolean;
-      }) => {
-        capturedOnDirtyStateChange = onDirtyStateChange;
-        capturedIsReadOnly = isReadOnly;
-        capturedIsPrebuilt = isPrebuilt;
+  const mocked = {
+    PackForm: ({
+      onDirtyStateChange,
+      isReadOnly,
+      isPrebuilt,
+    }: {
+      onDirtyStateChange?: (isDirty: boolean) => void;
+      isReadOnly?: boolean;
+      isPrebuilt?: boolean;
+    }) => {
+      capturedOnDirtyStateChange = onDirtyStateChange;
+      capturedIsReadOnly = isReadOnly;
+      capturedIsPrebuilt = isPrebuilt;
 
-        return <div data-testid="pack-form">Mock PackForm</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return <div data-testid="pack-form">Mock PackForm</div>;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUsePack = vi.fn();
 vi.mock('../../../packs/use_pack', () => {
-      const mocked = {
-      usePack: (args: unknown) => mockUsePack(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePack: (args: unknown) => mockUsePack(args),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteMutateAsync = vi.fn().mockResolvedValue(undefined);
 const mockUseDeletePack = vi.fn();
 vi.mock('../../../packs/use_delete_pack', () => {
-      const mocked = {
-      useDeletePack: (args: unknown) => mockUseDeletePack(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeletePack: (args: unknown) => mockUseDeletePack(args),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockCopyMutateAsync = vi.fn().mockResolvedValue(undefined);
 const mockUseCopyPack = vi.fn();
 vi.mock('../../../packs/use_copy_pack', () => {
-      const mocked = {
-      useCopyPack: (args: unknown) => mockUseCopyPack(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCopyPack: (args: unknown) => mockUseCopyPack(args),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/layouts', () => {
-      const mocked = {
-      fullWidthFormContentCss: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fullWidthFormContentCss: {},
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({

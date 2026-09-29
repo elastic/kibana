@@ -20,59 +20,59 @@ import { TestProviders } from '../../../../common/mock';
 import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
 vi.mock('../components/ai_summary_section', () => {
-      const mocked = {
-      AISummarySection: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="mock-ai-summary-section" data-hit-id={(hit as { id: string }).id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AISummarySection: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="mock-ai-summary-section" data-hit-id={(hit as { id: string }).id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/visualizations_section', () => {
-      const mocked = {
-      VisualizationsSection: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="mock-visualizations-section" data-hit-id={(hit as { id: string }).id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationsSection: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="mock-visualizations-section" data-hit-id={(hit as { id: string }).id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/insights_section', () => {
-      const mocked = {
-      InsightsSection: vi.fn(() => <div data-test-subj="mock-insights-section" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InsightsSection: vi.fn(() => <div data-test-subj="mock-insights-section" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/is_in_security_app');
 
 // Keep the tool panels light: they are only referenced as children of the (mocked) system flyout.
 vi.mock('../../tools/correlations', () => {
-      const mocked = {
-      CorrelationsDetails: () => <div data-test-subj="mock-correlations-details" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CorrelationsDetails: () => <div data-test-subj="mock-correlations-details" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../tools/entities', () => {
-      const mocked = {
-      EntitiesDetails: () => <div data-test-subj="mock-entities-details" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntitiesDetails: () => <div data-test-subj="mock-entities-details" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../document/main/document_flyout_wrapper', () => {
-      const mocked = {
-      DocumentFlyoutWrapper: () => <div data-test-subj="mock-document-flyout-wrapper" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentFlyoutWrapper: () => <div data-test-subj="mock-document-flyout-wrapper" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/hooks/use_default_flyout_properties', async () => {
-  const actual = (await vi.importActual('../../../shared/hooks/use_default_flyout_properties'));
+  const actual = await vi.importActual('../../../shared/hooks/use_default_flyout_properties');
   return { ...actual, useDefaultDocumentFlyoutProperties: vi.fn(() => ({})) };
 });
 

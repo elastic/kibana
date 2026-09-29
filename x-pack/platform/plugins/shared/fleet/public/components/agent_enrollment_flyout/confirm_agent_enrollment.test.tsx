@@ -18,20 +18,20 @@ import { ConfirmAgentEnrollment, usePollingAgentCount } from './confirm_agent_en
 const mockNavigateToUrl = vi.fn();
 
 vi.mock('../../hooks', () => {
-      const mocked = {
-      sendGetAgents: vi.fn(),
-      useLink: vi.fn(() => ({
-        getHref: vi.fn((page: string, values?: { kuery?: string }) => {
-          const kuery = values?.kuery ? `?kuery=${values.kuery}` : '';
-          return `/app/fleet/agents${kuery}`;
-        }),
-      })),
-      useStartServices: vi.fn(() => ({
-        application: { navigateToUrl: mockNavigateToUrl },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetAgents: vi.fn(),
+    useLink: vi.fn(() => ({
+      getHref: vi.fn((page: string, values?: { kuery?: string }) => {
+        const kuery = values?.kuery ? `?kuery=${values.kuery}` : '';
+        return `/app/fleet/agents${kuery}`;
+      }),
+    })),
+    useStartServices: vi.fn(() => ({
+      application: { navigateToUrl: mockNavigateToUrl },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendGetAgents = sendGetAgents as Mock;
 

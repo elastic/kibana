@@ -20,24 +20,22 @@ import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_rel
 vi.mock('./use_relay_app_bindings');
 const mockDisconnectWorkspace = vi.fn().mockResolvedValue(undefined);
 vi.mock('./use_relay_app_connection', () => {
-      const mocked = {
-      useRelayAppConnection: () => ({
-        isLoading: false,
-        available: true,
-        status: 'connected',
-        error: undefined,
-        isMutating: false,
-        connect: vi.fn(),
-        disconnect: mockDisconnectWorkspace,
-      }),
-      RELAY_APP_CONNECTION_STATUS_QUERY_KEY: ['relayAppConnectionStatus'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRelayAppConnection: () => ({
+      isLoading: false,
+      available: true,
+      status: 'connected',
+      error: undefined,
+      isMutating: false,
+      connect: vi.fn(),
+      disconnect: mockDisconnectWorkspace,
+    }),
+    RELAY_APP_CONNECTION_STATUS_QUERY_KEY: ['relayAppConnectionStatus'],
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockUseRelayAppBindings = useRelayAppBindings as MockedFunction<
-  typeof useRelayAppBindings
->;
+const mockUseRelayAppBindings = useRelayAppBindings as MockedFunction<typeof useRelayAppBindings>;
 const mockUseBindChannel = useBindChannel as MockedFunction<typeof useBindChannel>;
 const mockUseUnbindChannel = useUnbindChannel as MockedFunction<typeof useUnbindChannel>;
 

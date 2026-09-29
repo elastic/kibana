@@ -23,8 +23,9 @@ import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions');
 
-(await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'))
-  .useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
+(
+  await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions')
+).useGetRuleTypesPermissions.mockReturnValue({ authorizedToReadRuleType: () => true });
 
 const mockColumns = [
   {

@@ -18,11 +18,11 @@ const mockServices = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({ services: mockServices }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: mockServices }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui-illustrations', () => {
   const stub = (id: string, title: string) => ({

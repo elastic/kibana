@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter } from '../../__mocks__/kea_logic';
 import { mockKibanaValues } from '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import { resetContext } from 'kea';
+import { vi } from 'vitest';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 

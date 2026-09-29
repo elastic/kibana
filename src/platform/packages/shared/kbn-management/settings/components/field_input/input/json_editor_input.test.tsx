@@ -23,22 +23,22 @@ const initialValue = '{"foo":"bar"}';
 import { wrap } from '../mocks';
 
 vi.mock('../code_editor', () => {
-      const mocked = {
-      CodeEditor: ({ value, onChange }: CodeEditorProps) => (
-        <input
-          data-test-subj="management-settings-editField-some:json:field"
-          type="text"
-          value={String(value)}
-          onChange={(e) => {
-            if (onChange) {
-              onChange(e.target.value, e as any);
-            }
-          }}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({ value, onChange }: CodeEditorProps) => (
+      <input
+        data-test-subj="management-settings-editField-some:json:field"
+        type="text"
+        value={String(value)}
+        onChange={(e) => {
+          if (onChange) {
+            onChange(e.target.value, e as any);
+          }
+        }}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('JsonEditorInput', () => {
   const onInputChange = vi.fn();

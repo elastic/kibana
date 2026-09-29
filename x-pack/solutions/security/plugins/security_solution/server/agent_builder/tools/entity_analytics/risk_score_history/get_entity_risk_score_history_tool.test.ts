@@ -29,17 +29,17 @@ import {
 
 vi.mock('../../../../lib/entity_analytics/risk_score/risk_score_data_client');
 vi.mock('../../../utils/get_agent_builder_resource_availability', () => {
-      const mocked = {
-      getAgentBuilderResourceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentBuilderResourceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockRiskScoreDataClient = RiskScoreDataClient as MockedClass<typeof RiskScoreDataClient>;
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;

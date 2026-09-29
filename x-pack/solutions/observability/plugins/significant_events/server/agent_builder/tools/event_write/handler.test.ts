@@ -72,9 +72,7 @@ const makeStoredEvent = (
  * Returns a typed eventClient mock with default no-op implementations.
  * Override individual methods by passing a partial mock.
  */
-const makeEventClient = (
-  overrides: Partial<Mocked<EventClient>> = {}
-): Mocked<EventClient> =>
+const makeEventClient = (overrides: Partial<Mocked<EventClient>> = {}): Mocked<EventClient> =>
   ({
     findLatestActive: vi.fn().mockResolvedValue({ hits: [] }),
     findLatestByEventIds: vi.fn().mockResolvedValue(new Map()),

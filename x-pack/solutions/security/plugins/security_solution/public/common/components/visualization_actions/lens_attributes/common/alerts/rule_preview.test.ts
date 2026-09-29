@@ -17,23 +17,23 @@ const mockInternalReferenceId = 'internal-reference-id-generated-uuid';
 const mockRuleId = 'rule-id-generated-uuid';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      ...require('uuid'),
-      v4: vi.fn().mockReturnValue('generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('uuid'),
+    v4: vi.fn().mockReturnValue('generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          pageName: 'alerts',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        pageName: 'alerts',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getRulePreviewLensAttributes', () => {
   beforeEach(() => {

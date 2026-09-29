@@ -28,23 +28,23 @@ import {
 
 vi.mock('./get');
 vi.mock('../elasticsearch/template/template', () => {
-      const mocked = {
-      generateNamespaceTemplateName: vi.fn(
-        (templateName: string, namespace: string) => `${templateName}@namespace.${namespace}`
-      ),
-      updateCurrentWriteIndices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateNamespaceTemplateName: vi.fn(
+      (templateName: string, namespace: string) => `${templateName}@namespace.${namespace}`
+    ),
+    updateCurrentWriteIndices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../elasticsearch/template/remove');
 vi.mock('./es_assets_reference');
 vi.mock('../../app_context');
 vi.mock('../elasticsearch/retry', () => {
-      const mocked = {
-      retryTransientEsErrors: vi.fn((fn: () => unknown) => fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retryTransientEsErrors: vi.fn((fn: () => unknown) => fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({

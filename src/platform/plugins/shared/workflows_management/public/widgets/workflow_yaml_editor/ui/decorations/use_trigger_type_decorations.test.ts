@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
+import type { MutableRefObject } from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
-import type { MutableRefObject } from 'react';
 import { parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import {
@@ -20,22 +20,22 @@ import {
 } from './use_trigger_type_decorations';
 
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      isTriggerType: vi.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    isTriggerType: vi.fn((type: string) => ['alert', 'manual', 'scheduled'].includes(type)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getTriggerDefinition: vi.fn(() => undefined),
-        getRegisteredIds: vi.fn(() => []),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getTriggerDefinition: vi.fn(() => undefined),
+      getRegisteredIds: vi.fn(() => []),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockModel = (value: string) => {
   const lines = value.split('\n');

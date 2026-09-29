@@ -17,7 +17,7 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { toScheduledItem } from './utils';
 
 vi.mock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     toScheduledItem: vi.fn().mockImplementation((item) => {

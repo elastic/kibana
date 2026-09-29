@@ -46,49 +46,49 @@ fields: []
 `;
 
 vi.mock('../../components/template_form', () => {
-      const mocked = {
-      TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/template_preview', () => {
-      const mocked = {
-      TemplatePreview: () => <div data-test-subj="create-template-preview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplatePreview: () => <div data-test-subj="create-template-preview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMutateAsync = vi.fn();
 const mockNavigateToCasesTemplates = vi.fn();
 const mockNavigateToEditTemplate = vi.fn();
 
 vi.mock('../../hooks/use_create_template', () => {
-      const mocked = {
-      useCreateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateTemplate: () => ({ mutateAsync: mockMutateAsync, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/navigation', () => {
-      const mocked = {
-      useCasesTemplatesNavigation: () => ({
-        navigateToCasesTemplates: mockNavigateToCasesTemplates,
-        getCasesTemplatesUrl: vi.fn().mockReturnValue('/app/security/cases/configure/templates'),
-      }),
-      useCasesEditTemplateNavigation: () => ({
-        navigateToCasesEditTemplate: mockNavigateToEditTemplate,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesTemplatesNavigation: () => ({
+      navigateToCasesTemplates: mockNavigateToCasesTemplates,
+      getCasesTemplatesUrl: vi.fn().mockReturnValue('/app/security/cases/configure/templates'),
+    }),
+    useCasesEditTemplateNavigation: () => ({
+      navigateToCasesEditTemplate: mockNavigateToEditTemplate,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../use_breadcrumbs', () => {
-      const mocked = {
-      useCasesTemplatesBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesTemplatesBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * The template name is the editable page title, so naming a template is a header interaction rather

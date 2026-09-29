@@ -13,24 +13,24 @@ import React from 'react';
 import * as i18n from './translations';
 
 vi.mock('../../../common/services', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          application: {
-            getUrlForApp: vi
-              .fn()
-              .mockReturnValue('http://localhost:5601/app/management/stack/license_management'),
-          },
-          http: {
-            basePath: {
-              get: () => 'some-base-path',
-            },
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        application: {
+          getUrlForApp: vi
+            .fn()
+            .mockReturnValue('http://localhost:5601/app/management/stack/license_management'),
+        },
+        http: {
+          basePath: {
+            get: () => 'some-base-path',
           },
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { AttacksUpsellingPageESS } from '.';
 

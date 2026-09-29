@@ -29,39 +29,39 @@ import * as apmPluginModule from '../plugin';
 import * as createCallApmApiModule from '../services/rest/create_call_apm_api';
 
 vi.mock('../context/time_range_metadata/time_range_metadata_context', () => {
-      const mocked = {
-      TimeRangeMetadataContextProvider: ({
-        children,
-        start,
-        end,
-        kuery,
-      }: {
-        children: React.ReactNode;
-        start: string;
-        end: string;
-        kuery: string;
-      }) => (
-        <div
-          data-test-subj="time-range-metadata-provider"
-          data-start={start}
-          data-end={end}
-          data-kuery={kuery}
-        >
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeRangeMetadataContextProvider: ({
+      children,
+      start,
+      end,
+      kuery,
+    }: {
+      children: React.ReactNode;
+      start: string;
+      end: string;
+      kuery: string;
+    }) => (
+      <div
+        data-test-subj="time-range-metadata-provider"
+        data-start={start}
+        data-end={end}
+        data-kuery={kuery}
+      >
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context/apm_index_settings/apm_index_settings_context', () => {
-      const mocked = {
-      ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="apm-index-settings-provider">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmIndexSettingsContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="apm-index-settings-provider">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCore = mockApmPluginContextValue.core as Parameters<
   typeof ApmEmbeddableContext

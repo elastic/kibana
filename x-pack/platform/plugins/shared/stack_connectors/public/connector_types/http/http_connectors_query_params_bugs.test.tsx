@@ -23,11 +23,11 @@ vi.mock('../../common/auth/auth_config', () => ({
 
 const mockUseSecretQueryParams = vi.fn();
 vi.mock('../../common/auth/use_secret_query_params', () => {
-      const mocked = {
-      useSecretQueryParams: (...args: unknown[]) => mockUseSecretQueryParams(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSecretQueryParams: (...args: unknown[]) => mockUseSecretQueryParams(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const connectorWithExistingQueryParams = {
   id: 'existing-connector',

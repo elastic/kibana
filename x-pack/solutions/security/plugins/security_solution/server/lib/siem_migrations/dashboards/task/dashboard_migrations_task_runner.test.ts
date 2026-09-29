@@ -16,17 +16,17 @@ import { DashboardMigrationTaskRunner } from './dashboard_migrations_task_runner
 
 const mockGetResources = vi.fn().mockResolvedValue({});
 vi.mock('./retrievers', async () => {
-      const mocked = {
-      ...(await vi.importActual('./retrievers')),
-      DashboardMigrationsRetriever: vi.fn().mockImplementation(() => ({
-        initialize: vi.fn().mockResolvedValue(undefined),
-        resources: {
-          getResources: mockGetResources,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./retrievers')),
+    DashboardMigrationsRetriever: vi.fn().mockImplementation(() => ({
+      initialize: vi.fn().mockResolvedValue(undefined),
+      resources: {
+        getResources: mockGetResources,
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = loggerMock.create();
 const inferenceService = inferenceMock.createStartContract();

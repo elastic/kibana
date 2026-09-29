@@ -16,19 +16,19 @@ import { policyLabels } from '../data_retention/policy_labels';
 import type { DataStream } from '@kbn/index-management-plugin/common';
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./api', () => {
-      const mocked = {
-      getDslPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDslPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useGetDataStreamStatuses', () => {
   it('filters and formats the data returned by the data streams API', () => {

@@ -24,11 +24,11 @@ vi.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privi
 
 const mockDocumentFlyout = vi.fn((props: unknown) => <div data-test-subj="documentFlyoutStub" />);
 vi.mock('.', () => {
-      const mocked = {
-      DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentFlyout: (props: unknown) => mockDocumentFlyout(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAlertHit = (): DataTableRecord =>
   ({
@@ -114,11 +114,7 @@ describe('DocumentFlyoutWrapper', () => {
       flattened: { 'event.kind': 'event' },
       isAnchor: false,
     } as DataTableRecord;
-    (useEsDocSearch as Mock).mockReturnValue([
-      ElasticRequestState.Found,
-      nonAlertHit,
-      vi.fn(),
-    ]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, nonAlertHit, vi.fn()]);
     (useAlertsPrivileges as Mock).mockReturnValue({ hasAlertsRead: false, loading: true });
 
     const { getByTestId, queryByTestId } = renderDocumentFlyoutWrapper();
@@ -131,11 +127,7 @@ describe('DocumentFlyoutWrapper', () => {
     const hit = { id: '1', raw: {}, flattened: { 'event.kind': 'event' } } as DataTableRecord;
     const refetchDocument = vi.fn();
     const onAlertUpdated = vi.fn();
-    (useEsDocSearch as Mock).mockReturnValue([
-      ElasticRequestState.Found,
-      hit,
-      refetchDocument,
-    ]);
+    (useEsDocSearch as Mock).mockReturnValue([ElasticRequestState.Found, hit, refetchDocument]);
 
     const { getByTestId } = renderDocumentFlyoutWrapper({
       onAlertUpdated,

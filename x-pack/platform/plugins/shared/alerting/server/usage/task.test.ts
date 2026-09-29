@@ -107,9 +107,7 @@ describe('telemetryTaskRunner', () => {
 
     const savedObjectsRepository = savedObjectsRepositoryMock.create();
     const maintenanceWindows = { getMaintenanceWindowClientWithoutAuth: vi.fn() };
-    coreSetup.getStartServices = vi
-      .fn()
-      .mockResolvedValue([coreStart, { maintenanceWindows }, {}]);
+    coreSetup.getStartServices = vi.fn().mockResolvedValue([coreStart, { maintenanceWindows }, {}]);
 
     coreStart.savedObjects.createInternalRepository = vi
       .fn()

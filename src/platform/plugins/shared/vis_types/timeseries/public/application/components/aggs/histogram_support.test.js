@@ -18,11 +18,11 @@ import { setDataStart } from '../../../services';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 
 vi.mock('../query_bar_wrapper', () => {
-      const mocked = {
-      QueryBarWrapper: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBarWrapper: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runTest = (aggType, name, test, additionalProps = {}) => {
   describe(aggType, () => {

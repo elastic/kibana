@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import fs from 'fs';
 import type { OpenAPIV3 } from 'openapi-types';
+import { vi } from 'vitest';
 import { createRemoveServerDefaults } from './oas_remove_server_defaults';
 
 vi.mock('fs');

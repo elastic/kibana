@@ -26,79 +26,79 @@ const mockUseRiskContributingAlerts = vi
 const mockGetEuidFromObject = vi.fn().mockReturnValue('user:entity-1');
 
 vi.mock('../../../../hooks/use_risk_contributing_alerts', () => {
-      const mocked = {
-      useRiskContributingAlerts: (params: unknown) => mockUseRiskContributingAlerts(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskContributingAlerts: (params: unknown) => mockUseRiskContributingAlerts(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRiskScoreHistory = vi.fn().mockReturnValue({ data: undefined, isFetching: false });
 
 vi.mock('../../../../api/hooks/use_risk_score_history', () => {
-      const mocked = {
-      useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsExperimentalFeatureEnabled = vi.fn().mockReturnValue(false);
 
 vi.mock('../../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: (flag: string) => mockUseIsExperimentalFeatureEnabled(flag),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: (flag: string) => mockUseIsExperimentalFeatureEnabled(flag),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../risk_score_timeline', () => {
-      const mocked = {
-      RiskScoreTimeline: (props: {
-        entityId: string;
-        scoreType?: string;
-        onPointSelect: (timestamp: string | undefined) => void;
-        onRangeChange: (range: { from: string; to: string }) => void;
-      }) => (
-        <div
-          data-test-subj="mockRiskScoreTimeline"
-          data-entity-id={props.entityId}
-          data-score-type={props.scoreType}
-        >
-          <button
-            type="button"
-            data-test-subj="mockSelectPoint"
-            onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
-          />
-          <button
-            type="button"
-            data-test-subj="mockRangeExcludingSelection"
-            onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
-          />
-          <button
-            type="button"
-            data-test-subj="mockRangeIncludingSelection"
-            onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
-          />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreTimeline: (props: {
+      entityId: string;
+      scoreType?: string;
+      onPointSelect: (timestamp: string | undefined) => void;
+      onRangeChange: (range: { from: string; to: string }) => void;
+    }) => (
+      <div
+        data-test-subj="mockRiskScoreTimeline"
+        data-entity-id={props.entityId}
+        data-score-type={props.scoreType}
+      >
+        <button
+          type="button"
+          data-test-subj="mockSelectPoint"
+          onClick={() => props.onPointSelect('2021-08-10T14:00:00.000Z')}
+        />
+        <button
+          type="button"
+          data-test-subj="mockRangeExcludingSelection"
+          onClick={() => props.onRangeChange({ from: 'now-1d', to: 'now' })}
+        />
+        <button
+          type="button"
+          data-test-subj="mockRangeIncludingSelection"
+          onClick={() => props.onRangeChange({ from: 'now-10y', to: 'now' })}
+        />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      useEntityStoreEuidApi: () => ({
-        euid: {
-          getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreEuidApi: () => ({
+      euid: {
+        getEuidFromObject: (...args: unknown[]) => mockGetEuidFromObject(...args),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUiSetting = vi.fn().mockReturnValue([false]);
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useUiSetting$: () => mockUseUiSetting(),
@@ -108,80 +108,80 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 const mockUseRiskScore = vi.fn().mockReturnValue({ loading: false, data: [] });
 
 vi.mock('../../../../api/hooks/use_risk_score', () => {
-      const mocked = {
-      useRiskScore: (params: unknown) => mockUseRiskScore(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: (params: unknown) => mockUseRiskScore(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMissingRiskEnginePrivileges = vi.fn();
 
 vi.mock('../../../../hooks/use_missing_risk_engine_privileges', () => {
-      const mocked = {
-      useMissingRiskEnginePrivileges: (params: unknown) => mockUseMissingRiskEnginePrivileges(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMissingRiskEnginePrivileges: (params: unknown) => mockUseMissingRiskEnginePrivileges(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../risk_engine_privileges_callout', () => {
-      const mocked = {
-      RiskEnginePrivilegesCallOut: () => <div data-test-subj="missing-risk-engine-privileges" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskEnginePrivilegesCallOut: () => <div data-test-subj="missing-risk-engine-privileges" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetWatchlists = vi.fn().mockReturnValue({ data: [] });
 
 vi.mock('../../../../api/hooks/use_get_watchlists', () => {
-      const mocked = {
-      useGetWatchlists: () => mockUseGetWatchlists(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetWatchlists: () => mockUseGetWatchlists(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResolutionGroup = vi.fn().mockReturnValue({ data: undefined });
 
 vi.mock('../../../entity_resolution/hooks/use_resolution_group', () => {
-      const mocked = {
-      useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolutionGroup: (entityId: string) => mockUseResolutionGroup(entityId),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEntityFromStore = vi.fn().mockReturnValue({ entityRecord: null });
 
 vi.mock('../../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: (params: unknown) => mockUseEntityFromStore(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStableExpandableFlyoutState = vi.fn().mockReturnValue({});
 
 vi.mock('../../../../../flyout/shared/hooks/use_stable_expandable_flyout_state', () => {
-      const mocked = {
-      useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStableExpandableFlyoutState: () => mockUseStableExpandableFlyoutState(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenPreviewPanel = vi.fn();
 const mockOpenLeftPanel = vi.fn();
 const mockOnShowAlert = vi.fn();
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({
-        openPreviewPanel: mockOpenPreviewPanel,
-        openLeftPanel: mockOpenLeftPanel,
-      }),
-      useExpandableFlyoutState: () => ({}),
-      useExpandableFlyoutHistory: () => [],
-      ExpandableFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({
+      openPreviewPanel: mockOpenPreviewPanel,
+      openLeftPanel: mockOpenLeftPanel,
+    }),
+    useExpandableFlyoutState: () => ({}),
+    useExpandableFlyoutHistory: () => [],
+    ExpandableFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const riskScore = {
   '@timestamp': '2021-08-19T16:00:00.000Z',

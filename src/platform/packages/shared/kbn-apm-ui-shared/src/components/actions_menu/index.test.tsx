@@ -17,13 +17,13 @@ import { ActionsMenu } from '.';
 import type { ActionGroups } from './types';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: vi.fn(),
-      useGeneratedHtmlId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: vi.fn(),
+    useGeneratedHtmlId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockActions: ActionGroups = [
   {

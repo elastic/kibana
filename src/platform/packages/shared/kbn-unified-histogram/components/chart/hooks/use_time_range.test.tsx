@@ -16,17 +16,17 @@ import type { UnifiedHistogramBucketInterval } from '../../../types';
 import { useTimeRange } from './use_time_range';
 
 vi.mock('@kbn/datemath', () => {
-      const mocked = {
-      parse: vi.fn((datetime: string) => {
-        return {
-          format: vi.fn(() => {
-            return datetime;
-          }),
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parse: vi.fn((datetime: string) => {
+      return {
+        format: vi.fn(() => {
+          return datetime;
+        }),
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useTimeRange', () => {
   const uiSettings = uiSettingsServiceMock.createStartContract();

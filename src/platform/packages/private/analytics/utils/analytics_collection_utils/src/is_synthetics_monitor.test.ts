@@ -17,9 +17,9 @@ describe('isSyntheticsMonitor', () => {
   });
 
   test('returns true for when the user agent contains "Elastic/Synthetics"', () => {
-    vi
-      .spyOn(window.navigator, 'userAgent', 'get')
-      .mockReturnValue(window.navigator.userAgent + 'Elastic/Synthetics');
+    vi.spyOn(window.navigator, 'userAgent', 'get').mockReturnValue(
+      window.navigator.userAgent + 'Elastic/Synthetics'
+    );
     expect(isSyntheticsMonitor()).toBe(true);
   });
 });

@@ -16,36 +16,36 @@ import { useSplitQueryCompletion } from './use_split_query_completion';
 const mockDispose = vi.fn();
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      ESQL_LANG_ID: 'esql',
-      monaco: {
-        languages: {
-          CompletionItemInsertTextRule: {
-            InsertAsSnippet: 4,
-          },
-          CompletionItemKind: {
-            Field: 5,
-          },
-          registerCompletionItemProvider: vi.fn(),
+  const mocked = {
+    ESQL_LANG_ID: 'esql',
+    monaco: {
+      languages: {
+        CompletionItemInsertTextRule: {
+          InsertAsSnippet: 4,
         },
+        CompletionItemKind: {
+          Field: 5,
+        },
+        registerCompletionItemProvider: vi.fn(),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-language', () => {
-      const mocked = {
-      suggest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    suggest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getEsqlColumns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsqlColumns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useSplitQueryCompletion', () => {
   const baseQuery = 'FROM logs-*\n| STATS count = COUNT(*) BY host.name';
@@ -73,9 +73,9 @@ describe('useSplitQueryCompletion', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .mocked(monaco.languages.registerCompletionItemProvider)
-      .mockReturnValue({ dispose: mockDispose });
+    vi.mocked(monaco.languages.registerCompletionItemProvider).mockReturnValue({
+      dispose: mockDispose,
+    });
     vi.mocked(suggest).mockResolvedValue([
       {
         label: 'count',

@@ -12,11 +12,11 @@ import { shallow } from 'enzyme';
 import { CcrShard } from './ccr_shard';
 
 vi.mock('../../chart', () => {
-      const mocked = {
-      MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CcrShard', () => {
   const props = {

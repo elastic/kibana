@@ -14,13 +14,13 @@ import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LazyPackagePolicyInputVarField: vi.fn(() => null),
-      DataStreamTypeSelector: vi.fn(() => null),
-      useGetDataStreams: vi.fn(() => ({ data: undefined })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazyPackagePolicyInputVarField: vi.fn(() => null),
+    DataStreamTypeSelector: vi.fn(() => null),
+    useGetDataStreams: vi.fn(() => ({ data: undefined })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ServiceFieldsForm } from './service_fields_form';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';

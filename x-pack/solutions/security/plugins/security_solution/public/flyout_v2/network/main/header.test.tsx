@@ -19,7 +19,7 @@ const mockProps = {
 };
 
 vi.mock('../../../common/components/links', async () => {
-  const originalModule = (await vi.importActual('../../../common/components/links'));
+  const originalModule = await vi.importActual('../../../common/components/links');
   return {
     ...originalModule,
     SecuritySolutionLinkAnchor: vi.fn(({ children, path }) => <a href={path}>{children}</a>),

@@ -33,11 +33,11 @@ const mockUseDataConnectors = vi.fn(
 );
 
 vi.mock('../../hooks/use_data_connectors', () => {
-      const mocked = {
-      useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataConnectors: (options?: UseDataConnectorsOptions) => mockUseDataConnectors(options),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
@@ -182,13 +182,7 @@ describe('SourcesPanel', () => {
 
   it('hides the edit button for managed AI indexes', () => {
     renderWithProviders(
-      <SourcesPanel
-        isLoading={false}
-        sources={sources}
-        canEdit
-        onEditSources={vi.fn()}
-        isManaged
-      />
+      <SourcesPanel isLoading={false} sources={sources} canEdit onEditSources={vi.fn()} isManaged />
     );
 
     expect(screen.queryByTestId('contextEditSourcesButton')).not.toBeInTheDocument();

@@ -22,34 +22,34 @@ import { InferenceConnectorType } from '@kbn/inference-common';
 const MOCK_MODEL_SETTINGS_URL = '/app/management/modelManagement/model_settings';
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          http: {
-            basePath: {
-              prepend: (path: string) => `/test${path}`,
-            },
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        http: {
+          basePath: {
+            prepend: (path: string) => `/test${path}`,
           },
-          docLinks: {
-            links: {
-              observability: {
-                elasticManagedLlmUsageCost: 'https://example.com/cost',
-                elasticManagedLlm: 'https://example.com/learn-more',
-              },
+        },
+        docLinks: {
+          links: {
+            observability: {
+              elasticManagedLlmUsageCost: 'https://example.com/cost',
+              elasticManagedLlm: 'https://example.com/learn-more',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_model_settings_url', () => {
-      const mocked = {
-      useModelSettingsUrl: () => MOCK_MODEL_SETTINGS_URL,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useModelSettingsUrl: () => MOCK_MODEL_SETTINGS_URL,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockConnector = (connectorId: string, name: string) => ({
   connectorId,

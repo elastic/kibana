@@ -30,7 +30,7 @@ vi.mock('../../timelines/containers/api');
 vi.mock('../../common/hooks/use_app_toasts');
 vi.mock('../../common/components/discover_in_timeline/use_discover_in_timeline_context');
 vi.mock('../../common/components/link_to', async () => {
-  const originalModule = (await vi.importActual('../../common/components/link_to'));
+  const originalModule = await vi.importActual('../../common/components/link_to');
   return {
     ...originalModule,
     getTimelineUrl: vi.fn(),
@@ -137,8 +137,7 @@ describe('useRuleFromTimeline', () => {
       const customDataView = getMockDataViewWithMatchedIndices(['awesome-*']);
       customDataView.id = 'custom-data-view-id';
 
-      vi
-        .mocked(useDataView)
+      vi.mocked(useDataView)
         .mockReturnValueOnce({ status: 'ready', dataView: initialDataView })
         .mockReturnValue({ status: 'ready', dataView: customDataView });
     });

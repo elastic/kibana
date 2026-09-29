@@ -40,9 +40,7 @@ describe('NoDataFound Component', () => {
   });
 
   it('should disable the add integration button when loading', () => {
-    (useAddIntegrationPath as Mock).mockReturnValue(
-      mockUseAddIntegrationPath({ isLoading: true })
-    );
+    (useAddIntegrationPath as Mock).mockReturnValue(mockUseAddIntegrationPath({ isLoading: true }));
 
     renderWithTestProvider(<NoDataFound />);
 

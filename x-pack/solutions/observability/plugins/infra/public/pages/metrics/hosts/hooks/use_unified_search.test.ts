@@ -22,11 +22,11 @@ import { useUnifiedSearch } from './use_unified_search';
 import { useHostsUrlState } from './use_unified_search_url_state';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useKibanaQuerySettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaQuerySettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../alerting/use_alert_prefill');
 vi.mock('../../../../containers/ml/infra_ml_capabilities');
 vi.mock('../../../../containers/metrics_source');

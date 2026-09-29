@@ -47,11 +47,11 @@ const mockFeatures = [
 ];
 
 vi.mock('../../lib/ui_metric', () => {
-      const mocked = {
-      trackUiMetric: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trackUiMetric: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 

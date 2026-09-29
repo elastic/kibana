@@ -19,33 +19,33 @@ import { transformSearchResponseToAlerts } from './transform_search_response_to_
 import { transformToAlertDocuments } from './transform_to_alert_documents';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'generated-uuid',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'generated-uuid',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./transform_search_response_to_alerts', () => {
-      const mocked = {
-      transformSearchResponseToAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformSearchResponseToAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./transform_to_alert_documents', () => {
-      const mocked = {
-      transformToAlertDocuments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformToAlertDocuments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/attack-discovery-schedules-common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/attack-discovery-schedules-common')),
-      backfillAttackIdsBestEffort: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/attack-discovery-schedules-common')),
+    backfillAttackIdsBestEffort: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('validateAttackDiscoveries', () => {
   const authenticatedUser = {

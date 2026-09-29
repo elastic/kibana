@@ -40,39 +40,39 @@ import { IncludeExcludeRow } from './include_exclude_options';
 import { TERMS_MULTI_TERMS_AND_SCRIPTED_FIELDS } from '../../../../../user_messages_ids';
 
 vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
-      const mocked = {
-      loadFieldStats: vi.fn().mockResolvedValue({
-        topValues: {
-          buckets: [
-            {
-              key: 'A',
-            },
-            {
-              key: 'B',
-            },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadFieldStats: vi.fn().mockResolvedValue({
+      topValues: {
+        buckets: [
+          {
+            key: 'A',
+          },
+          {
+            key: 'B',
+          },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => {
-      const mocked = {
-      useExistingFieldsReader: vi.fn(() => {
-        return {
-          hasFieldData: (dataViewId: string, fieldName: string) => {
-            return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
-          },
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExistingFieldsReader: vi.fn(() => {
+      return {
+        hasFieldData: (dataViewId: string, fieldName: string) => {
+          return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+        },
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // mocking random id generator function
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

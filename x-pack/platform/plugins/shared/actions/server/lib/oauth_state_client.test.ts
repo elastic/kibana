@@ -15,7 +15,7 @@ import { OAuthStateClient } from './oauth_state_client';
 import { OAUTH_STATE_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 
 vi.mock('@kbn/core/server', async () => {
-  const actual = (await vi.importActual('@kbn/core/server'));
+  const actual = await vi.importActual('@kbn/core/server');
   return {
     ...actual,
     SavedObjectsUtils: {

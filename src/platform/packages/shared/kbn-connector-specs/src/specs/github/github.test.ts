@@ -19,13 +19,13 @@ const mockCallTool = vi.fn();
 const mockListTools = vi.fn();
 
 vi.mock('../../lib/mcp/with_mcp_client', () => {
-      const mocked = {
-      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-        return fn({ callTool: mockCallTool, listTools: mockListTools });
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+      return fn({ callTool: mockCallTool, listTools: mockListTools });
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock HTTP client methods for write actions that call ctx.client directly.
 const mockPost = vi.fn();
@@ -492,7 +492,7 @@ describe('GithubConnector', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
+      const { withMcpClient } = await vi.importMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
 
       await expect(testSpec.handler(mockContext)).rejects.toThrow('connection refused');

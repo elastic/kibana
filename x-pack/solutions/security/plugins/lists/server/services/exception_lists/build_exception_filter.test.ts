@@ -6,7 +6,6 @@
  */
 
 import type { Mock } from 'vitest';
-
 import type {
   EntryList,
   EntryMatchAny,

@@ -11,13 +11,13 @@ import React from 'react';
 import { getFirstUnusedSymbol } from './icon_stops';
 
 vi.mock('./icon_select', () => {
-      const mocked = {
-      IconSelect: () => {
-        return <div>mockIconSelect</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IconSelect: () => {
+      return <div>mockIconSelect</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../symbol_utils', () => {
   return {

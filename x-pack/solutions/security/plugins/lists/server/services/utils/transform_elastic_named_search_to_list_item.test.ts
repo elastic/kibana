@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import type { SearchListItemArraySchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { getSearchListItemResponseMock } from '../../../common/schemas/response/search_list_item_schema.mock';

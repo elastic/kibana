@@ -38,15 +38,17 @@ let mockCapabilities: Record<string, Record<string, boolean>> = WRITE_CAPABILITI
 let mockCanReadExecutionHistory = true;
 
 vi.mock('@kbn/alerting-v2-browser-shared', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
-      useEpisodeAutoAttach: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-v2-browser-shared')),
+    useEpisodeAutoAttach: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -67,130 +69,130 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_query', () => {
-      const mocked = {
-      useFetchEpisodeQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEpisodeQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_episode_actions', () => {
-      const mocked = {
-      useFetchEpisodeActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEpisodeActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions')),
-      useFetchGroupActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_group_actions')),
+    useFetchGroupActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_rule', () => {
-      const mocked = {
-      useFetchRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episode_flapping', () => {
-      const mocked = {
-      useEpisodeFlapping: vi.fn(() => ({ isFlapping: false, isLoading: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEpisodeFlapping: vi.fn(() => ({ isFlapping: false, isLoading: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/actions', () => {
-      const mocked = {
-      createEpisodeActions: vi.fn(),
-      READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEpisodeActions: vi.fn(),
+    READ_SAFE_EPISODE_ACTION_IDS: new Set(['ALERTING_V2_OPEN_EPISODE_IN_DISCOVER']),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Sections that call useFetchEpisodeQuery independently are mocked to keep the
 // test focused on the page-level layout and sidebar.
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/overview_list_section', () => {
-      const mocked = {
-      AlertEpisodeOverviewListSection: () => <div data-test-subj="stubOverviewListSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeOverviewListSection: () => <div data-test-subj="stubOverviewListSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/related_section', () => {
-      const mocked = {
-      AlertEpisodesRelatedSection: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodesRelatedSection: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/rule_overview_panel_section', () => {
-      const mocked = {
-      AlertEpisodeRuleOverviewPanelSection: vi.fn(() => (
-        <div data-test-subj="stubRuleOverviewPanelSection" />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeRuleOverviewPanelSection: vi.fn(() => (
+      <div data-test-subj="stubRuleOverviewPanelSection" />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/runbook_section', () => {
-      const mocked = {
-      AlertEpisodeRunbookSection: () => <div data-test-subj="stubRunbookSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeRunbookSection: () => <div data-test-subj="stubRunbookSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/trend_chart_section', () => {
-      const mocked = {
-      AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTrendChartSection: () => <div data-test-subj="stubTrendChartSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_heatmaps_section', () => {
-      const mocked = {
-      AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTimelineHeatmapsSection: () => <div data-test-subj="stubTimelineHeatmapsSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/metadata_section', () => {
-      const mocked = {
-      AlertEpisodeMetadataSection: vi.fn(() => <div data-test-subj="stubMetadataSection" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeMetadataSection: vi.fn(() => <div data-test-subj="stubMetadataSection" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/components/details/timeline_section', () => {
-      const mocked = {
-      AlertEpisodeTimelineSection: () => <div data-test-subj="stubTimelineSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTimelineSection: () => <div data-test-subj="stubTimelineSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/episode_action_policy_history_tab', () => {
-      const mocked = {
-      EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EpisodeActionPolicyHistoryTab: () => <div data-test-subj="stubEpisodeActionPolicyHistoryTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseParams = vi.mocked(useParams);
 const mockUseFetchEpisodeQuery = vi.mocked(useFetchEpisodeQuery);

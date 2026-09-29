@@ -50,19 +50,19 @@ const mockUseUrl = vi.fn(() => 'console-url');
 const mockExportJsonFlyoutContent = vi.fn((_props: MockExportJsonFlyoutContentProps) => null);
 
 vi.mock('@kbn/as-code-export-flyout-component', () => {
-      const mocked = {
-      ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
-        mockExportJsonFlyoutContent(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExportJsonFlyoutContent: (props: MockExportJsonFlyoutContentProps) =>
+      mockExportJsonFlyoutContent(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/share-plugin/public', () => {
-      const mocked = {
-      downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadFileAs: (...args: unknown[]) => mockDownloadFileAs(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Discover export JSON flyout', () => {
   beforeEach(() => {

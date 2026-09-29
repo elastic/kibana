@@ -14,28 +14,28 @@ import type { LeadEntity, Observation, RelatedEntity, ScoredEntity } from '../ty
 let mockChainInvokeResult: unknown;
 
 vi.mock('@langchain/core/output_parsers', () => {
-      const mocked = {
-      JsonOutputParser: vi.fn().mockImplementation(() => ({
-        pipe: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JsonOutputParser: vi.fn().mockImplementation(() => ({
+      pipe: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@langchain/core/prompts', () => {
-      const mocked = {
-      ChatPromptTemplate: {
-        fromTemplate: vi.fn().mockReturnValue({
+  const mocked = {
+    ChatPromptTemplate: {
+      fromTemplate: vi.fn().mockReturnValue({
+        pipe: vi.fn().mockReturnValue({
           pipe: vi.fn().mockReturnValue({
-            pipe: vi.fn().mockReturnValue({
-              invoke: vi.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
-            }),
+            invoke: vi.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
           }),
         }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { llmSynthesizeBatch, __testables } = (await vi.importActual('./llm_synthesize')) as {
   llmSynthesizeBatch: typeof import('./llm_synthesize').llmSynthesizeBatch;

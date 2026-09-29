@@ -16,12 +16,12 @@ import { useResolverQueryParamCleaner } from './use_resolver_query_params_cleane
 import { parameterName } from '../store/parameter_name';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useResolverQueryParamCleaner', () => {
   const id = 'test-instance';

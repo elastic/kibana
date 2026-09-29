@@ -19,15 +19,15 @@ const mockLineAnnotation = vi.fn();
 const mockSuperDatePicker = vi.fn();
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiSuperDatePicker: (props: Record<string, unknown>) => {
-        mockSuperDatePicker(props);
-        return <div data-test-subj="riskScoreTimeline-RangeSelect" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiSuperDatePicker: (props: Record<string, unknown>) => {
+      mockSuperDatePicker(props);
+      return <div data-test-subj="riskScoreTimeline-RangeSelect" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/charts', () => {
   const original = require('@elastic/charts');
@@ -54,11 +54,11 @@ vi.mock('@elastic/charts', () => {
 
 const mockUseRiskScoreHistory = vi.fn();
 vi.mock('../../api/hooks/use_risk_score_history', () => {
-      const mocked = {
-      useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScoreHistory: (params: unknown) => mockUseRiskScoreHistory(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const entries = [
   {

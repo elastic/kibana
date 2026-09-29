@@ -16,11 +16,11 @@ import { getOAuthPasswordAccessToken } from './get_oauth_password_access_token';
 import { requestOAuthPasswordToken } from './request_oauth_password_token';
 
 vi.mock('./request_oauth_password_token', () => {
-      const mocked = {
-      requestOAuthPasswordToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestOAuthPasswordToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 const configurationUtilities = actionsConfigMock.create();

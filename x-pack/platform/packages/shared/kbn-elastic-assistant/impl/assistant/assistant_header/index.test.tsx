@@ -59,17 +59,17 @@ const testProps = {
 };
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => {
-        return {
-          data: [],
-          error: null,
-          isSuccess: true,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => {
+      return {
+        data: [],
+        error: null,
+        isSuccess: true,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 (useLoadConnectors as Mock).mockReturnValue({
   data: mockConnectors,
@@ -78,15 +78,15 @@ vi.mock('@kbn/inference-connectors', () => {
 });
 const mockSetApiConfig = alertConvo;
 vi.mock('../use_conversation', () => {
-      const mocked = {
-      useConversation: vi.fn(() => {
-        return {
-          setApiConfig: vi.fn().mockReturnValue(mockSetApiConfig),
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: vi.fn(() => {
+      return {
+        setApiConfig: vi.fn().mockReturnValue(mockSetApiConfig),
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssistantHeader', () => {
   beforeEach(() => {

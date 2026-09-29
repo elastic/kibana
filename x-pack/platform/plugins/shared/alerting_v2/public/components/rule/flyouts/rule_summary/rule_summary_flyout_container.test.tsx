@@ -18,103 +18,103 @@ import { RuleSummaryFlyoutContainer } from './rule_summary_flyout_container';
 
 const mockHttp = { basePath: { prepend: (path: string) => `/base${path}` } };
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'CoreStart(http)') return mockHttp;
-        return { canWrite: () => true };
-      },
-      CoreStart: (key: string) => `CoreStart(${key})`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'CoreStart(http)') return mockHttp;
+      return { canWrite: () => true };
+    },
+    CoreStart: (key: string) => `CoreStart(${key})`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_fetch_rule', () => {
-      const mocked = { useFetchRule: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useFetchRule: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_fetch_source_rule', () => {
-      const mocked = {
-      useFetchSourceRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSourceRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMutation = { mutate: vi.fn(), isLoading: false };
 vi.mock('../../../../hooks/use_delete_rule', () => {
-      const mocked = { useDeleteRule: () => mockMutation };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useDeleteRule: () => mockMutation };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_toggle_rule_enabled', () => {
-      const mocked = {
-      useToggleRuleEnabled: () => mockMutation,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToggleRuleEnabled: () => mockMutation,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_run_rule', () => {
-      const mocked = { useRunRule: () => mockMutation };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useRunRule: () => mockMutation };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_bulk_update_rule_api_key', () => {
-      const mocked = {
-      useBulkUpdateRuleApiKey: () => mockMutation,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkUpdateRuleApiKey: () => mockMutation,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_summary_flyout', () => {
-      const mocked = {
-      RuleSummaryFlyout: ({
-        rule,
-        isToggleLoading,
-      }: {
-        rule: RuleApiResponse;
-        isToggleLoading?: boolean;
-      }) => (
-        <div
-          data-test-subj="mockRuleSummaryFlyout"
-          data-toggle-loading={isToggleLoading ? 'true' : 'false'}
-        >
-          {rule.metadata.name}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryFlyout: ({
+      rule,
+      isToggleLoading,
+    }: {
+      rule: RuleApiResponse;
+      isToggleLoading?: boolean;
+    }) => (
+      <div
+        data-test-subj="mockRuleSummaryFlyout"
+        data-toggle-loading={isToggleLoading ? 'true' : 'false'}
+      >
+        {rule.metadata.name}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../loading_flyout', () => {
-      const mocked = {
-      LoadingFlyout: ({ type }: { type?: string }) => (
-        <div data-test-subj="mockLoadingFlyout" data-type={type} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadingFlyout: ({ type }: { type?: string }) => (
+      <div data-test-subj="mockLoadingFlyout" data-type={type} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entity_not_found_flyout', () => {
-      const mocked = {
-      EntityNotFoundFlyout: ({ type }: { type?: string }) => (
-        <div data-test-subj="mockEntityNotFoundFlyout" data-type={type} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityNotFoundFlyout: ({ type }: { type?: string }) => (
+      <div data-test-subj="mockEntityNotFoundFlyout" data-type={type} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../source_rule_summary_flyout', () => {
-      const mocked = {
-      SourceRuleSummaryFlyout: ({
-        rule,
-        ruleDetailsHref,
-      }: {
-        rule: RuleResponse;
-        ruleDetailsHref: string | null;
-      }) => (
-        <div data-test-subj="mockSourceRuleSummaryFlyout" data-href={ruleDetailsHref}>
-          {rule.metadata?.name}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SourceRuleSummaryFlyout: ({
+      rule,
+      ruleDetailsHref,
+    }: {
+      rule: RuleResponse;
+      ruleDetailsHref: string | null;
+    }) => (
+      <div data-test-subj="mockSourceRuleSummaryFlyout" data-href={ruleDetailsHref}>
+        {rule.metadata?.name}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchRule = vi.mocked(useFetchRule);
 const mockUseFetchSourceRule = vi.mocked(useFetchSourceRule);

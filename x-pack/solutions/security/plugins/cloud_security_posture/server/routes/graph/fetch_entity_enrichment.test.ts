@@ -470,8 +470,7 @@ describe('fetchEntityEnrichment', () => {
       entityStoreIndexName: '.entities.v2.latest.default-00001',
     });
 
-    const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as Mock).mock
-      .calls[0];
+    const esqlCallArgs = (esClient.asInternalUser.helpers.esql as unknown as Mock).mock.calls[0];
     const callArg = esqlCallArgs[0];
     // Query should use parameter placeholders, not embedded IDs
     expect(callArg.query).toContain('?entityId0');

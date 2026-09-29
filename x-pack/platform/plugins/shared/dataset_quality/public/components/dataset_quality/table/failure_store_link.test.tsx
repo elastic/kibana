@@ -15,13 +15,13 @@ import type { DataStreamStat } from '../../../../common/data_streams_stats';
 
 const mockUpdateFailureStore = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useDatasetQualityTable: () => ({
-        updateFailureStore: mockUpdateFailureStore,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDatasetQualityTable: () => ({
+      updateFailureStore: mockUpdateFailureStore,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('FailureStoreHoverLink', () => {
   const mockDataStreamStat: DataStreamStat = {

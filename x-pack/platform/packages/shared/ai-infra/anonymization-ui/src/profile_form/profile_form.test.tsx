@@ -14,11 +14,11 @@ import { useTargetIdField } from './hooks/use_target_id_field';
 import { ProfileForm } from './profile_form';
 
 vi.mock('./hooks/use_target_id_field', () => {
-      const mocked = {
-      useTargetIdField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTargetIdField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseTargetIdField = {
   targetIdOptions: [],

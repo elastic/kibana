@@ -18,11 +18,11 @@ import { SettingsTemplate } from './settings_template';
 const mockLink = vi.fn((path: string) => `/link${path}`);
 
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({ link: mockLink }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({ link: mockLink }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Configurable mock so individual tests can toggle feature flags and ML capability.
 const mockPluginContext = {
@@ -44,32 +44,32 @@ const mockPluginContext = {
 };
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => mockPluginContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: () => mockPluginContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise the full tab-building logic without wiring up the template's own dependencies).
 // MockAppHeaderComponent is aliased to start with "Mock" so Jest's factory out-of-scope check permits it.
 vi.mock('./apm_main_template', () => {
-      const mocked = {
-      ApmMainTemplate: ({
-        header,
-        children,
-      }: {
-        header?: ApmMainTemplateHeaderProps;
-        children?: React.ReactNode;
-      }) => (
-        <>
-          {header ? <MockAppHeaderComponent {...header} /> : null}
-          {children}
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmMainTemplate: ({
+      header,
+      children,
+    }: {
+      header?: ApmMainTemplateHeaderProps;
+      children?: React.ReactNode;
+    }) => (
+      <>
+        {header ? <MockAppHeaderComponent {...header} /> : null}
+        {children}
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderTemplate(selectedTab: React.ComponentProps<typeof SettingsTemplate>['selectedTab']) {
   return render(

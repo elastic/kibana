@@ -18,11 +18,11 @@ import { createUpdateCustomContentTool } from './update_custom_content_tool';
 
 const mockResolver = vi.fn();
 vi.mock('@kbn/custom-content-server', () => {
-      const mocked = {
-      createCustomContentTemplateResolver: vi.fn(() => mockResolver),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCustomContentTemplateResolver: vi.fn(() => mockResolver),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeAttachment = (data: Record<string, unknown>) => ({
   id: 'att-1',

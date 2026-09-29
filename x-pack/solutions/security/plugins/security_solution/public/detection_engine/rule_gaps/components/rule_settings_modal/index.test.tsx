@@ -31,11 +31,11 @@ vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('../../context/gap_auto_fill_scheduler_context');
 vi.mock('../../api/hooks/use_gap_auto_fill_scheduler');
 vi.mock('../gap_auto_fill_logs', () => {
-      const mocked = {
-      GapAutoFillLogsFlyout: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GapAutoFillLogsFlyout: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseAppToasts = useAppToasts as Mock;

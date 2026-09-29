@@ -22,23 +22,23 @@ import { TARGET_TYPE_DATA_VIEW, TARGET_TYPE_INDEX } from '../target_types';
 import { useProfileForm } from './use_profile_form';
 
 vi.mock('../services/profiles/hooks/use_create_profile', () => {
-      const mocked = {
-      useCreateProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../services/profiles/hooks/use_update_profile', () => {
-      const mocked = {
-      useUpdateProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../services/profiles/hooks/get_conflict_state', () => {
-      const mocked = {
-      getConflictState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConflictState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createUseCreateProfileMutationMock = ({
   mutateAsync = vi.fn(),
@@ -106,9 +106,9 @@ describe('useProfileForm', () => {
 
   it('validates required fields before submit', async () => {
     const mutateAsync = vi.fn();
-    vi
-      .mocked(useCreateProfile)
-      .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
+    vi.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({ mutateAsync })
+    );
     vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
@@ -129,9 +129,9 @@ describe('useProfileForm', () => {
 
   it('requires entity class when anonymized field is empty', async () => {
     const mutateAsync = vi.fn();
-    vi
-      .mocked(useCreateProfile)
-      .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
+    vi.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({ mutateAsync })
+    );
     vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
@@ -167,9 +167,9 @@ describe('useProfileForm', () => {
 
   it('requires regex pattern and entity class for regex rules', async () => {
     const mutateAsync = vi.fn();
-    vi
-      .mocked(useCreateProfile)
-      .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
+    vi.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({ mutateAsync })
+    );
     vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
@@ -206,9 +206,9 @@ describe('useProfileForm', () => {
 
   it('requires ner model id and allowed entities for ner rules', async () => {
     const mutateAsync = vi.fn();
-    vi
-      .mocked(useCreateProfile)
-      .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync }));
+    vi.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({ mutateAsync })
+    );
     vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
@@ -246,9 +246,9 @@ describe('useProfileForm', () => {
   it('submits create form values through create mutation', async () => {
     const created = createProfile('new');
     const createMutateAsync = vi.fn().mockResolvedValue(created);
-    vi
-      .mocked(useCreateProfile)
-      .mockReturnValue(createUseCreateProfileMutationMock({ mutateAsync: createMutateAsync }));
+    vi.mocked(useCreateProfile).mockReturnValue(
+      createUseCreateProfileMutationMock({ mutateAsync: createMutateAsync })
+    );
     vi.mocked(useUpdateProfile).mockReturnValue(createUseUpdateProfileMutationMock());
 
     const { result } = renderHook(() =>
@@ -284,9 +284,9 @@ describe('useProfileForm', () => {
     const updated = { ...initialProfile, name: 'Updated Name' };
     const updateMutateAsync = vi.fn().mockResolvedValue(updated);
     vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    vi
-      .mocked(useUpdateProfile)
-      .mockReturnValue(createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync }));
+    vi.mocked(useUpdateProfile).mockReturnValue(
+      createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync })
+    );
 
     const { result } = renderHook(() =>
       useProfileForm({
@@ -593,9 +593,9 @@ describe('useProfileForm', () => {
     };
     const updateMutateAsync = vi.fn().mockResolvedValue(initialProfile);
     vi.mocked(useCreateProfile).mockReturnValue(createUseCreateProfileMutationMock());
-    vi
-      .mocked(useUpdateProfile)
-      .mockReturnValue(createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync }));
+    vi.mocked(useUpdateProfile).mockReturnValue(
+      createUseUpdateProfileMutationMock({ mutateAsync: updateMutateAsync })
+    );
 
     const { result } = renderHook(() =>
       useProfileForm({

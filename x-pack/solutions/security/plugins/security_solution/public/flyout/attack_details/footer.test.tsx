@@ -16,13 +16,13 @@ import { AttackDetailsContext } from './context';
 import { FLYOUT_FOOTER_TEST_ID } from './constants/test_ids';
 
 vi.mock('../../flyout_v2/attack/main/footer', () => {
-      const mocked = {
-      Footer: ({ attack }: { attack: { id: string } }) => (
-        <div data-test-subj="mockV2Footer" data-attack-id={attack.id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Footer: ({ attack }: { attack: { id: string } }) => (
+      <div data-test-subj="mockV2Footer" data-attack-id={attack.id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultSearchHit = {
   _id: 'attack-1',

@@ -53,7 +53,7 @@ vi.mock('react-router-dom', () => {
 const mockQueryTimelineById = vi.fn();
 
 vi.mock('./helpers', async () => {
-  const originalModule = (await vi.importActual('./helpers'));
+  const originalModule = await vi.importActual('./helpers');
   return {
     ...originalModule,
     useQueryTimelineById: () => mockQueryTimelineById,
@@ -61,7 +61,7 @@ vi.mock('./helpers', async () => {
 });
 
 vi.mock('../../containers/all', async () => {
-  const originalModule = (await vi.importActual('../../containers/all'));
+  const originalModule = await vi.importActual('../../containers/all');
   return {
     ...originalModule,
     useGetAllTimeline: vi.fn(),
@@ -69,7 +69,7 @@ vi.mock('../../containers/all', async () => {
 });
 const mockNavigateTo = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../common/lib/kibana');
   return {
     ...actual,
     useNavigation: () => ({
@@ -80,7 +80,7 @@ vi.mock('../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../common/components/link_to', async () => {
-  const originalModule = (await vi.importActual('../../../common/components/link_to'));
+  const originalModule = await vi.importActual('../../../common/components/link_to');
   return {
     ...originalModule,
     getTimelineTabsUrl: vi.fn(),
@@ -95,11 +95,11 @@ vi.mock('./use_timeline_status', () => {
 });
 
 vi.mock('../../containers/api', () => {
-      const mocked = {
-      deleteTimelinesByIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteTimelinesByIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as Mock;

@@ -21,16 +21,16 @@ import type { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src/data_types';
 
 vi.mock('@kbn/discover-utils/src/data_types/logs/utils', () => {
-      const mocked = {
-      getAllLogsDataViewSpec: vi.fn(({ allLogsIndexPattern }) => ({
-        id: 'discover-observability-solution-all-logs',
-        name: 'All logs',
-        title: allLogsIndexPattern,
-        timeFieldName: '@timestamp',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllLogsDataViewSpec: vi.fn(({ allLogsIndexPattern }) => ({
+      id: 'discover-observability-solution-all-logs',
+      name: 'All logs',
+      title: allLogsIndexPattern,
+      timeFieldName: '@timestamp',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('logs_explorer_url_schema', () => {
   const mockTime: TimeRange = { from: 'now-24h', to: 'now' };

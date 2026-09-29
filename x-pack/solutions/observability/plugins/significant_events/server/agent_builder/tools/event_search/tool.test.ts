@@ -17,19 +17,19 @@ import { searchEventsToolHandler } from './handler';
 import { createSearchEventsTool, SIGNIFICANT_EVENTS_SEARCH_EVENTS_TOOL_ID } from './tool';
 
 vi.mock('../../../routes/utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./handler', async () => {
-      const mocked = {
-      ...(await vi.importActual('./handler')),
-      searchEventsToolHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./handler')),
+    searchEventsToolHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockTelemetry = () => ({
   trackAgentToolEventSearch: vi.fn(),

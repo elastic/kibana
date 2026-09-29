@@ -16,25 +16,25 @@ import { createBadRequestError } from '@kbn/agent-builder-common';
 import { configurationSchema, configurationUpdateSchema } from './schemas';
 
 vi.mock('@kbn/esql-language', () => {
-      const mocked = {
-      validateQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLQueryVariables: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLQueryVariables: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-common', () => {
-      const mocked = {
-      createBadRequestError: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createBadRequestError: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateQuery = validateQuery as MockedFunction<typeof validateQuery>;
 const mockGetESQLQueryVariables = getESQLQueryVariables as MockedFunction<

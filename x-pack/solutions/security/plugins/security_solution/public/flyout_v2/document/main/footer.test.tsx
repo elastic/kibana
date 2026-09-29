@@ -13,23 +13,23 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { Footer } from './footer';
 
 vi.mock('./components/footer_ai_actions', () => {
-      const mocked = {
-      FooterAiActions: ({ hit }: { hit: DataTableRecord }) => (
-        <div data-test-subj="footerAiActions" data-hit-id={hit.id} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FooterAiActions: ({ hit }: { hit: DataTableRecord }) => (
+      <div data-test-subj="footerAiActions" data-hit-id={hit.id} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockTakeAction = vi.fn();
 vi.mock('./components/take_action', () => {
-      const mocked = {
-      TakeAction: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => {
-        mockTakeAction({ hit, onAlertUpdated });
-        return <div data-test-subj="takeAction" data-hit-id={hit.id} />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TakeAction: ({ hit, onAlertUpdated }: { hit: DataTableRecord; onAlertUpdated: () => void }) => {
+      mockTakeAction({ hit, onAlertUpdated });
+      return <div data-test-subj="takeAction" data-hit-id={hit.id} />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (): DataTableRecord =>
   ({

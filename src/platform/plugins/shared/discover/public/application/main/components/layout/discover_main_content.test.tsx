@@ -28,54 +28,54 @@ import { createContextAwarenessMocks } from '../../../../context_awareness/__moc
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 
 vi.mock('../../../../components/view_mode_toggle', () => {
-      const mocked = {
-      DocumentViewModeToggle: vi.fn(({ prepend }) => (
-        <div data-test-subj="documentViewModeToggleMock">{prepend}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentViewModeToggle: vi.fn(({ prepend }) => (
+      <div data-test-subj="documentViewModeToggleMock">{prepend}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./discover_documents', () => {
-      const mocked = {
-      DiscoverDocuments: vi.fn(({ renderViewModeToggle }) => (
-        <div
-          data-test-subj="discoverDocumentsMock"
-          data-has-view-mode-toggle={String(Boolean(renderViewModeToggle))}
-        >
-          {renderViewModeToggle?.()}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverDocuments: vi.fn(({ renderViewModeToggle }) => (
+      <div
+        data-test-subj="discoverDocumentsMock"
+        data-has-view-mode-toggle={String(Boolean(renderViewModeToggle))}
+      >
+        {renderViewModeToggle?.()}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../field_stats_table', () => {
-      const mocked = {
-      FieldStatisticsTab: vi.fn(() => <div data-test-subj="fieldStatisticsTabMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldStatisticsTab: vi.fn(() => <div data-test-subj="fieldStatisticsTabMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pattern_analysis/pattern_analysis_tab', () => {
-      const mocked = {
-      PatternAnalysisTab: vi.fn(() => <div data-test-subj="patternAnalysisTabMock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PatternAnalysisTab: vi.fn(() => <div data-test-subj="patternAnalysisTabMock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/panels_toggle', () => {
-      const mocked = {
-      PanelsToggle: vi.fn(({ omitChartButton, omitTableButton }) => (
-        <div
-          data-test-subj="panelsToggleMock"
-          data-omit-chart-button={String(omitChartButton)}
-          data-omit-table-button={String(omitTableButton)}
-        />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PanelsToggle: vi.fn(({ omitChartButton, omitTableButton }) => (
+      <div
+        data-test-subj="panelsToggleMock"
+        data-omit-chart-button={String(omitChartButton)}
+        data-omit-table-button={String(omitTableButton)}
+      />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView = dataViewWithTimefieldMock;
 

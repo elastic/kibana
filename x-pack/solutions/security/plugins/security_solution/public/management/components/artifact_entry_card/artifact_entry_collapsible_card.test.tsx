@@ -28,9 +28,7 @@ describe.each([
   let render: (
     props?: Partial<ArtifactEntryCollapsibleCardProps>
   ) => ReturnType<AppContextTestRender['render']>;
-  let handleOnExpandCollapse: MockedFunction<
-    ArtifactEntryCollapsibleCardProps['onExpandCollapse']
-  >;
+  let handleOnExpandCollapse: MockedFunction<ArtifactEntryCollapsibleCardProps['onExpandCollapse']>;
 
   beforeEach(() => {
     item = generateItem();

@@ -20,12 +20,12 @@ import {
 } from './use_console_esql_callbacks';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLSources: vi.fn(),
-      getEsqlColumns: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLSources: vi.fn(),
+    getEsqlColumns: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLSources = getESQLSources as MockedFunction<typeof getESQLSources>;
 const mockGetEsqlColumns = getEsqlColumns as MockedFunction<typeof getEsqlColumns>;

@@ -13,21 +13,21 @@ import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_t
 const mockGetFieldsForWildcard = vi.fn();
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          data: {
-            dataViews: {
-              getFieldsForWildcard: mockGetFieldsForWildcard,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        data: {
+          dataViews: {
+            getFieldsForWildcard: mockGetFieldsForWildcard,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { QueryClient, QueryClientProvider } = (await vi.importActual('@kbn/react-query'));
+const { QueryClient, QueryClientProvider } = await vi.importActual('@kbn/react-query');
 const React = require('react');
 
 function createWrapper() {

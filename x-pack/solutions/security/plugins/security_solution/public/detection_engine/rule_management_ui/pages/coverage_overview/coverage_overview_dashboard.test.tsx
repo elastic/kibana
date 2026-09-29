@@ -18,19 +18,19 @@ import { CoverageOverviewDashboard } from './coverage_overview_dashboard';
 import { CoverageOverviewDashboardContextProvider } from './coverage_overview_dashboard_context';
 
 vi.mock('../../../../common/utils/route/spy_routes', () => {
-      const mocked = { SpyRoute: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SpyRoute: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../rule_management/api/hooks/use_fetch_coverage_overview_query');
 
 // The invalid MITRE rules callout is gated behind the mitreAttackUpdatesUIEnabled
 // feature flag, which is off by default. Force it on for this test suite.
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderCoverageOverviewDashboard = () => {
   return render(

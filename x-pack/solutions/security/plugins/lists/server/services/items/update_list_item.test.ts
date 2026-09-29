@@ -17,23 +17,23 @@ import { getListItem } from './get_list_item';
 import { getUpdateListItemOptionsMock } from './update_list_item.mock';
 
 vi.mock('../utils/check_version_conflict', () => {
-      const mocked = {
-      checkVersionConflict: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkVersionConflict: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/wait_until_document_indexed', () => {
-      const mocked = {
-      waitUntilDocumentIndexed: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    waitUntilDocumentIndexed: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get_list_item', () => {
-      const mocked = {
-      getListItem: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListItem: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('update_list_item', () => {
   beforeEach(() => {

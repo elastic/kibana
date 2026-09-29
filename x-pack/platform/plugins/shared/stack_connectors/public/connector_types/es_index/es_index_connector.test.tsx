@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 // Capture the EuiComboBox onChange so tests can simulate index selection
 let latestComboBoxOnChange: EuiComboBoxProps<string>['onChange'] | undefined;
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiComboBox: (props: EuiComboBoxProps<string>) => {
@@ -32,12 +32,14 @@ vi.mock('@elastic/eui', async () => {
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+    )),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('lodash', () => {
   const module = require('lodash');
@@ -48,20 +50,24 @@ vi.mock('lodash', () => {
 });
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/index_controls', () => {
-      const mocked = {
-      firstFieldOption: {
-        text: 'Select a field',
-        value: '',
-      },
-      getFields: vi.fn(),
-      getIndexOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    firstFieldOption: {
+      text: 'Select a field',
+      value: '',
+    },
+    getFields: vi.fn(),
+    getIndexOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getIndexOptions } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/common/index_controls'));
+const { getIndexOptions } = await vi.importMock(
+  '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
+);
 
-const { getFields } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/common/index_controls'));
+const { getFields } = await vi.importMock(
+  '@kbn/triggers-actions-ui-plugin/public/common/index_controls'
+);
 
 const ILLEGAL_INDEX_CHARACTERS = ['\\', '/', '?', '"', '<', '>', '|', '#', ',', ':'];
 

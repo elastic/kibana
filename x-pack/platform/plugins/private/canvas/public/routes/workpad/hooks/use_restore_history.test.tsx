@@ -20,26 +20,26 @@ const history = { action: 'POP' };
 
 // Mock the hooks and actions
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => mockGetLocation(),
-      useHistory: () => mockGetHistory(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => mockGetLocation(),
+    useHistory: () => mockGetHistory(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/actions/workpad', () => {
-      const mocked = {
-      initializeWorkpad: () => ({ type: 'initialize' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeWorkpad: () => ({ type: 'initialize' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRestoreHistory', () => {
   beforeEach(() => {

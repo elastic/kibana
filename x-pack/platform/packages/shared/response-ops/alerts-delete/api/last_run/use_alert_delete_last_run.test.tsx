@@ -18,11 +18,11 @@ import { getAlertDeleteLastRun } from './get_alert_delete_last_run';
 const http = httpServiceMock.createStartContract();
 
 vi.mock('./get_alert_delete_last_run', () => {
-      const mocked = {
-      getAlertDeleteLastRun: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAlertDeleteLastRun: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAlertDeleteLastRun', () => {
   const queryClient = new QueryClient();

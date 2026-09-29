@@ -17,11 +17,11 @@ export const CapabilitiesServiceConstructor = vi
   .fn()
   .mockImplementation(() => MockCapabilitiesService);
 vi.doMock('@kbn/core-capabilities-browser-internal', () => {
-      const mocked = {
-      CapabilitiesService: CapabilitiesServiceConstructor,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CapabilitiesService: CapabilitiesServiceConstructor,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const MockHistory = {
   push: vi.fn(),
@@ -29,16 +29,16 @@ export const MockHistory = {
 };
 export const createBrowserHistoryMock = vi.fn().mockReturnValue(MockHistory);
 vi.doMock('history', () => {
-      const mocked = {
-      createBrowserHistory: createBrowserHistoryMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createBrowserHistory: createBrowserHistoryMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const parseAppUrlMock = vi.fn();
 export const getLocationObservableMock = vi.fn(() => new Observable());
 vi.doMock('./utils', async () => {
-  const original = (await vi.importActual('./utils'));
+  const original = await vi.importActual('./utils');
 
   return {
     ...original,
@@ -49,7 +49,7 @@ vi.doMock('./utils', async () => {
 
 export const registerAnalyticsContextProviderMock = vi.fn();
 vi.doMock('./register_analytics_context_provider', async () => {
-  const original = (await vi.importActual('./register_analytics_context_provider'));
+  const original = await vi.importActual('./register_analytics_context_provider');
 
   return {
     ...original,

@@ -19,11 +19,11 @@ import {
 } from './prepare_inferred_sampling';
 
 vi.mock('./fetch_sample_documents', () => {
-      const mocked = {
-      fetchSampleDocuments: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchSampleDocuments: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fetchSampleDocumentsMock = vi.mocked(fetchSampleDocuments);
 

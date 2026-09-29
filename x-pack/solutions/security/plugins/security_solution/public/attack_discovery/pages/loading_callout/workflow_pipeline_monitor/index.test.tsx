@@ -21,22 +21,22 @@ import type { StepExecutionWithLink } from '../types';
 
 vi.mock('../../use_workflow_editor_link');
 vi.mock('../live_timer', () => {
-      const mocked = {
-      LiveTimer: vi.fn(({ render: renderProp, startedAt }) => {
-        // When using the render prop, invoke it with mock data
-        if (renderProp != null) {
-          return (
-            <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''}>
-              {renderProp({ formattedDuration: '5s', liveTimeMs: 5000 })}
-            </span>
-          );
-        }
+  const mocked = {
+    LiveTimer: vi.fn(({ render: renderProp, startedAt }) => {
+      // When using the render prop, invoke it with mock data
+      if (renderProp != null) {
+        return (
+          <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''}>
+            {renderProp({ formattedDuration: '5s', liveTimeMs: 5000 })}
+          </span>
+        );
+      }
 
-        return <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''} />;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      return <span data-test-subj="liveTimer" data-started-at={startedAt ?? ''} />;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 

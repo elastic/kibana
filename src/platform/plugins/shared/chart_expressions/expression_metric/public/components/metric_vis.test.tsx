@@ -48,38 +48,38 @@ const mockFormatSettingLookup = vi.fn(() => CURRENCY_DEFAULT_FORMAT);
 const mockIsOverridden = vi.fn();
 
 vi.mock('../services', () => {
-      const mocked = {
-      getFormatService: () => {
-        return {
-          deserialize: mockDeserialize,
-        };
-      },
-      getPaletteService: () => ({
-        get: vi.fn(() => ({ getColorForValue: mockGetColorForValue })),
-      }),
-      getThemeService: async () => {
-        const { chartPluginMock } = (await vi.importActual('@kbn/charts-plugin/public/mocks'));
-        const { theme: themeServiceMock } = chartPluginMock.createSetupContract();
-        return themeServiceMock;
-      },
-      getUiSettingsService: () => {
-        return {
-          get: mockFormatSettingLookup,
-          isOverridden: mockIsOverridden,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormatService: () => {
+      return {
+        deserialize: mockDeserialize,
+      };
+    },
+    getPaletteService: () => ({
+      get: vi.fn(() => ({ getColorForValue: mockGetColorForValue })),
+    }),
+    getThemeService: async () => {
+      const { chartPluginMock } = await vi.importActual('@kbn/charts-plugin/public/mocks');
+      const { theme: themeServiceMock } = chartPluginMock.createSetupContract();
+      return themeServiceMock;
+    },
+    getUiSettingsService: () => {
+      return {
+        get: mockFormatSettingLookup,
+        isOverridden: mockIsOverridden,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/field-formats-plugin/common', () => {
-      const mocked = {
-      FORMATS_UI_SETTINGS: {
-        FORMAT_NUMBER_DEFAULT_LOCALE: 'format_number_default_locale',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FORMATS_UI_SETTINGS: {
+      FORMAT_NUMBER_DEFAULT_LOCALE: 'format_number_default_locale',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 type Props = MetricVisComponentProps;
 

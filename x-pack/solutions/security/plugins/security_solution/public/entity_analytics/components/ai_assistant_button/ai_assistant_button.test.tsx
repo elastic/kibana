@@ -18,7 +18,7 @@ import { ENTITY_PROMPT } from '../../../agent_builder/components/prompts';
 // Hard code the generated anonymized value for easier testing
 const ANONYMIZED_VALUE = 'anonymized-value';
 vi.mock('@kbn/elastic-assistant-common', async () => {
-  const actual = (await vi.importActual('@kbn/elastic-assistant-common'));
+  const actual = await vi.importActual('@kbn/elastic-assistant-common');
   return {
     ...actual,
     getAnonymizedValue: () => ANONYMIZED_VALUE,
@@ -29,16 +29,16 @@ const mockUseFetchAnonymizationFields = vi.fn();
 vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
   () => {
-      const mocked = {
-        useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useFetchAnonymizationFields: () => mockUseFetchAnonymizationFields(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseAskInAiAssistant = vi.fn();
 vi.mock('./use_ask_ai_assistant', async () => {
-  const actual = (await vi.importActual('./use_ask_ai_assistant'));
+  const actual = await vi.importActual('./use_ask_ai_assistant');
   return {
     ...actual,
     useAskAiAssistant: (params: unknown) => mockUseAskInAiAssistant(params),
@@ -47,21 +47,21 @@ vi.mock('./use_ask_ai_assistant', async () => {
 
 const mockUseAgentBuilderAvailability = vi.fn();
 vi.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: () => mockUseAgentBuilderAvailability(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenAgentBuilderFlyout = vi.fn();
 vi.mock('../../../agent_builder/hooks/use_agent_builder_attachment', () => {
-      const mocked = {
-      useAgentBuilderAttachment: () => ({
-        openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAttachment: () => ({
+      openAgentBuilderFlyout: mockOpenAgentBuilderFlyout,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AiAssistantButton', () => {
   const defaultProps: AiAssistantButtonProps<EntityType> = {

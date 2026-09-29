@@ -9,8 +9,8 @@ import { vi } from 'vitest';
 
 export const getUpdatableSavedObjectTypesMock = vi.fn();
 vi.doMock('./get_updatable_types', () => {
-      const mocked = {
-      getUpdatableSavedObjectTypes: getUpdatableSavedObjectTypesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUpdatableSavedObjectTypes: getUpdatableSavedObjectTypesMock,
+  };
+  return { ...mocked, default: mocked };
+});

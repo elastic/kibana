@@ -13,11 +13,11 @@ import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID } from '../constants';
 import { useSecurityDefaultPatterns } from './use_security_default_patterns';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useSecurityDefaultPatterns', () => {
   beforeEach(() => {

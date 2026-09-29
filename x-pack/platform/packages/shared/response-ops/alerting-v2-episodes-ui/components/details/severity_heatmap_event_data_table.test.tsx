@@ -13,7 +13,7 @@ import { useEuiTheme } from '@elastic/eui';
 import { SeverityHeatmapEventDataTable } from './severity_heatmap_event_data_table';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: vi.fn(),

@@ -167,9 +167,7 @@ describe('send_wait_for_approval_notifications', () => {
     });
 
     it('throws when a configured connector fails', async () => {
-      const execute = vi
-        .fn()
-        .mockResolvedValue({ status: 'error', message: 'Slack unavailable' });
+      const execute = vi.fn().mockResolvedValue({ status: 'error', message: 'Slack unavailable' });
 
       await expect(
         sendWaitForApprovalNotifications({

@@ -22,7 +22,7 @@ import { mockStatsYellowIndex } from '../__mocks__/mock_stats_yellow_index';
 import { mockMeteringStatsIndex } from '../__mocks__/mock_metering_stats_index';
 
 vi.mock('../lib', async () => {
-  const originalModule = (await vi.importActual('../lib'));
+  const originalModule = await vi.importActual('../lib');
   return {
     ...originalModule,
     fetchStats: vi.fn(),

@@ -23,12 +23,12 @@ import {
 } from './simplified_package_policy_helper';
 
 vi.mock('./cloud_connectors', async () => {
-      const mocked = {
-      ...(await vi.importActual('./cloud_connectors')),
-      detectTargetCsp: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./cloud_connectors')),
+    detectTargetCsp: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Minimal multi-template package fixture covering both shapes of the
@@ -601,7 +601,7 @@ describe('toPackagePolicy', () => {
 });
 
 describe('toNewAgentlessPolicy', async () => {
-  const { detectTargetCsp } = (await vi.importMock('./cloud_connectors'));
+  const { detectTargetCsp } = await vi.importMock('./cloud_connectors');
 
   type AgentlessPolicyInput = NewPackagePolicy & {
     force?: boolean;

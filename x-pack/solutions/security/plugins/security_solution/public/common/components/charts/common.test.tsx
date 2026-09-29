@@ -24,7 +24,7 @@ import {
 import { LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: vi.fn(),

@@ -24,23 +24,25 @@ import * as stepPropertySelectionCache from '../../../shared/lib/step_property_s
 
 // Mock the dependencies
 vi.mock('../../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getAllConnectorsMapCache: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getAllConnectorsMapCache: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows/common/utils/zod/get_schema_at_path', () => {
-      const mocked = {
-      getSchemaAtPath: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSchemaAtPath: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/lib/step_property_selection_cache', async () => {
-  const actual = (await vi.importActual<typeof import('../../../shared/lib/step_property_selection_cache')>('../../../shared/lib/step_property_selection_cache'));
+  const actual = await vi.importActual<
+    typeof import('../../../shared/lib/step_property_selection_cache')
+  >('../../../shared/lib/step_property_selection_cache');
   return {
     ...actual,
     getCachedSearchOption: vi.fn(actual.getCachedSearchOption),
@@ -62,7 +64,9 @@ describe('validateStepProperties', () => {
   beforeEach(async () => {
     clearStepPropertyValidationOutcomeCache();
     vi.clearAllMocks();
-    const actual = (await vi.importActual<typeof import('../../../shared/lib/step_property_selection_cache')>('../../../shared/lib/step_property_selection_cache'));
+    const actual = await vi.importActual<
+      typeof import('../../../shared/lib/step_property_selection_cache')
+    >('../../../shared/lib/step_property_selection_cache');
     mockGetCachedSearchOption.mockImplementation(actual.getCachedSearchOption);
   });
 

@@ -10,11 +10,11 @@ import { vi } from 'vitest';
 import { getEsNames } from './names';
 
 vi.mock('../../../../../../package.json', () => {
-      const mocked = {
-      version: '1.2.3',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    version: '1.2.3',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getEsNames()', () => {
   test('works as expected', () => {

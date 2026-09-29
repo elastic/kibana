@@ -25,7 +25,7 @@ import type { EventAnnotationStartDependencies } from '../plugin';
 import { of as mockOf } from 'rxjs';
 import { handleRequest } from '../../common/fetch_event_annotations/handle_request';
 vi.mock('../../common/fetch_event_annotations/handle_request', async () => {
-  const original = (await vi.importActual('../../common/fetch_event_annotations/handle_request'));
+  const original = await vi.importActual('../../common/fetch_event_annotations/handle_request');
   return {
     ...original,
     handleRequest: vi.fn(() =>

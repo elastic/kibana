@@ -491,9 +491,9 @@ describe('installAssetsForInputPackagePolicy', () => {
   });
 
   it('should skip the corroboration guard when skipUploadPackageValidation is set', async () => {
-    vi
-      .mocked(appContextService.getConfig)
-      .mockReturnValue({ internal: { skipUploadPackageValidation: true } } as any);
+    vi.mocked(appContextService.getConfig).mockReturnValue({
+      internal: { skipUploadPackageValidation: true },
+    } as any);
 
     vi.mocked(getInstalledPackageWithAssets).mockResolvedValue({
       installation: {
@@ -597,9 +597,9 @@ describe('installAssetsForInputPackagePolicy', () => {
     });
 
     it('stores an .otel-suffixed es index pattern for an otelcol input package', async () => {
-      vi
-        .mocked(appContextService.getExperimentalFeatures)
-        .mockReturnValue({ enableOtelIntegrations: true } as any);
+      vi.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+        enableOtelIntegrations: true,
+      } as any);
       const OTEL_PKG_INFO = {
         type: 'input',
         name: 'verifier_otel',
@@ -1414,9 +1414,8 @@ describe('installAssetsForInputPackagePolicy', () => {
       } as any);
 
       // Mock that logs data stream already exists (from same package)
-      vi
-        .mocked(dataStreamService)
-        .getMatchingDataStreams.mockImplementation(async (esClient, params) => {
+      vi.mocked(dataStreamService).getMatchingDataStreams.mockImplementation(
+        async (esClient, params) => {
           if (params.type === 'logs') {
             return [
               {
@@ -1430,7 +1429,8 @@ describe('installAssetsForInputPackagePolicy', () => {
             ] as any;
           }
           return [];
-        });
+        }
+      );
 
       const mockedLogger = vi.mocked(appContextService.getLogger());
 

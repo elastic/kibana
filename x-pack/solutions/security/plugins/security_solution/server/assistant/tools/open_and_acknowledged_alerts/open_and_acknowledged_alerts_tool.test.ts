@@ -26,12 +26,12 @@ import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/imp
 const MAX_SIZE = 10000;
 
 vi.mock('@kbn/elastic-assistant-common', async () => {
-      const mocked = {
-      transformRawData: vi.fn(() => 'transformedData'),
-      ...(await vi.importActual('@kbn/elastic-assistant-common')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformRawData: vi.fn(() => 'transformedData'),
+    ...(await vi.importActual('@kbn/elastic-assistant-common')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OpenAndAcknowledgedAlertsTool', () => {
   const alertsIndexPattern = 'alerts-index';

@@ -16,21 +16,21 @@ import { useCurrentConversationStreamType } from './use_is_current_conversation_
 import { useAnchoredItemKey } from './use_anchored_item_key';
 
 vi.mock('../components/conversations/timeline/use_timeline_items', () => {
-      const mocked = {
-      useTimelineItems: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineItems: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../context/conversation/use_conversation_id', () => {
-      const mocked = { useConversationId: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useConversationId: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_is_current_conversation_streaming', () => {
-      const mocked = {
-      useCurrentConversationStreamType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentConversationStreamType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const message = (id: string): TimelineItem => ({
   kind: 'userMessage',

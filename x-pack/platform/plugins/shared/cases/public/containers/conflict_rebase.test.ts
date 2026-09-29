@@ -51,10 +51,7 @@ describe('conflict_rebase', () => {
       updatedAt: '2024-01-01T00:00:00.000Z',
       version: 'WzQ4LDFd',
     };
-    const executeRequest = vi
-      .fn()
-      .mockRejectedValueOnce(conflictError)
-      .mockResolvedValueOnce('ok');
+    const executeRequest = vi.fn().mockRejectedValueOnce(conflictError).mockResolvedValueOnce('ok');
     const fetchLatestCase = vi.fn().mockResolvedValue(latestCase);
 
     const response = await rebaseCaseMutationOnConflict({
@@ -77,10 +74,7 @@ describe('conflict_rebase', () => {
   });
 
   it('re-throws the original error when user-visible fields changed on the latest case', async () => {
-    const executeRequest = vi
-      .fn()
-      .mockRejectedValueOnce(conflictError)
-      .mockResolvedValueOnce('ok');
+    const executeRequest = vi.fn().mockRejectedValueOnce(conflictError).mockResolvedValueOnce('ok');
     const fetchLatestCase = vi.fn().mockResolvedValue({
       ...basicCaseFixture,
       title: 'A different title',

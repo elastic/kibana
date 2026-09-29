@@ -36,7 +36,7 @@ import { RELATED_ENTITY, RELATED_HOST, RELATED_USER } from '../../../common/cons
 
 // Mock filter_store module
 vi.mock('../../filters/filter_store', async () => {
-  const actual = (await vi.importActual('../../filters/filter_store'));
+  const actual = await vi.importActual('../../filters/filter_store');
   return {
     ...actual,
     isFilterActiveForScope: vi.fn(() => false),
@@ -74,20 +74,20 @@ let capturedItemsFn:
   | null = null;
 
 vi.mock('./use_node_expand_popover', () => {
-      const mocked = {
-      useNodeExpandPopover: vi.fn(({ itemsFn }) => {
-        capturedItemsFn = itemsFn;
-        return {
-          id: 'test-popover',
-          onNodeExpandButtonClick: vi.fn(),
-          PopoverComponent: () => null,
-          actions: { openPopover: vi.fn(), closePopover: vi.fn() },
-          state: { isOpen: false, anchorElement: null },
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNodeExpandPopover: vi.fn(({ itemsFn }) => {
+      capturedItemsFn = itemsFn;
+      return {
+        id: 'test-popover',
+        onNodeExpandButtonClick: vi.fn(),
+        PopoverComponent: () => null,
+        actions: { openPopover: vi.fn(), closePopover: vi.fn() },
+        state: { isOpen: false, anchorElement: null },
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockNode = (
   docMode: 'single-entity' | 'grouped-entities',

@@ -15,17 +15,17 @@ import mockdataPoint from '../../fixtures/dispatch_heatmap_data_point.json';
 import mockConfigPercentage from '../../fixtures/dispatch_heatmap_config.json';
 
 vi.mock('d3', () => {
-      const mocked = {
-      event: {
-        target: {
-          nearestViewportElement: {
-            __data__: mockDispatchDataD3,
-          },
+  const mocked = {
+    event: {
+      target: {
+        nearestViewportElement: {
+          __data__: mockDispatchDataD3,
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getHandlerMock(config = {}, data = {}) {
   return {

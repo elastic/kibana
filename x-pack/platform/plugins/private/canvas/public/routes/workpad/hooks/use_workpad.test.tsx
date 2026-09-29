@@ -30,35 +30,35 @@ const workpadResponse = {
 
 // Mock the hooks, actions, and services used by the UseWorkpad hook
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-      useSelector: () => mockSelector,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+    useSelector: () => mockSelector,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services/canvas_workpad_service', () => {
-      const mocked = {
-      getCanvasWorkpadService: () => {
-        return {
-          resolve: mockResolveWorkpad,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCanvasWorkpadService: () => {
+      return {
+        resolve: mockResolveWorkpad,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 spacesService!.ui.redirectLegacyUrl = mockRedirectLegacyUrl;
 
 vi.mock('../../../state/actions/workpad', () => {
-      const mocked = {
-      setWorkpad: (payload: any) => ({
-        type: 'setWorkpad',
-        payload,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setWorkpad: (payload: any) => ({
+      type: 'setWorkpad',
+      payload,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useWorkpad', () => {
   beforeEach(() => {

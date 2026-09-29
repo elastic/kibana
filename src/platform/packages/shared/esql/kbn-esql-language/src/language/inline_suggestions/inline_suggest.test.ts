@@ -14,27 +14,27 @@ import { inlineSuggest } from './inline_suggest';
 import type { InlineSuggestionItem } from './types';
 
 vi.mock('../../commands/registry/options/recommended_queries', () => {
-      const mocked = {
-      getRecommendedQueriesTemplates: vi.fn(),
-      getTimeAndCategorizationFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRecommendedQueriesTemplates: vi.fn(),
+    getTimeAndCategorizationFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/columns_retrieval_helpers', () => {
-      const mocked = {
-      getColumnsByTypeRetriever: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getColumnsByTypeRetriever: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./inline_suggestions_cache', () => {
-      const mocked = {
-      fromCache: vi.fn(),
-      setToCache: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fromCache: vi.fn(),
+    setToCache: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   getRecommendedQueriesTemplates,

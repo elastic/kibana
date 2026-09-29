@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { BehaviorSubject } from 'rxjs';
+import { vi } from 'vitest';
 
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -20,14 +19,14 @@ const mockActiveSpace$ = new BehaviorSubject({ id: 'default', name: 'Default' })
 const mockSpacesManager = spacesManagerMock.create();
 
 vi.mock('./spaces_manager', () => {
-      const mocked = {
-      SpacesManager: vi.fn().mockImplementation(() => ({
-        ...mockSpacesManager,
-        onActiveSpaceChange$: mockActiveSpace$.asObservable(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpacesManager: vi.fn().mockImplementation(() => ({
+      ...mockSpacesManager,
+      onActiveSpaceChange$: mockActiveSpace$.asObservable(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Spaces plugin - execution context synchronization', () => {
   const coreSetup = coreMock.createSetup();

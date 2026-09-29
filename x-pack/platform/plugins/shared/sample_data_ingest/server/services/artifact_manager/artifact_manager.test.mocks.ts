@@ -16,7 +16,7 @@ export const loadManifestFileMock = vi.fn();
 export const deleteFileMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     fetchArtifactVersions: fetchArtifactVersionsMock,
@@ -32,7 +32,7 @@ export const majorMinorMock = vi.fn();
 export const latestVersionMock = vi.fn();
 
 vi.doMock('./utils/semver', async () => {
-  const actual = (await vi.importActual('./utils/semver'));
+  const actual = await vi.importActual('./utils/semver');
   return {
     ...actual,
     majorMinor: majorMinorMock,
@@ -41,8 +41,8 @@ vi.doMock('./utils/semver', async () => {
 });
 
 vi.doMock('@kbn/fs', () => {
-      const mocked = {
-      deleteFile: deleteFileMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteFile: deleteFileMock,
+  };
+  return { ...mocked, default: mocked };
+});

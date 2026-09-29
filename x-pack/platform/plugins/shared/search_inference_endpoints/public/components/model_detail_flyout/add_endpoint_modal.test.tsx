@@ -17,26 +17,26 @@ import { AddEndpointModal } from './add_endpoint_modal';
 const mockMutate = vi.fn();
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {},
-          notifications: { toasts: { addSuccess: vi.fn(), addDanger: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {},
+        notifications: { toasts: { addSuccess: vi.fn(), addDanger: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-endpoint-ui-common', () => {
-      const mocked = {
-      useInferenceEndpointMutation: () => ({
-        mutate: mockMutate,
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInferenceEndpointMutation: () => ({
+      mutate: mockMutate,
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultTaskTypes: TaskTypeOption[] = [
   {

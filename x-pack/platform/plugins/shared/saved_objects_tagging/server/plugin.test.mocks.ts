@@ -9,16 +9,16 @@ import { vi } from 'vitest';
 
 export const registerRoutesMock = vi.fn();
 vi.doMock('./routes', () => {
-      const mocked = {
-      registerRoutes: registerRoutesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: registerRoutesMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const createTagUsageCollectorMock = vi.fn();
 vi.doMock('./usage', () => {
-      const mocked = {
-      createTagUsageCollector: createTagUsageCollectorMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTagUsageCollector: createTagUsageCollectorMock,
+  };
+  return { ...mocked, default: mocked };
+});

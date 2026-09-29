@@ -39,92 +39,92 @@ const mockSourceContext: {
 };
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      Prompt: () => null,
-      BottomBarActions: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Prompt: () => null,
+    BottomBarActions: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_metrics_breadcrumbs', () => {
-      const mocked = {
-      useMetricsBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      useSourceContext: () => mockSourceContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSourceContext: () => mockSourceContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/ml/infra_ml_capabilities', () => {
-      const mocked = {
-      useInfraMLCapabilitiesContext: () => ({ hasInfraMLCapabilities: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInfraMLCapabilitiesContext: () => ({ hasInfraMLCapabilities: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/page_template', () => {
-      const mocked = {
-      PageTemplate: ({
-        children,
-        'data-test-subj': dataTestSubj,
-      }: {
-        children: React.ReactNode;
-        'data-test-subj'?: string;
-      }) => <div data-test-subj={dataTestSubj}>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageTemplate: ({
+      children,
+      'data-test-subj': dataTestSubj,
+    }: {
+      children: React.ReactNode;
+      'data-test-subj'?: string;
+    }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./indices_configuration_panel', () => {
-      const mocked = {
-      IndicesConfigurationPanel: () => <div data-test-subj="indicesConfigurationPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IndicesConfigurationPanel: () => <div data-test-subj="indicesConfigurationPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./ml_configuration_panel', () => {
-      const mocked = {
-      MLConfigurationPanel: () => <div data-test-subj="mlConfigurationPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MLConfigurationPanel: () => <div data-test-subj="mlConfigurationPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./name_configuration_panel', () => {
-      const mocked = {
-      NameConfigurationPanel: () => <div data-test-subj="nameConfigurationPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NameConfigurationPanel: () => <div data-test-subj="nameConfigurationPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./source_configuration_form_state', () => {
-      const mocked = {
-      useSourceConfigurationFormState: () => ({
-        indicesConfigurationProps: { name: {}, metricAlias: {}, anomalyThreshold: {} },
-        errors: [],
-        resetForm: vi.fn(),
-        isFormValid: true,
-        formState: {},
-        formStateChanges: {},
-        getUnsavedChanges: () => ({}),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSourceConfigurationFormState: () => ({
+      indicesConfigurationProps: { name: {}, metricAlias: {}, anomalyThreshold: {} },
+      errors: [],
+      resetForm: vi.fn(),
+      isFormValid: true,
+      formState: {},
+      formStateChanges: {},
+      getUnsavedChanges: () => ({}),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../header/use_metrics_app_header_menu', () => {
-      const mocked = {
-      useMetricsAppHeaderMenu: () => ({
-        menu: { items: [] },
-        flyouts: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsAppHeaderMenu: () => ({
+      menu: { items: [] },
+      flyouts: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderSettings = () =>
   render(

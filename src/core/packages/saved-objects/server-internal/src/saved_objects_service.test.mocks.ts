@@ -19,7 +19,7 @@ import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 export const migratorInstanceMock = mockKibanaMigrator.create();
 export const KibanaMigratorMock = vi.fn().mockImplementation(() => migratorInstanceMock);
 vi.doMock('@kbn/core-saved-objects-migration-server-internal', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-migration-server-internal'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-migration-server-internal');
   return {
     ...actual,
     KibanaMigrator: KibanaMigratorMock,
@@ -30,7 +30,7 @@ export const clientProviderInstanceMock = savedObjectsClientProviderMock.create(
 export const repositoryMock = savedObjectsRepositoryMock.create();
 
 vi.doMock('@kbn/core-saved-objects-api-server-internal', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-api-server-internal'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-api-server-internal');
   return {
     ...actual,
     SavedObjectsRepository: {
@@ -42,7 +42,7 @@ vi.doMock('@kbn/core-saved-objects-api-server-internal', async () => {
 
 export const typeRegistryInstanceMock = typeRegistryMock.create();
 vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-base-server-internal'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-base-server-internal');
   return {
     ...actual,
     SavedObjectTypeRegistry: vi.fn().mockImplementation(() => typeRegistryInstanceMock),
@@ -51,8 +51,8 @@ vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
 
 export const registerRoutesMock = vi.fn();
 vi.doMock('./routes', () => {
-      const mocked = {
-      registerRoutes: registerRoutesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: registerRoutesMock,
+  };
+  return { ...mocked, default: mocked };
+});

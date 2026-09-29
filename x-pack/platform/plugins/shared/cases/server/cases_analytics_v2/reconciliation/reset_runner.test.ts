@@ -23,21 +23,21 @@ import type { CasesActivityV2WriterContract } from '../writer/activity';
 import type { CasesAttachmentsV2WriterContract } from '../writer/attachments';
 
 vi.mock('./runner', () => {
-      const mocked = { runReconciliation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { runReconciliation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./activity_runner', () => {
-      const mocked = { runActivityReconciliation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { runActivityReconciliation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attachments_runner', () => {
-      const mocked = { runAttachmentsReconciliation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { runAttachmentsReconciliation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('.', () => {
-      const mocked = { resetReconciliationTask: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { resetReconciliationTask: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const runReconciliationMock = runReconciliation as Mock;
 const runActivityReconciliationMock = runActivityReconciliation as Mock;

@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, renderHook } from '@testing-library/react';
 import { useNavigateToExecution } from './use_navigate_to_execution';
 import { PLUGIN_ID } from '../../../common';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../mocks';

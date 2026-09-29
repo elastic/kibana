@@ -15,11 +15,11 @@ import { callApmApi } from '../../../services/rest/create_call_apm_api';
 import { hasRumData } from './ux_overview_fetchers';
 
 vi.mock('../../../services/rest/create_call_apm_api', () => {
-      const mocked = {
-      callApmApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    callApmApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const callApmApiMock = callApmApi as Mock;
 const INDEX = 'apm-*';

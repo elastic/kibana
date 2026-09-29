@@ -16,15 +16,15 @@ import { AgentBuilderDashboardsPlugin } from './plugin';
 import type { AgentBuilderDashboardsPluginPublicStartDependencies } from './types';
 
 vi.mock('./attachment_types', () => {
-      const mocked = {
-      registerDashboardAttachmentUiDefinition: vi.fn(() => vi.fn()),
-      createIdGenerator: () => ({
-        current: 'draft-id',
-        next: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerDashboardAttachmentUiDefinition: vi.fn(() => vi.fn()),
+    createIdGenerator: () => ({
+      current: 'draft-id',
+      next: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AgentBuilderDashboardsPlugin', () => {
   const registerActionAsync = vi.fn();

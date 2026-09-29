@@ -25,23 +25,27 @@ import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.moc
 
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('../../../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../../../../flyout_v2/use_flyout_api');
 
 vi.mock(
   '../../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
   async () => {
-      const mocked = {
-        useEntityEuidFromAlerts: vi.fn(() => ({ euid: undefined, isLoading: false })),
-        ENTITY_TYPE_BY_FIELD: (await vi.importActual('../../attack_discovery_markdown_formatter/field_markdown_renderer/helpers')).ENTITY_TYPE_BY_FIELD,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useEntityEuidFromAlerts: vi.fn(() => ({ euid: undefined, isLoading: false })),
+      ENTITY_TYPE_BY_FIELD: (
+        await vi.importActual(
+          '../../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
+        )
+      ).ENTITY_TYPE_BY_FIELD,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('ActionableSummary', () => {
@@ -57,12 +61,10 @@ describe('ActionableSummary', () => {
 
   beforeEach(async () => {
     vi.clearAllMocks();
-    vi
-      .mocked(useAgentBuilderAvailability)
-      .mockImplementation(
-        (await vi.importActual('../../../../../agent_builder/hooks/use_agent_builder_availability'))
-          .useAgentBuilderAvailability
-      );
+    vi.mocked(useAgentBuilderAvailability).mockImplementation(
+      (await vi.importActual('../../../../../agent_builder/hooks/use_agent_builder_availability'))
+        .useAgentBuilderAvailability
+    );
     mockUseExpandableFlyoutApi.mockReturnValue({
       ...createExpandableFlyoutApiMock(),
       openRightPanel: mockOpenRightPanel,

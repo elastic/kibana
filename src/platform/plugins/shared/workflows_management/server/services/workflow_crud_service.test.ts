@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { errors } from '@elastic/elasticsearch';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { errors } from '@elastic/elasticsearch';
 import {
   coreMock,
   elasticsearchServiceMock,
@@ -37,22 +37,20 @@ import { logWorkflowChanges } from '../lib/log_workflow_changes';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 vi.mock('../lib/log_workflow_changes', () => {
-      const mocked = {
-      logWorkflowChanges: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logWorkflowChanges: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../api/lib/workflow_disable_all', () => {
-      const mocked = {
-      disableAllWorkflows: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    disableAllWorkflows: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockedLogWorkflowChanges = logWorkflowChanges as MockedFunction<
-  typeof logWorkflowChanges
->;
+const mockedLogWorkflowChanges = logWorkflowChanges as MockedFunction<typeof logWorkflowChanges>;
 
 const mockedDisableAllWorkflowsLib = disableAllWorkflowsLib as MockedFunction<
   typeof disableAllWorkflowsLib
@@ -3515,9 +3513,12 @@ describe('bound workflow deletion errors', () => {
 
   it('rejects active-execution deletion before touching the binding', async () => {
     const { service, request, deps, bindings, deleteDocuments } = setup();
-    vi
-      .mocked(deps.executionQueryService.getWorkflowExecutions)
-      .mockResolvedValue({ total: 1, results: [], page: 1, size: 1 });
+    vi.mocked(deps.executionQueryService.getWorkflowExecutions).mockResolvedValue({
+      total: 1,
+      results: [],
+      page: 1,
+      size: 1,
+    });
     await expect(
       service.deleteWorkflows(['bound'], 'default', { force: true }, request)
     ).rejects.toThrow('running executions');

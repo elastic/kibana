@@ -11,11 +11,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { createCsvReport } from './create_csv_report';
 
 vi.mock('@kbn/rison', () => {
-      const mocked = {
-      encode: vi.fn((val) => JSON.stringify(val)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    encode: vi.fn((val) => JSON.stringify(val)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createCsvReport', () => {
   const mockCoreSetup = coreMock.createSetup();

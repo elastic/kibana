@@ -28,13 +28,13 @@ vi.mock('elastic-apm-node', () => ({
 }));
 
 vi.mock('@opentelemetry/api', () => {
-      const mocked = {
-      trace: {
-        getActiveSpan: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trace: {
+      getActiveSpan: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface MockSpan {
   setAttributes: Mock<void, [Record<string, AttributeValue>]>;

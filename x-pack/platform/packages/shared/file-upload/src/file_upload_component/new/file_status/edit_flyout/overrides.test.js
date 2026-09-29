@@ -14,13 +14,13 @@ import { FILE_FORMATS } from '@kbn/file-upload-common';
 import { Overrides } from './overrides';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      withKibana: (comp) => {
-        return comp;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withKibana: (comp) => {
+      return comp;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getProps() {
   return {

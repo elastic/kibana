@@ -18,12 +18,12 @@ import { FlowTarget } from '../../../../../common/search_strategy';
 import { FlowTargetSelect } from '../flow_controls/flow_target_select';
 
 vi.mock('../flow_controls/flow_target_select', async () => {
-      const mocked = {
-      ...(await vi.importActual('../flow_controls/flow_target_select')),
-      FlowTargetSelect: vi.fn(() => <div data-test-subj="flow-target-select-mock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../flow_controls/flow_target_select')),
+    FlowTargetSelect: vi.fn(() => <div data-test-subj="flow-target-select-mock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FlowTargetSelectMocked = FlowTargetSelect as MockedFunction<typeof FlowTargetSelect>;
 

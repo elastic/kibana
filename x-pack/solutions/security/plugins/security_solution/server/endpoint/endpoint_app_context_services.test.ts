@@ -25,12 +25,12 @@ import type { ResponseActionsClient } from './services';
 // Keep the real `./services` module, but replace the response actions client factory so tests can
 // assert exactly what `getInternalResponseActionsClient()` hands it.
 vi.mock('./services', async () => {
-      const mocked = {
-      ...(await vi.importActual('./services')),
-      getResponseActionsClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./services')),
+    getResponseActionsClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getResponseActionsClient } from './services';
 

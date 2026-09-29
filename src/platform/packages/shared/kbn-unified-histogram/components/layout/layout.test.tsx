@@ -31,7 +31,7 @@ import React, { useEffect } from 'react';
 let mockBreakpoint = 'l';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

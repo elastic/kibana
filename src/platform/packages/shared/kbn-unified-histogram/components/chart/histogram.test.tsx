@@ -225,9 +225,9 @@ describe('Histogram', () => {
       },
     };
 
-    vi
-      .spyOn(adapters.requests, 'getRequests')
-      .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
+    vi.spyOn(adapters.requests, 'getRequests').mockReturnValue([
+      { response: { json: { rawResponse } } } as any,
+    ]);
 
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(false);
 
@@ -248,9 +248,9 @@ describe('Histogram', () => {
     const onLoad = getEmbeddableProps().onLoad!;
     const adapters = createDefaultInspectorAdapters();
 
-    vi
-      .spyOn(adapters.requests, 'getRequests')
-      .mockReturnValue([{ status: RequestStatus.ERROR } as any]);
+    vi.spyOn(adapters.requests, 'getRequests').mockReturnValue([
+      { status: RequestStatus.ERROR } as any,
+    ]);
 
     onLoad?.(false, adapters);
 
@@ -280,9 +280,9 @@ describe('Histogram', () => {
       },
     };
 
-    vi
-      .spyOn(adapters.requests, 'getRequests')
-      .mockReturnValue([{ response: { json: { rawResponse } } } as any]);
+    vi.spyOn(adapters.requests, 'getRequests').mockReturnValue([
+      { response: { json: { rawResponse } } } as any,
+    ]);
 
     act(() => {
       onLoad?.(false, adapters);

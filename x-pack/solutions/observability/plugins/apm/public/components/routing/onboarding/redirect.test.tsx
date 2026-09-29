@@ -16,16 +16,16 @@ const mockNavigateToApp = vi.fn();
 let mockServerlessOnboarding = false;
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        config: { serverlessOnboarding: mockServerlessOnboarding },
-        core: {
-          application: { navigateToApp: mockNavigateToApp },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: () => ({
+      config: { serverlessOnboarding: mockServerlessOnboarding },
+      core: {
+        application: { navigateToApp: mockNavigateToApp },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderRedirect(initialEntry: string) {
   return render(

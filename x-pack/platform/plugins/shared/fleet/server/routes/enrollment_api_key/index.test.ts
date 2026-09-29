@@ -31,15 +31,15 @@ import {
 } from './handler';
 
 vi.mock('./handler', async () => {
-      const mocked = {
-      ...(await vi.importActual('./handler')),
-      getEnrollmentApiKeysHandler: vi.fn(),
-      getOneEnrollmentApiKeyHandler: vi.fn(),
-      deleteEnrollmentApiKeyHandler: vi.fn(),
-      postEnrollmentApiKeyHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./handler')),
+    getEnrollmentApiKeysHandler: vi.fn(),
+    getOneEnrollmentApiKeyHandler: vi.fn(),
+    deleteEnrollmentApiKeyHandler: vi.fn(),
+    postEnrollmentApiKeyHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;

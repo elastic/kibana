@@ -37,16 +37,17 @@ import { hasConnectedRemoteClusters } from '../../utils/ccs_utils';
 import { ID_BOUND_FACTORY_QUERY_TYPES, osquerySearchStrategyProvider } from '.';
 
 vi.mock('@kbn/data-plugin/server', () => {
-      const mocked = {
-      shimHitsTotal: (rawResponse: unknown) => rawResponse,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shimHitsTotal: (rawResponse: unknown) => rawResponse,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // Keep the real CCS prefixing so index-shape assertions exercise production
 // behaviour; only the remote-cluster probe (a network call) is stubbed.
 vi.mock('../../utils/ccs_utils', async () => {
-  const actual = (await vi.importActual('../../utils/ccs_utils'));
+  const actual = await vi.importActual('../../utils/ccs_utils');
 
   return {
     ...actual,

@@ -37,14 +37,14 @@ import { SearchEmbeddableGridComponent } from './search_embeddable_grid_componen
 const mockDiscoverGridEmbeddableProps = vi.fn();
 
 vi.mock('./saved_search_grid', () => {
-      const mocked = {
-      DiscoverGridEmbeddable: (props: Record<string, unknown>) => {
-        mockDiscoverGridEmbeddableProps(props);
-        return <div data-test-subj="mockedDiscoverGridEmbeddable" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverGridEmbeddable: (props: Record<string, unknown>) => {
+      mockDiscoverGridEmbeddableProps(props);
+      return <div data-test-subj="mockedDiscoverGridEmbeddable" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createStateManager = (): SearchEmbeddableStateManager => ({
   columns: new BehaviorSubject<string[] | undefined>(['message']),

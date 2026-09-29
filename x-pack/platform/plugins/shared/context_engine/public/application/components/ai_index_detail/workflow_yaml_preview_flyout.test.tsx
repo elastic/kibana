@@ -17,25 +17,25 @@ import { WorkflowYamlPreviewFlyout } from './workflow_yaml_preview_flyout';
 const mockUseWorkflow = vi.fn();
 
 vi.mock('../../hooks/use_workflow', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_workflow')),
-      useWorkflow: (...args: unknown[]) => mockUseWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_workflow')),
+    useWorkflow: (...args: unknown[]) => mockUseWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: ({
-        value,
-        'data-test-subj': dataTestSubj,
-      }: {
-        value: string;
-        'data-test-subj'?: string;
-      }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({
+      value,
+      'data-test-subj': dataTestSubj,
+    }: {
+      value: string;
+      'data-test-subj'?: string;
+    }) => <pre data-test-subj={dataTestSubj}>{value}</pre>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderFlyout = (onClose = vi.fn()) => {
   const queryClient = new QueryClient({

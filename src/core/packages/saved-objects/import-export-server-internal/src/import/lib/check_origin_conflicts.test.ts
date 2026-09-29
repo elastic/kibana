@@ -28,11 +28,11 @@ import { checkOriginConflicts } from './check_origin_conflicts';
 import type { ImportStateMap } from './types';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'uuidv4',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'uuidv4',
+  };
+  return { ...mocked, default: mocked };
+});
 
 type SavedObjectType = SavedObject<{ title?: string }>;
 type CheckOriginConflictsParams = Parameters<typeof checkOriginConflicts>[0];

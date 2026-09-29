@@ -23,57 +23,63 @@ const mockAddToCaseWrapper = vi.fn();
 const mockViewInDropdown = vi.fn();
 
 vi.mock('../../../common/experimental_features_context', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../results/export_filters_context', () => {
-      const mocked = {
-      useExportFilters: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportFilters: vi.fn().mockReturnValue(undefined),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../results/export_results_button', () => {
-      const mocked = {
-      ExportResultsButton: (props: Record<string, unknown>) => {
-        mockExportResultsButton(props);
+  const mocked = {
+    ExportResultsButton: (props: Record<string, unknown>) => {
+      mockExportResultsButton(props);
 
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return null;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../cases/add_to_cases', () => {
-      const mocked = {
-      AddToCaseWrapper: (props: Record<string, unknown>) => {
-        mockAddToCaseWrapper(props);
+  const mocked = {
+    AddToCaseWrapper: (props: Record<string, unknown>) => {
+      mockAddToCaseWrapper(props);
 
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return null;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./view_in_dropdown', () => {
-      const mocked = {
-      ViewInDropdown: (props: Record<string, unknown>) => {
-        mockViewInDropdown(props);
+  const mocked = {
+    ViewInDropdown: (props: Record<string, unknown>) => {
+      mockViewInDropdown(props);
 
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return null;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 const mockUseKibana = vi.fn();
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as MockedFunction<
   typeof useIsExperimentalFeatureEnabled

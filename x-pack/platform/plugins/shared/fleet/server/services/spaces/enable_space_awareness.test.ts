@@ -35,9 +35,9 @@ describe('enableSpaceAwarenessMigration', () => {
     soClient = savedObjectsClientMock.create();
     vi.mocked(appContextService.getExperimentalFeatures).mockReset();
     vi.mocked(appContextService.getLogger).mockReturnValue(mockedLogger);
-    vi
-      .mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension)
-      .mockReturnValue(soClient);
+    vi.mocked(appContextService.getInternalUserSOClientWithoutSpaceExtension).mockReturnValue(
+      soClient
+    );
     vi.mocked(getSettingsOrUndefined).mockReset();
     vi.mocked(saveSettings).mockReset();
 

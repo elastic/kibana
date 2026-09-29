@@ -23,40 +23,44 @@ const mockUseRouterNavigate = vi.fn();
 const mockPush = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({ push: mockPush }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({ push: mockPush }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-      useRouterNavigate: (path: string) => {
-        mockUseRouterNavigate(path);
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+    useRouterNavigate: (path: string) => {
+      mockUseRouterNavigate(path);
 
-        return { onClick: vi.fn(), href: path };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return { onClick: vi.fn(), href: path };
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/use_persisted_page_size', () => {
-      const mocked = {
-      usePersistedPageSize: vi.fn(() => [20, vi.fn()]),
-      PAGE_SIZE_OPTIONS: [10, 20, 50],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePersistedPageSize: vi.fn(() => [20, vi.fn()]),
+    PAGE_SIZE_OPTIONS: [10, 20, 50],
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSavedQueryUsers = vi.fn(() => ({
   users: [],
@@ -65,50 +69,56 @@ const mockUseSavedQueryUsers = vi.fn(() => ({
 }));
 
 vi.mock('../../../common/use_saved_object_users', () => {
-      const mocked = {
-      useSavedQueryUsers: () => mockUseSavedQueryUsers(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSavedQueryUsers: () => mockUseSavedQueryUsers(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_queries/use_copy_saved_query', () => {
-      const mocked = {
-      useCopySavedQuery: () => ({ mutateAsync: vi.fn(), isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCopySavedQuery: () => ({ mutateAsync: vi.fn(), isLoading: false }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_queries/use_delete_saved_query', () => {
-      const mocked = {
-      useDeleteSavedQuery: () => ({ mutateAsync: vi.fn(), isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteSavedQuery: () => ({ mutateAsync: vi.fn(), isLoading: false }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/table_toolbar', () => {
-      const mocked = {
-      TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableToolbar: (props: any) => <div data-test-subj="table-toolbar">{props.actionButton}</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../actions/components/run_by_column', () => {
-      const mocked = {
-      RunByColumn: ({ userId }: { userId?: string }) => (
-        <span data-test-subj="run-by-column">{userId ?? 'unknown'}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunByColumn: ({ userId }: { userId?: string }) => (
+      <span data-test-subj="run-by-column">{userId ?? 'unknown'}</span>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSavedQueries = vi.fn();
 
 vi.mock('../../../saved_queries/use_saved_queries', () => {
-      const mocked = {
-      useSavedQueries: (...args: unknown[]) => mockUseSavedQueries(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSavedQueries: (...args: unknown[]) => mockUseSavedQueries(...args),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createSavedQuery = (overrides: Partial<SavedQuerySO> = {}): SavedQuerySO => ({
   id: 'test-query-1',

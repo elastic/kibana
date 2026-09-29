@@ -341,9 +341,7 @@ describe('ApiKeyService', () => {
 
     it('reports a key as failed when bulkCreate returns no entry for it', async () => {
       const apiKeys = [Buffer.from('lonely-id:secret').toString('base64')];
-      invalidationSavedObjectsClient.bulkCreate = vi
-        .fn()
-        .mockResolvedValue({ saved_objects: [] });
+      invalidationSavedObjectsClient.bulkCreate = vi.fn().mockResolvedValue({ saved_objects: [] });
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.markApiKeysForInvalidation(apiKeys)).resolves.toEqual([

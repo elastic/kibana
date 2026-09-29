@@ -15,13 +15,13 @@ import { useFetch } from './use_fetch';
 export const mockEndTracking = vi.fn();
 export const mockStartTracking = vi.fn(() => ({ endTracking: mockEndTracking }));
 vi.mock('../../lib/apm/use_track_http_request', () => {
-      const mocked = {
-      useTrackHttpRequest: vi.fn(() => ({
-        startTracking: mockStartTracking,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTrackHttpRequest: vi.fn(() => ({
+      startTracking: mockStartTracking,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const requestName = 'test name' as RequestName;
 

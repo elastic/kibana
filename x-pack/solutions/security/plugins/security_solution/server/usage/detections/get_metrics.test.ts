@@ -53,11 +53,11 @@ let mockPrebuiltRuleAssetsClient: ReturnType<typeof createPrebuiltRuleAssetsClie
 vi.mock(
   '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
   () => {
-      const mocked = {
-        createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      createPrebuiltRuleAssetsClient: () => mockPrebuiltRuleAssetsClient,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('Detections Usage and Metrics', () => {
@@ -1849,9 +1849,7 @@ describe('Detections Usage and Metrics', () => {
       });
       const mockJobsResponse = vi.fn().mockResolvedValue(getMockMlJobDetailsResponse());
       const mockJobStatsResponse = vi.fn().mockResolvedValue(getMockMlJobStatsResponse());
-      const mockDatafeedStatsResponse = vi
-        .fn()
-        .mockResolvedValue(getMockMlDatafeedStatsResponse());
+      const mockDatafeedStatsResponse = vi.fn().mockResolvedValue(getMockMlDatafeedStatsResponse());
 
       mlClient.anomalyDetectorsProvider.mockReturnValue({
         jobs: mockJobsResponse,

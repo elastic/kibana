@@ -15,17 +15,17 @@ import type { AnomalyHit } from '../ml_anomaly_detection/types';
 import type { JobConfig } from '../ml_anomaly_detection/get_job_config';
 
 vi.mock('../ml_anomaly_detection', () => {
-      const mocked = {
-      searchEntityAnomalies: vi.fn(),
-      fetchBaselineBehavior: vi.fn(),
-      getJobConfig: vi.fn(),
-      getSecurityMlJobIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    searchEntityAnomalies: vi.fn(),
+    fetchBaselineBehavior: vi.fn(),
+    getJobConfig: vi.fn(),
+    getSecurityMlJobIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { searchEntityAnomalies, fetchBaselineBehavior, getJobConfig, getSecurityMlJobIds } =
-  (await vi.importMock('../ml_anomaly_detection'));
+  await vi.importMock('../ml_anomaly_detection');
 
 const makeAnomaly = (overrides: Partial<AnomalyHit> = {}): AnomalyHit => ({
   _id: 'anomaly-1',

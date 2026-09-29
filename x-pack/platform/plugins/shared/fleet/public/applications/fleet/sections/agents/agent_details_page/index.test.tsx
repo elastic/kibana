@@ -16,54 +16,54 @@ import { ExperimentalFeaturesService } from '../../../services';
 
 vi.mock('../../../../../services/experimental_features');
 vi.mock('../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../hooks')),
-      useGetOneAgent: vi.fn(),
-      useGetOneAgentPolicy: vi.fn().mockReturnValue({
-        isLoading: false,
-        data: undefined,
-        sendRequest: vi.fn(),
+  const mocked = {
+    ...(await vi.importActual('../../../hooks')),
+    useGetOneAgent: vi.fn(),
+    useGetOneAgentPolicy: vi.fn().mockReturnValue({
+      isLoading: false,
+      data: undefined,
+      sendRequest: vi.fn(),
+    }),
+    useLink: vi.fn().mockReturnValue({
+      getHref: vi.fn().mockReturnValue('#'),
+      getPath: vi.fn().mockImplementation((page: string, values: any) => {
+        if (page === 'agent_details') return `/agents/${values.agentId}`;
+        return '#';
       }),
-      useLink: vi.fn().mockReturnValue({
-        getHref: vi.fn().mockReturnValue('#'),
-        getPath: vi.fn().mockImplementation((page: string, values: any) => {
-          if (page === 'agent_details') return `/agents/${values.agentId}`;
-          return '#';
-        }),
-      }),
-      useBreadcrumbs: vi.fn(),
-      useStartServices: vi.fn().mockReturnValue({
-        application: { navigateToApp: vi.fn() },
-        notifications: { toasts: { addError: vi.fn() } },
-      }),
-      useIntraAppState: vi.fn(),
-      sendGetAgentTagsForRq: vi.fn().mockResolvedValue({ items: [] }),
-      useAgentlessResources: vi.fn().mockReturnValue({ showAgentless: true }),
-      useGetInfoOutputsForPolicy: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+    useBreadcrumbs: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
+      application: { navigateToApp: vi.fn() },
+      notifications: { toasts: { addError: vi.fn() } },
+    }),
+    useIntraAppState: vi.fn(),
+    sendGetAgentTagsForRq: vi.fn().mockResolvedValue({ items: [] }),
+    useAgentlessResources: vi.fn().mockReturnValue({ showAgentless: true }),
+    useGetInfoOutputsForPolicy: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components', () => {
-      const mocked = {
-      AgentLogs: () => <div>{'AgentLogs'}</div>,
-      AgentDetailsActionMenu: () => <div>{'AgentDetailsActionMenu'}</div>,
-      AgentDetailsContent: () => <div>{'AgentDetailsContent'}</div>,
-      AgentDiagnosticsTab: () => <div>{'AgentDiagnosticsTab'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentLogs: () => <div>{'AgentLogs'}</div>,
+    AgentDetailsActionMenu: () => <div>{'AgentDetailsActionMenu'}</div>,
+    AgentDetailsContent: () => <div>{'AgentDetailsContent'}</div>,
+    AgentDiagnosticsTab: () => <div>{'AgentDiagnosticsTab'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/agent_settings', () => {
-      const mocked = {
-      AgentSettings: () => <div>{'AgentSettings'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentSettings: () => <div>{'AgentSettings'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/collector_detail', () => {
-      const mocked = {
-      CollectorDetailsContent: () => <div>{'CollectorDetailsContent'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CollectorDetailsContent: () => <div>{'CollectorDetailsContent'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useGetOneAgent } from '../../../hooks';
 

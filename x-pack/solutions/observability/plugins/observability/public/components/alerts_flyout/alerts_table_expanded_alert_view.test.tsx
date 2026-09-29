@@ -56,23 +56,23 @@ vi.mock('../../utils/kibana_react', () => ({
 }));
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useRouteMatch: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteMatch: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetRuleTypesPermissions = vi.fn(() => ({
   authorizedToReadRuleType: (): boolean => true,
   authorizedToReadRuleForAlert: (): boolean => true,
 }));
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
-      useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerts-ui-shared/src/common/hooks')),
+    useGetRuleTypesPermissions: () => mockUseGetRuleTypesPermissions(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const activeAlert = {
   [ALERT_STATUS]: ['active'],
@@ -136,9 +136,7 @@ const tabsData = [
 ];
 
 describe('AlertsTableExpandedAlertView', () => {
-  vi
-    .spyOn(useUiSettingHook, 'useUiSetting')
-    .mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
+  vi.spyOn(useUiSettingHook, 'useUiSetting').mockImplementation(() => 'MMM D, YYYY @ HH:mm:ss.SSS');
   const observabilityRuleTypeRegistryMock = createObservabilityRuleTypeRegistryMock();
   const onExpandedAlertIndexChangeMock = vi.fn();
 

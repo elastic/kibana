@@ -21,11 +21,11 @@ import { useScanFailures } from '../../hooks/use_scan_failures';
 import { ScanFailureCallout } from './scan_failure_callout';
 
 vi.mock('../../hooks/use_scan_failures', () => {
-      const mocked = {
-      useScanFailures: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useScanFailures: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useScanFailuresMock = useScanFailures as MockedFunction<typeof useScanFailures>;
 

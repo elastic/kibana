@@ -23,31 +23,31 @@ vi.mock('react-use/lib/useLocalStorage', () => vi.fn());
 const mockSettingsGet = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {},
-          notifications: { toasts: {} },
-          settings: { client: { get: mockSettingsGet } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {},
+        notifications: { toasts: {} },
+        settings: { client: { get: mockSettingsGet } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/utils/get_inference_connector', () => {
-      const mocked = {
-      getInferenceConnectorInfo: vi.fn((connector) => connector),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInferenceConnectorInfo: vi.fn((connector) => connector),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRefetch = vi.fn();
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseLoadConnectors = useLoadConnectors as Mock;
 
 const mockAIConnectors: AIConnector[] = [

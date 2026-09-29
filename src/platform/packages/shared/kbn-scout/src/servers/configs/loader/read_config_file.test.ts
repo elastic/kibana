@@ -15,18 +15,18 @@ import { Config } from '../config';
 import { readConfigFile } from './read_config_file';
 
 vi.mock('path', () => {
-      const mocked = {
-      resolve: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolve: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../config', () => {
-      const mocked = {
-      Config: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Config: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('readConfigFile', () => {
   const configPath = '/mock/config/path';

@@ -41,9 +41,9 @@ const setup = () => {
   const dependencies = mockContextDependencies();
   const accounts = dependencies.coreStart.security.serviceAccounts;
   vi.spyOn(accounts, 'isEnabled').mockReturnValue(true);
-  vi
-    .spyOn(accounts, 'withScopedRequestForWorkload')
-    .mockRejectedValue(new Error('Binding changed'));
+  vi.spyOn(accounts, 'withScopedRequestForWorkload').mockRejectedValue(
+    new Error('Binding changed')
+  );
   let execution: EsWorkflowExecution = {
     id: 'child',
     workflowId: 'workflow',
@@ -262,12 +262,12 @@ describe.each([
     });
     if (when === 'terminal after last conflict') {
       let conflicts = 0;
-      vi
-        .mocked(params.workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion)
-        .mockImplementation(async () => {
-          if (++conflicts === 3) await cancel();
-          return false;
-        });
+      vi.mocked(
+        params.workflowExecutionRepository.tryUpdateWorkflowExecutionWithVersion
+      ).mockImplementation(async () => {
+        if (++conflicts === 3) await cancel();
+        return false;
+      });
     }
     if (when === 'before cleanup') {
       vi.mocked(accounts.withScopedRequestForWorkload).mockImplementationOnce(async () => {
@@ -347,8 +347,7 @@ describe.each([
     const { params, accounts } = setup();
     const repository = params.workflowExecutionRepository;
     const execution = await repository.getWorkflowExecutionById('child', 'default');
-    vi
-      .spyOn(repository, 'getWorkflowExecutionById')
+    vi.spyOn(repository, 'getWorkflowExecutionById')
       .mockResolvedValueOnce(execution)
       .mockRejectedValueOnce(new Error('Transient post-execution read failure'));
 
@@ -453,9 +452,9 @@ describe.each([
           throw new Error('Binding changed');
         });
       } else {
-        vi
-          .mocked(params.stepExecutionRepository.markNonTerminalStepsFailed)
-          .mockImplementationOnce(cancel);
+        vi.mocked(params.stepExecutionRepository.markNonTerminalStepsFailed).mockImplementationOnce(
+          cancel
+        );
       }
       await expect(execute(params)).rejects.toThrow('Binding changed');
       expect(

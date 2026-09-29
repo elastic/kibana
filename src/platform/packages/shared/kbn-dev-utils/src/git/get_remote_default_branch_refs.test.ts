@@ -16,11 +16,11 @@ import { getRemoteDefaultBranchRefs } from './get_remote_default_branch_refs';
 
 vi.mock('execa');
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExeca = execa as unknown as Mock;
 

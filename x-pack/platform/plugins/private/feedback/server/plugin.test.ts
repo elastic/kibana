@@ -14,11 +14,11 @@ import { feedbackSubmittedEventType } from './src';
 import { registerSendFeedbackRoute } from './routes';
 
 vi.mock('./routes', () => {
-      const mocked = {
-      registerSendFeedbackRoute: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerSendFeedbackRoute: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const coreSetup = coreMock.createSetup();
 const plugin = new FeedbackPlugin();

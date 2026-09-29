@@ -49,10 +49,7 @@ describe('FrequencySelector', () => {
   describe('Daily mode', () => {
     it('marks Daily as selected when frequency is "daily"', () => {
       renderWithProviders(
-        <FrequencySelector
-          value={{ ...baseRecurrence(), frequency: 'daily' }}
-          onChange={vi.fn()}
-        />
+        <FrequencySelector value={{ ...baseRecurrence(), frequency: 'daily' }} onChange={vi.fn()} />
       );
 
       const daily = screen.getByLabelText(FREQUENCY_DAILY) as HTMLInputElement;
@@ -61,10 +58,7 @@ describe('FrequencySelector', () => {
 
     it('does not render the weekday checkboxes or repeat-every field when in Daily mode', () => {
       renderWithProviders(
-        <FrequencySelector
-          value={{ ...baseRecurrence(), frequency: 'daily' }}
-          onChange={vi.fn()}
-        />
+        <FrequencySelector value={{ ...baseRecurrence(), frequency: 'daily' }} onChange={vi.fn()} />
       );
 
       expect(screen.queryByTestId('osquery-frequency-selector-weekdays')).not.toBeInTheDocument();

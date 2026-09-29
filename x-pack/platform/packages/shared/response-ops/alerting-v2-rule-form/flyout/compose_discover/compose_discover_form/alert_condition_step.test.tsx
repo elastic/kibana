@@ -21,22 +21,22 @@ import { AlertConditionStep } from './alert_condition_step';
 import { QueryFieldRules } from './query_field_rules';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getEsqlColumns: vi.fn(async () => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getEsqlColumns: vi.fn(async () => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_compose_discover_time_field', () => {
-      const mocked = {
-      useComposeDiscoverTimeField: () => ({
-        timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
-        isTimeFieldResolved: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useComposeDiscoverTimeField: () => ({
+      timeFieldOptions: [{ value: '@timestamp', text: '@timestamp' }],
+      isTimeFieldResolved: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const BASE_QUERY = 'FROM logs-*';
 const ALERT_BLOCK = '| WHERE count > 100';

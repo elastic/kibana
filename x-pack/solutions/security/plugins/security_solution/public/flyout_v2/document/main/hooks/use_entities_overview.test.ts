@@ -16,7 +16,7 @@ import { useEntityFromStore } from '../../../../flyout/entity_details/shared/hoo
 import { useEntitiesOverview } from './use_entities_overview';
 
 vi.mock('@kbn/entity-store/public', async () => {
-  const actual = (await vi.importActual('@kbn/entity-store/public'));
+  const actual = await vi.importActual('@kbn/entity-store/public');
   return {
     ...actual,
     useEntityStoreEuidApi: vi.fn(),

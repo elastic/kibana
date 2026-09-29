@@ -19,7 +19,7 @@ import type { RouteDependencies } from '../../..';
 import { registerSpecDefinitionsRoute } from '.';
 
 vi.mock('../../../../services/compact_spec_definitions', async () => {
-  const actual = (await vi.importActual('../../../../services/compact_spec_definitions'));
+  const actual = await vi.importActual('../../../../services/compact_spec_definitions');
   return {
     ...actual,
     compactSpecDefinitions: vi.fn(actual.compactSpecDefinitions),
@@ -46,7 +46,8 @@ describe('WHEN serving Console spec definitions', () => {
     // one-off throw from leaking into a later test.
     compactSpecDefinitionsMock.mockReset();
     compactSpecDefinitionsMock.mockImplementation(
-      (await vi.importActual('../../../../services/compact_spec_definitions')).compactSpecDefinitions
+      (await vi.importActual('../../../../services/compact_spec_definitions'))
+        .compactSpecDefinitions
     );
     specDefinitionService = new SpecDefinitionsService();
     const repeatedRules = createLargeRule();

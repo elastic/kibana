@@ -24,7 +24,7 @@ import {
 let mockKibanaVersion = '300.0.0';
 let mockConfig: DeepPartial<FleetConfigType> = {};
 
-const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
+const { loggerMock } = await vi.importActual('@kbn/logging-mocks');
 const mockLogger = loggerMock.create();
 
 vi.mock('../app_context', () => {

@@ -11,12 +11,12 @@ import type { Mock } from 'vitest';
 const mockTraceId = 'a'.repeat(32);
 
 vi.mock('../tracing', () => {
-      const mocked = {
-      withEvalsTaskSpan: vi.fn((_name: string, run: () => Promise<unknown>) => run()),
-      getCurrentTraceId: vi.fn(() => mockTraceId),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withEvalsTaskSpan: vi.fn((_name: string, run: () => Promise<unknown>) => run()),
+    getCurrentTraceId: vi.fn(() => mockTraceId),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { EvalsTaskContext } from '../types';
 import { getCurrentTraceId, withEvalsTaskSpan } from '../tracing';

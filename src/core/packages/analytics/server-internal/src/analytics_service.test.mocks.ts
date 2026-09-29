@@ -27,8 +27,8 @@ export const analyticsClientMock: Mocked<AnalyticsClient> = lazyObject({
 });
 
 vi.doMock('@elastic/ebt/client', () => {
-      const mocked = {
-      createAnalytics: () => analyticsClientMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createAnalytics: () => analyticsClientMock,
+  };
+  return { ...mocked, default: mocked };
+});

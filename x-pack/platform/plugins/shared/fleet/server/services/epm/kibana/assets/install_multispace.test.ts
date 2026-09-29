@@ -11,56 +11,56 @@ import type { MockedFunction } from 'vitest';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 vi.mock('timers/promises', () => {
-      const mocked = { setTimeout: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { setTimeout: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../packages/install', () => {
-      const mocked = {
-      saveKibanaAssetsRefs: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    saveKibanaAssetsRefs: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../packages/remove', () => {
-      const mocked = {
-      deleteKibanaSavedObjectsAssets: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteKibanaSavedObjectsAssets: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./saved_objects', () => {
-      const mocked = {
-      getSpaceAwareSaveobjectsClients: vi.fn().mockReturnValue({
-        savedObjectsImporter: {
-          import: vi.fn().mockResolvedValue({ successResults: [], errors: [], warnings: [] }),
-        },
-        savedObjectTagAssignmentService: { updateTagAssignments: vi.fn() },
-        savedObjectTagClient: { create: vi.fn(), get: vi.fn(), find: vi.fn() },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('./tag_assets', () => {
-      const mocked = {
-      tagKibanaAssets: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../..', () => {
-      const mocked = {
-      appContextService: {
-        getExperimentalFeatures: vi.fn().mockReturnValue({
-          enableAgentStatusAlerting: false,
-          enableSloTemplates: false,
-        }),
-        getSavedObjects: vi.fn().mockReturnValue({
-          getUnsafeInternalClient: vi.fn().mockReturnValue({
-            find: vi.fn().mockResolvedValue({ total: 0, page: 1, per_page: 100, saved_objects: [] }),
-            bulkDelete: vi.fn().mockResolvedValue({}),
-          }),
-        }),
+  const mocked = {
+    getSpaceAwareSaveobjectsClients: vi.fn().mockReturnValue({
+      savedObjectsImporter: {
+        import: vi.fn().mockResolvedValue({ successResults: [], errors: [], warnings: [] }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      savedObjectTagAssignmentService: { updateTagAssignments: vi.fn() },
+      savedObjectTagClient: { create: vi.fn(), get: vi.fn(), find: vi.fn() },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('./tag_assets', () => {
+  const mocked = {
+    tagKibanaAssets: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../..', () => {
+  const mocked = {
+    appContextService: {
+      getExperimentalFeatures: vi.fn().mockReturnValue({
+        enableAgentStatusAlerting: false,
+        enableSloTemplates: false,
+      }),
+      getSavedObjects: vi.fn().mockReturnValue({
+        getUnsafeInternalClient: vi.fn().mockReturnValue({
+          find: vi.fn().mockResolvedValue({ total: 0, page: 1, per_page: 100, saved_objects: [] }),
+          bulkDelete: vi.fn().mockResolvedValue({}),
+        }),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { SavedObject } from '@kbn/core/server';
 

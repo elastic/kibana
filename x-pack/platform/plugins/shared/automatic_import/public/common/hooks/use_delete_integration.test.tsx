@@ -22,21 +22,21 @@ const mockToastsAddError = vi.fn();
 const mockInvalidateQueries = vi.fn();
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {},
-          notifications: {
-            toasts: {
-              addSuccess: mockToastsAddSuccess,
-              addError: mockToastsAddError,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {},
+        notifications: {
+          toasts: {
+            addSuccess: mockToastsAddSuccess,
+            addError: mockToastsAddError,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

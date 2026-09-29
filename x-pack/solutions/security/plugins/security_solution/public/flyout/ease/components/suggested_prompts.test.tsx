@@ -15,12 +15,12 @@ import { useAssistantContext, useAssistantOverlay } from '@kbn/elastic-assistant
 
 // Mock the custom hooks
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-      useAssistantOverlay: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+    useAssistantOverlay: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SuggestedPrompts', () => {
   const mockShowAssistantOverlay = vi.fn();

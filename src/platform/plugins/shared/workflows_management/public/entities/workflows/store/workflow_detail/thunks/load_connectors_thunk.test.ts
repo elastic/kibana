@@ -22,32 +22,34 @@ import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 import { setConnectors } from '../slice';
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      loadConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLoadConnectors = loadConnectors as MockedFunction<typeof loadConnectors>;
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the schema functions
 vi.mock('../../../../../../common/schema', () => {
-      const mocked = {
-      addDynamicConnectorsToCache: vi.fn(),
-      getWorkflowZodSchema: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addDynamicConnectorsToCache: vi.fn(),
+    getWorkflowZodSchema: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { addDynamicConnectorsToCache, getWorkflowZodSchema } = (await vi.importMock('../../../../../../common/schema'));
+const { addDynamicConnectorsToCache, getWorkflowZodSchema } = await vi.importMock(
+  '../../../../../../common/schema'
+);
 
 // Mock connector data
 const mockConnectorType1 = {

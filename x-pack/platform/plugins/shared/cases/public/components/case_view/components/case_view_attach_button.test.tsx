@@ -26,21 +26,21 @@ import {
 import { SECURITY_TIMELINE_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
 
 vi.mock('../../attachments/file/upload_file_modal', () => {
-      const mocked = {
-      UploadFileModal: () => <div data-test-subj="upload-file-modal-mock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UploadFileModal: () => <div data-test-subj="upload-file-modal-mock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTrackAttachButtonClicked = vi.fn();
 const mockTrackAttachMenuItemClicked = vi.fn();
 vi.mock('../../../analytics/use_attach_button_ebt', () => {
-      const mocked = {
-      useAttachButtonClickedEBT: () => mockTrackAttachButtonClicked,
-      useAttachMenuItemClickedEBT: () => mockTrackAttachMenuItemClicked,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttachButtonClickedEBT: () => mockTrackAttachButtonClicked,
+    useAttachMenuItemClickedEBT: () => mockTrackAttachMenuItemClicked,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/use_create_attachments');
 const useCreateAttachmentsMock = useCreateAttachments as Mock;

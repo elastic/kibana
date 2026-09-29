@@ -34,7 +34,7 @@ vi.mock('../../../common/components/link_to', () => {
 const mockNavigateToUrl = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const originalModule = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const originalModule = await vi.importActual('@kbn/kibana-react-plugin/public');
   const useKibana = vi.fn().mockImplementation(() => ({
     services: {
       application: {

@@ -28,12 +28,12 @@ import { useBulkExportTemplates } from './use_bulk_export_templates';
 import { useCasesToast } from '../../../common/use_cases_toast';
 
 vi.mock('../../../common/navigation/hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/navigation/hooks')),
-      useCasesEditTemplateNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/navigation/hooks')),
+    useCasesEditTemplateNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_bulk_delete_templates');
 vi.mock('./use_create_template');

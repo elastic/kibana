@@ -18,13 +18,13 @@ import { Route } from './route';
 import { createMemoryHistory } from 'history';
 
 vi.mock('./routes_context', () => {
-      const mocked = {
-      useSharedUXRoutesContext: vi.fn().mockImplementation(() => ({
-        enableExecutionContextTracking: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSharedUXRoutesContext: vi.fn().mockImplementation(() => ({
+      enableExecutionContextTracking: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Route', () => {
   beforeEach(() => {

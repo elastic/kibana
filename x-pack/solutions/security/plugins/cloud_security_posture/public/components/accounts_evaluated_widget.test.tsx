@@ -16,11 +16,11 @@ import { FINDINGS_FILTER_OPTIONS, FINDINGS_GROUPING_OPTIONS } from '../common/co
 
 const mockNavToFindings = vi.fn();
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => {
-      const mocked = {
-      useNavigateFindings: () => mockNavToFindings,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateFindings: () => mockNavToFindings,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AccountsEvaluatedWidget', () => {
   const benchmarkAssets = [

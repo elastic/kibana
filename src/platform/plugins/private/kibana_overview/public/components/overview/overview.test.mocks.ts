@@ -35,48 +35,48 @@ const locatorUrls: Record<string, string> = {
 };
 
 vi.doMock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          application: applicationStartMock,
-          http: httpServiceMock.createStartContract(),
-          dataViews: {
-            hasData: {
-              hasESData,
-              hasDataView,
-            },
-          },
-          dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
-          share: {
-            url: {
-              locators: {
-                get: (id: string) => ({
-                  useUrl: () => locatorUrls[id] ?? '',
-                }),
-              },
-            },
-          },
-          uiSettings: { get: vi.fn() },
-          docLinks: {
-            links: {
-              kibana: {
-                guide: 'kibana_docs_url',
-              },
-            },
-          },
-          theme: {
-            theme$: of({ darkMode: false }),
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        application: applicationStartMock,
+        http: httpServiceMock.createStartContract(),
+        dataViews: {
+          hasData: {
+            hasESData,
+            hasDataView,
           },
         },
-      }),
-      OverviewPageFooter: vi.fn().mockReturnValue(React.createElement(React.Fragment)),
-    };
-      return { ...mocked, default: mocked };
-    });
+        dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
+        share: {
+          url: {
+            locators: {
+              get: (id: string) => ({
+                useUrl: () => locatorUrls[id] ?? '',
+              }),
+            },
+          },
+        },
+        uiSettings: { get: vi.fn() },
+        docLinks: {
+          links: {
+            kibana: {
+              guide: 'kibana_docs_url',
+            },
+          },
+        },
+        theme: {
+          theme$: of({ darkMode: false }),
+        },
+      },
+    }),
+    OverviewPageFooter: vi.fn().mockReturnValue(React.createElement(React.Fragment)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock('../../lib/ui_metric', () => {
-      const mocked = {
-      trackUiMetric: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trackUiMetric: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});

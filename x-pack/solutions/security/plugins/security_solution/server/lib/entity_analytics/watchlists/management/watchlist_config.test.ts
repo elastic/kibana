@@ -18,27 +18,27 @@ import { getIndexForWatchlist } from '../entities/utils';
 import { watchlistEntitySourceTypeName } from '../entity_sources/infra';
 
 vi.mock('../entities/utils', () => {
-      const mocked = {
-      getIndexForWatchlist: vi.fn().mockReturnValue('mock-watchlist-index'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIndexForWatchlist: vi.fn().mockReturnValue('mock-watchlist-index'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvalidateEntitySourceApiKey = vi.fn();
 vi.mock('../entity_sources/entity_source_api_key', () => {
-      const mocked = {
-      invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invalidateEntitySourceApiKey: (...args: unknown[]) => mockInvalidateEntitySourceApiKey(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateOrUpdateIndex = vi.fn();
 vi.mock('../../utils/create_or_update_index', () => {
-      const mocked = {
-      createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateIndex: (...args: unknown[]) => mockCreateOrUpdateIndex(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WatchlistConfigClient', () => {
   let soClientMock: ReturnType<typeof savedObjectsClientMock.create>;

@@ -14,11 +14,11 @@ import { render, screen } from '@testing-library/react';
 import { NamePopoverContent } from './name_popover_content';
 
 vi.mock('@kbn/field-utils/src/components/field_icon', () => {
-      const mocked = {
-      FieldIcon: ({}: { type: string; size: string }) => <span data-test-subj="fieldIcon" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldIcon: ({}: { type: string; size: string }) => <span data-test-subj="fieldIcon" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('NamePopoverContent', () => {
   it('renders the field name', () => {

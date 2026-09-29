@@ -55,11 +55,11 @@ import { AGENT_ID } from './highlighted_fields_config';
 import { SUPPORTED_AGENT_ID_ALERT_FIELDS } from '../../../../common/endpoint/service/response_actions/constants';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Exception helpers', () => {
   beforeEach(() => {
@@ -2606,18 +2606,18 @@ describe('Exception helpers', () => {
       });
       it('should return all highlighted fields when there are no fields to be filtered out', () => {
         vi.doMock('./highlighted_fields_config', () => {
-              const mocked = { highlightedFieldsPrefixToExclude: [] };
-              return { ...mocked, default: mocked };
-            });
+          const mocked = { highlightedFieldsPrefixToExclude: [] };
+          return { ...mocked, default: mocked };
+        });
 
         const res = getAlertHighlightedFields(alertData, []);
         expect(res).toEqual(allHighlightFields);
       });
       it('should exclude the "agent.id" from highlighted fields when agent.type is not "endpoint"', () => {
         vi.doMock('./highlighted_fields_config', () => {
-              const mocked = { highlightedFieldsPrefixToExclude: [] };
-              return { ...mocked, default: mocked };
-            });
+          const mocked = { highlightedFieldsPrefixToExclude: [] };
+          return { ...mocked, default: mocked };
+        });
 
         const alertDataWithoutAgentType = { ...alertData, agent: { ...alertData.agent, type: '' } };
         const res = getAlertHighlightedFields(alertDataWithoutAgentType, []);
@@ -2626,9 +2626,9 @@ describe('Exception helpers', () => {
       });
       it('should exclude the "agent.id" from highlighted fields when "kibana.alert.rule.uuid" is not part of the alertData', () => {
         vi.doMock('./highlighted_fields_config', () => {
-              const mocked = { highlightedFieldsPrefixToExclude: [] };
-              return { ...mocked, default: mocked };
-            });
+          const mocked = { highlightedFieldsPrefixToExclude: [] };
+          return { ...mocked, default: mocked };
+        });
 
         const alertDataWithoutRuleUUID = { ...alertData, 'kibana.alert.rule.uuid': '' };
         const res = getAlertHighlightedFields(alertDataWithoutRuleUUID, []);

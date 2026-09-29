@@ -18,11 +18,11 @@ import type { SavedObjectsServiceStart, ElasticsearchClient } from '@kbn/core/se
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 vi.mock('@kbn/core/server', () => {
-      const mocked = {
-      SavedObjectsClient: vi.fn().mockImplementation(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedObjectsClient: vi.fn().mockImplementation(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services/storage');
 vi.mock('../services/cloud_connect_client');

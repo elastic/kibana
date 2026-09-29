@@ -20,20 +20,20 @@ const mockSendBulkUpgradeAgentlessPolicies = vi.fn();
 const mockUpgradePoliciesMutateAsync = vi.fn();
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useConfirmForceInstall: vi.fn(),
-      useInstallPackage: () => mockInstallPackage,
-      useGetPackageInstallStatus: () => () => ({ status: 'installed', version: '1.0.0' }),
-      useAuthz: () => ({ integrations: { upgradePackages: true } }),
-      useLink: () => ({ getPath: (page: string) => `/mock/${page}` }),
-      useUpgradePackagePoliciesMutation: () => ({ mutateAsync: mockUpgradePoliciesMutateAsync }),
-      useBulkGetAgentPoliciesQuery: () => ({ data: undefined }),
-      sendBulkUpgradeAgentlessPolicies: (...args: unknown[]) =>
-        mockSendBulkUpgradeAgentlessPolicies(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useConfirmForceInstall: vi.fn(),
+    useInstallPackage: () => mockInstallPackage,
+    useGetPackageInstallStatus: () => () => ({ status: 'installed', version: '1.0.0' }),
+    useAuthz: () => ({ integrations: { upgradePackages: true } }),
+    useLink: () => ({ getPath: (page: string) => `/mock/${page}` }),
+    useUpgradePackagePoliciesMutation: () => ({ mutateAsync: mockUpgradePoliciesMutateAsync }),
+    useBulkGetAgentPoliciesQuery: () => ({ data: undefined }),
+    sendBulkUpgradeAgentlessPolicies: (...args: unknown[]) =>
+      mockSendBulkUpgradeAgentlessPolicies(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   name: 'nginx',

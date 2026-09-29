@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => '00000000-0000-4000-8000-000000000001',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => '00000000-0000-4000-8000-000000000001',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';

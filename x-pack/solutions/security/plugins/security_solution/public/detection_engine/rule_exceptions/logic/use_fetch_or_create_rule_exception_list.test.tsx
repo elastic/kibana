@@ -36,9 +36,7 @@ describe('useFetchOrCreateRuleExceptionList', () => {
   let fetchRuleById: MockInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
   let patchRule: MockInstance<ReturnType<typeof rulesApi.patchRule>>;
   let addExceptionList: MockInstance<ReturnType<typeof listsApi.addExceptionList>>;
-  let addEndpointExceptionList: MockInstance<
-    ReturnType<typeof listsApi.addEndpointExceptionList>
-  >;
+  let addEndpointExceptionList: MockInstance<ReturnType<typeof listsApi.addEndpointExceptionList>>;
   let fetchExceptionListById: MockInstance<Promise<ExceptionListSchema>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']

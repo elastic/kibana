@@ -24,7 +24,7 @@ let mockAgentBuilderSkillsRequirements = {
 let mockIsLicenseValid = true;
 
 vi.mock('@kbn/content-list-provider', async () => {
-  const actual = (await vi.importActual('@kbn/content-list-provider'));
+  const actual = await vi.importActual('@kbn/content-list-provider');
   return {
     ...actual,
     useContentListPhase: () => mockPhase,
@@ -32,34 +32,34 @@ vi.mock('@kbn/content-list-provider', async () => {
 });
 
 vi.mock('../../hooks/use_alerting_v2_experimental_features', () => {
-      const mocked = {
-      useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertingV2ExperimentalFeatures: () => mockExperimentalFeaturesEnabled,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_are_agent_builder_skills_available', () => {
-      const mocked = {
-      useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
-      useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAreAgentBuilderSkillsAvailable: () => mockAreAgentBuilderSkillsAvailable,
+    useAgentBuilderSkillsRequirements: () => mockAgentBuilderSkillsRequirements,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_is_action_policies_license_valid', () => {
-      const mocked = {
-      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/core-di-browser')),
-      useService: () => ({ capabilities: {}, getUrlForApp: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/core-di-browser')),
+    useService: () => ({ capabilities: {}, getUrlForApp: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onCreatePolicy = vi.fn();
 const onCreateWithAgent = vi.fn();

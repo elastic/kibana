@@ -13,24 +13,24 @@ import * as columns from '../components/rules_table_columns';
 import { createIntegrationsColumn } from '../components/rules_table_columns/integrations';
 
 vi.mock('../components/rules_table_columns', () => {
-      const mocked = {
-      createUpdatedColumn: vi.fn(),
-      createNameColumn: vi.fn(),
-      createStatusColumn: vi.fn(),
-      createRiskScoreColumn: vi.fn(),
-      createSeverityColumn: vi.fn(),
-      createAuthorColumn: vi.fn(),
-      createActionsColumn: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createUpdatedColumn: vi.fn(),
+    createNameColumn: vi.fn(),
+    createStatusColumn: vi.fn(),
+    createRiskScoreColumn: vi.fn(),
+    createSeverityColumn: vi.fn(),
+    createAuthorColumn: vi.fn(),
+    createActionsColumn: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/rules_table_columns/integrations', () => {
-      const mocked = {
-      createIntegrationsColumn: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createIntegrationsColumn: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMigrationRulesTableColumns', () => {
   const mockOpenMigrationRuleDetails = vi.fn();

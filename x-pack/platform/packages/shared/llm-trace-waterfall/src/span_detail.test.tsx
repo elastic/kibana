@@ -14,7 +14,7 @@ import { SpanDetail } from './span_detail';
 import type { SpanNode } from './types';
 
 vi.mock('@kbn/apm-ui-shared', async () => {
-  const actual = (await vi.importActual('@kbn/apm-ui-shared'));
+  const actual = await vi.importActual('@kbn/apm-ui-shared');
   return {
     ...actual,
     GenAiTab: ({ genAi }: { genAi: GenAiFields }) => (
@@ -146,10 +146,7 @@ describe('SpanDetail', () => {
 
   it('renders dash when kind or status is not provided', () => {
     render(
-      <SpanDetail
-        span={buildSpanNode({ kind: undefined, status: undefined })}
-        onClose={vi.fn()}
-      />
+      <SpanDetail span={buildSpanNode({ kind: undefined, status: undefined })} onClose={vi.fn()} />
     );
 
     expect(screen.getAllByText('-').length).toBeGreaterThanOrEqual(2);

@@ -14,21 +14,21 @@ import { validateAndProcessTestFiles } from './test_files';
 
 // Mock the kbn-repo-info module to return a predictable REPO_ROOT
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the fs module
 vi.mock('fs', () => {
-      const mocked = {
-      existsSync: vi.fn(),
-      statSync: vi.fn(),
-      readdirSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    existsSync: vi.fn(),
+    statSync: vi.fn(),
+    readdirSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import * as fs from 'fs';
 const mockFs = fs as Mocked<typeof fs>;

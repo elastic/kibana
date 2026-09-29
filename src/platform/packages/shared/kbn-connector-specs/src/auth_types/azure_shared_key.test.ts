@@ -20,11 +20,11 @@ import {
 import { computeSignature } from './azure_shared_key_crypto';
 
 vi.mock('./azure_shared_key_crypto', () => {
-      const mocked = {
-      computeSignature: vi.fn().mockResolvedValue('mock-signature'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    computeSignature: vi.fn().mockResolvedValue('mock-signature'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockComputeSignature = vi.mocked(computeSignature);
 

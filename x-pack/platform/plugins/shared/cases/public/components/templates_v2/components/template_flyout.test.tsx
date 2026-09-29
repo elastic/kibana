@@ -20,121 +20,121 @@ vi.mock('../hooks/use_parse_yaml');
 vi.mock('../hooks/use_import_templates');
 vi.mock('../hooks/use_import_steps');
 vi.mock('./upload_yaml_step', () => {
-      const mocked = {
-      UploadYamlStep: ({
-        onValidationComplete,
-      }: {
-        onValidationComplete: (result: { validFiles: unknown[]; errors: unknown[] }) => void;
-      }) => (
-        <div data-test-subj="upload-yaml-step">
-          <button
-            type="button"
-            onClick={() =>
-              onValidationComplete({
-                validFiles: [{ fileName: 'test.yaml', content: 'name: Test' }],
-                errors: [],
-              })
-            }
-          >
-            {'Mock Upload'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UploadYamlStep: ({
+      onValidationComplete,
+    }: {
+      onValidationComplete: (result: { validFiles: unknown[]; errors: unknown[] }) => void;
+    }) => (
+      <div data-test-subj="upload-yaml-step">
+        <button
+          type="button"
+          onClick={() =>
+            onValidationComplete({
+              validFiles: [{ fileName: 'test.yaml', content: 'name: Test' }],
+              errors: [],
+            })
+          }
+        >
+          {'Mock Upload'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./select_templates_step', () => {
-      const mocked = {
-      SelectTemplatesStep: ({
-        onSelectionChange,
-        onRowClick,
-      }: {
-        onSelectionChange: (templates: unknown[]) => void;
-        onRowClick: (template: unknown) => void;
-      }) => (
-        <div data-test-subj="select-templates-step">
-          <button
-            type="button"
-            onClick={() =>
-              onSelectionChange([
-                {
-                  name: 'Test',
-                  sourceFileName: 'test.yaml',
-                  documentIndex: 0,
-                  existsOnServer: false,
-                },
-              ])
-            }
-          >
-            {'Mock Select'}
-          </button>
-          <button
-            type="button"
-            onClick={() =>
-              onRowClick({
+  const mocked = {
+    SelectTemplatesStep: ({
+      onSelectionChange,
+      onRowClick,
+    }: {
+      onSelectionChange: (templates: unknown[]) => void;
+      onRowClick: (template: unknown) => void;
+    }) => (
+      <div data-test-subj="select-templates-step">
+        <button
+          type="button"
+          onClick={() =>
+            onSelectionChange([
+              {
                 name: 'Test',
                 sourceFileName: 'test.yaml',
                 documentIndex: 0,
                 existsOnServer: false,
-              })
-            }
-          >
-            {'Mock Row Click'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+              },
+            ])
+          }
+        >
+          {'Mock Select'}
+        </button>
+        <button
+          type="button"
+          onClick={() =>
+            onRowClick({
+              name: 'Test',
+              sourceFileName: 'test.yaml',
+              documentIndex: 0,
+              existsOnServer: false,
+            })
+          }
+        >
+          {'Mock Row Click'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./template_flyout_header', () => {
-      const mocked = {
-      TemplateFlyoutHeader: () => <div data-test-subj="template-flyout-header" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateFlyoutHeader: () => <div data-test-subj="template-flyout-header" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./template_flyout_footer', () => {
-      const mocked = {
-      TemplateFlyoutFooter: ({
-        onNext,
-        onImport,
-        onBack,
-        onCancel,
-      }: {
-        onNext: () => void;
-        onImport: () => void;
-        onBack: () => void;
-        onCancel: () => void;
-      }) => (
-        <div data-test-subj="template-flyout-footer">
-          <button type="button" onClick={onCancel}>
-            {'Cancel'}
-          </button>
-          <button type="button" onClick={onBack}>
-            {'Back'}
-          </button>
-          <button type="button" onClick={onNext}>
-            {'Next'}
-          </button>
-          <button type="button" onClick={onImport}>
-            {'Import'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateFlyoutFooter: ({
+      onNext,
+      onImport,
+      onBack,
+      onCancel,
+    }: {
+      onNext: () => void;
+      onImport: () => void;
+      onBack: () => void;
+      onCancel: () => void;
+    }) => (
+      <div data-test-subj="template-flyout-footer">
+        <button type="button" onClick={onCancel}>
+          {'Cancel'}
+        </button>
+        <button type="button" onClick={onBack}>
+          {'Back'}
+        </button>
+        <button type="button" onClick={onNext}>
+          {'Next'}
+        </button>
+        <button type="button" onClick={onImport}>
+          {'Import'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./template_preview_panel', () => {
-      const mocked = {
-      TemplatePreviewPanel: ({ onClose }: { onClose: () => void }) => (
-        <div data-test-subj="template-preview-panel">
-          <button type="button" onClick={onClose}>
-            {'Close Preview'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplatePreviewPanel: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="template-preview-panel">
+        <button type="button" onClick={onClose}>
+          {'Close Preview'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseParseYaml = useParseYaml as MockedFunction<typeof useParseYaml>;
 const mockUseImportTemplates = useImportTemplates as MockedFunction<typeof useImportTemplates>;

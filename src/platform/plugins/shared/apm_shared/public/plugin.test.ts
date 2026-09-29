@@ -22,11 +22,11 @@ import {
 } from '.';
 
 vi.mock('@kbn/apm-api-shared', () => {
-      const mocked = {
-      createCallApmApiV2: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCallApmApiV2: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createCallApmApiV2Mock = createCallApmApiV2 as MockedFunction<typeof createCallApmApiV2>;
 

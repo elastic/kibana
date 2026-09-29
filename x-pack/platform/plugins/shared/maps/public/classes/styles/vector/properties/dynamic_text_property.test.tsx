@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('../components/vector_style_editor', () => {
-      const mocked = {
-      VectorStyleEditor: () => {
-        return <div>mockVectorStyleEditor</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VectorStyleEditor: () => {
+      return <div>mockVectorStyleEditor</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 

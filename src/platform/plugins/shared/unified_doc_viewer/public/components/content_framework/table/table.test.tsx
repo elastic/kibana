@@ -18,65 +18,67 @@ import { buildHitMock } from '../../../__mocks__';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({
-        euiTheme: {
-          font: { weight: { semiBold: 700 } },
-          border: { thin: '1px solid #ccc' },
-          size: { xs: '12px' },
-        },
-      }),
-      useEuiFontSize: () => ({ fontSize: '12px' }),
-      euiFontSize: (_themeContext: any, size: string) => ({ fontSize: size === 's' ? '12px' : '10px' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({
+      euiTheme: {
+        font: { weight: { semiBold: 700 } },
+        border: { thin: '1px solid #ccc' },
+        size: { xs: '12px' },
+      },
+    }),
+    useEuiFontSize: () => ({ fontSize: '12px' }),
+    euiFontSize: (_themeContext: any, size: string) => ({
+      fontSize: size === 's' ? '12px' : '10px',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: () => ({
-        fieldsMetadata: {
-          useFieldsMetadata: () => ({
-            fieldsMetadata: {
-              fieldA: { short: 'Short desc A' },
-              fieldB: { short: 'Short desc B', type: 'keyword' },
-            },
-          }),
-        },
-        fieldFormats: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: () => ({
+      fieldsMetadata: {
+        useFieldsMetadata: () => ({
+          fieldsMetadata: {
+            fieldA: { short: 'Short desc A' },
+            fieldB: { short: 'Short desc B', type: 'keyword' },
+          },
+        }),
+      },
+      fieldFormats: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/field-utils/src/components/field_icon', () => {
-      const mocked = {
-      FieldIcon: () => <span data-test-subj="fieldIcon" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldIcon: () => <span data-test-subj="fieldIcon" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/discover-utils/src/utils/get_formatted_fields', () => {
-      const mocked = {
-      getFormattedFields: () => ({
-        fieldA: 'formattedA',
-        fieldB: 'formattedB',
-        fieldC: 'formattedC',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormattedFields: () => ({
+      fieldA: 'formattedA',
+      fieldB: 'formattedB',
+      fieldC: 'formattedC',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/discover-utils/src/utils/get_flattened_fields', () => {
-      const mocked = {
-      getFlattenedFields: () => ({
-        fieldA: 'valueA',
-        fieldB: 'valueB',
-        fieldC: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFlattenedFields: () => ({
+      fieldA: 'valueA',
+      fieldB: 'valueB',
+      fieldC: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',

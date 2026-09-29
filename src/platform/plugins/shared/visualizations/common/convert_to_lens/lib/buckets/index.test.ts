@@ -28,14 +28,14 @@ const mockConvertToTermsColumn = vi.fn();
 const mockConvertToRangeColumn = vi.fn();
 
 vi.mock('../convert', () => {
-      const mocked = {
-      convertToDateHistogramColumn: vi.fn(() => mockConvertToDateHistogramColumn()),
-      convertToFiltersColumn: vi.fn(() => mockConvertToFiltersColumn()),
-      convertToTermsColumn: vi.fn(() => mockConvertToTermsColumn()),
-      convertToRangeColumn: vi.fn(() => mockConvertToRangeColumn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToDateHistogramColumn: vi.fn(() => mockConvertToDateHistogramColumn()),
+    convertToFiltersColumn: vi.fn(() => mockConvertToFiltersColumn()),
+    convertToTermsColumn: vi.fn(() => mockConvertToTermsColumn()),
+    convertToRangeColumn: vi.fn(() => mockConvertToRangeColumn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertBucketToColumns', () => {
   const field = stubLogstashDataView.fields[0].name;

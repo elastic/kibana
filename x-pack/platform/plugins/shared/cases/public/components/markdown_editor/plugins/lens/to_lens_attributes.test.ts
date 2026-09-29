@@ -13,14 +13,14 @@ const mockIsSupported = vi.fn();
 const mockFromAPIFormat = vi.fn();
 
 vi.mock('@kbn/lens-embeddable-utils', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn().mockImplementation(() => ({
-        isSupported: (type?: string) => mockIsSupported(type),
-        fromAPIFormat: (config: unknown) => mockFromAPIFormat(config),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
+      isSupported: (type?: string) => mockIsSupported(type),
+      fromAPIFormat: (config: unknown) => mockFromAPIFormat(config),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('toLensAttributes', () => {
   beforeEach(() => {

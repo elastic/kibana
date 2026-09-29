@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup, EuiComboBox, EuiProvider, EuiSuperSelect } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import type { Role } from '@kbn/security-plugin-types-common';
 import { KibanaPrivileges, SecuredFeature } from '@kbn/security-role-management-model';

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { TemplateBody } from '@kbn/workflows-library';
@@ -21,49 +21,49 @@ import { createMockWorkflowApi } from '../../../api/workflows_api.mock';
 import { testQueryClientConfig } from '../../../test_utils';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('../../../api/use_workflows_api', () => {
-      const mocked = {
-      useWorkflowsApi: () => mockWorkflowApi,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => mockWorkflowApi,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The connector picker has its own test (it needs the services provider and
 // the connectors fetch); a button stub keeps this test self-contained.
 vi.mock('./connector_field', () => {
-      const mocked = {
-      ConnectorField: ({
-        onChange,
-        'data-test-subj': dataTestSubj,
-      }: {
-        onChange: (id: string) => void;
-        'data-test-subj'?: string;
-      }) => (
-        <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorField: ({
+      onChange,
+      'data-test-subj': dataTestSubj,
+    }: {
+      onChange: (id: string) => void;
+      'data-test-subj'?: string;
+    }) => (
+      <button type="button" data-test-subj={dataTestSubj} onClick={() => onChange('connector-1')} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Same for the requirements summary (it resolves connector labels through the
 // services provider); its own test covers the rendering.
 vi.mock('./template_requirements', () => {
-      const mocked = {
-      TemplateRequirements: ({ fields }: { fields: Array<{ name: string }> }) => (
-        <div data-test-subj="workflowLibraryTemplateRequirements">
-          {fields.map((field) => field.name).join(',')}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateRequirements: ({ fields }: { fields: Array<{ name: string }> }) => (
+      <div data-test-subj="workflowLibraryTemplateRequirements">
+        {fields.map((field) => field.name).join(',')}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 

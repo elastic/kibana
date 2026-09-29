@@ -18,69 +18,67 @@ import { outputService } from './output';
 import { fleetServerHostService } from './fleet_server_host';
 
 vi.mock('.', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: () => ({
-          debug: vi.fn(),
-          error: vi.fn(),
-        }),
-        getInternalUserSOClientWithoutSpaceExtension: () => ({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: () => ({
+        debug: vi.fn(),
+        error: vi.fn(),
+      }),
+      getInternalUserSOClientWithoutSpaceExtension: () => ({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agents/agentless_agent', () => {
-      const mocked = {
-      agentlessAgentService: {
-        getDefaultFleetServerId: vi.fn(),
-        getDefaultOutputId: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentlessAgentService: {
+      getDefaultFleetServerId: vi.fn(),
+      getDefaultOutputId: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        fetchAllAgentPolicies: vi.fn(),
-        update: vi.fn(),
-      },
-      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      fetchAllAgentPolicies: vi.fn(),
+      update: vi.fn(),
+    },
+    getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./package_policy', () => {
-      const mocked = {
-      packagePolicyService: {
-        findAllForAgentPolicy: vi.fn().mockResolvedValue([]),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    packagePolicyService: {
+      findAllForAgentPolicy: vi.fn().mockResolvedValue([]),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./output', () => {
-      const mocked = {
-      outputService: {
-        get: vi.fn().mockResolvedValue({ id: 'es-default-output' }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    outputService: {
+      get: vi.fn().mockResolvedValue({ id: 'es-default-output' }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./fleet_server_host', () => {
-      const mocked = {
-      fleetServerHostService: {
-        get: vi.fn().mockResolvedValue({ id: 'default-fleet-server' }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fleetServerHostService: {
+      get: vi.fn().mockResolvedValue({ id: 'default-fleet-server' }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockedAgentlessAgentService = agentlessAgentService as Mocked<
-  typeof agentlessAgentService
->;
+const mockedAgentlessAgentService = agentlessAgentService as Mocked<typeof agentlessAgentService>;
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 const mockedOutputService = outputService as Mocked<typeof outputService>;

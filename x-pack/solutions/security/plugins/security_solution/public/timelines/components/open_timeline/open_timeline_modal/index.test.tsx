@@ -20,7 +20,7 @@ import { OpenTimelineModal } from '.';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useNavigation: vi.fn().mockReturnValue({
@@ -31,29 +31,29 @@ vi.mock('../../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../containers/all', async () => {
-  const originalModule = (await vi.importActual('../../../containers/all'));
+  const originalModule = await vi.importActual('../../../containers/all');
   return {
     useGetAllTimeline: vi.fn(),
     getAllTimeline: originalModule.getAllTimeline,
   };
 });
 vi.mock('../use_timeline_types', () => {
-      const mocked = {
-      useTimelineTypes: vi.fn(() => ({
-        timelineType: 'default',
-        timelineTabs: <div />,
-        timelineFilters: <div />,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineTypes: vi.fn(() => ({
+      timelineType: 'default',
+      timelineTabs: <div />,
+      timelineFilters: <div />,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_timeline_status', () => {
-      const mocked = {
-      useTimelineStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // mock for EuiSelectable's virtualization
 vi.mock(

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import type { ApplicationStart } from '@kbn/core/public';
 

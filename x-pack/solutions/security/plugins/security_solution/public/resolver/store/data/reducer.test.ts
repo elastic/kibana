@@ -24,7 +24,7 @@ import { appReceivedNewExternalProperties } from '../actions';
 type SourceAndSchemaFunction = () => { schema: ResolverSchema; dataSource: string };
 
 vi.mock('../../../common/utils/default_date_settings', async () => {
-  const original = (await vi.importActual('../../../common/utils/default_date_settings'));
+  const original = await vi.importActual('../../../common/utils/default_date_settings');
   return {
     ...original,
     getTimeRangeSettings: () => ({ to: '', from: '' }),
@@ -32,7 +32,7 @@ vi.mock('../../../common/utils/default_date_settings', async () => {
 });
 
 vi.mock('../../../common/utils/normalize_time_range', async () => {
-  const original = (await vi.importActual('../../../common/utils/normalize_time_range'));
+  const original = await vi.importActual('../../../common/utils/normalize_time_range');
   return {
     ...original,
     normalizeTimeRange: () => original.normalizeTimeRange(false),

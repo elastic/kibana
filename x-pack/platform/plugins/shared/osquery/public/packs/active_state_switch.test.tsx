@@ -22,52 +22,55 @@ const mockAddSuccess = vi.fn();
 const mockMutateAsync = vi.fn().mockResolvedValue({ data: { name: 'Test Pack', enabled: true } });
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              osquery: { writePacks: mockWritePacks },
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: {
+            osquery: { writePacks: mockWritePacks },
           },
-          notifications: { toasts: { addSuccess: mockAddSuccess } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: { toasts: { addSuccess: mockAddSuccess } },
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../agent_policies/use_agent_policies', () => {
-      const mocked = {
-      useAgentPolicies: () => ({
-        data: {
-          agentPoliciesById: {
-            'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
-            'policy-no-agents': { id: 'policy-no-agents', agents: 0 },
-          },
+  const mocked = {
+    useAgentPolicies: () => ({
+      data: {
+        agentPoliciesById: {
+          'policy-with-agents': { id: 'policy-with-agents', agents: 3 },
+          'policy-no-agents': { id: 'policy-no-agents', agents: 0 },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_update_pack', () => {
-      const mocked = {
-      useUpdatePack: ({ options }: { options?: { onSuccess?: (response: unknown) => void } }) => ({
-        isLoading: false,
-        mutateAsync: (...args: unknown[]) => {
-          const result = mockMutateAsync(...args);
+  const mocked = {
+    useUpdatePack: ({ options }: { options?: { onSuccess?: (response: unknown) => void } }) => ({
+      isLoading: false,
+      mutateAsync: (...args: unknown[]) => {
+        const result = mockMutateAsync(...args);
 
-          return result.then((response: unknown) => {
-            options?.onSuccess?.(response);
+        return result.then((response: unknown) => {
+          options?.onSuccess?.(response);
 
-            return response;
-          });
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+          return response;
+        });
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const basePack = (
   overrides: Partial<PackSavedObject> = {}

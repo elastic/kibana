@@ -19,11 +19,11 @@ import { createPatternMatcherService } from './privileged_status_match';
 
 const mockBuildPrivilegedSearchBody = vi.fn();
 vi.mock('../queries', () => {
-      const mocked = {
-      buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildPrivilegedSearchBody: (...args: unknown[]) => mockBuildPrivilegedSearchBody(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type GenerateMonitoringLabelsFn =
   typeof import('./generate_monitoring_labels').generateMonitoringLabels;
@@ -32,33 +32,33 @@ const mockGenerateMonitoringLabels = vi.fn<
   Parameters<GenerateMonitoringLabelsFn>
 >(() => []);
 vi.mock('./generate_monitoring_labels', () => {
-      const mocked = {
-      generateMonitoringLabels: (...args: Parameters<GenerateMonitoringLabelsFn>) =>
-        mockGenerateMonitoringLabels(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateMonitoringLabels: (...args: Parameters<GenerateMonitoringLabelsFn>) =>
+      mockGenerateMonitoringLabels(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSearchService = {
   getExistingUsersMap: vi.fn(),
 };
 vi.mock('../../../../users/search', () => {
-      const mocked = {
-      createSearchService: () => mockSearchService,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSearchService: () => mockSearchService,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSyncMarkersService = {
   getLastProcessedMarker: vi.fn(),
   updateLastProcessedMarker: vi.fn(),
 };
 vi.mock('../../sync_markers', () => {
-      const mocked = {
-      createSyncMarkersService: () => mockSyncMarkersService,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSyncMarkersService: () => mockSyncMarkersService,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDataClient = (): PrivilegeMonitoringDataClient =>
   ({

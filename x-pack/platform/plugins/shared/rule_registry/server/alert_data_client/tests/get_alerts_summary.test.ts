@@ -18,9 +18,9 @@ import { ruleDataServiceMock } from '../../rule_data_plugin_service/rule_data_pl
 import type { JsonObject } from '@kbn/utility-types';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'unique-value' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'unique-value' };
+  return { ...mocked, default: mocked };
+});
 
 const alertingAuthMock = alertingAuthorizationMock.create();
 const esClientMock = elasticsearchClientMock.createElasticsearchClient();

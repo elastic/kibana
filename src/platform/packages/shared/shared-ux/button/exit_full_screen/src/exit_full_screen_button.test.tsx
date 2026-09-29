@@ -99,9 +99,7 @@ describe('<ExitFullScreenButton />', () => {
     });
 
     test('passing `false` to toggleChrome does not toggle chrome', () => {
-      const component = kibanaMount(
-        <ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />
-      );
+      const component = kibanaMount(<ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />);
       expect(kibanaServices.coreStart.chrome.setIsVisible).toHaveBeenCalledTimes(0);
 
       component.unmount();
@@ -112,9 +110,7 @@ describe('<ExitFullScreenButton />', () => {
       kibanaServices.coreStart.customBranding.customBranding$ = of({
         logo: 'imageSrcAsBase64encodedstring',
       });
-      const component = kibanaMount(
-        <ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />
-      );
+      const component = kibanaMount(<ExitFullScreenButton onExit={vi.fn()} toggleChrome={false} />);
       expect(component.render()).toMatchSnapshot();
     });
 

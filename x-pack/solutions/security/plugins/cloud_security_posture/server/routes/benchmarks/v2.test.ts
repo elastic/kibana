@@ -10,11 +10,11 @@ import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getBenchmarksData } from './v2';
 
 vi.mock('../benchmark_rules/get_states/v1', () => {
-      const mocked = {
-      getMutedRulesFilterQuery: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMutedRulesFilterQuery: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getBenchmarksData PIT refresh', () => {
   it('rolls forward pit_id between searches and uses latest for close', async () => {

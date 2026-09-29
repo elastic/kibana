@@ -15,7 +15,7 @@ import { AnomalyTabTableSection } from './anomalies_tab_table';
 import { ENTITY_ANOMALY_TABLE_EMPTY_MESSAGE } from './translations';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -31,61 +31,61 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../common/components/ml/hooks/use_get_jobs', () => {
-      const mocked = {
-      useGetInstalledJob: () => ({ jobs: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetInstalledJob: () => ({ jobs: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_job_name', () => {
-      const mocked = {
-      AnomalyJobName: ({ jobName }: { jobName: string }) => (
-        <span data-test-subj="mock-job-name">{jobName}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyJobName: ({ jobName }: { jobName: string }) => (
+      <span data-test-subj="mock-job-name">{jobName}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_tactic_badges', () => {
-      const mocked = {
-      AnomalyTacticBadges: ({ tactics }: { tactics: string[] }) => (
-        <span data-test-subj="mock-tactic-badges">{tactics.join(', ')}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyTacticBadges: ({ tactics }: { tactics: string[] }) => (
+      <span data-test-subj="mock-tactic-badges">{tactics.join(', ')}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_timestamp', () => {
-      const mocked = {
-      AnomalyTimestamp: ({ timestamp }: { timestamp: number }) => (
-        <span data-test-subj="mock-timestamp">{timestamp}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyTimestamp: ({ timestamp }: { timestamp: number }) => (
+      <span data-test-subj="mock-timestamp">{timestamp}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_expanded_row', () => {
-      const mocked = {
-      AnomalyExpandedRow: () => <div data-test-subj="mock-expanded-row">{'Expanded content'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyExpandedRow: () => <div data-test-subj="mock-expanded-row">{'Expanded content'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_score_badge', () => {
-      const mocked = {
-      AnomalyScoreBadge: ({ score }: { score: number }) => (
-        <span data-test-subj="mock-score-badge">{score}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyScoreBadge: ({ score }: { score: number }) => (
+      <span data-test-subj="mock-score-badge">{score}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table/anomaly_row_actions_menu', () => {
-      const mocked = {
-      AnomalyRowActionsMenu: () => <div data-test-subj="mock-row-actions-menu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyRowActionsMenu: () => <div data-test-subj="mock-row-actions-menu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const Wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <IntlProvider locale="en">{children}</IntlProvider>

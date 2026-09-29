@@ -20,21 +20,21 @@ import type { ConnectorExamples } from '../monaco_providers/provider_interfaces'
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      getAllConnectors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      isInternalConnector: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isInternalConnector: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getAllConnectors } = (await vi.importMock('../../../../../common/schema'));
-const { isInternalConnector } = (await vi.importMock('@kbn/workflows'));
+const { getAllConnectors } = await vi.importMock('../../../../../common/schema');
+const { isInternalConnector } = await vi.importMock('@kbn/workflows');
 
 describe('KibanaMonacoConnectorHandler', () => {
   let handler: KibanaMonacoConnectorHandler;

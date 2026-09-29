@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import { inspect } from 'node:util';
+import { vi } from 'vitest';
 
 import {
   elasticsearchServiceMock,

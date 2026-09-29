@@ -6,7 +6,6 @@
  */
 
 import type { Mocked } from 'vitest';
-
 import type { SavedObjectsBulkUpdateObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 

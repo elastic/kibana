@@ -13,42 +13,42 @@ import { AnomalyValueDisplay } from './anomaly_value_display';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 vi.mock('../../contexts/kibana', () => {
-      const mocked = {
-      useFieldFormatter: vi.fn().mockReturnValue((value: number | string) => value.toString()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldFormatter: vi.fn().mockReturnValue((value: number | string) => value.toString()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../formatters/format_value', () => {
-      const mocked = {
-      formatValue: vi.fn((value, mlFunction, fieldFormat) => {
-        if (fieldFormat && fieldFormat.convertToText) {
-          return fieldFormat.convertToText(value);
-        }
-        return value.toString();
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatValue: vi.fn((value, mlFunction, fieldFormat) => {
+      if (fieldFormat && fieldFormat.convertToText) {
+        return fieldFormat.convertToText(value);
+      }
+      return value.toString();
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./anomaly_value_utils', () => {
-      const mocked = {
-      isTimeFunction: (fn: string) => fn === 'time_of_day' || fn === 'time_of_week',
-      useTimeValueInfo: vi.fn((value, functionName) => {
-        // Return null for non-time functions
-        if (functionName !== 'time_of_day' && functionName !== 'time_of_week') {
-          return null;
-        }
-        // Return time info for time functions
-        return {
-          formattedTime: '14:30',
-          tooltipContent: 'January 1st 14:30',
-          dayOffset: value > 86400 ? 1 : 0,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isTimeFunction: (fn: string) => fn === 'time_of_day' || fn === 'time_of_week',
+    useTimeValueInfo: vi.fn((value, functionName) => {
+      // Return null for non-time functions
+      if (functionName !== 'time_of_day' && functionName !== 'time_of_week') {
+        return null;
+      }
+      // Return time info for time functions
+      return {
+        formattedTime: '14:30',
+        tooltipContent: 'January 1st 14:30',
+        dayOffset: value > 86400 ? 1 : 0,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseProps = {
   value: 42.5,

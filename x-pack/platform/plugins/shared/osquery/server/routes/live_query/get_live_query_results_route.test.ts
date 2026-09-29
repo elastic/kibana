@@ -19,11 +19,12 @@ import { getLiveQueryResultsRoute } from './get_live_query_results_route';
 import { getActionResponses } from './utils';
 
 vi.mock('./utils', () => {
-      const mocked = {
-      getActionResponses: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getActionResponses: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('getLiveQueryResultsRoute', () => {
   let routeHandler: RequestHandler;

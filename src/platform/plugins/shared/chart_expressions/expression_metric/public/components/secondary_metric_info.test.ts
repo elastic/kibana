@@ -32,11 +32,11 @@ const DECREASE_ICON = '↓';
 const STABLE_ICON = '=';
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      getMetricFormatter: vi.fn(() => (value: any) => value && String(value)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMetricFormatter: vi.fn(() => (value: any) => value && String(value)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetMetricFormatter = vi.mocked(getMetricFormatter);
 

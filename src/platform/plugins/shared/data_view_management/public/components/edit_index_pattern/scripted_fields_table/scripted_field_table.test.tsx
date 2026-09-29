@@ -19,24 +19,24 @@ import { screen, within } from '@testing-library/react';
 import { ScriptedFieldsTable } from '.';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              indexPatterns: {
-                runtimeFields: '#',
-              },
-              query: {
-                queryESQL: '#',
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            indexPatterns: {
+              runtimeFields: '#',
+            },
+            query: {
+              queryESQL: '#',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const helpers = {
   getRouteHref: vi.fn(),

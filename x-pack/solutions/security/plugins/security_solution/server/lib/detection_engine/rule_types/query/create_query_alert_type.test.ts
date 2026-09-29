@@ -26,47 +26,47 @@ import { hasTimestampFields } from '../utils/utils';
 import { createMockEndpointAppContextService } from '../../../../endpoint/mocks';
 
 vi.mock('@kbn/data-views-plugin/server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/data-views-plugin/server')),
-      IndexPatternsFetcher: vi.fn().mockImplementation(() => ({
-        getIndexPatternMatches: vi.fn().mockResolvedValue({ matchedIndexPatterns: ['some-index'] }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/data-views-plugin/server')),
+    IndexPatternsFetcher: vi.fn().mockImplementation(() => ({
+      getIndexPatternMatches: vi.fn().mockResolvedValue({ matchedIndexPatterns: ['some-index'] }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils/utils')),
-      getExceptions: () => [],
-      hasTimestampFields: vi.fn(async () => {
-        return {
-          foundNoIndices: false,
-          warningMessage: undefined,
-        };
-      }),
-      checkForFrozenIndices: vi.fn(async () => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils/utils')),
+    getExceptions: () => [],
+    hasTimestampFields: vi.fn(async () => {
+      return {
+        foundNoIndices: false,
+        warningMessage: undefined,
+      };
+    }),
+    checkForFrozenIndices: vi.fn(async () => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-plugin/server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/alerting-plugin/server')),
-      shouldCreateAlertsInAllSpaces: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/alerting-plugin/server')),
+    shouldCreateAlertsInAllSpaces: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/get_list_client', () => {
-      const mocked = {
-      getListClient: vi.fn().mockReturnValue({
-        listClient: vi.fn(),
-        exceptionsClient: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getListClient: vi.fn().mockReturnValue({
+      listClient: vi.fn(),
+      exceptionsClient: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Custom Query Alerts', () => {
   const mocks = createRuleTypeMocks();

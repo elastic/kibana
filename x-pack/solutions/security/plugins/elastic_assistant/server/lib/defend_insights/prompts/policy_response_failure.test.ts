@@ -14,7 +14,7 @@ import { getPolicyResponseFailurePrompt } from './policy_response_failure';
 import { promptGroupId } from '../../prompt/local_prompt_object';
 
 vi.mock('../../prompt', async () => {
-  const original = (await vi.importActual('../../prompt'));
+  const original = await vi.importActual('../../prompt');
   return {
     ...original,
     getPromptsByGroupId: vi.fn(),

@@ -22,11 +22,11 @@ export const coreSystemMock = {
   }),
 };
 vi.doMock('./core_system', () => {
-      const mocked = {
-      CoreSystem: vi.fn().mockImplementation(() => coreSystemMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreSystem: vi.fn().mockImplementation(() => coreSystemMock),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const apmSystem = {
   setup: vi.fn().mockResolvedValue(undefined),
@@ -34,25 +34,25 @@ export const apmSystem = {
 };
 export const ApmSystemConstructor = vi.fn().mockImplementation(() => apmSystem);
 vi.doMock('./apm_system', () => {
-      const mocked = {
-      ApmSystem: ApmSystemConstructor,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmSystem: ApmSystemConstructor,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const i18nLoad = vi.fn().mockResolvedValue(undefined);
 export const i18nInitDefault = vi.fn().mockReturnValue(undefined);
 export const i18nGetIsInitialized = vi.fn().mockReturnValue(false);
 export const setAvailableLocalesMock = vi.fn();
 vi.doMock('@kbn/i18n', async () => {
-      const mocked = {
-      i18n: {
-        ...(await vi.importActual('@kbn/i18n')).i18n,
-        load: i18nLoad,
-        initDefault: i18nInitDefault,
-        getIsInitialized: i18nGetIsInitialized,
-      },
-      setAvailableLocales: setAvailableLocalesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      ...(await vi.importActual('@kbn/i18n')).i18n,
+      load: i18nLoad,
+      initDefault: i18nInitDefault,
+      getIsInitialized: i18nGetIsInitialized,
+    },
+    setAvailableLocales: setAvailableLocalesMock,
+  };
+  return { ...mocked, default: mocked };
+});

@@ -15,12 +15,12 @@ import { compareWarmStartMemory } from './compare_warm_start_memory';
 import { writeWarmStartMemoryRegressionReport } from './memory_regression_report';
 
 vi.mock('./memory_regression_report', async () => {
-      const mocked = {
-      ...(await vi.importActual('./memory_regression_report')),
-      writeWarmStartMemoryRegressionReport: vi.fn().mockResolvedValue('report.json'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./memory_regression_report')),
+    writeWarmStartMemoryRegressionReport: vi.fn().mockResolvedValue('report.json'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MIB = 1024 * 1024;
 

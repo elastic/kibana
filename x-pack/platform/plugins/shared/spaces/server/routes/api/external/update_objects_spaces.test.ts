@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
 
 import type { ObjectType } from '@kbn/config-schema';
 import type { RouteValidatorConfig } from '@kbn/core/server';

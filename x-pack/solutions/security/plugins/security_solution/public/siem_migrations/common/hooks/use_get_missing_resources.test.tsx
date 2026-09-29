@@ -15,31 +15,31 @@ const mockGetMissingResourcesDashboard = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            rules: {
-              api: {
-                getMissingResources: mockGetMissingResourcesRule,
-              },
-            },
-            dashboards: {
-              api: {
-                getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          rules: {
+            api: {
+              getMissingResources: mockGetMissingResourcesRule,
             },
           },
-          notifications: {
-            toasts: {
-              addError: mockAddError,
+          dashboards: {
+            api: {
+              getDashboardMigrationMissingResources: mockGetMissingResourcesDashboard,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: {
+          toasts: {
+            addError: mockAddError,
+          },
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useGetMissingResources', () => {
   beforeEach(() => {

@@ -21,21 +21,21 @@ const mockToolSpan = {
 } as unknown as Span;
 
 vi.mock('@kbn/inference-tracing', () => {
-      const mocked = {
-      ElasticGenAIAttributes: {
-        InferenceSpanKind: 'CHAIN',
-      },
-      markToolSpanAsError: vi.fn(),
-      withActiveInferenceSpan: vi.fn(async (_name: string, _options: unknown, fn: () => unknown) =>
-        fn()
-      ),
-      withExecuteToolSpan: vi.fn(
-        async (_toolName: string, _attributes: unknown, fn: (span?: Span) => Promise<unknown>) =>
-          fn(mockToolSpan)
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ElasticGenAIAttributes: {
+      InferenceSpanKind: 'CHAIN',
+    },
+    markToolSpanAsError: vi.fn(),
+    withActiveInferenceSpan: vi.fn(async (_name: string, _options: unknown, fn: () => unknown) =>
+      fn()
+    ),
+    withExecuteToolSpan: vi.fn(
+      async (_toolName: string, _attributes: unknown, fn: (span?: Span) => Promise<unknown>) =>
+        fn(mockToolSpan)
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('executeUntilValid', () => {
   beforeEach(() => {

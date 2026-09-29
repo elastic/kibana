@@ -15,40 +15,40 @@ import { getMockAttackDiscoveryAlerts } from '../../../../mock/mock_attack_disco
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      useKibana: vi.fn(() => ({
-        services: {
-          application: { navigateToUrl: vi.fn() },
-        },
-      })),
-      useToasts: vi.fn(() => ({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+    useKibana: vi.fn(() => ({
+      services: {
+        application: { navigateToUrl: vi.fn() },
+      },
+    })),
+    useToasts: vi.fn(() => ({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../use_attack_discovery_bulk', () => {
-      const mocked = {
-      useAttackDiscoveryBulk: vi.fn(() => ({
-        mutate: vi.fn(),
-        isLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscoveryBulk: vi.fn(() => ({
+      mutate: vi.fn(),
+      isLoading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../use_find_attack_discoveries', () => {
-      const mocked = {
-      useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   attackDiscovery: getMockAttackDiscoveryAlerts()[0],

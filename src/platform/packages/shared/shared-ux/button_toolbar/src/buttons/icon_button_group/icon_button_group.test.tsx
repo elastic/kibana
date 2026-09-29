@@ -32,9 +32,7 @@ describe('<IconButtonGroup />', () => {
     renderWithI18n(
       <IconButtonGroup
         legend="Legend"
-        buttons={[
-          { label: 'Text', onClick: vi.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
-        ]}
+        buttons={[{ label: 'Text', onClick: vi.fn(), iconType: 'text', toolTipContent: 'Tooltip' }]}
       />
     );
 
@@ -46,9 +44,7 @@ describe('<IconButtonGroup />', () => {
     renderWithI18n(
       <IconButtonGroup
         legend="Legend"
-        buttons={[
-          { label: 'Text', onClick: vi.fn(), iconType: 'text', toolTipContent: 'Tooltip' },
-        ]}
+        buttons={[{ label: 'Text', onClick: vi.fn(), iconType: 'text', toolTipContent: 'Tooltip' }]}
       />
     );
 

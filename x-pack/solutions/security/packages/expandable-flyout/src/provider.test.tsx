@@ -21,7 +21,7 @@ const mockGet = vi.fn();
 const mockSet = vi.fn();
 const mockChange$ = vi.fn().mockReturnValue(of({}));
 vi.mock('@kbn/kibana-utils-plugin/public');
-const { createKbnUrlStateStorage } = (await vi.importMock('@kbn/kibana-utils-plugin/public'));
+const { createKbnUrlStateStorage } = await vi.importMock('@kbn/kibana-utils-plugin/public');
 
 const urlKey = 'urlKey';
 

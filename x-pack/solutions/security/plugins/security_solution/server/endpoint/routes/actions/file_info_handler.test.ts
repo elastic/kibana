@@ -22,7 +22,7 @@ import { createActionRequestsEsSearchResultsMock } from '../../services/actions/
 import { applyEsClientSearchMock } from '../../mocks/utils.mock';
 
 vi.mock('../../services', async () => {
-  const actual = (await vi.importActual('../../services'));
+  const actual = await vi.importActual('../../services');
   return {
     ...actual,
     validateActionIdMock: vi.fn(async () => {}),
@@ -76,9 +76,7 @@ describe('Response Action file info API', () => {
     });
 
     it('should error if user has no authz to api', async () => {
-      (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-      ).mockResolvedValue(
+      ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteFileOperations: false,
           canWriteExecuteOperations: false,

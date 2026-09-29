@@ -23,20 +23,20 @@ import {
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 
 vi.mock('../../hooks/use_load_alert_summary', () => {
-      const mocked = {
-      useLoadAlertSummary: vi.fn().mockReturnValue({
-        alertSummary: {
-          activeAlertCount: 1,
-          recoveredAlertCount: 7,
-          activeAlerts: [
-            { key: 1671321600000, doc_count: 0 },
-            { key: 1671408000000, doc_count: 1 },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadAlertSummary: vi.fn().mockReturnValue({
+      alertSummary: {
+        activeAlertCount: 1,
+        recoveredAlertCount: 7,
+        activeAlerts: [
+          { key: 1671321600000, doc_count: 0 },
+          { key: 1671408000000, doc_count: 1 },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TITLE_DATA_TEST_SUBJ = 'mockedTimeRangeTitle';
 

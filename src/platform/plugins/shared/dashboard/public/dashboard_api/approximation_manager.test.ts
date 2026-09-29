@@ -66,36 +66,38 @@ describe('approximationManager', () => {
   });
 
   test('startComparing detects change from false to true', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const manager = initializeApproximationManager(getSampleDashboardState());
-          const lastSavedState$ = createLastSavedState(false);
+      const manager = initializeApproximationManager(getSampleDashboardState());
+      const lastSavedState$ = createLastSavedState(false);
 
-          manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-            expect(changes).toEqual({ esql_approximation: true });
-            done();
-          });
+      manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
+        expect(changes).toEqual({ esql_approximation: true });
+        done();
+      });
 
-          manager.api.setEsqlApproximation(true);
-        
-      }));
+      manager.api.setEsqlApproximation(true);
+    }));
 
   test('startComparing emits empty object when value matches saved state', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const manager = initializeApproximationManager(
-            getSampleDashboardState({ esql_approximation: true })
-          );
-          const lastSavedState$ = createLastSavedState(true);
+      const manager = initializeApproximationManager(
+        getSampleDashboardState({ esql_approximation: true })
+      );
+      const lastSavedState$ = createLastSavedState(true);
 
-          manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
-            expect(changes).toEqual({});
-            done();
-          });
+      manager.internalApi.startComparing(lastSavedState$).subscribe((changes) => {
+        expect(changes).toEqual({});
+        done();
+      });
 
-          manager.api.setEsqlApproximation(true);
-        
-      }));
+      manager.api.setEsqlApproximation(true);
+    }));
 });

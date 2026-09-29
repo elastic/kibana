@@ -15,23 +15,23 @@ import { NeverFetchNewsfeedApiDriver } from './never_fetch_driver';
 
 export const storageInstanceMock = storageMock.create();
 vi.doMock('./storage', () => {
-      const mocked = {
-      NewsfeedStorage: vi.fn().mockImplementation(() => storageInstanceMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewsfeedStorage: vi.fn().mockImplementation(() => storageInstanceMock),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const driverInstanceMock = driverMock.create();
 vi.doMock('./driver', () => {
-      const mocked = {
-      NewsfeedApiDriver: vi.fn().mockImplementation(() => driverInstanceMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewsfeedApiDriver: vi.fn().mockImplementation(() => driverInstanceMock),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock('./never_fetch_driver', () => {
-      const mocked = {
-      NeverFetchNewsfeedApiDriver: vi.fn(() => new NeverFetchNewsfeedApiDriver()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NeverFetchNewsfeedApiDriver: vi.fn(() => new NeverFetchNewsfeedApiDriver()),
+  };
+  return { ...mocked, default: mocked };
+});

@@ -13,29 +13,29 @@ import { renderHook, act } from '@testing-library/react';
 import { useFailureStoreModal } from './use_failure_store_modal';
 
 vi.mock('./use_dataset_quality_details_state', () => {
-      const mocked = {
-      useDatasetQualityDetailsState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDatasetQualityDetailsState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/failure-store-modal', () => {
-      const mocked = {
-      FailureStoreModal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FailureStoreModal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/streams-schema', () => {
-      const mocked = {
-      isRootStreamDefinition: vi.fn(),
-      isEnabledFailureStore: vi.fn(),
-      isInheritFailureStore: vi.fn(),
-      isDisabledLifecycleFailureStore: vi.fn(),
-      isEnabledLifecycleFailureStore: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isRootStreamDefinition: vi.fn(),
+    isEnabledFailureStore: vi.fn(),
+    isInheritFailureStore: vi.fn(),
+    isDisabledLifecycleFailureStore: vi.fn(),
+    isEnabledLifecycleFailureStore: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
 import { FailureStoreModal } from '@kbn/failure-store-modal';
@@ -54,8 +54,7 @@ describe('useFailureStoreModal', () => {
   const mockIsRootStreamDefinition = isRootStreamDefinition as unknown as Mock;
   const mockIsEnabledFailureStore = isEnabledFailureStore as unknown as Mock;
   const mockIsInheritFailureStore = isInheritFailureStore as unknown as Mock;
-  const mockIsDisabledLifecycleFailureStore =
-    isDisabledLifecycleFailureStore as unknown as Mock;
+  const mockIsDisabledLifecycleFailureStore = isDisabledLifecycleFailureStore as unknown as Mock;
   const mockIsEnabledLifecycleFailureStore = isEnabledLifecycleFailureStore as unknown as Mock;
 
   const defaultMockData = {

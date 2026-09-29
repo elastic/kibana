@@ -20,11 +20,11 @@ const mockPrepend = vi.fn().mockImplementation((path: string) => path);
 
 const mockUseServiceFlyoutContext = vi.fn();
 vi.mock('../../service_flyout_context', () => {
-      const mocked = {
-      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function buildContext(
   overrides: {

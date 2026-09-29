@@ -15,11 +15,11 @@ import { TemplateMetadataForm } from './template_metadata_form';
 import type { TemplateMetadata } from '../utils/template_metadata';
 
 vi.mock('../hooks/use_get_template_tags', () => {
-      const mocked = {
-      useGetTemplateTags: () => ({ data: ['existing-tag'] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplateTags: () => ({ data: ['existing-tag'] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TemplateMetadataForm', () => {
   const baseMetadata: TemplateMetadata = {

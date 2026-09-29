@@ -12,12 +12,12 @@ import { safeExec } from './utils';
 import { readVaultConfigFromDevVault, resetDevVaultConfigCache } from './profiles';
 
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      safeExec: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    safeExec: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedSafeExec = vi.mocked(safeExec);
 

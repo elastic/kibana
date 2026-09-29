@@ -17,29 +17,29 @@ import { createAppContextStartContractMock } from '../../../../mocks';
 import { installKibanaAssetsWithStreaming } from './install_with_streaming';
 
 vi.mock('./saved_objects', () => {
-      const mocked = {
-      getSpaceAwareSaveobjectsClients: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpaceAwareSaveobjectsClients: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./install', async () => {
-      const mocked = {
-      ...(await vi.importActual('./install')),
-      installManagedIndexPattern: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./install')),
+    installManagedIndexPattern: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../packages/install', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../packages/install')),
-      saveKibanaAssetsRefs: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../packages/install')),
+    saveKibanaAssetsRefs: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getSpaceAwareSaveobjectsClients } = (await vi.importMock('./saved_objects'));
+const { getSpaceAwareSaveobjectsClients } = await vi.importMock('./saved_objects');
 
 const makeArchiveBuffer = (id: string, soType: string) =>
   Buffer.from(JSON.stringify({ id, type: soType, attributes: { title: id } }));

@@ -16,7 +16,7 @@ import { screen } from '@testing-library/react';
 import { TestQueryRow } from './test_query_row';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     __esModule: true,
     ...original,

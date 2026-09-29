@@ -23,25 +23,25 @@ const mockGetDefaultModel = vi.fn();
 const mockIsWorkflowsEnabledForSpace = vi.fn();
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => {
-      const mocked = {
-      executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../workflows/helpers/resolve_connector_details', () => {
-      const mocked = {
-      resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/is_workflows_enabled_for_space', () => {
-      const mocked = {
-      isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FAKE_REQUEST = httpServerMock.createKibanaRequest();
 const SOFT_DEADLINE_MS = 90_000;

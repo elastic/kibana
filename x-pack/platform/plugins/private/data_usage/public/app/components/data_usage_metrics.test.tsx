@@ -32,7 +32,7 @@ vi.mock('../../utils/use_kibana', () => {
 });
 
 vi.mock('../../hooks/use_get_usage_metrics', async () => {
-  const original = (await vi.importActual('../../hooks/use_get_usage_metrics'));
+  const original = await vi.importActual('../../hooks/use_get_usage_metrics');
   return {
     ...original,
     useGetDataUsageMetrics: vi.fn(original.useGetDataUsageMetrics),
@@ -41,22 +41,22 @@ vi.mock('../../hooks/use_get_usage_metrics', async () => {
 
 const mockUseLocation = vi.fn(() => ({ pathname: '/' }));
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: () => mockUseLocation(),
-      useHistory: vi.fn().mockReturnValue({
-        push: vi.fn(),
-        listen: vi.fn(),
-        location: {
-          search: '',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: () => mockUseLocation(),
+    useHistory: vi.fn().mockReturnValue({
+      push: vi.fn(),
+      listen: vi.fn(),
+      location: {
+        search: '',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_get_data_streams', async () => {
-  const original = (await vi.importActual('../../hooks/use_get_data_streams'));
+  const original = await vi.importActual('../../hooks/use_get_data_streams');
   return {
     ...original,
     useGetDataUsageDataStreams: vi.fn(original.useGetDataUsageDataStreams),
@@ -64,7 +64,7 @@ vi.mock('../../hooks/use_get_data_streams', async () => {
 });
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => mockUseKibana,

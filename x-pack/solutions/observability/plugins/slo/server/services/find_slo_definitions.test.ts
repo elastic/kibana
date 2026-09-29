@@ -98,9 +98,9 @@ describe('FindSLODefinitions with Health validation', () => {
         page: 1,
         perPage: 100,
       });
-      vi
-        .spyOn(computeHealth, 'computeHealth')
-        .mockRejectedValueOnce(new Error('Failed to compute health'));
+      vi.spyOn(computeHealth, 'computeHealth').mockRejectedValueOnce(
+        new Error('Failed to compute health')
+      );
 
       const result = await findSLODefinitions.execute({
         includeHealth: true,

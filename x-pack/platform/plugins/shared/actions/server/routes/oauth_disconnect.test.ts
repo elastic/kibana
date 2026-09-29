@@ -9,11 +9,11 @@ import { vi } from 'vitest';
 import type { Mock, MockedClass } from 'vitest';
 
 vi.mock('./verify_access_and_context', () => {
-      const mocked = {
-      verifyAccessAndContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyAccessAndContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/connector_token_client');
 
 import { httpServiceMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
@@ -23,9 +23,7 @@ import { verifyAccessAndContext } from './verify_access_and_context';
 import { oauthDisconnectRoute } from './oauth_disconnect';
 import { ConnectorTokenClient } from '../lib/connector_token_client';
 
-const MockConnectorTokenClient = ConnectorTokenClient as MockedClass<
-  typeof ConnectorTokenClient
->;
+const MockConnectorTokenClient = ConnectorTokenClient as MockedClass<typeof ConnectorTokenClient>;
 
 const mockLogger = loggingSystemMock.create().get();
 const configurationUtilities = actionsConfigMock.create();

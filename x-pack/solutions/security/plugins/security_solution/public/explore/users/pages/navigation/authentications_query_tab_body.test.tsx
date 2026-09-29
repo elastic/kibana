@@ -24,11 +24,11 @@ vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/components/visualization_actions/actions');
 vi.mock('../../../../common/components/visualization_actions/lens_embeddable');
 vi.mock('../../../../common/components/matrix_histogram', () => {
-      const mocked = {
-      MatrixHistogram: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MatrixHistogram: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Authentications query tab body', () => {
   const mockUseAuthentications = useAuthentications as Mock;

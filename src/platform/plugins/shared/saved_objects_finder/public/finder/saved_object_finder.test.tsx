@@ -42,7 +42,7 @@ vi.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual<typeof import('@elastic/eui')>('@elastic/eui'));
+  const actual = await vi.importActual<typeof import('@elastic/eui')>('@elastic/eui');
   const ActualEuiInMemoryTable = actual.EuiInMemoryTable;
 
   const EuiInMemoryTable = (props: React.ComponentProps<typeof ActualEuiInMemoryTable>) => {

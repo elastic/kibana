@@ -40,9 +40,7 @@ function createManifest(
   } as DiscoveredPlugin;
 }
 
-let mockContainerModuleCallback: MockedFunction<
-  ConstructorParameters<typeof ContainerModule>[0]
->;
+let mockContainerModuleCallback: MockedFunction<ConstructorParameters<typeof ContainerModule>[0]>;
 let pluginModule: ContainerModule;
 let plugin: PluginWrapper<unknown, Record<string, unknown>>;
 const opaqueId = Symbol();

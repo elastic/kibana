@@ -21,11 +21,11 @@ import {
 const fetchMock = vi.spyOn(global, 'fetch');
 
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn(() => Promise.resolve()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn(() => Promise.resolve()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const jsonResponse = (data: unknown, status = 200) =>
   new Response(JSON.stringify(data), { status });

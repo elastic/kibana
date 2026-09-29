@@ -16,11 +16,11 @@ import { MANAGED_CONNECTOR_INDEX_PREFIX } from '../constants';
 
 vi.mock('./exists_index');
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => '12345678-abcd-1234-efgh-123456789012'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => '12345678-abcd-1234-efgh-123456789012'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('generateConnectorName', () => {
   const mockClient = {} as any;

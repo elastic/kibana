@@ -28,11 +28,11 @@ import type { RecursivePartial, UseEuiTheme } from '@elastic/eui';
 import { ThemeProvider } from '@emotion/react';
 
 vi.mock('./report_info_flyout', () => {
-      const mocked = {
-      ReportInfoFlyout: () => <div data-test-subj="reportInfoFlyout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReportInfoFlyout: () => <div data-test-subj="reportInfoFlyout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const coreStart = coreMock.createStart();
 const http = httpServiceMock.createSetupContract();
@@ -73,9 +73,9 @@ describe('ReportExportsTable', () => {
   const mockTheme = getMockTheme({ euiTheme: { size: { s: '' } } });
   beforeEach(() => {
     vi.clearAllMocks();
-    vi
-      .spyOn(reportingAPIClient, 'list')
-      .mockImplementation(() => Promise.resolve(mockJobs.map((j) => new Job(j))));
+    vi.spyOn(reportingAPIClient, 'list').mockImplementation(() =>
+      Promise.resolve(mockJobs.map((j) => new Job(j)))
+    );
     vi.spyOn(reportingAPIClient, 'total').mockImplementation(() => Promise.resolve(18));
     window.open = vi.fn();
     window.focus = vi.fn();

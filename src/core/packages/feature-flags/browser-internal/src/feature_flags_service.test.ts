@@ -110,8 +110,7 @@ describe('FeatureFlagsService Browser', () => {
         await new Promise(() => {}); // never resolves
       });
       const addLabelsMock = vi.fn();
-      vi
-        .spyOn(apm, 'getCurrentTransaction')
+      vi.spyOn(apm, 'getCurrentTransaction')
         // @ts-expect-error incomplete signature, but we don't care at this point
         .mockImplementationOnce(() => ({ addLabels: addLabelsMock }));
       const fakeProvider = {} as Provider;
@@ -379,11 +378,9 @@ describe('FeatureFlagsService Browser', () => {
     });
 
     test('useBooleanValue uses the synchronous evaluation when the flag or fallback changes', () => {
-      vi
-        .spyOn(featureFlagsClient, 'getBooleanValue')
-        .mockImplementation((flagName: string, fallback: boolean) =>
-          flagName === 'my-flag' ? false : fallback
-        );
+      vi.spyOn(featureFlagsClient, 'getBooleanValue').mockImplementation(
+        (flagName: string, fallback: boolean) => (flagName === 'my-flag' ? false : fallback)
+      );
 
       const seen: boolean[] = [];
       const { rerender } = renderHook(

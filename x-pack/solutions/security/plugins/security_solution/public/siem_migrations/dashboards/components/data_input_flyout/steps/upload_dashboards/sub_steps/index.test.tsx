@@ -20,46 +20,46 @@ const DASHBOARDS_FILE_UPLOAD_TITLE = 'Update exported dashboards';
 const CHECK_RESOURCES_TITLE = 'Check for macros and lookups';
 
 vi.mock('../../../../../../common/components', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../common/components')),
-      useMigrationNameStep: () => ({
-        title: MIGRATION_NAME_TITLE,
-        status: 'current',
-        children: <div>{'Migration Name Content'}</div>,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../common/components')),
+    useMigrationNameStep: () => ({
+      title: MIGRATION_NAME_TITLE,
+      status: 'current',
+      children: <div>{'Migration Name Content'}</div>,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./copy_export_query', () => {
-      const mocked = {
-      useCopyExportQueryStep: () => ({
-        title: COPY_EXPORT_QUERY_TITLE,
-        status: 'incomplete',
-        children: <div>{'Copy Export Query Content'}</div>,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCopyExportQueryStep: () => ({
+      title: COPY_EXPORT_QUERY_TITLE,
+      status: 'incomplete',
+      children: <div>{'Copy Export Query Content'}</div>,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./dashboards_file_upload', () => {
-      const mocked = {
-      useDashboardsFileUploadStep: () => ({
-        title: DASHBOARDS_FILE_UPLOAD_TITLE,
-        status: 'incomplete',
-        children: <div>{'Dashboards File Upload Content'}</div>,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDashboardsFileUploadStep: () => ({
+      title: DASHBOARDS_FILE_UPLOAD_TITLE,
+      status: 'incomplete',
+      children: <div>{'Dashboards File Upload Content'}</div>,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/check_resources', () => {
-      const mocked = {
-      useCheckResourcesStep: () => ({
-        title: CHECK_RESOURCES_TITLE,
-        status: 'incomplete',
-        children: <div>{'Check Resources Content'}</div>,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCheckResourcesStep: () => ({
+      title: CHECK_RESOURCES_TITLE,
+      status: 'incomplete',
+      children: <div>{'Check Resources Content'}</div>,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DashboardsUploadSubSteps', () => {
   const defaultProps = {

@@ -33,16 +33,16 @@ vi.mock('../hooks/use_get_cloud_connectors');
 vi.mock('../hooks/use_create_cloud_connector');
 vi.mock('../hooks/use_cloud_connector_template');
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useIacProvisioner: vi.fn(),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIacProvisioner: vi.fn(),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../components/iac_key_check', () => {
-      const mocked = { IacKeyCheck: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { IacKeyCheck: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseGetCloudConnectors = useGetCloudConnectors as MockedFunction<

@@ -13,11 +13,11 @@ import React from 'react';
 import { AssetCriticalityLevel } from './asset_criticality_level';
 
 vi.mock('../../../../../common/components/draggables', () => {
-      const mocked = {
-      DefaultDraggable: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultDraggable: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   contextId: 'testContext',

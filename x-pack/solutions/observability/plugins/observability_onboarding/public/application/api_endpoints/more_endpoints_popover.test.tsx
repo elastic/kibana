@@ -15,11 +15,11 @@ import { ApiEndpointId } from '../../../common/api_endpoints';
 import { MoreEndpointsPopover } from './more_endpoints_popover';
 
 vi.mock('../shared/logo_icon', () => {
-      const mocked = {
-      LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LogoIcon: ({ logo }: { logo?: string }) => <div data-test-subj={`logoIconStub-${logo}`} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const vendors = [
   {

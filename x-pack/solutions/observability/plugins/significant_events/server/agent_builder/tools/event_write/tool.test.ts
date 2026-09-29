@@ -19,25 +19,25 @@ import { eventsWriteBulkHandler } from './handler';
 import { createEventsWriteTool, eventsWriteSchema } from './tool';
 
 vi.mock('../../../routes/utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
-      const mocked = {
-      assertCanManageSignificantEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanManageSignificantEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./handler', () => {
-      const mocked = {
-      eventsWriteBulkHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    eventsWriteBulkHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const input = {
   event_id: 'event-1',

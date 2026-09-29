@@ -193,12 +193,7 @@ describe('Toggle', () => {
 
     it('disables the switch while saving', async () => {
       render(
-        <FormWrapper
-          defaultValue={false}
-          onConfirm={vi.fn()}
-          isSaving
-          onSubmitResult={vi.fn()}
-        />
+        <FormWrapper defaultValue={false} onConfirm={vi.fn()} isSaving onSubmitResult={vi.fn()} />
       );
 
       expect(screen.getByRole('switch', { name: 'Requires escalation' })).toBeDisabled();

@@ -22,12 +22,12 @@ vi.mock('../../app_context');
 
 let mockRegistryProxyUrl: string | undefined;
 vi.mock('./proxy', () => {
-      const mocked = {
-      getProxyAgent: vi.fn().mockReturnValue('proxy agent'),
-      getRegistryProxyUrl: () => mockRegistryProxyUrl,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getProxyAgent: vi.fn().mockReturnValue('proxy agent'),
+    getRegistryProxyUrl: () => mockRegistryProxyUrl,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getSecuritySetup.mockImplementation(() => ({

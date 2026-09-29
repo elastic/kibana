@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 import { collectMediaElements } from './collect_media_elements';
 
 vi.mock('../components/edit/library/eui_icon_cache', () => {
-      const mocked = {
-      identifyIconType: vi.fn().mockResolvedValue(''),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    identifyIconType: vi.fn().mockResolvedValue(''),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('collectMediaElements', () => {
   let root: HTMLDivElement;

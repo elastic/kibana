@@ -40,12 +40,12 @@ let mockHistory: unknown = {
 };
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => mockHistory,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => mockHistory,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
 

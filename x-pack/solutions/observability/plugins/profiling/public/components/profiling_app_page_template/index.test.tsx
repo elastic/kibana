@@ -12,26 +12,26 @@ import React from 'react';
 import { render } from '@testing-library/react';
 
 vi.mock('react-router-dom', () => {
-      const mocked = { useLocation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useLocation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_profiling_router');
 vi.mock('../../hooks/use_default_time_range');
 vi.mock('../contexts/profiling_dependencies/use_profiling_dependencies');
 vi.mock('../contexts/back_navigation/use_back_navigation');
 vi.mock('./primary_profiling_search_bar', () => {
-      const mocked = {
-      PrimaryProfilingSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PrimaryProfilingSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/app-header', () => {
-      const mocked = {
-      AppHeader: () => null,
-      SuppressChromeBackButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AppHeader: () => null,
+    SuppressChromeBackButton: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useLocation } from 'react-router-dom';
 import { useProfilingRouter } from '../../hooks/use_profiling_router';

@@ -111,9 +111,9 @@ describe('service account editor badge', () => {
       })
     );
     const registration = registerServiceAccountDecorations(editor, directory);
-    vi
-      .mocked(editor.getModel)
-      .mockReturnValue(createMockMonacoModel('settings:\n  run_as: account-b'));
+    vi.mocked(editor.getModel).mockReturnValue(
+      createMockMonacoModel('settings:\n  run_as: account-b')
+    );
     resolveAccount(account);
     await Promise.resolve();
     expect(decorationsCollection.set).not.toHaveBeenCalled();

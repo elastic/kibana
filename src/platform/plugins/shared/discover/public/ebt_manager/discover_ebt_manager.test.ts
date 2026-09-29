@@ -26,12 +26,12 @@ import {
 } from './discover_in_dashboard_event_definition';
 
 vi.mock('@kbn/ebt-tools', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/ebt-tools')),
-      reportPerformanceMetricEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/ebt-tools')),
+    reportPerformanceMetricEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DiscoverEBTManager', () => {
   let discoverEBTContextManager: DiscoverEBTManager;
@@ -536,11 +536,11 @@ describe('DiscoverEBTManager', () => {
         results.push(discoverProfiles);
       });
 
-      vi
-        .spyOn(coreSetupMock.analytics, 'reportEvent')
-        .mockImplementation((eventType, eventData) => {
+      vi.spyOn(coreSetupMock.analytics, 'reportEvent').mockImplementation(
+        (eventType, eventData) => {
           results.push({ eventType, eventData });
-        });
+        }
+      );
 
       await anotherScopedManager.trackDataTableSelection({
         fieldName: 'test',
@@ -698,11 +698,11 @@ describe('DiscoverEBTManager', () => {
         results.push(discoverProfiles);
       });
 
-      vi
-        .spyOn(coreSetupMock.analytics, 'reportEvent')
-        .mockImplementation((eventType, eventData) => {
+      vi.spyOn(coreSetupMock.analytics, 'reportEvent').mockImplementation(
+        (eventType, eventData) => {
           results.push({ eventType, eventData });
-        });
+        }
+      );
 
       anotherScopedManager.trackContextualProfileResolvedEvent({
         contextLevel: ContextualProfileLevel.rootLevel,

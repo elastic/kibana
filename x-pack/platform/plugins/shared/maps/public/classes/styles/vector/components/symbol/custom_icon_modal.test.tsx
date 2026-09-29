@@ -13,20 +13,20 @@ import { render, screen } from '@testing-library/react';
 import { CustomIconModal } from './custom_icon_modal';
 
 vi.mock('../../../../../kibana_services', () => {
-      const mocked = {
-      getUsageCollection: () => {
-        return {
-          reportUiCounter: () => {},
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUsageCollection: () => {
+      return {
+        reportUiCounter: () => {},
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./icon_preview', () => {
-      const mocked = { IconPreview: () => <div data-test-subj="iconPreview" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { IconPreview: () => <div data-test-subj="iconPreview" /> };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   cutoff: 0.25,

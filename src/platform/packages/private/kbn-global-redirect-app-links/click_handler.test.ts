@@ -13,13 +13,13 @@ import type { Mock } from 'vitest';
 import { createClickHandler } from './click_handler';
 
 vi.mock('@kbn/shared-ux-utility', () => {
-      const mocked = {
-      getClosestLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getClosestLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getClosestLink } = (await vi.importMock('@kbn/shared-ux-utility'));
+const { getClosestLink } = await vi.importMock('@kbn/shared-ux-utility');
 
 describe('createClickHandler', () => {
   let navigateToUrl: Mock;

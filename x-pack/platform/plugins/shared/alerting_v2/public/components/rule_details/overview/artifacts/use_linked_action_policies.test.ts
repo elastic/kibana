@@ -16,19 +16,19 @@ const mockUseMatchedActionPolicies = vi.fn<UseMatchedActionPoliciesResult, [unkn
 const mockHttp = { fake: 'http-start-contract' };
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      useMatchedActionPolicies: (params: unknown) => mockUseMatchedActionPolicies(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMatchedActionPolicies: (params: unknown) => mockUseMatchedActionPolicies(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => (token === 'CoreStart(http)' ? mockHttp : {}),
-      CoreStart: (key: string) => `CoreStart(${key})`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => (token === 'CoreStart(http)' ? mockHttp : {}),
+    CoreStart: (key: string) => `CoreStart(${key})`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const RULE_TAGS = ['prod'];
 

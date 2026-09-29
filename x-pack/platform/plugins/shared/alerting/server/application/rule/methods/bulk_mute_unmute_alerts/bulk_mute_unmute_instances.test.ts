@@ -16,37 +16,37 @@ import { retryIfBulkEditConflicts } from '../../../../rules_client/common';
 import { bulkMuteUnmuteInstances } from './bulk_mute_unmute_instances';
 
 vi.mock('../../../../data/rule', () => {
-      const mocked = {
-      bulkGetRulesSo: vi.fn(),
-      bulkUpdateRuleSo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkGetRulesSo: vi.fn(),
+    bulkUpdateRuleSo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const bulkGetRulesSoMock = bulkGetRulesSo as Mock;
 const bulkUpdateRuleSoMock = bulkUpdateRuleSo as Mock;
 
 vi.mock('../../../../rules_client/common', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../rules_client/common')),
-      retryIfBulkEditConflicts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../rules_client/common')),
+    retryIfBulkEditConflicts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const retryIfBulkEditConflictsMock = retryIfBulkEditConflicts as Mock;
 
 vi.mock('./transforms/transform_rule_mute_instance_ids', () => {
-      const mocked = {
-      transformMuteRequestToRuleAttributes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformMuteRequestToRuleAttributes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./transforms/transform_rule_unmute_instance_ids', () => {
-      const mocked = {
-      transformUnmuteRequestToRuleAttributes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformUnmuteRequestToRuleAttributes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('bulkMuteUnmuteInstances', () => {
   const loggerErrorMock = vi.fn();

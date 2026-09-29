@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import { firstValueFrom } from 'rxjs';
 
 import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';

@@ -20,7 +20,7 @@ const useMutationMock = _useMutation as Mock;
 const postEvaluationMock = _postEvaluation as Mock;
 
 vi.mock('./evaluate', async () => {
-  const actual = (await vi.importActual('./evaluate'));
+  const actual = await vi.importActual('./evaluate');
   return {
     ...actual,
     postEvaluation: vi.fn((...args) => actual.postEvaluation(...args)),
@@ -28,18 +28,18 @@ vi.mock('./evaluate', async () => {
 });
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useMutation: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
-        try {
-          const res = await fn();
-          return Promise.resolve(res);
-        } catch (e) {
-          opts.onError(e);
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMutation: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+      try {
+        const res = await fn();
+        return Promise.resolve(res);
+      } catch (e) {
+        opts.onError(e);
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const statusResponse = {
   success: true,

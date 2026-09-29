@@ -19,7 +19,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/common', async () => {
-  const actual = (await vi.importActual('@kbn/triggers-actions-ui-plugin/common'));
+  const actual = await vi.importActual('@kbn/triggers-actions-ui-plugin/common');
   return {
     ...actual,
     parseAggregationResults: vi.fn(),

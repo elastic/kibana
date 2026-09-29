@@ -17,15 +17,15 @@ import { useDownloadAIValueReport } from './use_download_ai_value_report';
 import type { TimeRange } from '../../common/store/inputs/model';
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 const useKibanaMock = useKibana as Mock;
 
 vi.mock('../providers/ai_value/export_provider', () => {
-      const mocked = { useAIValueExportContext: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAIValueExportContext: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 const useAIValueExportContextMock = useAIValueExportContext as Mock;
 
 const shareServiceMock = {

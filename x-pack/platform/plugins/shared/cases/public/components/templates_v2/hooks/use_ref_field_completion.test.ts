@@ -14,31 +14,31 @@ const mockRegisterCompletionItemProvider = vi.fn();
 const mockDispose = vi.fn();
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        languages: {
-          registerCompletionItemProvider: (...args: unknown[]) => {
-            mockRegisterCompletionItemProvider(...args);
-            return { dispose: mockDispose };
-          },
-          CompletionItemKind: { Reference: 17 },
+  const mocked = {
+    monaco: {
+      languages: {
+        registerCompletionItemProvider: (...args: unknown[]) => {
+          mockRegisterCompletionItemProvider(...args);
+          return { dispose: mockDispose };
         },
-        // A no-op stand-in — the completion provider constructs a Range, but the tests assert on the
-        // suggestion labels, not the range geometry. (A class with TS parameter properties trips jest's
-        // mock-factory hoist analyzer, so keep it property-free.)
-        Range: class MockRange {},
+        CompletionItemKind: { Reference: 17 },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      // A no-op stand-in — the completion provider constructs a Range, but the tests assert on the
+      // suggestion labels, not the range geometry. (A class with TS parameter properties trips jest's
+      // mock-factory hoist analyzer, so keep it property-free.)
+      Range: class MockRange {},
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useRefFieldCompletion } from './use_ref_field_completion';
 

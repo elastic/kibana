@@ -50,41 +50,41 @@ import {
 } from './handlers';
 
 vi.mock('./handlers', async () => {
-      const mocked = {
-      ...(await vi.importActual('./handlers')),
-      getAgentPoliciesHandler: vi.fn(),
-      getOneAgentPolicyHandler: vi.fn(),
-      createAgentPolicyHandler: vi.fn(),
-      updateAgentPolicyHandler: vi.fn(),
-      copyAgentPolicyHandler: vi.fn(),
-      deleteAgentPoliciesHandler: vi.fn(),
-      getFullAgentPolicy: vi.fn(),
-      getK8sManifest: vi.fn(),
-      bulkGetAgentPoliciesHandler: vi.fn(),
-      createAgentAndPackagePoliciesHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./handlers')),
+    getAgentPoliciesHandler: vi.fn(),
+    getOneAgentPolicyHandler: vi.fn(),
+    createAgentPolicyHandler: vi.fn(),
+    updateAgentPolicyHandler: vi.fn(),
+    copyAgentPolicyHandler: vi.fn(),
+    deleteAgentPoliciesHandler: vi.fn(),
+    getFullAgentPolicy: vi.fn(),
+    getK8sManifest: vi.fn(),
+    bulkGetAgentPoliciesHandler: vi.fn(),
+    createAgentAndPackagePoliciesHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services', () => {
-      const mocked = {
-      agentPolicyService: {
-        getFullAgentPolicy: vi.fn(),
-        getFullAgentManifest: vi.fn(),
-      },
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      getFullAgentPolicy: vi.fn(),
+      getFullAgentManifest: vi.fn(),
+    },
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agents', () => {
-      const mocked = {
-      getLatestAgentAvailableDockerImageVersion: vi.fn().mockResolvedValue('1.0.0'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLatestAgentAvailableDockerImageVersion: vi.fn().mockResolvedValue('1.0.0'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -450,11 +450,9 @@ describe('schema validation', () => {
       const expectedResponse = {
         item: agentPolicy,
       };
-      (createAgentAndPackagePoliciesHandler as Mock).mockImplementation(
-        (ctx, request, res) => {
-          return res.ok({ body: expectedResponse });
-        }
-      );
+      (createAgentAndPackagePoliciesHandler as Mock).mockImplementation((ctx, request, res) => {
+        return res.ok({ body: expectedResponse });
+      });
       await createAgentAndPackagePoliciesHandler(context, {} as any, response);
 
       expect(response.ok).toHaveBeenCalledWith({

@@ -22,47 +22,47 @@ import { scheduleBulkUninstall } from '../../tasks/packages_bulk_operations';
 import { postBulkUninstallPackagesHandler } from './bulk_handler';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      appContextService: {
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
-        getTaskManagerStart: vi.fn().mockReturnValue({}),
-      },
-      packagePolicyService: {
-        list: vi.fn(),
-      },
-      licenseService: {
-        isAtLeast: vi.fn().mockReturnValue(true),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
+      getTaskManagerStart: vi.fn().mockReturnValue({}),
+    },
+    packagePolicyService: {
+      list: vi.fn(),
+    },
+    licenseService: {
+      isAtLeast: vi.fn().mockReturnValue(true),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/epm/packages/get', () => {
-      const mocked = {
-      getInstallationsByName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstallationsByName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/epm/packages/uninstall_authz', () => {
-      const mocked = {
-      assertUninstallAuthorizedForAffectedSpaces: vi.fn().mockResolvedValue(undefined),
-      collectSpacesForUninstallClosure: vi
-        .fn()
-        .mockResolvedValue({ spaceIds: new Set(['default']), truncated: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertUninstallAuthorizedForAffectedSpaces: vi.fn().mockResolvedValue(undefined),
+    collectSpacesForUninstallClosure: vi
+      .fn()
+      .mockResolvedValue({ spaceIds: new Set(['default']), truncated: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../tasks/packages_bulk_operations', () => {
-      const mocked = {
-      scheduleBulkUninstall: vi.fn().mockResolvedValue('task-id-123'),
-      scheduleBulkUpgrade: vi.fn(),
-      getBulkOperationTaskResults: vi.fn(),
-      scheduleBulkRollback: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scheduleBulkUninstall: vi.fn().mockResolvedValue('task-id-123'),
+    scheduleBulkUpgrade: vi.fn(),
+    getBulkOperationTaskResults: vi.fn(),
+    scheduleBulkRollback: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // validateInstalledPackages uses getInstallationsByName internally — keep it simple by
 // making every package appear installed.
@@ -72,12 +72,12 @@ const mockGetInstallationsByName = getInstallationsByName as MockedFunction<
 const mockPackagePolicyServiceList = packagePolicyService.list as MockedFunction<
   typeof packagePolicyService.list
 >;
-const mockAssertUninstallAuthorized =
-  assertUninstallAuthorizedForAffectedSpaces as MockedFunction<
-    typeof assertUninstallAuthorizedForAffectedSpaces
-  >;
-const mockCollectSpacesForUninstallClosure =
-  collectSpacesForUninstallClosure as MockedFunction<typeof collectSpacesForUninstallClosure>;
+const mockAssertUninstallAuthorized = assertUninstallAuthorizedForAffectedSpaces as MockedFunction<
+  typeof assertUninstallAuthorizedForAffectedSpaces
+>;
+const mockCollectSpacesForUninstallClosure = collectSpacesForUninstallClosure as MockedFunction<
+  typeof collectSpacesForUninstallClosure
+>;
 const mockScheduleBulkUninstall = scheduleBulkUninstall as MockedFunction<
   typeof scheduleBulkUninstall
 >;

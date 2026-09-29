@@ -23,12 +23,12 @@ import { ExampleDrilldownFlyout } from '.';
 
 vi.mock('../../hooks/use_evals_api');
 vi.mock('@kbn/llm-trace-waterfall', () => {
-      const mocked = {
-      TraceWaterfall: ({ traceId }: { traceId: string }) => <div>Trace {traceId}</div>,
-      useTraceSpans: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: ({ traceId }: { traceId: string }) => <div>Trace {traceId}</div>,
+    useTraceSpans: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseExperimentDatasetExamples = vi.mocked(useExperimentDatasetExamples);
 const mockUseExperimentExampleDetails = vi.mocked(useExperimentExampleDetails);

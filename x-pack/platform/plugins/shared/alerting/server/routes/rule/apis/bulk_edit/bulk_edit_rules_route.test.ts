@@ -22,11 +22,11 @@ import { omit } from 'lodash';
 
 const rulesClient = rulesClientMock.create();
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('bulkEditRulesRoute', () => {
   const mockedAlert: SanitizedRule<{}> = {

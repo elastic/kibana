@@ -60,7 +60,7 @@ const mockState: State = {
 };
 
 vi.mock('./use_discover_in_timeline_actions', async () => {
-  const actual = (await vi.importActual('./use_discover_in_timeline_actions'));
+  const actual = await vi.importActual('./use_discover_in_timeline_actions');
   return actual;
 });
 

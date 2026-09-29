@@ -13,7 +13,7 @@ import userEvent from '@testing-library/user-event';
 vi.mock('@elastic/eui', async () => {
   // We only override EuiPopover to avoid MutationObserver-based act warnings in JSDOM.
   const React = require('react');
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,

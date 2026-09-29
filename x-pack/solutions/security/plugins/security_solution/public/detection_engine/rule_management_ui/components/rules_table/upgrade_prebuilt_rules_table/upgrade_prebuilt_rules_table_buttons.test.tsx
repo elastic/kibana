@@ -27,9 +27,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 import { initialUserPrivilegesState } from '../../../../../common/components/user_privileges/user_privileges_context';
 
 vi.mock('./upgrade_prebuilt_rules_table_context');
-vi.mock(
-  '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status'
-);
+vi.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_customization_status');
 vi.mock('../../../../../common/components/user_privileges');
 
 const mockUseUpgradePrebuiltRulesTableContext = useUpgradePrebuiltRulesTableContext as Mock;

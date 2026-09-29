@@ -19,14 +19,14 @@ import {
 import { generateApiKey } from './generate_api_key';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX: '.search-acl-filter-',
-      CONNECTORS_INDEX: '.elastic-connectors',
-      createConnectorSecret: vi.fn(),
-      updateConnectorSecret: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX: '.search-acl-filter-',
+    CONNECTORS_INDEX: '.elastic-connectors',
+    createConnectorSecret: vi.fn(),
+    updateConnectorSecret: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('generateApiKey lib function for connector clients', () => {
   const mockClient = {

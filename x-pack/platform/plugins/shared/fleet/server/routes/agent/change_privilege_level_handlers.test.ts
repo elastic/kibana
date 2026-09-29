@@ -25,11 +25,11 @@ import { FleetUnauthorizedError } from '../../errors';
 import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 
 vi.mock('../../services/agents', () => {
-      const mocked = {
-      changeAgentPrivilegeLevel: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    changeAgentPrivilegeLevel: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Change privilege level handlers', () => {
   describe('changeAgentPrivilegeLevelHandler', () => {

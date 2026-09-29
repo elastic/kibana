@@ -15,28 +15,28 @@ import { useIsAgentBuilderEnabled } from './use_is_agent_builder_enabled';
 const mockUseUiSetting$ = vi.fn();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting$: (...args: unknown[]) => mockUseUiSetting$(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting$: (...args: unknown[]) => mockUseUiSetting$(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCapabilities: { agentBuilder?: { show?: boolean } } = {};
 const mockFeatureFlags = { getBooleanValue: vi.fn() };
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: mockCapabilities,
-          },
-          featureFlags: mockFeatureFlags,
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: mockCapabilities,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        featureFlags: mockFeatureFlags,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useIsAgentBuilderEnabled', () => {
   beforeEach(() => {

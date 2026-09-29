@@ -16,11 +16,11 @@ import { getIlmPolicySummaryStats } from '../edit_data_lifecycle_flyout/ilm_poli
 import { useRetentionWarning } from './flyout_footer_with_retention_warning';
 
 vi.mock('../edit_data_lifecycle_flyout/ilm_policy_summary_stats', () => {
-      const mocked = {
-      getIlmPolicySummaryStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIlmPolicySummaryStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetIlmPolicySummaryStats = getIlmPolicySummaryStats as MockedFunction<
   typeof getIlmPolicySummaryStats

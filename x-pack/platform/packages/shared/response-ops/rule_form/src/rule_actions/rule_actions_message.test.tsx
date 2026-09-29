@@ -23,13 +23,13 @@ import {
 import userEvent from '@testing-library/user-event';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState } = (await vi.importMock('../hooks'));
+const { useRuleFormState } = await vi.importMock('../hooks');
 
 const ruleType = {
   id: '.es-query',

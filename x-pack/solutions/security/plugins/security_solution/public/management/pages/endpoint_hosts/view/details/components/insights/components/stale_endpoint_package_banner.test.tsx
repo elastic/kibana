@@ -12,13 +12,15 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { StaleEndpointPackageBanner } from './stale_endpoint_package_banner';
 
 vi.mock('../../../../hooks/insights/use_fetch_endpoint_package_freshness', () => {
-      const mocked = {
-      useFetchEndpointPackageFreshness: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEndpointPackageFreshness: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockUseFetchEndpointPackageFreshness = (await vi.importMock('../../../../hooks/insights/use_fetch_endpoint_package_freshness')).useFetchEndpointPackageFreshness;
+const mockUseFetchEndpointPackageFreshness = (
+  await vi.importMock('../../../../hooks/insights/use_fetch_endpoint_package_freshness')
+).useFetchEndpointPackageFreshness;
 
 const STORAGE_KEY_PREFIX =
   'securitySolution.endpointHosts.workflowInsightsAB.stalePackageBannerDismissed';

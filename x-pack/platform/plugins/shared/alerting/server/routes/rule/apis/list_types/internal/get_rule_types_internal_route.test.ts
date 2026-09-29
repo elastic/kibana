@@ -21,11 +21,11 @@ import type { GetRuleTypesInternalResponseBody } from '../../../../../../common/
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

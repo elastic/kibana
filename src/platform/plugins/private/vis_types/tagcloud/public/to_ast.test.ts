@@ -34,11 +34,11 @@ const mockedSchemas = {
 };
 
 vi.mock('@kbn/visualizations-plugin/public', () => {
-      const mocked = {
-      getVisSchemas: () => mockedSchemas,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getVisSchemas: () => mockedSchemas,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('tagcloud vis toExpressionAst function', () => {
   let vis: Vis<TagCloudVisParams>;

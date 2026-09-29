@@ -65,80 +65,90 @@ describe('overview effects', () => {
     );
 
     it('calls the `trendsApi` with the first chunk of trend requests', () =>
-        new Promise<void>((resolve, reject) => {
-        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(callResult).toEqual(call(trendsApi, firstChunk));
-              return firstChunkResponse;
-            
-        }));
+        expect(callResult).toEqual(call(trendsApi, firstChunk));
+        return firstChunkResponse;
+      }));
 
     it('sends trends stats success action', () =>
-        new Promise<void>((resolve, reject) => {
-        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(putResult).toEqual(
-                put(trendStatsBatch.success({ trendStats: firstChunkResponse, batch: firstChunk }))
-              );
-            
-        }));
+        expect(putResult).toEqual(
+          put(trendStatsBatch.success({ trendStats: firstChunkResponse, batch: firstChunk }))
+        );
+      }));
 
     it('calls the api for the second chunk', () =>
-        new Promise<void>((resolve, reject) => {
-        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(callResult).toEqual(call(trendsApi, secondChunk));
-              return secondChunkResponse;
-            
-        }));
+        expect(callResult).toEqual(call(trendsApi, secondChunk));
+        return secondChunkResponse;
+      }));
 
     it('sends trends stats success action', () =>
-        new Promise<void>((resolve, reject) => {
-        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(putResult).toEqual(
-                put(trendStatsBatch.success({ trendStats: secondChunkResponse, batch: secondChunk }))
-              );
-            
-        }));
+        expect(putResult).toEqual(
+          put(trendStatsBatch.success({ trendStats: secondChunkResponse, batch: secondChunk }))
+        );
+      }));
 
     it('terminates', () =>
-        new Promise<void>((resolve, reject) => {
-        const result = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const result = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(result).toBeUndefined();
-            
-        }));
+        expect(result).toBeUndefined();
+      }));
   });
 
   describe('refreshTrends with no data', () => {
     const it = sagaHelper(refreshTrends() as IterableIterator<TrendTable>);
 
     it('selects the trends in the table', () =>
-        new Promise<void>((resolve, reject) => {
-        const selectResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const selectResult = Object.assign(
+          (error?: unknown) => (error ? reject(error) : resolve()),
+          { fail: reject }
+        );
 
-              expect(selectResult).toEqual(select(selectOverviewTrends));
-              return { monitor1: null, monitor2: null, monitor3: null };
-            
-        }));
+        expect(selectResult).toEqual(select(selectOverviewTrends));
+        return { monitor1: null, monitor2: null, monitor3: null };
+      }));
 
     it('selects the overview state', () =>
-        new Promise<void>((resolve, reject) => {
-        const selectResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const selectResult = Object.assign(
+          (error?: unknown) => (error ? reject(error) : resolve()),
+          { fail: reject }
+        );
 
-              expect(selectResult).toEqual(select(selectOverviewStatus));
-              return { allConfigs: {} };
-            
-        }));
+        expect(selectResult).toEqual(select(selectOverviewStatus));
+        return { allConfigs: {} };
+      }));
 
     it('skips the API if the data is null', () =>
-        new Promise<void>((resolve, reject) => {
-        const result = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const result = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(result).toBeUndefined();
-            
-        }));
+        expect(result).toBeUndefined();
+      }));
   });
 
   describe('refreshTrends with data', () => {
@@ -210,45 +220,51 @@ describe('overview effects', () => {
     };
 
     it('selects the trends in the table', () =>
-        new Promise<void>((resolve, reject) => {
-        const selectResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const selectResult = Object.assign(
+          (error?: unknown) => (error ? reject(error) : resolve()),
+          { fail: reject }
+        );
 
-              expect(selectResult).toEqual(select(selectOverviewTrends));
+        expect(selectResult).toEqual(select(selectOverviewTrends));
 
-              return table;
-            
-        }));
+        return table;
+      }));
 
     it('selects the overview state', () =>
-        new Promise<void>((resolve, reject) => {
-        const selectResults = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const selectResults = Object.assign(
+          (error?: unknown) => (error ? reject(error) : resolve()),
+          { fail: reject }
+        );
 
-              expect(selectResults).toEqual(select(selectOverviewStatus));
-              return {
-                allConfigs: {
-                  monitor1: { configId: 'monitor1', schedule: '3' },
-                  monitor3: { configId: 'monitor3', schedule: '3' },
-                },
-              };
-            
-        }));
+        expect(selectResults).toEqual(select(selectOverviewStatus));
+        return {
+          allConfigs: {
+            monitor1: { configId: 'monitor1', schedule: '3' },
+            monitor3: { configId: 'monitor3', schedule: '3' },
+          },
+        };
+      }));
 
     it('calls the api for the first chunk', () =>
-        new Promise<void>((resolve, reject) => {
-        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const callResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(callResult).toEqual(call(trendsApi, batch));
+        expect(callResult).toEqual(call(trendsApi, batch));
 
-              return apiResponse;
-            
-        }));
+        return apiResponse;
+      }));
 
     it('sends trends stats success action', () =>
-        new Promise<void>((resolve, reject) => {
-        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const putResult = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect(putResult).toEqual(put(trendStatsBatch.success(successPayload)));
-            
-        }));
+        expect(putResult).toEqual(put(trendStatsBatch.success(successPayload)));
+      }));
   });
 });

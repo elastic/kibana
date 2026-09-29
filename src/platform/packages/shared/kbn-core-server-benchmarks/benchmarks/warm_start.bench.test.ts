@@ -18,13 +18,13 @@ import { startKibana } from './utils';
 
 vi.mock('get-port');
 vi.mock('./utils', () => {
-      const mocked = {
-      startEs: vi.fn(),
-      startKibana: vi.fn(),
-      stopGracefully: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    startEs: vi.fn(),
+    startKibana: vi.fn(),
+    stopGracefully: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGetPort = getPort as MockedFunction<typeof getPort>;
 const mockedStartKibana = startKibana as MockedFunction<typeof startKibana>;

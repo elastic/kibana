@@ -16,11 +16,11 @@ import { Gap } from '../gap';
 import { alertingEventLoggerMock } from '../../alerting_event_logger/alerting_event_logger.mock';
 
 vi.mock('../update/update_gaps_in_event_log', () => {
-      const mocked = {
-      updateGapsInEventLog: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateGapsInEventLog: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const updateGapsInEventLogMock = updateGapsInEventLog as Mock;
 

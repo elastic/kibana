@@ -212,9 +212,7 @@ vi.mock('../download_source', () => {
 });
 
 function getAgentPolicyUpdateMock() {
-  return agentPolicyUpdateEventHandler as unknown as Mock<
-    typeof agentPolicyUpdateEventHandler
-  >;
+  return agentPolicyUpdateEventHandler as unknown as Mock<typeof agentPolicyUpdateEventHandler>;
 }
 
 describe('getFullAgentPolicy', () => {

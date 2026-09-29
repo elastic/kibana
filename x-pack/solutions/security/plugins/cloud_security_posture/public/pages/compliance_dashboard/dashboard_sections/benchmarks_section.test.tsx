@@ -21,11 +21,11 @@ import {
 
 const mockNavToFindings = vi.fn();
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_navigate_findings', () => {
-      const mocked = {
-      useNavigateFindings: () => mockNavToFindings,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateFindings: () => mockNavToFindings,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<BenchmarksSection />', () => {
   const renderBenchmarks = (alterMockData = {}, namespace?: string) =>

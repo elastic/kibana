@@ -24,12 +24,12 @@ import { CONNECTOR_SETUP_ATTACHMENT_TYPE } from '../../../common/attachments';
 import { createConnectorSetupAttachmentType } from '../../attachment_types/connector_setup';
 
 vi.mock('@kbn/connector-specs', () => {
-      const mocked = {
-      connectorsSpecs: {},
-      getConnectorSpec: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    connectorsSpecs: {},
+    getConnectorSpec: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getConnectorSpecMock = getConnectorSpec as MockedFunction<typeof getConnectorSpec>;
 

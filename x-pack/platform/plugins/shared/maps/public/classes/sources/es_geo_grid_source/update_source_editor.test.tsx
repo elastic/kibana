@@ -14,11 +14,11 @@ import { UpdateSourceEditor } from './update_source_editor';
 import { GRID_RESOLUTION, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   bucketsName: 'clusters',

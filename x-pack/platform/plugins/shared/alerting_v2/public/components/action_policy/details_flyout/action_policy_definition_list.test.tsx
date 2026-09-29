@@ -21,47 +21,47 @@ const renderWithI18n = (props: ActionPolicyDefinitionListProps) =>
   );
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => key,
-      useService: (token: unknown) => {
-        if (token === 'http') {
-          return { basePath: { prepend: (path: string) => `/base${path}` } };
-        }
-        return {};
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => key,
+    useService: (token: unknown) => {
+      if (token === 'http') {
+        return { basePath: { prepend: (path: string) => `/base${path}` } };
+      }
+      return {};
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../badge_list', () => {
-      const mocked = {
-      BadgeList: ({ items }: { items: string[] }) => (
-        <span data-test-subj="mockBadgeList">{items.join(', ')}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BadgeList: ({ items }: { items: string[] }) => (
+      <span data-test-subj="mockBadgeList">{items.join(', ')}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./destination_row', () => {
-      const mocked = {
-      DestinationRow: ({ destination }: { destination: { type: string; id: string } }) => (
-        <span data-test-subj="mockDestinationRow">{destination.id}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DestinationRow: ({ destination }: { destination: { type: string; id: string } }) => (
+      <span data-test-subj="mockDestinationRow">{destination.id}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../labels', () => {
-      const mocked = {
-      DISPATCH_PER_LABEL: 'Dispatch per',
-      FREQUENCY_LABEL: 'Frequency',
-      GROUP_BY_LABEL: 'Group by',
-      getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
-      getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
-        throttle?.strategy ?? 'Not configured',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DISPATCH_PER_LABEL: 'Dispatch per',
+    FREQUENCY_LABEL: 'Frequency',
+    GROUP_BY_LABEL: 'Group by',
+    getGroupingModeLabel: (mode: string | undefined) => mode ?? 'Not configured',
+    getFrequencyLabel: (throttle: { strategy?: string } | null | undefined) =>
+      throttle?.strategy ?? 'Not configured',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: ActionPolicyDefinitionListProps = {
   policy: {

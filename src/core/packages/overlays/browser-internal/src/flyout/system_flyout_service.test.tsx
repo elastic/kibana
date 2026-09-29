@@ -78,7 +78,7 @@ const setManagerContainer = (containerElement: HTMLElement | null) => {
 };
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     getFlyoutManagerStore: vi.fn(() => ({

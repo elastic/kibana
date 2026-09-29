@@ -17,30 +17,30 @@ import type { UserContentCommonSchema } from '@kbn/content-management-table-list
 import { SavedObjectActivityRow } from './saved_object_activity_row';
 
 vi.mock('@kbn/content-management-content-insights-public', () => {
-      const mocked = {
-      ContentInsightsProvider: ({
-        contentInsightsClient,
-        children,
-      }: {
-        contentInsightsClient: unknown;
-        children: React.ReactNode;
-      }) => (
-        <div
-          data-test-subj="contentInsightsProvider"
-          data-client-id={(contentInsightsClient as { id?: string })?.id ?? ''}
-        >
-          {children}
-        </div>
-      ),
-      ActivityView: ({ entityNamePlural }: { entityNamePlural?: string }) => (
-        <div data-test-subj="activityView">activity:{entityNamePlural}</div>
-      ),
-      ViewsStats: ({ item }: { item: { id: string } }) => (
-        <div data-test-subj="viewsStats">views:{item.id}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ContentInsightsProvider: ({
+      contentInsightsClient,
+      children,
+    }: {
+      contentInsightsClient: unknown;
+      children: React.ReactNode;
+    }) => (
+      <div
+        data-test-subj="contentInsightsProvider"
+        data-client-id={(contentInsightsClient as { id?: string })?.id ?? ''}
+      >
+        {children}
+      </div>
+    ),
+    ActivityView: ({ entityNamePlural }: { entityNamePlural?: string }) => (
+      <div data-test-subj="activityView">activity:{entityNamePlural}</div>
+    ),
+    ViewsStats: ({ item }: { item: { id: string } }) => (
+      <div data-test-subj="viewsStats">views:{item.id}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SavedObjectActivityRow', () => {
   const service = { id: 'svc-1' } as unknown as ContentInsightsClientPublic;

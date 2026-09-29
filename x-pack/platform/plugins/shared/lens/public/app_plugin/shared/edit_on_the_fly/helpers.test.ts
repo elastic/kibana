@@ -44,18 +44,18 @@ const mockGetESQLAdHocDataview = getESQLAdHocDataview as Mock;
 const mockReadUserChartTypeFromSessionStorage = readUserChartTypeFromSessionStorage as Mock;
 
 vi.mock('../../../lens_suggestions_api', () => {
-      const mocked = {
-      suggestionsApi: vi.fn(() => mockAllSuggestions),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    suggestionsApi: vi.fn(() => mockAllSuggestions),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../chart_type_session_storage', () => {
-      const mocked = {
-      readUserChartTypeFromSessionStorage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readUserChartTypeFromSessionStorage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryResponseColumns = [
   {

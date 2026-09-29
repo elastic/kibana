@@ -42,11 +42,11 @@ import type { Schemas } from '../vis_schemas';
 const mockConvertBucketToColumns = vi.fn();
 
 vi.mock('../../common/convert_to_lens/lib/buckets', () => {
-      const mocked = {
-      convertBucketToColumns: vi.fn(() => mockConvertBucketToColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertBucketToColumns: vi.fn(() => mockConvertBucketToColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('isReferenced', () => {
   const columnId = 'col1';

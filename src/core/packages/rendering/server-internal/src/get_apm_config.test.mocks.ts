@@ -12,12 +12,12 @@ import { vi } from 'vitest';
 export const getConfigurationMock = vi.fn();
 export const shouldInstrumentClientMock = vi.fn(() => true);
 vi.doMock('@kbn/apm-config-loader', () => {
-      const mocked = {
-      getConfiguration: getConfigurationMock,
-      shouldInstrumentClient: shouldInstrumentClientMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: getConfigurationMock,
+    shouldInstrumentClient: shouldInstrumentClientMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const agentMock = {} as Record<string, any>;
 vi.doMock('elastic-apm-node', () => agentMock);

@@ -15,14 +15,14 @@ import { registerGetStepDefinitionsTool } from './get_step_definitions_tool';
 const mockGetAllConnectors = vi.fn();
 const mockAddDynamicConnectorsToCache = vi.fn();
 vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
-      const mocked = {
-      getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
-      addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
-      getCachedAllConnectorsMap: () => null,
-      getDeprecatedStepMetadata: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: (...args: unknown[]) => mockGetAllConnectors(...args),
+    addDynamicConnectorsToCache: (...args: unknown[]) => mockAddDynamicConnectorsToCache(...args),
+    getCachedAllConnectorsMap: () => null,
+    getDeprecatedStepMetadata: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;

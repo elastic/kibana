@@ -13,42 +13,42 @@ import { useListAiIndices } from './use_list_ai_indices';
 const mockAddErrorToast = vi.fn();
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {
-            get: vi.fn(),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {
+          get: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_toasts', () => {
-      const mocked = {
-      useToasts: () => ({
-        addErrorToast: mockAddErrorToast,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: () => ({
+      addErrorToast: mockAddErrorToast,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-browser', () => {
-      const mocked = {
-      formatAgentBuilderErrorMessage: (error: Error) => error.message,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatAgentBuilderErrorMessage: (error: Error) => error.message,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useQuery } = (await vi.importMock('@kbn/react-query'));
+const { useQuery } = await vi.importMock('@kbn/react-query');
 
 describe('useListAiIndices', () => {
   beforeEach(() => {

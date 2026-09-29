@@ -12,8 +12,8 @@ import { vi } from 'vitest';
 export const mockGetConfigFromFiles = vi.fn();
 
 vi.mock('./read_config', () => {
-      const mocked = {
-      getConfigFromFiles: mockGetConfigFromFiles,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigFromFiles: mockGetConfigFromFiles,
+  };
+  return { ...mocked, default: mocked };
+});

@@ -22,7 +22,7 @@ import type { SnapshotState } from './use_snapshot_state';
 import { FixSnapshotsFlyout } from './flyout';
 
 vi.mock('../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../app_context'));
+  const actual = await vi.importActual('../../../../app_context');
 
   return {
     ...actual,
@@ -43,7 +43,7 @@ vi.mock('../../../../app_context', async () => {
 });
 
 vi.mock('../../../../lib/ui_metric', async () => {
-  const actual = (await vi.importActual('../../../../lib/ui_metric'));
+  const actual = await vi.importActual('../../../../lib/ui_metric');
 
   return {
     ...actual,

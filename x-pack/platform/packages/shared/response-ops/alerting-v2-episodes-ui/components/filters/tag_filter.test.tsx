@@ -20,11 +20,11 @@ import userEvent from '@testing-library/user-event';
 const InlineFilterPopoverSpy = vi.spyOn(inlineFilterPopoverModule, 'InlineFilterPopover');
 
 vi.mock('../../hooks/use_fetch_episode_tag_options', () => {
-      const mocked = {
-      useFetchEpisodeTagOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchEpisodeTagOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchEpisodeTagOptions = vi.mocked(
   useFetchEpisodeTagOptionsModule.useFetchEpisodeTagOptions

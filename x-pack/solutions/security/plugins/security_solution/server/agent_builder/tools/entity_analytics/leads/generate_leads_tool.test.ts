@@ -55,9 +55,7 @@ describe('generateLeadsTool', () => {
   const mockCreateCRUDClient = vi.fn().mockReturnValue({});
   const mockCreateRelationshipsClient = vi.fn().mockReturnValue({});
   const mockActionsGetAll = vi.fn();
-  const mockGetActionsClientWithRequest = vi
-    .fn()
-    .mockResolvedValue({ getAll: mockActionsGetAll });
+  const mockGetActionsClientWithRequest = vi.fn().mockResolvedValue({ getAll: mockActionsGetAll });
 
   const mockStartPlugins = {
     entityStore: {

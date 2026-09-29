@@ -81,9 +81,7 @@ describe('EnterIfNodeImpl', () => {
   });
 
   it('should start the step with condition rendered value and condition result', async () => {
-    mockContextManager.renderValueWithContext = vi
-      .fn()
-      .mockImplementation(() => 'event.type: foo');
+    mockContextManager.renderValueWithContext = vi.fn().mockImplementation(() => 'event.type: foo');
 
     await impl.run();
 
@@ -94,9 +92,7 @@ describe('EnterIfNodeImpl', () => {
   });
 
   it('should set step inputs', async () => {
-    mockContextManager.renderValueWithContext = vi
-      .fn()
-      .mockImplementation(() => 'event.type: foo');
+    mockContextManager.renderValueWithContext = vi.fn().mockImplementation(() => 'event.type: foo');
 
     await impl.run();
 

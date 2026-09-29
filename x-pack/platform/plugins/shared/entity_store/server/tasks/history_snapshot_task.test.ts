@@ -16,19 +16,19 @@ import type { EntityStoreCoreSetup } from '../types';
 import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 vi.mock('./should_delete_orphaned_task', () => {
-      const mocked = {
-      shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldDeleteOrphanedEntityStoreTask: vi.fn().mockResolvedValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 // Short-circuit tracing: return a canned result without invoking the inner run
 // so the test focuses on the executionContext wrap introduced by this PR.
 vi.mock('../telemetry/traces', () => {
-      const mocked = {
-      wrapTaskRun: vi.fn().mockResolvedValue({ state: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapTaskRun: vi.fn().mockResolvedValue({ state: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('registerHistorySnapshotTask — execution context wrap', () => {
   it('invokes coreStart.executionContext.withContext with the history-snapshot label and taskInstance.id', async () => {

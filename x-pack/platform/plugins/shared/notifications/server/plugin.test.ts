@@ -18,9 +18,7 @@ import type { EmailServiceStart } from './services';
 
 vi.mock('./services/connectors_email_service_provider');
 
-const emailServiceProviderMock = EmailServiceProvider as MockedClass<
-  typeof EmailServiceProvider
->;
+const emailServiceProviderMock = EmailServiceProvider as MockedClass<typeof EmailServiceProvider>;
 
 const validConnectorConfig = {
   connectors: {

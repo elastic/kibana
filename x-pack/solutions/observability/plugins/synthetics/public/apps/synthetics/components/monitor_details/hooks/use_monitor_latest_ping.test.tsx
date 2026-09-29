@@ -17,67 +17,67 @@ import { getMonitorLastRunAction } from '../../../state';
 import { fetchLatestTestRun } from '../../../state/monitor_details/api';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
-      // the mocked module below so there is a single source of truth.
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        PENDING: 'pending',
-      },
-      useFetcher: vi.fn().mockReturnValue({ data: undefined, status: 'pending', loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Mirror of the real FETCH_STATUS enum values; test bodies read it back off
+    // the mocked module below so there is a single source of truth.
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      PENDING: 'pending',
+    },
+    useFetcher: vi.fn().mockReturnValue({ data: undefined, status: 'pending', loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { FETCH_STATUS } = observabilitySharedPublic;
 
 vi.mock('../../../state/monitor_details/api', () => {
-      const mocked = {
-      fetchLatestTestRun: vi.fn().mockResolvedValue({ ping: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchLatestTestRun: vi.fn().mockResolvedValue({ ping: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUrlParams = vi.fn();
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseParams = vi.fn();
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useParams: () => mockUseParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParams: () => mockUseParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelectedMonitor = vi.fn();
 vi.mock('./use_selected_monitor', () => {
-      const mocked = {
-      useSelectedMonitor: () => mockUseSelectedMonitor(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedMonitor: () => mockUseSelectedMonitor(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSelectedLocation = vi.fn();
 vi.mock('./use_selected_location', () => {
-      const mocked = {
-      useSelectedLocation: () => mockUseSelectedLocation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedLocation: () => mockUseSelectedLocation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 const mockLatestPingState = vi.fn();

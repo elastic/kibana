@@ -18,11 +18,11 @@ import { rulesClientMock } from '../../../../rules_client.mock';
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedRule = {
   apiKeyOwner: 'api-key-owner',

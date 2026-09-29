@@ -222,20 +222,21 @@ describe('Vislib Dispatch Class Test Suite', function () {
     const vis = getVis(config);
     const mockUiState = getMockUiState();
     test('should attach whatever gets passed on vis.on() to chart.events', () =>
-        new Promise((resolve, reject) => {
-        const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise((resolve, reject) => {
+        const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              vis.on('someEvent', _.noop);
-              vis.render(data, mockUiState);
+        vis.on('someEvent', _.noop);
+        vis.render(data, mockUiState);
 
-              vis.handler.charts.forEach(function (chart) {
-                expect(chart.events.listenerCount('someEvent')).toBe(1);
-              });
+        vis.handler.charts.forEach(function (chart) {
+          expect(chart.events.listenerCount('someEvent')).toBe(1);
+        });
 
-              destroyVis(vis);
-              done();
-            
-        }));
+        destroyVis(vis);
+        done();
+      }));
 
     test('can be added after rendering', function () {
       vis.render(data, mockUiState);

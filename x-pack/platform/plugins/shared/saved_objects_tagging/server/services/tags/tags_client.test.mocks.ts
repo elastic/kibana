@@ -10,8 +10,8 @@ import { vi } from 'vitest';
 export const validateTagMock = vi.fn();
 
 vi.doMock('./validate_tag', () => {
-      const mocked = {
-      validateTag: validateTagMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateTag: validateTagMock,
+  };
+  return { ...mocked, default: mocked };
+});

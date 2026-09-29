@@ -28,9 +28,9 @@ vi.mock('./use_agent_builder_service');
 vi.mock('./agents/use_agents');
 vi.mock('./use_ui_privileges');
 
-const { useAgentBuilderServices } = (await vi.importMock('./use_agent_builder_service'));
-const { useAgentBuilderAgents } = (await vi.importMock('./agents/use_agents'));
-const { useUiPrivileges } = (await vi.importMock('./use_ui_privileges'));
+const { useAgentBuilderServices } = await vi.importMock('./use_agent_builder_service');
+const { useAgentBuilderAgents } = await vi.importMock('./agents/use_agents');
+const { useUiPrivileges } = await vi.importMock('./use_ui_privileges');
 
 const buildServices = (overrides?: { get?: Mock; set?: Mock }) => {
   const get = overrides?.get ?? vi.fn().mockResolvedValue({ default_agent_id: null });

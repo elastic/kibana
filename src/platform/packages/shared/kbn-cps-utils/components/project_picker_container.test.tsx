@@ -136,9 +136,7 @@ describe('ProjectPickerContainer', () => {
     it('should have EDITABLE access when on dashboard create page', async () => {
       await renderProjectPicker({
         cpsManager: {
-          getProjectPickerAccess$: vi.fn(
-            () => new BehaviorSubject(ProjectRoutingAccess.EDITABLE)
-          ),
+          getProjectPickerAccess$: vi.fn(() => new BehaviorSubject(ProjectRoutingAccess.EDITABLE)),
         },
       });
       const button = screen.getByTestId('cps-project-picker-button');
@@ -153,9 +151,7 @@ describe('ProjectPickerContainer', () => {
       await renderProjectPicker({
         cpsManager: {
           fetchProjects,
-          getProjectPickerAccess$: vi.fn(
-            () => new BehaviorSubject(ProjectRoutingAccess.DISABLED)
-          ),
+          getProjectPickerAccess$: vi.fn(() => new BehaviorSubject(ProjectRoutingAccess.DISABLED)),
         },
       });
       const button = screen.getByTestId('cps-project-picker-button-disabled');
@@ -166,9 +162,7 @@ describe('ProjectPickerContainer', () => {
     it('should have READONLY access when on Lens editor page', async () => {
       await renderProjectPicker({
         cpsManager: {
-          getProjectPickerAccess$: vi.fn(
-            () => new BehaviorSubject(ProjectRoutingAccess.READONLY)
-          ),
+          getProjectPickerAccess$: vi.fn(() => new BehaviorSubject(ProjectRoutingAccess.READONLY)),
         },
       });
       const button = screen.getByTestId('cps-project-picker-button');

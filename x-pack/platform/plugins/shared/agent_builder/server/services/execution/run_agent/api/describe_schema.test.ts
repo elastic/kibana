@@ -17,53 +17,53 @@ const mockWideDefinition = () => ({
 });
 
 vi.mock('@elastic/schemas/es/json/_types.json', () => {
-      const mocked = {
-      $defs: {
-        Duration: {
-          oneOf: [{ type: 'string' }, { const: -1 }],
-          description: 'A duration such as "30s".',
-        },
-        Wrapper: {
-          type: 'object',
-          properties: { every: { $ref: './_types.json#/$defs/Duration' } },
-        },
-        SelfReferential: {
-          type: 'object',
-          properties: { child: { $ref: './_types.json#/$defs/SelfReferential' } },
-        },
-        Oversized: { type: 'object', description: mockBigDescription },
-        OversizedUndocumented: {
-          type: 'object',
-          properties: { padding: { enum: [mockBigDescription] } },
-        },
-        OversizedWide: mockWideDefinition(),
-        OversizedWide2: mockWideDefinition(),
-        OversizedWide3: mockWideDefinition(),
-        OversizedWide4: mockWideDefinition(),
-        OversizedWide5: mockWideDefinition(),
-        OversizedWide6: mockWideDefinition(),
-        OversizedLocalUnion: {
-          description: mockBigDescription,
-          oneOf: [{ $ref: '#/$defs/Duration' }, { type: 'string' }],
-        },
-        OversizedUnion: {
-          description: mockBigDescription,
-          oneOf: [
-            { $ref: './_types.json#/$defs/Duration' },
-            { $ref: './_types.json#/$defs/Wrapper' },
-            { type: 'string' },
-            { const: -1 },
-            { enum: ['first', 'second'] },
-          ],
-        },
-        OversizedHolder: {
-          type: 'object',
-          properties: { big: { $ref: './_types.json#/$defs/Oversized' } },
-        },
+  const mocked = {
+    $defs: {
+      Duration: {
+        oneOf: [{ type: 'string' }, { const: -1 }],
+        description: 'A duration such as "30s".',
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      Wrapper: {
+        type: 'object',
+        properties: { every: { $ref: './_types.json#/$defs/Duration' } },
+      },
+      SelfReferential: {
+        type: 'object',
+        properties: { child: { $ref: './_types.json#/$defs/SelfReferential' } },
+      },
+      Oversized: { type: 'object', description: mockBigDescription },
+      OversizedUndocumented: {
+        type: 'object',
+        properties: { padding: { enum: [mockBigDescription] } },
+      },
+      OversizedWide: mockWideDefinition(),
+      OversizedWide2: mockWideDefinition(),
+      OversizedWide3: mockWideDefinition(),
+      OversizedWide4: mockWideDefinition(),
+      OversizedWide5: mockWideDefinition(),
+      OversizedWide6: mockWideDefinition(),
+      OversizedLocalUnion: {
+        description: mockBigDescription,
+        oneOf: [{ $ref: '#/$defs/Duration' }, { type: 'string' }],
+      },
+      OversizedUnion: {
+        description: mockBigDescription,
+        oneOf: [
+          { $ref: './_types.json#/$defs/Duration' },
+          { $ref: './_types.json#/$defs/Wrapper' },
+          { type: 'string' },
+          { const: -1 },
+          { enum: ['first', 'second'] },
+        ],
+      },
+      OversizedHolder: {
+        type: 'object',
+        properties: { big: { $ref: './_types.json#/$defs/Oversized' } },
+      },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('toDescribedSchema', () => {
   it('returns a schema without references or routing annotations unchanged', async () => {

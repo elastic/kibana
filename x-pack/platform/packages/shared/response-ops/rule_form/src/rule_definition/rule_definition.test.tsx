@@ -25,39 +25,39 @@ import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../constants/rule_flapping', () => {
-      const mocked = {
-      IS_RULE_SPECIFIC_FLAPPING_ENABLED: true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IS_RULE_SPECIFIC_FLAPPING_ENABLED: true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_form', () => {
-      const mocked = {
-      RuleSettingsFlappingForm: (props: RuleSettingsFlappingFormProps) => (
-        <div data-test-subj="ruleSettingsFlappingForm">
-          <button
-            onClick={() =>
-              props.onFlappingChange({
-                lookBackWindow: 15,
-                statusChangeThreshold: 15,
-              })
-            }
-          >
-            onFlappingChange
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSettingsFlappingForm: (props: RuleSettingsFlappingFormProps) => (
+      <div data-test-subj="ruleSettingsFlappingForm">
+        <button
+          onClick={() =>
+            props.onFlappingChange({
+              lookBackWindow: 15,
+              statusChangeThreshold: 15,
+            })
+          }
+        >
+          onFlappingChange
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleType = {
   id: '.es-query',
@@ -117,7 +117,7 @@ const plugins = {
   },
 };
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
 const mockOnChange = vi.fn();
 

@@ -20,28 +20,28 @@ import { DEFAULT_ROUTE_HANDLER_TIMEOUT_MS } from '../constants';
 import { registerGenerateRoute } from './post_generate';
 
 vi.mock('../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnalytics = coreMock.createSetup().analytics;
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/persistence/event_logging', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/persistence/event_logging')),
-      writeAttackDiscoveryEvent: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/discoveries/impl/attack_discovery/persistence/event_logging')),
+    writeAttackDiscoveryEvent: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'test-execution-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'test-execution-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Authorized-by-default authz mock: `hasAllRequested` is true so the route's
@@ -72,12 +72,12 @@ const mockExecuteGenerationWorkflow = vi.fn().mockResolvedValue(undefined);
 const mockResolveApiConfig = vi.fn();
 
 vi.mock('./helpers', () => {
-      const mocked = {
-      executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-      resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
+    resolveApiConfig: (...args: unknown[]) => mockResolveApiConfig(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('registerGenerateRoute', () => {
   let mockRouter: Mocked<IRouter>;

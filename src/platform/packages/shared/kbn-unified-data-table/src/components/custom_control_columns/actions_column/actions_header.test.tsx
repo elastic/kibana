@@ -19,7 +19,7 @@ type ResizeCb = (dimensions: { width: number; height: number }) => void;
 const resizeCallbacks: ResizeCb[] = [];
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiResizeObserver: ({

@@ -12,25 +12,25 @@ import { vi } from 'vitest';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 export const logger = loggingSystemMock.create();
 vi.doMock('@kbn/core-logging-server-internal', () => {
-      const mocked = {
-      LoggingSystem: vi.fn(() => logger),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoggingSystem: vi.fn(() => logger),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const realKbnConfig = (await vi.importActual('@kbn/config'));
+const realKbnConfig = await vi.importActual('@kbn/config');
 
 import { configServiceMock, rawConfigServiceMock } from '@kbn/config-mocks';
 export const configService = configServiceMock.create();
 export const rawConfigService = rawConfigServiceMock.create();
 vi.doMock('@kbn/config', () => {
-      const mocked = {
-      ...realKbnConfig,
-      ConfigService: vi.fn(() => configService),
-      RawConfigService: vi.fn(() => rawConfigService),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...realKbnConfig,
+    ConfigService: vi.fn(() => configService),
+    RawConfigService: vi.fn(() => rawConfigService),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const mockServer = {
   setupCoreConfig: vi.fn(),
@@ -41,6 +41,6 @@ export const mockServer = {
   configService,
 };
 vi.mock('../server', () => {
-      const mocked = { Server: vi.fn(() => mockServer) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Server: vi.fn(() => mockServer) };
+  return { ...mocked, default: mocked };
+});

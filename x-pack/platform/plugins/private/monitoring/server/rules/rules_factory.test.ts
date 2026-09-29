@@ -11,15 +11,15 @@ import { RulesFactory } from './rules_factory';
 import { RULE_CPU_USAGE } from '../../common/constants';
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          getLogger: () => ({ debug: vi.fn() }),
-        },
+  const mocked = {
+    Globals: {
+      app: {
+        getLogger: () => ({ debug: vi.fn() }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RulesFactory', () => {
   const rulesClient = {

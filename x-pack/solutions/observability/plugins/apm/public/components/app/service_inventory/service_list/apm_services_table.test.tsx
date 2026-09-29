@@ -27,24 +27,24 @@ import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/te
 import { EuiThemeProvider } from '@elastic/eui';
 
 vi.mock('../../../../hooks/use_breakpoints', () => {
-      const mocked = {
-      useBreakpoints: () => ({
-        isSmall: false,
-        isLarge: false,
-        isXl: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreakpoints: () => ({
+      isSmall: false,
+      isLarge: false,
+      isXl: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_fallback_to_transactions_fetcher', () => {
-      const mocked = {
-      useFallbackToTransactionsFetcher: () => ({
-        fallbackToTransactions: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFallbackToTransactionsFetcher: () => ({
+      fallbackToTransactions: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKibanaServices = {
   triggersActionsUi: {
@@ -71,7 +71,7 @@ const mockKibanaServices = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => ({
@@ -81,29 +81,29 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 });
 
 vi.mock('../../../alerting/ui_components/alerting_flyout', () => {
-      const mocked = {
-      AlertingFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/slo_overview_flyout', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../shared/slo_overview_flyout')),
-      SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
-        <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../shared/slo_overview_flyout')),
+    SloOverviewFlyout: ({ serviceName }: { serviceName: string }) => (
+      <div data-test-subj="sloOverviewFlyout">SLO Overview Flyout for {serviceName}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseServiceActions = vi.fn();
 vi.mock('./service_actions', () => {
-      const mocked = {
-      useServiceActions: () => mockUseServiceActions(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceActions: () => mockUseServiceActions(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultQuery = {
   rangeFrom: 'now-15m',

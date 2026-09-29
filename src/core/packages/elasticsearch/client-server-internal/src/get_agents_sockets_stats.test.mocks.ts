@@ -23,8 +23,7 @@ export const getHttpsAgentMock = (overrides: Partial<HttpsAgent>) => {
   return Object.assign(new HttpsAgent(), overrides);
 };
 
-export const getAgentsSocketsStatsMock: MockedFunction<typeof getAgentsSocketsStats> =
-  vi.fn();
+export const getAgentsSocketsStatsMock: MockedFunction<typeof getAgentsSocketsStats> = vi.fn();
 
 vi.doMock('./get_agents_sockets_stats', () => {
   return {

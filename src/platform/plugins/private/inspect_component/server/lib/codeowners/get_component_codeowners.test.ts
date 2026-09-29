@@ -17,11 +17,11 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 vi.mock('fs');
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExistsSync = existsSync as MockedFunction<typeof existsSync>;
 const mockReadFileSync = readFileSync as MockedFunction<typeof readFileSync>;

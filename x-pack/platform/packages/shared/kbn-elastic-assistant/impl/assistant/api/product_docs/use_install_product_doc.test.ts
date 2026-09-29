@@ -15,11 +15,11 @@ import { TestProviders } from '../../../mock/test_providers/test_providers';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
 
 vi.mock('../../../..', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInstallProductDoc', () => {
   const mockInstall = vi.fn();

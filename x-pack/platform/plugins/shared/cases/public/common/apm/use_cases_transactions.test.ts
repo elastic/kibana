@@ -17,13 +17,13 @@ import {
 const mockAddLabels = vi.fn();
 const mockStartTransaction = vi.fn(() => ({ addLabels: mockAddLabels }));
 vi.mock('./use_start_transaction', () => {
-      const mocked = {
-      useStartTransaction: () => ({
-        startTransaction: mockStartTransaction,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartTransaction: () => ({
+      startTransaction: mockStartTransaction,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const appId = 'testAppId';
 

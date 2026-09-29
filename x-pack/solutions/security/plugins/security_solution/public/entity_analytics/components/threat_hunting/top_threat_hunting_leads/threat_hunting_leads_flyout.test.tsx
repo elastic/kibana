@@ -18,55 +18,55 @@ import type { HuntingLead } from './types';
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenFlyout = vi.fn();
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({
-        openFlyout: mockOpenFlyout,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({
+      openFlyout: mockOpenFlyout,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout_v2/use_flyout_api', () => {
-      const mocked = {
-      useFlyoutApi: () => ({
-        openEntityFlyout: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutApi: () => ({
+      openEntityFlyout: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {},
-      }),
-      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      useTimeZone: vi.fn(() => 'UTC'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {},
+    }),
+    useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+    useTimeZone: vi.fn(() => 'UTC'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuery = (await vi.importMock('@kbn/react-query')).useQuery as Mock;
 const mockUseEntityAnalyticsRoutes = (await vi.importMock('../../../api/api'))

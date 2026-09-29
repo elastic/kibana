@@ -39,85 +39,85 @@ vi.mock('react-use/lib/useLocalStorage', () =>
 );
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => ({
-        isFetched: true,
-        data: mockConnectors,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => ({
+      isFetched: true,
+      data: mockConnectors,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_attack_discovery', () => {
-      const mocked = {
-      useAttackDiscovery: vi.fn().mockReturnValue({
-        fetchAttackDiscoveries: vi.fn(),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscovery: vi.fn().mockReturnValue({
+      fetchAttackDiscoveries: vi.fn(),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          uiSettings: {
-            get: vi.fn(),
-          },
-          settings: {},
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        uiSettings: {
+          get: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        settings: {},
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: () => ({
-        http: {},
-      }),
-      ATTACK_DISCOVERY_STORAGE_KEY: 'attackDiscovery',
-      DEFAULT_ASSISTANT_NAMESPACE: 'elasticAssistantDefault',
-      DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS: 100,
-      END_LOCAL_STORAGE_KEY: 'end',
-      FILTERS_LOCAL_STORAGE_KEY: 'filters',
-      MAX_ALERTS_LOCAL_STORAGE_KEY: 'maxAlerts',
-      QUERY_LOCAL_STORAGE_KEY: 'query',
-      START_LOCAL_STORAGE_KEY: 'start',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => ({
+      http: {},
+    }),
+    ATTACK_DISCOVERY_STORAGE_KEY: 'attackDiscovery',
+    DEFAULT_ASSISTANT_NAMESPACE: 'elasticAssistantDefault',
+    DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS: 100,
+    END_LOCAL_STORAGE_KEY: 'end',
+    FILTERS_LOCAL_STORAGE_KEY: 'filters',
+    MAX_ALERTS_LOCAL_STORAGE_KEY: 'maxAlerts',
+    QUERY_LOCAL_STORAGE_KEY: 'query',
+    START_LOCAL_STORAGE_KEY: 'start',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: () => ({
-        dataView: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: () => ({
+      dataView: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kuery', () => {
-      const mocked = {
-      convertToBuildEsQuery: vi.fn().mockReturnValue([{}, null]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToBuildEsQuery: vi.fn().mockReturnValue([{}, null]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_invalid_filter_query', () => {
-      const mocked = {
-      useInvalidFilterQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidFilterQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_get_attack_discovery_generations', () => {
-      const mocked = {
-      useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAttackDiscoveryControls', () => {
   beforeEach(() => {

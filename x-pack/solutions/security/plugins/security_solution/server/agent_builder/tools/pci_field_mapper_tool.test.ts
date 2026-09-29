@@ -146,8 +146,7 @@ describe('pciFieldMapperTool', () => {
         createToolHandlerContext(mockRequest, mockEsClient, mockLogger)
       );
 
-      const searchCall = (mockEsClient.asCurrentUser.search as unknown as Mock).mock
-        .calls[0][0];
+      const searchCall = (mockEsClient.asCurrentUser.search as unknown as Mock).mock.calls[0][0];
       expect(searchCall.query).toEqual({
         range: {
           '@timestamp': {

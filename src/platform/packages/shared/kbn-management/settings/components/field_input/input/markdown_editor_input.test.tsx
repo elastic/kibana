@@ -23,22 +23,22 @@ const id = 'some:markdown:field';
 const initialValue = '# A Markdown Title';
 
 vi.mock('../code_editor', () => {
-      const mocked = {
-      CodeEditor: ({ value, onChange }: CodeEditorProps) => (
-        <input
-          data-test-subj="management-settings-editField-some:markdown:field"
-          type="text"
-          value={String(value)}
-          onChange={(e) => {
-            if (onChange) {
-              onChange(e.target.value, e as any);
-            }
-          }}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: ({ value, onChange }: CodeEditorProps) => (
+      <input
+        data-test-subj="management-settings-editField-some:markdown:field"
+        type="text"
+        value={String(value)}
+        onChange={(e) => {
+          if (onChange) {
+            onChange(e.target.value, e as any);
+          }
+        }}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MarkdownEditorInput', () => {
   const onInputChange = vi.fn();

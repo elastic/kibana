@@ -23,29 +23,29 @@ const mockPackageInfo = {
 } as unknown as PackageInfo;
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LazyPackagePolicyInputVarField: ({ value, errors }: { value: string; errors?: string[] }) => (
-        <div data-test-subj="mocked-input-field" data-value={value || ''}>
-          {value ? `Value: ${value}` : ''}
-          {errors && errors.length > 0 && <div data-test-subj="field-error">{errors.join(', ')}</div>}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazyPackagePolicyInputVarField: ({ value, errors }: { value: string; errors?: string[] }) => (
+      <div data-test-subj="mocked-input-field" data-value={value || ''}>
+        {value ? `Value: ${value}` : ''}
+        {errors && errors.length > 0 && <div data-test-subj="field-error">{errors.join(', ')}</div>}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils', () => {
-      const mocked = {
-      findVariableDef: vi.fn((packageInfo, varName) => ({
-        name: varName,
-        type: 'text',
-        title: varName.split('.').pop(),
-        required: true,
-      })),
-      fieldIsInvalid: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findVariableDef: vi.fn((packageInfo, varName) => ({
+      name: varName,
+      type: 'text',
+      title: varName.split('.').pop(),
+      required: true,
+    })),
+    fieldIsInvalid: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AwsInputVarFields', () => {
   const mockOnChange = vi.fn();
@@ -107,7 +107,7 @@ describe('AwsInputVarFields', () => {
   });
 
   it('handles validation errors and field variations', async () => {
-    const utils = (await vi.importMock('../utils'));
+    const utils = await vi.importMock('../utils');
     utils.fieldIsInvalid.mockReturnValue(true);
 
     const emptyFields = awsFields.map((field) => ({ ...field, value: '' }));

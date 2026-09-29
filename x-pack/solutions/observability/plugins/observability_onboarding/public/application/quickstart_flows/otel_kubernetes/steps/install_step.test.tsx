@@ -13,23 +13,23 @@ import { renderWithHostPageProviders } from '../../../pages/host/__tests__/test_
 import { OtelKubernetesInstallStep } from './install_step';
 
 vi.mock('../../shared/masked_code_block', () => {
-      const mocked = {
-      MaskedCodeBlock: ({
-        value,
-        secrets,
-        dataTestSubj,
-      }: {
-        value: string;
-        secrets: string[];
-        dataTestSubj: string;
-      }) => (
-        <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
-          {value}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MaskedCodeBlock: ({
+      value,
+      secrets,
+      dataTestSubj,
+    }: {
+      value: string;
+      secrets: string[];
+      dataTestSubj: string;
+    }) => (
+      <div data-test-subj={dataTestSubj} data-value={value} data-secrets={secrets.join('|')}>
+        {value}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OtelKubernetesInstallStep', () => {
   it('renders the heading and masked install command when requested', () => {

@@ -17,11 +17,11 @@ import { getFilterKeys, isFilterApplicable } from './is_filter_applicable';
 const mockGetIndexPatternFromFilter = vi.fn();
 
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = {
-      getIndexPatternFromFilter: (...args: unknown[]) => mockGetIndexPatternFromFilter(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIndexPatternFromFilter: (...args: unknown[]) => mockGetIndexPatternFromFilter(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('is_filter_applicable', () => {
   const dataView: DataView = createStubDataView({

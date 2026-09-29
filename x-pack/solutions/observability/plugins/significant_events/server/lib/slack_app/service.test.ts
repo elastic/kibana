@@ -29,11 +29,11 @@ const getAgent = vi.fn();
 const getRegistry = vi.fn();
 
 vi.mock('@kbn/core-http-server-utils', () => {
-      const mocked = {
-      kibanaRequestFactory: vi.fn((rawRequest) => rawRequest),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaRequestFactory: vi.fn((rawRequest) => rawRequest),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface HarnessOptions {
   /** `streams.significantEventsAppsEnabled` feature flag value. Defaults to enabled. */

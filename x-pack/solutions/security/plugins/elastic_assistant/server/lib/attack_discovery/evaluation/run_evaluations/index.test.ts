@@ -21,33 +21,33 @@ import { mockExperimentConnector } from '../__mocks__/mock_experiment_connector'
 import { getLlmType } from '../../../../routes/utils';
 
 vi.mock('@kbn/langchain/server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/langchain/server')),
+  const mocked = {
+    ...(await vi.importActual('@kbn/langchain/server')),
 
-      ActionsClientLlm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+    ActionsClientLlm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('langsmith/evaluation', () => {
-      const mocked = {
-      evaluate: vi.fn(async (predict: Function) =>
-        predict({
-          overrides: {
-            errors: ['test-error'],
-          },
-        })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    evaluate: vi.fn(async (predict: Function) =>
+      predict({
+        overrides: {
+          errors: ['test-error'],
+        },
+      })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/get_custom_evaluator', () => {
-      const mocked = {
-      getCustomEvaluator: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCustomEvaluator: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/get_evaluator_llm', () => {
   const mockLlm = vi.fn() as unknown as ActionsClientLlm;

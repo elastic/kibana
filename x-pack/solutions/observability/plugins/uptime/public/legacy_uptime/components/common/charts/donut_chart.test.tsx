@@ -15,13 +15,13 @@ import React from 'react';
 import { mockCore } from '../../../lib/helper/rtl_helpers';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockImplementation(() => ({
-        services: mockCore(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockImplementation(() => ({
+      services: mockCore(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DonutChart component', () => {
   it('passes correct props without errors for valid props', () => {

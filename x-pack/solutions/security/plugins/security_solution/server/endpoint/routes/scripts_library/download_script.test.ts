@@ -44,9 +44,7 @@ describe('Download script API route', () => {
 
     httpRequestMock.params = { script_id: '123' };
 
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
-      'space_a'
-    );
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue('space_a');
 
     registerDownloadScriptRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
@@ -63,9 +61,7 @@ describe('Download script API route', () => {
     });
 
     it('should error if user has no authz to api', async () => {
-      (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-      ).mockResolvedValue(
+      ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteScriptsLibrary: false,
           canReadScriptsLibrary: false,

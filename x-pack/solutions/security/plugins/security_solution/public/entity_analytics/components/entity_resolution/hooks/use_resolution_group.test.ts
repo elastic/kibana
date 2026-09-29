@@ -17,11 +17,11 @@ import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 vi.setConfig({ testTimeout: 15000 });
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetch = vi.fn();
 (useKibana as Mock).mockReturnValue({ services: { http: { fetch: mockFetch } } });

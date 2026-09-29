@@ -25,29 +25,29 @@ const mockFns = {
 };
 
 vi.mock('../..', () => {
-      const mocked = {
-      appContextService: {
-        getSecurity: vi.fn(),
-        getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
-        getExperimentalFeatures: vi.fn().mockReturnValue({ enableResolveDependencies: false }),
-      },
-      packagePolicyService: {
-        list: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getSecurity: vi.fn(),
+      getInternalUserSOClientWithoutSpaceExtension: vi.fn().mockReturnValue({}),
+      getExperimentalFeatures: vi.fn().mockReturnValue({ enableResolveDependencies: false }),
+    },
+    packagePolicyService: {
+      list: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock getInstallationObject so the dependency walker in collectSpacesForUninstallClosure
 // finds no dependencies (returns undefined for any dep lookup).
 vi.mock('.', () => {
-      const mocked = {
-      getInstallationObject: vi.fn().mockResolvedValue(undefined),
-      kibanaSavedObjectTypes: [],
-      getPackageInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInstallationObject: vi.fn().mockResolvedValue(undefined),
+    kibanaSavedObjectTypes: [],
+    getPackageInfo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetSecurity = appContextService.getSecurity as Mock;
 const mockGetExperimentalFeatures = appContextService.getExperimentalFeatures as Mock;

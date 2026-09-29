@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux-v7';
+import { vi } from 'vitest';
 import type { monaco } from '@kbn/monaco';
 import { useFocusedStepDecoration } from './use_focused_step_decoration';
 import { createMockStore } from '../../../../entities/workflows/store/__mocks__/store.mock';
@@ -25,7 +24,7 @@ import type { StepInfo } from '../../../../entities/workflows/store/workflow_det
 import { createStepInfo } from '../../../../shared/test_utils';
 
 vi.mock('@kbn/monaco', async () => {
-  const actualMonaco = (await vi.importActual('@kbn/monaco'));
+  const actualMonaco = await vi.importActual('@kbn/monaco');
   return {
     ...actualMonaco,
     monaco: {
@@ -41,7 +40,7 @@ vi.mock('@kbn/monaco', async () => {
 });
 
 vi.mock('@elastic/eui', async () => {
-  const actualEui = (await vi.importActual('@elastic/eui'));
+  const actualEui = await vi.importActual('@elastic/eui');
   return {
     ...actualEui,
     useEuiTheme: vi.fn(() => ({
@@ -59,11 +58,11 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@emotion/css', () => {
-      const mocked = {
-      css: vi.fn(() => 'mock-block-class-name'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    css: vi.fn(() => 'mock-block-class-name'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockEditor = () => {
   const decorationsCollection = {

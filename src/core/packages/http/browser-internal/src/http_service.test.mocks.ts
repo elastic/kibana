@@ -13,8 +13,8 @@ import { loadingCountServiceMock } from './loading_count_service.mock';
 
 export const loadingServiceMock = loadingCountServiceMock.create();
 vi.doMock('./loading_count_service', () => {
-      const mocked = {
-      LoadingCountService: vi.fn(() => loadingServiceMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadingCountService: vi.fn(() => loadingServiceMock),
+  };
+  return { ...mocked, default: mocked };
+});

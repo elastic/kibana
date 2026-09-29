@@ -620,26 +620,24 @@ describe('queryMatrixScores', () => {
 
   it('prefers the newest run when the same model ran on several unioned branches', async () => {
     // When a model exists on both branches, selection still picks the most recent experiment.
-    const listExperiments = vi
-      .fn()
-      .mockImplementation(async ({ branch }: { branch?: string }) => {
-        if (branch === 'old') {
-          return [
-            experiment({
-              experiment_id: 'exp-old',
-              modelId: 'm1',
-              timestamp: '2026-01-01T00:00:00.000Z',
-            }),
-          ];
-        }
+    const listExperiments = vi.fn().mockImplementation(async ({ branch }: { branch?: string }) => {
+      if (branch === 'old') {
         return [
           experiment({
-            experiment_id: 'exp-new',
+            experiment_id: 'exp-old',
             modelId: 'm1',
-            timestamp: '2026-06-01T00:00:00.000Z',
+            timestamp: '2026-01-01T00:00:00.000Z',
           }),
         ];
-      });
+      }
+      return [
+        experiment({
+          experiment_id: 'exp-new',
+          modelId: 'm1',
+          timestamp: '2026-06-01T00:00:00.000Z',
+        }),
+      ];
+    });
     const getExperimentStats = vi.fn().mockResolvedValue(stats);
     const client = { listExperiments, getExperimentStats } as unknown as MatrixEvalsClient;
 

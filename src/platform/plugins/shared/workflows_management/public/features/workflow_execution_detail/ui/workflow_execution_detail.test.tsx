@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { render, screen } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { render, screen } from '@testing-library/react';
-import React from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import type { WorkflowExecutionDto, WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
@@ -23,12 +23,12 @@ import {
 } from '../../../shared/test_utils';
 
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseQueryClient = useQueryClient as MockedFunction<typeof useQueryClient>;
 
 const mockSetSelectedStepExecution = vi.fn();
@@ -47,11 +47,11 @@ const mockUseWorkflowUrlState = vi.fn(() => ({
   shouldAutoResume: mockUrlState.shouldAutoResume,
 }));
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Track step execution details props
 const mockStepExecutionDetailsProps: { current: Record<string, unknown> } = {
@@ -59,40 +59,40 @@ const mockStepExecutionDetailsProps: { current: Record<string, unknown> } = {
 };
 
 vi.mock('./workflow_execution_panel', () => {
-      const mocked = {
-      WorkflowExecutionPanel: ({
-        execution,
-        error,
-        showBackButton,
-      }: {
-        execution: WorkflowExecutionDto | null;
-        error: Error | null;
-        showBackButton: boolean;
-      }) => (
-        <div data-test-subj="execution-panel">
-          <div data-test-subj="show-back-button">{String(showBackButton)}</div>
-          <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionPanel: ({
+      execution,
+      error,
+      showBackButton,
+    }: {
+      execution: WorkflowExecutionDto | null;
+      error: Error | null;
+      showBackButton: boolean;
+    }) => (
+      <div data-test-subj="execution-panel">
+        <div data-test-subj="show-back-button">{String(showBackButton)}</div>
+        <div data-test-subj="panel-execution-status">{execution?.status ?? 'no-execution'}</div>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_step_execution_details', () => {
-      const mocked = {
-      WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
-        mockStepExecutionDetailsProps.current = props;
-        return (
-          <div data-test-subj="step-details">
-            <div data-test-subj="step-resume-message">{String(props.resumeMessage ?? '')}</div>
-            <div data-test-subj="step-auto-resume">{String(props.shouldAutoResume)}</div>
-            <div data-test-subj="step-loading">{String(props.isLoadingStepData)}</div>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowStepExecutionDetails: (props: Record<string, unknown>) => {
+      mockStepExecutionDetailsProps.current = props;
+      return (
+        <div data-test-subj="step-details">
+          <div data-test-subj="step-resume-message">{String(props.resumeMessage ?? '')}</div>
+          <div data-test-subj="step-auto-resume">{String(props.shouldAutoResume)}</div>
+          <div data-test-subj="step-loading">{String(props.isLoadingStepData)}</div>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 type UseStepExecutionParams = Parameters<
   typeof import('../model/use_step_execution').useStepExecution
@@ -109,22 +109,22 @@ const mockUseStepExecution = vi.fn<UseStepExecutionQueryStub, UseStepExecutionPa
 }));
 
 vi.mock('../model/use_step_execution', () => {
-      const mocked = {
-      useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStepExecution: (...args: UseStepExecutionParams) => mockUseStepExecution(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockChildExecutions = new Map();
 vi.mock('../model/use_child_workflow_executions', () => {
-      const mocked = {
-      useChildWorkflowExecutions: vi.fn(() => ({
-        childExecutions: mockChildExecutions,
-        isLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChildWorkflowExecutions: vi.fn(() => ({
+      childExecutions: mockChildExecutions,
+      isLoading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPollingResult: {
   workflowExecution: WorkflowExecutionDto | undefined;
@@ -137,20 +137,20 @@ const mockPollingResult: {
 
 const mockUseWorkflowExecutionPolling = vi.fn((): typeof mockPollingResult => mockPollingResult);
 vi.mock('../../../entities/workflows/model/use_workflow_execution_polling', () => {
-      const mocked = {
-      useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowExecutionPolling: () => mockUseWorkflowExecutionPolling(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The component reads the polled execution from the store; mirror the mocked poll result there.
 vi.mock('../../../entities/workflows/store/workflow_detail/selectors', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../entities/workflows/store/workflow_detail/selectors')),
-      selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../entities/workflows/store/workflow_detail/selectors')),
+    selectExecution: () => mockUseWorkflowExecutionPolling().workflowExecution,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockExecution = (
   overrides: Partial<WorkflowExecutionDto> = {}

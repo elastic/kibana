@@ -178,9 +178,9 @@ describe('tabs actions', () => {
       };
       const expectedToolkit = EMPTY_CONTEXT_AWARENESS_TOOLKIT;
 
-      vi
-        .spyOn(contextAwarenessToolkitModule, 'createContextAwarenessToolkit')
-        .mockReturnValue(expectedToolkit);
+      vi.spyOn(contextAwarenessToolkitModule, 'createContextAwarenessToolkit').mockReturnValue(
+        expectedToolkit
+      );
       const createTabRuntimeStateSpy = vi.spyOn(runtimeStateModule, 'createTabRuntimeState');
 
       internalState.dispatch(

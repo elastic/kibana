@@ -28,22 +28,22 @@ import {
 import { MULTI_KEY_VISUAL_SEPARATOR } from './constants';
 
 vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
-      const mocked = {
-      loadFieldStats: vi.fn().mockResolvedValue({
-        topValues: {
-          buckets: [
-            {
-              key: 'A',
-            },
-            {
-              key: 'B',
-            },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadFieldStats: vi.fn().mockResolvedValue({
+      topValues: {
+        buckets: [
+          {
+            key: 'A',
+          },
+          {
+            key: 'B',
+          },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const indexPattern = createMockedIndexPattern();
 const dataMock = dataPluginMock.createStartContract();

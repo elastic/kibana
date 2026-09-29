@@ -30,11 +30,11 @@ const now = new Date();
 const nowIso = now.toISOString();
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123abc'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123abc'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('POST custom element', () => {
   let routeHandler: RequestHandler<any, any, any>;

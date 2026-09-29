@@ -18,19 +18,19 @@ vi.mock('@kbn/datemath', () => ({
 }));
 
 vi.mock('@kbn/es-query', () => {
-      const mocked = {
-      buildEsQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEsQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLResults: vi.fn(),
-      getESQLTimeField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLResults: vi.fn(),
+    getESQLTimeField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { HttpStart } from '@kbn/core/public';
 import type { Filter, Query } from '@kbn/es-query';

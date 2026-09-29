@@ -16,37 +16,37 @@ import type { ParsedMetricItem } from '../../types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 
 vi.mock('./metrics_flyout_body', () => {
-      const mocked = {
-      MetricFlyoutBody: vi.fn(() => <div data-test-subj="metricFlyoutBody" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricFlyoutBody: vi.fn(() => <div data-test-subj="metricFlyoutBody" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_flyout_a11y', () => {
-      const mocked = {
-      useFlyoutA11y: vi.fn(() => ({
-        a11yProps: {},
-        screenReaderDescription: null,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutA11y: vi.fn(() => ({
+      a11yProps: {},
+      screenReaderDescription: null,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../context/fields_metadata', () => {
-      const mocked = {
-      useFieldsMetadataContext: vi.fn(() => ({
-        fieldsMetadata: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldsMetadataContext: vi.fn(() => ({
+      fieldsMetadata: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useLocalStorage', () => {
   return vi.fn(() => [544, vi.fn()]);
 });
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useIsWithinMinBreakpoint: vi.fn(() => true),
@@ -56,8 +56,10 @@ vi.mock('@elastic/eui', async () => {
 describe('MetricInsightsFlyout', async () => {
   const mockMetricFlyoutBody = (await vi.importMock('./metrics_flyout_body')).MetricFlyoutBody;
   const mockUseFlyoutA11y = (await vi.importMock('./hooks/use_flyout_a11y')).useFlyoutA11y;
-  const mockUseFieldsMetadataContext = (await vi.importMock('../../context/fields_metadata')).useFieldsMetadataContext;
-  const mockUseIsWithinMinBreakpoint = (await vi.importMock('@elastic/eui')).useIsWithinMinBreakpoint;
+  const mockUseFieldsMetadataContext = (await vi.importMock('../../context/fields_metadata'))
+    .useFieldsMetadataContext;
+  const mockUseIsWithinMinBreakpoint = (await vi.importMock('@elastic/eui'))
+    .useIsWithinMinBreakpoint;
 
   const createMockMetric = (overrides: Partial<ParsedMetricItem> = {}): ParsedMetricItem =>
     ({

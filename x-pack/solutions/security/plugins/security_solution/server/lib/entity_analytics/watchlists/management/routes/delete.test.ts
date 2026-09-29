@@ -18,23 +18,23 @@ import {
 const mockWatchlistDelete = vi.fn();
 const mockGetEntitySourceIds = vi.fn();
 vi.mock('../watchlist_config', () => {
-      const mocked = {
-      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
-        delete: mockWatchlistDelete,
-        getEntitySourceIds: mockGetEntitySourceIds,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+      delete: mockWatchlistDelete,
+      getEntitySourceIds: mockGetEntitySourceIds,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_sources/entity_sources_service', () => {
-      const mocked = {
-      createEntitySourcesService: vi.fn().mockImplementation(() => ({
-        deleteWatchlistEntities: vi.fn().mockResolvedValue(undefined),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEntitySourcesService: vi.fn().mockImplementation(() => ({
+      deleteWatchlistEntities: vi.fn().mockResolvedValue(undefined),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetStartServices = vi.fn();
 

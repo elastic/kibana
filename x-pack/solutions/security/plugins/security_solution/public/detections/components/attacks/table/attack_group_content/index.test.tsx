@@ -23,43 +23,40 @@ import {
 
 const mockReportEvent = vi.fn();
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          telemetry: {
-            reportEvent: mockReportEvent,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        telemetry: {
+          reportEvent: mockReportEvent,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../attack_discovery/pages/settings_flyout/schedule/details_flyout', () => {
-      const mocked = {
-      DetailsFlyout: vi.fn(() => <div data-test-subj="mock-details-flyout" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DetailsFlyout: vi.fn(() => <div data-test-subj="mock-details-flyout" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
-vi.mock(
-  '../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter',
-  () => {
-      const mocked = {
-        AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }) => (
-          <div data-test-subj="mock-markdown-formatter">{markdown}</div>
-        )),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
+  const mocked = {
+    AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }) => (
+      <div data-test-subj="mock-markdown-formatter">{markdown}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./subtitle', () => {
-      const mocked = {
-      Subtitle: vi.fn(() => <div data-test-subj="mock-subtitle" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Subtitle: vi.fn(() => <div data-test-subj="mock-subtitle" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttack = getMockAttackDiscoveryAlerts()[0];
 

@@ -106,9 +106,7 @@ vi.mock('./spaces/helpers', async () => {
 
 vi.mock('./license');
 
-const mockedSendTelemetryEvents = sendTelemetryEvents as MockedFunction<
-  typeof sendTelemetryEvents
->;
+const mockedSendTelemetryEvents = sendTelemetryEvents as MockedFunction<typeof sendTelemetryEvents>;
 
 const ASSETS_MAP_FIXTURES = new Map([
   [
@@ -301,61 +299,61 @@ vi.mock('./epm/packages', () => {
 });
 
 vi.mock('../../common/services/package_to_package_policy', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/services/package_to_package_policy')),
-      packageToPackagePolicy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/services/package_to_package_policy')),
+    packageToPackagePolicy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./epm/registry', () => {
-      const mocked = {
-      getPackage: vi.fn().mockResolvedValue({ assetsMap: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackage: vi.fn().mockResolvedValue({ assetsMap: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./epm/packages/get', () => {
-      const mocked = {
-      getPackageAssetsMap: vi.fn().mockResolvedValue(new Map()),
-      getAgentTemplateAssetsMap: vi.fn().mockImplementation(async (params) => {
-        const assetsMap = new Map();
-        // Add mock template data for aws package
-        if (params.packageInfo.name === 'aws') {
-          assetsMap.set('test-template.yml', {
-            buffer: Buffer.from('mock template content'),
-            path: 'test-template.yml',
-          });
-        }
-        if (params.packageInfo.name === 'test') {
-          assetsMap.set(
-            'data_stream/cel.yml.hbs',
-            Buffer.from(
-              '{{#semverSatisfies _meta.agent.version "^9.3.0"}}mock template content{{/semverSatisfies}}'
-            )
-          );
-        }
-        return assetsMap;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackageAssetsMap: vi.fn().mockResolvedValue(new Map()),
+    getAgentTemplateAssetsMap: vi.fn().mockImplementation(async (params) => {
+      const assetsMap = new Map();
+      // Add mock template data for aws package
+      if (params.packageInfo.name === 'aws') {
+        assetsMap.set('test-template.yml', {
+          buffer: Buffer.from('mock template content'),
+          path: 'test-template.yml',
+        });
+      }
+      if (params.packageInfo.name === 'test') {
+        assetsMap.set(
+          'data_stream/cel.yml.hbs',
+          Buffer.from(
+            '{{#semverSatisfies _meta.agent.version "^9.3.0"}}mock template content{{/semverSatisfies}}'
+          )
+        );
+      }
+      return assetsMap;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/version_specific_policies', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils/version_specific_policies')),
-      getAgentVersionsForVersionSpecificPolicies: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils/version_specific_policies')),
+    getAgentVersionsForVersionSpecificPolicies: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_policies/package_policies_to_agent_inputs', async () => {
-      const mocked = {
-      ...(await vi.importActual('./agent_policies/package_policies_to_agent_inputs')),
-      recompileInputsWithAgentVersion: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./agent_policies/package_policies_to_agent_inputs')),
+    recompileInputsWithAgentVersion: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent_policy');
 const mockAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
@@ -375,18 +373,18 @@ vi.mock('./audit_logging');
 const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 
 vi.mock('./secrets', () => {
-      const mocked = {
-      isSecretStorageEnabled: vi.fn(),
-      toCompiledSecretRef: vi.fn((id: string) => ({
-        id,
-        isSecretRef: true,
-      })),
-      extractAndWriteSecrets: vi.fn(),
-      extractAndUpdateSecrets: vi.fn(),
-      deleteSecretsIfNotReferenced: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSecretStorageEnabled: vi.fn(),
+    toCompiledSecretRef: vi.fn((id: string) => ({
+      id,
+      isSecretRef: true,
+    })),
+    extractAndWriteSecrets: vi.fn(),
+    extractAndUpdateSecrets: vi.fn(),
+    deleteSecretsIfNotReferenced: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedSecretsModule = secretsModule as Mocked<typeof secretsModule>;
 
@@ -15368,8 +15366,9 @@ describe('_getAssetForTemplatePath()', () => {
 });
 
 describe('compilePackagePolicyForVersions()', () => {
-  const mockRecompileInputsWithAgentVersion =
-    recompileInputsWithAgentVersion as MockedFunction<typeof recompileInputsWithAgentVersion>;
+  const mockRecompileInputsWithAgentVersion = recompileInputsWithAgentVersion as MockedFunction<
+    typeof recompileInputsWithAgentVersion
+  >;
   const mockGetAgentVersionsForVersionSpecificPolicies =
     getAgentVersionsForVersionSpecificPolicies as MockedFunction<
       typeof getAgentVersionsForVersionSpecificPolicies

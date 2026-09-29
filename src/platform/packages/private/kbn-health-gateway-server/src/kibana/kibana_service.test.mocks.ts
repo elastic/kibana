@@ -11,6 +11,6 @@ import { vi } from 'vitest';
 
 export const mockReadFileSync = vi.fn();
 vi.doMock('fs', () => {
-      const mocked = { readFileSync: mockReadFileSync };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { readFileSync: mockReadFileSync };
+  return { ...mocked, default: mocked };
+});

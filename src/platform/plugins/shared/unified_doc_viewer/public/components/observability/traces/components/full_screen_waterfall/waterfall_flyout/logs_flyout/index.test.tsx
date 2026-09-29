@@ -35,13 +35,13 @@ const mockIndexes = {
 };
 
 vi.mock('../../../../../../../hooks/use_data_sources', () => {
-      const mocked = {
-      useDataSourcesContext: () => ({
-        indexes: mockIndexes,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataSourcesContext: () => ({
+      indexes: mockIndexes,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('LogFlyoutContent', () => {
   const mockHit = buildDataTableRecord(

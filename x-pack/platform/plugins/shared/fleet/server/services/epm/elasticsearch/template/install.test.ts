@@ -21,22 +21,22 @@ import { saveSettings } from '../../../settings';
 import { prepareTemplate, prepareToInstallTemplates } from './install';
 
 vi.mock('../../fields/field', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../fields/field')),
-      loadDatastreamsFieldsFromYaml: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../fields/field')),
+    loadDatastreamsFieldsFromYaml: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../settings', () => {
-      const mocked = {
-      getSettingsOrUndefined: vi.fn().mockResolvedValue({
-        ilm_migration_status: {},
-      }),
-      saveSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSettingsOrUndefined: vi.fn().mockResolvedValue({
+      ilm_migration_status: {},
+    }),
+    saveSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedLoadFieldsFromYaml = loadDatastreamsFieldsFromYaml as MockedFunction<
   typeof loadDatastreamsFieldsFromYaml

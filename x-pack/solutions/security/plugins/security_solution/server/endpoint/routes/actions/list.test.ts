@@ -92,9 +92,7 @@ describe('Action List Route', () => {
     }: CallApiRouteInterface): Promise<
       AwaitedProperties<SecuritySolutionRequestHandlerContextMock>
     > => {
-      (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(
-        () => superUser
-      );
+      (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(() => superUser);
 
       const ctx = createRouteHandlerContext(mockScopedClient, mockSavedObjectClient);
 

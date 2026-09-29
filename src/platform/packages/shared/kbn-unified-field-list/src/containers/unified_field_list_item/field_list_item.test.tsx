@@ -22,27 +22,27 @@ import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { UnifiedFieldListItem } from './field_list_item';
 
 vi.mock('../../services/field_stats', () => {
-      const mocked = {
-      loadFieldStats: vi.fn().mockResolvedValue({
-        totalDocuments: 1624,
-        sampledDocuments: 1624,
-        sampledValues: 3248,
-        topValues: {
-          buckets: [
-            {
-              count: 2042,
-              key: 'osx',
-            },
-            {
-              count: 1206,
-              key: 'winx',
-            },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadFieldStats: vi.fn().mockResolvedValue({
+      totalDocuments: 1624,
+      sampledDocuments: 1624,
+      sampledValues: 3248,
+      topValues: {
+        buckets: [
+          {
+            count: 2042,
+            key: 'osx',
+          },
+          {
+            count: 1206,
+            key: 'winx',
+          },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = async ({
   canFilter = true,

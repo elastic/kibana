@@ -15,18 +15,18 @@ import {
 } from './use_line_differences_decorations';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        Range: vi.fn((startLine, startCol, endLine, endCol) => ({
-          startLineNumber: startLine,
-          startColumn: startCol,
-          endLineNumber: endLine,
-          endColumn: endCol,
-        })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    monaco: {
+      Range: vi.fn((startLine, startCol, endLine, endCol) => ({
+        startLineNumber: startLine,
+        startColumn: startCol,
+        endLineNumber: endLine,
+        endColumn: endCol,
+      })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockEditor = () => {
   const clearFn = vi.fn();

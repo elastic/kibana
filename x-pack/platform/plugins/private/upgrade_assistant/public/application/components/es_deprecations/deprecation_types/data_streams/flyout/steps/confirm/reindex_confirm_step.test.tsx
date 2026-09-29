@@ -21,7 +21,7 @@ import {
 } from './test_utils/confirm_step_test_scaffold';
 
 vi.mock('../../../../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../../../../app_context'));
+  const actual = await vi.importActual('../../../../../../../app_context');
 
   return {
     ...actual,
@@ -45,41 +45,41 @@ vi.mock('../../../../../../../app_context', async () => {
 });
 
 vi.mock('./warnings', () => {
-      const mocked = {
-      IncompatibleDataInDataStreamWarningCheckbox: ({
-        isChecked,
-        onChange,
-        id,
-      }: WarningCheckboxProps) => (
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={onChange}
-          id={id}
-          data-test-subj={id}
-          aria-label={id}
-        />
-      ),
-      AffectExistingSetupsWarningCheckbox: ({ isChecked, onChange, id }: WarningCheckboxProps) => (
-        <input
-          type="checkbox"
-          checked={isChecked}
-          onChange={onChange}
-          id={id}
-          data-test-subj={id}
-          aria-label={id}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IncompatibleDataInDataStreamWarningCheckbox: ({
+      isChecked,
+      onChange,
+      id,
+    }: WarningCheckboxProps) => (
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={onChange}
+        id={id}
+        data-test-subj={id}
+        aria-label={id}
+      />
+    ),
+    AffectExistingSetupsWarningCheckbox: ({ isChecked, onChange, id }: WarningCheckboxProps) => (
+      <input
+        type="checkbox"
+        checked={isChecked}
+        onChange={onChange}
+        id={id}
+        data-test-subj={id}
+        aria-label={id}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/nodes_low_disk_space', () => {
-      const mocked = {
-      NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowDiskSpaceCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NodesLowSpaceCallOut: () => <div data-test-subj="nodesLowDiskSpaceCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWarnings = createWarnings('reindex');
 

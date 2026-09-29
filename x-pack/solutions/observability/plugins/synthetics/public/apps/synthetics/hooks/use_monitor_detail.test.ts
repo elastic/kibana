@@ -16,11 +16,11 @@ import { HEARTBEAT_UNMAPPED_LOCATION_LABEL } from '../../../../common/runtime_ty
 import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_defaults';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 

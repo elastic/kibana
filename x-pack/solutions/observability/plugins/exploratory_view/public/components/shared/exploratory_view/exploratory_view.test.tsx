@@ -19,7 +19,7 @@ import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assist
 const mockObservabilityAIAssistant = observabilityAIAssistantPluginMock.createStartContract();
 
 vi.mock('./hooks/use_kibana', async () => {
-  const originalModule = (await vi.importActual('./hooks/use_kibana'));
+  const originalModule = await vi.importActual('./hooks/use_kibana');
   return {
     ...originalModule,
     useKibana: () => {

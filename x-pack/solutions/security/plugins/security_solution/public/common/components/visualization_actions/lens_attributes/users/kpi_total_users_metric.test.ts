@@ -21,23 +21,23 @@ import { useDataView } from '../../../../../data_view_manager/hooks/use_data_vie
 import { withIndices } from '../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          detailName: 'elastic',
-          pageName: 'users',
-          tabName: 'events',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        detailName: 'elastic',
+        pageName: 'users',
+        tabName: 'events',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('kpiTotalUsersMetricLensAttributes', () => {
   beforeAll(() => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['auditbeat-mytest-*'], 'security-solution-my-test'));
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(['auditbeat-mytest-*'], 'security-solution-my-test')
+    );
   });
 
   it('should render', () => {

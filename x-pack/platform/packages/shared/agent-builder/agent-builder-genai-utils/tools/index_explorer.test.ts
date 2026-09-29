@@ -24,19 +24,19 @@ import type { ScopedModel } from '@kbn/agent-builder-server';
 
 vi.mock('./steps/list_search_sources');
 vi.mock('./utils/ccs', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils/ccs')),
-      getIndexFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils/ccs')),
+    getIndexFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./utils/mappings', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils/mappings')),
-      getDataStreamMappings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils/mappings')),
+    getDataStreamMappings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const listSearchSourcesMock = listSearchSources as Mock;
 const getIndexFieldsMock = getIndexFields as Mock;

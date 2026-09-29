@@ -15,25 +15,25 @@ import { MitreAttack } from './mitre_attack';
 import { MITRE_ATTACK_DETAILS_TEST_ID, MITRE_ATTACK_TITLE_TEST_ID } from './test_ids';
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/mitre/use_mitre_configuration', () => {
-      const mocked = {
-      useMitreConfiguration: vi.fn().mockReturnValue({
-        tactics: [],
-        techniques: [],
-        subtechniques: [],
-        frameworkVersion: undefined,
-        isLoading: false,
-        isError: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMitreConfiguration: vi.fn().mockReturnValue({
+      tactics: [],
+      techniques: [],
+      subtechniques: [],
+      frameworkVersion: undefined,
+      isLoading: false,
+      isError: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

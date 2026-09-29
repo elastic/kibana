@@ -28,12 +28,12 @@ const mockCheckIndicesPrivileges = vi.fn(({ indices }: CheckIndicesPrivilegesPar
 );
 
 vi.mock('./privileges', () => {
-      const mocked = {
-      checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
-        mockCheckIndicesPrivileges(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkIndicesPrivileges: (params: CheckIndicesPrivilegesParam) =>
+      mockCheckIndicesPrivileges(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createTestSetup = () => {
   const server = serverMock.create();

@@ -16,18 +16,18 @@ const mockRefetch = vi.fn();
 let mockShow = false;
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: (selector: (s: unknown) => unknown) => selector({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: (selector: (s: unknown) => unknown) => selector({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../timelines/store/selectors', () => {
-      const mocked = {
-      getTimelineShowStatusByIdSelector: () => () => ({ show: mockShow }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimelineShowStatusByIdSelector: () => () => ({ show: mockShow }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRefetchOnTimelineClose', () => {
   beforeEach(() => {

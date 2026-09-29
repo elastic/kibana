@@ -29,37 +29,41 @@ const MOCK_RUN_EXAMPLE_URL = 'http://localhost:5601/s/default/app/workflows/work
 const mockFilterManager = createFilterManagerMock();
 
 vi.mock('./alert_retrieval_step', () => {
-      const mocked = {
-      AlertRetrievalStep: () => <div data-test-subj="alertRetrievalStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertRetrievalStep: () => <div data-test-subj="alertRetrievalStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../alert_selection/connector_field', () => {
-      const mocked = {
-      ConnectorField: ({ helpText }: { helpText?: React.ReactNode }) => (
-        <div data-test-subj="connectorField">{helpText}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorField: ({ helpText }: { helpText?: React.ReactNode }) => (
+      <div data-test-subj="connectorField">{helpText}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../workflow_configuration', () => {
-      const mocked = {
-      ValidationPanel: ({
-        isInvalid,
-        onChange,
-        value,
-      }: {
-        isInvalid: boolean;
-        onChange: (id: string) => void;
-        value: string;
-      }) => (
-        <div data-test-subj="validationPanel" data-is-invalid={String(isInvalid)} data-value={value} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ValidationPanel: ({
+      isInvalid,
+      onChange,
+      value,
+    }: {
+      isInvalid: boolean;
+      onChange: (id: string) => void;
+      value: string;
+    }) => (
+      <div
+        data-test-subj="validationPanel"
+        data-is-invalid={String(isInvalid)}
+        data-value={value}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultWorkflowConfiguration: WorkflowConfiguration = {
   alertRetrievalMode: 'custom_query',

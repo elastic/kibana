@@ -21,9 +21,9 @@ import { createPersistenceExecutorOptionsMock } from '@kbn/rule-registry-plugin/
 
 vi.mock('../../routes/index/get_index_version');
 vi.mock('../utils/get_data_tier_filter', () => {
-      const mocked = { getDataTierFilter: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getDataTierFilter: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const getDataTierFilterMock = getDataTierFilter as Mock;
 

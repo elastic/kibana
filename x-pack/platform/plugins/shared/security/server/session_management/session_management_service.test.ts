@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { Subject } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
-import { Subject } from 'rxjs';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';

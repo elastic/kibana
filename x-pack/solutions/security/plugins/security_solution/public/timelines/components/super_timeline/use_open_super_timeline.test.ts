@@ -29,81 +29,82 @@ const mockBuildSuperTimelineModel = vi.fn();
 let mockActiveTimeline: Partial<TimelineModel> = {};
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: (selector: (s: unknown) => unknown) =>
-        selector({
-          timeline: {
-            timelineById: {
-              'timeline-1': mockActiveTimeline,
-            },
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: (selector: (s: unknown) => unknown) =>
+      selector({
+        timeline: {
+          timelineById: {
+            'timeline-1': mockActiveTimeline,
           },
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
-
-vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          uiSettings: {},
-          notifications: { toasts: { addWarning: mockAddWarning, addError: mockAddError } },
-          overlays: { openConfirm: mockOpenConfirm },
         },
       }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  };
+  return { ...mocked, default: mocked };
+});
+
+vi.mock('../../../common/lib/kibana', () => {
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        uiSettings: {},
+        notifications: { toasts: { addWarning: mockAddWarning, addError: mockAddError } },
+        overlays: { openConfirm: mockOpenConfirm },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/data-plugin/common', () => {
-      const mocked = {
-      getEsQueryConfig: () => ({ allowLeadingWildcards: true, queryStringOptions: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsQueryConfig: () => ({ allowLeadingWildcards: true, queryStringOptions: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: () => ({ dataView: { id: 'mock-dv', fields: [] }, status: 'ready' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: () => ({ dataView: { id: 'mock-dv', fields: [] }, status: 'ready' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../open_timeline/use_update_timeline', () => {
-      const mocked = {
-      useUpdateTimeline: () => mockUpdateTimeline,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateTimeline: () => mockUpdateTimeline,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../containers/api', () => {
-      const mocked = {
-      resolveTimeline: (...args: unknown[]) => mockResolveTimeline(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveTimeline: (...args: unknown[]) => mockResolveTimeline(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../open_timeline/helpers', () => {
-      const mocked = {
-      formatTimelineResponseToModel: (...args: unknown[]) => mockFormatTimelineResponseToModel(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatTimelineResponseToModel: (...args: unknown[]) =>
+      mockFormatTimelineResponseToModel(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./build_super_timeline_model', () => {
-      const mocked = {
-      buildSuperTimelineModel: (...args: unknown[]) => mockBuildSuperTimelineModel(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildSuperTimelineModel: (...args: unknown[]) => mockBuildSuperTimelineModel(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 

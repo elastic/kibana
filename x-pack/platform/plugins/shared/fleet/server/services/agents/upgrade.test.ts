@@ -26,9 +26,7 @@ import * as crud from './crud';
 
 vi.mock('./versions', () => {
   return {
-    getAvailableVersions: vi
-      .fn()
-      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getAvailableVersions: vi.fn().mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
     getLatestAvailableAgentVersion: vi.fn().mockResolvedValue('8.8.0'),
   };
 });

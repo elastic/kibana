@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { getLanguageService } from 'yaml-language-server';
 import type { z } from '@kbn/zod/v4';

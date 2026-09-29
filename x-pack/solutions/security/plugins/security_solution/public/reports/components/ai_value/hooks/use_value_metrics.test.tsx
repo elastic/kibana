@@ -32,17 +32,17 @@ const mockAssistantAvailability = vi.fn(() => ({
   hasAssistantPrivilege: true,
 }));
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: () => ({
-        alertsIndexPattern: 'alerts-index-pattern',
-        assistantAvailability: mockAssistantAvailability(),
-        knowledgeBase: {
-          latestAlerts: 20,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => ({
+      alertsIndexPattern: 'alerts-index-pattern',
+      assistantAvailability: mockAssistantAvailability(),
+      knowledgeBase: {
+        latestAlerts: 20,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('useValueMetrics', () => {
   const mockSignalIndexName = 'mock-signal-index';
   const mockUniqueAlertIds = ['id1', 'id2'];

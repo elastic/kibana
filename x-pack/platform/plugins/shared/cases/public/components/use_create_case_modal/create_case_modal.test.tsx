@@ -17,11 +17,11 @@ import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { CreateCase } from '../create';
 
 vi.mock('../create', () => {
-      const mocked = {
-      CreateCase: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateCase: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const CreateCaseMock = CreateCase as unknown as Mock;
 

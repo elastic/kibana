@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus, type WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { WorkflowExecutionListFooter } from './workflow_execution_list_footer';
 import { TestWrapper } from '../../../shared/test_utils';

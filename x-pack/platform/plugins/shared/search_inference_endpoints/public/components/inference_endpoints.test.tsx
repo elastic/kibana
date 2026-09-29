@@ -23,23 +23,23 @@ import { InferenceEndpoints } from './inference_endpoints';
 const mockRefetch = vi.fn();
 
 vi.mock('../hooks/use_inference_endpoints', () => {
-      const mocked = {
-      useQueryInferenceEndpoints: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryInferenceEndpoints: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_delete_endpoint', () => {
-      const mocked = {
-      useDeleteEndpoint: () => ({
-        mutate: vi.fn().mockImplementation(() => Promise.resolve()),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteEndpoint: () => ({
+      mutate: vi.fn().mockImplementation(() => Promise.resolve()),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const actual = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...actual,
     useKibana: vi.fn(() => ({
@@ -59,7 +59,7 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 
 const mockUseKibana = (await vi.importMock('@kbn/kibana-react-plugin/public')).useKibana as Mock;
 
-const { useQueryInferenceEndpoints } = (await vi.importMock('../hooks/use_inference_endpoints'));
+const { useQueryInferenceEndpoints } = await vi.importMock('../hooks/use_inference_endpoints');
 
 const mixedEndpoints: InferenceAPIConfigResponse[] = [
   {

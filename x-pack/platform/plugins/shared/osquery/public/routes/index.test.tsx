@@ -20,88 +20,97 @@ import { ExperimentalFeaturesProvider } from '../common/experimental_features_co
 import { allowedExperimentalValues } from '../../common/experimental_features';
 
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          appName: 'osquery',
-          application: {
-            getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
-            navigateToApp: vi.fn(),
-            capabilities: {
-              osquery: {
-                writeLiveQueries: true,
-                readLiveQueries: true,
-                runSavedQueries: true,
-                readPacks: true,
-                writePacks: true,
-                readSavedQueries: true,
-                writeSavedQueries: true,
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        appName: 'osquery',
+        application: {
+          getUrlForApp: vi.fn().mockReturnValue('/app/osquery'),
+          navigateToApp: vi.fn(),
+          capabilities: {
+            osquery: {
+              writeLiveQueries: true,
+              readLiveQueries: true,
+              runSavedQueries: true,
+              readPacks: true,
+              writePacks: true,
+              readSavedQueries: true,
+              writeSavedQueries: true,
             },
           },
-          chrome: {
-            setBreadcrumbs: vi.fn(),
-            docTitle: { change: vi.fn(), reset: vi.fn() },
-          },
-          http: {
-            basePath: { get: vi.fn().mockReturnValue(''), prepend: vi.fn((p: string) => p) },
-          },
-          notifications: { toasts: { addWarning: vi.fn(), addError: vi.fn() } },
-          uiSettings: { get: vi.fn().mockReturnValue(false) },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        chrome: {
+          setBreadcrumbs: vi.fn(),
+          docTitle: { change: vi.fn(), reset: vi.fn() },
+        },
+        http: {
+          basePath: { get: vi.fn().mockReturnValue(''), prepend: vi.fn((p: string) => p) },
+        },
+        notifications: { toasts: { addWarning: vi.fn(), addError: vi.fn() } },
+        uiSettings: { get: vi.fn().mockReturnValue(false) },
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // Mock the leaf pages rather than the `./history` sub-router, so that the real sub-router runs
 // and multi-hop redirects (e.g. `/live_queries/new` -> `/history/new` -> `/new`) are observed.
 vi.mock('./history/list', () => {
-      const mocked = { HistoryPage: () => <div data-test-subj="history" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { HistoryPage: () => <div data-test-subj="history" /> };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./history/scheduled_execution_details', () => {
-      const mocked = {
-      ScheduledExecutionDetailsPage: () => <div data-test-subj="scheduled-execution-details" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScheduledExecutionDetailsPage: () => <div data-test-subj="scheduled-execution-details" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./live_queries/details', () => {
-      const mocked = {
-      LiveQueryDetailsPage: () => <div data-test-subj="live-query-details" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LiveQueryDetailsPage: () => <div data-test-subj="live-query-details" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./saved_queries', () => {
-      const mocked = {
-      SavedQueries: () => <div data-test-subj="saved-queries" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedQueries: () => <div data-test-subj="saved-queries" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./packs', () => {
-      const mocked = { Packs: () => <div data-test-subj="packs" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Packs: () => <div data-test-subj="packs" /> };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./live_queries/new', () => {
-      const mocked = {
-      NewLiveQueryPage: () => <div data-test-subj="new-live-query" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewLiveQueryPage: () => <div data-test-subj="new-live-query" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components', () => {
-      const mocked = {
-      MissingPrivileges: () => <div data-test-subj="missing-privileges" />,
-      NotFoundPage: () => <div data-test-subj="not-found" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MissingPrivileges: () => <div data-test-subj="missing-privileges" />,
+    NotFoundPage: () => <div data-test-subj="not-found" />,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const createTestQueryClient = () =>
   new QueryClient({ defaultOptions: { queries: { retry: false, cacheTime: 0 } } });

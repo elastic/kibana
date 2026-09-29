@@ -19,19 +19,19 @@ import {
 } from './use_field_name_validation';
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        editor: {
-          setModelMarkers: vi.fn(),
-          MarkerSeverity: {
-            Error: 8,
-            Warning: 4,
-          },
+  const mocked = {
+    monaco: {
+      editor: {
+        setModelMarkers: vi.fn(),
+        MarkerSeverity: {
+          Error: 8,
+          Warning: 4,
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetModelMarkers = monaco.editor.setModelMarkers as Mock;
 

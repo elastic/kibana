@@ -33,15 +33,15 @@ const mockStepDefinitions: PublicStepDefinition[] = [
 ];
 
 vi.mock('../../../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getAllRegisteredStepDefinitions: vi.fn().mockReturnValue([]),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getAllRegisteredStepDefinitions: vi.fn().mockReturnValue([]),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { stepSchemas } = (await vi.importMock('../../../../../common/step_schemas'));
+const { stepSchemas } = await vi.importMock('../../../../../common/step_schemas');
 
 describe('CustomMonacoStepHandler', () => {
   let handler: CustomMonacoStepHandler;

@@ -12,15 +12,16 @@ import { buildActionDetailsQuery } from './query.action_details.dsl';
 import { ACTIONS_INDEX } from '../../../../../../common/constants';
 
 vi.mock('../../../../../utils/build_query', () => {
-      const mocked = {
-      getQueryFilter: vi.fn(({ filter }: { filter: string }) => ({
-        query_string: {
-          query: filter,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getQueryFilter: vi.fn(({ filter }: { filter: string }) => ({
+      query_string: {
+        query: filter,
+      },
+    })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('buildActionDetailsQuery', () => {
   it('returns the index as a single-element array (matching the other factories)', () => {

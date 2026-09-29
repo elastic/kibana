@@ -18,28 +18,28 @@ import { EMPTY_LABEL, NULL_LABEL } from '@kbn/field-formats-common';
 import { getDisplayValueFromFilter } from '@kbn/data-plugin/public';
 
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = {
-      getDisplayValueFromFilter: vi.fn(),
-      getFieldDisplayValueFromFilter: vi.fn(() => ''),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDisplayValueFromFilter: vi.fn(),
+    getFieldDisplayValueFromFilter: vi.fn(() => ''),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./filter_badge_invalid', () => {
-      const mocked = {
-      FilterBadgeInvalidPlaceholder: () => <div data-test-subj="invalid-placeholder" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterBadgeInvalidPlaceholder: () => <div data-test-subj="invalid-placeholder" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./filter_content', () => {
-      const mocked = {
-      FilterContent: ({ valueLabel }: { valueLabel: string }) => (
-        <div data-test-subj="filter-content">{valueLabel}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterContent: ({ valueLabel }: { valueLabel: string }) => (
+      <div data-test-subj="filter-content">{valueLabel}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetDisplayValue = getDisplayValueFromFilter as Mock;
 

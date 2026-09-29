@@ -16,23 +16,23 @@ import { renderWithTestingProviders } from '../../common/mock';
 
 const mockSetFieldValue = vi.fn();
 vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib')),
-      useFormContext: () => ({ setFieldValue: mockSetFieldValue }),
-      UseField: ({ path }: { path: string }) => (
-        <input type="hidden" data-test-subj={`field-${path}`} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib')),
+    useFormContext: () => ({ setFieldValue: mockSetFieldValue }),
+    UseField: ({ path }: { path: string }) => (
+      <input type="hidden" data-test-subj={`field-${path}`} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetTemplates = vi.fn();
 vi.mock('../templates_v2/hooks/use_get_templates', () => {
-      const mocked = {
-      useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTemplatesData = {
   templates: [

@@ -33,18 +33,18 @@ import {
 import { registerRoutes } from './routes/register_routes';
 
 vi.mock('./managed_workflows/initialize_managed_workflows', () => {
-      const mocked = {
-      initializeManagedWorkflows: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeManagedWorkflows: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./routes/register_routes', () => {
-      const mocked = {
-      registerRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createContext = () =>
   ({

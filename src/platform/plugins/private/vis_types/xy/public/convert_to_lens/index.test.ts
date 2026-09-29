@@ -20,37 +20,37 @@ const mockGetVisSchemas = vi.fn().mockReturnValue({
 const mockGetConfiguration = vi.fn().mockReturnValue({});
 
 vi.mock('../services', () => {
-      const mocked = {
-      getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/get_series_params', () => {
-      const mocked = {
-      getSeriesParams: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSeriesParams: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/visualizations-plugin/public', () => {
-      const mocked = {
-      getConvertToLensModule: async () => ({
-        getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
-        createStaticValueColumn: vi.fn(() => mockCreateStaticValueColumn()),
-      }),
-      getDataViewByIndexPatternId: vi.fn(() => ({ id: 'index-pattern' })),
-      getVisSchemas: vi.fn(() => mockGetVisSchemas()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConvertToLensModule: async () => ({
+      getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
+      createStaticValueColumn: vi.fn(() => mockCreateStaticValueColumn()),
+    }),
+    getDataViewByIndexPatternId: vi.fn(() => ({ id: 'index-pattern' })),
+    getVisSchemas: vi.fn(() => mockGetVisSchemas()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configurations', () => {
-      const mocked = {
-      getConfiguration: vi.fn(() => mockGetConfiguration()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: vi.fn(() => mockGetConfiguration()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToLens', () => {
   afterEach(() => {

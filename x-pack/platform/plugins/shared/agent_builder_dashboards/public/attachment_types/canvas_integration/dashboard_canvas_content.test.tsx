@@ -23,14 +23,14 @@ import * as agentBuilderDashboardsCommon from '@kbn/agent-builder-dashboards-com
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 
 vi.mock('@kbn/dashboard-plugin/public', () => {
-      const mocked = {
-      DashboardRenderer: vi.fn(() => <div data-test-subj="dashboardRenderer" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardRenderer: vi.fn(() => <div data-test-subj="dashboardRenderer" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-dashboards-common', async () => {
-  const actual = (await vi.importActual('@kbn/agent-builder-dashboards-common'));
+  const actual = await vi.importActual('@kbn/agent-builder-dashboards-common');
 
   return {
     ...actual,
@@ -187,8 +187,7 @@ describe('DashboardCanvasAttachment', () => {
     const updateOrigin: MockedFunction<DashboardCanvasAttachmentProps['updateOrigin']> = vi
       .fn()
       .mockResolvedValue(undefined);
-    const closeCanvas: MockedFunction<DashboardCanvasAttachmentProps['closeCanvas']> =
-      vi.fn();
+    const closeCanvas: MockedFunction<DashboardCanvasAttachmentProps['closeCanvas']> = vi.fn();
     const checkSavedDashboardExist: MockedFunction<
       DashboardCanvasAttachmentProps['checkSavedDashboardExist']
     > = vi.fn().mockResolvedValue(false);

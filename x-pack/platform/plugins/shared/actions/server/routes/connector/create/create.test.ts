@@ -26,11 +26,11 @@ import { createMockConnector } from '../../../application/connector/mocks';
 import { actionsConfigMock } from '../../../actions_config.mock';
 
 vi.mock('../../verify_access_and_context', () => {
-      const mocked = {
-      verifyAccessAndContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyAccessAndContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

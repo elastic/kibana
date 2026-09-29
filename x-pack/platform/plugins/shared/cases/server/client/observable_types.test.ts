@@ -54,9 +54,9 @@ describe('getAvailableObservableTypesMap', () => {
   });
 
   it('should handle errors and return an empty map', async () => {
-    vi
-      .mocked(mockCasesClient.configure.get)
-      .mockRejectedValue(new Error('Failed to fetch configuration'));
+    vi.mocked(mockCasesClient.configure.get).mockRejectedValue(
+      new Error('Failed to fetch configuration')
+    );
 
     const result = await getAvailableObservableTypesMap(mockCasesClient, 'mock-owner');
 

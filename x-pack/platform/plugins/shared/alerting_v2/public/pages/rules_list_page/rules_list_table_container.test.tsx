@@ -20,7 +20,9 @@ import { MockLocatorProvider } from '../../test_utils/test_providers';
 const mockNavigateToUrl = vi.fn();
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -45,69 +47,69 @@ vi.mock('@kbn/core-di-browser', async () => {
 const mockDeleteMutate = vi.fn();
 const mockUseDeleteRule = vi.fn();
 vi.mock('../../hooks/use_delete_rule', () => {
-      const mocked = {
-      useDeleteRule: () => mockUseDeleteRule(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteRule: () => mockUseDeleteRule(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBulkDeleteMutate = vi.fn();
 vi.mock('../../hooks/use_bulk_delete_rules', () => {
-      const mocked = {
-      useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkDeleteRules: () => ({ mutate: mockBulkDeleteMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBulkEnableMutate = vi.fn();
 const mockBulkDisableMutate = vi.fn();
 const mockUseBulkEnableRules = vi.fn();
 const mockUseBulkDisableRules = vi.fn();
 vi.mock('../../hooks/use_bulk_enable_disable_rules', () => {
-      const mocked = {
-      useBulkEnableRules: () => mockUseBulkEnableRules(),
-      useBulkDisableRules: () => mockUseBulkDisableRules(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkEnableRules: () => mockUseBulkEnableRules(),
+    useBulkDisableRules: () => mockUseBulkDisableRules(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToggleEnabledMutate = vi.fn();
 const mockUseToggleRuleEnabled = vi.fn();
 vi.mock('../../hooks/use_toggle_rule_enabled', () => {
-      const mocked = {
-      useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToggleRuleEnabled: () => mockUseToggleRuleEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpdateApiKeyMutate = vi.fn();
 vi.mock('../../hooks/use_bulk_update_rule_api_key', () => {
-      const mocked = {
-      useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkUpdateRuleApiKey: () => ({ mutate: mockUpdateApiKeyMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunRuleMutate = vi.fn();
 const mockUseRunRule = vi.fn();
 vi.mock('../../hooks/use_run_rule', () => {
-      const mocked = {
-      useRunRule: () => mockUseRunRule(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunRule: () => mockUseRunRule(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockToRulesQueryParams = vi.fn((..._args: unknown[]) => ({
   filter: undefined as string | undefined,
   search: undefined as string | undefined,
 }));
 vi.mock('./rules_query_params', async () => {
-      const mocked = {
-      ...(await vi.importActual('./rules_query_params')),
-      toRulesQueryParams: (...args: unknown[]) => mockToRulesQueryParams(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./rules_query_params')),
+    toRulesQueryParams: (...args: unknown[]) => mockToRulesQueryParams(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRules = [
   {

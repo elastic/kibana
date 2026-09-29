@@ -25,26 +25,26 @@ import { executeEsqlQuery, fetchEsqlResponseOrThrow } from './execute_esql_query
 import { getMetricsExecutionContext } from './execution_context';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLResults: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLResults: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/es-query', () => {
-      const mocked = {
-      buildEsQuery: vi.fn(() => ({ query: { bool: {} } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildEsQuery: vi.fn(() => ({ query: { bool: {} } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = {
-      getTime: vi.fn(),
-      getEsQueryConfig: vi.fn(() => ({ allowLeadingWildcards: true, queryStringOptions: {} })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTime: vi.fn(),
+    getEsQueryConfig: vi.fn(() => ({ allowLeadingWildcards: true, queryStringOptions: {} })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLResults = getESQLResults as MockedFunction<typeof getESQLResults>;
 const mockBuildEsQuery = buildEsQuery as MockedFunction<typeof buildEsQuery>;

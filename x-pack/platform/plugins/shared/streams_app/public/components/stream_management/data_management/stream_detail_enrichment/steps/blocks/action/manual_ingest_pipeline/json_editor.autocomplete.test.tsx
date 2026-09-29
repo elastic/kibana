@@ -17,21 +17,21 @@ import { JsonEditor } from './json_editor';
 
 // Minimal stub for the CodeEditor to avoid mounting Monaco
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: { docLinks: { links: { ingest: { processors: '#', conditionalProcessor: '#' } } } },
-        dependencies: { start: { streams: { streamsRepositoryClient: { fetch: vi.fn() } } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      core: { docLinks: { links: { ingest: { processors: '#', conditionalProcessor: '#' } } } },
+      dependencies: { start: { streams: { streamsRepositoryClient: { fetch: vi.fn() } } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fixtures: ProcessorSuggestionsResponse = {
   processors: [
@@ -51,7 +51,7 @@ const fixtures: ProcessorSuggestionsResponse = {
 };
 
 vi.mock('../../../../helpers', async () => {
-  const actual = (await vi.importActual('../../../../helpers'));
+  const actual = await vi.importActual('../../../../helpers');
   return {
     ...actual,
     fetchProcessorSuggestions: vi.fn(async () => fixtures),
@@ -118,18 +118,16 @@ describe('JsonEditor autocomplete provider', () => {
 
   beforeEach(() => {
     capturedProvider = undefined;
-    vi
-      .spyOn(monaco.languages, 'registerCompletionItemProvider')
-      .mockImplementation(
-        (
-          _selector: string | monaco.languages.LanguageSelector,
-          provider: monaco.languages.CompletionItemProvider
-        ): monaco.IDisposable => {
-          capturedProvider = provider;
-          const disposable: monaco.IDisposable = { dispose: () => {} };
-          return disposable;
-        }
-      );
+    vi.spyOn(monaco.languages, 'registerCompletionItemProvider').mockImplementation(
+      (
+        _selector: string | monaco.languages.LanguageSelector,
+        provider: monaco.languages.CompletionItemProvider
+      ): monaco.IDisposable => {
+        capturedProvider = provider;
+        const disposable: monaco.IDisposable = { dispose: () => {} };
+        return disposable;
+      }
+    );
   });
 
   afterEach(() => {

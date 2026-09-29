@@ -19,7 +19,7 @@ import { SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/conne
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 vi.mock('../../../actions/pending_actions_summary', async () => {
-  const realModule = (await vi.importActual('../../../actions/pending_actions_summary'));
+  const realModule = await vi.importActual('../../../actions/pending_actions_summary');
   return {
     ...realModule,
     getPendingActionsSummary: vi.fn(realModule.getPendingActionsSummary),

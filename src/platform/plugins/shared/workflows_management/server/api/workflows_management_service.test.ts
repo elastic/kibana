@@ -8,7 +8,7 @@
  */
 
 import { vi } from 'vitest';
-import type { Mock, MockInstance, Mocked, MockedClass, MockedFunction } from 'vitest';
+import type { Mock, Mocked, MockedClass, MockedFunction, MockInstance } from 'vitest';
 
 /**
  * Facade tests for WorkflowsService.
@@ -43,11 +43,11 @@ import type { WorkflowsServerPluginSetupDeps, WorkflowsServerPluginStartDeps } f
 
 vi.mock('../services/workflow_change_history_service');
 vi.mock('../lib/wait_for_managed_workflow_install_readiness', () => {
-      const mocked = {
-      waitForManagedWorkflowInstallReadiness: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    waitForManagedWorkflowInstallReadiness: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockedWorkflowChangeHistoryService = WorkflowChangeHistoryService as MockedClass<
   typeof WorkflowChangeHistoryService
@@ -67,9 +67,7 @@ const spyPrototype = <T extends object>(
   const spies: PrototypeSpies = {};
   const prototype = klass.prototype as unknown as Record<string, Mock>;
   for (const method of methods) {
-    spies[method] = vi
-      .spyOn(prototype, method)
-      .mockResolvedValue({ facadeTest: method } as never);
+    spies[method] = vi.spyOn(prototype, method).mockResolvedValue({ facadeTest: method } as never);
   }
   return spies;
 };

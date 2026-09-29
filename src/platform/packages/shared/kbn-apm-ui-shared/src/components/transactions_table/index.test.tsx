@@ -21,24 +21,24 @@ const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useIsWithinMaxBreakpoint: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useIsWithinMaxBreakpoint: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../sparkline', () => {
-      const mocked = {
-      Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
-        isLoading ? (
-          <div data-test-subj="sparkline-loading" />
-        ) : (
-          <div data-test-subj="sparkline-chart" />
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Sparkline: ({ isLoading }: { isLoading?: boolean }) =>
+      isLoading ? (
+        <div data-test-subj="sparkline-loading" />
+      ) : (
+        <div data-test-subj="sparkline-chart" />
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const items: TransactionGroup[] = [
   {

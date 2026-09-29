@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { resetContext } from 'kea';
+import { vi } from 'vitest';
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 

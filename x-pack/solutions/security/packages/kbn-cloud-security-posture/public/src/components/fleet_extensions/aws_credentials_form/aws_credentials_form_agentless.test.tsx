@@ -32,34 +32,34 @@ const mockCloudConnectorSetup = vi.fn(() => <div data-test-subj="cloud-connector
 const mockAWSSetupInfoContent = vi.fn(() => <div data-test-subj="aws-setup-info-mock" />);
 
 vi.mock('./aws_input_var_fields', () => {
-      const mocked = {
-      AwsInputVarFields: (props: unknown) => mockAwsInputVarFields(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AwsInputVarFields: (props: unknown) => mockAwsInputVarFields(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./aws_credential_type_selector', () => {
-      const mocked = {
-      AwsCredentialTypeSelector: (props: unknown) => mockAwsCredentialTypeSelector(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AwsCredentialTypeSelector: (props: unknown) => mockAwsCredentialTypeSelector(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock CloudConnectorSetup (lazy loaded from Fleet)
 vi.mock('@kbn/fleet-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/fleet-plugin/public')),
-      LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/fleet-plugin/public')),
+    LazyCloudConnectorSetup: (props: unknown) => mockCloudConnectorSetup(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./aws_setup_info', () => {
-      const mocked = {
-      AWSSetupInfoContent: (props: unknown) => mockAWSSetupInfoContent(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AWSSetupInfoContent: (props: unknown) => mockAWSSetupInfoContent(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_cloud_setup_context');
 const mockUseCloudSetup = useCloudSetup as MockedFunction<typeof useCloudSetup>;

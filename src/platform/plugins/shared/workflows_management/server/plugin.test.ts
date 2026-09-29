@@ -11,24 +11,24 @@ import { vi } from 'vitest';
 import type { Mock, MockedClass, MockedFunction } from 'vitest';
 
 vi.mock('./api/routes', () => {
-      const mocked = { defineRoutes: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { defineRoutes: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./api/workflows_management_api', () => {
-      const mocked = {
-      WorkflowsManagementApi: vi.fn().mockImplementation(() => ({
-        setAuditLog: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowsManagementApi: vi.fn().mockImplementation(() => ({
+      setAuditLog: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./api/workflows_management_service');
 vi.mock('@kbn/workflows-execution-engine/server', () => {
-      const mocked = {
-      registerHitlLifecycleAuditor: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerHitlLifecycleAuditor: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
@@ -179,9 +179,9 @@ describe('WorkflowsPlugin', () => {
 
   it('does not register connector-event triggers when inbound events are disabled', () => {
     const actions = actionsMock.createSetup();
-    (
-      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as Mock
-    ).mockReturnValue(false);
+    (actions.getActionsConfigurationUtilities().isInboundEventsEnabled as Mock).mockReturnValue(
+      false
+    );
     const workflowsExtensions = workflowsExtensionsMock.createSetup();
     const plugin = new WorkflowsPlugin(
       coreMock.createPluginInitializerContext({
@@ -207,9 +207,9 @@ describe('WorkflowsPlugin', () => {
 
   it('registers inboundWebhook.received when inbound events are enabled', () => {
     const actions = actionsMock.createSetup();
-    (
-      actions.getActionsConfigurationUtilities().isInboundEventsEnabled as Mock
-    ).mockReturnValue(true);
+    (actions.getActionsConfigurationUtilities().isInboundEventsEnabled as Mock).mockReturnValue(
+      true
+    );
     const workflowsExtensions = workflowsExtensionsMock.createSetup();
     const plugin = new WorkflowsPlugin(
       coreMock.createPluginInitializerContext({

@@ -62,17 +62,17 @@ vi.mock('../applications/integrations/sections/epm/screens/detail/policies/packa
 vi.mock(
   '../applications/integrations/sections/epm/screens/installed_integrations/components/pending_upgrade_review_status',
   () => {
-      const mocked = {
-        scheduleAutoOpenModal: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      scheduleAutoOpenModal: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 // Capture the textToCopy prop passed to EuiCopy so tests can assert the bundle text
 let capturedCopyText: string | undefined;
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiCopy: ({
@@ -227,11 +227,9 @@ describe('PackagePolicyActionsMenu', () => {
     });
 
     it('upgrades an agentless policy through the agentless API and refreshes on confirm', async () => {
-      vi
-        .mocked(sendBulkUpgradeAgentlessPolicies)
-        .mockResolvedValue([
-          { id: 'some-uuid2', name: 'mock-package-policy', success: true },
-        ] as any);
+      vi.mocked(sendBulkUpgradeAgentlessPolicies).mockResolvedValue([
+        { id: 'some-uuid2', name: 'mock-package-policy', success: true },
+      ] as any);
       const onUpgraded = vi.fn();
       const agentPolicies = createMockAgentPolicies({ supports_agentless: true });
       const packagePolicy = createMockPackagePolicy({ hasUpgrade: true, supports_agentless: true });
@@ -624,7 +622,7 @@ describe('PackagePolicyActionsMenu', () => {
     });
 
     it('should use project_id instead of deployment_id on serverless', async () => {
-      const { useStartServices } = (await vi.importMock('../hooks'));
+      const { useStartServices } = await vi.importMock('../hooks');
       const serverlessReturnValue = {
         application: { navigateToApp: vi.fn() },
         notifications: { toasts: { addSuccess: vi.fn() } },

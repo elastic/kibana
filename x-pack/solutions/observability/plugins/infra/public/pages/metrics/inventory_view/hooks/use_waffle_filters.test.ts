@@ -33,14 +33,14 @@ const mockUseAlertPrefillContext = useAlertPrefillContext as MockedFunction<
 
 // Mock useUrlState hook
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({
-        location: '',
-        replace: () => {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({
+      location: '',
+      replace: () => {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = {
   id: 'mock-id',
@@ -52,29 +52,29 @@ const mockDataView = {
 } as Mocked<DataView>;
 
 vi.mock('../../../../containers/metrics_source', () => {
-      const mocked = {
-      useMetricsDataViewContext: () => ({
-        metricsView: {
-          indices: 'jestbeat-*',
-          timeFieldName: mockDataView.timeFieldName,
-          fields: mockDataView.fields,
-          dataViewReference: mockDataView,
-        } as ResolvedDataView,
-        loading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsDataViewContext: () => ({
+      metricsView: {
+        indices: 'jestbeat-*',
+        timeFieldName: mockDataView.timeFieldName,
+        fields: mockDataView.fields,
+        dataViewReference: mockDataView,
+      } as ResolvedDataView,
+      loading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_inventory_views', () => {
-      const mocked = {
-      useInventoryViewsContext: () => ({
-        currentView: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInventoryViewsContext: () => ({
+      currentView: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseWaffleFiltersHook = () => renderHook(() => useWaffleFilters());
 const setPrefillState = vi.fn();

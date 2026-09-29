@@ -220,7 +220,7 @@ describe('upgradeManagedPackagePolicies', () => {
 });
 
 describe('setupUpgradeManagedPackagePolicies', async () => {
-  const { hasNewDeprecations } = (await vi.importMock('../epm/packages/deprecation_helpers'));
+  const { hasNewDeprecations } = await vi.importMock('../epm/packages/deprecation_helpers');
 
   afterEach(() => {
     vi.clearAllMocks();

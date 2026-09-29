@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import type { EuiSideNavItemType } from '@elastic/eui';
 import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 import { WorkflowsPageName } from '@kbn/deeplinks-workflows';
 import { setWorkflowsNavLinks } from './test_helpers';
 import { useWorkflowsSolutionNav } from './use_workflows_solution_nav';

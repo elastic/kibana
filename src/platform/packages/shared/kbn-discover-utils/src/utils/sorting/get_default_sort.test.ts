@@ -19,7 +19,7 @@ import { isSortable } from './get_sort';
 const isSortableMock = vi.mocked(isSortable);
 
 vi.mock('./get_sort', async () => {
-  const originalModule = (await vi.importActual('./get_sort'));
+  const originalModule = await vi.importActual('./get_sort');
   return {
     ...originalModule,
     isSortable: vi.fn(originalModule.isSortable),

@@ -30,9 +30,9 @@ describe('fetchActionRequestById() utility', () => {
   });
 
   it('should search the actions index with expected query', async () => {
-    (
-      endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock
-    ).mockResolvedValue(undefined);
+    (endpointServiceMock.getInternalFleetServices().ensureInCurrentSpace as Mock).mockResolvedValue(
+      undefined
+    );
 
     await fetchActionRequestById(endpointServiceMock, 'default', '123');
   });

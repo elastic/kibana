@@ -17,29 +17,29 @@ import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowChangeHistoryPreviewFooter } from './workflow_change_history_preview_footer';
 
 vi.mock('../../widgets/workflow_yaml_editor/ui/workflow_yaml_validation_accordion', () => {
-      const mocked = {
-      WorkflowYamlValidationAccordion: ({
-        validationErrors,
-        isLoading,
-        error,
-      }: {
-        validationErrors?: YamlValidationResult[] | null;
-        isLoading?: boolean;
-        error?: Error | null;
-      }) => (
-        <div data-test-subj="workflowYamlEditorValidationErrorsList">
-          {isLoading || validationErrors === null
-            ? 'Initializing validation...'
-            : error
-            ? `Validation failed: ${error.message}`
-            : !validationErrors || validationErrors.length === 0
-            ? 'No validation errors'
-            : `${validationErrors.length} error(s)`}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYamlValidationAccordion: ({
+      validationErrors,
+      isLoading,
+      error,
+    }: {
+      validationErrors?: YamlValidationResult[] | null;
+      isLoading?: boolean;
+      error?: Error | null;
+    }) => (
+      <div data-test-subj="workflowYamlEditorValidationErrorsList">
+        {isLoading || validationErrors === null
+          ? 'Initializing validation...'
+          : error
+          ? `Validation failed: ${error.message}`
+          : !validationErrors || validationErrors.length === 0
+          ? 'No validation errors'
+          : `${validationErrors.length} error(s)`}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const sampleError: YamlValidationResult = {
   id: 'custom-error',

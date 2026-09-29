@@ -15,35 +15,35 @@ import { ProviderSelector } from './provider_selector';
 
 // Mock the CloudSetup context hook
 vi.mock('./hooks/use_cloud_setup_context', () => {
-      const mocked = {
-      useCloudSetup: () => ({
-        templateInputOptions: [
-          {
-            id: 'aws',
-            label: 'AWS',
-            icon: 'logoAWS',
-            tooltip: 'Amazon Web Services',
-            testId: 'aws-radio-option',
-          },
-          {
-            id: 'azure',
-            label: 'Azure',
-            icon: 'logoAzure',
-            tooltip: 'Microsoft Azure',
-            testId: 'azure-radio-option',
-          },
-          {
-            id: 'gcp',
-            label: 'GCP',
-            icon: 'logoGCP',
-            tooltip: 'Google Cloud Platform',
-            testId: 'gcp-radio-option',
-          },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudSetup: () => ({
+      templateInputOptions: [
+        {
+          id: 'aws',
+          label: 'AWS',
+          icon: 'logoAWS',
+          tooltip: 'Amazon Web Services',
+          testId: 'aws-radio-option',
+        },
+        {
+          id: 'azure',
+          label: 'Azure',
+          icon: 'logoAzure',
+          tooltip: 'Microsoft Azure',
+          testId: 'azure-radio-option',
+        },
+        {
+          id: 'gcp',
+          label: 'GCP',
+          icon: 'logoGCP',
+          tooltip: 'Google Cloud Platform',
+          testId: 'gcp-radio-option',
+        },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (component: React.ReactElement) =>
   render(<I18nProvider>{component}</I18nProvider>);
@@ -226,13 +226,13 @@ describe('<ProviderSelector />', () => {
   describe('Edge Cases', () => {
     it('handles empty templateInputOptions gracefully', () => {
       vi.doMock('./hooks/use_cloud_setup_context', () => {
-            const mocked = {
-                  useCloudSetup: () => ({
-                    templateInputOptions: [],
-                  }),
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          useCloudSetup: () => ({
+            templateInputOptions: [],
+          }),
+        };
+        return { ...mocked, default: mocked };
+      });
 
       // Should render without throwing
       renderWithIntl(<ProviderSelector {...defaultProps} />);
@@ -240,21 +240,21 @@ describe('<ProviderSelector />', () => {
 
     it('handles provider with no testId', () => {
       vi.doMock('./hooks/use_cloud_setup_context', () => {
-            const mocked = {
-                  useCloudSetup: () => ({
-                    templateInputOptions: [
-                      {
-                        id: 'aws',
-                        label: 'AWS',
-                        icon: 'logoAWS',
-                        tooltip: 'Amazon Web Services',
-                        // No testId
-                      },
-                    ],
-                  }),
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          useCloudSetup: () => ({
+            templateInputOptions: [
+              {
+                id: 'aws',
+                label: 'AWS',
+                icon: 'logoAWS',
+                tooltip: 'Amazon Web Services',
+                // No testId
+              },
+            ],
+          }),
+        };
+        return { ...mocked, default: mocked };
+      });
 
       // Should render without throwing
       renderWithIntl(<ProviderSelector {...defaultProps} />);

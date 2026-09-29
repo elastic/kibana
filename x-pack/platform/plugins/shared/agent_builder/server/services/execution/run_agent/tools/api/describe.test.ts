@@ -19,25 +19,25 @@ import { getRegistries } from '../../api/registry';
 import type { ApiRegistry, ApiRegistryDefinition, LoadedApi } from '../../api';
 
 vi.mock('../../api/registry', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../api/registry')),
-      getRegistries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../api/registry')),
+    getRegistries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/schemas/es/json/_types.json', () => {
-      const mocked = {
-      $defs: {
-        Oversized: {
-          type: 'object',
-          description: 'x'.repeat(2_000),
-          properties: { bool: { type: 'object' }, term: { type: 'object' } },
-        },
+  const mocked = {
+    $defs: {
+      Oversized: {
+        type: 'object',
+        description: 'x'.repeat(2_000),
+        properties: { bool: { type: 'object' }, term: { type: 'object' } },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRegistries = vi.mocked(getRegistries);
 

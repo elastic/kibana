@@ -20,7 +20,7 @@ const mockValidate = vi.fn().mockResolvedValue({ errors: [], warnings: [] });
 const mockSetModelMarkers = vi.fn();
 
 vi.mock('@kbn/code-editor', async () => {
-  const actual = (await vi.importActual('@kbn/code-editor'));
+  const actual = await vi.importActual('@kbn/code-editor');
   return {
     ...actual,
     ESQLLang: {

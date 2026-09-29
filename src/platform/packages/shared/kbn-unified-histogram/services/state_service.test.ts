@@ -24,14 +24,14 @@ import type { UnifiedHistogramState } from './state_service';
 import { createStateService } from './state_service';
 
 vi.mock('@kbn/discover-utils', () => {
-      const mocked = {
-      getChartHidden: vi.fn(),
-      getTopPanelHeight: vi.fn(),
-      setChartHidden: vi.fn(),
-      setTopPanelHeight: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getChartHidden: vi.fn(),
+    getTopPanelHeight: vi.fn(),
+    setChartHidden: vi.fn(),
+    setTopPanelHeight: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UnifiedHistogramStateService', () => {
   beforeEach(() => {

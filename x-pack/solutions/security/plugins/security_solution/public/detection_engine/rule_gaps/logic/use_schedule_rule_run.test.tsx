@@ -20,15 +20,15 @@ const mockUseScheduleRuleRunMutation = vi.fn();
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../api/hooks/use_schedule_rule_run_mutation', () => {
-      const mocked = {
-      useScheduleRuleRunMutation: () => {
-        return {
-          mutateAsync: mockUseScheduleRuleRunMutation,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useScheduleRuleRunMutation: () => {
+      return {
+        mutateAsync: mockUseScheduleRuleRunMutation,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseKibana = {
   ...mockUseKibana(),

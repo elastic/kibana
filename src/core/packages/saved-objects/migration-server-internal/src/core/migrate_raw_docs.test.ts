@@ -112,8 +112,8 @@ describe('migrateRawDocs', () => {
     );
 
     await expect(result).rejects.toMatchInlineSnapshot(
-            `[Error: Unable to migrate the corrupt saved object document with _id: 'foo:b'.]`
-          );
+      `[Error: Unable to migrate the corrupt saved object document with _id: 'foo:b'.]`
+    );
 
     expect(transform).toHaveBeenCalledTimes(0);
   });

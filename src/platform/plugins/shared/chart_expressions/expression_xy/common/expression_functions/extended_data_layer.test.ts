@@ -54,70 +54,70 @@ describe('extendedDataLayerConfig', () => {
     const { data } = sampleArgs();
 
     await expect(
-            extendedDataLayerFunction.fn(
-              data,
-              { ...args, seriesType: 'bar', markSizeAccessor: 'b' },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', markSizeAccessor: 'b' },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test("throws the error if markSizeAccessor doesn't have the corresponding column in the table", async () => {
     const { data } = sampleArgs();
 
     await expect(
-            extendedDataLayerFunction.fn(
-              data,
-              { ...args, markSizeAccessor: 'nonsense' },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, markSizeAccessor: 'nonsense' },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if lineWidth is provided to the not line/area chart', async () => {
     const { data } = sampleArgs();
     await expect(
-            extendedDataLayerFunction.fn(
-              data,
-              { ...args, seriesType: 'bar', lineWidth: 10 },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', lineWidth: 10 },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if showPoints is provided to the not line/area chart', async () => {
     const { data } = sampleArgs();
 
     await expect(
-            extendedDataLayerFunction.fn(
-              data,
-              { ...args, seriesType: 'bar', showPoints: true },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', showPoints: true },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if pointsRadius is provided to the not line/area chart', async () => {
     const { data } = sampleArgs();
 
     await expect(
-            extendedDataLayerFunction.fn(
-              data,
-              { ...args, seriesType: 'bar', pointsRadius: 10 },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', pointsRadius: 10 },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('throws the error if showLines is provided to the not line/area chart', async () => {
     const { data } = sampleArgs();
 
     await expect(
-            extendedDataLayerFunction.fn(
-              data,
-              { ...args, seriesType: 'bar', showLines: true },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      extendedDataLayerFunction.fn(
+        data,
+        { ...args, seriesType: 'bar', showLines: true },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

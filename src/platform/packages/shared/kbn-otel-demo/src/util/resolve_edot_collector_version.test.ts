@@ -15,18 +15,18 @@ import execa from 'execa';
 import { resolveEdotCollectorVersion } from './resolve_edot_collector_version';
 
 vi.mock('execa', () => {
-      const mocked = {
-      command: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    command: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecaCommand = execa.command as MockedFunction<typeof execa.command>;
 
@@ -62,11 +62,11 @@ describe('resolveEdotCollectorVersion', () => {
 
     vi.resetModules();
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
+      };
+      return { ...mocked, default: mocked };
+    });
 
     const version = await resolveEdotCollectorVersion(mockLog as unknown as ToolingLog);
 
@@ -77,11 +77,11 @@ describe('resolveEdotCollectorVersion', () => {
   it('should walk back minor versions when patch is 0', async () => {
     vi.resetModules();
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              kibanaPackageJson: { version: '9.2.0-SNAPSHOT' },
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        kibanaPackageJson: { version: '9.2.0-SNAPSHOT' },
+      };
+      return { ...mocked, default: mocked };
+    });
 
     mockExecaCommand
       .mockRejectedValueOnce(new Error('not found')) // 9.2.0
@@ -97,11 +97,11 @@ describe('resolveEdotCollectorVersion', () => {
   it('should cross major boundary with minor set to 20', async () => {
     vi.resetModules();
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              kibanaPackageJson: { version: '10.0.0-SNAPSHOT' },
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        kibanaPackageJson: { version: '10.0.0-SNAPSHOT' },
+      };
+      return { ...mocked, default: mocked };
+    });
 
     mockExecaCommand
       .mockRejectedValueOnce(new Error('not found')) // 10.0.0
@@ -122,11 +122,11 @@ describe('resolveEdotCollectorVersion', () => {
   it('should strip -SNAPSHOT suffix from Kibana version', async () => {
     vi.resetModules();
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        kibanaPackageJson: { version: '9.1.0-SNAPSHOT' },
+      };
+      return { ...mocked, default: mocked };
+    });
 
     mockExecaCommand.mockResolvedValueOnce(mockExecaResult);
 
@@ -142,11 +142,11 @@ describe('resolveEdotCollectorVersion', () => {
   it('should fall back to Kibana version when no image is found', async () => {
     vi.resetModules();
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              kibanaPackageJson: { version: '1.0.0' },
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        kibanaPackageJson: { version: '1.0.0' },
+      };
+      return { ...mocked, default: mocked };
+    });
 
     mockExecaCommand.mockRejectedValue(new Error('not found'));
 
@@ -159,11 +159,11 @@ describe('resolveEdotCollectorVersion', () => {
   it('should walk back patch before minor', async () => {
     vi.resetModules();
     vi.doMock('@kbn/repo-info', () => {
-          const mocked = {
-              kibanaPackageJson: { version: '9.1.2' },
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        kibanaPackageJson: { version: '9.1.2' },
+      };
+      return { ...mocked, default: mocked };
+    });
 
     mockExecaCommand
       .mockRejectedValueOnce(new Error('not found')) // 9.1.2

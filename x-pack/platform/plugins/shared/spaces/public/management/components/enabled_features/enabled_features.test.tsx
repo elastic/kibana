@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import type { EuiCheckboxProps } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { asSpaceId } from '@kbn/core-spaces-common';

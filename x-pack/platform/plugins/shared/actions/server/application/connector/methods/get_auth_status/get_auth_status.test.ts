@@ -32,7 +32,7 @@ import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.
 import { filterInferenceConnectors } from '../get_all';
 
 vi.mock('../get_all', async () => {
-  const actual = (await vi.importActual('../get_all'));
+  const actual = await vi.importActual('../get_all');
   return {
     ...actual,
     filterInferenceConnectors: vi.fn(
@@ -42,17 +42,17 @@ vi.mock('../get_all', async () => {
 });
 
 vi.mock('../../../../lib/get_oauth_jwt_access_token', () => {
-      const mocked = {
-      getOAuthJwtAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthJwtAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../lib/get_oauth_client_credentials_access_token', () => {
-      const mocked = {
-      getOAuthClientCredentialsAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthClientCredentialsAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
@@ -79,9 +79,9 @@ const authTypeRegistry: AuthTypeRegistry =
 describe('getAuthStatus()', () => {
   beforeEach(() => {
     vi.resetAllMocks();
-    vi
-      .mocked(filterInferenceConnectors)
-      .mockImplementation(async (_esClient, connectors) => connectors);
+    vi.mocked(filterInferenceConnectors).mockImplementation(
+      async (_esClient, connectors) => connectors
+    );
     actionTypeRegistry.isDeprecated = vi.fn().mockReturnValue(false);
     actionsClient = new ActionsClient({
       logger,
@@ -322,11 +322,9 @@ describe('getAuthStatus()', () => {
       authMode: 'per-user',
     });
 
-    vi
-      .mocked(filterInferenceConnectors)
-      .mockImplementationOnce(async (_esClient, connectors) =>
-        connectors.filter((c) => c.id === 'in-memory-kept')
-      );
+    vi.mocked(filterInferenceConnectors).mockImplementationOnce(async (_esClient, connectors) =>
+      connectors.filter((c) => c.id === 'in-memory-kept')
+    );
 
     actionsClient = buildActionsClientWithProfile({
       profileUid: 'test-profile-uid',

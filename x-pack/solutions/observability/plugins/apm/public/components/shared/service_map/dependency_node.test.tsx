@@ -15,7 +15,7 @@ import type { DependencyNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
@@ -27,11 +27,11 @@ vi.mock('@elastic/eui', async () => {
 
 // Mock the span icon
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      getSpanIcon: vi.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpanIcon: vi.fn((type?: string) => (type ? 'mock-span-icon.svg' : undefined)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultNodeProps = {
   id: 'test-dependency',

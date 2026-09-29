@@ -43,17 +43,17 @@ const initialRules = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          http: {
-            post: vi.fn(),
-          },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        http: {
+          post: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testWrapper = () => {
   const queryClient = new QueryClient({

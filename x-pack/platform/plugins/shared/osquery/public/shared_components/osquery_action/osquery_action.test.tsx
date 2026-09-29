@@ -24,30 +24,32 @@ import { AGENT_STATUS_ERROR, EMPTY_PROMPT, NOT_AVAILABLE, PERMISSION_DENIED } fr
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../../common/experimental_features_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/experimental_features_context')),
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/experimental_features_context')),
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // Infra's embedded usage renders <OsqueryAction formType="simple" hideAgentsField ... />,
 // which terminates in <LiveQuery ...>. Stub LiveQuery so these tests can assert the
 // props the osquery package receives from the embedder without mounting the full
 // Monaco + agent-selector + submit subtree.
 vi.mock('../../live_queries', () => {
-      const mocked = {
-      LiveQuery: (props: Record<string, unknown>) => (
-        <div
-          data-test-subj="live-query-mock"
-          data-form-type={String(props.formType ?? '')}
-          data-hide-agents-field={String(props.hideAgentsField ?? '')}
-          data-agent-id={String(props.agentId ?? '')}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LiveQuery: (props: Record<string, unknown>) => (
+      <div
+        data-test-subj="live-query-mock"
+        data-form-type={String(props.formType ?? '')}
+        data-hide-agents-field={String(props.hideAgentsField ?? '')}
+        data-agent-id={String(props.agentId ?? '')}
+      />
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 

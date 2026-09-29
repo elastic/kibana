@@ -97,12 +97,12 @@ const mockSearchBarCustomizationWithHiddenDataViewPicker: SearchBarCustomization
 let mockUseCustomizations = false;
 
 vi.mock('../../../../customizations', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../customizations')),
-      useDiscoverCustomization: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../customizations')),
+    useDiscoverCustomization: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDefaultCapabilities = {
   discover_v2: { save: true },

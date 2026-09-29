@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('./kibana_services', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 vi.mock('./licensed_features', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 
 import {
   getSourceFields,

@@ -15,24 +15,24 @@ import { useLensAttributes } from '../../common/components/visualization_actions
 import { wrapper } from '../../common/components/visualization_actions/mocks';
 
 vi.mock('../../common/utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'hostRisk',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        detailName: 'mockHost',
+        pageName: 'hosts',
+        tabName: 'hostRisk',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getRiskScoreOverTimeAreaAttributes', () => {
   it('should render', () => {

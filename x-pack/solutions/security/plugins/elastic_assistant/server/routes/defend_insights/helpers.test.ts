@@ -35,13 +35,13 @@ import {
 import { appContextService } from '../../services/app_context';
 
 vi.mock('../../services/app_context', () => {
-      const mocked = {
-      appContextService: {
-        getRegisteredCallbacks: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getRegisteredCallbacks: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('defend insights route helpers', () => {
   afterEach(() => {

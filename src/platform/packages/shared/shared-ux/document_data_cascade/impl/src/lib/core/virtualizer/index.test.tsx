@@ -124,9 +124,9 @@ describe('virtualizer', () => {
       const childRowIndex = 10;
 
       // mock the child row to have a parent row
-      vi
-        .spyOn(rows[childRowIndex], 'getParentRows')
-        .mockReturnValue([rows[parentRowIndex]] as Row<GroupNode>[]);
+      vi.spyOn(rows[childRowIndex], 'getParentRows').mockReturnValue([
+        rows[parentRowIndex],
+      ] as Row<GroupNode>[]);
 
       const range: Range = {
         startIndex: childRowIndex,

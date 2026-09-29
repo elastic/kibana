@@ -42,38 +42,38 @@ const existingNoteIds = undefined;
 const isImmutable = true;
 
 vi.mock('../../../saved_object/timelines', () => {
-      const mocked = {
-      persistTimeline: vi.fn().mockResolvedValue({
-        timeline: {
-          savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
-          version: 'xJs23==',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    persistTimeline: vi.fn().mockResolvedValue({
+      timeline: {
+        savedObjectId: 'eb2781c0-1df5-11eb-8589-2f13958b79f7',
+        version: 'xJs23==',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_object/pinned_events', () => {
-      const mocked = {
-      savePinnedEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    savePinnedEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_object/notes', () => {
-      const mocked = {
-      getNote: vi.fn(),
-      persistNote: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getNote: vi.fn(),
+    persistNote: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../saved_object/notes/persist_notes', () => {
-      const mocked = {
-      persistNotes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    persistNotes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createTimelines', () => {
   let frameworkRequest: FrameworkRequest;

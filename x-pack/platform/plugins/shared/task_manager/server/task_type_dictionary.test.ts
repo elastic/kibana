@@ -15,15 +15,15 @@ import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { REMOVED_TYPES, sanitizeTaskDefinitions, TaskTypeDictionary } from './task_type_dictionary';
 
 vi.mock('./constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-        'foo',
-        'sampleTaskSharedConcurrencyType1',
-        'sampleTaskSharedConcurrencyType2',
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+      'foo',
+      'sampleTaskSharedConcurrencyType1',
+      'sampleTaskSharedConcurrencyType2',
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface Opts {
   numTasks: number;

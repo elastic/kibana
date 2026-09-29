@@ -18,27 +18,27 @@ import type {
 } from '@kbn/saved-objects-management-plugin/common';
 
 vi.mock('./delete_data_view_flyout_content', () => {
-      const mocked = {
-      DeleteModalContent: vi.fn(() => <div data-testid="delete-modal-content" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeleteModalContent: vi.fn(() => <div data-testid="delete-modal-content" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          notifications: {
-            toasts: {
-              addSuccess: vi.fn(),
-              addDanger: vi.fn(),
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addDanger: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataViews = {
   delete: vi.fn(),

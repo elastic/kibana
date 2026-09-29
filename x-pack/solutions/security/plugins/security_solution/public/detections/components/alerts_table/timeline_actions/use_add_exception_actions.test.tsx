@@ -74,8 +74,7 @@ describe('useAlertExceptionActions', () => {
     mockUseEndpointExceptionsCapability.mockReturnValue(true);
 
     const { result } = renderHook(
-      () =>
-        useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: vi.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 
@@ -143,8 +142,7 @@ describe('useAlertExceptionActions', () => {
     mockUseAlertsPrivileges.mockReturnValue({ hasIndexWrite: false });
 
     const { result } = renderHook(
-      () =>
-        useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: vi.fn() }),
+      () => useAlertExceptionActions({ isEndpointAlert: false, onAddExceptionTypeClick: vi.fn() }),
       { wrapper: TestProviders }
     );
 

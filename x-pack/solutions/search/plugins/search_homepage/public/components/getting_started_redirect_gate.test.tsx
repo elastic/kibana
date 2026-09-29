@@ -13,35 +13,35 @@ import { GettingStartedRedirectGate } from './getting_started_redirect_gate';
 import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
 
 vi.mock('@kbn/search-shared-ui', () => {
-      const mocked = {
-      GETTING_STARTED_SESSIONSTORAGE_KEY: 'gettingStartedVisited',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GETTING_STARTED_SESSIONSTORAGE_KEY: 'gettingStartedVisited',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetLicenseInfo = vi.fn();
 vi.mock('../hooks/use_get_license_info', () => {
-      const mocked = {
-      useGetLicenseInfo: () => mockUseGetLicenseInfo(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetLicenseInfo: () => mockUseGetLicenseInfo(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStats = vi.fn();
 vi.mock('../hooks/api/use_stats', () => {
-      const mocked = {
-      useStats: () => mockUseStats(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStats: () => mockUseStats(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GettingStartedRedirectGate', () => {
   const navigateToApp = vi.fn();

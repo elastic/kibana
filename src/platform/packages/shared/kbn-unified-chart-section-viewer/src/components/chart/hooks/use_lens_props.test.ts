@@ -30,11 +30,11 @@ vi.mock('./use_chart_layers');
 vi.mock('@kbn/lens-embeddable-utils');
 const mockReportError = vi.fn();
 vi.mock('./use_report_chart_section_error', () => {
-      const mocked = {
-      useReportChartSectionError: vi.fn(() => mockReportError),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReportChartSectionError: vi.fn(() => mockReportError),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const LensConfigBuilderMock = LensConfigBuilder as MockedClass<typeof LensConfigBuilder>;
 const useChartLayersMock = useChartLayers as MockedFunction<typeof useChartLayers>;

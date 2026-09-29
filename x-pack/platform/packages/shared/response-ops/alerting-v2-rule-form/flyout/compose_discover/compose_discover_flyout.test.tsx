@@ -32,53 +32,53 @@ import type { QueryTab } from './types';
 type FormProps = React.ComponentProps<typeof ComposeDiscoverForm>;
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => <div data-test-subj="codeEditorMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => <div data-test-subj="codeEditorMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-editor', () => {
-      const mocked = {
-      ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLEditor: () => <div data-test-subj="esqlEditorMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_form/alert_condition_step', () => {
-      const mocked = {
-      AlertConditionStep: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertConditionStep: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_form/recovery_condition_step', () => {
-      const mocked = {
-      RecoveryConditionStep: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RecoveryConditionStep: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_form/details_and_artifacts_step', () => {
-      const mocked = {
-      DetailsAndArtifactsStep: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DetailsAndArtifactsStep: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_form/linked_action_policies_step', () => {
-      const mocked = {
-      LinkedActionPoliciesStep: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LinkedActionPoliciesStep: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compose_discover_form/esql_recovery_content', () => {
-      const mocked = {
-      EsqlRecoveryContent: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsqlRecoveryContent: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockComposeDiscoverForm = vi.fn((_props: FormProps) => (
   <div data-test-subj="composeDiscoverFormMock" />
@@ -86,8 +86,12 @@ const mockComposeDiscoverForm = vi.fn((_props: FormProps) => (
 
 vi.mock('./compose_discover_form', async () => {
   const { useFormContext } = require('react-hook-form') as typeof import('react-hook-form');
-  const { getSteps } = (await vi.importActual('./compose_discover_form')) as typeof import('./compose_discover_form');
-  const { QueryFieldRules } = (await vi.importActual('./compose_discover_form/query_field_rules')) as typeof import('./compose_discover_form/query_field_rules');
+  const { getSteps } = (await vi.importActual(
+    './compose_discover_form'
+  )) as typeof import('./compose_discover_form');
+  const { QueryFieldRules } = (await vi.importActual(
+    './compose_discover_form/query_field_rules'
+  )) as typeof import('./compose_discover_form/query_field_rules');
   return {
     getSteps,
     ComposeDiscoverForm: (props: FormProps) => {
@@ -157,93 +161,97 @@ let readRecovery: (() => FormValues['recovery']) | undefined;
 let readTimeField: (() => FormValues['timeField']) | undefined;
 
 vi.mock('./query_sandbox_flyout', () => {
-      const mocked = {
-      QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
-        sandboxFlyoutProps = props;
-        return (
-          <div data-test-subj="composeDiscoverChildMock">
-            <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
-            {props.onTimeFieldChange ? (
-              <select
-                data-test-subj="querySandboxTimeField"
-                value={props.timeField}
-                onChange={(e) => props.onTimeFieldChange?.(e.target.value)}
-              >
-                {props.timeFieldOptions?.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.text}
-                  </option>
-                ))}
-              </select>
-            ) : null}
-            {props.onApply ? (
-              <button type="button" data-test-subj="mockSandboxApply" onClick={() => props.onApply?.()}>
-                Apply
-              </button>
-            ) : null}
+  const mocked = {
+    QuerySandboxFlyout: (props: SandboxFlyoutMockProps) => {
+      sandboxFlyoutProps = props;
+      return (
+        <div data-test-subj="composeDiscoverChildMock">
+          <div data-test-subj="mockSandboxHelpText">{props.helpText}</div>
+          {props.onTimeFieldChange ? (
+            <select
+              data-test-subj="querySandboxTimeField"
+              value={props.timeField}
+              onChange={(e) => props.onTimeFieldChange?.(e.target.value)}
+            >
+              {props.timeFieldOptions?.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.text}
+                </option>
+              ))}
+            </select>
+          ) : null}
+          {props.onApply ? (
             <button
               type="button"
-              data-test-subj="composeDiscoverChildMockClose"
-              onClick={props.onClose}
+              data-test-subj="mockSandboxApply"
+              onClick={() => props.onApply?.()}
             >
-              Close sandbox
+              Apply
             </button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          ) : null}
+          <button
+            type="button"
+            data-test-subj="composeDiscoverChildMockClose"
+            onClick={props.onClose}
+          >
+            Close sandbox
+          </button>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_esql_providers', () => {
-      const mocked = {
-      useEsqlAutocomplete: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlAutocomplete: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_split_query_completion', () => {
-      const mocked = {
-      useSplitQueryCompletion: () => ({ onEditorMount: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSplitQueryCompletion: () => ({ onEditorMount: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_resolve_time_field', () => {
-      const mocked = {
-      useResolveTimeField: () => ({
-        timeFieldOptions: [
-          { value: '@timestamp', text: '@timestamp' },
-          { value: 'event.ingested', text: 'event.ingested' },
-        ],
-        isTimeFieldResolved: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolveTimeField: () => ({
+      timeFieldOptions: [
+        { value: '@timestamp', text: '@timestamp' },
+        { value: 'event.ingested', text: 'event.ingested' },
+      ],
+      isTimeFieldResolved: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/hooks/use_data_fields', () => {
-      const mocked = {
-      useDataFields: () => ({ data: {}, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataFields: () => ({ data: {}, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLTimeField: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLTimeField: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/utils/yaml_form_utils', () => {
-      const mocked = {
-      serializeFormToYaml: () => 'mock-yaml',
-      parseYamlToFormValues: vi.fn((yaml: string) => mockParseYamlToFormValues(yaml)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    serializeFormToYaml: () => 'mock-yaml',
+    parseYamlToFormValues: vi.fn((yaml: string) => mockParseYamlToFormValues(yaml)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultYamlFormValues: FormValues = {
   kind: 'signal',
@@ -265,27 +273,27 @@ let mockParseYamlToFormValues: (yaml: string) => {
 });
 
 vi.mock('../../form/yaml_rule_form', () => {
-      const mocked = {
-      YamlRuleForm: (props: {
-        setYamlText: (yaml: string) => void;
-        onBlurSync: (values: FormValues) => void;
-      }) => {
-        yamlRuleFormProps = props;
-        return (
-          <div data-test-subj="yamlRuleFormMock">
-            <button
-              data-test-subj="mockMakeYamlDirty"
-              onClick={() => props.setYamlText('name: changed\n')}
-              type="button"
-            >
-              Make YAML dirty
-            </button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    YamlRuleForm: (props: {
+      setYamlText: (yaml: string) => void;
+      onBlurSync: (values: FormValues) => void;
+    }) => {
+      yamlRuleFormProps = props;
+      return (
+        <div data-test-subj="yamlRuleFormMock">
+          <button
+            data-test-subj="mockMakeYamlDirty"
+            onClick={() => props.setYamlText('name: changed\n')}
+            type="button"
+          >
+            Make YAML dirty
+          </button>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockServices = (): RuleFormServices => ({
   http: httpServiceMock.createStartContract(),

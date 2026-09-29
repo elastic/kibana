@@ -22,16 +22,16 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QuickSearchVisor, type QuickSearchVisorProps } from '.';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLAdHocDataview: vi.fn().mockResolvedValue({
-        id: 'mock-adhoc-dataview',
-        title: 'test_index',
-        type: 'esql',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLAdHocDataview: vi.fn().mockResolvedValue({
+      id: 'mock-adhoc-dataview',
+      title: 'test_index',
+      type: 'esql',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Quick search visor', () => {
   const corePluginMock = coreMock.createStart();

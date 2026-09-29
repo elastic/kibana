@@ -17,12 +17,12 @@ import { setIndexPatterns, setSearchService } from '../../services';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLAdHocDataview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLAdHocDataview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLAdHocDataview = getESQLAdHocDataview as MockedFunction<
   typeof getESQLAdHocDataview

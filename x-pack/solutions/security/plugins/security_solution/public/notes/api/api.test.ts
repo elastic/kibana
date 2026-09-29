@@ -36,12 +36,12 @@ describe('Notes API client', () => {
       });
 
       await expect(async () =>
-                api.createNote({
-                  note: {
-                    timelineId: '1',
-                  },
-                })
-              ).rejects.toThrow();
+        api.createNote({
+          note: {
+            timelineId: '1',
+          },
+        })
+      ).rejects.toThrow();
     });
   });
 });

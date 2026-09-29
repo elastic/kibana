@@ -49,13 +49,13 @@ vi.mock('@elastic/charts', () => {
 });
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { charts: { theme: { useChartsBaseTheme: () => ({}) } } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { charts: { theme: { useChartsBaseTheme: () => ({}) } } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSeries: TrendSeries = {
   id: 'count',

@@ -56,12 +56,12 @@ const mockControlGroupRenderer = getMockedControlGroupRenderer(
 );
 
 vi.mock('@kbn/control-group-renderer', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/control-group-renderer')),
-      ControlGroupRenderer: vi.fn().mockImplementation((props) => mockControlGroupRenderer(props)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/control-group-renderer')),
+    ControlGroupRenderer: vi.fn().mockImplementation((props) => mockControlGroupRenderer(props)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onFilterChangeMock = vi.fn();
 const onInitMock = vi.fn();

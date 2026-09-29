@@ -19,60 +19,60 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 const mockUseFetcher = vi.fn();
 
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-      isPending: vi.fn((status: string) => status === 'loading' || status === 'not_initiated'),
-      isSuccess: vi.fn((status: string) => status === 'success'),
-      isFailure: vi.fn((status: string) => status === 'failure'),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+    isPending: vi.fn((status: string) => status === 'loading' || status === 'not_initiated'),
+    isSuccess: vi.fn((status: string) => status === 'success'),
+    isFailure: vi.fn((status: string) => status === 'failure'),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        path: { groupId: 'test-group-id' },
-        query: {
-          rangeFrom: 'now-24h',
-          rangeTo: 'now',
-          environment: 'ENVIRONMENT_ALL',
-          kuery: '',
-          errorId: 'error-id-1',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      path: { groupId: 'test-group-id' },
+      query: {
+        rangeFrom: 'now-24h',
+        rangeTo: 'now',
+        environment: 'ENVIRONMENT_ALL',
+        kuery: '',
+        errorId: 'error-id-1',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../context/apm_service/use_apm_service_context', () => {
-      const mocked = {
-      useApmServiceContext: () => ({ serviceName: 'test-service' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmServiceContext: () => ({ serviceName: 'test-service' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start: '2025-01-01T00:00:00.000Z',
-        end: '2025-01-02T00:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start: '2025-01-01T00:00:00.000Z',
+      end: '2025-01-02T00:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./error_sample_contextual_insight', () => {
-      const mocked = {
-      ErrorSampleContextualInsight: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ErrorSampleContextualInsight: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

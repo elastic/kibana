@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { searchConnectorsMock } from '@kbn/content-connectors-plugin/public/plugin.mock';
 
 import React from 'react';
@@ -15,6 +13,7 @@ import { act } from '@testing-library/react';
 import { getContext } from 'kea';
 
 import { Observable } from 'rxjs';
+import { vi } from 'vitest';
 
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';

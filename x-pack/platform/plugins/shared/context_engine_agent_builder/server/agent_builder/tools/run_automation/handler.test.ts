@@ -12,25 +12,27 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { runAutomationHandler } from './handler';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
-      const mocked = {
-      hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
-      hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
-      executeWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
+    hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
+    executeWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../assert_context_engine_write_access', () => {
-      const mocked = {
-      assertContextEngineWriteAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertContextEngineWriteAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege, executeWorkflow } =
-  (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
+  await vi.importMock('@kbn/agent-builder-tools-base/workflows');
 
-const { assertContextEngineWriteAccess } = (await vi.importMock('../../assert_context_engine_write_access'));
+const { assertContextEngineWriteAccess } = await vi.importMock(
+  '../../assert_context_engine_write_access'
+);
 
 describe('runAutomationHandler', () => {
   const request = httpServerMock.createKibanaRequest();

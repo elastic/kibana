@@ -15,22 +15,22 @@ import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_call
 import { getDynamicSettingsAction } from '../../../state/settings/actions';
 
 vi.mock('../../../contexts', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../contexts')),
-      useSyntheticsStartPlugins: vi.fn().mockReturnValue({
-        share: {
-          url: {
-            locators: {
-              get: vi.fn().mockReturnValue({
-                getUrl: vi.fn().mockResolvedValue('url'),
-              }),
-            },
+  const mocked = {
+    ...(await vi.importActual('../../../contexts')),
+    useSyntheticsStartPlugins: vi.fn().mockReturnValue({
+      share: {
+        url: {
+          locators: {
+            get: vi.fn().mockReturnValue({
+              getUrl: vi.fn().mockResolvedValue('url'),
+            }),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertingCallout', () => {
   it.each([

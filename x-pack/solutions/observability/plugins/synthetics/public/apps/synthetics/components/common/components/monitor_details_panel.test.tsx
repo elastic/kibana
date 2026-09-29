@@ -19,71 +19,71 @@ import type {
 import { MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: () => ({ space: { id: 'default' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: () => ({ space: { id: 'default' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useGetUrlParams: () => ({ spaceId: undefined, remoteName: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => ({ spaceId: undefined, remoteName: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_date_format', () => {
-      const mocked = {
-      useDateFormat: () => (ts?: string) => ts ?? '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateFormat: () => (ts?: string) => ts ?? '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../monitors_page/management/monitor_list_table/monitor_enabled', () => {
-      const mocked = {
-      MonitorEnabled: () => <div data-test-subj="monitorEnabledStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitorEnabled: () => <div data-test-subj="monitorEnabledStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../monitor_details/monitor_summary/locations_status', () => {
-      const mocked = {
-      LocationsStatus: () => <div data-test-subj="locationsStatusStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LocationsStatus: () => <div data-test-subj="locationsStatusStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./monitor_assigned_agents', () => {
-      const mocked = {
-      MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitorAssignedAgents: () => <div data-test-subj="monitorAssignedAgentsStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      TagsList: ({ tags }: { tags: string[] }) => (
-        <div data-test-subj="tagsListStub">{tags.join(',')}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TagsList: ({ tags }: { tags: string[] }) => (
+      <div data-test-subj="tagsListStub">{tags.join(',')}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./monitor_maintenance_windows', () => {
-      const mocked = {
-      MonitorMaintenanceWindows: ({ monitorMWs }: { monitorMWs: string[] }) => (
-        <div data-test-subj="maintenanceWindowsStub">{monitorMWs.join(',')}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitorMaintenanceWindows: ({ monitorMWs }: { monitorMWs: string[] }) => (
+      <div data-test-subj="maintenanceWindowsStub">{monitorMWs.join(',')}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const localMonitor = {
   config_id: 'config-1',

@@ -15,11 +15,11 @@ import { JsonCodeEditorCommon } from './json_code_editor_common';
 import { render, screen } from '@testing-library/react';
 
 vi.mock('./json_code_editor_common', () => {
-      const mocked = {
-      JsonCodeEditorCommon: vi.fn(() => <div data-test-subj="jsonCodeEditorCommon" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JsonCodeEditorCommon: vi.fn(() => <div data-test-subj="jsonCodeEditorCommon" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedJsonCodeEditorCommon = vi.mocked(JsonCodeEditorCommon);
 

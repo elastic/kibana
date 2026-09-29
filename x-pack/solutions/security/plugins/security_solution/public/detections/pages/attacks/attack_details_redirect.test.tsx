@@ -31,12 +31,12 @@ const testAttackId = 'test-attack-id';
 const mockRouteParams: { attackId?: string } = { attackId: testAttackId };
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => mockRouteParams,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => mockRouteParams,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testIndex = '.someTestIndex';
 const testTimestamp = '2023-04-20T12:00:00.000Z';

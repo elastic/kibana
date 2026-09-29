@@ -17,37 +17,37 @@ import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useAgentId } from '../../../hooks/use_conversation';
 
 vi.mock('../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/agents/use_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Stub child: EmbeddableConversationList renders a conversation list — irrelevant here
 vi.mock('./embeddable_conversation_list', () => {
-      const mocked = {
-      EmbeddableConversationList: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmbeddableConversationList: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // EUI useEuiTheme — conversations_popover_view accesses size.* and colors.* inline
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -60,18 +60,18 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/ebt-click', () => {
-      const mocked = {
-      getEbtProps: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEbtProps: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/agent_avatar', () => {
-      const mocked = {
-      AgentAvatar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentAvatar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationContext = vi.mocked(useConversationContext);
 const mockUseAgentBuilderAgents = vi.mocked(useAgentBuilderAgents);

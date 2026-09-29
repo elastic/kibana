@@ -15,18 +15,18 @@ import { useSplitQueryValidation } from './use_split_query_validation';
 import { getModelDependencies } from './esql_editor_messages_registry';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      ESQLLang: {
-        validate: vi.fn(),
+  const mocked = {
+    ESQLLang: {
+      validate: vi.fn(),
+    },
+    monaco: {
+      editor: {
+        setModelMarkers: vi.fn(),
       },
-      monaco: {
-        editor: {
-          setModelMarkers: vi.fn(),
-        },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const flushDebounce = async () => {
   vi.advanceTimersByTime(256);

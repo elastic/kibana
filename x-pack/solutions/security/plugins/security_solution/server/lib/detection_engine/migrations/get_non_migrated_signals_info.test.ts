@@ -20,23 +20,23 @@ import { getLatestIndexTemplateVersion } from './get_latest_index_template_versi
 import { getIndexAliasPerSpace } from './get_index_alias_per_space';
 
 vi.mock('./get_index_versions_by_index', () => {
-      const mocked = { getIndexVersionsByIndex: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getIndexVersionsByIndex: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get_signal_versions_by_index', () => {
-      const mocked = { getSignalVersionsByIndex: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getSignalVersionsByIndex: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get_latest_index_template_version', () => {
-      const mocked = {
-      getLatestIndexTemplateVersion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLatestIndexTemplateVersion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./get_index_alias_per_space', () => {
-      const mocked = { getIndexAliasPerSpace: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getIndexAliasPerSpace: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const getIndexVersionsByIndexMock = getIndexVersionsByIndex as Mock;
 const getSignalVersionsByIndexMock = getSignalVersionsByIndex as Mock;

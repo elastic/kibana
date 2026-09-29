@@ -38,23 +38,23 @@ import { createFlyoutApiMock } from '../../../../../flyout_v2/use_flyout_api.moc
 import { useIsNewFlyoutEnabled } from '../../../../../common/hooks/use_is_new_flyout_enabled';
 
 vi.mock('../../../../containers', () => {
-      const mocked = {
-      useTimelineEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../containers/details', () => {
-      const mocked = {
-      useTimelineEventsDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEventsDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/user_privileges');
 
@@ -70,7 +70,7 @@ vi.mock('use-resize-observer/polyfilled');
 mockUseResizeObserver.mockImplementation(() => ({}));
 
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: vi.fn(),

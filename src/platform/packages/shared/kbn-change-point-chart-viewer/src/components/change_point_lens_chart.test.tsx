@@ -20,21 +20,21 @@ import type { ChangePointLensChartProps } from './change_point_lens_chart';
 
 vi.mock('../hooks/use_change_point_lens_props');
 vi.mock('@kbn/embeddable-plugin/public', () => {
-      const mocked = {
-      EmbeddableRendererContext: {
-        Provider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmbeddableRendererContext: {
+      Provider: ({ children }: { children?: React.ReactNode }) => <>{children}</>,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./change_point_badge', () => {
-      const mocked = {
-      ChangePointBadge: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangePointBadge: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -49,7 +49,7 @@ vi.mock('@elastic/eui', async () => {
 
 // ---- helpers ----
 
-const { useChangePointLensProps } = (await vi.importMock('../hooks/use_change_point_lens_props'));
+const { useChangePointLensProps } = await vi.importMock('../hooks/use_change_point_lens_props');
 
 const stubCard = (overrides: Partial<ChangePointCardModel> = {}): ChangePointCardModel => ({
   id: 'card-1',

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { renderHook, waitFor } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
@@ -15,11 +14,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { useFooterLinks } from './use_footer_links';
 
 vi.mock('@kbn/cloud/connection_details', () => {
-      const mocked = {
-      openWiredConnectionDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openWiredConnectionDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createApplication = (
   overrides: {

@@ -21,54 +21,54 @@ import { steps as nodeNames } from './constants';
 // The graph, the event conversion and the round assembly run for real: what a sub-agent run goes
 // through when it is started from inside the parent's `executeTool` node.
 vi.mock('./utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('./utils')),
-      prepareConversation: vi.fn(),
-      selectTools: vi.fn(),
-      selectSkills: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./utils')),
+    prepareConversation: vi.fn(),
+    selectTools: vi.fn(),
+    selectSkills: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tools/register_internal_tools', () => {
-      const mocked = {
-      registerInternalTools: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerInternalTools: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/create_result_transformer', () => {
-      const mocked = {
-      createResultTransformer: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createResultTransformer: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/image_resolver', () => {
-      const mocked = {
-      createImageResolver: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createImageResolver: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./prompts', () => {
-      const mocked = {
-      createPromptFactory: vi.fn(() => ({
-        getMainPrompt: vi.fn().mockResolvedValue([]),
-        getStructuredAnswerPrompt: vi.fn().mockResolvedValue([]),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPromptFactory: vi.fn(() => ({
+      getMainPrompt: vi.fn().mockResolvedValue([]),
+      getStructuredAnswerPrompt: vi.fn().mockResolvedValue([]),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@langchain/langgraph/prebuilt', () => {
-      const mocked = {
-      ToolNode: vi.fn().mockImplementation(() => ({
-        invoke: vi.fn().mockResolvedValue([]),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolNode: vi.fn().mockImplementation(() => ({
+      invoke: vi.fn().mockResolvedValue([]),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const prepareConversationMock = prepareConversation as MockedFunction<typeof prepareConversation>;
 const selectToolsMock = selectTools as MockedFunction<typeof selectTools>;
@@ -104,7 +104,7 @@ describe('runDefaultAgentMode started from inside another graph node (sub-agent 
       attachmentStateManager: context.attachmentStateManager,
     } as any);
     selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools: [] } as any);
-    const { ToolNode } = (await vi.importMock('@langchain/langgraph/prebuilt'));
+    const { ToolNode } = await vi.importMock('@langchain/langgraph/prebuilt');
     ToolNode.mockImplementationOnce(() => ({
       invoke: vi.fn().mockResolvedValue([
         new ToolMessage({

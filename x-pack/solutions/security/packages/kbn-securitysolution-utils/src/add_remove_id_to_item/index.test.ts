@@ -10,11 +10,11 @@ import { vi } from 'vitest';
 import { addIdToItem, removeIdFromItem } from '.';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('add_remove_id_to_item', () => {
   afterEach(() => {

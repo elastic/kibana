@@ -21,13 +21,13 @@ import { WorkflowExecutionDetails } from './workflow_execution_details';
 // is covered by `workflow_execution_details.test.tsx`). These tests focus on the
 // wrapper's own responsibilities: the flyout chrome and prop pass-through.
 vi.mock('./workflow_execution_details', () => {
-      const mocked = {
-      WorkflowExecutionDetails: vi.fn(() => (
-        <div data-test-subj="workflowExecutionDetails">{'Mock WorkflowExecutionDetails'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionDetails: vi.fn(() => (
+      <div data-test-subj="workflowExecutionDetails">{'Mock WorkflowExecutionDetails'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockWorkflowExecutionDetails = WorkflowExecutionDetails as MockedFunction<
   typeof WorkflowExecutionDetails

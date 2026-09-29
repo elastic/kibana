@@ -21,7 +21,7 @@ import { EntityAnalyticsAgentNavigationProvider } from './entity_analytics_agent
 import { EntityListTable, type EntityListRow } from './entity_list_table';
 
 vi.mock('./entity_explore_navigation', async () => {
-  const actual = (await vi.importActual('./entity_explore_navigation'));
+  const actual = await vi.importActual('./entity_explore_navigation');
   return {
     ...actual,
     navigateToEntityAnalyticsWithFlyoutInApp: vi.fn(),
@@ -33,25 +33,25 @@ vi.mock('./entity_explore_navigation', async () => {
 // that are not wired up in this focused test. Mocked so rendering the Risk
 // level column doesn't pull the whole EUI theme setup into every test case.
 vi.mock('../../entity_analytics/components/severity/common', () => {
-      const mocked = {
-      RiskScoreLevel: ({ severity }: { severity?: string }) => (
-        <span data-test-subj="riskScoreLevelMock">{severity}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreLevel: ({ severity }: { severity?: string }) => (
+      <span data-test-subj="riskScoreLevelMock">{severity}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // `FormattedRelativePreferenceDate` pulls in Kibana UI settings and the shared
 // date-formatting infrastructure. We only care about the Name column here, so
 // stub it with a trivial renderer.
 vi.mock('../../common/components/formatted_date', () => {
-      const mocked = {
-      FormattedRelativePreferenceDate: ({ value }: { value?: string }) => (
-        <span data-test-subj="formattedRelativePreferenceDateMock">{value}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedRelativePreferenceDate: ({ value }: { value?: string }) => (
+      <span data-test-subj="formattedRelativePreferenceDateMock">{value}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedNavigateToFlyout = navigateToEntityAnalyticsWithFlyoutInApp as Mock;
 const mockedNavigateToHome = navigateToEntityAnalyticsHomePageInApp as Mock;

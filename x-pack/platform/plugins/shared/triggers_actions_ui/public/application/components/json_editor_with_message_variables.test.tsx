@@ -15,7 +15,7 @@ import { MockedCodeEditor } from '@kbn/code-editor-mock';
 const mockCodeEditor = vi.fn();
 
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {

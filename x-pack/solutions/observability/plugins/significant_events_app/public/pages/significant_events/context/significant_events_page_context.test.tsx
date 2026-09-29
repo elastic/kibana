@@ -18,18 +18,18 @@ import {
 } from './significant_events_page_context';
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_significant_events_discovery_api', () => {
-      const mocked = {
-      useSignificantEventsDiscoveryApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsDiscoveryApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '../../../hooks/use_kibana';
 import { useSignificantEventsDiscoveryApi } from '../../../hooks/use_significant_events_discovery_api';

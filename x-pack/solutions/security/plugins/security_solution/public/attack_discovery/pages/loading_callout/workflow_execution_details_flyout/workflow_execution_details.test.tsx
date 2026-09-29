@@ -31,68 +31,68 @@ vi.mock('../../hooks/use_workflow_execution_details');
 vi.mock('../../hooks/use_get_attack_discovery_generation');
 vi.mock('../../hooks/use_has_workflows_privileges');
 vi.mock('./conversation_link', () => {
-      const mocked = {
-      ConversationLink: vi.fn(({ conversationId }: { conversationId: string }) => (
-        <div data-test-subj="conversationLink" data-conversation-id={conversationId} />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConversationLink: vi.fn(({ conversationId }: { conversationId: string }) => (
+      <div data-test-subj="conversationLink" data-conversation-id={conversationId} />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../workflow_pipeline_monitor', () => {
-      const mocked = {
-      WorkflowPipelineMonitor: vi.fn((props: Record<string, unknown>) => (
-        <div data-test-subj="workflowPipelineMonitor">
-          {'Mock WorkflowPipelineMonitor'}
-          {typeof props.onViewData === 'function' && (
-            <>
-              <button
-                data-test-subj="mockViewRetrieval"
-                onClick={() => (props.onViewData as Function)('retrieval')}
-                type="button"
-              />
-              <button
-                data-test-subj="mockViewGeneration"
-                onClick={() => (props.onViewData as Function)('generation')}
-                type="button"
-              />
-              <button
-                data-test-subj="mockViewValidation"
-                onClick={() => (props.onViewData as Function)('validation')}
-                type="button"
-              />
-            </>
-          )}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowPipelineMonitor: vi.fn((props: Record<string, unknown>) => (
+      <div data-test-subj="workflowPipelineMonitor">
+        {'Mock WorkflowPipelineMonitor'}
+        {typeof props.onViewData === 'function' && (
+          <>
+            <button
+              data-test-subj="mockViewRetrieval"
+              onClick={() => (props.onViewData as Function)('retrieval')}
+              type="button"
+            />
+            <button
+              data-test-subj="mockViewGeneration"
+              onClick={() => (props.onViewData as Function)('generation')}
+              type="button"
+            />
+            <button
+              data-test-subj="mockViewValidation"
+              onClick={() => (props.onViewData as Function)('validation')}
+              type="button"
+            />
+          </>
+        )}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('..', () => {
-      const mocked = {
-      LoadingCallout: vi.fn(({ hideActions }) => (
-        <div data-test-subj="loadingCallout" data-hide-actions={hideActions}>
-          {'Mock LoadingCallout'}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadingCallout: vi.fn(({ hideActions }) => (
+      <div data-test-subj="loadingCallout" data-hide-actions={hideActions}>
+        {'Mock LoadingCallout'}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./troubleshoot_with_ai', () => {
-      const mocked = {
-      TroubleshootWithAi: vi.fn((props: TroubleshootWithAiProps) => (
-        <div data-test-subj="troubleshootWithAi" data-generation-status={props.generationStatus}>
-          {'Mock TroubleshootWithAi'}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TroubleshootWithAi: vi.fn((props: TroubleshootWithAiProps) => (
+      <div data-test-subj="troubleshootWithAi" data-generation-status={props.generationStatus}>
+        {'Mock TroubleshootWithAi'}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./failure_section', () => {
-      const mocked = {
-      FailureSection: vi.fn(() => <div data-test-subj="failureSection" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FailureSection: vi.fn(() => <div data-test-subj="failureSection" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockWorkflowPipelineMonitor = WorkflowPipelineMonitor as unknown as Mock;
 const mockUsePipelineData = usePipelineData as Mock;

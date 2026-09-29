@@ -13,11 +13,11 @@ import { getResearchAgentPrompt } from './research_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 vi.mock('../utils/to_langchain_messages', () => {
-      const mocked = {
-      prepareMessages: vi.fn().mockResolvedValue([['human', 'history']]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prepareMessages: vi.fn().mockResolvedValue([['human', 'history']]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Unique marker present only in the injected notification, not in the static pointer prose.
 const NOTICE_MARKER = 'The following skills appear relevant';

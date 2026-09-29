@@ -19,12 +19,12 @@ import { validateWorkflowInputs } from './validate_workflow_inputs';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 
 vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
-      getInputsFromDefinition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+    getInputsFromDefinition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition

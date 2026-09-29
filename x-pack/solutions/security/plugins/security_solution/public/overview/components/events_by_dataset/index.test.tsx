@@ -18,11 +18,11 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 
 vi.mock('../../../common/components/link_to');
 vi.mock('../../../common/components/matrix_histogram', () => {
-      const mocked = {
-      MatrixHistogram: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MatrixHistogram: vi.fn().mockReturnValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MatrixHistogramMocked = MatrixHistogram as MockedFunction<typeof MatrixHistogram>;
 

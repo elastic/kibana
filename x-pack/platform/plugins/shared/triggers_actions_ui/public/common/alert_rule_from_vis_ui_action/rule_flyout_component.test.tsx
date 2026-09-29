@@ -25,15 +25,13 @@ import type { TypeRegistry } from '../../application/type_registry';
 const mockRuleFormFlyout = vi.fn((props) => <div data-test-subj={props['data-test-subj']} />);
 
 vi.mock('@kbn/response-ops-rule-form/flyout', () => {
-      const mocked = {
-      RuleForm: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleForm: (...args: Parameters<typeof mockRuleFormFlyout>) => mockRuleFormFlyout(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
-function createRegistryMock<
-  T extends PublicMethodsOf<TypeRegistry<{ id: string }>>
->(): Mocked<T> {
+function createRegistryMock<T extends PublicMethodsOf<TypeRegistry<{ id: string }>>>(): Mocked<T> {
   return {
     has: vi.fn(),
     register: vi.fn(),

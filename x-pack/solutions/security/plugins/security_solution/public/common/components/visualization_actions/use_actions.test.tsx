@@ -22,14 +22,14 @@ vi.mock('./use_add_to_existing_case', () => {
   };
 });
 vi.mock('./use_redirect_to_dashboard_from_lens', () => {
-      const mocked = {
-      useRedirectToDashboardFromLens: vi.fn().mockReturnValue({
-        redirectTo: vi.fn(),
-        getEditOrCreateDashboardPath: vi.fn().mockReturnValue('mockDashboardPath'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRedirectToDashboardFromLens: vi.fn().mockReturnValue({
+      redirectTo: vi.fn(),
+      getEditOrCreateDashboardPath: vi.fn().mockReturnValue('mockDashboardPath'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/kibana/kibana_react', () => {
   return {

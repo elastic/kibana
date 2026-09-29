@@ -53,11 +53,11 @@ import {
 import { userMessageEvent } from '../../conversation/client/rounds_to_events';
 
 vi.mock('../../../tracing', () => {
-      const mocked = {
-      getCurrentTraceId: () => 'trace-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentTraceId: () => 'trace-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const attachmentAddedEvent = (id = 'att-evt-1'): AttachmentTimelineEvent => ({
   id,

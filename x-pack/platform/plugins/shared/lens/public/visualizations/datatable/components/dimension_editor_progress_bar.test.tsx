@@ -40,7 +40,7 @@ interface MockColorMappingByValuesProps {
 }
 
 vi.mock('../../../shared_components/coloring/color_mapping_by_values', () => {
-  const ReactLib = (require('react') as typeof import('react'));
+  const ReactLib = require('react') as typeof import('react');
 
   return {
     ColorMappingByValues: ({ palette, setPalette, dataBounds }: MockColorMappingByValuesProps) => {

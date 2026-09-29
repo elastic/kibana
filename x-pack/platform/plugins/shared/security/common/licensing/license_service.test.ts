@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { BehaviorSubject, of } from 'rxjs';
+import { vi } from 'vitest';
 
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 

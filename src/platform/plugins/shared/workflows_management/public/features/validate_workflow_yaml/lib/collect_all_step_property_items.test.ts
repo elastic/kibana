@@ -191,14 +191,12 @@ steps:
       resolve: vi.fn(),
       getDetails: vi.fn(),
     };
-    const getPropertyHandler = vi.fn(
-      (stepType: string, scope: 'config' | 'input', key: string) => {
-        if (stepType === 'run-agent' && scope === 'config' && key === 'extra') {
-          return { selection: selectionHandler };
-        }
-        return null;
+    const getPropertyHandler = vi.fn((stepType: string, scope: 'config' | 'input', key: string) => {
+      if (stepType === 'run-agent' && scope === 'config' && key === 'extra') {
+        return { selection: selectionHandler };
       }
-    );
+      return null;
+    });
     const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
@@ -225,14 +223,12 @@ steps:
       resolve: vi.fn(),
       getDetails: vi.fn(),
     };
-    const getPropertyHandler = vi.fn(
-      (stepType: string, scope: 'config' | 'input', key: string) => {
-        if (stepType === 'run-agent' && scope === 'config' && key === 'proxy.id') {
-          return { selection: selectionHandler };
-        }
-        return null;
+    const getPropertyHandler = vi.fn((stepType: string, scope: 'config' | 'input', key: string) => {
+      if (stepType === 'run-agent' && scope === 'config' && key === 'proxy.id') {
+        return { selection: selectionHandler };
       }
-    );
+      return null;
+    });
     const stepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,
@@ -260,14 +256,12 @@ steps:
       resolve: vi.fn(),
       getDetails: vi.fn(),
     };
-    const getPropertyHandler = vi.fn(
-      (stepType: string, scope: 'config' | 'input', key: string) => {
-        if (stepType === 'elasticsearch.search' && scope === 'input' && key === 'index') {
-          return { selection: selectionHandler };
-        }
-        return null;
+    const getPropertyHandler = vi.fn((stepType: string, scope: 'config' | 'input', key: string) => {
+      if (stepType === 'elasticsearch.search' && scope === 'input' && key === 'index') {
+        return { selection: selectionHandler };
       }
-    );
+      return null;
+    });
     const esStepPropertyItems = collectAllStepPropertyItems(
       workflowLookup!,
       yamlLineCounter!,

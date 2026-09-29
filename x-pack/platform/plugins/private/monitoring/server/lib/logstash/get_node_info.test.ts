@@ -22,19 +22,19 @@ interface HitParams {
 }
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // deletes, adds, or updates the properties based on a default object
 function createResponseObjHit(params?: HitParams[]): ElasticsearchResponseHit {

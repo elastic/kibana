@@ -20,15 +20,15 @@ import { RemoteDocumentCallout } from './remote_document_callout';
 
 let mockCloud: unknown;
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          cloud: mockCloud,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        cloud: mockCloud,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const REMOTE_ATTACK_TEXT =
   'This attack originates from a remote cluster. Some features may not be available.';

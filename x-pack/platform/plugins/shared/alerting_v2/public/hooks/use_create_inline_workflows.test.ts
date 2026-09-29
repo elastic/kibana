@@ -17,11 +17,11 @@ import { useCreateInlineWorkflows } from './use_create_inline_workflows';
 vi.mock('@kbn/core-di-browser');
 vi.mock('@kbn/workflows-ui');
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      buildInlineWorkflowYaml: vi.fn().mockReturnValue('workflow: yaml'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildInlineWorkflowYaml: vi.fn().mockReturnValue('workflow: yaml'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseService = useService as MockedFunction<typeof useService>;
 

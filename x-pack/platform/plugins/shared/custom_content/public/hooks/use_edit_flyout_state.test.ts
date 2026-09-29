@@ -14,9 +14,9 @@ import type { EuiThemeComputed } from '@elastic/eui';
 vi.mock('../services');
 vi.mock('@kbn/custom-content-renderer');
 vi.mock('@kbn/data-plugin/public', () => {
-      const mocked = { getEsQueryConfig: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getEsQueryConfig: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 import type { HttpStart } from '@kbn/core/public';
 import {

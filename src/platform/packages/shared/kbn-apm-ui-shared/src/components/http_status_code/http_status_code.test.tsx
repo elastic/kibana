@@ -18,12 +18,12 @@ import { httpStatusCodes } from './http_status_codes';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const euiColorVisGrey0 = '111';
 const euiColorVisSuccess0 = '222';

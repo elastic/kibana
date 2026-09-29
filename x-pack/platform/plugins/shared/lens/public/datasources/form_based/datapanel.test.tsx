@@ -406,15 +406,15 @@ describe('FormBased Data Panel', () => {
     });
 
     it('loads existence data if layer index pattern changes', async () => {
-      vi
-        .spyOn(ExistingFieldsServiceApi, 'loadFieldExisting')
-        .mockImplementation(async ({ dataView }) => ({
+      vi.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting').mockImplementation(
+        async ({ dataView }) => ({
           indexPatternTitle: 'idx1',
           existingFieldNames:
             dataView.id === indexPatterns['1'].id
               ? [indexPatterns['1'].fields[0].name, indexPatterns['1'].fields[1].name]
               : [indexPatterns['2'].fields[0].name],
-        }));
+        })
+      );
 
       const { rerender } = await renderFormBasedDataPanel();
 

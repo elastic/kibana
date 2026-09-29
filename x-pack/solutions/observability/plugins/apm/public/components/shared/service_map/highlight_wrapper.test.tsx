@@ -14,7 +14,7 @@ import { useServiceMapSearchHighlight } from './service_map_search_context';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
@@ -25,14 +25,14 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./service_map_search_context', () => {
-      const mocked = {
-      useServiceMapSearchHighlight: vi.fn(() => ({
-        isSearchMatch: false,
-        isActiveSearchMatch: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceMapSearchHighlight: vi.fn(() => ({
+      isSearchMatch: false,
+      isActiveSearchMatch: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseServiceMapSearchHighlight = vi.mocked(useServiceMapSearchHighlight);
 

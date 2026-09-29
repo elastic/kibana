@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus, isExecuteSyncStepType } from '@kbn/workflows';
@@ -20,26 +20,26 @@ import { useChildWorkflowExecutions } from './use_child_workflow_executions';
 import { CHILD_WORKFLOW_EXECUTIONS_POLL_INTERVAL_MS } from '../../../hooks/polling_constants';
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 const mockIsExecuteSyncStepType = isExecuteSyncStepType as MockedFunction<
   typeof isExecuteSyncStepType
 >;
 
 vi.mock('@kbn/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows')),
-      isExecuteSyncStepType: vi.fn(() => false),
-      isTerminalStatus: vi.fn((status: string) =>
-        ['completed', 'failed', 'skipped'].includes(status)
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows')),
+    isExecuteSyncStepType: vi.fn(() => false),
+    isTerminalStatus: vi.fn((status: string) =>
+      ['completed', 'failed', 'skipped'].includes(status)
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = (queryClient: QueryClient) => {
   const Wrapper = ({ children }: { children: React.ReactNode }) =>

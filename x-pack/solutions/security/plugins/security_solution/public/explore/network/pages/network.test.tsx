@@ -29,27 +29,27 @@ vi.mock('../../../common/components/empty_prompt');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 vi.mock('../../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/visualization_actions/actions');
 vi.mock('../../../common/components/visualization_actions/lens_embeddable');
 
 vi.mock('./navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('./navigation')),
-      NetworkRoutes: vi.fn(() => <div data-test-subj="network-routes-mock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./navigation')),
+    NetworkRoutes: vi.fn(() => <div data-test-subj="network-routes-mock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const NetworkRoutesMocked = NetworkRoutes as MockedFunction<typeof NetworkRoutes>;
 
@@ -94,7 +94,7 @@ const mockSecurityCapabilities = {
   [SECURITY_FEATURE_ID]: { crud_alerts: true, read_alerts: true },
 };
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
 
   return {
     ...original,

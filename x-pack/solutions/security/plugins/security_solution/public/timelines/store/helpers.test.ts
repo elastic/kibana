@@ -57,7 +57,7 @@ import {
 
 vi.mock('../../common/utils/normalize_time_range');
 vi.mock('../../common/utils/default_date_settings', async () => {
-  const actual = (await vi.importActual('../../common/utils/default_date_settings'));
+  const actual = await vi.importActual('../../common/utils/default_date_settings');
   return {
     ...actual,
     DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),

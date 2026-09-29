@@ -33,11 +33,11 @@ import { EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID } from '../../../../../flyou
 import { useShouldShowGraph } from '../../../../shared/hooks/use_should_show_graph';
 
 vi.mock('../../../../../flyout_v2/shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
   const original = require('react-redux-v7');
@@ -53,22 +53,22 @@ vi.mock('../../../../shared/hooks/use_should_show_graph');
 const mockUseShouldShowGraph = useShouldShowGraph as Mock;
 
 vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
-      const mocked = {
-      useFetchGraphData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGraphData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchGraphData = useFetchGraphData as Mock;
 
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: {
-        trackUiMetric: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: {
+      trackUiMetric: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const uiMetricServiceMock = uiMetricService as Mocked<typeof uiMetricService>;
 

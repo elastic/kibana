@@ -13,11 +13,11 @@ import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_pag
 
 const mockNavigateTo = vi.fn();
 vi.mock('../lib/kibana', () => {
-      const mocked = {
-      useNavigation: () => ({ navigateTo: mockNavigateTo }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: () => ({ navigateTo: mockNavigateTo }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {

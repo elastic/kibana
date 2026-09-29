@@ -23,7 +23,7 @@ import {
 } from './resolve_chrome_header_announcement';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,

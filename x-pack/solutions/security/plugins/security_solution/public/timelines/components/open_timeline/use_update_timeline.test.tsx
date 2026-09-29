@@ -46,7 +46,7 @@ vi.mock('../../../common/store/app/actions');
 
 const mockUpdateTimeline = vi.fn();
 vi.mock('./helpers', async () => {
-  const actual = (await vi.importActual('./helpers'));
+  const actual = await vi.importActual('./helpers');
   return {
     ...actual,
     useUpdateTimeline: () => mockUpdateTimeline,
@@ -54,7 +54,7 @@ vi.mock('./helpers', async () => {
 });
 
 vi.mock('../../../common/utils/default_date_settings', async () => {
-  const actual = (await vi.importActual('../../../common/utils/default_date_settings'));
+  const actual = await vi.importActual('../../../common/utils/default_date_settings');
   return {
     ...actual,
     DEFAULT_FROM_MOMENT: new Date('2020-10-27T11:37:31.655Z'),

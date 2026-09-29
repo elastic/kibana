@@ -27,13 +27,13 @@ import { INTERNAL_OVERRIDE_FIELDS, ServiceProviderKeys } from '../constants';
 let mockClonedProviders: InferenceProvider[];
 
 vi.mock('../hooks/use_providers', () => {
-      const mocked = {
-      useProviders: vi.fn(() => ({
-        data: mockClonedProviders,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProviders: vi.fn(() => ({
+      data: mockClonedProviders,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const httpMock = httpServiceMock.createStartContract();
 const notificationsMock = notificationServiceMock.createStartContract();

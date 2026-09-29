@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { addSpaceIdToPath, asSpaceId } from '@kbn/core-spaces-common';
@@ -25,28 +24,28 @@ import { SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX } from '../constants';
 import type { SupportedSolutionView } from '../types';
 
 vi.mock('./modal', () => {
-      const mocked = {
-      SolutionViewSwitchModal: ({
-        onSwitch,
-        onClose,
-        isLoading,
-      }: {
-        onSwitch: (solution: SupportedSolutionView) => void;
-        onClose: () => void;
-        isLoading: boolean;
-      }) => (
-        <div>
-          <button type="button" onClick={() => onSwitch('oblt')} disabled={isLoading}>
-            Mock switch
-          </button>
-          <button type="button" onClick={onClose}>
-            Mock close
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SolutionViewSwitchModal: ({
+      onSwitch,
+      onClose,
+      isLoading,
+    }: {
+      onSwitch: (solution: SupportedSolutionView) => void;
+      onClose: () => void;
+      isLoading: boolean;
+    }) => (
+      <div>
+        <button type="button" onClick={() => onSwitch('oblt')} disabled={isLoading}>
+          Mock switch
+        </button>
+        <button type="button" onClick={onClose}>
+          Mock close
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SolutionViewSwitchCallout', () => {
   const originalLocation = window.location;
@@ -155,11 +154,9 @@ describe('SolutionViewSwitchCallout', () => {
   });
 
   test('does not render when previously dismissed', async () => {
-    vi
-      .spyOn(Storage.prototype, 'getItem')
-      .mockImplementation((key) =>
-        key === `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}.dismissed` ? 'true' : null
-      );
+    vi.spyOn(Storage.prototype, 'getItem').mockImplementation((key) =>
+      key === `${SOLUTION_VIEW_SWITCH_STORAGE_KEY_PREFIX}.dismissed` ? 'true' : null
+    );
 
     await setup();
 

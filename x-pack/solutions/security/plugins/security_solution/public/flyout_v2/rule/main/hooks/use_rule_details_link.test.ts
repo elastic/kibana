@@ -16,20 +16,20 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { initialUserPrivilegesState } from '../../../../common/components/user_privileges/user_privileges_context';
 
 vi.mock('../../../../common/components/link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl: vi
-        .fn()
-        .mockReturnValue(
-          vi
-            .fn()
-            .mockReturnValue(
-              "app/security/rules/id/99eb0638-b2c7-4a1b-bc30-689e25978174?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('logs-*')))&timerange=(global:(linkTo:!(),timerange:(from:'2024-04-22T05:00:00.000Z',fromStr:now%2Fd,kind:absolute,to:'2024-04-23T04:59:59.999Z',toStr:now%2Fd)),timeline:(linkTo:!(),timerange:(from:'2024-04-22T21:02:05.427Z',kind:absolute,to:'2024-04-22T21:08:05.427Z')))&timeline=(activeTab:query,graphEventId:'',isOpen:!t)"
-            )
-        ),
-      getRuleDetailsUrl: vi.fn().mockReturnValue(''),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl: vi
+      .fn()
+      .mockReturnValue(
+        vi
+          .fn()
+          .mockReturnValue(
+            "app/security/rules/id/99eb0638-b2c7-4a1b-bc30-689e25978174?sourcerer=(default:(id:security-solution-default,selectedPatterns:!('logs-*')))&timerange=(global:(linkTo:!(),timerange:(from:'2024-04-22T05:00:00.000Z',fromStr:now%2Fd,kind:absolute,to:'2024-04-23T04:59:59.999Z',toStr:now%2Fd)),timeline:(linkTo:!(),timerange:(from:'2024-04-22T21:02:05.427Z',kind:absolute,to:'2024-04-22T21:08:05.427Z')))&timeline=(activeTab:query,graphEventId:'',isOpen:!t)"
+          )
+      ),
+    getRuleDetailsUrl: vi.fn().mockReturnValue(''),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/user_privileges');
 

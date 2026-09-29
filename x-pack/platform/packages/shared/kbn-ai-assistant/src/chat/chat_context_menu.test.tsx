@@ -14,14 +14,14 @@ import { ChatContextMenu } from './chat_context_menu';
 import { useConfirmModal } from '../hooks';
 
 vi.mock('../hooks/use_confirm_modal', () => {
-      const mocked = {
-      useConfirmModal: vi.fn(() => ({
-        element: <div data-test-subj="confirmModal" />,
-        confirm: vi.fn(() => Promise.resolve(true)),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConfirmModal: vi.fn(() => ({
+      element: <div data-test-subj="confirmModal" />,
+      confirm: vi.fn(() => Promise.resolve(true)),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ChatContextMenu', () => {
   const onCopyToClipboardClick = vi.fn();

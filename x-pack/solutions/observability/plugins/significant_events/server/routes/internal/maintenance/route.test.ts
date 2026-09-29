@@ -12,11 +12,11 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { internalMaintenanceRoutes } from './route';
 
 vi.mock('../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const route =
   internalMaintenanceRoutes['POST /internal/significant_events/maintenance/cleanup/_bootstrap'];

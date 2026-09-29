@@ -25,19 +25,19 @@ import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 
 vi.mock('../lib/gen_ai/create_gen_ai_dashboard');
 vi.mock('@kbn/actions-plugin/server/sub_action_framework/helpers/validators', () => {
-      const mocked = {
-      assertURL: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertURL: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the imported function
 vi.mock('@kbn/actions-plugin/server/lib/get_gcp_oauth_access_token', () => {
-      const mocked = {
-      getGoogleOAuthJwtAccessToken: vi.fn().mockResolvedValue('mock_access_token'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getGoogleOAuthJwtAccessToken: vi.fn().mockResolvedValue('mock_access_token'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockRequest: Mock;
 

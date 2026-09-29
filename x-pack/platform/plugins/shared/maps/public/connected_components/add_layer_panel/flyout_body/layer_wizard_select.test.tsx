@@ -8,9 +8,9 @@
 import { vi } from 'vitest';
 
 vi.mock('../../../classes/layers', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

@@ -16,14 +16,14 @@ import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analy
 import { LEADS_INDEX_PATTERN } from '../../../common/entity_analytics/lead_generation/constants';
 
 vi.mock('../../common/components/callouts/use_callout_storage', () => {
-      const mocked = {
-      useCallOutStorage: () => ({
-        isVisible: () => true,
-        dismiss: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCallOutStorage: () => ({
+      isVisible: () => true,
+      dismiss: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ALL_PRIVILEGES_GRANTED: RiskEngineMissingPrivilegesResponse = {
   isLoading: false,

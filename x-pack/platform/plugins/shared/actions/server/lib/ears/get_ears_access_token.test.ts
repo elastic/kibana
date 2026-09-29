@@ -18,11 +18,11 @@ import { getEarsAccessToken } from './get_ears_access_token';
 import { requestEarsRefreshToken } from './request_ears_refresh_token';
 
 vi.mock('./request_ears_refresh_token', () => {
-      const mocked = {
-      requestEarsRefreshToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestEarsRefreshToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const NOW = new Date('2024-01-15T12:00:00.000Z');
 

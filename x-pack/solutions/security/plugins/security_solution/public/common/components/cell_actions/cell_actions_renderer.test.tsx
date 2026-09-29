@@ -22,20 +22,20 @@ const MockSecurityCellActions = vi.fn(({ children }: { children: React.ReactNode
   <div data-test-subj="mockSecurityCellActions">{children}</div>
 ));
 vi.mock('.', async () => {
-      const mocked = {
-      ...(await vi.importActual('.')),
-      SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('.')),
+    SecurityCellActions: (params: { children: React.ReactNode }) => MockSecurityCellActions(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSourcererScopeId = 'testSourcererScopeId';
 vi.mock('../../../helpers', () => {
-      const mocked = {
-      getSourcererScopeId: vi.fn(() => mockSourcererScopeId),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSourcererScopeId: vi.fn(() => mockSourcererScopeId),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('cell actions renderer', () => {
   describe('rendering', () => {

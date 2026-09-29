@@ -22,13 +22,13 @@ import { ScoutReportEventAction } from '../../report';
 import { ScoutPlaywrightReporter } from './playwright_reporter';
 
 vi.mock('@kbn/code-owners', () => {
-      const mocked = {
-      getCodeOwnersEntries: vi.fn(() => []),
-      getOwningTeamsForPath: vi.fn(() => []),
-      findAreaForCodeOwner: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCodeOwnersEntries: vi.fn(() => []),
+    getOwningTeamsForPath: vi.fn(() => []),
+    findAreaForCodeOwner: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockConfig = (): FullConfig =>
   ({ configFile: undefined, fullyParallel: false } as unknown as FullConfig);

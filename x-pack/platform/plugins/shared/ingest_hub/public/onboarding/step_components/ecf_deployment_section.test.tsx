@@ -17,47 +17,47 @@ import { I18nProvider } from '@kbn/i18n-react';
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
 vi.mock('../ecf_cloudformation', () => {
-      const mocked = {
-      getEcfServiceConfigs: vi.fn(),
-      buildEcfUnifiedCloudFormationUrl: vi.fn(() => 'https://cf.aws/unified'),
-      buildEcfOtelCloudFormationUrl: vi.fn(() => 'https://cf.aws/otel'),
-      buildEcfCrowdstrikeCloudFormationUrl: vi.fn(() => 'https://cf.aws/crowdstrike'),
-      ECF_UNIFIED_STACK_NAME: 'edot-cloud-forwarder',
-      ECF_OTEL_STACK_NAME: 'edot-cloud-forwarder-otel',
-      ECF_CROWDSTRIKE_STACK_NAME: 'edot-cloud-forwarder-crowdstrike-fdr',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEcfServiceConfigs: vi.fn(),
+    buildEcfUnifiedCloudFormationUrl: vi.fn(() => 'https://cf.aws/unified'),
+    buildEcfOtelCloudFormationUrl: vi.fn(() => 'https://cf.aws/otel'),
+    buildEcfCrowdstrikeCloudFormationUrl: vi.fn(() => 'https://cf.aws/crowdstrike'),
+    ECF_UNIFIED_STACK_NAME: 'edot-cloud-forwarder',
+    ECF_OTEL_STACK_NAME: 'edot-cloud-forwarder-otel',
+    ECF_CROWDSTRIKE_STACK_NAME: 'edot-cloud-forwarder-crowdstrike-fdr',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../onboarding_session_storage', () => {
-      const mocked = {
-      getOnboardingSessionKey: vi.fn(() => 'onboarding.aws.ecfLaunchStep'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOnboardingSessionKey: vi.fn(() => 'onboarding.aws.ecfLaunchStep'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../aws_service_matrix', () => {
-      const mocked = {
-      AWS_SERVICES_MAP: new Map([
-        ['cloudtrail', { ecfLogType: 'cloudtrail', ecfDedicatedTemplate: null }],
-        ['waf', { ecfLogType: 'waf', ecfDedicatedTemplate: null }],
-        ['cloudwatch_logs', { ecfLogType: 'cloudwatch_logs', ecfDedicatedTemplate: 'otel' }],
-        ['crowdstrike_fdr', { ecfLogType: null, ecfDedicatedTemplate: 'crowdstrike_fdr' }],
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AWS_SERVICES_MAP: new Map([
+      ['cloudtrail', { ecfLogType: 'cloudtrail', ecfDedicatedTemplate: null }],
+      ['waf', { ecfLogType: 'waf', ecfDedicatedTemplate: null }],
+      ['cloudwatch_logs', { ecfLogType: 'cloudwatch_logs', ecfDedicatedTemplate: 'otel' }],
+      ['crowdstrike_fdr', { ecfLogType: null, ecfDedicatedTemplate: 'crowdstrike_fdr' }],
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_ecf_template_version', () => {
-      const mocked = {
-      useEcfTemplateVersion: vi.fn(() => ({
-        version: '1.10.0',
-        source: 'remote' as const,
-        isLoading: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEcfTemplateVersion: vi.fn(() => ({
+      version: '1.10.0',
+      source: 'remote' as const,
+      isLoading: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { getEcfServiceConfigs } from '../ecf_cloudformation';

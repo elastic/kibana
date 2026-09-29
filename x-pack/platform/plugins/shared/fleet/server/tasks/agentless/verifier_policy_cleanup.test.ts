@@ -22,22 +22,22 @@ import {
 } from './verifier_policy_cleanup_task';
 
 vi.mock('../../services/agent_policy_update', () => {
-      const mocked = {
-      agentPolicyUpdateEventHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyUpdateEventHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        list: vi.fn(),
-        deleteVerifierPolicy: vi.fn(),
-      },
-      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      list: vi.fn(),
+      deleteVerifierPolicy: vi.fn(),
+    },
+    getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('ingest-agent-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
@@ -57,9 +57,9 @@ describe('verifier_policy_cleanup', () => {
     appContextService.start(mockContext);
 
     vi.spyOn(appContextService, 'getLogger').mockReturnValue(logger);
-    vi
-      .spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension')
-      .mockReturnValue({} as any);
+    vi.spyOn(appContextService, 'getInternalUserSOClientWithoutSpaceExtension').mockReturnValue(
+      {} as any
+    );
     vi.spyOn(appContextService, 'getInternalUserESClient').mockReturnValue(mockEsClient);
     vi.spyOn(appContextService, 'getExperimentalFeatures').mockReturnValue({
       enableOTelVerifier: true,

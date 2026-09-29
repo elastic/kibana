@@ -32,7 +32,7 @@ import { DefendInsightsDataClient } from '.';
 
 vi.mock('./get_defend_insight');
 vi.mock('./helpers', async () => {
-  const original = (await vi.importActual('./helpers'));
+  const original = await vi.importActual('./helpers');
   return {
     ...original,
     queryParamsToEsQuery: vi.fn(),

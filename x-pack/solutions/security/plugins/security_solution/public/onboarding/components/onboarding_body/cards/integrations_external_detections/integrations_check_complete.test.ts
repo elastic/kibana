@@ -12,11 +12,11 @@ import { checkIntegrationsCardComplete } from './integrations_check_complete';
 import type { StartServices } from '../../../../../types';
 
 vi.mock('rxjs', () => {
-      const mocked = {
-      ...require('rxjs'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('rxjs'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('checkIntegrationsCardComplete', () => {
   const mockHttpGet: Mock = vi.fn();

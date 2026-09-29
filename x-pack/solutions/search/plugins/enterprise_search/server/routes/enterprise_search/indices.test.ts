@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { MockRouter, mockDependencies } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-import { MockRouter, mockDependencies } from '../../__mocks__';
 
 import type {
   KibanaRequest,
@@ -22,110 +22,107 @@ import { mlPluginServerMock } from '@kbn/ml-plugin/server/mocks';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 vi.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_pipeline_history', () => {
-      const mocked = {
-      fetchMlInferencePipelineHistory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchMlInferencePipelineHistory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/get_ml_inference_pipeline_processors',
   () => {
-      const mocked = {
-        fetchMlInferencePipelineProcessors: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      fetchMlInferencePipelineProcessors: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/create_ml_inference_pipeline',
   () => {
-      const mocked = {
-        preparePipelineAndIndexForMlInference: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      preparePipelineAndIndexForMlInference: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
-vi.mock(
-  '../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline',
-  () => {
-      const mocked = {
-        attachMlInferencePipeline: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../lib/indices/pipelines/ml_inference/pipeline_processors/attach_ml_pipeline', () => {
+  const mocked = {
+    attachMlInferencePipeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/delete_ml_inference_pipeline',
   () => {
-      const mocked = {
-        deleteMlInferencePipeline: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      deleteMlInferencePipeline: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock(
   '../../lib/indices/pipelines/ml_inference/pipeline_processors/detach_ml_inference_pipeline',
   () => {
-      const mocked = {
-        detachMlInferencePipeline: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      detachMlInferencePipeline: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock('../../lib/indices/exists_index', () => {
-      const mocked = {
-      indexOrAliasExists: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    indexOrAliasExists: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/indices/pipelines/ml_inference/get_ml_inference_errors', () => {
-      const mocked = {
-      getMlInferenceErrors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMlInferenceErrors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/pipelines/ml_inference/get_ml_inference_pipelines', () => {
-      const mocked = {
-      getMlInferencePipelines: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMlInferencePipelines: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/ml/fetch_ml_models', () => {
-      const mocked = {
-      fetchMlModels: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchMlModels: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/ml/get_ml_model_deployment_status', () => {
-      const mocked = {
-      getMlModelDeploymentStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMlModelDeploymentStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/ml/start_ml_model_deployment', () => {
-      const mocked = {
-      startMlModelDeployment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    startMlModelDeployment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/ml/start_ml_model_download', () => {
-      const mocked = {
-      startMlModelDownload: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    startMlModelDownload: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ml-plugin/server/saved_objects/service', () => {
-      const mocked = {
-      mlSavedObjectServiceFactory: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mlSavedObjectServiceFactory: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/ml-plugin/server/lib/ml_client/ml_client', () => {
-      const mocked = {
-      getMlClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMlClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { MlModelDeploymentState } from '../../../common/types/ml';
 import { indexOrAliasExists } from '../../lib/indices/exists_index';

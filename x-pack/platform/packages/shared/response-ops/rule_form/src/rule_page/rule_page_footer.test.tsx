@@ -18,22 +18,22 @@ import {
 } from '../translations';
 
 vi.mock('../validation/validate_form', () => {
-      const mocked = {
-      hasRuleErrors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasRuleErrors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormScreenContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormScreenContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { hasRuleErrors } = (await vi.importMock('../validation/validate_form'));
-const { useRuleFormState, useRuleFormScreenContext } = (await vi.importMock('../hooks'));
+const { hasRuleErrors } = await vi.importMock('../validation/validate_form');
+const { useRuleFormState, useRuleFormScreenContext } = await vi.importMock('../hooks');
 
 const onSave = vi.fn();
 const onCancel = vi.fn();

@@ -15,57 +15,57 @@ import type { EntityStoreRecord } from '../shared/hooks/use_entity_from_store';
 import { ADD_TO_CASE_TEST_ID } from '../../../../common/cases/attachments/entity/test_ids';
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      useEntityStoreEuidApi: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreEuidApi: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsExperimentalFeatureEnabled = vi.fn();
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: () => mockUseIsExperimentalFeatureEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render additionalItems inline so tests can assert on them without opening the popover.
 vi.mock('../shared/components/take_action', () => {
-      const mocked = {
-      TakeAction: ({
-        additionalItems,
-      }: {
-        additionalItems?: (close: () => void) => React.ReactElement[];
-      }) => <div data-test-subj="mockTakeAction">{additionalItems?.(() => {}) ?? []}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TakeAction: ({
+      additionalItems,
+    }: {
+      additionalItems?: (close: () => void) => React.ReactElement[];
+    }) => <div data-test-subj="mockTakeAction">{additionalItems?.(() => {}) ?? []}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entity_analytics/components/ai_assistant_button/ai_assistant_button', () => {
-      const mocked = {
-      AiAssistantButton: ({ entityName }: { entityName: string }) => (
-        <div data-test-subj="mockAiAssistantButton">{entityName}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AiAssistantButton: ({ entityName }: { entityName: string }) => (
+      <div data-test-subj="mockAiAssistantButton">{entityName}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../cases/attachments/entity/components/add_to_case', () => {
-      const mocked = {
-      AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
-        <div data-test-subj={testSubj} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToCase: ({ 'data-test-subj': testSubj }: { 'data-test-subj': string }) => (
+      <div data-test-subj={testSubj} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SERVICE_IDENTITY_FIELDS = { 'service.name': 'service-alice' };
 const ENTITY_STORE_RECORD = {

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
+import { vi } from 'vitest';
 
 import '@kbn/code-editor-mock/jest_helper';
 import { CodeEditorField } from '@kbn/code-editor';

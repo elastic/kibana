@@ -15,17 +15,17 @@ import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/kibana');
 vi.mock('../../utils/global_query_string', () => {
-      const mocked = { useInitializeUrlParam: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useInitializeUrlParam: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInitTimerangeFromUrlParam', () => {
   const dispatch = vi.fn();

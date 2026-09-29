@@ -13,13 +13,13 @@ import { renderWithHostPageProviders } from '../../../pages/host/__tests__/test_
 import { OtelKubernetesVisualizeStep } from './visualize_step';
 
 vi.mock('../../kubernetes/data_ingest_status', () => {
-      const mocked = {
-      DataIngestStatus: ({ onboardingId }: { onboardingId: string }) => (
-        <div data-test-subj="dataIngestStatus" data-onboarding-id={onboardingId} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataIngestStatus: ({ onboardingId }: { onboardingId: string }) => (
+      <div data-test-subj="dataIngestStatus" data-onboarding-id={onboardingId} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OtelKubernetesVisualizeStep', () => {
   const defaultProps = {

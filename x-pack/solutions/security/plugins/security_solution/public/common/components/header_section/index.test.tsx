@@ -24,7 +24,7 @@ import { ModalInspectQuery } from '../inspect/modal';
 import { useEuiTheme } from '@elastic/eui';
 
 vi.mock('../inspect/modal', async () => {
-  const actual = (await vi.importActual('../inspect/modal'));
+  const actual = await vi.importActual('../inspect/modal');
   return {
     ...actual,
     ModalInspectQuery: vi.fn().mockReturnValue(null),
@@ -32,16 +32,16 @@ vi.mock('../inspect/modal', async () => {
 });
 
 vi.mock('../inspect/use_inspect', () => {
-      const mocked = {
-      useInspect: () => ({
-        isShowingModal: true,
-        handleClick: vi.fn(),
-        request: 'fake request',
-        response: 'fake response',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInspect: () => ({
+      isShowingModal: true,
+      handleClick: vi.fn(),
+      request: 'fake request',
+      response: 'fake response',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderHeaderSection = (props: HeaderSectionProps) =>
   render(

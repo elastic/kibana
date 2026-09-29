@@ -30,18 +30,18 @@ import { computeAndPersistCompositeSummaries } from './compute_and_persist_compo
 import { COMPOSITE_SLO_SUMMARY_TASK_SKIP_REASON } from './constants';
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      addTransactionLabels: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addTransactionLabels: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./compute_and_persist_composite_summaries', () => {
-      const mocked = {
-      computeAndPersistCompositeSummaries: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    computeAndPersistCompositeSummaries: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const addTransactionLabelsMock = addTransactionLabels as MockedFunction<
   typeof addTransactionLabels

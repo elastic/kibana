@@ -25,16 +25,16 @@ import { BehaviorSubject } from 'rxjs';
 import type { CascadedDocumentsFetcher } from '../../../../data_fetching/cascaded_documents_fetcher';
 
 vi.mock('../telemetry', () => {
-      const mocked = {
-      useCascadedDocumentsTelemetry: () => ({
-        trackCascadeExpanded: vi.fn(),
-        trackCascadeCollapsed: vi.fn(),
-        trackCascadeOptOut: vi.fn(),
-        trackCascadeOpenInNewTab: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCascadedDocumentsTelemetry: () => ({
+      trackCascadeExpanded: vi.fn(),
+      trackCascadeCollapsed: vi.fn(),
+      trackCascadeOptOut: vi.fn(),
+      trackCascadeOpenInNewTab: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('data_fetching related hooks', () => {
   beforeEach(() => {

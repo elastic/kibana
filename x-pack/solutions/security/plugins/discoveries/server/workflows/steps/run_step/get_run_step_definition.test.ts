@@ -17,11 +17,11 @@ import { resolveDefaultConnectorId } from '../../helpers/resolve_default_connect
 const mockIsWorkflowsEnabledForSpace = vi.fn();
 
 vi.mock('../../../lib/is_workflows_enabled_for_space', () => {
-      const mocked = {
-      isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isWorkflowsEnabledForSpace: (...args: unknown[]) => mockIsWorkflowsEnabledForSpace(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ATTACK_DISCOVERY_RUN_SOFT_DEADLINE_MS } from './constants';
 import { getRunStepDefinition } from './get_run_step_definition';
@@ -29,32 +29,32 @@ import { getRunStepDefinition } from './get_run_step_definition';
 const mockExecuteGenerationWorkflow = vi.fn();
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/generation/execute_generation_workflow', () => {
-      const mocked = {
-      executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeGenerationWorkflow: (...args: unknown[]) => mockExecuteGenerationWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers/resolve_connector_details', () => {
-      const mocked = {
-      resolveConnectorDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../helpers/resolve_default_connector_id', () => {
-      const mocked = {
-      resolveDefaultConnectorId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveDefaultConnectorId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'test-execution-uuid',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'test-execution-uuid',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResolveConnectorDetails = resolveConnectorDetails as MockedFunction<
   typeof resolveConnectorDetails

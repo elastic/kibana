@@ -27,31 +27,31 @@ const emptyRegistry = createMockWorkflowContextRegistry();
 
 // Mock dependencies
 vi.mock('./suggestions/get_suggestions', () => {
-      const mocked = {
-      getSuggestions: vi.fn(() => []),
-      isInsideLoopBody: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSuggestions: vi.fn(() => []),
+    isInsideLoopBody: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./context/build_autocomplete_context', () => {
-      const mocked = {
-      buildAutocompleteContext: vi.fn(() => ({
-        path: ['triggers', 0, 'type'],
-        linePrefix: '  - type:',
-        lineSuffix: '',
-        isInEsqlQueryField: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildAutocompleteContext: vi.fn(() => ({
+      path: ['triggers', 0, 'type'],
+      linePrefix: '  - type:',
+      lineSuffix: '',
+      isInEsqlQueryField: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/schema', () => {
-      const mocked = {
-      isDeprecatedStepType: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isDeprecatedStepType: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getCompletionItemProvider', () => {
   let mockModel: monaco.editor.ITextModel;

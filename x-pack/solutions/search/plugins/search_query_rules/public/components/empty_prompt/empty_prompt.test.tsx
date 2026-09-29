@@ -14,13 +14,13 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../../../common/doc_links', () => {
-      const mocked = {
-      docLinks: {
-        queryRulesApi: 'documentation-url',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    docLinks: {
+      queryRulesApi: 'documentation-url',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 const Wrapper = ({ children }: { children?: React.ReactNode }) => (
   <I18nProvider>{children}</I18nProvider>
 );

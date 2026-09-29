@@ -23,7 +23,7 @@ import type { openLazyFlyout } from '@kbn/presentation-util';
 import type { EditCustomContentFlyoutProps } from './components/edit_custom_content_flyout';
 
 vi.mock('@kbn/presentation-publishing', async () => {
-  const actual = (await vi.importActual('@kbn/presentation-publishing'));
+  const actual = await vi.importActual('@kbn/presentation-publishing');
   return { ...actual, apiIsPresentationContainer: vi.fn(() => false) };
 });
 
@@ -40,31 +40,31 @@ let capturedComponentProps:
   | undefined;
 
 vi.mock('@kbn/custom-content-renderer', () => {
-      const mocked = {
-      CustomContentComponent: (props: {
-        esqlQuery: string | undefined;
-        savedTemplate: string | undefined;
-        generationVersion: number;
-        timeRange: { from: string; to: string } | undefined;
-        isGenerating?: boolean;
-        onLoadingChange: (isLoading: boolean) => void;
-        onGenerateWithChat?: () => void;
-      }) => {
-        capturedComponentProps = props;
-        return (
-          <div
-            data-test-subj="mockCustomContentComponent"
-            data-esql-query={props.esqlQuery ?? ''}
-            data-saved-template={props.savedTemplate ?? ''}
-            data-generation-version={props.generationVersion}
-            data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
-            data-is-generating={String(Boolean(props.isGenerating))}
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomContentComponent: (props: {
+      esqlQuery: string | undefined;
+      savedTemplate: string | undefined;
+      generationVersion: number;
+      timeRange: { from: string; to: string } | undefined;
+      isGenerating?: boolean;
+      onLoadingChange: (isLoading: boolean) => void;
+      onGenerateWithChat?: () => void;
+    }) => {
+      capturedComponentProps = props;
+      return (
+        <div
+          data-test-subj="mockCustomContentComponent"
+          data-esql-query={props.esqlQuery ?? ''}
+          data-saved-template={props.savedTemplate ?? ''}
+          data-generation-version={props.generationVersion}
+          data-time-range={props.timeRange ? `${props.timeRange.from}/${props.timeRange.to}` : ''}
+          data-is-generating={String(Boolean(props.isGenerating))}
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedFlyoutProps:
   | {
@@ -75,14 +75,14 @@ let capturedFlyoutProps:
   | undefined;
 
 vi.mock('./components/edit_custom_content_flyout', () => {
-      const mocked = {
-      EditCustomContentFlyout: (props: EditCustomContentFlyoutProps) => {
-        capturedFlyoutProps = props;
-        return <div data-test-subj="mockEditCustomContentFlyout" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditCustomContentFlyout: (props: EditCustomContentFlyoutProps) => {
+      capturedFlyoutProps = props;
+      return <div data-test-subj="mockEditCustomContentFlyout" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 type LoadContentFn = (args: {
   closeFlyout: () => void;
@@ -96,23 +96,23 @@ let mockFlyoutClose: () => void = () => {};
 let mockFlyoutOnClose: Promise<void> = Promise.resolve();
 
 vi.mock('@kbn/presentation-util', () => {
-      const mocked = {
-      openLazyFlyout: (args: Parameters<typeof openLazyFlyout>[0]) => {
-        capturedOpenLazyFlyoutArgs = args;
-        let resolve: () => void;
-        mockFlyoutOnClose = new Promise<void>((r) => {
-          resolve = r;
-        });
-        mockFlyoutClose = () => resolve();
-        return { onClose: mockFlyoutOnClose, close: mockFlyoutClose };
-      },
-      tracksOverlays: (api: unknown) =>
-        !!api &&
-        typeof (api as Record<string, unknown>).clearOverlays === 'function' &&
-        typeof (api as Record<string, unknown>).openOverlay === 'function',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openLazyFlyout: (args: Parameters<typeof openLazyFlyout>[0]) => {
+      capturedOpenLazyFlyoutArgs = args;
+      let resolve: () => void;
+      mockFlyoutOnClose = new Promise<void>((r) => {
+        resolve = r;
+      });
+      mockFlyoutClose = () => resolve();
+      return { onClose: mockFlyoutOnClose, close: mockFlyoutClose };
+    },
+    tracksOverlays: (api: unknown) =>
+      !!api &&
+      typeof (api as Record<string, unknown>).clearOverlays === 'function' &&
+      typeof (api as Record<string, unknown>).openOverlay === 'function',
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockAgentBuilder: unknown;
 
@@ -126,20 +126,20 @@ const mockTelemetry = {
 };
 
 vi.mock('./telemetry', () => {
-      const mocked = { getTelemetry: () => mockTelemetry };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getTelemetry: () => mockTelemetry };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services', () => {
-      const mocked = {
-      getServices: () => ({
-        agentBuilder: mockAgentBuilder,
-        core: { http: {} },
-        search: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({
+      agentBuilder: mockAgentBuilder,
+      core: { http: {} },
+      search: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseState: CustomContentEmbeddableState = {
   esql_query: ['FROM logs | STATS count = COUNT(*)'],

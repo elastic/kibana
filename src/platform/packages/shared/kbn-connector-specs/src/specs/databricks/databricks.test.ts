@@ -19,13 +19,13 @@ const mockCallTool = vi.fn();
 const mockListTools = vi.fn();
 
 vi.mock('../../lib/mcp/with_mcp_client', () => {
-      const mocked = {
-      withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
-        return fn({ callTool: mockCallTool, listTools: mockListTools });
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withMcpClient: vi.fn(async (_ctx: unknown, fn: (mcp: unknown) => Promise<unknown>) => {
+      return fn({ callTool: mockCallTool, listTools: mockListTools });
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // REST API mocks
 const mockGet = vi.fn();
@@ -270,7 +270,7 @@ describe('Databricks', () => {
     });
 
     it('propagates errors thrown by withMcpClient', async () => {
-      const { withMcpClient } = (await vi.importMock('../../lib/mcp/with_mcp_client'));
+      const { withMcpClient } = await vi.importMock('../../lib/mcp/with_mcp_client');
       withMcpClient.mockRejectedValueOnce(new Error('connection refused'));
       if (!Databricks.test) throw new Error('test handler not defined');
       await expect(Databricks.test.handler(mockContext)).rejects.toThrow('connection refused');

@@ -16,45 +16,48 @@ import { OsqueryEditor } from '.';
 let mockEditorDidMountCallback: any = null;
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: (props: any) => {
-        // Capture the editorDidMount callback so we can simulate Monaco editor behavior
-        if (props.editorDidMount) {
-          mockEditorDidMountCallback = props.editorDidMount;
-        }
+  const mocked = {
+    CodeEditor: (props: any) => {
+      // Capture the editorDidMount callback so we can simulate Monaco editor behavior
+      if (props.editorDidMount) {
+        mockEditorDidMountCallback = props.editorDidMount;
+      }
 
-        return (
-          <div
-            data-test-subj="codeEditor"
-            data-height={props.height}
-            data-value={props.value}
-            data-language={props.languageId}
-          >
-            <textarea
-              data-test-subj="codeEditorInput"
-              value={props.value}
-              onChange={(e) => props.onChange(e.target.value)}
-            />
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return (
+        <div
+          data-test-subj="codeEditor"
+          data-height={props.height}
+          data-value={props.value}
+          data-language={props.languageId}
+        >
+          <textarea
+            data-test-subj="codeEditorInput"
+            value={props.value}
+            onChange={(e) => props.onChange(e.target.value)}
+          />
+        </div>
+      );
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./osquery_highlight_rules', () => {
-      const mocked = {
-      initializeOsqueryEditor: vi.fn(() => ({ dispose: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeOsqueryEditor: vi.fn(() => ({ dispose: vi.fn() })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./osquery_tables', () => {
-      const mocked = {
-      useOsqueryTables: vi.fn(() => ({ tableNames: [], tablesRecord: {} })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOsqueryTables: vi.fn(() => ({ tableNames: [], tablesRecord: {} })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const renderEditor = (props: Partial<React.ComponentProps<typeof OsqueryEditor>> = {}) =>
   render(

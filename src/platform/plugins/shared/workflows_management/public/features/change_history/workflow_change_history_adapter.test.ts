@@ -362,12 +362,9 @@ describe('createWorkflowChangeHistoryAdapter', () => {
   it('reloads the workflow detail after a successful restore', async () => {
     const onWorkflowRestored = vi.fn().mockResolvedValue(undefined);
     const post = vi.fn().mockResolvedValue({});
-    const adapter = createWorkflowChangeHistoryAdapter(
-      createHttpMock(vi.fn(), post) as HttpSetup,
-      {
-        onWorkflowRestored,
-      }
-    );
+    const adapter = createWorkflowChangeHistoryAdapter(createHttpMock(vi.fn(), post) as HttpSetup, {
+      onWorkflowRestored,
+    });
 
     await adapter.restoreChange!({
       objectId: SAMPLE_WORKFLOW_ID,
@@ -384,12 +381,9 @@ describe('createWorkflowChangeHistoryAdapter', () => {
       body: { message: 'Workflow was updated by another user.' },
       message: 'Conflict',
     });
-    const adapter = createWorkflowChangeHistoryAdapter(
-      createHttpMock(vi.fn(), post) as HttpSetup,
-      {
-        onWorkflowRestored,
-      }
-    );
+    const adapter = createWorkflowChangeHistoryAdapter(createHttpMock(vi.fn(), post) as HttpSetup, {
+      onWorkflowRestored,
+    });
 
     await expect(
       adapter.restoreChange!({
@@ -411,9 +405,7 @@ describe('createWorkflowChangeHistoryAdapter', () => {
       body: { message: 'Workflow was updated by another user.' },
       message: 'Conflict',
     });
-    const adapter = createWorkflowChangeHistoryAdapter(
-      createHttpMock(vi.fn(), post) as HttpSetup
-    );
+    const adapter = createWorkflowChangeHistoryAdapter(createHttpMock(vi.fn(), post) as HttpSetup);
 
     await expect(
       adapter.restoreChange!({

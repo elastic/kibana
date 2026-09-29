@@ -27,17 +27,17 @@ import { mockGetBulkOperationError } from './update_objects_spaces.test.mock';
 import { savedObjectsExtensionsMock } from '../../../mocks/saved_objects_extensions.mock';
 
 vi.mock('../utils', async () => {
-      const mocked = {
-      getBulkOperationError: vi.fn(),
-      getExpectedVersionProperties: vi.fn(),
-      rawDocExistsInNamespace: vi.fn(),
-      isLeft: (await vi.importActual('../utils')).isLeft,
-      isRight: (await vi.importActual('../utils')).isRight,
-      left: (await vi.importActual('../utils')).left,
-      right: (await vi.importActual('../utils')).right,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBulkOperationError: vi.fn(),
+    getExpectedVersionProperties: vi.fn(),
+    rawDocExistsInNamespace: vi.fn(),
+    isLeft: (await vi.importActual('../utils')).isLeft,
+    isRight: (await vi.importActual('../utils')).isRight,
+    left: (await vi.importActual('../utils')).left,
+    right: (await vi.importActual('../utils')).right,
+  };
+  return { ...mocked, default: mocked };
+});
 
 type SetupParams = Partial<Pick<ChangeAccessControlParams, 'objects'>>;
 

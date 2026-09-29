@@ -47,9 +47,7 @@ describe('GET: fetch list of scripts', () => {
       },
     });
 
-    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue(
-      'space_a'
-    );
+    ((await httpHandlerContextMock.securitySolution).getSpaceId as Mock).mockReturnValue('space_a');
 
     registerListScriptsRoute(apiTestSetup.routerMock, apiTestSetup.endpointAppContextMock);
   });
@@ -66,9 +64,7 @@ describe('GET: fetch list of scripts', () => {
     });
 
     it('should error if user has no authz to api', async () => {
-      (
-        (await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock
-      ).mockResolvedValue(
+      ((await httpHandlerContextMock.securitySolution).getEndpointAuthz as Mock).mockResolvedValue(
         getEndpointAuthzInitialStateMock({
           canWriteScriptsLibrary: false,
           canReadScriptsLibrary: false,

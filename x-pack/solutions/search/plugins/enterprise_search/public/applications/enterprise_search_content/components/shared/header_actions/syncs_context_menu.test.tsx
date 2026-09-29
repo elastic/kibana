@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues, setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { screen, fireEvent } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { IngestionStatus, IngestionMethod, ConnectorStatus } from '@kbn/search-connectors';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';

@@ -21,11 +21,11 @@ const mockVegaRequestHandler = vi.fn();
 const mockCreateVegaRequestHandler = vi.fn(() => mockVegaRequestHandler);
 
 vi.mock('./async_services', () => {
-      const mocked = {
-      createVegaRequestHandler: mockCreateVegaRequestHandler,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createVegaRequestHandler: mockCreateVegaRequestHandler,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createVegaFn', () => {
   const visualizationDependencies = {

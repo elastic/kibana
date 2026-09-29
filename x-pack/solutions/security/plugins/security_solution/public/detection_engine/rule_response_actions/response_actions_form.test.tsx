@@ -20,16 +20,16 @@ import { getMockTheme } from '../../common/lib/kibana/kibana_react.mock';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'), // use actual for all non-hook parts
-      useParams: () => ({
-        detailName: 'testId',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'), // use actual for all non-hook parts
+    useParams: () => ({
+      detailName: 'testId',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
   return {
     ...original,
     useToasts: vi.fn().mockReturnValue({
@@ -43,11 +43,11 @@ vi.mock('../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import * as rules from '../rule_management/logic/use_rule';
 // @ts-expect-error we don't really care about thr useRule return value

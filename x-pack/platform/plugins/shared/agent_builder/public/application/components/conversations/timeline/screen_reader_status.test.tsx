@@ -13,11 +13,11 @@ import { useConversationStream } from '../../../hooks/use_conversation_stream';
 import { TimelineScreenReaderStatus } from './screen_reader_status';
 
 vi.mock('../../../hooks/use_conversation_stream', () => {
-      const mocked = {
-      useConversationStream: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationStream: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setLoading = (isResponseLoading: boolean) =>
   vi

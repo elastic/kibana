@@ -40,7 +40,7 @@ const mockDataViewsService = {
 };
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -62,9 +62,9 @@ vi.mock('../../../../common/lib/kibana', async () => {
   };
 });
 
-vi
-  .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
-  .mockImplementation(() => <span data-test-subj="filter-group__loading" />);
+vi.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementation(() => (
+  <span data-test-subj="filter-group__loading" />
+));
 
 const filters: Filter[] = [];
 const onFiltersChange = vi.fn();
@@ -128,14 +128,12 @@ describe('PageFilters', () => {
         hide_exists: true,
       },
     ];
-    vi
-      .spyOn(alertFilterControlsPackage, 'AlertFilterControls')
-      .mockImplementationOnce((props) => {
-        useEffect(() => {
-          props.setControlsUrlState!(controlsConfig);
-        }, [props.setControlsUrlState]);
-        return <span />;
-      });
+    vi.spyOn(alertFilterControlsPackage, 'AlertFilterControls').mockImplementationOnce((props) => {
+      useEffect(() => {
+        props.setControlsUrlState!(controlsConfig);
+      }, [props.setControlsUrlState]);
+      return <span />;
+    });
 
     render(
       <PageFilters

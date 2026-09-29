@@ -18,13 +18,13 @@ import { lintFiles } from './lint_files';
 
 vi.mock('execa', () => vi.fn());
 vi.mock('./constants', () => {
-      const mocked = {
-      LINT_LOG_PREFIX: '[oxlint]',
-      OXLINT_CONFIG_PATH: '.oxlintrc.json',
-      oxlintBinPath: '/bin/oxlint',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LINT_LOG_PREFIX: '[oxlint]',
+    OXLINT_CONFIG_PATH: '.oxlintrc.json',
+    oxlintBinPath: '/bin/oxlint',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExeca = (await vi.importMock('execa')) as Mock;
 

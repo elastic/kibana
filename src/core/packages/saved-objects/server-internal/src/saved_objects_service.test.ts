@@ -153,8 +153,7 @@ describe('SavedObjectsService', () => {
       deprecationsSetup.getRegistry.mockReturnValue(mockRegistry);
 
       const deprecations = Symbol('deprecations');
-      const mockedGetSavedObjectsDeprecationsProvider =
-        getSavedObjectsDeprecationsProvider as Mock;
+      const mockedGetSavedObjectsDeprecationsProvider = getSavedObjectsDeprecationsProvider as Mock;
       mockedGetSavedObjectsDeprecationsProvider.mockReturnValue(deprecations);
       await soService.setup(createSetupDeps());
 
@@ -936,8 +935,8 @@ describe('SavedObjectsService', () => {
           expect(client).toBeInstanceOf(SavedObjectsClient);
 
           expect(SavedObjectsRepository.createRepository).toHaveBeenCalledTimes(1);
-          const [[, , , esClient]] = (SavedObjectsRepository.createRepository as Mocked<any>)
-            .mock.calls;
+          const [[, , , esClient]] = (SavedObjectsRepository.createRepository as Mocked<any>).mock
+            .calls;
 
           expect(esClient).toBeDefined();
         });
@@ -1140,16 +1139,16 @@ describe('SavedObjectsService', () => {
           );
           let capturedExcludedExtensions: string[] = [];
 
-          vi
-            .spyOn(soService as any, 'getInternalExtensions')
-            .mockImplementation((excludedExtensions = []) => {
+          vi.spyOn(soService as any, 'getInternalExtensions').mockImplementation(
+            (excludedExtensions = []) => {
               // Capture the excluded extensions for verification
               capturedExcludedExtensions = [
                 ...(excludedExtensions as string[]),
                 'securityExtension',
               ];
               return originalGetInternalExtensions(excludedExtensions);
-            });
+            }
+          );
 
           await soService.start(createStartDeps());
 

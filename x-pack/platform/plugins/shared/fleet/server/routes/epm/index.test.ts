@@ -79,36 +79,36 @@ import {
 import { installPackageKibanaAssetsHandler } from './install_assets_handler';
 
 vi.mock('./handlers', async () => {
-      const mocked = {
-      ...(await vi.importActual('./handlers')),
-      getCategoriesHandler: vi.fn(),
-      getListHandler: vi.fn(),
-      getInstalledListHandler: vi.fn(),
-      getLimitedListHandler: vi.fn(),
-      getInfoHandler: vi.fn(),
-      getBulkAssetsHandler: vi.fn(),
-      installPackageFromRegistryHandler: vi.fn(),
-      installPackageByUploadHandler: vi.fn(),
-      deletePackageHandler: vi.fn(),
-      bulkInstallPackagesFromRegistryHandler: vi.fn(),
-      getStatsHandler: vi.fn(),
-      updatePackageHandler: vi.fn(),
-      getVerificationKeyIdHandler: vi.fn(),
-      reauthorizeTransformsHandler: vi.fn(),
-      getDataStreamsHandler: vi.fn(),
-      createCustomIntegrationHandler: vi.fn(),
-      updateCustomIntegrationHandler: vi.fn(),
-      getInputsHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./handlers')),
+    getCategoriesHandler: vi.fn(),
+    getListHandler: vi.fn(),
+    getInstalledListHandler: vi.fn(),
+    getLimitedListHandler: vi.fn(),
+    getInfoHandler: vi.fn(),
+    getBulkAssetsHandler: vi.fn(),
+    installPackageFromRegistryHandler: vi.fn(),
+    installPackageByUploadHandler: vi.fn(),
+    deletePackageHandler: vi.fn(),
+    bulkInstallPackagesFromRegistryHandler: vi.fn(),
+    getStatsHandler: vi.fn(),
+    updatePackageHandler: vi.fn(),
+    getVerificationKeyIdHandler: vi.fn(),
+    reauthorizeTransformsHandler: vi.fn(),
+    getDataStreamsHandler: vi.fn(),
+    createCustomIntegrationHandler: vi.fn(),
+    updateCustomIntegrationHandler: vi.fn(),
+    getInputsHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./install_assets_handler', () => {
-      const mocked = {
-      installPackageKibanaAssetsHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installPackageKibanaAssetsHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -722,11 +722,9 @@ describe('schema validation', () => {
     const expectedResponse: BulkInstallPackagesResponse = {
       items: [item, { name: 'test', statusCode: 400, error: 'test' }],
     };
-    (bulkInstallPackagesFromRegistryHandler as Mock).mockImplementation(
-      (ctx, request, res) => {
-        return res.ok({ body: expectedResponse });
-      }
-    );
+    (bulkInstallPackagesFromRegistryHandler as Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
     await bulkInstallPackagesFromRegistryHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({

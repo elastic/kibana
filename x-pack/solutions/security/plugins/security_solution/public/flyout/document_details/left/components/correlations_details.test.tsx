@@ -21,17 +21,17 @@ vi.mock('@kbn/expandable-flyout');
 vi.mock(
   '../../../../flyout_v2/document/tools/correlations/components/correlations_details_view',
   () => {
-      const mocked = {
-        CorrelationsDetailsView: ({ scopeId, onShowAttack }: CorrelationsDetailsProps) => (
-          <div
-            data-test-subj="correlationsDetailsV2Mock"
-            data-scope-id={scopeId}
-            data-has-on-show-attack={String(typeof onShowAttack === 'function')}
-          />
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      CorrelationsDetailsView: ({ scopeId, onShowAttack }: CorrelationsDetailsProps) => (
+        <div
+          data-test-subj="correlationsDetailsV2Mock"
+          data-scope-id={scopeId}
+          data-has-on-show-attack={String(typeof onShowAttack === 'function')}
+        />
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const renderCorrelationDetails = () =>

@@ -16,38 +16,38 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
-        <pre>
-          <code data-test-subj="codeBlock">{children}</code>
-        </pre>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCodeBlock: ({ children }: { children?: React.ReactNode }) => (
+      <pre>
+        <code data-test-subj="codeBlock">{children}</code>
+      </pre>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hover_popover_action', () => {
-      const mocked = {
-      HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HoverActionPopover: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockConvertToReact = vi.fn((value: unknown) => value);
 
 vi.mock('../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: () => ({
-        fieldFormats: {
-          getDefaultInstance: () => ({
-            convertToReact: mockConvertToReact,
-          }),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: () => ({
+      fieldFormats: {
+        getDefaultInstance: () => ({
+          convertToReact: mockConvertToReact,
+        }),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = {
   fields: {

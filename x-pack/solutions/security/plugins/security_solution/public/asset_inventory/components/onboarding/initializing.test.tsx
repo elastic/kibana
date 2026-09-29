@@ -19,17 +19,17 @@ vi.mock('./hooks/use_add_integration_path');
 
 const mockNavigateToApp = vi.fn();
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            navigateToApp: mockNavigateToApp,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToApp: mockNavigateToApp,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Initializing', () => {
   afterEach(() => {
@@ -52,9 +52,7 @@ describe('Initializing', () => {
   });
 
   it('should disable the add integration button when loading', () => {
-    (useAddIntegrationPath as Mock).mockReturnValue(
-      mockUseAddIntegrationPath({ isLoading: true })
-    );
+    (useAddIntegrationPath as Mock).mockReturnValue(mockUseAddIntegrationPath({ isLoading: true }));
 
     renderWithTestProvider(<Initializing />);
 

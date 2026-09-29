@@ -15,32 +15,32 @@ import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries'
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 vi.mock('./use_knowledge_base_entries', () => {
-      const mocked = {
-      useInvalidateKnowledgeBaseEntries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateKnowledgeBaseEntries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useMutation: vi.fn().mockImplementation((queryKey, fn, opts) => {
-        return {
-          mutate: async (variables: unknown) => {
-            try {
-              const res = await fn(variables);
-              opts.onSuccess(res);
-              opts.onSettled();
-              return Promise.resolve(res);
-            } catch (e) {
-              opts.onError(e);
-              opts.onSettled();
-            }
-          },
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMutation: vi.fn().mockImplementation((queryKey, fn, opts) => {
+      return {
+        mutate: async (variables: unknown) => {
+          try {
+            const res = await fn(variables);
+            opts.onSuccess(res);
+            opts.onSettled();
+            return Promise.resolve(res);
+          } catch (e) {
+            opts.onError(e);
+            opts.onSettled();
+          }
+        },
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const http = {
   post: vi.fn(),
@@ -58,9 +58,7 @@ describe('useDeleteKnowledgeBaseEntries', () => {
 
   it('should call the mutation function on success', async () => {
     const invalidateKnowledgeBaseEntries = vi.fn();
-    (useInvalidateKnowledgeBaseEntries as Mock).mockReturnValue(
-      invalidateKnowledgeBaseEntries
-    );
+    (useInvalidateKnowledgeBaseEntries as Mock).mockReturnValue(invalidateKnowledgeBaseEntries);
     http.post.mockResolvedValue({});
 
     const { result } = renderHook(() => useDeleteKnowledgeBaseEntries(defaultProps));
@@ -98,9 +96,7 @@ describe('useDeleteKnowledgeBaseEntries', () => {
 
   it('should call the onSettled function after mutation', async () => {
     const invalidateKnowledgeBaseEntries = vi.fn();
-    (useInvalidateKnowledgeBaseEntries as Mock).mockReturnValue(
-      invalidateKnowledgeBaseEntries
-    );
+    (useInvalidateKnowledgeBaseEntries as Mock).mockReturnValue(invalidateKnowledgeBaseEntries);
     http.post.mockResolvedValue({});
 
     const { result } = renderHook(() => useDeleteKnowledgeBaseEntries(defaultProps));

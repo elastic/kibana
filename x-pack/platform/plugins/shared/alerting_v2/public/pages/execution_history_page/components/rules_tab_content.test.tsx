@@ -22,27 +22,27 @@ const mockUseAlertingRulesCache = vi.fn();
 let mockCanReadRules = true;
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'settings') {
-          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-        }
-        if (token === 'http') {
-          return {};
-        }
-        if (typeof token === 'function') {
-          return {
-            canRead: () => mockCanReadRules,
-            canWrite: () => mockCanReadRules,
-            can: () => mockCanReadRules,
-          };
-        }
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'settings') {
+        return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+      }
+      if (token === 'http') {
         return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+      }
+      if (typeof token === 'function') {
+        return {
+          canRead: () => mockCanReadRules,
+          canWrite: () => mockCanReadRules,
+          can: () => mockCanReadRules,
+        };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/unified-data-table', () => {
   const ReactActual = require('react');
@@ -75,40 +75,40 @@ vi.mock('@kbn/unified-data-table', () => {
 });
 
 vi.mock('@kbn/cell-actions', () => {
-      const mocked = {
-      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../data_view', async () => {
-      const mocked = {
-      ...(await vi.importActual('../data_view')),
-      useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../data_view')),
+    useRuleExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_unified_data_table_services', () => {
-      const mocked = {
-      useUnifiedDataTableServices: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedDataTableServices: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_rule_executions', () => {
-      const mocked = {
-      useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_alerting_rules_cache', () => {
-      const mocked = {
-      useAlertingRulesCache: (...args: unknown[]) => mockUseAlertingRulesCache(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertingRulesCache: (...args: unknown[]) => mockUseAlertingRulesCache(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildItem = (overrides: Partial<RuleExecutionView> = {}): RuleExecutionView => ({
   id: 'exec-1',

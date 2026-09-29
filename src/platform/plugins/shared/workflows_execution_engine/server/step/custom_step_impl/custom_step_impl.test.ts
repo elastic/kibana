@@ -20,18 +20,18 @@ const mockPollRun = vi.fn();
 const mockPollOnCancel = vi.fn();
 
 vi.mock('./step_definition_handlers', () => {
-      const mocked = {
-      OneShotStepDefinitionHandler: vi.fn().mockImplementation(() => ({
-        run: mockOneShotRun,
-        onCancel: mockOneShotOnCancel,
-      })),
-      PollPolicyStepHandler: vi.fn().mockImplementation(() => ({
-        run: mockPollRun,
-        onCancel: mockPollOnCancel,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OneShotStepDefinitionHandler: vi.fn().mockImplementation(() => ({
+      run: mockOneShotRun,
+      onCancel: mockOneShotOnCancel,
+    })),
+    PollPolicyStepHandler: vi.fn().mockImplementation(() => ({
+      run: mockPollRun,
+      onCancel: mockPollOnCancel,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockedOneShotStepDefinitionHandler = OneShotStepDefinitionHandler as MockedClass<
   typeof OneShotStepDefinitionHandler

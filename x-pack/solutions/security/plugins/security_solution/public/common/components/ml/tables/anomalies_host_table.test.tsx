@@ -26,11 +26,11 @@ vi.mock('../../../../../common/machine_learning/has_ml_user_permissions');
 vi.mock('../hooks/use_installed_security_jobs');
 vi.mock('@kbn/ml-plugin/public');
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      useEntityStoreEuidApi: vi.fn(() => ({ euid: undefined })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreEuidApi: vi.fn(() => ({ euid: undefined })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQueryToggle = useQueryToggle as Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as Mock;

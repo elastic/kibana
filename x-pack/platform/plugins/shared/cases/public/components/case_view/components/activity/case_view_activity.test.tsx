@@ -51,17 +51,17 @@ vi.mock('../../../../containers/use_get_case_user_actions_stats');
 vi.mock('../../../../containers/configure/use_get_supported_action_connectors');
 vi.mock('../../../../containers/use_post_push_to_service');
 vi.mock('../../../user_actions/timestamp', () => {
-      const mocked = {
-      UserActionTimestamp: () => <></>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserActionTimestamp: () => <></>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../sidebar/sidebar_toggle_button', () => {
-      const mocked = {
-      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/navigation/hooks');
 vi.mock('../../../../containers/use_get_action_license');
 vi.mock('../../../../containers/use_get_tags');

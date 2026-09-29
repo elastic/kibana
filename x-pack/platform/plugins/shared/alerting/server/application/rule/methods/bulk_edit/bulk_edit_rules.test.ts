@@ -27,18 +27,18 @@ import type { Rule } from '../../../../../common';
 import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/snooze/get_active_snooze_if_exist', () => {
-      const mocked = {
-      getActiveSnoozeIfExist: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getActiveSnoozeIfExist: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
   let uuid = 100;
@@ -46,14 +46,16 @@ vi.mock('uuid', () => {
 });
 
 vi.mock('../get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getActiveSnoozeIfExist } = (await vi.importMock('../../../../lib/snooze/get_active_snooze_if_exist'));
-const { validateScheduleLimit } = (await vi.importMock('../get_schedule_frequency'));
+const { getActiveSnoozeIfExist } = await vi.importMock(
+  '../../../../lib/snooze/get_active_snooze_if_exist'
+);
+const { validateScheduleLimit } = await vi.importMock('../get_schedule_frequency');
 
 const kibanaVersion = 'v8.2.0';
 const createAPIKeyMock = vi.fn();

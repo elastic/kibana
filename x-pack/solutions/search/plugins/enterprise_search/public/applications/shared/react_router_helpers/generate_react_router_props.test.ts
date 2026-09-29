@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockKibanaValues } from '../../__mocks__/kea_logic';
 import { mockHistory } from '../../__mocks__/react_router';
+
+import { vi } from 'vitest';
 
 import { generateReactRouterProps } from '.';
 

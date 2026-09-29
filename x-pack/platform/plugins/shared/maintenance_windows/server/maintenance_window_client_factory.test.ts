@@ -53,7 +53,7 @@ test('creates a maintenance window client with proper constructor arguments when
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-  const { MaintenanceWindowClient } = (await vi.importMock('./client'));
+  const { MaintenanceWindowClient } = await vi.importMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -77,7 +77,7 @@ test('creates a maintenance window client with proper constructor arguments', as
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-  const { MaintenanceWindowClient } = (await vi.importMock('./client'));
+  const { MaintenanceWindowClient } = await vi.importMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -102,7 +102,7 @@ test('creates an unauthorized maintenance window client', async () => {
     includedHiddenTypes: [MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE],
   });
 
-  const { MaintenanceWindowClient } = (await vi.importMock('./client'));
+  const { MaintenanceWindowClient } = await vi.importMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -126,7 +126,7 @@ test('creates an internal maintenance window client', async () => {
     MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
   ]);
 
-  const { MaintenanceWindowClient } = (await vi.importMock('./client'));
+  const { MaintenanceWindowClient } = await vi.importMock('./client');
 
   expect(MaintenanceWindowClient).toHaveBeenCalledWith({
     logger: maintenanceWindowClientFactoryParams.logger,
@@ -146,7 +146,7 @@ test('passes notifyChange through to the client', async () => {
   savedObjectsService.getScopedClient.mockReturnValue(savedObjectsClient);
   factory.createWithAuthorization(request);
 
-  const { MaintenanceWindowClient } = (await vi.importMock('./client'));
+  const { MaintenanceWindowClient } = await vi.importMock('./client');
   expect(MaintenanceWindowClient).toHaveBeenCalledWith(expect.objectContaining({ notifyChange }));
 });
 
@@ -156,7 +156,8 @@ test('getUserName() returns null when security is disabled', async () => {
   const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
-  const constructorCall = (await vi.importMock('./client')).MaintenanceWindowClient.mock.calls[0][0];
+  const constructorCall = (await vi.importMock('./client')).MaintenanceWindowClient.mock
+    .calls[0][0];
 
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual(null);
@@ -169,7 +170,8 @@ test('getUserName() returns a name when security is enabled', async () => {
 
   factory.createWithAuthorization(request);
 
-  const constructorCall = (await vi.importMock('./client')).MaintenanceWindowClient.mock.calls[0][0];
+  const constructorCall = (await vi.importMock('./client')).MaintenanceWindowClient.mock
+    .calls[0][0];
 
   securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'testname',

@@ -64,44 +64,43 @@ vi.mock('react-redux-v7', () => {
 const from = '2022-07-20T08:20:18.966Z';
 const to = '2022-07-28T08:20:18.966Z';
 vi.mock('../../../../common/containers/use_global_time', async () => {
-  const actual = (await vi.importActual('../../../../common/containers/use_global_time'));
+  const actual = await vi.importActual('../../../../common/containers/use_global_time');
   return {
     ...actual,
-    useGlobalTime: vi
-      .fn()
-      .mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
+    useGlobalTime: vi.fn().mockReturnValue({ from, to, setQuery: vi.fn(), deleteQuery: vi.fn() }),
   };
 });
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/ml/hooks/use_ml_capabilities');
 const mockUseMlUserPermissions = useMlCapabilities as Mock;
 
 vi.mock('../../../../common/components/ml/anomaly/anomaly_table_provider', () => {
-      const mocked = {
-      AnomalyTableProvider: ({
-        children,
-      }: {
-        children: (args: {
-          anomaliesData: Anomalies;
-          isLoadingAnomaliesData: boolean;
-          jobNameById: Record<string, string | undefined>;
-        }) => React.ReactNode;
-      }) => children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyTableProvider: ({
+      children,
+    }: {
+      children: (args: {
+        anomaliesData: Anomalies;
+        isLoadingAnomaliesData: boolean;
+        jobNameById: Record<string, string | undefined>;
+      }) => React.ReactNode;
+    }) =>
+      children({ anomaliesData: mockAnomalies, isLoadingAnomaliesData: false, jobNameById: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../helper_hooks', () => {
-      const mocked = { useHasSecurityCapability: () => true };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useHasSecurityCapability: () => true };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout_v2/entity/user/main/hooks/use_observed_user');
 const mockUseObservedUser = useObservedUser as Mock;
@@ -112,9 +111,7 @@ const mockUseUsersRelatedHosts = useUserRelatedHosts as Mock;
 vi.mock('../../../../entity_analytics/api/hooks/use_risk_score');
 const mockUseRiskScore = useRiskScore as Mock;
 
-vi.mock(
-  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
-);
+vi.mock('../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status');
 const mockAlertData = {
   open: {
     total: 2,
@@ -182,9 +179,10 @@ describe('<UserDetails />', () => {
     mockUseUsersRelatedHosts.mockReturnValue(mockRelatedHostsResponse);
     (useMisconfigurationPreview as Mock).mockReturnValue({});
     (useAlertsByStatus as Mock).mockReturnValue({ isLoading: false, items: {} });
-    vi
-      .mocked(useDataView)
-      .mockReturnValue({ dataView: getMockDataViewWithMatchedIndices(['index']), status: 'ready' });
+    vi.mocked(useDataView).mockReturnValue({
+      dataView: getMockDataViewWithMatchedIndices(['index']),
+      status: 'ready',
+    });
   });
 
   it('should render user details correctly', () => {

@@ -26,12 +26,12 @@ import { allowedExperimentalValues } from '../../../../common';
 import type { Modifier } from './modifiers/types';
 
 vi.mock('./modifiers/asset_criticality', async () => {
-      const mocked = {
-      ...(await vi.importActual('./modifiers/asset_criticality')),
-      applyCriticalityModifier: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./modifiers/asset_criticality')),
+    applyCriticalityModifier: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./modifiers/privileged_users');
 
 const experimentalFeatures = { ...allowedExperimentalValues, enableRiskScorePrivmonModifier: true };

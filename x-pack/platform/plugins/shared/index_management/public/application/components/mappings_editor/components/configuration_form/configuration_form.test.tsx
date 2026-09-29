@@ -18,7 +18,7 @@ import { MappingsEditorProvider } from '../../mappings_editor_context';
 import { ConfigurationForm } from './configuration_form';
 
 vi.mock('@kbn/es-ui-shared-plugin/static/forms/components', async () => {
-  const original = (await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/components'));
+  const original = await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/components');
   return {
     ...original,
     // JsonEditorField pulls in the shared-ux code editor (Monaco) which requires Canvas/Suspense.

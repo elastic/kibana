@@ -122,14 +122,14 @@ describe('registerEnabledProfileProviders', () => {
       });
 
     // Mock feature availability
-    vi
-      .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
-      .mockImplementation((featureId) => {
+    vi.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockImplementation(
+      (featureId) => {
         if (featureId === FEATURE_ID_1) {
           return true;
         }
         return false;
-      });
+      }
+    );
 
     // Sanity check
     expect(profileProviderServices.core.pricing.isFeatureAvailable(FEATURE_ID_1)).toBeTruthy();
@@ -168,14 +168,14 @@ describe('registerEnabledProfileProviders', () => {
       });
 
     // Mock feature availability
-    vi
-      .spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable')
-      .mockImplementation((featureId) => {
+    vi.spyOn(profileProviderServices.core.pricing, 'isFeatureAvailable').mockImplementation(
+      (featureId) => {
         if (featureId === FEATURE_ID_2) {
           return true;
         }
         return false;
-      });
+      }
+    );
 
     // Sanity check
     expect(profileProviderServices.core.pricing.isFeatureAvailable(FEATURE_ID_1)).not.toBeTruthy();

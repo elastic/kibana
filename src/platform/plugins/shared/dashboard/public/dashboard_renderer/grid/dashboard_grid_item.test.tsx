@@ -29,7 +29,7 @@ const mockUseEffect = React.useEffect;
 let capturedOnApiAvailable: ((api: DefaultEmbeddableApi) => void) | undefined;
 
 vi.mock('@kbn/embeddable-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/embeddable-plugin/public'));
+  const original = await vi.importActual('@kbn/embeddable-plugin/public');
 
   return {
     ...original,

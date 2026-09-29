@@ -26,77 +26,77 @@ let mockMissingFields: string[];
 const filterUpdates$ = new Subject<void>();
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => ({
-        query: {
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          kuery: 'service.name:"opbeans-go"',
-          environment: 'production',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => ({
+      query: {
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        kuery: 'service.name:"opbeans-go"',
+        environment: 'production',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_service_name', () => {
-      const mocked = {
-      useServiceName: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceName: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_adhoc_apm_data_view', () => {
-      const mocked = {
-      useAdHocApmDataView: () => ({
-        dataView: {
-          id: 'apm-data-view',
-          title: 'apm-*',
-          fields: {
-            getByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
-          },
-          getFieldByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
+  const mocked = {
+    useAdHocApmDataView: () => ({
+      dataView: {
+        id: 'apm-data-view',
+        title: 'apm-*',
+        fields: {
+          getByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        getFieldByName: (name: string) => (mockMissingFields.includes(name) ? undefined : { name }),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useKibanaQuerySettings: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaQuerySettings: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./service_map_search_context', () => {
-      const mocked = {
-      useServiceMapSearchContext: () => ({
-        setEsQuery: (...args: unknown[]) => mockSetEsQuery(...args),
-        setHighlightedServiceNames: (...args: unknown[]) => mockSetHighlightedServiceNames(...args),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceMapSearchContext: () => ({
+      setEsQuery: (...args: unknown[]) => mockSetEsQuery(...args),
+      setHighlightedServiceNames: (...args: unknown[]) => mockSetHighlightedServiceNames(...args),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_filter_url_sync', () => {
-      const mocked = {
-      useFilterUrlSync: () => ({
-        initialAppFilters: mockInitialAppFilters,
-        persistControlSelections: vi.fn(),
-        getRestoredControlSelections: () => mockRestoredControlSelections,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFilterUrlSync: () => ({
+      initialAppFilters: mockInitialAppFilters,
+      persistControlSelections: vi.fn(),
+      getRestoredControlSelections: () => mockRestoredControlSelections,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({ replace: mockHistoryReplace }),
-      useLocation: () => ({ search: mockLocationSearch, pathname: '/service-map' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({ replace: mockHistoryReplace }),
+    useLocation: () => ({ search: mockLocationSearch, pathname: '/service-map' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFilterManager = {
   getAppFilters: vi.fn().mockReturnValue([]),
@@ -105,77 +105,77 @@ const mockFilterManager = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          data: { query: { filterManager: mockFilterManager } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        data: { query: { filterManager: mockFilterManager } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/search_bar/search_bar', () => {
-      const mocked = {
-      SearchBar: () => <div data-testid="search-bar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchBar: () => <div data-testid="search-bar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/time_comparison', () => {
-      const mocked = {
-      TimeComparison: () => <div data-testid="time-comparison" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeComparison: () => <div data-testid="time-comparison" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./service_map_controls', () => {
-      const mocked = {
-      ServiceMapControls: ({
-        onFiltersChange,
-        controlsConfig,
-      }: {
-        onFiltersChange: (filters: Filter[]) => void;
-        controlsConfig: Array<{ field_name: string; width: string; grow: boolean }>;
-      }) => {
-        mockOnFiltersChange = onFiltersChange;
-        return (
-          <div
-            data-testid="service-map-controls"
-            data-fields={controlsConfig.map((c) => c.field_name).join(',')}
-            data-widths={controlsConfig.map((c) => c.width).join(',')}
-            data-grows={controlsConfig.map((c) => String(c.grow)).join(',')}
-          />
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceMapControls: ({
+      onFiltersChange,
+      controlsConfig,
+    }: {
+      onFiltersChange: (filters: Filter[]) => void;
+      controlsConfig: Array<{ field_name: string; width: string; grow: boolean }>;
+    }) => {
+      mockOnFiltersChange = onFiltersChange;
+      return (
+        <div
+          data-testid="service-map-controls"
+          data-fields={controlsConfig.map((c) => c.field_name).join(',')}
+          data-widths={controlsConfig.map((c) => c.width).join(',')}
+          data-grows={controlsConfig.map((c) => String(c.grow)).join(',')}
+        />
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock buildEsQuery to return a predictable structure based on filters
 vi.mock('@kbn/es-query', () => {
-      const mocked = {
-      buildEsQuery: (_dataView: unknown, _queries: unknown, filters: Filter[]) => ({
-        bool: {
-          must: [],
-          filter: filters.map((f: Filter) => ({
-            match_phrase: { [f.meta?.key ?? '']: 'value' },
-          })),
-          should: [],
-          must_not: [],
-        },
-      }),
-      isPhraseFilter: (f: Filter) =>
-        f.query && typeof f.query === 'object' && 'match_phrase' in f.query,
-      getPhraseFilterValue: (f: Filter) => {
-        const mp = (f as unknown as { query: { match_phrase: Record<string, string> } }).query
-          .match_phrase;
-        return Object.values(mp)[0];
+  const mocked = {
+    buildEsQuery: (_dataView: unknown, _queries: unknown, filters: Filter[]) => ({
+      bool: {
+        must: [],
+        filter: filters.map((f: Filter) => ({
+          match_phrase: { [f.meta?.key ?? '']: 'value' },
+        })),
+        should: [],
+        must_not: [],
       },
-      isPhrasesFilter: (f: Filter) => f.meta?.type === 'phrases',
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+    isPhraseFilter: (f: Filter) =>
+      f.query && typeof f.query === 'object' && 'match_phrase' in f.query,
+    getPhraseFilterValue: (f: Filter) => {
+      const mp = (f as unknown as { query: { match_phrase: Record<string, string> } }).query
+        .match_phrase;
+      return Object.values(mp)[0];
+    },
+    isPhrasesFilter: (f: Filter) => f.meta?.type === 'phrases',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ServiceMapSearchBar', () => {
   beforeEach(() => {

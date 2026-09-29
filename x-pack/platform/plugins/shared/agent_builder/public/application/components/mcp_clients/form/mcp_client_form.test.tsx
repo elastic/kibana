@@ -18,11 +18,11 @@ import { McpClientFormMode } from './types';
 import { useMcpClientForm } from './use_mcp_client_form';
 
 vi.mock('./mcp_logo_picker', () => {
-      const mocked = {
-      McpLogoPicker: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    McpLogoPicker: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TestForm = ({ mode }: { mode: McpClientFormMode }) => {
   const form = useMcpClientForm();

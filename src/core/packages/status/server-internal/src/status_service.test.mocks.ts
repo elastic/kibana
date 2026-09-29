@@ -11,24 +11,24 @@ import { vi } from 'vitest';
 
 export const logOverallStatusChangesMock = vi.fn();
 vi.doMock('./log_overall_status', () => {
-      const mocked = {
-      logOverallStatusChanges: logOverallStatusChangesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logOverallStatusChanges: logOverallStatusChangesMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const logCoreStatusChangesMock = vi.fn();
 vi.doMock('./log_core_services_status', () => {
-      const mocked = {
-      logCoreStatusChanges: logCoreStatusChangesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logCoreStatusChanges: logCoreStatusChangesMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const logPluginsStatusChangesMock = vi.fn();
 vi.doMock('./log_plugins_status', () => {
-      const mocked = {
-      logPluginsStatusChanges: logPluginsStatusChangesMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logPluginsStatusChanges: logPluginsStatusChangesMock,
+  };
+  return { ...mocked, default: mocked };
+});

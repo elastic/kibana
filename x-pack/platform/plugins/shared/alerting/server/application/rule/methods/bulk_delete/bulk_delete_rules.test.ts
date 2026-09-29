@@ -38,18 +38,18 @@ import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 import { softDeleteGapsByQuery } from '../../../../lib/rule_gaps/soft_delete_gaps_by_query';
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/rule_gaps/soft_delete_gaps_by_query', () => {
-      const mocked = {
-      softDeleteGapsByQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    softDeleteGapsByQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const softDeleteGapsByQueryMock = softDeleteGapsByQuery as Mock;
 

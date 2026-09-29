@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import type {
   EntryExists,
   EntryList,
@@ -69,11 +68,11 @@ import { getEntryListMock } from '../../../../common/schemas/types/entry_list.mo
 // TODO: ALL THESE TESTS SHOULD BE MOVED TO @kbn/securitysolution-list-utils for its helper. The only reason why they're here is due to missing other packages we hae to create or missing things from kbn packages such as mocks from kibana core
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getEntryExistsWithIdMock = (): EntryExists & { id: string } => ({
   ...getEntryExistsMock(),

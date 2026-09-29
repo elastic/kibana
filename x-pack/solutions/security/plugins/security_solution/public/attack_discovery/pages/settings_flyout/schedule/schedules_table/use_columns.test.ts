@@ -20,9 +20,7 @@ import {
 
 vi.mock('./columns');
 
-const mockCreateActionsColumn = createActionsColumn as MockedFunction<
-  typeof createActionsColumn
->;
+const mockCreateActionsColumn = createActionsColumn as MockedFunction<typeof createActionsColumn>;
 const mockCreateEnableColumn = createEnableColumn as MockedFunction<typeof createEnableColumn>;
 const mockCreateNameColumn = createNameColumn as MockedFunction<typeof createNameColumn>;
 const mockCreateStatusColumn = createStatusColumn as MockedFunction<typeof createStatusColumn>;

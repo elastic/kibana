@@ -16,15 +16,15 @@ import { fetchIndices } from './fetch_indices';
 
 // Create a mock powered by the actual implementation
 vi.mock('./catch_retryable_es_client_errors', async () => {
-      const mocked = {
-      catchRetryableEsClientErrors: vi
-        .fn()
-        .mockImplementation(
-          (await vi.importActual('./catch_retryable_es_client_errors')).catchRetryableEsClientErrors
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    catchRetryableEsClientErrors: vi
+      .fn()
+      .mockImplementation(
+        (await vi.importActual('./catch_retryable_es_client_errors')).catchRetryableEsClientErrors
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('fetchIndices', () => {
   beforeEach(() => {
@@ -64,7 +64,7 @@ describe('fetchIndices', () => {
     const task = fetchIndices({ client, indices: ['my_index'] });
 
     await expect(task()).rejects.toMatchInlineSnapshot(
-            `[ResponseError: {"ok":false,"message":"Unknown resource."}]`
-          );
+      `[ResponseError: {"ok":false,"message":"Unknown resource."}]`
+    );
   });
 });

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import fetchMock from 'fetch-mock';
+import { vi } from 'vitest';
 
 import type { HttpSetup } from '@kbn/core/public';
 import { applicationServiceMock } from '@kbn/core/public/mocks';

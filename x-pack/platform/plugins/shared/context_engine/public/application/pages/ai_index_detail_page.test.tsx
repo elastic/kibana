@@ -32,109 +32,109 @@ import { AiIndexDetailPage } from './ai_index_detail_page';
 import { useFeedbackLoopEnabled } from '../hooks/use_feedback_loop_enabled';
 
 vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: ({
-        query,
-        onTextLangQueryChange,
-      }: {
-        query: { esql: string };
-        onTextLangQueryChange: (query: { esql: string }) => void;
-      }) => (
-        <textarea
-          data-test-subj="mockEsqlEditor"
-          value={query.esql}
-          onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLLangEditor: ({
+      query,
+      onTextLangQueryChange,
+    }: {
+      query: { esql: string };
+      onTextLangQueryChange: (query: { esql: string }) => void;
+    }) => (
+      <textarea
+        data-test-subj="mockEsqlEditor"
+        value={query.esql}
+        onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_data_connectors', () => {
-      const mocked = {
-      useDataConnectors: () => ({
-        connectors: [],
-        connectorNameById: new Map(),
-        connectorActionTypeById: new Map(),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataConnectors: () => ({
+      connectors: [],
+      connectorNameById: new Map(),
+      connectorActionTypeById: new Map(),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMgetWorkflows = vi.fn();
 const mockCreateWorkflow = vi.fn();
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: () => ({
-        mgetWorkflows: mockMgetWorkflows,
-        createWorkflow: mockCreateWorkflow,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => ({
+      mgetWorkflows: mockMgetWorkflows,
+      createWorkflow: mockCreateWorkflow,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_ki_list', () => {
-      const mocked = {
-      useKiList: () => ({
-        kis: [],
+  const mocked = {
+    useKiList: () => ({
+      kis: [],
+      total: 25,
+      summary: {
         total: 25,
-        summary: {
-          total: 25,
-          countsByType: [
-            { type: 'index_metadata', count: 10 },
-            { type: 'document', count: 8 },
-            { type: 'detection', count: 7 },
-          ],
-        },
-        isLoading: false,
-        error: undefined,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        countsByType: [
+          { type: 'index_metadata', count: 10 },
+          { type: 'document', count: 8 },
+          { type: 'detection', count: 7 },
+        ],
+      },
+      isLoading: false,
+      error: undefined,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_signal_groups', () => {
-      const mocked = {
-      useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_feedback_loop_enabled', () => {
-      const mocked = {
-      useFeedbackLoopEnabled: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFeedbackLoopEnabled: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_agent_builder_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => ({
-        agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
-        isLoading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => ({
+      agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+      isLoading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFeedbackLoopEnabled = vi.mocked(useFeedbackLoopEnabled);
 
 vi.mock('../hooks/use_signals', () => {
-      const mocked = {
-      useSignals: () => ({
-        signals: [],
-        total: 0,
-        isLoading: false,
-        error: undefined,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignals: () => ({
+      signals: [],
+      total: 0,
+      isLoading: false,
+      error: undefined,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',

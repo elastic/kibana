@@ -21,32 +21,32 @@ import { copyAll } from '../lib';
 
 vi.mock('../lib');
 vi.mock('globby', () => {
-      const mocked = { globbySync: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { globbySync: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('del', () => vi.fn().mockResolvedValue(undefined));
 
 vi.mock('@kbn/core-i18n-server-internal', () => {
-      const mocked = {
-      getKibanaTranslationFiles: vi.fn().mockResolvedValue([]),
-      discoverAllTranslationPaths: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getKibanaTranslationFiles: vi.fn().mockResolvedValue([]),
+    discoverAllTranslationPaths: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        init: vi.fn(),
-        getTranslation: vi.fn().mockReturnValue({}),
-      },
-      i18nLoader: {
-        registerTranslationFiles: vi.fn(),
-        getTranslationsByLocale: vi.fn().mockResolvedValue({}),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      init: vi.fn(),
+      getTranslation: vi.fn().mockReturnValue({}),
+    },
+    i18nLoader: {
+      registerTranslationFiles: vi.fn(),
+      getTranslationsByLocale: vi.fn().mockResolvedValue({}),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { globbySync } = (await vi.importMock('globby')) as { globbySync: Mock };
 globbySync.mockReturnValue([]);

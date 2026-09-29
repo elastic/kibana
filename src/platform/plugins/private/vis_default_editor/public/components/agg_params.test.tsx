@@ -38,51 +38,51 @@ const DefaultEditorAggParams = (props: DefaultEditorAggParamsProps) => (
 );
 
 vi.mock('./utils', () => {
-      const mocked = {
-      getEditorConfig: vi.fn(() => mockEditorConfig),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEditorConfig: vi.fn(() => mockEditorConfig),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./agg_params_helper', () => {
-      const mocked = {
-      getAggParamsToRender: vi.fn(() => ({
-        basic: [
-          {
-            aggParam: {
-              displayName: 'Custom label',
-              name: 'customLabel',
-              type: 'string',
-            },
+  const mocked = {
+    getAggParamsToRender: vi.fn(() => ({
+      basic: [
+        {
+          aggParam: {
+            displayName: 'Custom label',
+            name: 'customLabel',
+            type: 'string',
           },
-        ],
-        advanced: [
-          {
-            aggParam: {
-              advanced: true,
-              name: 'json',
-              type: 'json',
-            },
+        },
+      ],
+      advanced: [
+        {
+          aggParam: {
+            advanced: true,
+            name: 'json',
+            type: 'json',
           },
-        ],
-      })),
-      getAggTypeOptions: vi.fn(() => []),
-      getError: vi.fn((agg, aggIsTooLow) => (aggIsTooLow ? ['error'] : [])),
-      isInvalidParamsTouched: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+        },
+      ],
+    })),
+    getAggTypeOptions: vi.fn(() => []),
+    getError: vi.fn((agg, aggIsTooLow) => (aggIsTooLow ? ['error'] : [])),
+    isInvalidParamsTouched: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./agg_select', () => {
-      const mocked = {
-      DefaultEditorAggSelect: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultEditorAggSelect: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./agg_param', () => {
-      const mocked = {
-      DefaultEditorAggParam: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultEditorAggParam: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DefaultEditorAggParams component', () => {
   let setAggParamValue: Mock;

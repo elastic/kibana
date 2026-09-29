@@ -12,79 +12,79 @@ import type { SomeDevLog } from '@kbn/some-dev-log';
 import type { TsProject } from '@kbn/ts-projects';
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = { run: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { run: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: vi.fn((msg: string) => new Error(msg)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: vi.fn((msg: string) => new Error(msg)),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/repo-info', () => {
-      const mocked = { REPO_ROOT: '/repo' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { REPO_ROOT: '/repo' };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/std', () => {
-      const mocked = {
-      asyncForEachWithLimit: vi.fn().mockResolvedValue(undefined),
-      asyncMapWithLimit: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    asyncForEachWithLimit: vi.fn().mockResolvedValue(undefined),
+    asyncMapWithLimit: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./cache/restore_ts_build_artifacts', () => {
-      const mocked = {
-      restoreTSBuildArtifacts: vi.fn(),
-      resolveRestoreStrategy: vi.fn().mockResolvedValue({ shouldRestore: false, bestSha: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    restoreTSBuildArtifacts: vi.fn(),
+    resolveRestoreStrategy: vi.fn().mockResolvedValue({ shouldRestore: false, bestSha: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./cache/artifacts_state', () => {
-      const mocked = {
-      writeArtifactsState: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    writeArtifactsState: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./cache/utils', () => {
-      const mocked = {
-      isCiEnvironment: vi.fn().mockReturnValue(false),
-      resolveCurrentCommitSha: vi.fn().mockResolvedValue('head-sha'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isCiEnvironment: vi.fn().mockReturnValue(false),
+    resolveCurrentCommitSha: vi.fn().mockResolvedValue('head-sha'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tsc/run_tsc', () => {
-      const mocked = {
-      runTsc: vi.fn().mockResolvedValue(true),
-      runTscFastPass: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runTsc: vi.fn().mockResolvedValue(true),
+    runTscFastPass: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tsc/root_refs_config', () => {
-      const mocked = {
-      updateRootRefsConfig: vi.fn(),
-      ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateRootRefsConfig: vi.fn(),
+    ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./cache/clean_cache', () => {
-      const mocked = {
-      cleanCache: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cleanCache: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tsc/create_type_check_configs', () => {
-      const mocked = {
-      createTypeCheckConfigs: vi.fn().mockResolvedValue(new Set()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTypeCheckConfigs: vi.fn().mockResolvedValue(new Set()),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tsc/normalize_project_path', () => {
-      const mocked = {
-      normalizeProjectPath: vi.fn((p: string | undefined) => p),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    normalizeProjectPath: vi.fn((p: string | undefined) => p),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeProject = (name: string, dir: string): TsProject =>
   ({
@@ -99,15 +99,15 @@ const makeProject = (name: string, dir: string): TsProject =>
   } as unknown as TsProject);
 
 vi.mock('@kbn/ts-projects', () => {
-      const mocked = {
-      TS_PROJECTS: [
-        makeProject('streams_app', 'x-pack/plugins/streams_app'),
-        makeProject('kbn-std', 'src/packages/kbn-std'),
-        makeProject('kbn-utils', 'src/packages/kbn-utils'),
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TS_PROJECTS: [
+      makeProject('streams_app', 'x-pack/plugins/streams_app'),
+      makeProject('kbn-std', 'src/packages/kbn-std'),
+      makeProject('kbn-utils', 'src/packages/kbn-utils'),
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Import the module AFTER all mocks are in place — this triggers the
 // top-level `run()` call which we intercept via the mock above.
@@ -128,7 +128,9 @@ const { isCiEnvironment, resolveCurrentCommitSha } = (await vi.importMock('./cac
   isCiEnvironment: MockedFunction<() => boolean>;
   resolveCurrentCommitSha: MockedFunction<() => Promise<string | undefined>>;
 };
-const { restoreTSBuildArtifacts, resolveRestoreStrategy } = (await vi.importMock('./cache/restore_ts_build_artifacts')) as {
+const { restoreTSBuildArtifacts, resolveRestoreStrategy } = (await vi.importMock(
+  './cache/restore_ts_build_artifacts'
+)) as {
   restoreTSBuildArtifacts: MockedFunction<
     (
       log: SomeDevLog,

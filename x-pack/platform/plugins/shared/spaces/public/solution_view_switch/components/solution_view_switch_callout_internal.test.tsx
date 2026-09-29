@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
@@ -17,28 +16,28 @@ import { SolutionViewSwitchCalloutInternal } from './solution_view_switch_callou
 import type { SupportedSolutionView } from '../types';
 
 vi.mock('./modal', () => {
-      const mocked = {
-      SolutionViewSwitchModal: ({
-        onSwitch,
-        onClose,
-        isLoading,
-      }: {
-        onSwitch: (solution: SupportedSolutionView) => void;
-        onClose: () => void;
-        isLoading: boolean;
-      }) => (
-        <div>
-          <button type="button" onClick={() => onSwitch('oblt')} disabled={isLoading}>
-            Mock switch
-          </button>
-          <button type="button" onClick={onClose}>
-            Mock close
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SolutionViewSwitchModal: ({
+      onSwitch,
+      onClose,
+      isLoading,
+    }: {
+      onSwitch: (solution: SupportedSolutionView) => void;
+      onClose: () => void;
+      isLoading: boolean;
+    }) => (
+      <div>
+        <button type="button" onClick={() => onSwitch('oblt')} disabled={isLoading}>
+          Mock switch
+        </button>
+        <button type="button" onClick={onClose}>
+          Mock close
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SolutionViewSwitchCalloutInternal', () => {
   const setup = ({ updateSpaceRejects }: { updateSpaceRejects?: Error } = {}) => {

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { capitalize } from 'lodash';
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
+import type { Mock } from 'vitest';
 
 import type { SavedObjectsNamespaceType, SavedObjectsType } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';

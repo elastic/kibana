@@ -7,21 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 
 vi.mock('./workflow_execution_list_filters', () => {
-      const mocked = {
-      ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExecutionListFilters: () => <div data-test-subj="executionListFilters">{'Filters'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowExecutionList', () => {
   const defaultFilters = {

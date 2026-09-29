@@ -24,7 +24,7 @@ import { getCreateFromCsvPath, ROUTES } from '../../public/application/services/
 import { setupEnvironment, WithAppDependencies } from './helpers/setup_environment';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
-
-import Boom from '@hapi/boom';
 
 import type { AuthenticatedUser, KibanaRequest } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';

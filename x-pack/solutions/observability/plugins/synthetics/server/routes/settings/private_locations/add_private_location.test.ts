@@ -77,9 +77,9 @@ describe('addPrivateLocationRoute handler - space containment', () => {
   // validation + SO create; stub those so tests that pass containment don't
   // touch Elasticsearch/Fleet internals.
   const stubDownstream = () => {
-    vi
-      .spyOn(PrivateLocationRepository.prototype, 'validatePrivateLocation')
-      .mockResolvedValue(undefined);
+    vi.spyOn(PrivateLocationRepository.prototype, 'validatePrivateLocation').mockResolvedValue(
+      undefined
+    );
     return vi
       .spyOn(PrivateLocationRepository.prototype, 'createPrivateLocation')
       .mockResolvedValue({

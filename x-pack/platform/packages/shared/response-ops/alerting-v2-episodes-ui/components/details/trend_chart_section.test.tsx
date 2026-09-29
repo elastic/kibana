@@ -19,13 +19,13 @@ vi.mock('../../hooks/use_fetch_episode_query');
 vi.mock('../../hooks/use_fetch_rule');
 vi.mock('../../hooks/use_fetch_episode_trend_query');
 vi.mock('./trend_chart', () => {
-      const mocked = {
-      AlertEpisodeTrendChart: ({ series }: { series: { label: string } }) => (
-        <div data-test-subj="trend-chart-stub" data-metric={series.label} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertEpisodeTrendChart: ({ series }: { series: { label: string } }) => (
+      <div data-test-subj="trend-chart-stub" data-metric={series.label} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchEpisodeQuery = vi.mocked(useFetchEpisodeQuery);
 const mockUseFetchRule = vi.mocked(useFetchRule);

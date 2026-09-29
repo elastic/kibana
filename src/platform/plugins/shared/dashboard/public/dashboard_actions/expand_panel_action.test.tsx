@@ -45,16 +45,17 @@ describe('Expand panel action', () => {
   });
 
   it('getCompatibilityChangesSubject emits when expandedPanelId changes', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const subject = action.getCompatibilityChangesSubject(context);
-          subject?.pipe(take(1)).subscribe(() => {
-            done();
-          });
-          expandedPanelId$.next('superPanelId');
-        
-      }));
+      const subject = action.getCompatibilityChangesSubject(context);
+      subject?.pipe(take(1)).subscribe(() => {
+        done();
+      });
+      expandedPanelId$.next('superPanelId');
+    }));
 
   it('returns the correct icon based on expanded panel id', async () => {
     expect(await action.getIconType(context)).toBe('maximize');

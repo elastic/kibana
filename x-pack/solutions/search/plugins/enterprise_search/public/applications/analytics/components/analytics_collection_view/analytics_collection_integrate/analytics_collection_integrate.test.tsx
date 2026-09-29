@@ -20,13 +20,13 @@ import type { AnalyticsCollection } from '../../../../../../common/types/analyti
 import { AnalyticsCollectionIntegrateView } from './analytics_collection_integrate_view';
 
 vi.mock('../../../../shared/cloud_details/cloud_details', () => {
-      const mocked = {
-      useCloudDetails: () => ({
-        elasticsearchUrl: 'your_deployment_url',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudDetails: () => ({
+      elasticsearchUrl: 'your_deployment_url',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnalyticsCollectionIntegrate', () => {
   const analyticsCollections: AnalyticsCollection = {

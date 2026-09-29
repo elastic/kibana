@@ -14,19 +14,19 @@ import path from 'path';
 import type { ModuleDiscoveryInfo } from './types';
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFindPackageForPath = vi.fn();
 vi.mock('@kbn/repo-packages', () => {
-      const mocked = {
-      findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findPackageForPath: (...args: unknown[]) => mockFindPackageForPath(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   filterModulesByAffectedConfigs,

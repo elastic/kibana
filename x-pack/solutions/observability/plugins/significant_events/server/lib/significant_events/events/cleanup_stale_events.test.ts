@@ -17,11 +17,11 @@ import { cleanupStaleEvents, STALE_EVENT_ASSESSMENT_NOTE } from './cleanup_stale
 import { updateSignificantEventStatus } from './update_event_status';
 
 vi.mock('./update_event_status', () => {
-      const mocked = {
-      updateSignificantEventStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateSignificantEventStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const updateStatusMock = updateSignificantEventStatus as MockedFunction<
   typeof updateSignificantEventStatus
@@ -161,9 +161,9 @@ describe('cleanupStaleEvents', () => {
   it('does not write when checking live rules fails', async () => {
     const eventClient = createEventClient([[createEvent('event-1', ['rule-1'])]]);
     const rulesClient = createRulesClient([]);
-    vi
-      .mocked(rulesClient.findExistingRuleIds)
-      .mockRejectedValueOnce(new Error('rule lookup failed'));
+    vi.mocked(rulesClient.findExistingRuleIds).mockRejectedValueOnce(
+      new Error('rule lookup failed')
+    );
 
     await expect(
       cleanupStaleEvents({
@@ -182,8 +182,7 @@ describe('cleanupStaleEvents', () => {
     );
     const eventClient = createEventClient([firstBatch, [createEvent('event-1000', ['rule-2'])]]);
     const rulesClient = createRulesClient([]);
-    vi
-      .mocked(rulesClient.findExistingRuleIds)
+    vi.mocked(rulesClient.findExistingRuleIds)
       .mockResolvedValueOnce([])
       .mockRejectedValueOnce(new Error('later lookup failed'));
 

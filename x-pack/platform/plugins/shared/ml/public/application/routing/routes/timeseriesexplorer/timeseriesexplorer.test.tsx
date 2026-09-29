@@ -22,31 +22,31 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 vi.mock('../../../services/toast_notification_service');
 
 vi.mock('../../../timeseriesexplorer', () => {
-      const mocked = {
-      TimeSeriesExplorer: vi.fn(() => {
-        return null;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeSeriesExplorer: vi.fn(() => {
+      return null;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../timeseriesexplorer/timeseriesexplorer_page', () => {
-      const mocked = {
-      TimeSeriesExplorerPage: vi.fn(({ children }: PropsWithChildren<unknown>) => {
-        return <>{children}</>;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeSeriesExplorerPage: vi.fn(({ children }: PropsWithChildren<unknown>) => {
+      return <>{children}</>;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../timeseriesexplorer/components/timeseriesexplorer_no_jobs_found', () => {
-      const mocked = {
-      TimeseriesexplorerNoJobsFound: vi.fn(() => {
-        return null;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeseriesexplorerNoJobsFound: vi.fn(() => {
+      return null;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockedTimeSeriesExplorer = TimeSeriesExplorer as MockedClass<typeof TimeSeriesExplorer>;
 const MockedTimeSeriesExplorerPage = TimeSeriesExplorerPage as MockedFunction<
@@ -106,11 +106,11 @@ vi.mock('@kbn/ml-url-state', () => {
 vi.mock('../../../timeseriesexplorer/hooks/use_timeseriesexplorer_url_state');
 
 vi.mock('../../../components/help_menu', () => {
-      const mocked = {
-      HelpMenu: () => <div id="mockHelpMenu" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HelpMenu: () => <div id="mockHelpMenu" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts/kibana/kibana_context', () => {
   return {

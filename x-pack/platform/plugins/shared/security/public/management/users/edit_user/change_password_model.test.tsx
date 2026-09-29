@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { useCurrentUser } from '@kbn/core-user-profile-browser-hooks';
@@ -22,7 +21,7 @@ import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 
 vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
-  const actual = (await vi.importActual('@kbn/core-user-profile-browser-hooks'));
+  const actual = await vi.importActual('@kbn/core-user-profile-browser-hooks');
   return { ...actual, useCurrentUser: vi.fn() };
 });
 

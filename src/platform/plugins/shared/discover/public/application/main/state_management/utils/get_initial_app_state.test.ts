@@ -477,9 +477,7 @@ describe('getInitialAppState', () => {
             // Given
             const services = createDiscoverServicesMock();
             const dataSource = createDataViewDataSource({ dataViewId: 'some-data-view-id' });
-            services.data.query.queryString.getDefaultQuery = vi
-              .fn()
-              .mockReturnValue(defaultQuery);
+            services.data.query.queryString.getDefaultQuery = vi.fn().mockReturnValue(defaultQuery);
 
             // When
             const appState = getInitialAppState({
@@ -607,9 +605,7 @@ describe('getInitialAppState', () => {
               .mockReturnValue({ currentMode: 'classic', defaultMode: 'esql' });
             services.uiSettings.get = vi.fn().mockReturnValue(true);
             services.discoverFeatureFlags.getIsEsqlDefault = vi.fn(() => true);
-            services.data.query.queryString.getDefaultQuery = vi
-              .fn()
-              .mockReturnValue(defaultQuery);
+            services.data.query.queryString.getDefaultQuery = vi.fn().mockReturnValue(defaultQuery);
 
             const appState = getInitialAppState({
               hasGlobalState: false,
@@ -857,9 +853,7 @@ describe('getInitialAppState', () => {
             const services = createDiscoverServicesMock();
             services.storage.get = vi.fn().mockReturnValue(queryMode);
             services.uiSettings.get = vi.fn().mockReturnValue(false);
-            services.data.query.queryString.getDefaultQuery = vi
-              .fn()
-              .mockReturnValue(defaultQuery);
+            services.data.query.queryString.getDefaultQuery = vi.fn().mockReturnValue(defaultQuery);
 
             // When
             const appState = getInitialAppState({

@@ -34,29 +34,28 @@ const mockDocumentFooter = vi.fn((props: unknown) => {
     </button>
   );
 });
-const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
-  <>{children}</>
-));
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>);
 const mockReportEvent = vi.fn();
 
 vi.mock('../../flyout_v2/document/main/footer', () => {
-      const mocked = {
-      Footer: (props: unknown) => mockDocumentFooter(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Footer: (props: unknown) => mockDocumentFooter(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: (props: unknown) =>
+      mockFlyoutProviders(props as { children: React.ReactNode }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertFlyoutFooter', () => {
   const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);

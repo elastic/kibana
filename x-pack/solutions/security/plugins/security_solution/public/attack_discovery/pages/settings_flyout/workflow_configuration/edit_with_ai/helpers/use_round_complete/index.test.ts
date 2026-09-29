@@ -18,11 +18,11 @@ import type { RoundCompleteEventData } from '@kbn/agent-builder-common/chat/even
 import { useRoundComplete } from '.';
 
 vi.mock('@kbn/agent-builder-common', () => {
-      const mocked = {
-      isRoundCompleteEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isRoundCompleteEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsRoundCompleteEvent = isRoundCompleteEvent as unknown as Mock;
 

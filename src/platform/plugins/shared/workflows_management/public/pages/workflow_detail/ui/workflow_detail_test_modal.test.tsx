@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowDetailTestModal } from './workflow_detail_test_modal';
@@ -33,79 +33,79 @@ const mockUseWorkflowUrlState = vi.fn();
 const mockUseAsyncThunk = vi.fn();
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
 >;
 
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_async_thunk', () => {
-      const mocked = {
-      useAsyncThunk: (...args: unknown[]) => mockUseAsyncThunk(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAsyncThunk: (...args: unknown[]) => mockUseAsyncThunk(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entities/workflows/store/workflow_detail/selectors', () => {
-      const mocked = {
-      selectIsTestModalOpen: vi.fn(),
-      selectReplayExecutionId: vi.fn(),
-      selectWorkflowDefinition: vi.fn(),
-      selectWorkflowId: vi.fn(),
-      selectWorkflow: vi.fn(),
-      selectEditorYaml: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    selectIsTestModalOpen: vi.fn(),
+    selectReplayExecutionId: vi.fn(),
+    selectWorkflowDefinition: vi.fn(),
+    selectWorkflowId: vi.fn(),
+    selectWorkflow: vi.fn(),
+    selectEditorYaml: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock WorkflowExecuteModal
 vi.mock('../../../features/run_workflow/ui/workflow_execute_modal', () => {
-      const mocked = {
-      WorkflowExecuteModal: ({
-        definition,
-        onClose,
-        onSubmit,
-      }: {
-        definition: any;
-        onClose: () => void;
-        onSubmit: (inputs: any, triggerTab: string) => void;
-      }) => (
-        <div data-test-subj="workflow-execute-modal">
-          <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
-          <button type="button" data-test-subj="close-modal" onClick={onClose}>
-            {'Close'}
-          </button>
-          <button
-            type="button"
-            data-test-subj="submit-modal"
-            onClick={() => onSubmit({ test: 'input' }, 'manual')}
-          >
-            {'Run'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecuteModal: ({
+      definition,
+      onClose,
+      onSubmit,
+    }: {
+      definition: any;
+      onClose: () => void;
+      onSubmit: (inputs: any, triggerTab: string) => void;
+    }) => (
+      <div data-test-subj="workflow-execute-modal">
+        <div data-test-subj="modal-definition">{JSON.stringify(definition)}</div>
+        <button type="button" data-test-subj="close-modal" onClick={onClose}>
+          {'Close'}
+        </button>
+        <button
+          type="button"
+          data-test-subj="submit-modal"
+          onClick={() => onSubmit({ test: 'input' }, 'manual')}
+        >
+          {'Run'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowDetailTestModal', () => {
   const mockDefinition = {

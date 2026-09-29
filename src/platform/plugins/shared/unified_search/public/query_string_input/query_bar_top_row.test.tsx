@@ -13,23 +13,23 @@ import type { Mock } from 'vitest';
 import { mockPersistedLogFactory } from '@kbn/kql/public/components/query_string_input/query_string_input.test.mocks';
 
 vi.mock('@kbn/esql/public/kibana_services', () => {
-      const mocked = {
-      useKibanaServices: vi.fn(() => ({})),
-      untilPluginStartServicesReady: vi.fn(() => new Promise(() => {})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaServices: vi.fn(() => ({})),
+    untilPluginStartServicesReady: vi.fn(() => new Promise(() => {})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/date-range-picker-presets', () => {
-      const mocked = {
-      useDateRangePickerPresets: vi.fn(() => ({
-        presets: [],
-        onPresetSave: undefined,
-        onPresetDelete: undefined,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateRangePickerPresets: vi.fn(() => ({
+      presets: [],
+      onPresetSave: undefined,
+      onPresetDelete: undefined,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';

@@ -12,11 +12,11 @@ import { withSpan } from '@kbn/apm-utils';
 import { withApm as withApmDecorator } from './with_apm_decorator';
 
 vi.mock('@kbn/apm-utils', () => {
-      const mocked = {
-      withSpan: vi.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb() as Promise<T>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withSpan: vi.fn(<T>(_opts: unknown, cb: () => Promise<T>) => cb() as Promise<T>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const withSpanMock = withSpan as MockedFunction<typeof withSpan>;
 

@@ -21,21 +21,21 @@ import { applicationServiceMock, notificationServiceMock } from '@kbn/core/publi
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: () => ({
-        pathname: '/test-path',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: () => ({
+      pathname: '/test-path',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNotifications = notificationServiceMock.createStartContract();
 const mockApplication = applicationServiceMock.createStartContract();
 const mockSpaces = spacesPluginMock.createStartContract();
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => ({

@@ -18,40 +18,37 @@ import { findGapsSearchAfter } from '../find_gaps';
 import { updateGapsInEventLog } from './update_gaps_in_event_log';
 import type { Logger } from '@kbn/core/server';
 vi.mock('../find_gaps', () => {
-      const mocked = {
-      findGapsSearchAfter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findGapsSearchAfter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-vi.mock(
-  '../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps',
-  () => {
-      const mocked = {
-        getRuleIdsWithGaps: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../application/gaps/methods/get_rule_ids_with_gaps/get_rule_ids_with_gaps', () => {
+  const mocked = {
+    getRuleIdsWithGaps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../task/utils', () => {
-      const mocked = {
-      filterGapsWithOverlappingBackfills: vi.fn(async (gaps: unknown[]) => gaps),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterGapsWithOverlappingBackfills: vi.fn(async (gaps: unknown[]) => gaps),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./update_gaps_in_event_log', () => {
-      const mocked = {
-      updateGapsInEventLog: vi.fn(async ({ gaps, prepareGaps }) => {
-        if (typeof prepareGaps === 'function') {
-          await prepareGaps(gaps);
-        }
-        return true;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateGapsInEventLog: vi.fn(async ({ gaps, prepareGaps }) => {
+      if (typeof prepareGaps === 'function') {
+        await prepareGaps(gaps);
+      }
+      return true;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('cleanupStuckInProgressGaps', () => {
   const logger = {
@@ -115,7 +112,7 @@ describe('cleanupStuckInProgressGaps', () => {
       pitId: undefined,
     } as Awaited<ReturnType<typeof findGapsSearchAfter>>);
 
-    const { filterGapsWithOverlappingBackfills } = (await vi.importMock('../task/utils'));
+    const { filterGapsWithOverlappingBackfills } = await vi.importMock('../task/utils');
     (filterGapsWithOverlappingBackfills as Mock).mockResolvedValue(gaps);
 
     await cleanupStuckInProgressGaps({
@@ -169,7 +166,7 @@ describe('cleanupStuckInProgressGaps', () => {
     } as Awaited<ReturnType<typeof findGapsSearchAfter>>);
 
     // Simulate that overlapping backfills exist, so no reset should occur
-    const { filterGapsWithOverlappingBackfills } = (await vi.importMock('../task/utils'));
+    const { filterGapsWithOverlappingBackfills } = await vi.importMock('../task/utils');
     (filterGapsWithOverlappingBackfills as Mock).mockResolvedValueOnce([]);
 
     await cleanupStuckInProgressGaps({

@@ -19,13 +19,13 @@ import type { GlobalDataTag } from '../../../../../common/types';
 import { GlobalDataTagsTable } from './global_data_tags_table';
 
 vi.mock('../../../../hooks/use_fleet_status', () => {
-      const mocked = {
-      FleetStatusProvider: (props: any) => {
-        return props.children;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FleetStatusProvider: (props: any) => {
+      return props.children;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_IDS = {
   NAME_INPUT: 'globalDataTagsNameInput',

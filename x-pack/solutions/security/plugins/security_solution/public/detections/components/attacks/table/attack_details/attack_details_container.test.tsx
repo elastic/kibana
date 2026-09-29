@@ -30,25 +30,25 @@ import { SummaryTab } from './summary_tab';
 
 // Mock heavy child components to speed up tests
 vi.mock('./alerts_tab', () => {
-      const mocked = {
-      AlertsTab: vi.fn(() => <div data-test-subj="testAlertsTab">{'AlertsTab'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTab: vi.fn(() => <div data-test-subj="testAlertsTab">{'AlertsTab'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./summary_tab', () => {
-      const mocked = {
-      SummaryTab: vi.fn(() => <div data-test-subj="testAttackSummaryTab">{'SummaryTab'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SummaryTab: vi.fn(() => <div data-test-subj="testAttackSummaryTab">{'SummaryTab'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/local_storage', () => {
-      const mocked = {
-      useLocalStorage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocalStorage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AttacksEventTypes } from '../../../../../common/lib/telemetry';

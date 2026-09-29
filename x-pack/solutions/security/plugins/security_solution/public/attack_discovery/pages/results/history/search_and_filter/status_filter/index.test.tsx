@@ -17,7 +17,7 @@ import { TestProviders } from '../../../../../../common/mock/test_providers';
 import * as useFindAttackDiscoveriesModule from '../../../../use_find_attack_discoveries';
 
 vi.mock('../../../../use_find_attack_discoveries', async () => {
-  const actual = (await vi.importActual('../../../../use_find_attack_discoveries'));
+  const actual = await vi.importActual('../../../../use_find_attack_discoveries');
   return {
     ...actual,
     useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),

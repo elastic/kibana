@@ -103,28 +103,28 @@ vi.mock('@kbn/code-editor', () => {
 });
 
 vi.mock('../../contexts', () => {
-      const mocked = {
-      useEditorReadContext: vi.fn(),
-      useOutputFilterReadContext: vi.fn(),
-      useRequestReadContext: vi.fn(),
-      useServicesContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEditorReadContext: vi.fn(),
+    useOutputFilterReadContext: vi.fn(),
+    useRequestReadContext: vi.fn(),
+    useServicesContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks', () => {
-      const mocked = {
-      useResizeCheckerUtils: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResizeCheckerUtils: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/copy_text_to_clipboard', () => {
-      const mocked = {
-      copyTextToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    copyTextToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEditorReadContext = useEditorReadContext as MockedFunction<
   typeof useEditorReadContext
@@ -139,9 +139,7 @@ const mockUseServicesContext = useServicesContext as MockedFunction<typeof useSe
 const mockUseResizeCheckerUtils = useResizeCheckerUtils as MockedFunction<
   typeof useResizeCheckerUtils
 >;
-const mockCopyTextToClipboard = copyTextToClipboard as MockedFunction<
-  typeof copyTextToClipboard
->;
+const mockCopyTextToClipboard = copyTextToClipboard as MockedFunction<typeof copyTextToClipboard>;
 
 describe('WHEN rendering Console output', () => {
   const addSuccess = vi.fn();

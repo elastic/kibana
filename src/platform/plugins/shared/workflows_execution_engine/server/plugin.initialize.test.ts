@@ -20,8 +20,10 @@ import {
 } from './test_utils/data_client_jest_mock';
 
 vi.mock('./repositories/data_access_layer', async () => {
-  const actual = (await vi.importActual('./repositories/data_access_layer'));
-  const { createDataClientJestMock: createDataAccessMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
+  const actual = await vi.importActual('./repositories/data_access_layer');
+  const { createDataClientJestMock: createDataAccessMock } = await vi.importActual(
+    './test_utils/data_client_jest_mock'
+  );
   return {
     ...actual,
     createDataClientBundle: vi.fn(() => createDataAccessMock()),

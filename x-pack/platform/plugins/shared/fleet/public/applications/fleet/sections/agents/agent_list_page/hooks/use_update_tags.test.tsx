@@ -19,20 +19,20 @@ import {
 import { useUpdateTags } from './use_update_tags';
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      sendPutAgentTagsUpdate: vi.fn(),
-      sendPostBulkAgentTagsUpdate: vi.fn(),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: vi.fn(),
-            addError: vi.fn(),
-          },
+  const mocked = {
+    sendPutAgentTagsUpdate: vi.fn(),
+    sendPostBulkAgentTagsUpdate: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendPutAgentTagsUpdate = sendPutAgentTagsUpdate as Mock;
 const mockSendPostBulkAgentTagsUpdate = sendPostBulkAgentTagsUpdate as Mock;
@@ -61,10 +61,9 @@ describe('useUpdateTags', () => {
     const { result } = renderHook(() => useUpdateTags());
     await act(() => result.current.updateTags('agent1', ['tag1'], mockOnSuccess));
     expect(mockOnSuccess).not.toHaveBeenCalled();
-    expect(useStartServices().notifications.toasts.addError as Mock).toHaveBeenCalledWith(
-      'error',
-      { title: 'Tag(s) update failed' }
-    );
+    expect(useStartServices().notifications.toasts.addError as Mock).toHaveBeenCalledWith('error', {
+      title: 'Tag(s) update failed',
+    });
   });
 
   it('should call onSuccess when bulk update tags succeeds', async () => {
@@ -84,9 +83,8 @@ describe('useUpdateTags', () => {
     const { result } = renderHook(() => useUpdateTags());
     await act(() => result.current.bulkUpdateTags('query', ['tag1'], [], mockOnSuccess));
     expect(mockOnSuccess).not.toHaveBeenCalled();
-    expect(useStartServices().notifications.toasts.addError as Mock).toHaveBeenCalledWith(
-      'error',
-      { title: 'Tag(s) update failed' }
-    );
+    expect(useStartServices().notifications.toasts.addError as Mock).toHaveBeenCalledWith('error', {
+      title: 'Tag(s) update failed',
+    });
   });
 });

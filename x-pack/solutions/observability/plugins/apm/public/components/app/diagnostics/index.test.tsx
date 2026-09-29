@@ -17,33 +17,33 @@ import { DiagnosticsTemplate } from '.';
 const mockLink = vi.fn((path: string) => `/link${path}`);
 
 vi.mock('../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({ link: mockLink }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({ link: mockLink }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => ({ query: { rangeFrom: 'now-15m', rangeTo: 'now' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRoutePath = { current: '/diagnostics' };
 vi.mock('../../../hooks/use_apm_route_path', () => {
-      const mocked = {
-      useApmRoutePath: () => mockRoutePath.current,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRoutePath: () => mockRoutePath.current,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      isPending: (status: string) => status === 'loading',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isPending: (status: string) => status === 'loading',
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Configurable context so individual tests can toggle loading/imported state and tab statuses.
 const mockDiagnosticsContext = {
@@ -55,11 +55,11 @@ const mockDiagnosticsContext = {
 };
 
 vi.mock('./context/use_diagnostics', () => {
-      const mocked = {
-      useDiagnosticsContext: () => mockDiagnosticsContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiagnosticsContext: () => mockDiagnosticsContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Tab status helpers are configurable per test; tab components are stubbed out to keep the
 // module graph light (only the template itself is under test).
@@ -72,83 +72,83 @@ const mockTabStatuses = {
 };
 
 vi.mock('./summary_tab', () => {
-      const mocked = {
-      DiagnosticsSummary: () => null,
-      getIsCrossCluster: () => mockTabStatuses.isCrossCluster,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiagnosticsSummary: () => null,
+    getIsCrossCluster: () => mockTabStatuses.isCrossCluster,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./index_pattern_settings_tab', () => {
-      const mocked = {
-      DiagnosticsIndexPatternSettings: () => null,
-      getIsIndexPatternTabOk: () => mockTabStatuses.indexPatternOk,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiagnosticsIndexPatternSettings: () => null,
+    getIsIndexPatternTabOk: () => mockTabStatuses.indexPatternOk,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./summary_tab/index_templates_status', () => {
-      const mocked = {
-      getIsIndexTemplateOk: () => mockTabStatuses.indexTemplateOk,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsIndexTemplateOk: () => mockTabStatuses.indexTemplateOk,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./summary_tab/data_streams_status', () => {
-      const mocked = {
-      getIsDataStreamTabOk: () => mockTabStatuses.dataStreamOk,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsDataStreamTabOk: () => mockTabStatuses.dataStreamOk,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./summary_tab/indicies_status', () => {
-      const mocked = {
-      getIsIndicesTabOk: () => mockTabStatuses.indicesOk,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsIndicesTabOk: () => mockTabStatuses.indicesOk,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./index_templates_tab', () => {
-      const mocked = { DiagnosticsIndexTemplates: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { DiagnosticsIndexTemplates: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./indices_tab', () => {
-      const mocked = { DiagnosticsIndices: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { DiagnosticsIndices: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./data_stream_tab', () => {
-      const mocked = { DiagnosticsDataStreams: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { DiagnosticsDataStreams: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./import_export_tab', () => {
-      const mocked = { DiagnosticsImportExport: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { DiagnosticsImportExport: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./apm_documents_tab', () => {
-      const mocked = { DiagnosticsApmDocuments: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { DiagnosticsApmDocuments: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./context/diagnostics_context', () => {
-      const mocked = {
-      DiagnosticsContextProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiagnosticsContextProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render ApmMainTemplate as a thin wrapper that passes `header` straight into a real AppHeader
 // (so we exercise the full tab/menu-building logic without the template's own dependencies).
 vi.mock('../../routing/templates/apm_main_template', () => {
-      const mocked = {
-      ApmMainTemplate: ({
-        header,
-        children,
-      }: {
-        header?: ApmMainTemplateHeaderProps;
-        children?: React.ReactNode;
-      }) => (
-        <>
-          {header ? <MockAppHeaderComponent {...header} /> : null}
-          {children}
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApmMainTemplate: ({
+      header,
+      children,
+    }: {
+      header?: ApmMainTemplateHeaderProps;
+      children?: React.ReactNode;
+    }) => (
+      <>
+        {header ? <MockAppHeaderComponent {...header} /> : null}
+        {children}
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ALL_TAB_TEST_SUBJECTS = [
   'summary-tab',

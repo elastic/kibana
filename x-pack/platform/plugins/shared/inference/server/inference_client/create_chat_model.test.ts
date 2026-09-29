@@ -25,9 +25,7 @@ const getConnectorByIdMock = getConnectorById as unknown as MockedFunction<typeo
 vi.mock('@kbn/inference-langchain');
 import { InferenceChatModel } from '@kbn/inference-langchain';
 import { createRegexWorkerServiceMock } from '../test_utils';
-const InferenceChatModelMock = InferenceChatModel as unknown as Mock<
-  typeof InferenceChatModel
->;
+const InferenceChatModelMock = InferenceChatModel as unknown as Mock<typeof InferenceChatModel>;
 
 describe('createChatModel', () => {
   let logger: MockedLogger;

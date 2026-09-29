@@ -21,14 +21,14 @@ import { AiIndexDeleteConfirmModal } from './ai_index_delete_confirm_modal';
 const mockDeleteAiIndex = vi.fn();
 
 vi.mock('../../hooks/use_delete_ai_index', () => {
-      const mocked = {
-      useDeleteAiIndex: () => ({
-        deleteAiIndex: mockDeleteAiIndex,
-        isDeleting: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteAiIndex: () => ({
+      deleteAiIndex: mockDeleteAiIndex,
+      isDeleting: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const aiIndex: AiIndexHttpItem = {
   id: 'my-ai-index',
@@ -52,10 +52,7 @@ const createServices = () => {
 
 const renderModal = (
   overrides: Partial<AiIndexHttpItem> = {},
-  {
-    onClose = vi.fn(),
-    onSuccess = vi.fn(),
-  }: { onClose?: Mock; onSuccess?: Mock } = {}
+  { onClose = vi.fn(), onSuccess = vi.fn() }: { onClose?: Mock; onSuccess?: Mock } = {}
 ) => {
   const services = createServices();
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

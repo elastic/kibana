@@ -17,21 +17,21 @@ import { TemplateConnectorPreview } from './template_connector_preview';
 
 vi.mock('../../../containers/configure/use_get_supported_action_connectors');
 vi.mock('../../connectors/fields_preview_form', () => {
-      const mocked = {
-      ConnectorFieldsPreviewForm: ({
-        connector,
-        fields,
-      }: {
-        connector: { name: string };
-        fields: unknown;
-      }) => (
-        <div data-test-subj="mock-fields-preview-form">{`${connector?.name}:${JSON.stringify(
-          fields
-        )}`}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorFieldsPreviewForm: ({
+      connector,
+      fields,
+    }: {
+      connector: { name: string };
+      fields: unknown;
+    }) => (
+      <div data-test-subj="mock-fields-preview-form">{`${connector?.name}:${JSON.stringify(
+        fields
+      )}`}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetSupportedActionConnectorsMock = useGetSupportedActionConnectors as Mock;
 

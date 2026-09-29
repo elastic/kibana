@@ -22,11 +22,11 @@ vi.mock('../../../../common/utils/route/use_route_spy');
 vi.mock('../../../../timelines/containers/details');
 vi.mock('./use_get_fields_data');
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const eventId = 'eventId';
 const indexName = 'indexName';

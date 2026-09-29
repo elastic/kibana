@@ -14,11 +14,11 @@ import { AdHocTaskRunningHandler } from './ad_hoc_task_running_handler';
 import { adHocRunStatus } from '../../common/constants';
 
 vi.mock('./lib', () => {
-      const mocked = {
-      partiallyUpdateAdHocRun: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    partiallyUpdateAdHocRun: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('isRunning handler', () => {
   const soClient = vi.fn() as unknown as ISavedObjectsRepository;
@@ -93,9 +93,7 @@ describe('isRunning handler', () => {
   });
 
   test('Should reject when the update isRunning has been a failure', async () => {
-    (partiallyUpdateAdHocRun as Mock).mockImplementation(() =>
-      Promise.reject(new Error('error'))
-    );
+    (partiallyUpdateAdHocRun as Mock).mockImplementation(() => Promise.reject(new Error('error')));
     const runHandler = new AdHocTaskRunningHandler(soClient, logger);
     runHandler.start('9876543210', [
       {

@@ -30,25 +30,25 @@ import {
 } from '../test_ids';
 
 vi.mock('../../../../../common/components/event_details/investigate_in_timeline_button', () => {
-      const mocked = {
-      InvestigateInTimelineButton: ({
-        children,
-        'data-test-subj': dataTestSubj,
-      }: {
-        children: React.ReactNode;
-        'data-test-subj': string;
-      }) => <div data-test-subj={dataTestSubj}>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InvestigateInTimelineButton: ({
+      children,
+      'data-test-subj': dataTestSubj,
+    }: {
+      children: React.ReactNode;
+      'data-test-subj': string;
+    }) => <div data-test-subj={dataTestSubj}>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/event_details/use_action_cell_data_provider', () => {
-      const mocked = {
-      getDataProvider: vi.fn(() => ({ id: 'mock-provider', field: 'field', value: 'value' })),
-      getDataProviderAnd: vi.fn(() => ({ id: 'mock-and-provider' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataProvider: vi.fn(() => ({ id: 'mock-provider', field: 'field', value: 'value' })),
+    getDataProviderAnd: vi.fn(() => ({ id: 'mock-and-provider' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockChildLink = ({
   field,

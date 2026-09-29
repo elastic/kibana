@@ -114,12 +114,14 @@ const mockNavigateToLeftPanel = vi.fn();
 
 describe('<CorrelationsOverview />', () => {
   beforeEach(() => {
-    vi
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, ancestryDocumentId: 'event-id' });
-    vi
-      .mocked(useShowRelatedAlertsBySameSourceEvent)
-      .mockReturnValue({ show: false, originalEventId });
+    vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+      show: false,
+      ancestryDocumentId: 'event-id',
+    });
+    vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+      show: false,
+      originalEventId,
+    });
     vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false });
     vi.mocked(useShowRelatedCases).mockReturnValue(false);
     vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
@@ -144,15 +146,15 @@ describe('<CorrelationsOverview />', () => {
   });
 
   it('should show component with all rows in expandable panel', () => {
-    vi
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: true, ancestryDocumentId: 'event-id' });
-    vi
-      .mocked(useShowRelatedAlertsBySameSourceEvent)
-      .mockReturnValue({ show: true, originalEventId: 'originalEventId' });
-    vi
-      .mocked(useShowRelatedAlertsBySession)
-      .mockReturnValue({ show: true, entityId: 'entityId' });
+    vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+      show: true,
+      ancestryDocumentId: 'event-id',
+    });
+    vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+      show: true,
+      originalEventId: 'originalEventId',
+    });
+    vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: true, entityId: 'entityId' });
     vi.mocked(useShowRelatedCases).mockReturnValue(true);
     vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: true, alertSuppressionCount: 1 });
 
@@ -192,15 +194,15 @@ describe('<CorrelationsOverview />', () => {
   });
 
   it('should hide rows and show error message if show values are false', () => {
-    vi
-      .mocked(useShowRelatedAlertsByAncestry)
-      .mockReturnValue({ show: false, ancestryDocumentId: 'event-id' });
-    vi
-      .mocked(useShowRelatedAlertsBySameSourceEvent)
-      .mockReturnValue({ show: false, originalEventId: 'originalEventId' });
-    vi
-      .mocked(useShowRelatedAlertsBySession)
-      .mockReturnValue({ show: false, entityId: 'entityId' });
+    vi.mocked(useShowRelatedAlertsByAncestry).mockReturnValue({
+      show: false,
+      ancestryDocumentId: 'event-id',
+    });
+    vi.mocked(useShowRelatedAlertsBySameSourceEvent).mockReturnValue({
+      show: false,
+      originalEventId: 'originalEventId',
+    });
+    vi.mocked(useShowRelatedAlertsBySession).mockReturnValue({ show: false, entityId: 'entityId' });
     vi.mocked(useShowRelatedCases).mockReturnValue(false);
     vi.mocked(useShowSuppressedAlerts).mockReturnValue({ show: false, alertSuppressionCount: 0 });
 

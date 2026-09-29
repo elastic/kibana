@@ -16,11 +16,11 @@ import { transformToNotifyWhen } from './transform_to_notify_when';
 import type { LegacyIRuleActionsAttributes } from './types';
 
 vi.mock('./transform_to_notify_when', () => {
-      const mocked = {
-      transformToNotifyWhen: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformToNotifyWhen: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const legacyActionsAttr: LegacyIRuleActionsAttributes = {
   actions: [

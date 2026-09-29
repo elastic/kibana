@@ -36,39 +36,39 @@ vi.mock('../../../../common/lib/kibana', () => {
 });
 
 vi.mock('../../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: vi.fn().mockReturnValue({
-        entity: null,
-        entityRecord: null,
-        firstSeen: null,
-        lastSeen: null,
-        isLoading: false,
-        error: null,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: vi.fn().mockReturnValue({
+      entity: null,
+      entityRecord: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout/document_details/shared/hooks/use_which_flyout', () => {
-      const mocked = {
-      useWhichFlyout: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWhichFlyout: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../flyout_v2/use_flyout_api');
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

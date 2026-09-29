@@ -12,19 +12,19 @@ import { STANDALONE_CLUSTER_CLUSTER_UUID } from '../../../common/constants';
 import type { LegacyRequest } from '../../types';
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getNodes', () => {
   it('ensures collapse key is present query responses', async () => {

@@ -116,8 +116,7 @@ describe('findUserActions', () => {
         expect.arrayContaining([expect.anything()])
       );
       expect(
-        (clientArgs.services.userActionService.finder.decodeUserActions as Mock).mock
-          .calls[0][0]
+        (clientArgs.services.userActionService.finder.decodeUserActions as Mock).mock.calls[0][0]
       ).toHaveLength(1);
       expect(result.total).toBe(2);
       expect(result.userActions).toHaveLength(1);

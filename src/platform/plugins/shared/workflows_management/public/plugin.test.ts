@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { waitFor } from '@testing-library/react';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { App, AppUpdatableFields, AppUpdater } from '@kbn/core/public';
 import { applicationServiceMock, coreMock } from '@kbn/core/public/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
@@ -29,9 +29,9 @@ import { PLUGIN_ID } from '../common';
 import { stepSchemas } from '../common/step_schemas';
 
 vi.mock('./application', () => {
-      const mocked = { renderApp: vi.fn(() => vi.fn()) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { renderApp: vi.fn(() => vi.fn()) };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./common/lib/telemetry/telemetry_service', () => {
   return {
@@ -43,25 +43,25 @@ vi.mock('./common/lib/telemetry/telemetry_service', () => {
 });
 
 vi.mock('../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: { initialize: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: { initialize: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: { initialize: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: { initialize: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./connectors/workflows', () => {
-      const mocked = {
-      getWorkflowsConnectorType: vi.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowsConnectorType: vi.fn(() => ({ id: 'workflows', actionTypeId: 'workflows' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createPlugin = () =>
   new WorkflowsPlugin(

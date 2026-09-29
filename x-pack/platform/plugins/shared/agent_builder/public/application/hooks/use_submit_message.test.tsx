@@ -21,41 +21,41 @@ import { useToasts } from './use_toasts';
 import { useSubmitMessage } from './use_submit_message';
 
 vi.mock('../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../context/conversation/use_conversation_id', () => {
-      const mocked = { useConversationId: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useConversationId: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_agent_builder_service', () => {
-      const mocked = { useAgentBuilderServices: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAgentBuilderServices: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_conversation', () => {
-      const mocked = { useAgentId: () => 'agent-1' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAgentId: () => 'agent-1' };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_conversation_stream', () => {
-      const mocked = { useConversationStream: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useConversationStream: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_navigation', () => {
-      const mocked = { useNavigation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useNavigation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_toasts', () => {
-      const mocked = { useToasts: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useToasts: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/agent-builder-browser', () => {
-      const mocked = {
-      formatAgentBuilderErrorMessage: (error: Error) => error.message,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatAgentBuilderErrorMessage: (error: Error) => error.message,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const created = { id: 'conv-1', agent_id: 'agent-1', events: [], rounds: [] };
 const create = vi.fn();

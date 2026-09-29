@@ -22,12 +22,12 @@ import { RequestAdapter } from '@kbn/inspector-plugin/common';
 vi.mock('../services/state_service');
 vi.mock('./use_state_props');
 vi.mock('@kbn/discover-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/discover-utils/src/constants')),
-      getBreakdownField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/discover-utils/src/constants')),
+    getBreakdownField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createStateServiceMock = createStateService as MockedFunction<typeof createStateService>;
 const useStatePropsMock = useStateProps as MockedFunction<typeof useStateProps>;

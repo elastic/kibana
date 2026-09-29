@@ -18,33 +18,33 @@ const mockCaseDefaultsForm = vi.fn((_props?: unknown) => (
 ));
 
 vi.mock('../field_types/field_renderer', () => {
-      const mocked = {
-      TemplateFieldRenderer: vi.fn(() => <div data-test-subj="template-field-renderer" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateFieldRenderer: vi.fn(() => <div data-test-subj="template-field-renderer" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./template_case_defaults_form', () => {
-      const mocked = {
-      TemplateCaseDefaultsForm: (props: unknown) => mockCaseDefaultsForm(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateCaseDefaultsForm: (props: unknown) => mockCaseDefaultsForm(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases_context/use_cases_context', () => {
-      const mocked = {
-      useCasesContext: () => ({ owner: ['securitySolution'] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesContext: () => ({ owner: ['securitySolution'] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // TemplatePreview renders TemplateMetadataPreview, which calls useCasesFeatures (sync-alerts gate).
 // Mock it so the preview doesn't need the full cases features/permissions context.
 vi.mock('../../../common/use_cases_features', () => {
-      const mocked = {
-      useCasesFeatures: () => ({ isSyncAlertsEnabled: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesFeatures: () => ({ isSyncAlertsEnabled: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CreateTemplatePreview', () => {
   const renderPreview = (

@@ -29,13 +29,13 @@ import {
 } from './attack_discovery_verdict_attachment';
 
 vi.mock('../../../attack_discovery/pages/results/attack_discovery_markdown_formatter', () => {
-      const mocked = {
-      AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }: { markdown: string }) => (
-        <div data-test-subj="attackDiscoveryMarkdownFormatter">{markdown}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryMarkdownFormatter: vi.fn(({ markdown }: { markdown: string }) => (
+      <div data-test-subj="attackDiscoveryMarkdownFormatter">{markdown}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFormatter = AttackDiscoveryMarkdownFormatter as MockedFunction<
   typeof AttackDiscoveryMarkdownFormatter

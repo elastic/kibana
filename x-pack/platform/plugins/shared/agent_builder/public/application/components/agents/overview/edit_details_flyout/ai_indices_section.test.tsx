@@ -18,31 +18,31 @@ import { AiIndicesSection } from './ai_indices_section';
 import type { EditDetailsFormData } from './types';
 
 vi.mock('../../../../hooks/use_is_context_engine_enabled', () => {
-      const mocked = {
-      useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/ai_indices/use_list_ai_indices', () => {
-      const mocked = {
-      useListAiIndices: () => ({
-        aiIndices: mockAvailableAiIndices,
-        isLoading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useListAiIndices: () => ({
+      aiIndices: mockAvailableAiIndices,
+      isLoading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => {
-      const mocked = {
-      useAgentAiIndicesById: () => ({
-        aiIndices: mockAgentAiIndices,
-        isLoading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentAiIndicesById: () => ({
+      aiIndices: mockAgentAiIndices,
+      isLoading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const AGENT_ID = 'my-agent';
 

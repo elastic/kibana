@@ -18,29 +18,29 @@ import { EntityType } from '../../../../common/search_strategy';
 
 vi.mock('../api');
 vi.mock('./use_risk_engine_status', () => {
-      const mocked = {
-      useRiskEngineStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskEngineStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/ml/hooks/use_ml_capabilities', () => {
-      const mocked = {
-      useMlCapabilities: vi.fn().mockReturnValue({ isPlatinumOrTrialLicense: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlCapabilities: vi.fn().mockReturnValue({ isPlatinumOrTrialLicense: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../helper_hooks', () => {
-      const mocked = {
-      useHasSecurityCapability: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasSecurityCapability: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_error_toast', () => {
-      const mocked = {
-      useErrorToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchEntitiesListV2 = vi.fn();
 const mockUseRiskEngineStatus = useRiskEngineStatus as Mock;

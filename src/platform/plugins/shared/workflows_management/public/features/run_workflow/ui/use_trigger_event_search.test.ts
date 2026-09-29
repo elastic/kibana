@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { act, renderHook, waitFor } from '@testing-library/react';
 import { useQueryTriggerEvents } from '@kbn/workflows-ui';
 import { TIMEPICKER_FALLBACK } from './constants';
 import { useTriggerEventSearch } from './use_trigger_event_search';
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useQueryTriggerEvents: vi.fn(),

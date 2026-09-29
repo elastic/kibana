@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
+import { vi } from 'vitest';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
@@ -18,11 +17,11 @@ import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.
 import { securityMock } from '../../mocks';
 
 vi.mock('./application_connections_page', () => {
-      const mocked = {
-      ApplicationConnectionsPage: () => 'Application Connections Page',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApplicationConnectionsPage: () => 'Application Connections Page',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const element = document.body.appendChild(document.createElement('div'));
 

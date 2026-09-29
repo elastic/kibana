@@ -64,63 +64,63 @@ const alertsNavLink: NavigationLink = {
 
 const mockSolutionSideNav = vi.fn((_: SolutionSideNavProps) => <></>);
 vi.mock('@kbn/security-solution-side-nav', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-solution-side-nav')),
-      SolutionSideNav: (props: SolutionSideNavProps) => mockSolutionSideNav(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-solution-side-nav')),
+    SolutionSideNav: (props: SolutionSideNavProps) => mockSolutionSideNav(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/kibana');
 
 const mockUseRouteSpy = vi.fn(() => [{ pageName: SecurityPageName.alerts }]);
 vi.mock('../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: () => mockUseRouteSpy(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: () => mockUseRouteSpy(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../links/links_hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../links/links_hooks')),
-      useParentLinks: (id: string) => [{ id }],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../links/links_hooks')),
+    useParentLinks: (id: string) => [{ id }],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseNavLinks = vi.fn();
 vi.mock('../../../links/nav_links', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../links/nav_links')),
-      useNavLinks: () => mockUseNavLinks(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../links/nav_links')),
+    useNavLinks: () => mockUseNavLinks(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../links', () => {
-      const mocked = {
-      useGetSecuritySolutionLinkProps:
-        () =>
-        ({ deepLinkId }: { deepLinkId: SecurityPageName }) => ({
-          href: `/${deepLinkId}`,
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionLinkProps:
+      () =>
+      ({ deepLinkId }: { deepLinkId: SecurityPageName }) => ({
+        href: `/${deepLinkId}`,
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseShowTimeline = vi.fn((): [boolean] => [false]);
 vi.mock('../../../utils/timeline/use_show_timeline', () => {
-      const mocked = {
-      useShowTimeline: () => mockUseShowTimeline(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShowTimeline: () => mockUseShowTimeline(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseIsPolicySettingsBarVisible = vi.fn((): boolean => false);
 vi.mock('../../../../management/pages/policy/view/policy_hooks', () => {
-      const mocked = {
-      useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsPolicySettingsBarVisible: () => mockUseIsPolicySettingsBarVisible(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderNav = (options?: { store?: ReturnType<typeof createMockStore> }) =>
   render(<SecuritySideNav />, {
@@ -461,12 +461,8 @@ describe('SecuritySideNav', () => {
         path: '/agents',
       }
     );
-    expect(useKibana().services.application.getUrlForApp as Mock).toHaveBeenCalledWith(
-      'discover'
-    );
-    expect(useKibana().services.application.getUrlForApp as Mock).toHaveBeenCalledWith(
-      'workflows'
-    );
+    expect(useKibana().services.application.getUrlForApp as Mock).toHaveBeenCalledWith('discover');
+    expect(useKibana().services.application.getUrlForApp as Mock).toHaveBeenCalledWith('workflows');
 
     expect(mockSolutionSideNav).toHaveBeenCalledWith(
       expect.objectContaining({

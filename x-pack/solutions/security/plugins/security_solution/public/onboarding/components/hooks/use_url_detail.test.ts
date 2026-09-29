@@ -13,45 +13,45 @@ import { useHistory } from 'react-router-dom';
 
 // --- Mocks for dependencies ---
 vi.mock('@kbn/security-solution-navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-solution-navigation')),
-      useNavigateTo: vi.fn(),
-      SecurityPageName: { landing: 'landing', siemMigrationsManage: 'siemMigrationsManage' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-solution-navigation')),
+    useNavigateTo: vi.fn(),
+    SecurityPageName: { landing: 'landing', siemMigrationsManage: 'siemMigrationsManage' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_stored_state', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_stored_state')),
-      useStoredUrlDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_stored_state')),
+    useStoredUrlDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_topic_id', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_topic_id')),
-      useTopicId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_topic_id')),
+    useTopicId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_cloud_topic_id', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_cloud_topic_id')),
-      useCloudTopicId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_cloud_topic_id')),
+    useCloudTopicId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../onboarding_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../onboarding_context')),
-      useOnboardingContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../onboarding_context')),
+    useOnboardingContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
   const originalModule = require('react-router-dom');
@@ -262,10 +262,7 @@ describe('useSyncUrlDetails', () => {
 
   it('navigates to the stored detail when URL is empty and a stored detail exists', () => {
     // Simulate that a stored detail already exists
-    (useStoredUrlDetails as Mock).mockReturnValue([
-      'customTopic#card1',
-      mockSetStoredUrlDetail,
-    ]);
+    (useStoredUrlDetails as Mock).mockReturnValue(['customTopic#card1', mockSetStoredUrlDetail]);
 
     renderHook(() => useSyncUrlDetails({ pathTopicId: null, hashCardId: null }));
 
@@ -325,10 +322,7 @@ describe('useSyncUrlDetails', () => {
 
   it('clears stored detail if the stored topic is invalid', () => {
     // Simulate a stored detail with an invalid topic
-    (useStoredUrlDetails as Mock).mockReturnValue([
-      'invalidTopic#card1',
-      mockSetStoredUrlDetail,
-    ]);
+    (useStoredUrlDetails as Mock).mockReturnValue(['invalidTopic#card1', mockSetStoredUrlDetail]);
     // Simulate config.has returning false for an invalid topic
     mockConfigHas.mockReturnValue(false);
 

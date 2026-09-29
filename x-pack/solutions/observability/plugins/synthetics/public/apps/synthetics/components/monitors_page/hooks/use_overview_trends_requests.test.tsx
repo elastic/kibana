@@ -16,13 +16,13 @@ import type { OverviewStatusMetaData } from '../../../../../../common/runtime_ty
 import * as reduxHooks from 'react-redux-v7';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useOverviewTrendsRequests', () => {
   const mockMonitor1 = {

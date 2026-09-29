@@ -42,77 +42,77 @@ const mockDocumentHeader = vi.fn((props: unknown) => {
 const mockReportEvent = vi.fn();
 
 vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
-      const mocked = {
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/document/main/header', () => {
-      const mocked = {
-      Header: (props: unknown) => mockDocumentHeader(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Header: (props: unknown) => mockDocumentHeader(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/tools/notes', () => {
-      const mocked = {
-      NotesDetails: () => <div>{'MockNotesDetails'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesDetails: () => <div>{'MockNotesDetails'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
-      const mocked = {
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/discover_in_timeline/provider', () => {
-      const mocked = {
-      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases/components/provider/provider', () => {
-      const mocked = {
-      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../assistant/provider', () => {
-      const mocked = {
-      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/components/ml/permissions/ml_capabilities_provider', () => {
-      const mocked = {
-      MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MlCapabilitiesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // EntityStoreEuidApiProvider uses a dynamic import('./euid_browser') in a useEffect.
 // That async import causes react-test-renderer's act() to wait indefinitely when
 // the component tree is inspected via TestRenderer. Mock it out to avoid the hang.
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      EntityStoreEuidApiProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityStoreEuidApiProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertFlyoutHeader', () => {
   const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);

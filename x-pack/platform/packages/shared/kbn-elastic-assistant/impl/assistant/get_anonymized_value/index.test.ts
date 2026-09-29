@@ -12,11 +12,11 @@ import { invert } from 'lodash/fp';
 import { getAnonymizedValue } from '.';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'test-uuid',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'test-uuid',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getAnonymizedValue', () => {
   beforeEach(() => vi.clearAllMocks());

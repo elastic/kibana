@@ -16,15 +16,15 @@ vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 // useDeploymentSummary calls useAgentPolicySummary unconditionally (it's a no-op when agentPolicyId
 // is absent), but the hook internally calls useGetEnrollmentAPIKeysQuery which requires @tanstack/react-query.
 vi.mock('./use_agent_policy_summary', () => {
-      const mocked = {
-      useAgentPolicySummary: () => ({
-        agentPolicyName: undefined,
-        enrollmentToken: undefined,
-        agentCount: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentPolicySummary: () => ({
+      agentPolicyName: undefined,
+      enrollmentToken: undefined,
+      agentCount: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useDeploymentSummary } from './use_deployment_summary';

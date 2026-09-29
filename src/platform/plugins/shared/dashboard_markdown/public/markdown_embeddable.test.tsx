@@ -344,9 +344,12 @@ describe('MarkdownEmbeddable', () => {
 
   describe('anyStateChange$', () => {
     let embeddableApi: MarkdownEditorApi;
-    beforeEach(() =>
-    new Promise<void>((resolve, reject) => {
-    const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    beforeEach(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
           renderEmbeddable(
             markdownEmbeddableSchema.parse({
@@ -359,27 +362,28 @@ describe('MarkdownEmbeddable', () => {
               done();
             })
             .catch(done);
-        
-    }));
+        })
+    );
 
     test('should not emit on subscribe and emit when any state changes', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              embeddableApi.anyStateChange$.subscribe(() => {
-                try {
-                  const { title } = embeddableApi.serializeState();
-                  expect(title).toBe('cute puppies');
-                } catch (error) {
-                  // title assertion fails when
-                  // anyStateChange$ emits on subscribe
-                  done(error);
-                  return;
-                }
-                done();
-              });
-              embeddableApi.setTitle('cute puppies');
-            
-        }));
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      }));
   });
 });

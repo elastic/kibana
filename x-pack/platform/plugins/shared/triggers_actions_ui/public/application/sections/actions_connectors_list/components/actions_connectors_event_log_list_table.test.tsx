@@ -16,30 +16,30 @@ import { ConnectorEventLogListTable } from './actions_connectors_event_log_list_
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 vi.mock('../../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/lib/kibana')),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          notifications: { toasts: { addDanger: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../common/lib/kibana')),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        notifications: { toasts: { addDanger: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/action_connector_api/load_execution_log_aggregations', () => {
-      const mocked = {
-      loadGlobalConnectorExecutionLogAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadGlobalConnectorExecutionLogAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResponse = {
   total: 1,

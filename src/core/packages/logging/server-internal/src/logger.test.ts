@@ -521,9 +521,7 @@ describe('trace context in log records', () => {
     });
 
     it('falls back to OTel span context for traceId and spanId', () => {
-      vi
-        .spyOn(trace, 'getActiveSpan')
-        .mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
+      vi.spyOn(trace, 'getActiveSpan').mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
 
       logger.info('test message');
 
@@ -533,9 +531,7 @@ describe('trace context in log records', () => {
     });
 
     it('does not populate transactionId (no OTel equivalent)', () => {
-      vi
-        .spyOn(trace, 'getActiveSpan')
-        .mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
+      vi.spyOn(trace, 'getActiveSpan').mockReturnValue(createMockOtelSpan(otelTraceId, otelSpanId));
 
       logger.info('test message');
 

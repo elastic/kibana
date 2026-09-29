@@ -24,7 +24,7 @@ import type { EsQueryRuleParams, SearchType } from '../types';
 import { EsQueryExpression } from './es_query_expression';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const module = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const module = await vi.importActual('@kbn/kibana-react-plugin/public');
 
   return {
     ...module,
@@ -33,34 +33,34 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 });
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      // Mocking CodeEditor
+  const mocked = {
+    // Mocking CodeEditor
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      CodeEditor: (props: any) => (
-        <input
-          data-test-subj="mockCodeEditor"
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          onChange={(syntheticEvent: any) => {
-            props.onChange(syntheticEvent.jsonString);
-          }}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    CodeEditor: (props: any) => (
+      <input
+        data-test-subj="mockCodeEditor"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        onChange={(syntheticEvent: any) => {
+          props.onChange(syntheticEvent.jsonString);
+        }}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/es-ui-shared-plugin/public', () => {
-      const mocked = {
-      XJson: {
-        useXJsonMode: vi.fn().mockReturnValue({
-          convertToJson: vi.fn(),
-          setXJson: vi.fn(),
-          xJson: vi.fn(),
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    XJson: {
+      useXJsonMode: vi.fn().mockReturnValue({
+        convertToJson: vi.fn(),
+        setXJson: vi.fn(),
+        xJson: vi.fn(),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDataPluginMock = () => {
   const dataMock = dataPluginMock.createStartContract() as DataPublicPluginStart & {

@@ -49,10 +49,9 @@ const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackage
 const mockedGetCustomDatasetStreams = getCustomDatasetStreams as Mock<
   ReturnType<typeof getCustomDatasetStreams>
 >;
-const mockedFindDataStreamsFromDifferentPackages =
-  findDataStreamsFromDifferentPackages as Mock<
-    ReturnType<typeof findDataStreamsFromDifferentPackages>
-  >;
+const mockedFindDataStreamsFromDifferentPackages = findDataStreamsFromDifferentPackages as Mock<
+  ReturnType<typeof findDataStreamsFromDifferentPackages>
+>;
 const mockedCheckExistingDataStreamsAreFromDifferentPackage =
   checkExistingDataStreamsAreFromDifferentPackage as Mock<
     ReturnType<typeof checkExistingDataStreamsAreFromDifferentPackage>

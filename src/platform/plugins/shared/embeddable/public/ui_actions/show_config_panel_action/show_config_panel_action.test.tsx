@@ -61,14 +61,15 @@ describe('Show config panel action', () => {
   });
 
   it('should trigger a change ont he subject when changing viewMode', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const subject$ = action.getCompatibilityChangesSubject(context);
-          subject$?.pipe(take(1)).subscribe(() => {
-            done();
-          });
-          updateViewMode('edit');
-        
-      }));
+      const subject$ = action.getCompatibilityChangesSubject(context);
+      subject$?.pipe(take(1)).subscribe(() => {
+        done();
+      });
+      updateViewMode('edit');
+    }));
 });

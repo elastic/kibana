@@ -140,9 +140,10 @@ describe('AggConfig', () => {
       const avgConfig = ac.byName('avg')[0];
       const football = {};
 
-      vi
-        .spyOn(histoConfig, 'write')
-        .mockImplementation(() => ({ params: {}, subAggs: [avgConfig] }));
+      vi.spyOn(histoConfig, 'write').mockImplementation(() => ({
+        params: {},
+        subAggs: [avgConfig],
+      }));
       vi.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
 
       const dsl = histoConfig.toDsl();
@@ -180,9 +181,10 @@ describe('AggConfig', () => {
       const medianConfig = ac.byName('median')[0];
       const football = {};
 
-      vi
-        .spyOn(histoConfig, 'write')
-        .mockImplementation(() => ({ params: {}, subAggs: [avgConfig] }));
+      vi.spyOn(histoConfig, 'write').mockImplementation(() => ({
+        params: {},
+        subAggs: [avgConfig],
+      }));
       vi.spyOn(avgConfig, 'write').mockImplementation(() => ({ params: football }));
       vi.spyOn(medianConfig, 'write').mockImplementation(() => ({ params: football }));
 

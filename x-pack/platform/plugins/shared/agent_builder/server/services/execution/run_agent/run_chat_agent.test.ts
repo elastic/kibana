@@ -50,63 +50,63 @@ import { createRootStateChunkEvent } from '../../../test_utils/graph_stream';
 import type { StateType } from './state';
 
 // the real fold, so resume tests exercise the actual pending-turn detection
-const { getPendingTurn: realGetPendingTurn } = (await vi.importActual('./utils/conversation_turn'));
+const { getPendingTurn: realGetPendingTurn } = await vi.importActual('./utils/conversation_turn');
 
 vi.mock('./utils', () => {
-      const mocked = {
-      prepareConversation: vi.fn(),
-      selectSkills: vi.fn().mockResolvedValue([]),
-      selectTools: vi.fn(),
-      extractRound: vi.fn(),
-      getPendingTurn: vi.fn(() => undefined),
-      createPreExecutionSteps: vi.fn(() => []),
-      addRoundCompleteEvent: vi.fn(() => (source$: any) => source$),
-      estimatePerRoundTokens: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prepareConversation: vi.fn(),
+    selectSkills: vi.fn().mockResolvedValue([]),
+    selectTools: vi.fn(),
+    extractRound: vi.fn(),
+    getPendingTurn: vi.fn(() => undefined),
+    createPreExecutionSteps: vi.fn(() => []),
+    addRoundCompleteEvent: vi.fn(() => (source$: any) => source$),
+    estimatePerRoundTokens: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tools/register_internal_tools', () => {
-      const mocked = {
-      registerInternalTools: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerInternalTools: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/create_result_transformer', () => {
-      const mocked = {
-      createResultTransformer: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createResultTransformer: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/image_resolver', () => {
-      const mocked = {
-      createImageResolver: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createImageResolver: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./prompts', () => {
-      const mocked = {
-      createPromptFactory: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPromptFactory: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./graph', () => {
-      const mocked = {
-      createAgentGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createAgentGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./convert_graph_events', () => {
-      const mocked = {
-      convertGraphEvents: vi.fn(() => (source$: any) => source$),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertGraphEvents: vi.fn(() => (source$: any) => source$),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const prepareConversationMock = prepareConversation as MockedFunction<typeof prepareConversation>;
 const selectToolsMock = selectTools as MockedFunction<typeof selectTools>;

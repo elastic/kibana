@@ -14,11 +14,11 @@ import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_ex
 import { MigrationSource } from '../../../common/types';
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExperimentalFeature = (
   flags: Partial<Record<'qradarRulesMigration' | 'sentinelRulesMigration', boolean>>

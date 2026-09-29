@@ -11,29 +11,29 @@ import { vi } from 'vitest';
 
 export const registerRouteForBundleMock = vi.fn();
 vi.doMock('./bundles_route', () => {
-      const mocked = {
-      registerRouteForBundle: registerRouteForBundleMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRouteForBundle: registerRouteForBundleMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock('@kbn/ui-shared-deps-src', () => {
-      const mocked = {
-      distDir: 'uiSharedDepsSrcDistDir',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    distDir: 'uiSharedDepsSrcDistDir',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock('@kbn/ui-shared-deps-npm', () => {
-      const mocked = {
-      distDir: 'uiSharedDepsNpmDistDir',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    distDir: 'uiSharedDepsNpmDistDir',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.doMock('@kbn/monaco/server', () => {
-      const mocked = {
-      bundleDir: 'kbnMonacoBundleDir',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bundleDir: 'kbnMonacoBundleDir',
+  };
+  return { ...mocked, default: mocked };
+});

@@ -16,19 +16,21 @@ import type { RelatedEntity } from './types';
 let mockChainInvokeResult: unknown;
 
 vi.mock('@langchain/core/prompts', () => {
-      const mocked = {
-      ChatPromptTemplate: {
-        fromTemplate: vi.fn().mockReturnValue({
-          pipe: vi.fn().mockReturnValue({
-            invoke: vi.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
-          }),
+  const mocked = {
+    ChatPromptTemplate: {
+      fromTemplate: vi.fn().mockReturnValue({
+        pipe: vi.fn().mockReturnValue({
+          invoke: vi.fn().mockImplementation(() => Promise.resolve(mockChainInvokeResult)),
         }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { buildExploratoryLeads, POOL_SIZE, MAX_POOL_PAYLOAD_CHARS } = (await vi.importActual('./exploratory_leads')) as {
+const { buildExploratoryLeads, POOL_SIZE, MAX_POOL_PAYLOAD_CHARS } = (await vi.importActual(
+  './exploratory_leads'
+)) as {
   buildExploratoryLeads: typeof import('./exploratory_leads').buildExploratoryLeads;
   POOL_SIZE: typeof import('./exploratory_leads').POOL_SIZE;
   MAX_POOL_PAYLOAD_CHARS: typeof import('./exploratory_leads').MAX_POOL_PAYLOAD_CHARS;

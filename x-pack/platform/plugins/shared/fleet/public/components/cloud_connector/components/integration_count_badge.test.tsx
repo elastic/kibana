@@ -18,11 +18,11 @@ import { IntegrationCountBadge } from './integration_count_badge';
 
 // Mock the useCloudConnectorUsage hook
 vi.mock('../hooks/use_cloud_connector_usage', () => {
-      const mocked = {
-      useCloudConnectorUsage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudConnectorUsage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCloudConnectorUsage = useCloudConnectorUsage as MockedFunction<
   typeof useCloudConnectorUsage

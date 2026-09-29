@@ -21,17 +21,17 @@ const mockOpenPopover = vi.fn();
 vi.mock(
   '@kbn/elastic-assistant/impl/data_anonymization/settings/anonymization_settings_management',
   () => {
-      const mocked = {
-        AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
-          <div data-test-subj="anonymizationSettingsModal">
-            <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
-              {'Close'}
-            </button>
-          </div>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AnonymizationSettingsManagement: ({ onClose }: { onClose: () => void }) => (
+        <div data-test-subj="anonymizationSettingsModal">
+          <button type="button" data-test-subj="closeAnonymizationSettingsModal" onClick={onClose}>
+            {'Close'}
+          </button>
+        </div>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 describe('EntityHighlightsSettings', () => {

@@ -33,12 +33,12 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => mockHistory,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => mockHistory,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultLinkInfo: LinkInfo = {
   id: SecurityPageName.alerts,
@@ -49,12 +49,12 @@ const defaultLinkInfo: LinkInfo = {
 const mockLinkInfo = vi.fn().mockResolvedValue(defaultLinkInfo);
 
 vi.mock('../../links', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../links')),
-      useLinkInfo: () => mockLinkInfo(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../links')),
+    useLinkInfo: () => mockLinkInfo(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('global query string', () => {
   const makeStore = (globalUrlParam: GlobalUrlParam) =>

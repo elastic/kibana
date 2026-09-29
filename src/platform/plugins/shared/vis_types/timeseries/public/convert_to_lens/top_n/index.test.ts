@@ -26,49 +26,49 @@ const mockGetDatasourceValue = vi
 const mockExtractOrGenerateDatasourceInfo = vi.fn();
 
 vi.mock('../../services', () => {
-      const mocked = {
-      getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewsStart: vi.fn(() => mockGetDatasourceValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/convert', () => {
-      const mocked = {
-      excludeMetaFromColumn: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    excludeMetaFromColumn: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/series', () => {
-      const mocked = {
-      getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
-      getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMetricsColumns: vi.fn(() => mockGetMetricsColumns()),
+    getBucketsColumns: vi.fn(() => mockGetBucketsColumns()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/configurations/xy', () => {
-      const mocked = {
-      getConfigurationForTopN: vi.fn(() => mockGetConfigurationForTopN()),
-      getLayers: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfigurationForTopN: vi.fn(() => mockGetConfigurationForTopN()),
+    getLayers: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/metrics', () => {
-      const mocked = {
-      isValidMetrics: vi.fn(() => mockIsValidMetrics()),
-      getReducedTimeRange: vi.fn().mockReturnValue('10'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isValidMetrics: vi.fn(() => mockIsValidMetrics()),
+    getReducedTimeRange: vi.fn().mockReturnValue('10'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/datasource', () => {
-      const mocked = {
-      extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractOrGenerateDatasourceInfo: vi.fn(() => mockExtractOrGenerateDatasourceInfo()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToLens', () => {
   const model = createPanel({

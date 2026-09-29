@@ -18,11 +18,11 @@ import { BUTTON_TEST_ID, TABLE_UPDATE_PROGRESS_TEST_ID } from './test_ids';
 import { IOC_DETAILS_TITLE_TEST_ID } from '../../../../../flyout_v2/ioc/main/test_ids';
 
 vi.mock('../../../../hooks/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: vi.fn(() => ({ investigateInTimelineFn: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: vi.fn(() => ({ investigateInTimelineFn: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const stub = () => {};
 

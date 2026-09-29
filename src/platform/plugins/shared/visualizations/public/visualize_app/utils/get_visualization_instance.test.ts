@@ -27,22 +27,24 @@ const commonSerializedVisMock = {
 };
 
 vi.mock('../../utils/saved_visualize_utils', async () => {
-  const actual = (await vi.importActual('../../utils/saved_visualize_utils'));
+  const actual = await vi.importActual('../../utils/saved_visualize_utils');
   return {
     ...actual,
     getSavedVisualization: vi.fn(),
     convertToSerializedVis: vi.fn().mockReturnValue(commonSerializedVisMock),
   };
 });
-const { getSavedVisualization, convertToSerializedVis } = (await vi.importMock('../../utils/saved_visualize_utils'));
+const { getSavedVisualization, convertToSerializedVis } = await vi.importMock(
+  '../../utils/saved_visualize_utils'
+);
 
 vi.mock('../../vis_async', () => {
-      const mocked = {
-      createVisAsync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { createVisAsync } = (await vi.importMock('../../vis_async'));
+  const mocked = {
+    createVisAsync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { createVisAsync } = await vi.importMock('../../vis_async');
 
 let savedVisMock: VisSavedObject;
 

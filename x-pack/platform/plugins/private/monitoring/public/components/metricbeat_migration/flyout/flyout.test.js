@@ -20,34 +20,34 @@ import {
 } from '../../../../common/constants';
 
 vi.mock('../../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          kfetch: vi.fn(),
-          docLinks: {
-            links: {
-              monitoring: {
-                monitorKibana: 'jest-metadata-mock-url',
-                monitorElasticsearch: 'jest-metadata-mock-url',
-              },
-              metricbeat: {
-                install: 'jest-metadata-mock-url',
-                configure: 'jest-metadata-mock-url',
-              },
+  const mocked = {
+    Legacy: {
+      shims: {
+        kfetch: vi.fn(),
+        docLinks: {
+          links: {
+            monitoring: {
+              monitorKibana: 'jest-metadata-mock-url',
+              monitorElasticsearch: 'jest-metadata-mock-url',
+            },
+            metricbeat: {
+              install: 'jest-metadata-mock-url',
+              configure: 'jest-metadata-mock-url',
             },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common', () => {
-      const mocked = {
-      formatTimestampToDuration: () => `0 seconds`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatTimestampToDuration: () => `0 seconds`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const PRODUCTS = [
   {

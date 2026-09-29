@@ -24,11 +24,11 @@ import { applyStepUpdates, stepUpdates, type RunStepUpdate } from '../step_state
 import { buildInterruptedRound } from './round_summary';
 
 vi.mock('../../../../tracing', () => {
-      const mocked = {
-      getCurrentTraceId: () => 'trace-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentTraceId: () => 'trace-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const toolCall = (id: string, results: ToolCallStep['results'] = []): ToolCallStep => ({
   type: ConversationRoundStepType.toolCall,

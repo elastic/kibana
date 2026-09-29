@@ -41,23 +41,23 @@ import { FLYOUT_ORIGIN } from '../../../../../common/lib/telemetry';
 const SPECIAL_TEST_TIMEOUT = 30000;
 
 vi.mock('../../../../containers', () => {
-      const mocked = {
-      useTimelineEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../containers/details', () => {
-      const mocked = {
-      useTimelineEventsDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEventsDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
@@ -75,11 +75,11 @@ vi.mock('../../../../../flyout_v2/use_flyout_api');
 vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled');
 
 vi.mock('../../body/unified_timeline_body', () => {
-      const mocked = {
-      UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UnifiedTimelineBody: ({ header }: { header: React.ReactNode }) => header,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let useTimelineEventsMock = vi.fn();
 

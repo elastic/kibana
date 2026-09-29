@@ -48,9 +48,7 @@ describe('useAggregatedIndicators()', () => {
   type MockedCreateFetchAggregatedIndicators = MockedFunction<
     typeof createFetchAggregatedIndicators
   >;
-  let aggregatedIndicatorsQuery: MockedFunction<
-    ReturnType<typeof createFetchAggregatedIndicators>
-  >;
+  let aggregatedIndicatorsQuery: MockedFunction<ReturnType<typeof createFetchAggregatedIndicators>>;
 
   beforeEach(vi.clearAllMocks);
 

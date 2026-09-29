@@ -18,17 +18,17 @@ import type { AutoSizerProps } from '../../../../../components/auto_sizer';
 import { EuiProvider } from '@elastic/eui';
 
 vi.mock('../../../../../components/auto_sizer', () => {
-      const mocked = {
-      AutoSizer: ({ children }: AutoSizerProps) => {
-        return children({
-          bounds: { height: 800, width: 1200 },
-          content: { height: 800, width: 1200 },
-          measureRef: vi.fn(),
-        });
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AutoSizer: ({ children }: AutoSizerProps) => {
+      return children({
+        bounds: { height: 800, width: 1200 },
+        content: { height: 800, width: 1200 },
+        measureRef: vi.fn(),
+      });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const wrapWithProviders = (children: React.ReactNode) => <EuiProvider>{children}</EuiProvider>;
 

@@ -26,14 +26,14 @@ vi.mock('../app_navigation_handler', () => {
 });
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
-        trackUiMetric: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({
+      share: { url: { locators: { get: () => ({ useUrl: () => '' }) } } },
+      trackUiMetric: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.clearAllMocks();

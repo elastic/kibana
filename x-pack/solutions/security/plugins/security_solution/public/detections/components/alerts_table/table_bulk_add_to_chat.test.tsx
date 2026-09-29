@@ -20,171 +20,171 @@ import { useReportAddToChat } from '../../../agent_builder/hooks/use_report_add_
 import { AlertsTable } from '.';
 
 vi.mock('@kbn/response-ops-alerts-table', () => {
-      const mocked = {
-      AlertsTable: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTable: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../agent_builder/hooks/use_report_add_to_chat');
 vi.mock('../../../agent_builder/hooks/use_agent_builder_availability', () => {
-      const mocked = {
-      useAgentBuilderAvailability: vi.fn(() => ({
-        isAgentBuilderEnabled: true,
-        hasAgentBuilderPrivilege: true,
-        isAgentChatExperienceEnabled: true,
-        hasValidAgentBuilderLicense: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAvailability: vi.fn(() => ({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../agent_builder/helpers', () => {
-      const mocked = {
-      alertsToAttachmentGroup: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    alertsToAttachmentGroup: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          data: {},
-          http: {},
-          notifications: {},
-          rendering: {},
-          fieldFormats: {},
-          application: {},
-          licensing: {},
-          uiSettings: { get: vi.fn() },
-          settings: {},
-          cases: {},
-          agentBuilder: {},
-        },
-      })),
-      KibanaServices: {
-        getKibanaVersion: vi.fn(() => '8.0.0'),
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        data: {},
+        http: {},
+        notifications: {},
+        rendering: {},
+        fieldFormats: {},
+        application: {},
+        licensing: {},
+        uiSettings: { get: vi.fn() },
+        settings: {},
+        cases: {},
+        agentBuilder: {},
       },
-      KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+    })),
+    KibanaServices: {
+      getKibanaVersion: vi.fn(() => '8.0.0'),
+    },
+    KibanaContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn(() => ({
-        from: '2020-01-01T00:00:00Z',
-        to: '2020-01-02T00:00:00Z',
-        setQuery: vi.fn(),
-        deleteQuery: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn(() => ({
+      from: '2020-01-01T00:00:00Z',
+      to: '2020-01-02T00:00:00Z',
+      setQuery: vi.fn(),
+      deleteQuery: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(() => ({
-        dataView: { getRuntimeMappings: vi.fn(() => ({})) },
-        status: 'ready',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(() => ({
+      dataView: { getRuntimeMappings: vi.fn(() => ({})) },
+      status: 'ready',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_license', () => {
-      const mocked = {
-      useLicense: vi.fn(() => ({
-        isEnterprise: vi.fn(() => false),
-        isPlatinumPlus: vi.fn(() => false),
-        isGold: vi.fn(() => false),
-        getType: vi.fn(() => 'basic'),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: vi.fn(() => ({
+      isEnterprise: vi.fn(() => false),
+      isPlatinumPlus: vi.fn(() => false),
+      isGold: vi.fn(() => false),
+      getType: vi.fn(() => 'basic'),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_selector', () => {
-      const mocked = {
-      useDeepEqualSelector: vi.fn(() => []),
-      useShallowEqualSelector: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeepEqualSelector: vi.fn(() => []),
+    useShallowEqualSelector: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/trigger_actions_alert_table/use_bulk_actions', () => {
-      const mocked = {
-      useBulkActionsByTableType: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkActionsByTableType: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: vi.fn(() => ({
-        timelinePrivileges: { read: true },
-        notesPrivileges: { read: true },
-        kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserPrivileges: vi.fn(() => ({
+      timelinePrivileges: { read: true },
+      notesPrivileges: { read: true },
+      kibanaSecuritySolutionsPrivileges: { crud: true, read: true },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../notes/hooks/use_fetch_notes', () => {
-      const mocked = {
-      useFetchNotes: vi.fn(() => ({ onLoad: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchNotes: vi.fn(() => ({ onLoad: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../configurations/security_solution_detections/fetch_page_context', () => {
-      const mocked = {
-      useFetchUserProfilesFromAlerts: vi.fn(() => new Map()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchUserProfilesFromAlerts: vi.fn(() => new Map()),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/trigger_actions_alert_table/use_cell_actions', () => {
-      const mocked = {
-      useCellActionsOptions: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCellActionsOptions: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock(
   '../../hooks/trigger_actions_alert_table/use_trigger_actions_browser_fields_options',
   () => {
-      const mocked = {
-        useAlertsTableFieldsBrowserOptions: vi.fn(() => undefined),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAlertsTableFieldsBrowserOptions: vi.fn(() => undefined),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock('../../../common/hooks/use_invalid_filter_query', () => {
-      const mocked = {
-      useInvalidFilterQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidFilterQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/lib/kuery', () => {
-      const mocked = {
-      combineQueries: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    combineQueries: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../configurations/security_solution_detections', () => {
-      const mocked = {
-      CellValue: () => null,
-      getColumns: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellValue: () => null,
+    getColumns: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../timelines/components/timeline/body/control_columns', () => {
-      const mocked = {
-      getDefaultControlColumn: vi.fn(() => [{ width: 124 }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultControlColumn: vi.fn(() => [{ width: 124 }]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeItem = (id: string): TimelineItem =>
   ({ _id: id, data: [], ecs: { _id: id, _index: '' } } as unknown as TimelineItem);

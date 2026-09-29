@@ -20,19 +20,19 @@ vi.mock('../../../data_view_manager/hooks/use_data_view');
 vi.mock('../../../timelines/containers/details');
 vi.mock('../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('@kbn/discover-utils', () => {
-      const mocked = {
-      buildDataTableRecord: vi.fn(() => ({ id: '1', raw: { _id: '1' }, flattened: {} })),
-      getFieldValue: vi.fn(() => 'event'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildDataTableRecord: vi.fn(() => ({ id: '1', raw: { _id: '1' }, flattened: {} })),
+    getFieldValue: vi.fn(() => 'event'),
+  };
+  return { ...mocked, default: mocked };
+});
 // Stub the presentational flyout so we don't need its full provider tree.
 vi.mock('.', () => {
-      const mocked = {
-      DocumentFlyout: () => <div data-test-subj="document-flyout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentFlyout: () => <div data-test-subj="document-flyout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const props = {
   documentId: '1',

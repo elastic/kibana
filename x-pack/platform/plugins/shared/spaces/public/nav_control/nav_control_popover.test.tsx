@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -24,14 +23,14 @@ import type { SpacesManager } from '../spaces_manager';
 import { spacesManagerMock } from '../spaces_manager/mocks';
 
 vi.mock('./solution_view_switch_tour', () => {
-      const mocked = {
-      SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX: 'spaces.solutionViewSwitchTourShown',
-      SolutionViewSwitchTour: function MockSolutionViewSwitchTour() {
-        return <div data-test-subj="solutionViewSwitchTour" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SOLUTION_VIEW_SWITCH_TOUR_STORAGE_KEY_PREFIX: 'spaces.solutionViewSwitchTourShown',
+    SolutionViewSwitchTour: function MockSolutionViewSwitchTour() {
+      return <div data-test-subj="solutionViewSwitchTour" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSpaces = [
   {

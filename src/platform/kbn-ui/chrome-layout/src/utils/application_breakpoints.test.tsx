@@ -25,13 +25,13 @@ const EUI_BREAKPOINTS = {
 };
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: () => ({
-        euiTheme: { breakpoint: EUI_BREAKPOINTS },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTheme: () => ({
+      euiTheme: { breakpoint: EUI_BREAKPOINTS },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let resizeObserverCallback: ResizeObserverCallback | undefined;
 const observeMock = vi.fn();

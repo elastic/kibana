@@ -41,12 +41,12 @@ const defaultProps: ScheduledReportMenuItem = {
 describe('ScheduledReportFlyoutShareWrapper', () => {
   const mockUseKibana = vi.fn();
   vi.doMock('@kbn/reporting-public', async () => {
-        const mocked = {
-          ...(await vi.importActual('@kbn/reporting-public')),
-          useKibana: mockUseKibana,
-        };
-        return { ...mocked, default: mocked };
-      });
+    const mocked = {
+      ...(await vi.importActual('@kbn/reporting-public')),
+      useKibana: mockUseKibana,
+    };
+    return { ...mocked, default: mocked };
+  });
 
   beforeEach(() => {
     vi.clearAllMocks();

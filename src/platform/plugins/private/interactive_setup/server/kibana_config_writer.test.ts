@@ -26,14 +26,14 @@ describe('KibanaConfigWriter', () => {
   beforeEach(async () => {
     vi.spyOn(Date, 'now').mockReturnValue(1234);
 
-    const fsMocks = (await vi.importMock('fs/promises'));
+    const fsMocks = await vi.importMock('fs/promises');
     mockFsAccess = fsMocks.access;
     mockWriteFile = fsMocks.writeFile;
     mockReadFile = fsMocks.readFile;
 
     mockReadFile.mockResolvedValue('');
 
-    const mockCrypto = (await vi.importMock('crypto'));
+    const mockCrypto = await vi.importMock('crypto');
     mockCrypto.X509Certificate = function (cert: string) {
       if (cert === 'invalid-cert') {
         throw new Error('Invalid certificate');

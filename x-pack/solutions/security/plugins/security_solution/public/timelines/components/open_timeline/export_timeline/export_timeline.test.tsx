@@ -26,11 +26,11 @@ import { exportSelectedTimeline } from '../../../containers/api';
 vi.mock('../../../../common/hooks/use_app_toasts');
 vi.mock('../../../../common/utils/download_blob');
 vi.mock('../../../containers/api', () => {
-      const mocked = {
-      exportSelectedTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    exportSelectedTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('.', () => {
   return {

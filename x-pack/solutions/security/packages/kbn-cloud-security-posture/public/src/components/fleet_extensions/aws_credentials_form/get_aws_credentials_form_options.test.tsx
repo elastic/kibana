@@ -13,16 +13,16 @@ import {
 } from './get_aws_credentials_form_options';
 
 vi.mock('../utils', () => {
-      const mocked = {
-      isAgentlessSupported: vi.fn(() => true),
-      getInputTypesFromPackageInfo: vi.fn(() => [
-        { type: 'cloudbeat/cis_aws', policy_template: 'cspm' },
-      ]),
-      getPosturePolicy: vi.fn(() => 'cspm'),
-      getAwsCredentialsType: vi.fn(() => 'direct_access_keys'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAgentlessSupported: vi.fn(() => true),
+    getInputTypesFromPackageInfo: vi.fn(() => [
+      { type: 'cloudbeat/cis_aws', policy_template: 'cspm' },
+    ]),
+    getPosturePolicy: vi.fn(() => 'cspm'),
+    getAwsCredentialsType: vi.fn(() => 'direct_access_keys'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('get_aws_credentials_form_options', () => {
   beforeEach(() => {

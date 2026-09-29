@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { act, renderHook } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { WorkflowListItemDto } from '@kbn/workflows';
 import { useWorkflowBulkActions } from './use_workflow_bulk_actions';
 import { TestWrapper } from '../../../shared/test_utils';
@@ -19,14 +18,14 @@ const mockDeleteWorkflows = { mutate: vi.fn() };
 const mockUpdateWorkflow = { mutate: vi.fn() };
 
 vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
-      const mocked = {
-      useWorkflowActions: () => ({
-        deleteWorkflows: mockDeleteWorkflows,
-        updateWorkflow: mockUpdateWorkflow,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowActions: () => ({
+      deleteWorkflows: mockDeleteWorkflows,
+      updateWorkflow: mockUpdateWorkflow,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNotifications = {
   toasts: {
@@ -48,39 +47,39 @@ const mockApplication = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: mockApplication,
-          notifications: mockNotifications,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: mockApplication,
+        notifications: mockNotifications,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useExportWithReferences
 vi.mock('./use_export_with_references', () => {
-      const mocked = {
-      useExportWithReferences: () => ({
-        exportModalState: null,
-        startExport: vi.fn(),
-        handleIgnore: vi.fn(),
-        handleAddDirect: vi.fn(),
-        handleAddAll: vi.fn(),
-        handleCancel: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportWithReferences: () => ({
+      exportModalState: null,
+      startExport: vi.fn(),
+      handleIgnore: vi.fn(),
+      handleAddDirect: vi.fn(),
+      handleAddAll: vi.fn(),
+      handleCancel: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock ExportReferencesModal
 vi.mock('./export_references_modal', () => {
-      const mocked = {
-      ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockWorkflow = (overrides: Partial<WorkflowListItemDto> = {}): WorkflowListItemDto => ({
   id: 'wf-1',

@@ -20,18 +20,18 @@ import {
 } from '@kbn/cloud-security-posture/src/utils/query_utils';
 
 vi.mock('@kbn/cloud-security-posture/src/utils/query_utils', () => {
-      const mocked = {
-      decodeMultipleRisonParams: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    decodeMultipleRisonParams: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cloud-security-posture', () => {
-      const mocked = {
-      encodeQuery: vi.fn(() => `cspq=mocked-cspq-string`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    encodeQuery: vi.fn(() => `cspq=mocked-cspq-string`),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDecodeMultipleRisonParams = decodeMultipleRisonParams as MockedFunction<
   typeof decodeMultipleRisonParams

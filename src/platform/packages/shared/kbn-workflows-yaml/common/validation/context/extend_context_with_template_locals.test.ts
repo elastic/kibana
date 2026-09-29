@@ -198,7 +198,11 @@ describe('getContextSchemaWithTemplateLocals', async () => {
   const mockGetScalarValueAtOffset = getScalarValueAtOffset as MockedFunction<
     typeof getScalarValueAtOffset
   >;
-  const realGetScalarValueAtOffset = (await vi.importActual<typeof import('../../yaml/get_scalar_value_at_offset')>('../../yaml/get_scalar_value_at_offset')).getScalarValueAtOffset;
+  const realGetScalarValueAtOffset = (
+    await vi.importActual<typeof import('../../yaml/get_scalar_value_at_offset')>(
+      '../../yaml/get_scalar_value_at_offset'
+    )
+  ).getScalarValueAtOffset;
 
   it('returns base schema when scalar at offset is null', () => {
     mockGetScalarValueAtOffset.mockReturnValue(null);

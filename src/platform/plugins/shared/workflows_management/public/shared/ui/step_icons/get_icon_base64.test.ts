@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-import type React from 'react';
 
 import { getStepIconType, HardcodedIconDataUrls, HardcodedIcons } from '@kbn/workflows-ui';
 import {
@@ -22,31 +21,31 @@ import {
 
 // Mock renderToStaticMarkup from react-dom/server
 vi.mock('react-dom/server', () => {
-      const mocked = {
-      renderToStaticMarkup: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    renderToStaticMarkup: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the SVG component imports - they are React components
 vi.mock('./icons/elasticsearch.svg', () => {
-      const mocked = {
-      ElasticsearchLogo: () => 'ElasticsearchLogo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ElasticsearchLogo: () => 'ElasticsearchLogo',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./icons/kibana.svg', () => {
-      const mocked = {
-      KibanaLogo: () => 'KibanaLogo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaLogo: () => 'KibanaLogo',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/connector-specs/icons', () => {
-      const mocked = {
-      ConnectorIconsMap: new Map([['.notion', () => null]]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorIconsMap: new Map([['.notion', () => null]]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { renderToStaticMarkup } = (await vi.importMock('react-dom/server')) as {
   renderToStaticMarkup: Mock;

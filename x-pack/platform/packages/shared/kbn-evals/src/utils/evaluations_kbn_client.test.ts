@@ -17,11 +17,11 @@ import {
 } from './evaluations_kbn_client';
 
 vi.mock('./kbn_client_with_retries', () => {
-      const mocked = {
-      wrapKbnClientWithRetries: vi.fn(({ kbnClient }) => kbnClient),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapKbnClientWithRetries: vi.fn(({ kbnClient }) => kbnClient),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockKbnClient = (): Mocked<KbnClient> =>
   ({

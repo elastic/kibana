@@ -281,9 +281,7 @@ describe('Grouping', () => {
 
     it('calls custom groupsUnit callback correctly', () => {
       // Provide a custom groupsUnit function in testProps
-      const customGroupsUnit = vi.fn(
-        (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
-      );
+      const customGroupsUnit = vi.fn((n, parentSelectedGroup, hasNullGroup) => `${n} custom units`);
       const customProps = { ...testProps, groupsUnit: customGroupsUnit };
 
       render(
@@ -297,9 +295,7 @@ describe('Grouping', () => {
     });
 
     it('calls custom groupsUnit callback with hasNullGroup = false and null group in current page', () => {
-      const customGroupsUnit = vi.fn(
-        (n, parentSelectedGroup, hasNullGroup) => `${n} custom units`
-      );
+      const customGroupsUnit = vi.fn((n, parentSelectedGroup, hasNullGroup) => `${n} custom units`);
 
       const customProps = {
         ...testProps,

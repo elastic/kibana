@@ -32,15 +32,15 @@ const mockGetMockDataStreamPrivileges = vi.fn().mockImplementation(() => DATA_ST
 describe('getDataStreams', () => {
   beforeAll(() => {
     // Mock dataStreamService
-    vi
-      .spyOn(dataStreamService, 'getMatchingDataStreams')
-      .mockImplementation(mockGetMockMatchingDataStreams);
-    vi
-      .spyOn(datasetQualityPrivileges, 'getDatasetPrivileges')
-      .mockImplementation(mockGetDatasetPrivileges);
-    vi
-      .spyOn(datasetQualityPrivileges, 'getHasIndexPrivileges')
-      .mockImplementation(mockGetMockDataStreamPrivileges);
+    vi.spyOn(dataStreamService, 'getMatchingDataStreams').mockImplementation(
+      mockGetMockMatchingDataStreams
+    );
+    vi.spyOn(datasetQualityPrivileges, 'getDatasetPrivileges').mockImplementation(
+      mockGetDatasetPrivileges
+    );
+    vi.spyOn(datasetQualityPrivileges, 'getHasIndexPrivileges').mockImplementation(
+      mockGetMockDataStreamPrivileges
+    );
   });
 
   afterAll(() => {

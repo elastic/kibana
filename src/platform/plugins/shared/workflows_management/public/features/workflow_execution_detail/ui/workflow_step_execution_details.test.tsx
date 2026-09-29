@@ -7,49 +7,48 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
 import { TestWrapper } from '../../../shared/test_utils';
 
 vi.mock('./step_execution_data_view', () => {
-      const mocked = {
-      StepExecutionDataView: ({ mode }: { mode: string }) => (
-        <div data-test-subj={`step-execution-data-view-${mode}`} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepExecutionDataView: ({ mode }: { mode: string }) => (
+      <div data-test-subj={`step-execution-data-view-${mode}`} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./foreach_iterations_section', () => {
-      const mocked = {
-      ForeachIterationsSection: () => <div data-test-subj="workflowExecutionIterationsSection" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ForeachIterationsSection: () => <div data-test-subj="workflowExecutionIterationsSection" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOverviewProps: { current: Record<string, unknown> } = { current: {} };
 
 vi.mock('./workflow_execution_overview', () => {
-      const mocked = {
-      WorkflowExecutionOverview: (props: Record<string, unknown>) => {
-        mockOverviewProps.current = props;
-        return <div data-test-subj="workflow-execution-overview" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionOverview: (props: Record<string, unknown>) => {
+      mockOverviewProps.current = props;
+      return <div data-test-subj="workflow-execution-overview" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
-      const mocked = {
-      useNavigateToExecution: () => ({ navigate: vi.fn(), href: '' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToExecution: () => ({ navigate: vi.fn(), href: '' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createTriggerStep = (
   overrides: Partial<WorkflowStepExecutionDto> = {}

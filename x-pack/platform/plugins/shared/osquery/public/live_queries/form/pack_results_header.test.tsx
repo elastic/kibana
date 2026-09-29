@@ -18,61 +18,69 @@ import {
 const mockAddToCaseWrapper = vi.fn();
 
 vi.mock('../../common/experimental_features_context', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../results/export_filters_context', () => {
-      const mocked = {
-      useExportFilters: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../results/export_results_button', () => {
-      const mocked = {
-      ExportResultsButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../cases/add_to_cases', () => {
-      const mocked = {
-      AddToCaseWrapper: (props: Record<string, unknown>) => {
-        mockAddToCaseWrapper(props);
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
 
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../results/export_filters_context', () => {
+  const mocked = {
+    useExportFilters: vi.fn().mockReturnValue(undefined),
+  };
+
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../results/export_results_button', () => {
+  const mocked = {
+    ExportResultsButton: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../cases/add_to_cases', () => {
+  const mocked = {
+    AddToCaseWrapper: (props: Record<string, unknown>) => {
+      mockAddToCaseWrapper(props);
+
+      return null;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../timelines/add_to_timeline_button', () => {
-      const mocked = {
-      AddToTimelineButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddToTimelineButton: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../actions/components/add_tags_flyout', () => {
-      const mocked = {
-      AddTagsFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddTagsFlyout: () => null,
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../actions/use_live_query_details', () => {
-      const mocked = {
-      useLiveQueryDetails: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLiveQueryDetails: vi.fn().mockReturnValue({ data: undefined }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = vi.fn();
 
 vi.mock('../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const renderHeader = (props: Partial<Parameters<typeof PackResultsHeader>[0]> = {}) => {
   const services = createMockKibanaServices({

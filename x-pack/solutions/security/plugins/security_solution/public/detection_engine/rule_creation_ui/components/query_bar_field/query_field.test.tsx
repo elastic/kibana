@@ -25,7 +25,7 @@ import type { ResolveTimelineResponse } from '../../../../../common/api/timeline
 
 vi.mock('../../../../timelines/containers/api');
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     KibanaServices: {
@@ -46,7 +46,7 @@ vi.mock('../../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../../timelines/containers/all', async () => {
-  const originalModule = (await vi.importActual('../../../../timelines/containers/all'));
+  const originalModule = await vi.importActual('../../../../timelines/containers/all');
   return {
     ...originalModule,
     useGetAllTimeline: vi.fn(),

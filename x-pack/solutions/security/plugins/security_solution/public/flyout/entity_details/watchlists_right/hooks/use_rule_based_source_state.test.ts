@@ -16,8 +16,9 @@ import { EMPTY_QUERY } from './rule_based_source_helpers';
 import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_timestamp';
 
 vi.mock('./use_validate_index_pattern_timestamp');
-const mockUseValidateIndexPatternTimestamp =
-  useValidateIndexPatternTimestamp as MockedFunction<typeof useValidateIndexPatternTimestamp>;
+const mockUseValidateIndexPatternTimestamp = useValidateIndexPatternTimestamp as MockedFunction<
+  typeof useValidateIndexPatternTimestamp
+>;
 
 const mockTimestampResult = (hasTimestamp: boolean | undefined, isLoading = false) =>
   mockUseValidateIndexPatternTimestamp.mockReturnValue({ hasTimestamp, isLoading });

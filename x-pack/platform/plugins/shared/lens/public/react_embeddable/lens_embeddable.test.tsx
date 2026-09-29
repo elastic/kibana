@@ -17,11 +17,11 @@ import { createEmptyLensState } from './helper';
 import { makeEmbeddableServices } from './mocks';
 
 vi.mock('./data_loader', () => {
-      const mocked = {
-      loadEmbeddableData: () => ({ cleanup: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadEmbeddableData: () => ({ cleanup: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildPanel = async (
   initialState: LensWireAPIConfig,

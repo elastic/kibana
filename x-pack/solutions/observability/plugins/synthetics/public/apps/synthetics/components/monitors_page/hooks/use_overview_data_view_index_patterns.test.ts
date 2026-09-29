@@ -16,28 +16,28 @@ import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 
 const mockSettingsContext = vi.fn();
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => mockSettingsContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => mockSettingsContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = vi.fn();
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Avoid pulling the real settings module (and its API/context deps) into the test.
 vi.mock('../../settings/remote_clusters/hooks/use_get_ccs_settings', () => {
-      const mocked = {
-      DEFAULT_CCS_SETTINGS: { useAllRemoteClusters: false, selectedRemoteClusters: [], spaces: [] },
-      fetchCCSSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DEFAULT_CCS_SETTINGS: { useAllRemoteClusters: false, selectedRemoteClusters: [], spaces: [] },
+    fetchCCSSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('buildOverviewSyntheticsIndices', () => {
   it('returns the local pattern when CCS is disabled, regardless of settings', () => {

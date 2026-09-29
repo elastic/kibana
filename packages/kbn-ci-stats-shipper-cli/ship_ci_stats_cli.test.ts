@@ -11,27 +11,27 @@ import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ci-stats-reporter', () => {
-      const mocked = {
-      CiStatsReporter: {
-        fromEnv: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CiStatsReporter: {
+      fromEnv: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import Fs from 'fs';
 
@@ -48,9 +48,7 @@ describe('ship_ci_stats_cli', () => {
   }) => Promise<void>;
 
   const mockMetrics = vi.fn();
-  const mockFromEnv = CiStatsReporter.fromEnv as MockedFunction<
-    typeof CiStatsReporter.fromEnv
-  >;
+  const mockFromEnv = CiStatsReporter.fromEnv as MockedFunction<typeof CiStatsReporter.fromEnv>;
 
   beforeAll(() => {
     require('./ship_ci_stats_cli');

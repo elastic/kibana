@@ -25,24 +25,24 @@ vi.mock('@kbn/kibana-utils-plugin/public', async () => {
 });
 
 vi.mock('@kbn/saved-search-component', () => {
-      const mocked = {
-      LazySavedSearchComponent: (props: any) => <div data-test-subj="lazySavedSearchComponent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazySavedSearchComponent: (props: any) => <div data-test-subj="lazySavedSearchComponent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/embeddable-plugin/public', () => {
-      const mocked = {
-      ViewMode: {
-        VIEW: 'view',
-        EDIT: 'edit',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ViewMode: {
+      VIEW: 'view',
+      EDIT: 'edit',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/logs-shared-plugin/common', async () => {
-  const originalModule = (await vi.importActual('@kbn/logs-shared-plugin/common'));
+  const originalModule = await vi.importActual('@kbn/logs-shared-plugin/common');
   return {
     ...originalModule,
     getLogsLocatorFromUrlService: vi

@@ -20,32 +20,34 @@ import { classifyFailure } from './helpers/classify_failure';
 import { FailureActions } from '.';
 
 vi.mock('./helpers/classify_failure', () => {
-      const mocked = {
-      classifyFailure: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    classifyFailure: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../use_workflow_editor_link', () => {
-      const mocked = {
-      useWorkflowEditorLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowEditorLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockClassifyFailure = classifyFailure as Mock;
 const mockGetUrlForApp = vi.fn();
 const mockUseKibana = useKibana as Mock;
 const mockUseWorkflowEditorLink = useWorkflowEditorLink as Mock;
 
-const { classifyFailure: realClassifyFailure } = (await vi.importActual('./helpers/classify_failure'));
+const { classifyFailure: realClassifyFailure } = await vi.importActual(
+  './helpers/classify_failure'
+);
 
 const defaultAggregatedExecution: AggregatedWorkflowExecution = {
   status: ExecutionStatus.FAILED,

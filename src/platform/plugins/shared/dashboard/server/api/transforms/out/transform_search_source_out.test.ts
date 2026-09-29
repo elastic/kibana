@@ -28,11 +28,11 @@ import { getDashboardStateSchema } from '../../dashboard_state_schemas';
 import { transformSearchSourceOut } from './transform_search_source_out';
 
 vi.mock('../../../kibana_services', () => {
-      const mocked = {
-      logger: { warn: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    logger: { warn: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformSearchSourceOut', () => {
   afterEach(() => {

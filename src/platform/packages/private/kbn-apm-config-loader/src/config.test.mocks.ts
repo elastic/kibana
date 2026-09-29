@@ -22,31 +22,31 @@ vi.doMock(join(mockedRootDir, 'package.json'), () => packageMock.raw, { virtual:
 
 export const gitRevExecMock = vi.fn();
 vi.doMock('child_process', () => {
-      const mocked = {
-      ...childProcessModule,
-      execSync: (command: string, options: any) => {
-        if (command.startsWith('git rev-parse')) {
-          return gitRevExecMock(command, options);
-        }
-        return childProcessModule.execSync(command, options);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...childProcessModule,
+    execSync: (command: string, options: any) => {
+      if (command.startsWith('git rev-parse')) {
+        return gitRevExecMock(command, options);
+      }
+      return childProcessModule.execSync(command, options);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const readUuidFileMock = vi.fn();
 vi.doMock('fs', () => {
-      const mocked = {
-      ...fsModule,
-      readFileSync: (path: string, options: any) => {
-        if (path.endsWith('uuid')) {
-          return readUuidFileMock(path, options);
-        }
-        return fsModule.readFileSync(path, options);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...fsModule,
+    readFileSync: (path: string, options: any) => {
+      if (path.endsWith('uuid')) {
+        return readUuidFileMock(path, options);
+      }
+      return fsModule.readFileSync(path, options);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const resetAllMocks = () => {
   packageMock.raw = {};

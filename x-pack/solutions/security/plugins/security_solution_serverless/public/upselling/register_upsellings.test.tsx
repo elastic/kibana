@@ -20,12 +20,12 @@ import { of } from 'rxjs';
 const mockGetEnabledProductFeatures = vi.fn();
 const mockGetRequiredProductTypesForFeature = vi.fn();
 vi.mock('../../common/pli/pli_features', () => {
-      const mocked = {
-      getEnabledProductFeatures: () => mockGetEnabledProductFeatures(),
-      getRequiredProductTypesForFeature: () => mockGetRequiredProductTypesForFeature(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEnabledProductFeatures: () => mockGetEnabledProductFeatures(),
+    getRequiredProductTypesForFeature: () => mockGetRequiredProductTypesForFeature(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setPages = vi.fn();
 const setSections = vi.fn();

@@ -11,11 +11,11 @@ import { transformDiscoveriesToOutputFormat } from '.';
 
 const mockUuid = 'mock-generated-uuid';
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => mockUuid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => mockUuid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformDiscoveriesToOutputFormat', () => {
   const baseParams = {

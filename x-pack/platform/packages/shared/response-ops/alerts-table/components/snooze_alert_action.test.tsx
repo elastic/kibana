@@ -36,37 +36,37 @@ const mockSnoozeAlert = vi.fn().mockResolvedValue(true);
 const mockUnsnoozeAlert = vi.fn().mockResolvedValue(true);
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alert_field_names', () => {
-      const mocked = {
-      useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertFieldNames: () => ({ fieldNames: [], isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-alert-snooze', () => {
-      const mocked = {
-      useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
-      AlertSnoozePanelInline: ({
-        onApply,
-        onBack,
-      }: {
-        onApply: (payload: unknown) => void;
-        onBack: () => void;
-      }) => (
-        <div data-test-subj="alertSnoozePanelInline">
-          <button
-            data-test-subj="alertSnoozePanelInlineApply"
-            onClick={() => onApply({ expiresAt: null })}
-          >
-            Apply
-          </button>
-          <button data-test-subj="alertSnoozePanelInlineBack" onClick={onBack}>
-            Back
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertSnooze: () => ({ snoozeAlert: mockSnoozeAlert, unsnoozeAlert: mockUnsnoozeAlert }),
+    AlertSnoozePanelInline: ({
+      onApply,
+      onBack,
+    }: {
+      onApply: (payload: unknown) => void;
+      onBack: () => void;
+    }) => (
+      <div data-test-subj="alertSnoozePanelInline">
+        <button
+          data-test-subj="alertSnoozePanelInlineApply"
+          onClick={() => onApply({ expiresAt: null })}
+        >
+          Apply
+        </button>
+        <button data-test-subj="alertSnoozePanelInlineBack" onClick={onBack}>
+          Back
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useAlertMutedState } from '../hooks/use_alert_muted_state';
 import { useAlertSnoozedState } from '../hooks/use_alert_snoozed_state';

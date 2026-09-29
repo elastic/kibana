@@ -26,19 +26,19 @@ vi.mock('../../../../common/components/visualization_actions/visualization_embed
 
 const mockedHostRiskScore = vi.fn().mockReturnValue(mockHostRiskScoreState);
 vi.mock('../../../../entity_analytics/api/hooks/use_risk_score', () => {
-      const mocked = {
-      useRiskScore: () => mockedHostRiskScore(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: () => mockedHostRiskScore(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseObservedHost = vi.fn().mockReturnValue(mockObservedHostData);
 vi.mock('./hooks/use_observed_host', () => {
-      const mocked = {
-      useObservedHost: () => mockedUseObservedHost(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useObservedHost: () => mockedUseObservedHost(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<Host />', () => {
   beforeEach(() => {

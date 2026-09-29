@@ -20,25 +20,25 @@ const mockGetRedirectUrl = vi.fn(
 );
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        core: { http: {} },
-        services: {},
-        dependencies: {
-          start: {
-            share: {
-              url: {
-                locators: {
-                  get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-                },
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      core: { http: {} },
+      services: {},
+      dependencies: {
+        start: {
+          share: {
+            url: {
+              locators: {
+                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
               },
             },
           },
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ESQL_QUERY =
   'FROM logs.checkout | WHERE @timestamp >= "2026-06-11T15:03:00Z" AND @timestamp <= "2026-06-11T15:10:00.000Z"';

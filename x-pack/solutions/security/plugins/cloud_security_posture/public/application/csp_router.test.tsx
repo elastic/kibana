@@ -18,25 +18,25 @@ import * as constants from '../common/navigation/constants';
 import type { QueryClientProviderProps } from '@kbn/react-query';
 
 vi.mock('../pages', () => {
-      const mocked = {
-      Findings: () => <div data-test-subj="Findings">Findings</div>,
-      ComplianceDashboard: () => <div data-test-subj="ComplianceDashboard">ComplianceDashboard</div>,
-      VulnerabilityDashboard: () => (
-        <div data-test-subj="VulnerabilityDashboard">VulnerabilityDashboard</div>
-      ),
-      Rules: () => <div data-test-subj="Rules">Rules</div>,
-      Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Findings: () => <div data-test-subj="Findings">Findings</div>,
+    ComplianceDashboard: () => <div data-test-subj="ComplianceDashboard">ComplianceDashboard</div>,
+    VulnerabilityDashboard: () => (
+      <div data-test-subj="VulnerabilityDashboard">VulnerabilityDashboard</div>
+    ),
+    Rules: () => <div data-test-subj="Rules">Rules</div>,
+    Benchmarks: () => <div data-test-subj="Benchmarks">Benchmarks</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
-      QueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryClientProvider: ({ children }: QueryClientProviderProps) => <>{children}</>,
+    QueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CspRouter', () => {
   const originalCloudPosturePages = { ...constants.cloudPosturePages };

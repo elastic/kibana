@@ -15,23 +15,23 @@ import { PinnedConversationProvider } from './embeddable_conversations_provider'
 
 const mockUseEffectiveSpaceDefaultAgent = vi.fn();
 vi.mock('../../hooks/use_space_default_agent', () => {
-      const mocked = {
-      useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEffectiveSpaceDefaultAgent: () => mockUseEffectiveSpaceDefaultAgent(),
+  };
+  return { ...mocked, default: mocked };
+});
 // Rendered by the component but irrelevant here (it has its own dependencies).
 vi.mock('./conversation_change_notifier', () => {
-      const mocked = { ConversationChangeNotifier: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ConversationChangeNotifier: () => null };
+  return { ...mocked, default: mocked };
+});
 // Render the spinner as a marker so we can assert the isReady gate.
 vi.mock('../../components/redirects/redirect_loading', () => {
-      const mocked = {
-      RedirectLoading: () => <div>loading-spinner</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectLoading: () => <div>loading-spinner</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const AgentIdConsumer = () => {
   const ctx = useContext(ConversationContext);

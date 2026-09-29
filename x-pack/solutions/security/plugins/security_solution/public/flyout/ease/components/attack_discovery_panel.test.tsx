@@ -23,18 +23,18 @@ import { useAttackDiscoveryHistoryTimerange } from '../../../attack_discovery/pa
 import { ATTACK_DISCOVERY_DETAILS_ALERTS_BADGE_TEST_ID } from './attack_discovery_details';
 
 vi.mock('../../../attack_discovery/pages/use_find_attack_discoveries', () => {
-      const mocked = {
-      useFindAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../attack_discovery/pages/results/history/use_ids_from_url');
 vi.mock('../../../attack_discovery/pages/use_attack_discovery_history_timerange');
 vi.mock('@kbn/security-solution-navigation');

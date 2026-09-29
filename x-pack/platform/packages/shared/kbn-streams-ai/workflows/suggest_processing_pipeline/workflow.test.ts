@@ -23,11 +23,11 @@ import {
 } from '.';
 
 vi.mock('@kbn/inference-prompt-utils', () => {
-      const mocked = {
-      executeAsReasoningAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeAsReasoningAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 

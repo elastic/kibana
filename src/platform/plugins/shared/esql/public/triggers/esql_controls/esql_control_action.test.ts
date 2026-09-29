@@ -21,11 +21,11 @@ import { CreateESQLControlAction } from './esql_control_action';
 vi.mock('@kbn/discover-utils');
 vi.mock('@kbn/presentation-util');
 vi.mock('./esql_control_helpers', () => {
-      const mocked = {
-      loadESQLControlFlyout: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadESQLControlFlyout: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDismissAllFlyoutsExceptFor = dismissAllFlyoutsExceptFor as MockedFunction<
   typeof dismissAllFlyoutsExceptFor

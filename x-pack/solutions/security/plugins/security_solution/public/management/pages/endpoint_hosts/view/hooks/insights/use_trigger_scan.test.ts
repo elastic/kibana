@@ -15,34 +15,34 @@ import { API_VERSIONS, DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
 const mockHttpPost = vi.fn();
 
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { http: { post: mockHttpPost } },
-      }),
-      useToasts: () => ({
-        addWarning: vi.fn(),
-        addDanger: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { http: { post: mockHttpPost } },
+    }),
+    useToasts: () => ({
+      addWarning: vi.fn(),
+      addDanger: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
   () => {
-      const mocked = {
-        useFetchAnonymizationFields: () => ({ data: { data: [] } }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useFetchAnonymizationFields: () => ({ data: { data: [] } }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useMutation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMutation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMutation = (await vi.importMock('@kbn/react-query')).useMutation;
 

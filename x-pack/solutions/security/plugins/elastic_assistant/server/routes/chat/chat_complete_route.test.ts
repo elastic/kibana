@@ -40,14 +40,14 @@ const license = licensingMock.createLicenseMock();
 
 const actionsClient = actionsClientMock.create();
 vi.mock('../../lib/build_response', () => {
-      const mocked = {
-      buildResponse: vi.fn().mockImplementation((x) => x),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildResponse: vi.fn().mockImplementation((x) => x),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers', async () => {
-  const original = (await vi.importActual('../helpers'));
+  const original = await vi.importActual('../helpers');
 
   return {
     ...original,

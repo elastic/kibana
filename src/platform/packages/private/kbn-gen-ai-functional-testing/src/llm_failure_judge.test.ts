@@ -80,8 +80,7 @@ describe('parseJudgeVerdict', () => {
 });
 
 describe('judgeLlmSmokeFailure', () => {
-  const clientWith = (request: Mock): Client =>
-    ({ transport: { request } } as unknown as Client);
+  const clientWith = (request: Mock): Client => ({ transport: { request } } as unknown as Client);
 
   it('returns the verdict from the first reachable judge', async () => {
     const request = vi

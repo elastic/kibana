@@ -16,7 +16,7 @@ import type { State } from '../../../../../common/store';
 import { useNotesTabData } from './use_notes_tab_data';
 
 vi.mock('../../../../../notes', async () => {
-  const actual = (await vi.importActual('../../../../../notes'));
+  const actual = await vi.importActual('../../../../../notes');
   return {
     fetchNotesBySavedObjectIds: vi.fn((args) => ({ type: 'FETCH_NOTES', payload: args })),
     makeSelectNotesBySavedObjectId: actual.makeSelectNotesBySavedObjectId,
@@ -71,13 +71,13 @@ const makeNotesState = (
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useSelector: (selector: (s: unknown) => unknown) => selector(mockState as State),
-      useDispatch: () => mockDispatch,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useSelector: (selector: (s: unknown) => unknown) => selector(mockState as State),
+    useDispatch: () => mockDispatch,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockState: Pick<State, 'timeline' | 'notes'>;
 

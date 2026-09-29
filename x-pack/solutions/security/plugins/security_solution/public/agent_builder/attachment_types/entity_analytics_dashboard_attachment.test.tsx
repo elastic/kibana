@@ -32,7 +32,7 @@ const experimentalFeatures = {
 
 vi.mock('@elastic/eui', async () => {
   const React_ = require('react');
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   const EuiResizeObserver = ({
     onResize,
@@ -89,32 +89,32 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../entity_analytics/components/home/risk_level_breakdown_table', () => {
-      const mocked = {
-      RiskLevelBreakdownTable: () => <div data-test-subj="riskLevelBreakdownTableMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskLevelBreakdownTable: () => <div data-test-subj="riskLevelBreakdownTableMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_analytics/components/risk_score_donut_chart', () => {
-      const mocked = {
-      RiskScoreDonutChart: () => <div data-test-subj="riskScoreDonutChartMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RiskScoreDonutChart: () => <div data-test-subj="riskScoreDonutChartMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./entity_list_table', () => {
-      const mocked = {
-      EntityListTable: () => <div data-test-subj="entityListTableMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntityListTable: () => <div data-test-subj="entityListTableMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./entity_explore_navigation', () => {
-      const mocked = {
-      navigateToEntityAnalyticsHomePageInApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    navigateToEntityAnalyticsHomePageInApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const triggerResize = (dimensions: ResizeDimensions) => {
   const onResize = (global as unknown as Record<string, unknown>)[RESIZE_CALLBACK_KEY] as

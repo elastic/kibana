@@ -23,11 +23,11 @@ import { KibanaServices } from '../../common/lib/kibana';
 
 vi.mock('../../containers/user_profiles/api');
 vi.mock('../create/template_fields', () => {
-      const mocked = {
-      CreateCaseTemplateFields: () => <div data-test-subj="create-case-template-fields" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateCaseTemplateFields: () => <div data-test-subj="create-case-template-fields" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/navigation/hooks');
 
 describe('CaseFormFields', () => {
@@ -374,11 +374,9 @@ describe('CaseFormFields', () => {
     });
 
     it('renders CreateCaseTemplateFields when templates v2 is enabled', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
 
       renderWithTestingProviders(
         <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
@@ -390,11 +388,9 @@ describe('CaseFormFields', () => {
     });
 
     it('does not render legacy custom fields when templates v2 is enabled and the switch is off', () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
 
       renderWithTestingProviders(
         <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>
@@ -414,11 +410,9 @@ describe('CaseFormFields', () => {
     });
 
     it('renders legacy custom fields, badge, callout, and divider when the switch is on', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
       localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
 
       renderWithTestingProviders(
@@ -447,11 +441,9 @@ describe('CaseFormFields', () => {
     });
 
     it('shows the administrator message in the deprecation callout when the user lacks settings permission', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
       localStorage.setItem('securitySolution.cases.showLegacyCustomFields', 'true');
 
       renderWithTestingProviders(
@@ -482,11 +474,9 @@ describe('CaseFormFields', () => {
     });
 
     it('forces legacy custom fields visible when required fields lack defaults', async () => {
-      vi
-        .spyOn(KibanaServices, 'getConfig')
-        .mockReturnValue({ templates: { enabled: true } } as ReturnType<
-          typeof KibanaServices.getConfig
-        >);
+      vi.spyOn(KibanaServices, 'getConfig').mockReturnValue({
+        templates: { enabled: true },
+      } as ReturnType<typeof KibanaServices.getConfig>);
 
       renderWithTestingProviders(
         <FormTestComponent formDefaultValue={formDefaultValue} onSubmit={onSubmit}>

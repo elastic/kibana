@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { MockedFunction } from 'vitest';
-
 import { errors } from '@elastic/elasticsearch';
 import { BehaviorSubject } from 'rxjs';
 import tls from 'tls';
+import type { MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 
 import { pollEsNodesVersion } from '@kbn/core/server';
 import type { NodesVersionCompatibility } from '@kbn/core/server';
@@ -27,11 +26,11 @@ import { ElasticsearchConnectionStatus } from '../common';
 
 vi.mock('tls');
 vi.mock('@kbn/core/server', () => {
-      const mocked = {
-      pollEsNodesVersion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pollEsNodesVersion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const tlsConnectMock = tls.connect as MockedFunction<typeof tls.connect>;
 const mockPollEsNodesVersion = pollEsNodesVersion as MockedFunction<typeof pollEsNodesVersion>;

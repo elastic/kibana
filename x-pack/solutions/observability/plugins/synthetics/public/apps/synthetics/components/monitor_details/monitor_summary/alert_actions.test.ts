@@ -12,11 +12,11 @@ import rison from '@kbn/rison';
 import { useAlertsUrl } from './alert_actions';
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => ({ basePath: '/s/default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const decodeAppState = (url: string) => {
   const encoded = url.split('_a=')[1];

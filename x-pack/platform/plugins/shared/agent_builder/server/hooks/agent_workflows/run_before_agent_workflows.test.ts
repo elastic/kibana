@@ -19,18 +19,18 @@ import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
-      const mocked = {
-      executeWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/spaces', () => {
-      const mocked = {
-      getCurrentSpaceId: vi.fn(() => 'default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentSpaceId: vi.fn(() => 'default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const executeWorkflowMock = vi.mocked(executeWorkflow);
 const getCurrentSpaceIdMock = vi.mocked(getCurrentSpaceId);

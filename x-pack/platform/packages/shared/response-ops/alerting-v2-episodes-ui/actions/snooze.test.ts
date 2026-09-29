@@ -73,9 +73,7 @@ describe('createSnoozeAction', () => {
   it('execute: opens modal, POSTs unique-by-group SNOOZE items, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
     vi.spyOn(modal, 'openSnoozeExpiryModal').mockResolvedValue('2026-05-01T00:00:00Z');
-    vi
-      .spyOn(bulk, 'bulkSnoozeSeriesActions')
-      .mockResolvedValue({ affected_count: 1, errors: [] });
+    vi.spyOn(bulk, 'bulkSnoozeSeriesActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = vi.fn();
     await createSnoozeAction(deps).execute({
       episodes: [makeEpisode(), makeEpisode({ 'episode.id': 'e2' })],

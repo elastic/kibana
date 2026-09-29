@@ -28,11 +28,11 @@ const createDataStreamClientMock = () => ({
 });
 
 vi.mock('./data_stream', () => {
-      const mocked = {
-      initializeDataStreamClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeDataStreamClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { initializeDataStreamClient } = require('./data_stream');

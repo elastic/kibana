@@ -17,7 +17,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { KibanaContentListPage } from './kibana_content_list_page';
 
 vi.mock('@kbn/shared-ux-page-kibana-template', async () => {
-  const actual = (await vi.importActual('@kbn/shared-ux-page-kibana-template'));
+  const actual = await vi.importActual('@kbn/shared-ux-page-kibana-template');
   // Wrap the real `KibanaPageTemplate` in a jest.fn so callers can assert
   // forwarded props (`restrictWidth`, etc.) without losing the real
   // sub-component slots (`Header`, `Section`).

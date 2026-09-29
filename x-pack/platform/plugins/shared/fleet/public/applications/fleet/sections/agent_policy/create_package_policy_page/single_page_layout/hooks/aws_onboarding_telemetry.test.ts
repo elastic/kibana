@@ -22,29 +22,29 @@ import { useIntraAppState } from '../../../../../../../hooks/use_intra_app_state
 import { useAwsOnboardingTelemetry } from './aws_onboarding_telemetry';
 
 vi.mock('../../../../../../../../common/telemetry/aws_onboarding_events', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../../../common/telemetry/aws_onboarding_events')),
-      reportAwsOnboardingCredentialsAdded: vi.fn(),
-      reportAwsOnboardingDeployClicked: vi.fn(),
-      reportAwsOnboardingEnrollmentSucceeded: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../../../common/telemetry/aws_onboarding_events')),
+    reportAwsOnboardingCredentialsAdded: vi.fn(),
+    reportAwsOnboardingDeployClicked: vi.fn(),
+    reportAwsOnboardingEnrollmentSucceeded: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../../hooks')),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../../hooks')),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/use_intra_app_state', () => {
-      const mocked = {
-      useIntraAppState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIntraAppState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnalytics = { reportEvent: vi.fn() };
 

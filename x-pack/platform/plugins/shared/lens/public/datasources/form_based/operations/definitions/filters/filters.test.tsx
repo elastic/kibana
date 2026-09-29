@@ -62,17 +62,17 @@ const defaultProps = {
 // @ts-expect-error
 window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
 vi.mock('@kbn/kql/public', () => {
-      const mocked = {
-      QueryStringInput: () => {
-        return 'QueryStringInput';
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryStringInput: () => {
+      return 'QueryStringInput';
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // mocking random id generator function
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,

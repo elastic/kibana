@@ -26,13 +26,13 @@ import { useWithScriptLibraryData } from '../../../../hooks/script_library';
 import type { EndpointScript } from '../../../../../../common/endpoint/types';
 
 vi.mock('../../../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../common/lib/kibana')),
-      useToasts: vi.fn(),
-      useStorage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../common/lib/kibana')),
+    useToasts: vi.fn(),
+    useStorage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/script_library/use_with_script_library_data');
 vi.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as Mock;

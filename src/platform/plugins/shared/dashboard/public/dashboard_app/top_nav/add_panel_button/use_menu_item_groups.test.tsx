@@ -18,7 +18,7 @@ import { Subject } from 'rxjs';
 const mockGetTriggerCompatibleActions = vi.fn();
 const mockGetAction = vi.fn();
 vi.mock('../../../services/kibana_services', async () => {
-  const actual = (await vi.importActual('../../../services/kibana_services'));
+  const actual = await vi.importActual('../../../services/kibana_services');
   return {
     ...actual,
     uiActionsService: {

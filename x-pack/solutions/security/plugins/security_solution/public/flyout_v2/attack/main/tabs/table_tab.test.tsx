@@ -18,48 +18,48 @@ import { TestProviders } from '../../../../common/mock';
 import { noopCellActionRenderer } from '../../../shared/components/cell_actions';
 
 vi.mock('../../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: () => ({ dataView: {}, status: 'ready' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: () => ({ dataView: {}, status: 'ready' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../document/main/utils/get_timeline_events_details_from_record', () => {
-      const mocked = {
-      getTimelineEventsDetailsFromRecord: () => [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimelineEventsDetailsFromRecord: () => [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/table_tab_items', () => {
-      const mocked = {
-      getTableTabItems: vi.fn().mockReturnValue([
-        {
-          field: 'title',
-          values: ['Test attack title'],
-          type: 'string',
-          isObjectArray: false,
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTableTabItems: vi.fn().mockReturnValue([
+      {
+        field: 'title',
+        values: ['Test attack title'],
+        type: 'string',
+        isObjectArray: false,
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/table_field_value_cell', () => {
-      const mocked = {
-      TableFieldValueCell: ({ values }: { values: string[] | null | undefined }) => (
-        <span>{Array.isArray(values) ? values.join(', ') : values}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableFieldValueCell: ({ values }: { values: string[] | null | undefined }) => (
+      <span>{Array.isArray(values) ? values.join(', ') : values}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const hit = { id: 'test-attack-id' } as unknown as DataTableRecord;
 

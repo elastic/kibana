@@ -21,7 +21,7 @@ import { agentRouteService, API_VERSIONS } from '@kbn/fleet-plugin/common';
 const useQueryMock = _useQuery as Mock;
 
 vi.mock('@kbn/react-query', async () => {
-  const actualReactQueryModule = (await vi.importActual('@kbn/react-query'));
+  const actualReactQueryModule = await vi.importActual('@kbn/react-query');
 
   return {
     ...actualReactQueryModule,

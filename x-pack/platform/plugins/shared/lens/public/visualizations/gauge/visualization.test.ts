@@ -37,12 +37,12 @@ const stops = [
 ];
 
 vi.mock('@kbn/coloring', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/coloring')),
-      applyPaletteParams: vi.fn().mockReturnValue(stops),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/coloring')),
+    applyPaletteParams: vi.fn().mockReturnValue(stops),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function exampleState(): GaugeVisualizationState {
   return {

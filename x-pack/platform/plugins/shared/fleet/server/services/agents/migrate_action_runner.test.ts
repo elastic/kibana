@@ -14,14 +14,14 @@ import type { Agent } from '../../types';
 import { partitionAgentsForMigration } from './migrate_action_runner';
 
 vi.mock('./crud', () => {
-      const mocked = {
-      getAgentPolicyForAgents: vi.fn().mockResolvedValue([
-        { id: 'protected-policy', is_protected: true },
-        { id: 'open-policy', is_protected: false },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentPolicyForAgents: vi.fn().mockResolvedValue([
+      { id: 'protected-policy', is_protected: true },
+      { id: 'open-policy', is_protected: false },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeAgent = (overrides: Partial<Agent>): Agent =>
   ({

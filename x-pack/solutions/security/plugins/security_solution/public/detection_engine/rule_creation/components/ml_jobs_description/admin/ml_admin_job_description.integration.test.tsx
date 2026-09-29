@@ -19,11 +19,11 @@ import { MlAdminJobDescription } from './ml_admin_job_description';
 
 vi.mock('../../../../../common/lib/kibana');
 vi.mock('../../../../../common/components/ml_popover/hooks/use_enable_data_feed', () => {
-      const mocked = {
-      useEnableDataFeed: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnableDataFeed: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { mockSecurityJobs } from '../../../../../common/components/ml_popover/api.mock';
 

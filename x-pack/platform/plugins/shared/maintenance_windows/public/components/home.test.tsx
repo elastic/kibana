@@ -20,19 +20,21 @@ import { MAINTENANCE_WINDOW_FEATURE_ID } from '../../common';
 
 vi.mock('../hooks/use_find_maintenance_windows');
 vi.mock('../hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./maintenance_windows_list', () => {
-      const mocked = {
-      MaintenanceWindowsList: () => <div data-test-subj="maintenance-windows-list" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MaintenanceWindowsList: () => <div data-test-subj="maintenance-windows-list" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useFindMaintenanceWindows: useFindMaintenanceWindowsMock } = (await vi.importMock('../hooks/use_find_maintenance_windows'));
+const { useFindMaintenanceWindows: useFindMaintenanceWindowsMock } = await vi.importMock(
+  '../hooks/use_find_maintenance_windows'
+);
 
 const platinumLicense = licensingMock.createLicense({
   license: { type: 'platinum' },

@@ -47,7 +47,7 @@ const mockUseAssistantContext = {
 };
 
 vi.mock('../../../assistant_context', async () => {
-  const original = (await vi.importActual('../../../assistant_context'));
+  const original = await vi.importActual('../../../assistant_context');
   return {
     ...original,
     useAssistantContext: vi.fn().mockImplementation(() => mockUseAssistantContext),
@@ -58,7 +58,7 @@ const mockUseConversation = {
   setApiConfig: vi.fn(),
 };
 vi.mock('../../use_conversation', async () => {
-  const original = (await vi.importActual('../../use_conversation'));
+  const original = await vi.importActual('../../use_conversation');
 
   return {
     ...original,
@@ -75,7 +75,7 @@ describe('SystemPrompt', () => {
     vi.clearAllMocks();
 
     vi.doMock('../../../assistant_context', async () => {
-      const original = (await vi.importActual('../../../assistant_context'));
+      const original = await vi.importActual('../../../assistant_context');
       return {
         ...original,
         useAssistantContext: vi.fn().mockImplementation(() => mockUseAssistantContext),

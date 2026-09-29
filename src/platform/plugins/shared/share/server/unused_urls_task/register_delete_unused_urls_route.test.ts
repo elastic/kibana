@@ -19,11 +19,11 @@ import { registerDeleteUnusedUrlsRoute } from './register_delete_unused_urls_rou
 import { runDeleteUnusedUrlsTask } from './task';
 
 vi.mock('./task', () => {
-      const mocked = {
-      runDeleteUnusedUrlsTask: vi.fn().mockResolvedValue({ deletedCount: 5 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runDeleteUnusedUrlsTask: vi.fn().mockResolvedValue({ deletedCount: 5 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('registerDeleteUnusedUrlsRoute', () => {
   const mockRouter = router.create();

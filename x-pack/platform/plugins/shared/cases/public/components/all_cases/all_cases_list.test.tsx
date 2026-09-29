@@ -70,20 +70,20 @@ vi.mock('../../containers/configure/use_get_supported_action_connectors');
 vi.mock('../../common/lib/kibana');
 vi.mock('../../common/navigation/hooks');
 vi.mock('../app/use_available_owners', () => {
-      const mocked = {
-      useAvailableCasesOwners: () => ['securitySolution', 'observability'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAvailableCasesOwners: () => ['securitySolution', 'observability'],
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../containers/use_update_case');
 vi.mock('../../common/use_license');
 vi.mock('../../containers/user_profiles/use_suggest_user_profiles');
 vi.mock('./hooks/use_view_mode', () => {
-      const mocked = {
-      useViewMode: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useViewMode: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useViewModeMock = useViewModeModule.useViewMode as Mock;
 

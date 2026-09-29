@@ -56,9 +56,7 @@ vi.mock('../../remove', async () => {
 const mockedInstallKibanaAssetsAndReferencesMultispace = vi.mocked(
   installKibanaAssetsAndReferencesMultispace
 );
-const mockedDeleteKibanaAssets = deleteKibanaAssets as MockedFunction<
-  typeof deleteKibanaAssets
->;
+const mockedDeleteKibanaAssets = deleteKibanaAssets as MockedFunction<typeof deleteKibanaAssets>;
 
 let soClient: Mocked<SavedObjectsClientContract>;
 let esClient: Mocked<ElasticsearchClient>;

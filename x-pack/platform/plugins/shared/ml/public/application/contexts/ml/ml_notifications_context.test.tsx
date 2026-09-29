@@ -40,23 +40,23 @@ const mockKibana = {
 };
 
 vi.mock('../kibana', () => {
-      const mocked = {
-      useMlKibana: vi.fn(() => {
-        return mockKibana;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMlKibana: vi.fn(() => {
+      return mockKibana;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetStorageValue = vi.fn();
 vi.mock('@kbn/ml-local-storage', () => {
-      const mocked = {
-      useStorage: vi.fn(() => {
-        return [undefined, mockSetStorageValue];
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStorage: vi.fn(() => {
+      return [undefined, mockSetStorageValue];
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMlNotifications', () => {
   beforeEach(() => {

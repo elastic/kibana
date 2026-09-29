@@ -19,14 +19,14 @@ import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { EmbeddableDeps } from '../types';
 
 vi.mock('../../hooks/use_adhoc_apm_data_view', () => {
-      const mocked = {
-      useAdHocApmDataView: () => ({
-        dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
-        apmIndices: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAdHocApmDataView: () => ({
+      dataView: { id: 'mock-apm-data-view', getIndexPattern: () => 'traces-apm*' },
+      apmIndices: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockQueryStringInput = vi.fn(({ query, onChange, onSubmit, dataTestSubj, placeholder }) => (
   <input

@@ -11,8 +11,8 @@ import { vi } from 'vitest';
 
 export const mockLoadConfiguration = vi.fn();
 vi.doMock('./config_loader', () => {
-      const mocked = {
-      loadConfiguration: mockLoadConfiguration,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadConfiguration: mockLoadConfiguration,
+  };
+  return { ...mocked, default: mocked };
+});

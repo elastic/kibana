@@ -17,21 +17,21 @@ import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 vi.mock('@kbn/observability-shared-plugin/public');
 vi.mock('../../../../alerting/use_alert_prefill');
 vi.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => {
-      const mocked = {
-      useIsPodSchemaSelectorEnabled: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsPodSchemaSelectorEnabled: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const updateTopbarMenuVisibilityBySchema = vi.fn();
 vi.mock('../../../../containers/ml/infra_ml_capabilities', () => {
-      const mocked = {
-      useInfraMLCapabilitiesContext: () => ({
-        updateTopbarMenuVisibilityBySchema,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInfraMLCapabilitiesContext: () => ({
+      updateTopbarMenuVisibilityBySchema,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUrlState = useUrlState as MockedFunction<typeof useUrlState>;
 const mockUseAlertPrefillContext = useAlertPrefillContext as MockedFunction<
@@ -40,23 +40,23 @@ const mockUseAlertPrefillContext = useAlertPrefillContext as MockedFunction<
 
 // Mock useUrlState hook
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => ({
-        location: '',
-        replace: () => {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => ({
+      location: '',
+      replace: () => {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_inventory_views', () => {
-      const mocked = {
-      useInventoryViewsContext: () => ({
-        currentView: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInventoryViewsContext: () => ({
+      currentView: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseWaffleOptionsHook = () => renderHook(() => useWaffleOptions());
 

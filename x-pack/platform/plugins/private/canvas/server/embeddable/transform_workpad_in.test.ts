@@ -27,20 +27,20 @@ const mockTransformIn = vi.fn((config: any) => {
 });
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      embeddableService: {
-        getTransforms: vi.fn((type: string) => {
-          return {
-            transformIn: mockTransformIn,
-          };
-        }),
-      },
-      logger: {
-        warn: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    embeddableService: {
+      getTransforms: vi.fn((type: string) => {
+        return {
+          transformIn: mockTransformIn,
+        };
+      }),
+    },
+    logger: {
+      warn: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformWorkpadIn', () => {
   it('transforms REST API embeddable state to stored state', () => {

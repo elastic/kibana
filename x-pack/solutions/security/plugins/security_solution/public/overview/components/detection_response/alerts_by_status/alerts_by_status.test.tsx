@@ -29,24 +29,24 @@ vi.mock('./chart_label', () => {
   };
 });
 vi.mock('./use_alerts_by_status', () => {
-      const mocked = {
-      useAlertsByStatus: vi.fn().mockReturnValue({
-        items: [],
-        isLoading: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsByStatus: vi.fn().mockReturnValue({
+      items: [],
+      isLoading: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({
-        from: '2022-04-08T12:00:00.000Z',
-        to: '2022-04-09T12:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({
+      from: '2022-04-08T12:00:00.000Z',
+      to: '2022-04-09T12:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('AlertsByStatus', () => {
   const mockCases = mockCasesContract();
 

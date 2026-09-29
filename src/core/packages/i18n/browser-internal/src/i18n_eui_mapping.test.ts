@@ -26,9 +26,7 @@ type I18nTranslateCall = [
 
 describe('@elastic/eui i18n tokens', async () => {
   const i18nTranslateActual = (await vi.importActual('@kbn/i18n')).i18n.translate;
-  const i18nTranslateMock = vi
-    .fn()
-    .mockImplementation((id, { defaultMessage }) => defaultMessage);
+  const i18nTranslateMock = vi.fn().mockImplementation((id, { defaultMessage }) => defaultMessage);
   i18n.translate = i18nTranslateMock;
 
   const euiContextMapping = getEuiContextMapping();

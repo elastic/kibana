@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, render } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { act, render } from '@testing-library/react';
-import React from 'react';
 import { monaco } from '@kbn/monaco';
 import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 import { WorkflowDetailConnectorFlyout } from './workflow_detail_connector_flyout';
@@ -28,25 +28,25 @@ const mockUseAsyncThunk = vi.fn();
 const mockUseFetchConnector = vi.fn();
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_async_thunk', () => {
-      const mocked = {
-      useAsyncThunk: (thunk: any) => mockUseAsyncThunk(thunk),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAsyncThunk: (thunk: any) => mockUseAsyncThunk(thunk),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entities/connectors/model/use_available_connectors', () => {
-      const mocked = {
-      useFetchConnector: (connectorId?: string) => mockUseFetchConnector(connectorId),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchConnector: (connectorId?: string) => mockUseFetchConnector(connectorId),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowDetailConnectorFlyout', () => {
   const mockEditorRef = {

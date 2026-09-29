@@ -29,7 +29,7 @@ import { FIELD_NOT_FOUND, FIELD_WRONG_TYPE } from '../user_messages_ids';
 import { getLongMessage } from '../user_messages_utils';
 
 vi.mock('@kbn/shared-ux-link-redirect-app', async () => {
-  const original = (await vi.importActual('@kbn/shared-ux-link-redirect-app'));
+  const original = await vi.importActual('@kbn/shared-ux-link-redirect-app');
   return {
     ...original,
     RedirectAppLinks: () => <a>RedirectAppLinks</a>,

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import React from 'react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { WorkflowDetailDto, WorkflowListDto, WorkflowYaml } from '@kbn/workflows';
 import { createMockWorkflowApi } from '@kbn/workflows-ui/src/api/workflows_api.mock';
@@ -35,26 +35,26 @@ const mockParseImportFile = parseImportFile as MockedFunction<typeof parseImport
 vi.mock('../../../features/import_workflows/lib/parse_import_file');
 vi.mock('../../../hooks/use_telemetry');
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useRunWorkflow: ({ onSuccess, onError }: { onSuccess: Function; onError: Function }) => ({
-        mutate: vi.fn((...args: unknown[]) => {
-          try {
-            onSuccess(undefined, args[0]);
-          } catch {
-            // no-op
-          }
-        }),
-        mutateAsync: vi.fn().mockResolvedValue(undefined),
-        isLoading: false,
-        data: undefined,
-        error: null,
-        reset: vi.fn(),
-        onSuccess,
-        onError,
+  const mocked = {
+    useRunWorkflow: ({ onSuccess, onError }: { onSuccess: Function; onError: Function }) => ({
+      mutate: vi.fn((...args: unknown[]) => {
+        try {
+          onSuccess(undefined, args[0]);
+        } catch {
+          // no-op
+        }
       }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      mutateAsync: vi.fn().mockResolvedValue(undefined),
+      isLoading: false,
+      data: undefined,
+      error: null,
+      reset: vi.fn(),
+      onSuccess,
+      onError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('@kbn/workflows-ui', () => {

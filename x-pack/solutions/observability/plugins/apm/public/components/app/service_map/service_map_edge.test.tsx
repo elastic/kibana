@@ -16,7 +16,7 @@ import type { ServiceMapEdgeData } from '../../../../common/service_map';
 import { MOCK_PRIMARY_COLOR, MOCK_DEFAULT_COLOR, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({

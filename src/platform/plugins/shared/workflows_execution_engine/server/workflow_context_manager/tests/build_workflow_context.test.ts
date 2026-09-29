@@ -17,25 +17,25 @@ import { mockContextDependencies } from '../../execution_functions/__mock__/cont
 import { buildWorkflowContext, buildWorkflowRenderContext } from '../build_workflow_context';
 
 vi.mock('../../utils', () => {
-      const mocked = {
-      getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
-      buildWorkflowExecutionUrl: vi
-        .fn()
-        .mockImplementation((kibanaUrl, spaceId, workflowId, executionId) => {
-          const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-          return `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}?executionId=${executionId}`;
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
+    buildWorkflowExecutionUrl: vi
+      .fn()
+      .mockImplementation((kibanaUrl, spaceId, workflowId, executionId) => {
+        const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+        return `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}?executionId=${executionId}`;
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
-      getInputsFromDefinition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+    getInputsFromDefinition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetInputsFromDefinition = getInputsFromDefinition as MockedFunction<
   typeof getInputsFromDefinition

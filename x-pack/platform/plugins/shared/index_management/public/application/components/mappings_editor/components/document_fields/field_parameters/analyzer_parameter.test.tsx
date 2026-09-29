@@ -32,15 +32,15 @@ vi.mock('../../../config_context', () => {
 
 // AnalyzersParameter uses documentationService.getAnalyzerLink() for a doc link
 vi.mock('../../../../../services/documentation', () => {
-      const mocked = {
-      documentationService: {
-        getAnalyzerLink: () => 'https://example.com/docs',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    documentationService: {
+      getAnalyzerLink: () => 'https://example.com/docs',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { __setMockIndexSettings } = (await vi.importMock('../../../config_context'));
+const { __setMockIndexSettings } = await vi.importMock('../../../config_context');
 
 const createMockField = (source: Record<string, unknown> = {}): NormalizedField => ({
   id: 'test-field',

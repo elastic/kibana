@@ -23,54 +23,54 @@ import type { ObservabilityOnboardingAppServices } from '../..';
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('../quickstart_flows/shared/use_pricing_feature');
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({
-        onPageReady: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({
+      onPageReady: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCustomCards = vi.fn<IntegrationCardItem[], []>(() => []);
 
 vi.mock('./use_custom_cards', () => {
-      const mocked = {
-      useCustomCards: () => mockUseCustomCards(),
-      AWS_CLOUDWATCH_OTEL_CARD_ID: 'aws-cloudwatch-otel-virtual',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCustomCards: () => mockUseCustomCards(),
+    AWS_CLOUDWATCH_OTEL_CARD_ID: 'aws-cloudwatch-otel-virtual',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../package_list/package_list', () => {
-      const mocked = {
-      PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
-        <div data-test-subj="package-list">
-          {list.map((item, index) => (
-            <div key={index} data-test-subj={`package-item-${item.id || index}`}>
-              {item.title || item.name}
-            </div>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageList: ({ list }: { list: IntegrationCardItem[] }) => (
+      <div data-test-subj="package-list">
+        {list.map((item, index) => (
+          <div key={index} data-test-subj={`package-item-${item.id || index}`}>
+            {item.title || item.name}
+          </div>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LazyPackageCard: ({ id, title }: IntegrationCardItem) => (
-        <div data-test-subj={`package-card-${id}`}>{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LazyPackageCard: ({ id, title }: IntegrationCardItem) => (
+      <div data-test-subj={`package-card-${id}`}>{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../api_endpoints/api_endpoints', () => {
-      const mocked = {
-      ApiEndpoints: () => <div data-test-subj="apiEndpointsStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ApiEndpoints: () => <div data-test-subj="apiEndpointsStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUsePricingFeature = usePricingFeature as MockedFunction<typeof usePricingFeature>;
@@ -79,11 +79,11 @@ const mockPackageListSearchForm = vi.fn(({ searchQuery }: { searchQuery: string 
 ));
 
 vi.mock('../package_list_search_form/package_list_search_form', () => {
-      const mocked = {
-      PackageListSearchForm: (props: { searchQuery: string }) => mockPackageListSearchForm(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageListSearchForm: (props: { searchQuery: string }) => mockPackageListSearchForm(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (children: React.ReactNode, initialEntries: string[] = ['/']) => {
   return render(

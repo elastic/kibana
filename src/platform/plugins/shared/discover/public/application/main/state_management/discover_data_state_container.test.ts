@@ -36,25 +36,25 @@ import { PROFILE_STATE_URL_KEY } from '../../../../common/constants';
 import { TEST_PROFILE_STATE_DEF } from '../../../context_awareness/__mocks__/profile_state';
 
 vi.mock('../data_fetching/fetch_documents', () => {
-      const mocked = {
-      fetchDocuments: vi.fn().mockResolvedValue({ records: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchDocuments: vi.fn().mockResolvedValue({ records: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../data_fetching/fetch_esql', () => {
-      const mocked = {
-      fetchEsql: vi.fn().mockResolvedValue({ records: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsql: vi.fn().mockResolvedValue({ records: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      reportPerformanceMetricEvent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reportPerformanceMetricEvent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchDocuments = vi.mocked(fetchDocuments);
 const mockFetchEsql = vi.mocked(fetchEsql);
@@ -196,9 +196,7 @@ describe('test getDataStateContainer', () => {
     expect(dataState.data$.documents$.value.result).toEqual([]);
 
     // gets a new search session id
-    expect(
-      stateContainer.searchSessionManager.getNextSearchSessionId as Mock
-    ).toHaveBeenCalled();
+    expect(stateContainer.searchSessionManager.getNextSearchSessionId as Mock).toHaveBeenCalled();
 
     unsubscribe();
   });
@@ -312,9 +310,9 @@ describe('test getDataStateContainer', () => {
       firstTabId
     ).scopedProfilesManager$.getValue();
 
-    vi
-      .spyOn(scopedProfilesManager, 'resolveDataSourceProfile')
-      .mockReturnValue(resolveProfileDeferred.promise);
+    vi.spyOn(scopedProfilesManager, 'resolveDataSourceProfile').mockReturnValue(
+      resolveProfileDeferred.promise
+    );
 
     await toolkit.initializeSingleTab({ tabId: firstTabId, skipWaitForDataFetching: true });
 
@@ -382,54 +380,55 @@ describe('test getDataStateContainer', () => {
   });
 
   test('refetch$ accepts "fetch_more" signal', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
-          const initialRecords = [records[0], records[1]];
-          const moreRecords = [records[2], records[3]];
+      const records = esHitsMockWithSort.map((hit) => buildDataTableRecord(hit, dataViewMock));
+      const initialRecords = [records[0], records[1]];
+      const moreRecords = [records[2], records[3]];
 
-          mockFetchDocuments.mockResolvedValue({ records: moreRecords });
+      mockFetchDocuments.mockResolvedValue({ records: moreRecords });
 
-          const stateContainer = getDiscoverStateMock({ isTimeBased: true });
-          const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
-          dataState.data$.documents$ = new BehaviorSubject({
-            fetchStatus: FetchStatus.COMPLETE,
-            result: initialRecords,
-          }) as DataDocuments$;
+      const stateContainer = getDiscoverStateMock({ isTimeBased: true });
+      const dataState = initializeDataStateInDiscoverStateMock(stateContainer);
+      dataState.data$.documents$ = new BehaviorSubject({
+        fetchStatus: FetchStatus.COMPLETE,
+        result: initialRecords,
+      }) as DataDocuments$;
 
-          const unsubscribe = dataState.subscribe();
-          const { scopedProfilesManager$ } = selectTabRuntimeState(
-            stateContainer.runtimeStateManager,
-            stateContainer.getCurrentTab().id
-          );
-          const resolveDataSourceProfileSpy = vi.spyOn(
-            scopedProfilesManager$.getValue(),
-            'resolveDataSourceProfile'
-          );
+      const unsubscribe = dataState.subscribe();
+      const { scopedProfilesManager$ } = selectTabRuntimeState(
+        stateContainer.runtimeStateManager,
+        stateContainer.getCurrentTab().id
+      );
+      const resolveDataSourceProfileSpy = vi.spyOn(
+        scopedProfilesManager$.getValue(),
+        'resolveDataSourceProfile'
+      );
 
+      expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
+      expect(dataState.data$.documents$.value.result).toEqual(initialRecords);
+
+      let hasLoadingMoreStarted = false;
+
+      dataState.data$.documents$.subscribe((value) => {
+        if (value.fetchStatus === FetchStatus.LOADING_MORE) {
+          hasLoadingMoreStarted = true;
+          return;
+        }
+
+        if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
           expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
-          expect(dataState.data$.documents$.value.result).toEqual(initialRecords);
+          expect(value.result).toEqual([...initialRecords, ...moreRecords]);
+          unsubscribe();
+          done();
+        }
+      });
 
-          let hasLoadingMoreStarted = false;
-
-          dataState.data$.documents$.subscribe((value) => {
-            if (value.fetchStatus === FetchStatus.LOADING_MORE) {
-              hasLoadingMoreStarted = true;
-              return;
-            }
-
-            if (hasLoadingMoreStarted && value.fetchStatus === FetchStatus.COMPLETE) {
-              expect(resolveDataSourceProfileSpy).not.toHaveBeenCalled();
-              expect(value.result).toEqual([...initialRecords, ...moreRecords]);
-              unsubscribe();
-              done();
-            }
-          });
-
-          dataState.refetch$.next('fetch_more');
-        
-      }));
+      dataState.refetch$.next('fetch_more');
+    }));
 
   describe('profile app state defaults', () => {
     it('should populate snapshotsByProfileId when the data source profile changes', async () => {
@@ -449,9 +448,10 @@ describe('test getDataStateContainer', () => {
       const { scopedProfilesManager$ } = selectTabRuntimeState(toolkit.runtimeStateManager, tabId);
       const previousProfileId = selectDataSourceProfileId(toolkit.runtimeStateManager, tabId);
 
-      vi
-        .spyOn(scopedProfilesManager$.getValue(), 'resolveDataSourceProfile')
-        .mockResolvedValue({ didProfileChange: true, isFirstResolution: true });
+      vi.spyOn(scopedProfilesManager$.getValue(), 'resolveDataSourceProfile').mockResolvedValue({
+        didProfileChange: true,
+        isFirstResolution: true,
+      });
 
       toolkit.internalState.dispatch(
         internalStateActions.assignNextDataView({
@@ -967,9 +967,9 @@ describe('test getDataStateContainer', () => {
     const setup = async ({ featureFlagEnabled = true }: { featureFlagEnabled?: boolean } = {}) => {
       const services = createDiscoverServicesMock();
 
-      vi
-        .spyOn(services.discoverFeatureFlags, 'getCascadeLayoutEnabled')
-        .mockReturnValue(featureFlagEnabled);
+      vi.spyOn(services.discoverFeatureFlags, 'getCascadeLayoutEnabled').mockReturnValue(
+        featureFlagEnabled
+      );
 
       const toolkit = getDiscoverInternalStateMock({ services });
 

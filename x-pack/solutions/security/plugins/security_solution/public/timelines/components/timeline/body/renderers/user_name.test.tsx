@@ -25,18 +25,18 @@ const mockOpenFlyout = vi.fn();
 
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../../../../common/hooks/use_is_new_flyout_enabled', () => {
-      const mocked = {
-      useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsNewFlyoutEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/draggables', () => {
-      const mocked = {
-      DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DefaultDraggable: () => <div data-test-subj="DefaultDraggable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../flyout_v2/use_flyout_api');
 
@@ -50,9 +50,9 @@ describe('UserName', () => {
     });
     vi.mocked(useIsNewFlyoutEnabled).mockReturnValue(false);
     flyoutApi = createEntityFlyoutApiMock();
-    vi
-      .mocked(useFlyoutApi)
-      .mockReturnValue(flyoutApi as unknown as ReturnType<typeof useFlyoutApi>);
+    vi.mocked(useFlyoutApi).mockReturnValue(
+      flyoutApi as unknown as ReturnType<typeof useFlyoutApi>
+    );
   });
   afterEach(() => {
     vi.clearAllMocks();

@@ -38,7 +38,7 @@ const mockDataCascadeRefObject = { getUISnapshotStore: mockGetUISnapshotStore };
 vi.mock('@kbn/shared-ux-document-data-cascade', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ReactLib = require('react');
-  const actual = (await vi.importActual('@kbn/shared-ux-document-data-cascade'));
+  const actual = await vi.importActual('@kbn/shared-ux-document-data-cascade');
   const MockDataCascade = ReactLib.forwardRef(function MockDataCascade(
     props: ComponentProps<typeof DataCascade<ESQLDataGroupNode, DataTableRecord>>,
     ref: ForwardedRef<DataCascadeImplRef<ESQLDataGroupNode, DataTableRecord>>
@@ -64,21 +64,21 @@ vi.mock('@kbn/shared-ux-document-data-cascade', async () => {
 });
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLStatsQueryMeta: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLStatsQueryMeta: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils/src/utils/cascaded_documents_helpers/utils', () => {
-      const mocked = {
-      getStatsCommandToOperateOn: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getStatsCommandToOperateOn: vi.fn().mockReturnValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-language', async () => {
-  const { FunctionNames } = (await vi.importActual('@kbn/esql-language'));
+  const { FunctionNames } = await vi.importActual('@kbn/esql-language');
 
   return {
     EsqlQuery: {
@@ -101,7 +101,7 @@ const defaultQueryMeta: ESQLStatsQueryMeta = {
 vi.mock('./blocks', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const ReactLib = require('react');
-  const actual = (await vi.importActual('./blocks'));
+  const actual = await vi.importActual('./blocks');
   return {
     ...actual,
     useEsqlDataCascadeRowHeaderComponents: vi.fn().mockReturnValue({
@@ -117,14 +117,14 @@ vi.mock('./blocks', async () => {
 });
 
 vi.mock('./blocks/use_row_header_components', () => {
-      const mocked = {
-      useEsqlDataCascadeRowActionHelpers: vi.fn().mockReturnValue({
-        renderRowActionPopover: () => null,
-        togglePopover: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlDataCascadeRowActionHelpers: vi.fn().mockReturnValue({
+      renderRowActionPopover: () => null,
+      togglePopover: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockFetcher = (): CascadedDocumentsFetcher =>
   ({

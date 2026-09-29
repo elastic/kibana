@@ -23,32 +23,32 @@ import type { AsScopedOptions } from '@kbn/core-elasticsearch-server';
 import { ESQL_ASYNC_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
 vi.mock('../lib/wrap_scoped_cluster_client', () => {
-      const mocked = {
-      createWrappedScopedClusterClientFactory: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createWrappedScopedClusterClientFactory: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/wrap_search_source_client', () => {
-      const mocked = {
-      wrapSearchSourceClient: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapSearchSourceClient: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/wrap_async_search_client', () => {
-      const mocked = {
-      wrapAsyncSearchClient: vi.fn().mockReturnValue({ search: vi.fn(), getMetrics: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapAsyncSearchClient: vi.fn().mockReturnValue({ search: vi.fn(), getMetrics: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./resolve_cps_data', () => {
-      const mocked = {
-      resolveCpsData: vi.fn().mockResolvedValue({ linkedProjects: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveCpsData: vi.fn().mockResolvedValue({ linkedProjects: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const projectRouting: AsScopedOptions = { projectRouting: 'space' };
 
@@ -151,8 +151,7 @@ describe('getExecutorServices', () => {
     it('calls data.search.asScoped with fakeRequest and projectRouting', () => {
       const context = createMockContext();
       const fakeRequest = createFakeRequest();
-      const dataSearchAsScoped = (context.data.search as unknown as { asScoped: Mock })
-        .asScoped;
+      const dataSearchAsScoped = (context.data.search as unknown as { asScoped: Mock }).asScoped;
 
       const executorServices = getExecutorServices({
         context,
@@ -188,8 +187,8 @@ describe('getExecutorServices', () => {
 
       await executorServices.getDataViews();
 
-      const scopedClusterClient = (context.elasticsearch.client.asScoped as Mock).mock
-        .results[0].value;
+      const scopedClusterClient = (context.elasticsearch.client.asScoped as Mock).mock.results[0]
+        .value;
       expect(context.dataViews.dataViewsServiceFactory).toHaveBeenCalledWith(
         expect.anything(),
         scopedClusterClient.asCurrentUser
@@ -214,8 +213,8 @@ describe('getExecutorServices', () => {
 
       await executorServices.getCpsData();
 
-      const scopedClusterClient = (context.elasticsearch.client.asScoped as Mock).mock
-        .results[0].value;
+      const scopedClusterClient = (context.elasticsearch.client.asScoped as Mock).mock.results[0]
+        .value;
       expect(resolveCpsData).toHaveBeenCalledWith(
         scopedClusterClient.asInternalUser,
         scopedClusterClient.asCurrentUser,

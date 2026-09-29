@@ -11,13 +11,13 @@ import { renderHook } from '@testing-library/react';
 import { i18n } from '@kbn/i18n';
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        getLocale: vi.fn().mockReturnValue(undefined),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      getLocale: vi.fn().mockReturnValue(undefined),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useDateFormat } from './use_date_format';
 

@@ -14,11 +14,11 @@ import { parseExpression } from '../ast';
 import { Execution } from '../execution/execution';
 
 vi.mock('../execution/execution', () => {
-      const mocked = {
-      Execution: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Execution: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.clearAllMocks();

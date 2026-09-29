@@ -38,9 +38,7 @@ vi.mock('../../../../app_context', () => {
         debug: vi.fn(),
       }),
       getLockManagerService: vi.fn().mockReturnValue({
-        withLock: vi
-          .fn()
-          .mockImplementation((_lockName: string, fn: () => Promise<void>) => fn()),
+        withLock: vi.fn().mockImplementation((_lockName: string, fn: () => Promise<void>) => fn()),
       }),
     },
   };

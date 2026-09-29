@@ -23,31 +23,31 @@ const renderComponent = (props: React.ComponentProps<typeof DatasetFilter>) => {
 };
 
 vi.mock('../../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../hooks')),
-      useStartServices: vi.fn().mockReturnValue({
-        data: {
-          dataViews: {
-            getFieldsForWildcard: vi.fn().mockResolvedValue([]),
-            create: vi.fn().mockResolvedValue([]),
-          },
+  const mocked = {
+    ...(await vi.importActual('../../../../../hooks')),
+    useStartServices: vi.fn().mockReturnValue({
+      data: {
+        dataViews: {
+          getFieldsForWildcard: vi.fn().mockResolvedValue([]),
+          create: vi.fn().mockResolvedValue([]),
         },
-        kql: {
-          autocomplete: {
-            getValueSuggestions: vi
-              .fn()
-              .mockResolvedValue([
-                'elastic_agent',
-                'elastic_agent.filebeat',
-                'elastic_agent.fleet_server',
-                'elastic_agent.metricbeat',
-              ]),
-          },
+      },
+      kql: {
+        autocomplete: {
+          getValueSuggestions: vi
+            .fn()
+            .mockResolvedValue([
+              'elastic_agent',
+              'elastic_agent.filebeat',
+              'elastic_agent.fleet_server',
+              'elastic_agent.metricbeat',
+            ]),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DatasetFilter', () => {
   const { getByRole, getByText } = renderComponent({

@@ -23,24 +23,22 @@ import { ScoutFailedTestReporter } from './failed_test_reporter';
 import { ScoutFailureTracker } from './failure_tracking';
 
 vi.mock('@kbn/code-owners', () => {
-      const mocked = {
-      getCodeOwnersEntries: vi.fn(() => []),
-      getOwningTeamsForPath: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCodeOwnersEntries: vi.fn(() => []),
+    getOwningTeamsForPath: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../helpers', async () => {
-  const actual = (await vi.importActual('../../../helpers'));
+  const actual = await vi.importActual('../../../helpers');
   return {
     ...actual,
     getKibanaModuleData: vi.fn(),
   };
 });
 
-const mockedGetKibanaModuleData = getKibanaModuleData as MockedFunction<
-  typeof getKibanaModuleData
->;
+const mockedGetKibanaModuleData = getKibanaModuleData as MockedFunction<typeof getKibanaModuleData>;
 
 const createMockConfig = (configFile?: string): FullConfig =>
   ({ configFile } as unknown as FullConfig);
@@ -90,9 +88,7 @@ describe('ScoutFailedTestReporter', () => {
 
   beforeEach(() => {
     reporter = new ScoutFailedTestReporter({ runId: 'test-run-id' });
-    reportLogEventSpy = vi
-      .spyOn((reporter as any).report, 'logEvent')
-      .mockImplementation(() => {});
+    reportLogEventSpy = vi.spyOn((reporter as any).report, 'logEvent').mockImplementation(() => {});
     vi.spyOn((reporter as any).report, 'save').mockImplementation(() => {});
     vi.spyOn((reporter as any).report, 'conclude').mockImplementation(() => {});
     trackerSaveSpy = vi.spyOn(ScoutFailureTracker.prototype, 'save').mockImplementation(() => {});

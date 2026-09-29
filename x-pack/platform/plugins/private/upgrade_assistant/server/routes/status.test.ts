@@ -32,42 +32,42 @@ const defaultApiResponseProperties = {
   kibanaApiDeprecations: undefined,
 };
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
-      const mocked = {
-      versionCheckHandlerWrapper: () => (a: any) => a,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    versionCheckHandlerWrapper: () => (a: any) => a,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/es_deprecations_status', () => {
-      const mocked = {
-      getESUpgradeStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESUpgradeStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const getESUpgradeStatusMock = getESUpgradeStatus as Mock;
 
 vi.mock('../lib/kibana_status', () => {
-      const mocked = {
-      getKibanaUpgradeStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getKibanaUpgradeStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const getKibanaUpgradeStatusMock = getKibanaUpgradeStatus as Mock;
 
 vi.mock('../lib/es_system_indices_migration', () => {
-      const mocked = {
-      getESSystemIndicesMigrationStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESSystemIndicesMigrationStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const getESSystemIndicesMigrationStatusMock = getESSystemIndicesMigrationStatus as Mock;
 
 vi.mock('../lib/es_deprecation_logging_apis', () => {
-      const mocked = {
-      getRecentEsDeprecationLogs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRecentEsDeprecationLogs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const getRecentEsDeprecationLogsMock = getRecentEsDeprecationLogs as Mock;
 
 const esDeprecationsResponse = {

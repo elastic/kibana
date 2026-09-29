@@ -16,11 +16,11 @@ import { getMockAttackDiscoveryAlerts } from '../../../../../../mock/mock_attack
 import { isAttackDiscoveryAlert } from '../../../../../../utils/is_attack_discovery_alert';
 
 vi.mock('../../../../../../utils/is_attack_discovery_alert', () => {
-      const mocked = {
-      isAttackDiscoveryAlert: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAttackDiscoveryAlert: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowBadge', () => {
   const defaultProps = {

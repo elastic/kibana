@@ -29,14 +29,14 @@ import { CascadedDocumentsFetcher } from './cascaded_documents_fetcher';
 import { fetchEsql } from './fetch_esql';
 
 vi.mock('./fetch_esql', () => {
-      const mocked = {
-      fetchEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', async () => {
-  const actual = (await vi.importActual('@kbn/esql-utils'));
+  const actual = await vi.importActual('@kbn/esql-utils');
   return {
     ...actual,
     constructCascadeQuery: vi.fn(actual.constructCascadeQuery),
@@ -44,13 +44,13 @@ vi.mock('@kbn/esql-utils', async () => {
 });
 
 vi.mock('@elastic/apm-rum', () => {
-      const mocked = {
-      apm: {
-        captureError: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apm: {
+      captureError: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchEsql = vi.mocked(fetchEsql);
 const mockConstructCascadeQuery = vi.mocked(constructCascadeQuery);

@@ -16,13 +16,13 @@ import { GenAiMessages } from './genai_messages';
 import { GENAI_EBT_CLICK_ACTIONS } from './ebt_constants';
 
 vi.mock('@kbn/shared-ux-markdown', () => {
-      const mocked = {
-      Markdown: ({ children }: { children: string }) => (
-        <div data-test-subj="markdownContent">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Markdown: ({ children }: { children: string }) => (
+      <div data-test-subj="markdownContent">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderMessages(
   inputMessages: Array<{

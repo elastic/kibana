@@ -13,11 +13,11 @@ import { useEuiTheme } from '@elastic/eui';
 import { getMockEuiBorealisTheme } from './__mocks__/severity_colors';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEuiTheme: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const EXPECTED_SEVERITY_COLOR_BOREALIS = {
   low: '#54B399',

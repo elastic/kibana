@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock, MockedFunction } from 'vitest';
-
 import { EuiSelectable } from '@elastic/eui';
 import Boom from '@hapi/boom';
 import { act, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import type { Mock, MockedFunction } from 'vitest';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import type { SavedObjectReferenceWithContext } from '@kbn/core-saved-objects-api-server';
@@ -29,7 +28,7 @@ import { getSpacesContextProviderWrapper } from '../../spaces_context';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiSelectable: vi.fn((props: any) => <actual.EuiSelectable {...props} />),
@@ -37,39 +36,39 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('./selectable_spaces_control', async () => {
-  const actual = (await vi.importActual('./selectable_spaces_control'));
+  const actual = await vi.importActual('./selectable_spaces_control');
   return {
     SelectableSpacesControl: vi.fn((props: any) => <actual.SelectableSpacesControl {...props} />),
   };
 });
 
 vi.mock('./share_mode_control', async () => {
-  const actual = (await vi.importActual('./share_mode_control'));
+  const actual = await vi.importActual('./share_mode_control');
   return {
     ShareModeControl: vi.fn((props: any) => <actual.ShareModeControl {...props} />),
   };
 });
 
 vi.mock('./alias_table', async () => {
-  const actual = (await vi.importActual('./alias_table'));
+  const actual = await vi.importActual('./alias_table');
   return {
     AliasTable: vi.fn((props: any) => <actual.AliasTable {...props} />),
   };
 });
 
 vi.mock('./relatives_footer', async () => {
-  const actual = (await vi.importActual('./relatives_footer'));
+  const actual = await vi.importActual('./relatives_footer');
   return {
     RelativesFooter: vi.fn((props: any) => <actual.RelativesFooter {...props} />),
   };
 });
 
 vi.mock('../../copy_saved_objects_to_space/components/copy_to_space_flyout_internal', () => {
-      const mocked = {
-      CopyToSpaceFlyoutInternal: () => <div data-test-subj="copy-to-space-flyout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CopyToSpaceFlyoutInternal: () => <div data-test-subj="copy-to-space-flyout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockedSelectableSpacesControl = SelectableSpacesControl as unknown as MockedFunction<
   typeof SelectableSpacesControl
@@ -78,9 +77,7 @@ const MockedShareModeControl = ShareModeControl as unknown as MockedFunction<
   typeof ShareModeControl
 >;
 const MockedAliasTable = AliasTable as unknown as MockedFunction<typeof AliasTable>;
-const MockedRelativesFooter = RelativesFooter as unknown as MockedFunction<
-  typeof RelativesFooter
->;
+const MockedRelativesFooter = RelativesFooter as unknown as MockedFunction<typeof RelativesFooter>;
 const MockedEuiSelectable = EuiSelectable as unknown as Mock;
 
 interface SetupOpts {

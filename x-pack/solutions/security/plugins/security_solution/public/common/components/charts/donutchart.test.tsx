@@ -34,11 +34,11 @@ vi.mock('@elastic/charts', () => {
 });
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('test-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('test-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../overview/components/detection_response/alerts_by_status/chart_label', () => {
   return {

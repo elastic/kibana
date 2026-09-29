@@ -19,12 +19,12 @@ import {
 } from '../get_package_policy_decorators';
 
 vi.mock('./create_apm_api_keys', () => {
-      const mocked = {
-      createApmAgentConfigApiKey: vi.fn().mockResolvedValue('agent-key-id:agent-key-secret'),
-      createApmSourceMapApiKey: vi.fn().mockResolvedValue('sourcemap-key-id:sourcemap-key-secret'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createApmAgentConfigApiKey: vi.fn().mockResolvedValue('agent-key-id:agent-key-secret'),
+    createApmSourceMapApiKey: vi.fn().mockResolvedValue('sourcemap-key-id:sourcemap-key-secret'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { createApmAgentConfigApiKey, createApmSourceMapApiKey } from './create_apm_api_keys';
 

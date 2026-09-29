@@ -40,12 +40,12 @@ import { transformSloToCloneState } from '../slo_edit/helpers/transform_slo_to_c
 import { SloDetailsPage } from './slo_details';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public');
 vi.mock('../../hooks/use_kibana');
@@ -167,9 +167,12 @@ describe('SLO Details Page', () => {
     useFetchActiveAlertsMock.mockReturnValue({ isLoading: false, data: new ActiveAlerts() });
     useDeleteSloMock.mockReturnValue({ mutate: mockDelete });
     useDeleteSloInstanceMock.mockReturnValue({ mutate: mockDeleteInstance });
-    vi
-      .spyOn(Router, 'useLocation')
-      .mockReturnValue({ pathname: '/slos/1234', search: '', state: '', hash: '' });
+    vi.spyOn(Router, 'useLocation').mockReturnValue({
+      pathname: '/slos/1234',
+      search: '',
+      state: '',
+      hash: '',
+    });
   });
 
   describe('when the incorrect license is found', () => {

@@ -42,18 +42,18 @@ const TestComponent = () => (
 );
 
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_finding', () => {
-      const mocked = {
-      useMisconfigurationFinding: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMisconfigurationFinding: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<FindingsFlyout/>', () => {
   beforeEach(() => {

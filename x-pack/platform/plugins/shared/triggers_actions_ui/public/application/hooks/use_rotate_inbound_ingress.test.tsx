@@ -17,7 +17,7 @@ const mockAddSuccess = vi.fn();
 const mockRotateInboundIngress = vi.fn();
 
 vi.mock('../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: () => {
@@ -33,11 +33,11 @@ vi.mock('../../common/lib/kibana', async () => {
 });
 
 vi.mock('../lib/action_connector_api', () => {
-      const mocked = {
-      rotateInboundIngress: (...args: unknown[]) => mockRotateInboundIngress(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    rotateInboundIngress: (...args: unknown[]) => mockRotateInboundIngress(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient({
   defaultOptions: {

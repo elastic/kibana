@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import React from 'react';
 import { themeServiceMock } from '@kbn/core/public/mocks';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import {
@@ -27,15 +27,15 @@ import { TestProvider } from '../../../shared/mocks/test_providers';
 
 vi.mock('../../../hooks/use_kibana');
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      SearchBar: MockSearchBar,
-      DataViewPicker: MockDataViewPicker,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchBar: MockSearchBar,
+    DataViewPicker: MockDataViewPicker,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/unified-data-table', async () => {
-  const actual = (await vi.importActual('@kbn/unified-data-table'));
+  const actual = await vi.importActual('@kbn/unified-data-table');
   return {
     ...actual,
     UnifiedDataTable: () => <div data-test-subj="unifiedDataTable" />,

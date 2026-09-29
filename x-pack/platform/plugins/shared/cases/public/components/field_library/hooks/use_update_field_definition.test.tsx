@@ -22,11 +22,11 @@ vi.mock('../../../common/use_cases_toast');
 
 const mockReportFieldDefinitionUpdated = vi.fn();
 vi.mock('../../../analytics/field_library', () => {
-      const mocked = {
-      useFieldDefinitionUpdatedEBT: () => mockReportFieldDefinitionUpdated,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldDefinitionUpdatedEBT: () => mockReportFieldDefinitionUpdated,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUpdateFieldDefinition', () => {
   const showErrorToast = vi.fn();

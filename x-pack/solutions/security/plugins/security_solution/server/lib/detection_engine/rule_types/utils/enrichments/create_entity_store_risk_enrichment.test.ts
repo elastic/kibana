@@ -17,13 +17,13 @@ import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { ALERT_ENTITY_ID } from '../../../../../../common/field_maps/field_names';
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        getEuidFromObjectForSearch: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    euid: {
+      getEuidFromObjectForSearch: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetEuidForSearch = euid.getEuidFromObjectForSearch as Mock;
 

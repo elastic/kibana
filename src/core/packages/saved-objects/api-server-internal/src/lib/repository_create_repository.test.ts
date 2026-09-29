@@ -18,7 +18,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 
 vi.mock('./repository');
 
-const { SavedObjectsRepository: originalRepository } = (await vi.importActual('./repository'));
+const { SavedObjectsRepository: originalRepository } = await vi.importActual('./repository');
 
 describe('SavedObjectsRepository#createRepository', () => {
   let logger: MockedLogger;
@@ -62,8 +62,7 @@ describe('SavedObjectsRepository#createRepository', () => {
   });
 
   const migrator = kibanaMigratorMock.create({ types: typeRegistry.getAllTypes() });
-  const RepositoryConstructor =
-    SavedObjectsRepository as unknown as Mock<SavedObjectsRepository>;
+  const RepositoryConstructor = SavedObjectsRepository as unknown as Mock<SavedObjectsRepository>;
 
   beforeEach(() => {
     logger = loggerMock.create();

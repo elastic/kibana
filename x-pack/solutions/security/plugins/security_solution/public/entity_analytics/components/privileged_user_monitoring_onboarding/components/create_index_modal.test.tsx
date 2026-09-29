@@ -14,13 +14,13 @@ import { TestProviders } from '../../../../common/mock';
 
 const mockCreatePrivMonImportIndex = vi.fn().mockResolvedValue({});
 vi.mock('../../../api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        createPrivMonImportIndex: mockCreatePrivMonImportIndex,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      createPrivMonImportIndex: mockCreatePrivMonImportIndex,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onCloseMock = vi.fn();
 const onCreateMock = vi.fn();

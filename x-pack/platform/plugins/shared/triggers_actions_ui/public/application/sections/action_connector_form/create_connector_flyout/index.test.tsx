@@ -20,16 +20,16 @@ import { TECH_PREVIEW_LABEL } from '../../translations';
 import { AgentBuilderConnectorFeatureId } from '@kbn/actions-plugin/common';
 
 vi.mock('../../../lib/action_connector_api', async () => {
-      const mocked = {
-      ...((await vi.importActual('../../../lib/action_connector_api')) as any),
-      loadActionTypes: vi.fn(),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...((await vi.importActual('../../../lib/action_connector_api')) as any),
+    loadActionTypes: vi.fn(),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeIsDual: vi.fn((id: string) => id === '.dual'),
@@ -41,7 +41,7 @@ vi.mock('@kbn/connector-specs', async () => {
   };
 });
 
-const { loadActionTypes } = (await vi.importMock('../../../lib/action_connector_api'));
+const { loadActionTypes } = await vi.importMock('../../../lib/action_connector_api');
 
 const createConnectorResponse = {
   connector_type_id: 'test',

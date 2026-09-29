@@ -21,12 +21,12 @@ const defaultProps: ControlsProps = {
 };
 
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      useStore: vi.fn(),
-      useReactFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStore: vi.fn(),
+    useReactFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useReactFlowMock = useReactFlow as Mock;
 const useStoreMock = useStore as Mock;

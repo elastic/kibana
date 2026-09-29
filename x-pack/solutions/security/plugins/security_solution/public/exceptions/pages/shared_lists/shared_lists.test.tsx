@@ -40,10 +40,10 @@ vi.mock('react-router-dom', () => {
   };
 });
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
 
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
   const FormattedRelative = vi.fn();
   FormattedRelative.mockImplementationOnce(() => '2 days ago');
   FormattedRelative.mockImplementation(() => '20 hours ago');
@@ -55,44 +55,43 @@ vi.mock('@kbn/i18n-react', async () => {
 });
 
 vi.mock('../../../detections/containers/detection_engine/lists/use_lists_config', () => {
-      const mocked = {
-      useListsConfig: vi.fn().mockReturnValue({ loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useListsConfig: vi.fn().mockReturnValue({ loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cps-utils', () => {
-      const mocked = {
-      useRouteBasedCpsPickerAccess: vi.fn(),
-      ProjectRoutingAccess: { READONLY: 'readonly' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteBasedCpsPickerAccess: vi.fn(),
+    ProjectRoutingAccess: { READONLY: 'readonly' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_endpoint_exceptions_capability');
 vi.mock('../../components/create_shared_exception_list', () => {
-      const mocked = {
-      CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
-        <div data-test-subj="createSharedExceptionListFlyout">
-          <button type="button" data-test-subj="closeFlyoutButton" onClick={handleCloseFlyout}>
-            {'Close'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateSharedListFlyout: ({ handleCloseFlyout }: { handleCloseFlyout: () => void }) => (
+      <div data-test-subj="createSharedExceptionListFlyout">
+        <button type="button" data-test-subj="closeFlyoutButton" onClick={handleCloseFlyout}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../management/hooks/artifacts/use_endpoint_per_policy_opt_in');
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
-const mockUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as Mock;
+const mockUseGetEndpointExceptionsPerPolicyOptIn = useGetEndpointExceptionsPerPolicyOptIn as Mock;
 
 describe('SharedLists', () => {
   const mockHistory = generateHistoryMock();

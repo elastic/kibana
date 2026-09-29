@@ -34,7 +34,9 @@ let mockTargetIdField = createBaseTargetIdField();
 
 vi.mock('../profile_form/profile_form_provider', async () => {
   const mockReact: typeof import('react') = require('react');
-  const { ProfileFormContextProvider } = (await vi.importActual('../profile_form/profile_form_context'));
+  const { ProfileFormContextProvider } = await vi.importActual(
+    '../profile_form/profile_form_context'
+  );
   type MockProfileFormProviderProps = React.PropsWithChildren<ProfileFormProps>;
 
   return {

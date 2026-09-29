@@ -24,11 +24,11 @@ const mockAttackFlyout = vi.fn((props: { onAttackUpdated?: () => void }) => (
   />
 ));
 vi.mock('.', () => {
-      const mocked = {
-      AttackFlyout: (props: unknown) => mockAttackFlyout(props as { onAttackUpdated?: () => void }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackFlyout: (props: unknown) => mockAttackFlyout(props as { onAttackUpdated?: () => void }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSearchHit = {
   _id: 'attack-1',

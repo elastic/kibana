@@ -68,9 +68,7 @@ describe('export timelines', () => {
 
     (convertSavedObjectToSavedTimeline as unknown as Mock).mockReturnValue(mockTimelines());
     (convertSavedObjectToSavedNote as unknown as Mock).mockReturnValue(mockNotes());
-    (convertSavedObjectToSavedPinnedEvent as unknown as Mock).mockReturnValue(
-      mockPinnedEvents()
-    );
+    (convertSavedObjectToSavedPinnedEvent as unknown as Mock).mockReturnValue(mockPinnedEvents());
   });
 
   afterEach(() => {

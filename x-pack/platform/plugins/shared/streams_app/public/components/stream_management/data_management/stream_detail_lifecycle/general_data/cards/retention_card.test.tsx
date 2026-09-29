@@ -24,30 +24,30 @@ import {
 import { useStreamsAppFetch } from '../../../../../../hooks/use_streams_app_fetch';
 
 vi.mock('../../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        dependencies: {
-          start: {
-            streams: {
-              streamsRepositoryClient: { fetch: vi.fn() },
-            },
+  const mocked = {
+    useKibana: () => ({
+      dependencies: {
+        start: {
+          streams: {
+            streamsRepositoryClient: { fetch: vi.fn() },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: vi.fn(() => ({
-        value: undefined,
-        loading: false,
-        refresh: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: vi.fn(() => ({
+      value: undefined,
+      loading: false,
+      refresh: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStreamsAppFetch = useStreamsAppFetch as unknown as Mock;
 

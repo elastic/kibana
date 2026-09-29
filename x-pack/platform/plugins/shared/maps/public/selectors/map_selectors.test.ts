@@ -13,31 +13,31 @@ vi.mock('../classes/layers/heatmap_layer', () => {});
 vi.mock('../classes/layers/ems_vector_tile_layer/ems_vector_tile_layer', () => {});
 vi.mock('../classes/joins/inner_join', () => {});
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      getTimeFilter: () => ({
-        getTime: () => {
-          return {
-            to: 'now',
-            from: 'now-15m',
-          };
-        },
-      }),
-      getMapsCapabilities() {
-        return { save: true };
-      },
-      getIsDarkMode() {
-        return false;
-      },
-      getEMSSettings() {
+  const mocked = {
+    getTimeFilter: () => ({
+      getTime: () => {
         return {
-          isEMSUrlSet() {
-            return false;
-          },
+          to: 'now',
+          from: 'now-15m',
         };
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    }),
+    getMapsCapabilities() {
+      return { save: true };
+    },
+    getIsDarkMode() {
+      return false;
+    },
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { DEFAULT_MAP_STORE_STATE } from '../reducers/store';
 import {

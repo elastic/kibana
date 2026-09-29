@@ -31,13 +31,13 @@ const mockOnOpenNotesTab = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {

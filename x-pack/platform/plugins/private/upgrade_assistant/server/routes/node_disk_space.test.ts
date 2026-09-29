@@ -15,11 +15,11 @@ import { createRequestMock } from './__mocks__/request.mock';
 import { handleEsError } from '../shared_imports';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
-      const mocked = {
-      versionCheckHandlerWrapper: () => (a: any) => a,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    versionCheckHandlerWrapper: () => (a: any) => a,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
 
@@ -69,8 +69,7 @@ describe('Disk space API', () => {
 
     it('returns the default low watermark disk usage setting', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockResolvedValue({
         defaults: {
           'cluster.routing.allocation.disk.watermark.low': '75%',
@@ -96,8 +95,7 @@ describe('Disk space API', () => {
 
     it('returns the persistent low watermark disk usage setting', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockResolvedValue({
         defaults: {},
         transient: {},
@@ -121,8 +119,7 @@ describe('Disk space API', () => {
 
     it('returns the transient low watermark disk usage setting', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockResolvedValue({
         defaults: {},
         transient: { 'cluster.routing.allocation.disk.watermark.low': '79%' },
@@ -146,8 +143,7 @@ describe('Disk space API', () => {
 
     it('returns nodes with low disk space when low watermark disk usage setting is bytes value', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockResolvedValue({
         defaults: {
           'cluster.routing.allocation.disk.watermark.low': '80b',
@@ -173,8 +169,7 @@ describe('Disk space API', () => {
 
     it('returns empty array if nodes have not reached low disk usage', async () => {
       (
-        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster
-          .getSettings as Mock
+        routeHandlerContextMock.core.elasticsearch.client.asCurrentUser.cluster.getSettings as Mock
       ).mockResolvedValue({
         defaults: {
           'cluster.routing.allocation.disk.watermark.low': '85%',

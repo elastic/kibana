@@ -38,28 +38,28 @@ import {
 // `useGroupEditor` imports the flyout via its inner sibling path, so the
 // mock must target that path rather than the package barrel.
 vi.mock('./group_editor_flyout/group_editor_flyout', () => {
-      const mocked = {
-      GroupEditorFlyout: vi.fn(({ group, updateGroup, onSave, onClose, searchSessionId }: any) => (
-        <div data-test-subj="mock-group-editor-flyout">
-          <span data-test-subj="mock-group-editor-flyout-title">{group?.title}</span>
-          <span data-test-subj="mock-group-editor-flyout-session">{searchSessionId}</span>
-          <button
-            data-test-subj="mock-group-editor-flyout-update"
-            onClick={() => updateGroup({ ...group, tags: ['my-new-tag'] })}
-          >
-            update
-          </button>
-          <button data-test-subj="mock-group-editor-flyout-save" onClick={() => onSave()}>
-            save
-          </button>
-          <button data-test-subj="mock-group-editor-flyout-close" onClick={() => onClose()}>
-            close
-          </button>
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GroupEditorFlyout: vi.fn(({ group, updateGroup, onSave, onClose, searchSessionId }: any) => (
+      <div data-test-subj="mock-group-editor-flyout">
+        <span data-test-subj="mock-group-editor-flyout-title">{group?.title}</span>
+        <span data-test-subj="mock-group-editor-flyout-session">{searchSessionId}</span>
+        <button
+          data-test-subj="mock-group-editor-flyout-update"
+          onClick={() => updateGroup({ ...group, tags: ['my-new-tag'] })}
+        >
+          update
+        </button>
+        <button data-test-subj="mock-group-editor-flyout-save" onClick={() => onSave()}>
+          save
+        </button>
+        <button data-test-subj="mock-group-editor-flyout-close" onClick={() => onClose()}>
+          close
+        </button>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildContent = (id: string, title: string): EventAnnotationGroupContent => ({
   id,
@@ -292,7 +292,9 @@ describe('annotation list view', () => {
       // Re-open by closing and re-clicking to take a new session reading once
       // the mocked flyout invokes the refresh; the component re-renders the
       // flyout body with the new searchSessionId.
-      const { GroupEditorFlyout } = (await vi.importMock('./group_editor_flyout/group_editor_flyout')) as { GroupEditorFlyout: Mock };
+      const { GroupEditorFlyout } = (await vi.importMock(
+        './group_editor_flyout/group_editor_flyout'
+      )) as { GroupEditorFlyout: Mock };
       const lastCallProps =
         GroupEditorFlyout.mock.calls[GroupEditorFlyout.mock.calls.length - 1][0];
       act(() => {

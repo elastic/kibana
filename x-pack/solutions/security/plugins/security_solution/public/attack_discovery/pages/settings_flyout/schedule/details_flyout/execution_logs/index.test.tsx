@@ -20,8 +20,9 @@ import { useGetScheduleExecutionLogs } from './use_get_schedule_execution_logs';
 vi.mock('../../../../use_get_attack_discovery_generations');
 vi.mock('./use_get_schedule_execution_logs');
 
-const mockUseGetAttackDiscoveryGenerations =
-  useGetAttackDiscoveryGenerations as MockedFunction<typeof useGetAttackDiscoveryGenerations>;
+const mockUseGetAttackDiscoveryGenerations = useGetAttackDiscoveryGenerations as MockedFunction<
+  typeof useGetAttackDiscoveryGenerations
+>;
 
 const mockUseGetScheduleExecutionLogs = useGetScheduleExecutionLogs as MockedFunction<
   typeof useGetScheduleExecutionLogs

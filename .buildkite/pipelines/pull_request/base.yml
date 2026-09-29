@@ -29,7 +29,7 @@ steps:
     key: quick_checks
     timeout_in_minutes: 60
     env:
-      CHECK_GATE: 'true'
+      CHECK_GATE: 'false' # [vitest experiment] keep test steps running when checks fail
     retry:
       automatic:
         - exit_status: '-1'
@@ -39,7 +39,7 @@ steps:
     label: 'Checks'
     key: checks
     env:
-      CHECK_GATE: 'true'
+      CHECK_GATE: 'false' # [vitest experiment] keep test steps running when checks fail
     agents:
       machineType: n2d-standard-2
       preemptible: true
@@ -62,7 +62,7 @@ steps:
     key: linting
     timeout_in_minutes: 60
     env:
-      CHECK_GATE: 'true'
+      CHECK_GATE: 'false' # [vitest experiment] keep test steps running when checks fail
     retry:
       automatic:
         - exit_status: '-1'
@@ -79,7 +79,7 @@ steps:
     key: linting_with_types
     timeout_in_minutes: 60
     env:
-      CHECK_GATE: 'true'
+      CHECK_GATE: 'false' # [vitest experiment] keep test steps running when checks fail
     retry:
       automatic:
         - exit_status: '-1'
@@ -96,7 +96,7 @@ steps:
     key: check_types
     timeout_in_minutes: 60
     env:
-      CHECK_GATE: 'true'
+      CHECK_GATE: 'false' # [vitest experiment] keep test steps running when checks fail
       RESTORE_ARCHIVE: 'true'
       UPLOAD_ARCHIVE: 'true'
     retry:

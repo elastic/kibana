@@ -31,39 +31,39 @@ import {
 } from './update_elser_mappings_modal.test_helpers';
 
 vi.mock('../../../../../components/mappings_editor/lib/utils', () => {
-      const mocked = {
-      deNormalize: vi.fn(),
-      prepareFieldsForEisUpdate: vi.fn(),
-      isElserOnMlNodeSemanticField: vi.fn(),
-      getFieldConfig: vi.fn(() => ({
-        serializer: vi.fn(),
-        deserializer: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deNormalize: vi.fn(),
+    prepareFieldsForEisUpdate: vi.fn(),
+    isElserOnMlNodeSemanticField: vi.fn(),
+    getFieldConfig: vi.fn(() => ({
+      serializer: vi.fn(),
+      deserializer: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../components/mappings_editor/mappings_state_context');
 
 vi.mock('../../../../../services/api', () => {
-      const mocked = {
-      updateIndexMappings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateIndexMappings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      documentationService: {
-        docLinks: {
-          enterpriseSearch: {
-            elasticInferenceService: 'http://example.com/docs',
-          },
+  const mocked = {
+    documentationService: {
+      docLinks: {
+        enterpriseSearch: {
+          elasticInferenceService: 'http://example.com/docs',
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const deNormalizeMock = vi.mocked(deNormalize);
 const prepareFieldsForEisUpdateMock = vi.mocked(prepareFieldsForEisUpdate);

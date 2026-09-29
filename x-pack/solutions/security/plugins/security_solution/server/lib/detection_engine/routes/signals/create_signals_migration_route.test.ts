@@ -23,7 +23,7 @@ import { docLinksServiceMock } from '@kbn/core/server/mocks';
 
 vi.mock('../index/check_template_version');
 vi.mock('@kbn/securitysolution-es-utils', async () => {
-  const original = (await vi.importActual('@kbn/securitysolution-es-utils'));
+  const original = await vi.importActual('@kbn/securitysolution-es-utils');
   return {
     ...original,
     getIndexAliases: vi.fn(),

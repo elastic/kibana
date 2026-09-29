@@ -19,25 +19,25 @@ const mockOpenAgentBuilderFlyout = vi.fn();
 const mockUseAgentBuilderAttachment = vi.fn();
 
 vi.mock('../../../../agent_builder/hooks/use_agent_builder_attachment', () => {
-      const mocked = {
-      useAgentBuilderAttachment: (attachment: unknown) => {
-        mockUseAgentBuilderAttachment(attachment);
-        return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAttachment: (attachment: unknown) => {
+      mockUseAgentBuilderAttachment(attachment);
+      return { openAgentBuilderFlyout: mockOpenAgentBuilderFlyout };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../agent_builder/components/new_agent_builder_attachment', () => {
-      const mocked = {
-      NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => (
-        <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
-          {'Add to chat'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewAgentBuilderAttachment: (props: NewAgentBuilderAttachmentProps) => (
+      <button type="button" data-test-subj="newAgentBuilderAttachmentMock" onClick={props.onClick}>
+        {'Add to chat'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getCapturedAttachment = (): UseAgentBuilderAttachmentParams => {
   const [attachment] = mockUseAgentBuilderAttachment.mock.calls[0] as [

@@ -25,23 +25,23 @@ const mockServiceMapEmbeddable = vi.fn((_props: unknown) => (
 ));
 
 vi.mock('../../../../embeddable/service_map/service_map_embeddable', () => {
-      const mocked = {
-      ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceMapEmbeddable: (props: unknown) => mockServiceMapEmbeddable(props as never),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetServiceMapUrl = vi.fn(
   (_core: unknown, _params?: unknown) => '/app/apm#/service-map?rangeFrom=now-15m&rangeTo=now'
 );
 
 vi.mock('../../../../embeddable/service_map/get_service_map_url', () => {
-      const mocked = {
-      getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
-        mockGetServiceMapUrl(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServiceMapUrl: (...args: Parameters<typeof mockGetServiceMapUrl>) =>
+      mockGetServiceMapUrl(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: ContextualServiceMapSectionProps = {
   serviceName: 'opbeans-node',

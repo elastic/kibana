@@ -36,36 +36,36 @@ vi.mock('../../../common/components/visualization_actions/visualization_embeddab
 
 const mockedUseRiskScore = vi.fn().mockReturnValue(mockServiceRiskScoreState);
 vi.mock('../../../entity_analytics/api/hooks/use_risk_score', () => {
-      const mocked = {
-      useRiskScore: () => mockedUseRiskScore(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskScore: () => mockedUseRiskScore(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseEntityRiskScores = vi.fn();
 vi.mock('../../../entity_analytics/api/hooks/use_entity_risk_scores', () => {
-      const mocked = {
-      useEntityRiskScores: () => mockedUseEntityRiskScores(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityRiskScores: () => mockedUseEntityRiskScores(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseObservedService = vi.fn().mockReturnValue(mockObservedService);
 
 vi.mock('./hooks/use_observed_service', () => {
-      const mocked = {
-      useObservedService: () => mockedUseObservedService(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useObservedService: () => mockedUseObservedService(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseIsExperimentalFeatureEnabled = vi.fn().mockReturnValue(true);
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: () => mockedUseIsExperimentalFeatureEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const flyoutContextValue = {
   closeLeftPanel: vi.fn(),
@@ -75,20 +75,20 @@ const flyoutHistory: FlyoutPanelHistory[] = [
   { lastOpen: Date.now(), panel: { id: 'id1', params: {} } },
 ];
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      useExpandableFlyoutHistory: vi.fn(),
-      useExpandableFlyoutState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    useExpandableFlyoutHistory: vi.fn(),
+    useExpandableFlyoutState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/utils/timeline/use_show_timeline', () => {
-      const mocked = {
-      useShowTimeline: vi.fn(() => [true]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShowTimeline: vi.fn(() => [true]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ServicePanel', () => {
   beforeEach(() => {

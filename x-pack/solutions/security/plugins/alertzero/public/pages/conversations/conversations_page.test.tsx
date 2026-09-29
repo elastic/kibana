@@ -43,40 +43,40 @@ import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
 vi.mock('../../components/scan_failure_callout/scan_failure_callout', () => {
-      const mocked = {
-      ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
 vi.mock('@kbn/proposals-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/proposals-plugin/public')),
-      useApproveProposal: vi.fn(),
-      useDismissProposal: vi.fn(),
-      useIsApprovingProposal: vi.fn(),
-      useIsDecliningProposal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/proposals-plugin/public')),
+    useApproveProposal: vi.fn(),
+    useDismissProposal: vi.fn(),
+    useIsApprovingProposal: vi.fn(),
+    useIsDecliningProposal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 // Only the profile lookup and the assignee-picker's own hooks are stubbed here — two separate
 // jest.mock calls for the same module would silently replace one another rather than merge.
 vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
-      useCurrentUserProfile: vi.fn(() => ({ data: null })),
-      useAssignInvestigation: vi.fn(),
-      useUserProfiles: vi.fn(),
-      useSuggestUserProfiles: vi.fn(),
-      useSetInvestigationStatus: vi.fn(),
-      useInvestigationClosePreview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+    useCurrentUserProfile: vi.fn(() => ({ data: null })),
+    useAssignInvestigation: vi.fn(),
+    useUserProfiles: vi.fn(),
+    useSuggestUserProfiles: vi.fn(),
+    useSetInvestigationStatus: vi.fn(),
+    useInvestigationClosePreview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/agentic-investigations-common', async () => {
-  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
+  const actual = await vi.importActual('@kbn/agentic-investigations-common');
   return {
     ...actual,
     // Replace AssignToUsers with a minimal stub so the queue renders without needing
@@ -108,11 +108,11 @@ vi.mock('@kbn/agentic-investigations-common', async () => {
 vi.mock('../../hooks/use_proposals_api');
 vi.mock('../../hooks/use_proposal_charts_summary');
 vi.mock('../../components/proposals_trend_chart', () => {
-      const mocked = {
-      ProposalsTrendChartRow: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ProposalsTrendChartRow: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
 // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
 // so the mutation assertions still hold.

@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, fireEvent, render, screen } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { act, fireEvent, render, screen } from '@testing-library/react';
-import React from 'react';
 import { ConnectorField } from './connector_field';
 import { WorkflowsUiServicesProvider } from '../../../context';
 import { createMockWorkflowsUiServices } from '../../../context/__mocks__/mocks';
@@ -19,21 +19,21 @@ import { createMockWorkflowsUiServices } from '../../../context/__mocks__/mocks'
 const mockUseConnectors = vi.fn();
 const mockInvalidateConnectors = vi.fn();
 vi.mock('../../hooks/use_connectors', () => {
-      const mocked = {
-      useConnectors: (connectorType: string) => mockUseConnectors(connectorType),
-      useInvalidateConnectors: () => mockInvalidateConnectors,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConnectors: (connectorType: string) => mockUseConnectors(connectorType),
+    useInvalidateConnectors: () => mockInvalidateConnectors,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The icon resolution pipeline is covered by TypeIcon's own tests.
 vi.mock('../../../components', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../components')),
-      TypeIcon: ({ type }: { type: string }) => <span data-test-subj={`mockTypeIcon-${type}`} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../components')),
+    TypeIcon: ({ type }: { type: string }) => <span data-test-subj={`mockTypeIcon-${type}`} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const CONNECTORS = [
   { id: 'c-1', name: 'Team Slack', actionTypeId: '.slack' },
@@ -113,8 +113,8 @@ describe('ConnectorField', () => {
     fireEvent.click(screen.getByTestId('connectorField'));
     fireEvent.click(screen.getByTestId('connectorField-createNew'));
 
-    const { onConnectorCreated } = (services.triggersActionsUi.getAddConnectorFlyout as Mock)
-      .mock.calls[0][0];
+    const { onConnectorCreated } = (services.triggersActionsUi.getAddConnectorFlyout as Mock).mock
+      .calls[0][0];
     act(() => {
       onConnectorCreated({ id: 'c-new', name: 'New Slack', actionTypeId: '.slack' });
     });

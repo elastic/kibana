@@ -21,9 +21,7 @@ vi.mock('../../../synthetics_service/private_location/package_policy_service');
 const mockGetLocations = getPrivateLocationsAndAgentPolicies as Mock;
 const mockListByAgentPolicy = vi.fn();
 
-const mockPackagePolicyService = PackagePolicyService as MockedClass<
-  typeof PackagePolicyService
->;
+const mockPackagePolicyService = PackagePolicyService as MockedClass<typeof PackagePolicyService>;
 
 const GIB = 1024 * 1024 * 1024;
 

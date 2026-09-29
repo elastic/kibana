@@ -12,11 +12,11 @@ import { syncRoutes } from './sync_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 
 vi.mock('../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const route = syncRoutes['GET /internal/streams/_knowledge_indicators/_streams_with_indicators'];
 

@@ -28,15 +28,15 @@ import { loadSyntheticSourceStatus } from '../../services/api';
 vi.mock('@kbn/code-editor');
 
 vi.mock('../../services/api', () => {
-      const mocked = {
-      loadSyntheticSourceStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadSyntheticSourceStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/document_fields/field_parameters/type_parameter', async () => {
-  const sharedImports = (await vi.importActual('./shared_imports'));
-  const lib = (await vi.importActual('./lib'));
+  const sharedImports = await vi.importActual('./shared_imports');
+  const lib = await vi.importActual('./lib');
   const UseFieldActual = sharedImports.UseField as typeof UseField;
   const getFieldConfigActual = lib.getFieldConfig as typeof getFieldConfig;
 
@@ -78,8 +78,8 @@ vi.mock('./components/document_fields/field_parameters/type_parameter', async ()
 });
 
 vi.mock('./components/document_fields/field_parameters/reference_field_selects', async () => {
-  const sharedImports = (await vi.importActual('./shared_imports'));
-  const lib = (await vi.importActual('./lib'));
+  const sharedImports = await vi.importActual('./shared_imports');
+  const lib = await vi.importActual('./lib');
   const UseFieldActual = sharedImports.UseField as typeof UseField;
   const getFieldConfigActual = lib.getFieldConfig as typeof getFieldConfig;
 
@@ -107,7 +107,7 @@ vi.mock('./components/document_fields/field_parameters/reference_field_selects',
 });
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual('../../app_context'));
+  const actual = await vi.importActual('../../app_context');
   return {
     ...actual,
     useAppContext: vi.fn(),
@@ -148,23 +148,23 @@ function mockSelectInferenceId({ 'data-test-subj': dataTestSubj }: { 'data-test-
 }
 
 vi.mock('./components/document_fields/field_parameters/select_inference_id', () => {
-      const mocked = {
-      SelectInferenceId: mockSelectInferenceId,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SelectInferenceId: mockSelectInferenceId,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../component_templates/component_templates_context', () => {
-      const mocked = {
-      useComponentTemplatesContext: vi.fn().mockReturnValue({
-        toasts: {
-          addError: vi.fn(),
-          addSuccess: vi.fn(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useComponentTemplatesContext: vi.fn().mockReturnValue({
+      toasts: {
+        addError: vi.fn(),
+        addSuccess: vi.fn(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { GlobalFlyoutProvider } = GlobalFlyout;
 const mockUseAppContext = useAppContext as unknown as MockedFunction<typeof useAppContext>;

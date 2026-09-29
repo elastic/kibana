@@ -17,7 +17,7 @@ const mockSetBreadcrumbs = vi.fn();
 const mockSetTitle = vi.fn();
 
 vi.mock('../utils/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../utils/kibana_react'));
+  const originalModule = await vi.importActual('../utils/kibana_react');
   return {
     ...originalModule,
     useKibana: () => {
@@ -33,7 +33,7 @@ vi.mock('../utils/kibana_react', async () => {
 });
 
 vi.mock('./use_navigation', async () => {
-  const originalModule = (await vi.importActual('./use_navigation'));
+  const originalModule = await vi.importActual('./use_navigation');
   return {
     ...originalModule,
     useNavigation: vi.fn().mockReturnValue({

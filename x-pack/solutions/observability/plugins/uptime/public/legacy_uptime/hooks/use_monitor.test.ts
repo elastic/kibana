@@ -13,12 +13,12 @@ import { useParams } from 'react-router-dom';
 import { useMonitorId } from './use_monitor';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMonitorId', () => {
   const mockUseParams = (monitorId: string | undefined) => {

@@ -73,10 +73,7 @@ describe('docCountApi', () => {
 
   it('accumulates results across multiple batches', async () => {
     const httpSetup = {
-      post: vi
-        .fn()
-        .mockResolvedValueOnce({ 'index-a': 1 })
-        .mockResolvedValueOnce({ 'index-b': 2 }),
+      post: vi.fn().mockResolvedValueOnce({ 'index-a': 1 }).mockResolvedValueOnce({ 'index-b': 2 }),
     } as any;
 
     const api = docCountApi(httpSetup);

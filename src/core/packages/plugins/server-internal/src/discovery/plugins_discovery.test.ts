@@ -32,28 +32,31 @@ import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';
 
 vi.mock('@kbn/repo-packages', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/repo-packages')),
-      getPluginPackagesFilter: vi.fn().mockReturnValue(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/repo-packages')),
+    getPluginPackagesFilter: vi.fn().mockReturnValue(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./plugin_manifest_from_plugin_package', () => {
-      const mocked = {
-      pluginManifestFromPluginPackage: vi.fn((version, pkgManifest) => ({
-        version,
-        ...pkgManifest,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pluginManifestFromPluginPackage: vi.fn((version, pkgManifest) => ({
+      version,
+      ...pkgManifest,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const getPluginPackagesFilter = (await vi.importActual('@kbn/repo-packages')).getPluginPackagesFilter;
+const getPluginPackagesFilter = (await vi.importActual('@kbn/repo-packages'))
+  .getPluginPackagesFilter;
 
-const getPluginPackagesFilterMock: Mock =
-  (await vi.importMock('@kbn/repo-packages')).getPluginPackagesFilter;
-const pluginManifestFromPluginPackageMock: Mock = (await vi.importMock('./plugin_manifest_from_plugin_package')).pluginManifestFromPluginPackage;
+const getPluginPackagesFilterMock: Mock = (await vi.importMock('@kbn/repo-packages'))
+  .getPluginPackagesFilter;
+const pluginManifestFromPluginPackageMock: Mock = (
+  await vi.importMock('./plugin_manifest_from_plugin_package')
+).pluginManifestFromPluginPackage;
 
 function getMockPackage(id: string, group: string = 'platform') {
   const relativePath = `packages/${id}`;

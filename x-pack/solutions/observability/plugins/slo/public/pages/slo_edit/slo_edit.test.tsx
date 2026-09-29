@@ -36,12 +36,12 @@ import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { render } from '../../utils/test_helper';
 import { SloEditPage } from './slo_edit';
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public');
 vi.mock('@kbn/observability-plugin/public');
@@ -58,11 +58,11 @@ vi.mock('../../hooks/use_create_burn_rate_rule');
 const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => mockUseKibanaReturnValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(() => mockUseKibanaReturnValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useFetchIndicesMock = useFetchIndices as Mock;
@@ -237,9 +237,12 @@ describe('SLO Edit Page', () => {
   describe('create SLO flow', () => {
     beforeEach(() => {
       vi.spyOn(Router, 'useParams').mockReturnValue({ sloId: undefined });
-      vi
-        .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: '/slos/create', search: '', state: '', hash: '' });
+      vi.spyOn(Router, 'useLocation').mockReturnValue({
+        pathname: '/slos/create',
+        search: '',
+        state: '',
+        hash: '',
+      });
       useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: undefined });
       useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });
     });
@@ -409,9 +412,12 @@ describe('SLO Edit Page', () => {
     let slo: SLOWithSummaryResponse;
     beforeEach(() => {
       vi.spyOn(Router, 'useParams').mockReturnValue({ sloId: SLO_ID });
-      vi
-        .spyOn(Router, 'useLocation')
-        .mockReturnValue({ pathname: `/slos/edit/${SLO_ID}`, search: '', state: '', hash: '' });
+      vi.spyOn(Router, 'useLocation').mockReturnValue({
+        pathname: `/slos/edit/${SLO_ID}`,
+        search: '',
+        state: '',
+        hash: '',
+      });
       slo = buildSlo({ id: SLO_ID });
       useFetchSloDetailsMock.mockReturnValue({ isInitialLoading: false, data: slo });
       useFetchSloTemplateMock.mockReturnValue({ isInitialLoading: false, data: undefined });

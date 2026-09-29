@@ -33,11 +33,12 @@ import {
 } from './mocks';
 
 vi.mock('../../utils/find_osquery_action_metadata', () => {
-      const mocked = {
-      findOsqueryActionMetadata: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findOsqueryActionMetadata: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { findOsqueryActionMetadata } from '../../utils/find_osquery_action_metadata';
 

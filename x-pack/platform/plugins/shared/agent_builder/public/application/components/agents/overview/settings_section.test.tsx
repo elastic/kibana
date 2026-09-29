@@ -16,21 +16,21 @@ import { SettingsSection } from './settings_section';
 import type { SettingsSectionProps } from './settings_section';
 
 vi.mock('../../../hooks/use_is_context_engine_enabled', () => {
-      const mocked = {
-      useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsContextEngineEnabled: () => mockIsContextEngineEnabled,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/ai_indices/use_agent_ai_indices_by_id', () => {
-      const mocked = {
-      useAgentAiIndicesById: () => ({
-        aiIndices: mockAgentAiIndices,
-        isLoading: mockAgentAiIndicesIsLoading,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentAiIndicesById: () => ({
+      aiIndices: mockAgentAiIndices,
+      isLoading: mockAgentAiIndicesIsLoading,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const AGENT_ID = 'my-agent';
 

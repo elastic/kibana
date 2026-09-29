@@ -28,19 +28,19 @@ import {
 } from './entity_relationship_history_tool';
 
 vi.mock('../../utils/get_agent_builder_resource_availability', () => {
-      const mocked = {
-      getAgentBuilderResourceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentBuilderResourceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./entity_resolution', async () => {
-      const mocked = {
-      ...(await vi.importActual('./entity_resolution')),
-      requireResolvedEntity: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./entity_resolution')),
+    requireResolvedEntity: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAgentBuilderResourceAvailability = getAgentBuilderResourceAvailability as Mock;
 const mockRequireResolvedEntity = requireResolvedEntity as MockedFunction<

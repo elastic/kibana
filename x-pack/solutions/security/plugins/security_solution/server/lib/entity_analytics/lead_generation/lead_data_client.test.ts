@@ -13,15 +13,15 @@ import { hashEuid } from '@kbn/entity-store/common/domain/euid';
 const mockCreateIndex = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('./indices/lead_index_service', () => {
-      const mocked = {
-      createLeadIndexService: () => ({
-        createIndex: mockCreateIndex,
-        doesIndexExist: vi.fn().mockResolvedValue(true),
-        deleteIndex: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadIndexService: () => ({
+      createIndex: mockCreateIndex,
+      doesIndexExist: vi.fn().mockResolvedValue(true),
+      deleteIndex: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { createLeadDataClient } from './lead_data_client';
 import type { LeadDataClient } from './lead_data_client';

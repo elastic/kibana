@@ -14,7 +14,7 @@ import { formatTimestamp } from './entries';
 import { AlertEpisodeTimelineRelativeTimestamp } from './timeline_relative_timestamp';
 
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en', messages: {} });
 
   return {

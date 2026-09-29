@@ -14,11 +14,11 @@ import { useDeleteProfile } from '../../common/services/profiles/hooks/use_delet
 import { useDeleteProfileFlow } from './use_delete_profile_flow';
 
 vi.mock('../../common/services/profiles/hooks/use_delete_profile', () => {
-      const mocked = {
-      useDeleteProfile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteProfile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDeleteProfileMutationMock = ({
   mutateAsync = vi.fn(),

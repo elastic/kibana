@@ -17,11 +17,11 @@ import { convertToColumnInPercentageMode } from './percentage_mode';
 const mockGetFormulaForAgg = vi.fn();
 
 vi.mock('../metrics/formula', () => {
-      const mocked = {
-      getFormulaForAgg: vi.fn(() => mockGetFormulaForAgg()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormulaForAgg: vi.fn(() => mockGetFormulaForAgg()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToColumnInPercentageMode', () => {
   const visType = 'heatmap';

@@ -26,9 +26,7 @@ describe('DataSetStepImpl', () => {
   let mockNode: DataSetGraphNode;
 
   let stepContextAbortController: AbortController;
-  let mockContextManager: Mocked<
-    Pick<WorkflowContextManager, 'renderValueAccordingToContext'>
-  > & {
+  let mockContextManager: Mocked<Pick<WorkflowContextManager, 'renderValueAccordingToContext'>> & {
     abortController: AbortController;
   };
 

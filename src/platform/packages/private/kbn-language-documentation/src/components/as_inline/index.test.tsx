@@ -19,7 +19,7 @@ const mockMarkDownDescription = () => (
 );
 
 vi.mock('../../sections', async () => {
-  const module = (await vi.importActual('../../sections'));
+  const module = await vi.importActual('../../sections');
   return {
     ...module,
     getESQLDocsSections: () => ({

@@ -17,7 +17,7 @@ vi.mock('node-fetch');
 
 const mockedFetch = fetch as MockedFunction<typeof fetch>;
 
-const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
+const { loggerMock } = await vi.importActual('@kbn/logging-mocks');
 const mockLogger = loggerMock.create();
 
 /** A minimal YAML excerpt that contains a parseable SemanticVersion field. */

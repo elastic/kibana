@@ -7,11 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import type { Node, NodeProps } from '@xyflow/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows';
 import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_node';
@@ -19,13 +18,13 @@ import { WorkflowGraphForeachGroupNode } from './workflow_graph_foreach_group_no
 // Stub @xyflow/react's Handle — it requires an internal React Flow context that
 // isn't available in unit tests, and we're not testing connection logic here.
 vi.mock('@xyflow/react', () => {
-      const mocked = {
-      ...require('@xyflow/react'),
-      Handle: () => null,
-      Position: { Top: 'top', Bottom: 'bottom' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('@xyflow/react'),
+    Handle: () => null,
+    Position: { Top: 'top', Bottom: 'bottom' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface ForeachGroupNodeData extends Record<string, unknown> {
   readonly label: string;

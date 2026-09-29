@@ -19,35 +19,35 @@ import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_def
 import { PageScope } from '../../../data_view_manager/constants';
 
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
-      const mocked = {
-      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils', () => {
-      const mocked = {
-      getExcludeAlertsFilters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getExcludeAlertsFilters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/alert_filtering_metric',
   () => {
-      const mocked = {
-        getAlertFilteringMetricLensAttributes: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getAlertFilteringMetricLensAttributes: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../hooks/use_signal_index_with_default', () => {
-      const mocked = {
-      useSignalIndexWithDefault: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndexWithDefault: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetExcludeAlertsFilters = getExcludeAlertsFilters as MockedFunction<
   typeof getExcludeAlertsFilters

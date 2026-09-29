@@ -25,7 +25,7 @@ const mockRevokeEarsCredentials = revokeEarsCredentials as MockedFunction<
 
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {

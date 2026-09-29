@@ -20,9 +20,9 @@ import { useProposalsByCategory } from '../../../hooks/use_proposals_api';
 import { useDropDecidedProposal } from './use_drop_decided_proposal';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 

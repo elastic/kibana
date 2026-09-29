@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { Mocked } from 'vitest';
-
 import { Transform } from 'stream';
+import type { Mocked } from 'vitest';
 
 import type { ISavedObjectTypeRegistry } from '@kbn/core/server';
 

@@ -10,19 +10,19 @@ import { vi } from 'vitest';
 import { getNodeIds } from './get_node_ids';
 
 vi.mock('../../../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getNodeIds', () => {
   it('should return a list of ids and uuids', async () => {

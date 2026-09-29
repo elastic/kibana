@@ -17,18 +17,16 @@ import { getSkippedPreconfiguredConnectorIds } from '../lib/action_connector_api
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../lib/action_connector_api')),
-      getSkippedPreconfiguredConnectorIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../lib/action_connector_api')),
+    getSkippedPreconfiguredConnectorIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const getSkippedPreconfiguredConnectorIdsMock =
-  getSkippedPreconfiguredConnectorIds as MockedFunction<
-    typeof getSkippedPreconfiguredConnectorIds
-  >;
+  getSkippedPreconfiguredConnectorIds as MockedFunction<typeof getSkippedPreconfiguredConnectorIds>;
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

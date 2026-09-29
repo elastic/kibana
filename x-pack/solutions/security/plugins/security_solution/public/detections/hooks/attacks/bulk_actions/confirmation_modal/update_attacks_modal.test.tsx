@@ -20,7 +20,7 @@ import {
 
 // Mock EUI hooks and components
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({ euiTheme: { size: { m: '8px', xxxl: '32px' } } }),

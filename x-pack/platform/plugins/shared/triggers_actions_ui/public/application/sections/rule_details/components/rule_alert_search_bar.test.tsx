@@ -18,11 +18,11 @@ import {
 } from '../../alerts_search_bar/constants';
 
 vi.mock('../../alerts_search_bar/url_synced_alerts_search_bar', () => {
-      const mocked = {
-      UrlSyncedAlertsSearchBar: vi.fn(() => <div data-test-subj="urlSyncedAlertsSearchBar" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UrlSyncedAlertsSearchBar: vi.fn(() => <div data-test-subj="urlSyncedAlertsSearchBar" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RuleAlertSearchBar', () => {
   beforeEach(() => {

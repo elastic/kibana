@@ -19,7 +19,7 @@ import type { MigrationState } from '../use_migration_state';
 import { DataStreamReindexFlyout } from './container';
 
 vi.mock('../../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../../app_context'));
+  const actual = await vi.importActual('../../../../../app_context');
 
   return {
     ...actual,
@@ -39,44 +39,44 @@ vi.mock('../../../../../app_context', async () => {
 });
 
 vi.mock('../use_migration_step', () => {
-      const mocked = {
-      useMigrationStep: () => ['confirm', vi.fn()] as const,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMigrationStep: () => ['confirm', vi.fn()] as const,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./steps/confirm', () => {
-      const mocked = {
-      ConfirmMigrationReindexFlyoutStep: ({
-        lastIndexCreationDateFormatted,
-      }: {
-        lastIndexCreationDateFormatted: string;
-      }) => <div data-test-subj="confirmMigrationStep">{lastIndexCreationDateFormatted}</div>,
-      ConfirmMigrationReadonlyFlyoutStep: () => <div data-test-subj="confirmReadonlyStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConfirmMigrationReindexFlyoutStep: ({
+      lastIndexCreationDateFormatted,
+    }: {
+      lastIndexCreationDateFormatted: string;
+    }) => <div data-test-subj="confirmMigrationStep">{lastIndexCreationDateFormatted}</div>,
+    ConfirmMigrationReadonlyFlyoutStep: () => <div data-test-subj="confirmReadonlyStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./steps/checklist', () => {
-      const mocked = {
-      ChecklistFlyoutStep: () => <div data-test-subj="checklistStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChecklistFlyoutStep: () => <div data-test-subj="checklistStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./steps/completed', () => {
-      const mocked = {
-      MigrationCompletedFlyoutStep: () => <div data-test-subj="completedStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationCompletedFlyoutStep: () => <div data-test-subj="completedStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/initializing_step', () => {
-      const mocked = {
-      InitializingStep: () => <div data-test-subj="initializingStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InitializingStep: () => <div data-test-subj="initializingStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeprecation: EnrichedDeprecationInfo = {
   type: 'data_streams',

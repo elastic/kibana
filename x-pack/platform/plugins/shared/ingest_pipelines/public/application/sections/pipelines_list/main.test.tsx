@@ -68,101 +68,101 @@ const createServicesWithLoadPipelines = (
 };
 
 vi.mock('../../../shared_imports', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../shared_imports')),
-      useKibana: () => mockUseKibana(),
-      SectionLoading: ({ children }: ComponentProps<typeof SectionLoading>) => (
-        <div data-test-subj="sectionLoading">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../shared_imports')),
+    useKibana: () => mockUseKibana(),
+    SectionLoading: ({ children }: ComponentProps<typeof SectionLoading>) => (
+      <div data-test-subj="sectionLoading">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../manage_processors', async () => {
-      const mocked = {
-      ...(await vi.importActual('../manage_processors')),
-      useCheckManageProcessorsPrivileges: () => mockUseCheckManageProcessorsPrivileges(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../manage_processors')),
+    useCheckManageProcessorsPrivileges: () => mockUseCheckManageProcessorsPrivileges(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./empty_list', async () => {
-      const mocked = {
-      ...(await vi.importActual('./empty_list')),
-      EmptyList: () => <div data-test-subj="emptyList">EMPTY_LIST</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./empty_list')),
+    EmptyList: () => <div data-test-subj="emptyList">EMPTY_LIST</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const editName = 'p!@# name';
 const cloneName = 'clone$%^name';
 const unknownCreateName = 'create&*()name';
 
 vi.mock('./table', async () => {
-      const mocked = {
-      ...(await vi.importActual('./table')),
-      PipelineTable: (props: ComponentProps<typeof PipelineTable>) => (
-        <div data-test-subj="pipelineTable">
-          PIPELINE_TABLE
-          <button
-            data-test-subj="openFlyout"
-            onClick={() => {
-              props.openFlyout('from-table');
-            }}
-          >
-            openFlyout
-          </button>
-          <button
-            data-test-subj="editPipeline"
-            onClick={() => {
-              props.onEditPipelineClick(editName);
-            }}
-          >
-            edit
-          </button>
-          <button
-            data-test-subj="clonePipeline"
-            onClick={() => {
-              props.onClonePipelineClick(cloneName);
-            }}
-          >
-            clone
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./table')),
+    PipelineTable: (props: ComponentProps<typeof PipelineTable>) => (
+      <div data-test-subj="pipelineTable">
+        PIPELINE_TABLE
+        <button
+          data-test-subj="openFlyout"
+          onClick={() => {
+            props.openFlyout('from-table');
+          }}
+        >
+          openFlyout
+        </button>
+        <button
+          data-test-subj="editPipeline"
+          onClick={() => {
+            props.onEditPipelineClick(editName);
+          }}
+        >
+          edit
+        </button>
+        <button
+          data-test-subj="clonePipeline"
+          onClick={() => {
+            props.onClonePipelineClick(cloneName);
+          }}
+        >
+          clone
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./delete_modal', async () => {
-      const mocked = {
-      ...(await vi.importActual('./delete_modal')),
-      PipelineDeleteModal: ({ pipelinesToDelete }: { pipelinesToDelete?: unknown[] }) => (
-        <div data-test-subj="pipelineDeleteModal">DELETE {pipelinesToDelete?.length ?? 0}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./delete_modal')),
+    PipelineDeleteModal: ({ pipelinesToDelete }: { pipelinesToDelete?: unknown[] }) => (
+      <div data-test-subj="pipelineDeleteModal">DELETE {pipelinesToDelete?.length ?? 0}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./pipeline_flyout', async () => {
-      const mocked = {
-      ...(await vi.importActual('./pipeline_flyout')),
-      PipelineFlyout: (props: { ingestPipeline: string; onCreateClick: (name: string) => void }) => (
-        <div data-test-subj="pipelineFlyout">
-          <h1>FLYOUT {props.ingestPipeline}</h1>
-          <button
-            data-test-subj="createUnknownPipeline"
-            onClick={() => {
-              props.onCreateClick(props.ingestPipeline);
-            }}
-          >
-            Create pipeline
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./pipeline_flyout')),
+    PipelineFlyout: (props: { ingestPipeline: string; onCreateClick: (name: string) => void }) => (
+      <div data-test-subj="pipelineFlyout">
+        <h1>FLYOUT {props.ingestPipeline}</h1>
+        <button
+          data-test-subj="createUnknownPipeline"
+          onClick={() => {
+            props.onCreateClick(props.ingestPipeline);
+          }}
+        >
+          Create pipeline
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderList = (
   history: ReturnType<typeof createMemoryHistory>,

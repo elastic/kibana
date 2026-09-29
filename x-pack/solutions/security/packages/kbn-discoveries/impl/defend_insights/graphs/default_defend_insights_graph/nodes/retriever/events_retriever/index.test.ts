@@ -18,11 +18,11 @@ import { mockAnonymizedEvents } from '../../../mock/mock_anonymized_events';
 import { AnonymizedEventsRetriever } from '.';
 
 vi.mock('./get_events', () => {
-      const mocked = {
-      getAnonymizedEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAnonymizedEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnonymizedEventsRetriever', () => {
   let esClient: ElasticsearchClient;

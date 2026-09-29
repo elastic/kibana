@@ -17,27 +17,27 @@ import { sendPostGenerateAgentsReport } from '../../../../../../hooks';
 import { useExportCSV } from './export_csv';
 
 vi.mock('../../../../../../hooks', () => {
-      const mocked = {
-      sendPostGenerateAgentsReport: vi.fn(),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addSuccess: vi.fn(),
-            addError: vi.fn(),
-          },
+  const mocked = {
+    sendPostGenerateAgentsReport: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addSuccess: vi.fn(),
+          addError: vi.fn(),
         },
-        http: {
-          basePath: {
-            prepend: vi.fn((path) => path),
-          },
+      },
+      http: {
+        basePath: {
+          prepend: vi.fn((path) => path),
         },
-        uiSettings: {
-          get: () => 'America/Los_Angeles',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      uiSettings: {
+        get: () => 'America/Los_Angeles',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('export_csv', () => {
   let renderResult: RenderHookResult<any, any>;

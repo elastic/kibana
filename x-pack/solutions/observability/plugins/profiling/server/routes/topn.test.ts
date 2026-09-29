@@ -19,22 +19,26 @@ const smallestInterval = '1s';
 const testAgg = { aggs: { test: {} } };
 
 vi.mock('./query', () => {
-      const mocked = {
-      createCommonFilter: ({}: {}) => {
-        return anyQuery;
-      },
-      findFixedIntervalForBucketsPerTimeRange: (from: number, to: number, buckets: number): string => {
-        return smallestInterval;
-      },
-      aggregateByFieldAndTimestamp: (
-        searchField: string,
-        interval: string
-      ): AggregationsAggregationContainer => {
-        return testAgg;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCommonFilter: ({}: {}) => {
+      return anyQuery;
+    },
+    findFixedIntervalForBucketsPerTimeRange: (
+      from: number,
+      to: number,
+      buckets: number
+    ): string => {
+      return smallestInterval;
+    },
+    aggregateByFieldAndTimestamp: (
+      searchField: string,
+      interval: string
+    ): AggregationsAggregationContainer => {
+      return testAgg;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('TopN data from Elasticsearch', () => {
   const context = coreMock.createRequestHandlerContext();

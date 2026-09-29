@@ -26,15 +26,15 @@ import { createPlaywrightConfig } from './create_config';
 type PlaywrightProject = Project & { teardown?: string };
 
 vi.mock('@kbn/scout-reporting', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/scout-reporting')),
-      generateTestRunId: vi.fn(),
-      scoutPlaywrightReporter: vi.fn(),
-      scoutFailedTestsReporter: vi.fn(),
-      scoutFailureSummaryReporter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/scout-reporting')),
+    generateTestRunId: vi.fn(),
+    scoutPlaywrightReporter: vi.fn(),
+    scoutFailedTestsReporter: vi.fn(),
+    scoutFailureSummaryReporter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createPlaywrightConfig', () => {
   const mockedRunId = 'mocked-run-id';

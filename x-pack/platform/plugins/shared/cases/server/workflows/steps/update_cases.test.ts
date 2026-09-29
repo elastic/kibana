@@ -79,9 +79,7 @@ describe('updateCasesStepDefinition', () => {
 
   it('passes extended_fields through to bulkUpdate', async () => {
     const get = vi.fn().mockResolvedValue(createCaseResponseFixture);
-    const bulkUpdate = vi
-      .fn()
-      .mockResolvedValue([{ ...createCaseResponseFixture, id: 'case-1' }]);
+    const bulkUpdate = vi.fn().mockResolvedValue([{ ...createCaseResponseFixture, id: 'case-1' }]);
     const getCasesClient = vi.fn().mockResolvedValue({
       cases: { get, bulkUpdate },
     } as unknown as CasesClient);

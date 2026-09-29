@@ -12,11 +12,11 @@ import { getFlyoutDiscoverNavigation } from './get_flyout_discover_navigation';
 
 const mockGetESQLQuery = vi.fn();
 vi.mock('../../links/discover_links/get_esql_query', () => {
-      const mocked = {
-      getESQLQuery: (...args: unknown[]) => mockGetESQLQuery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLQuery: (...args: unknown[]) => mockGetESQLQuery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRedirectUrl = vi.fn(() => '/app/discover?mock-url');
 const mockLocator = { getRedirectUrl: mockGetRedirectUrl };

@@ -16,12 +16,12 @@ import { sendRequestForRq } from './use_request';
 import { useUpgradeAgentlessPoliciesDryRunQuery } from './agentless_policy';
 
 vi.mock('./use_request', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_request')),
-      sendRequestForRq: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_request')),
+    sendRequestForRq: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The upgrade dry run is a POST that react-query treats as a query. These tests pin down that it
 // behaves as a point-in-time read: exactly one request per (ids, version) pair, with none of the

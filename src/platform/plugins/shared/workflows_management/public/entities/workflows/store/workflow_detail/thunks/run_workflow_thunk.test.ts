@@ -18,11 +18,11 @@ import type { MockServices, MockStore } from '../../__mocks__/store.mock';
 
 const mockWorkflowApi = createMockWorkflowApi();
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => mockWorkflowApi),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('runWorkflowThunk', () => {
   let store: MockStore;

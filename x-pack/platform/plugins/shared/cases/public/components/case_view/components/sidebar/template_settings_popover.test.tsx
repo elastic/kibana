@@ -18,46 +18,46 @@ import { basicCase } from '../../../../containers/mock';
 
 const mockUseGetTemplates = vi.fn();
 vi.mock('../../../templates_v2/hooks/use_get_templates', () => {
-      const mocked = {
-      useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetTemplate = vi.fn();
 vi.mock('../../../templates_v2/hooks/use_get_template', () => {
-      const mocked = {
-      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMutate = vi.fn();
 vi.mock('../../use_change_applied_template', () => {
-      const mocked = {
-      useChangeAppliedTemplate: () => ({ mutate: mockMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeAppliedTemplate: () => ({ mutate: mockMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseTemplateNonGlobalFields = vi.fn();
 vi.mock('../../../templates_v2/hooks/use_template_non_global_fields', () => {
-      const mocked = {
-      useTemplateNonGlobalFields: (...args: unknown[]) => mockUseTemplateNonGlobalFields(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTemplateNonGlobalFields: (...args: unknown[]) => mockUseTemplateNonGlobalFields(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFormApiTrigger = vi.fn();
 const mockFormApiGetValues = vi.fn();
 const mockTemplateFieldsFormReady = vi.fn();
 vi.mock('../template_fields_form_ready', () => {
-      const mocked = {
-      EMPTY_EXTENDED_FIELDS: {},
-      TemplateFieldsFormReady: (...args: unknown[]) => mockTemplateFieldsFormReady(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EMPTY_EXTENDED_FIELDS: {},
+    TemplateFieldsFormReady: (...args: unknown[]) => mockTemplateFieldsFormReady(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const appliedTemplate = {
   templateId: 'template-1',

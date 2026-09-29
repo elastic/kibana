@@ -15,27 +15,27 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 vi.mock('../../../../lib/retry_if_conflicts', () => {
-      const mocked = {
-      retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
-        return asyncFn();
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retryIfConflicts: (_: unknown, id: unknown, asyncFn: () => Promise<unknown>) => {
+      return asyncFn();
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../rules_client/lib', () => {
-      const mocked = {
-      updateMetaAttributes: (_context: unknown, attributes: unknown) => attributes,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateMetaAttributes: (_context: unknown, attributes: unknown) => attributes,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../saved_objects', () => {
-      const mocked = {
-      partiallyUpdateRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    partiallyUpdateRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const loggerErrorMock = vi.fn();
 const getBulkMock = vi.fn();
@@ -50,7 +50,9 @@ savedObjectsMock.get = vi.fn().mockReturnValue({
   version: '9.0.0',
 });
 
-const { partiallyUpdateRule: partiallyUpdateRuleMock } = (await vi.importMock('../../../../saved_objects'));
+const { partiallyUpdateRule: partiallyUpdateRuleMock } = await vi.importMock(
+  '../../../../saved_objects'
+);
 
 const context = {
   logger: { error: loggerErrorMock },

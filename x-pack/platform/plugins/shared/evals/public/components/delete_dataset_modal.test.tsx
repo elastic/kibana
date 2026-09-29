@@ -20,9 +20,7 @@ import { DeleteDatasetModal } from './delete_dataset_modal';
 vi.mock('../hooks/use_spaces');
 vi.mock('../hooks/use_evals_api');
 
-const mockUseAccessibleSpaces = useAccessibleSpaces as MockedFunction<
-  typeof useAccessibleSpaces
->;
+const mockUseAccessibleSpaces = useAccessibleSpaces as MockedFunction<typeof useAccessibleSpaces>;
 const mockUseDeleteDataset = useDeleteDataset as MockedFunction<typeof useDeleteDataset>;
 const mockUseEvaluationExperiments = useEvaluationExperiments as MockedFunction<
   typeof useEvaluationExperiments

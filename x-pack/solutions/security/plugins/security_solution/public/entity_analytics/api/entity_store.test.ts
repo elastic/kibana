@@ -16,11 +16,11 @@ import { useKibana } from '../../common/lib/kibana/kibana_react';
 import { WATCHLISTS_PREBUILT_INSTALL_URL } from '../../../common/entity_analytics/watchlists/constants';
 
 vi.mock('../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetch = vi.fn();
 const useKibanaMock = useKibana as Mock;

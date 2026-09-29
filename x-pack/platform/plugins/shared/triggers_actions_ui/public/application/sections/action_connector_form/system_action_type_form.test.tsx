@@ -22,7 +22,7 @@ const actionTypeRegistry = actionTypeRegistryMock.create();
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', async () => {
-  const original = (await vi.importActual('@kbn/alerts-ui-shared/src/action_variables/transforms'));
+  const original = await vi.importActual('@kbn/alerts-ui-shared/src/action_variables/transforms');
   return {
     ...original,
     transformActionVariables: vi.fn(),
@@ -30,14 +30,14 @@ vi.mock('@kbn/alerts-ui-shared/src/action_variables/transforms', async () => {
 });
 
 vi.mock('../../hooks/use_rule_alert_fields', () => {
-      const mocked = {
-      useRuleTypeAlertFields: () => ({
-        isLoading: false,
-        fields: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleTypeAlertFields: () => ({
+      isLoading: false,
+      fields: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const actionConnector = createMockActionConnector({
   actionTypeId: '.test-system-action',

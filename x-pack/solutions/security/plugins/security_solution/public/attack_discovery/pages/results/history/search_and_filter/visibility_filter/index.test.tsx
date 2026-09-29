@@ -16,11 +16,11 @@ import { VisibilityFilter } from '.';
 import { TestProviders } from '../../../../../../common/mock/test_providers';
 
 vi.mock('../../../../use_find_attack_discoveries', () => {
-      const mocked = {
-      useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateFindAttackDiscoveries: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   setShared: vi.fn(),

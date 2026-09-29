@@ -74,7 +74,7 @@ describe('useImagePasteUpload', () => {
       mockUploadState = createMockUploadState();
 
       vi.doMock('@kbn/shared-ux-file-upload/src/upload_state', async () => {
-        const actual = (await vi.importActual('@kbn/shared-ux-file-upload/src/upload_state'));
+        const actual = await vi.importActual('@kbn/shared-ux-file-upload/src/upload_state');
         return {
           ...actual,
           createUploadState: () => mockUploadState,

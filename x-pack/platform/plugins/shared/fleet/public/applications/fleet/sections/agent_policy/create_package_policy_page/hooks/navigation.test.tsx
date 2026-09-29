@@ -26,18 +26,18 @@ const mockGetHref = vi.fn((page: string, params?: Record<string, string>) => {
 });
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      useStartServices: vi.fn(() => ({
-        application: {
-          navigateToApp: mockNavigateToApp,
-          getUrlForApp: mockGetUrlForApp,
-        },
-      })),
-      useLink: vi.fn(() => ({ getHref: mockGetHref })),
-      useIntraAppState: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartServices: vi.fn(() => ({
+      application: {
+        navigateToApp: mockNavigateToApp,
+        getUrlForApp: mockGetUrlForApp,
+      },
+    })),
+    useLink: vi.fn(() => ({ getHref: mockGetHref })),
+    useIntraAppState: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithSearch = (search: string) =>
   renderHook(

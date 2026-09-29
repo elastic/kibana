@@ -21,19 +21,19 @@ const mockApiPublishesTimeRange = vi.fn();
 const mockOpenLazyFlyout = vi.fn();
 
 vi.mock('@kbn/presentation-publishing', () => {
-      const mocked = {
-      apiIsPresentationContainer: (...args: unknown[]) => mockApiIsPresentationContainer(...args),
-      apiPublishesTimeRange: (...args: unknown[]) => mockApiPublishesTimeRange(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiIsPresentationContainer: (...args: unknown[]) => mockApiIsPresentationContainer(...args),
+    apiPublishesTimeRange: (...args: unknown[]) => mockApiPublishesTimeRange(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/presentation-util', () => {
-      const mocked = {
-      openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openLazyFlyout: (...args: unknown[]) => mockOpenLazyFlyout(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCoreStart = {
   overlays: { openFlyout: vi.fn() },

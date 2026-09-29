@@ -49,7 +49,7 @@ import { executeAgent$, generateTitle, resolveServices } from './utils';
 import type { Span } from '@opentelemetry/api';
 
 vi.mock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
 
   return {
     ...actual,
@@ -70,13 +70,12 @@ vi.mock('uuid', () => {
 const mockSpanSetAttribute = vi.fn();
 
 vi.mock('../../tracing', async () => {
-  const actual = (await vi.importActual('../../tracing'));
+  const actual = await vi.importActual('../../tracing');
 
   return {
     ...actual,
-    withConverseSpan: vi.fn(
-      (_opts: unknown, cb: (span: { setAttribute: Mock }) => unknown) =>
-        cb({ setAttribute: mockSpanSetAttribute })
+    withConverseSpan: vi.fn((_opts: unknown, cb: (span: { setAttribute: Mock }) => unknown) =>
+      cb({ setAttribute: mockSpanSetAttribute })
     ),
     loadTracingPrivacySettings: vi.fn().mockResolvedValue({
       enabled: true,

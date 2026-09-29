@@ -20,12 +20,12 @@ import { statusSignal } from '../connected_status/status_signal';
 import { ConnectedLinkedInvestigations } from './connected_linked_investigations';
 
 vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
-      useLinkedInvestigations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+    useLinkedInvestigations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLinkedInvestigations = useLinkedInvestigations as Mock;
 

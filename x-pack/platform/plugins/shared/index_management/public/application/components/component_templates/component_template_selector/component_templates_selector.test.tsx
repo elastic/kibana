@@ -18,70 +18,70 @@ const mockUseLoadComponentTemplates = vi.fn();
 const mockSelectionComponentsSpy = vi.fn();
 
 vi.mock('../component_templates_context', () => {
-      const mocked = {
-      useApi: () => ({ useLoadComponentTemplates: () => mockUseLoadComponentTemplates() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApi: () => ({ useLoadComponentTemplates: () => mockUseLoadComponentTemplates() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../template_form/steps/use_creates_data_stream', () => {
-      const mocked = {
-      useCreatesDataStream: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreatesDataStream: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared_imports', () => {
-      const mocked = {
-      SectionError: () => <div data-test-subj="sectionError" />,
-      SectionLoading: () => <div data-test-subj="sectionLoading" />,
-      GlobalFlyout: {
-        useGlobalFlyout: () => ({ addContent: vi.fn(), removeContent: vi.fn() }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SectionError: () => <div data-test-subj="sectionError" />,
+    SectionLoading: () => <div data-test-subj="sectionLoading" />,
+    GlobalFlyout: {
+      useGlobalFlyout: () => ({ addContent: vi.fn(), removeContent: vi.fn() }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../component_template_details', () => {
-      const mocked = {
-      ComponentTemplateDetailsFlyoutContent: () => null,
-      defaultFlyoutProps: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComponentTemplateDetailsFlyoutContent: () => null,
+    defaultFlyoutProps: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components', () => {
-      const mocked = {
-      CreateButtonPopOver: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateButtonPopOver: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./component_templates', () => {
-      const mocked = {
-      ComponentTemplates: () => <div data-test-subj="mockComponentTemplatesList" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComponentTemplates: () => <div data-test-subj="mockComponentTemplatesList" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./component_templates_selection', () => {
-      const mocked = {
-      ComponentTemplatesSelection: ({ components }: { components: ComponentTemplateListItem[] }) => {
-        mockSelectionComponentsSpy(components);
+  const mocked = {
+    ComponentTemplatesSelection: ({ components }: { components: ComponentTemplateListItem[] }) => {
+      mockSelectionComponentsSpy(components);
 
-        return (
-          <ul>
-            {components.map(({ name }) => (
-              <li key={name} data-test-subj="selectedComponent">
-                {name}
-              </li>
-            ))}
-          </ul>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return (
+        <ul>
+          {components.map(({ name }) => (
+            <li key={name} data-test-subj="selectedComponent">
+              {name}
+            </li>
+          ))}
+        </ul>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Every field other than `name` differs from the placeholder entry, so the object
 // assertions fail when an existing template falls back to a placeholder (or a partial copy).

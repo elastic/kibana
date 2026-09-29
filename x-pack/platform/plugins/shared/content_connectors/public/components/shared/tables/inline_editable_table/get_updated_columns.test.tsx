@@ -12,13 +12,13 @@ import type React from 'react';
 import { render } from '@testing-library/react';
 
 vi.mock('./action_column', () => {
-      const mocked = { ActionColumn: vi.fn(() => null) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ActionColumn: vi.fn(() => null) };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./editing_column', () => {
-      const mocked = { EditingColumn: vi.fn(() => null) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { EditingColumn: vi.fn(() => null) };
+  return { ...mocked, default: mocked };
+});
 
 import { ActionColumn } from './action_column';
 import { EditingColumn } from './editing_column';

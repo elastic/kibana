@@ -19,11 +19,11 @@ const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();
 
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
-      const mocked = {
-      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertDeleteRuleSettingsSection', () => {
   const lastRunDate = '2025-10-01T02:10:23.000Z';

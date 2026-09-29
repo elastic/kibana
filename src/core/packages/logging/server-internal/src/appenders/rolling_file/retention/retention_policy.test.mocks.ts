@@ -17,7 +17,7 @@ export const listFilesExceedingSizeMock: MockedFunction<typeof listFilesExceedin
 export const listFilesOlderThanMock: MockedFunction<typeof listFilesOlderThan> = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     listFilesExceedingSize: listFilesExceedingSizeMock,
@@ -28,7 +28,7 @@ vi.doMock('./utils', async () => {
 export const deleteFilesMock: MockedFunction<typeof deleteFiles> = vi.fn();
 
 vi.doMock('./fs', async () => {
-  const actual = (await vi.importActual('./fs'));
+  const actual = await vi.importActual('./fs');
   return {
     ...actual,
     deleteFiles: deleteFilesMock,

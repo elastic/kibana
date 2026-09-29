@@ -46,47 +46,47 @@ export const mockDetectResources = vi.fn(() => ({
 }));
 
 vi.mock('@opentelemetry/sdk-logs', () => {
-      const mocked = {
-      LoggerProvider: mockLoggerProvider,
-      BatchLogRecordProcessor: mockBatchLogRecordProcessor,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoggerProvider: mockLoggerProvider,
+    BatchLogRecordProcessor: mockBatchLogRecordProcessor,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@opentelemetry/exporter-logs-otlp-http', () => {
-      const mocked = {
-      OTLPLogExporter: mockOTLPLogExporter,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OTLPLogExporter: mockOTLPLogExporter,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@opentelemetry/exporter-logs-otlp-grpc', () => {
-      const mocked = {
-      OTLPLogExporter: mockOTLPLogExporter,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OTLPLogExporter: mockOTLPLogExporter,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@opentelemetry/exporter-logs-otlp-proto', () => {
-      const mocked = {
-      OTLPLogExporter: mockOTLPLogExporter,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OTLPLogExporter: mockOTLPLogExporter,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/opentelemetry-node/sdk', () => {
-      const mocked = {
-      resources: {
-        detectResources: mockDetectResources,
-        resourceFromAttributes: mockResourceFromAttributes,
-        envDetector: 'envDetector',
-        hostDetector: 'hostDetector',
-        osDetector: 'osDetector',
-        processDetector: 'processDetector',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resources: {
+      detectResources: mockDetectResources,
+      resourceFromAttributes: mockResourceFromAttributes,
+      envDetector: 'envDetector',
+      hostDetector: 'hostDetector',
+      osDetector: 'osDetector',
+      processDetector: 'processDetector',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@opentelemetry/api', () => {
   const actual = require('@opentelemetry/api');
@@ -109,27 +109,27 @@ vi.mock('@opentelemetry/api', () => {
 
 export const mockGetConfiguration = vi.fn();
 vi.mock('@kbn/apm-config-loader', () => {
-      const mocked = {
-      getConfiguration: mockGetConfiguration,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: mockGetConfiguration,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // @kbn/telemetry re-exports initTelemetry which transitively imports @kbn/tracing and
 // @kbn/metrics. Those packages load heavy OTel SDK modules (tracers, exporters, etc.)
 // at require-time that are unrelated to what otel_appender.ts actually uses
 // (buildOtelResources). Mocking them here keeps those module graphs from loading.
 vi.mock('@kbn/tracing', () => {
-      const mocked = {
-      initTracing: vi.fn(),
-      LateBindingSpanProcessor: { get: vi.fn() },
-      OTLPSpanProcessor: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initTracing: vi.fn(),
+    LateBindingSpanProcessor: { get: vi.fn() },
+    OTLPSpanProcessor: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/metrics', () => {
-      const mocked = {
-      initMetrics: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initMetrics: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});

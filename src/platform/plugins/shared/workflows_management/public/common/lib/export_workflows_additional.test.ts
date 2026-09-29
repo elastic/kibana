@@ -14,27 +14,27 @@ import { findMissingReferencedIds, resolveAllReferences } from './export_workflo
 
 // Mock downloadFileAs (required by module but not used in these tests)
 vi.mock('@kbn/share-plugin/public', () => {
-      const mocked = {
-      downloadFileAs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    downloadFileAs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-yaml', () => {
-      const mocked = {
-      stringifyWorkflowDefinition: (def: unknown) => `stringified:${JSON.stringify(def)}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stringifyWorkflowDefinition: (def: unknown) => `stringified:${JSON.stringify(def)}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock extractReferencedWorkflowIds
 const mockExtractReferencedWorkflowIds = vi.fn();
 vi.mock('./export/extract_workflow_references', () => {
-      const mocked = {
-      extractReferencedWorkflowIds: (...args: unknown[]) => mockExtractReferencedWorkflowIds(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractReferencedWorkflowIds: (...args: unknown[]) => mockExtractReferencedWorkflowIds(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWorkflow = (
   id: string,

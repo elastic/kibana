@@ -43,42 +43,42 @@ const mockGetJob = vi.fn(() => ({
 }));
 
 vi.mock('../../services/job_service', () => {
-      const mocked = {
-      mlJobServiceFactory: () => ({
-        getJob: mockGetJob,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mlJobServiceFactory: () => ({
+      getJob: mockGetJob,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../capabilities/check_capabilities', () => {
-      const mocked = {
-      checkPermission: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkPermission: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      withKibana: (comp) => {
-        return comp;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withKibana: (comp) => {
+      return comp;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./select_rule_action', () => {
-      const mocked = {
-      SelectRuleAction: vi.fn().mockImplementation(({ job, anomaly }) => {
-        const React = require('react');
-        return React.createElement(
-          'div',
-          { 'data-testid': 'mock-select-rule-action' },
-          `Mock SelectRuleAction for job ${job?.job_id} and detector ${anomaly?.detectorIndex}`
-        );
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SelectRuleAction: vi.fn().mockImplementation(({ job, anomaly }) => {
+      const React = require('react');
+      return React.createElement(
+        'div',
+        { 'data-testid': 'mock-select-rule-action' },
+        `Mock SelectRuleAction for job ${job?.job_id} and detector ${anomaly?.detectorIndex}`
+      );
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';

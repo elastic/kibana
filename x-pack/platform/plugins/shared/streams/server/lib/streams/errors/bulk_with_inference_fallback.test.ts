@@ -18,11 +18,11 @@ import {
 } from './bulk_with_inference_fallback';
 
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { setTimeout as mockedSetTimeout } from 'timers/promises';
 

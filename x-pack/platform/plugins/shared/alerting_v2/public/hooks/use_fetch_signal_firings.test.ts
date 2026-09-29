@@ -16,23 +16,23 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 
 vi.mock('@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search', () => {
-      const mocked = {
-      runEsqlAsyncSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runEsqlAsyncSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows', () => {
-      const mocked = {
-      esqlResponseToObjectRows: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    esqlResponseToObjectRows: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/alerting-v2-episodes-ui/utils/histogram_utils', () => {
-      const mocked = {
-      computeBucketInterval: vi.fn(() => '1h'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    computeBucketInterval: vi.fn(() => '1h'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { runEsqlAsyncSearch } from '@kbn/alerting-v2-episodes-ui/utils/run_esql_async_search';
 import { esqlResponseToObjectRows } from '@kbn/alerting-v2-episodes-ui/utils/esql_response_to_rows';

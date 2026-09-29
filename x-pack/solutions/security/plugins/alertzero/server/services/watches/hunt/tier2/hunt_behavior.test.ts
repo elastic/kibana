@@ -17,12 +17,12 @@ import { ESQL_GENERATION_INSTRUCTIONS } from './extraction_contract';
 import { getMitreCatalog } from './mitre_catalog';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const generateEsqlMock = generateEsql as MockedFunction<typeof generateEsql>;
 const executeEsqlMock = executeEsql as MockedFunction<typeof executeEsql>;

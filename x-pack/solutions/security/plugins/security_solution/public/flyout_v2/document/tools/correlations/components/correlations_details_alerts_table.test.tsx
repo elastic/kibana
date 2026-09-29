@@ -30,20 +30,20 @@ vi.mock('../../../../../detections/containers/detection_engine/alerts/use_alerts
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../../../../common/hooks/is_in_security_app');
 vi.mock('../../../../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: () => ({
-        timelinePrivileges: {
+  const mocked = {
+    useUserPrivileges: () => ({
+      timelinePrivileges: {
+        read: true,
+      },
+      rulesPrivileges: {
+        rules: {
           read: true,
         },
-        rulesPrivileges: {
-          rules: {
-            read: true,
-          },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useAlertsPrivilegesMock = useAlertsPrivileges as Mock;
 

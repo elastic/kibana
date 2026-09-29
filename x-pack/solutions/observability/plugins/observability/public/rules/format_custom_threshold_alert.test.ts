@@ -12,13 +12,15 @@ import { formatCustomThresholdAlert } from './format_custom_threshold_alert';
 import { Aggregators } from '../../common/custom_threshold_rule/types';
 
 vi.mock('../../common/custom_threshold_rule/get_view_in_app_url', () => {
-      const mocked = {
-      getViewInAppUrl: vi.fn(() => 'mockedUrl'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getViewInAppUrl: vi.fn(() => 'mockedUrl'),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getViewInAppUrl } = (await vi.importMock('../../common/custom_threshold_rule/get_view_in_app_url'));
+const { getViewInAppUrl } = await vi.importMock(
+  '../../common/custom_threshold_rule/get_view_in_app_url'
+);
 
 describe('formatCustomThresholdAlert', () => {
   beforeEach(() => {

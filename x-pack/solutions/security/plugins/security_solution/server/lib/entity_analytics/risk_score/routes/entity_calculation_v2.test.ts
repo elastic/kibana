@@ -35,15 +35,15 @@ import { buildAlertFilters } from '../maintainer/steps/build_alert_filters';
 const entityId = 'host:test-host-name';
 
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        dsl: {
-          getEuidFilterBasedOnDocument: vi.fn().mockReturnValue({ term: { 'entity.id': entityId } }),
-        },
+  const mocked = {
+    euid: {
+      dsl: {
+        getEuidFilterBasedOnDocument: vi.fn().mockReturnValue({ term: { 'entity.id': entityId } }),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../get_risk_inputs_index');
 vi.mock('../../risk_engine/utils/saved_object_configuration');
 vi.mock('../maintainer/steps/score_base_entities');

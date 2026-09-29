@@ -22,21 +22,23 @@ const defaultProps = {
 const newConnector = { actionTypeId: '.gen-ai', name: 'cool name' };
 
 vi.mock('../add_connector_modal', () => {
-      const mocked = {
-      // @ts-ignore
-      AddConnectorModal: ({ onSaveConnector, isMissingConnectorPrivileges }) => (
-        <>
-          <button
-            type="button"
-            data-test-subj="modal-mock"
-            onClick={() => onSaveConnector(newConnector)}
-          />
-          {isMissingConnectorPrivileges && <span data-test-subj="modal-missing-privileges-indicator" />}
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    AddConnectorModal: ({ onSaveConnector, isMissingConnectorPrivileges }) => (
+      <>
+        <button
+          type="button"
+          data-test-subj="modal-mock"
+          onClick={() => onSaveConnector(newConnector)}
+        />
+        {isMissingConnectorPrivileges && (
+          <span data-test-subj="modal-missing-privileges-indicator" />
+        )}
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const setApiConfig = vi.fn().mockResolvedValue(welcomeConvo);
 const mockConversation = {
@@ -49,11 +51,11 @@ const mockConversation = {
 };
 
 vi.mock('../../assistant/use_conversation', () => {
-      const mocked = {
-      useConversation: () => mockConversation,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: () => mockConversation,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.spyOn(global, 'clearTimeout');
 describe('ConnectorSetup', () => {

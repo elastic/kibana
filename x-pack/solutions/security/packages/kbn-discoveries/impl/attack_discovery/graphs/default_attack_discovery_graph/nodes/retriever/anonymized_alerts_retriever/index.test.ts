@@ -23,11 +23,11 @@ const rawAlerts = [
 ];
 
 vi.mock('../helpers/get_anonymized_alerts', () => {
-      const mocked = {
-      getAnonymizedAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAnonymizedAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnonymizedAlertsRetriever', () => {
   let esClient: ElasticsearchClient;

@@ -85,15 +85,13 @@ describe('MonitorAddPage', () => {
   });
 
   it('redirects to getting started page when no locations are available', async () => {
-    const useCloneMonitorSpy = vi
-      .spyOn(useCloneMonitorModule, 'useCloneMonitor')
-      .mockReturnValue({
-        data: undefined,
-        status: 'success' as any,
-        loading: false,
-        error: undefined,
-        refetch: vi.fn(),
-      });
+    const useCloneMonitorSpy = vi.spyOn(useCloneMonitorModule, 'useCloneMonitor').mockReturnValue({
+      data: undefined,
+      status: 'success' as any,
+      loading: false,
+      error: undefined,
+      refetch: vi.fn(),
+    });
     let history: ReturnType<typeof render>['history'];
 
     act(() => {
@@ -113,15 +111,13 @@ describe('MonitorAddPage', () => {
   });
 
   it('preserves return params when redirecting to getting started', async () => {
-    const useCloneMonitorSpy = vi
-      .spyOn(useCloneMonitorModule, 'useCloneMonitor')
-      .mockReturnValue({
-        data: undefined,
-        status: 'success' as any,
-        loading: false,
-        error: undefined,
-        refetch: vi.fn(),
-      });
+    const useCloneMonitorSpy = vi.spyOn(useCloneMonitorModule, 'useCloneMonitor').mockReturnValue({
+      data: undefined,
+      status: 'success' as any,
+      loading: false,
+      error: undefined,
+      refetch: vi.fn(),
+    });
     const history = createMemoryHistory({
       initialEntries: ['/add-monitor?returnAppId=observabilityOnboarding&returnPath=%3F'],
     });

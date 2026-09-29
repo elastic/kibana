@@ -21,7 +21,7 @@ import type { IScopedWorkflowChangeHistoryService } from '../services/workflow_c
 import type { WorkflowProperties } from '../storage/workflow_storage';
 
 vi.mock('@kbn/occ', async () => {
-  const actual = (await vi.importActual('@kbn/occ'));
+  const actual = await vi.importActual('@kbn/occ');
   return {
     ...actual,
     delayMs: vi.fn().mockResolvedValue(undefined),

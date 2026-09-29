@@ -23,22 +23,22 @@ import { getColumns, TIMESTAMP_DATE_FORMAT } from './get_columns';
 vi.mock('@kbn/expandable-flyout');
 vi.mock('../../../../../common/components/user_privileges');
 vi.mock('../../../../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          telemetry: { reportEvent: vi.fn() },
-        },
-      }),
-      useUiSetting: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        telemetry: { reportEvent: vi.fn() },
+      },
+    }),
+    useUiSetting: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const scopeId = 'test-scope';
 const dataTestSubj = 'TEST';

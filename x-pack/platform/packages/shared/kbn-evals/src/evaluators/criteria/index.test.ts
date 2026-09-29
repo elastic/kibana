@@ -12,11 +12,11 @@ import type { BoundInferenceClient, ToolCallback } from '@kbn/inference-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 vi.mock('@kbn/inference-prompt-utils', () => {
-      const mocked = {
-      executeUntilValid: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeUntilValid: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import { createCriteriaEvaluator, type EvaluationCriterion } from '.';

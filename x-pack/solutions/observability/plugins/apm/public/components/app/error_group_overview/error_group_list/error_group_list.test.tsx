@@ -14,13 +14,13 @@ import * as stories from './error_group_list.stories';
 
 // Mock the usePerformanceContext hook
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({
-        onPageReady: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({
+      onPageReady: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { Example } = composeStories(stories);
 

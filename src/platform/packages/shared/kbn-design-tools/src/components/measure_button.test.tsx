@@ -17,12 +17,12 @@ import { MeasureButton } from './measure_button';
 import { isMeasureShortcut } from '../lib/keyboard_shortcuts';
 
 vi.mock('../lib/keyboard_shortcuts', () => {
-      const mocked = {
-      isEscapeKey: vi.fn(),
-      isMeasureShortcut: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isEscapeKey: vi.fn(),
+    isMeasureShortcut: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedIsMeasureShortcut = vi.mocked(isMeasureShortcut);
 

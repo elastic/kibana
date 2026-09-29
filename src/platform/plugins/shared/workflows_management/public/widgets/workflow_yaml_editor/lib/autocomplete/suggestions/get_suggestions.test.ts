@@ -15,91 +15,91 @@ import { getSuggestions, isInsideLoopBody } from './get_suggestions';
 import type { ExtendedAutocompleteContext } from '../context/autocomplete.types';
 
 vi.mock('./connector_id/get_connector_id_suggestions', () => {
-      const mocked = {
-      getConnectorIdSuggestions: vi.fn(() => [{ label: 'connector-id-1' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorIdSuggestions: vi.fn(() => [{ label: 'connector-id-1' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./connector_type/get_connector_type_suggestions', () => {
-      const mocked = {
-      getConnectorTypeSuggestions: vi.fn(() => [{ label: 'type-1' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConnectorTypeSuggestions: vi.fn(() => [{ label: 'type-1' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./step_property/get_step_property_suggestions', () => {
-      const mocked = {
-      getStepPropertySuggestions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getStepPropertySuggestions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./json_schema/get_json_schema_suggestions', () => {
-      const mocked = {
-      getJsonSchemaSuggestions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getJsonSchemaSuggestions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./liquid/liquid_completions', () => {
-      const mocked = {
-      createLiquidBlockKeywordCompletions: vi.fn(() => [{ label: 'assign' }]),
-      createLiquidFilterCompletions: vi.fn(() => [{ label: 'upcase' }]),
-      createLiquidSyntaxCompletions: vi.fn(() => [{ label: '{% if %}' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLiquidBlockKeywordCompletions: vi.fn(() => [{ label: 'assign' }]),
+    createLiquidFilterCompletions: vi.fn(() => [{ label: 'upcase' }]),
+    createLiquidSyntaxCompletions: vi.fn(() => [{ label: '{% if %}' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./rrule/get_rrule_scheduling_suggestions', () => {
-      const mocked = {
-      getRRuleSchedulingSuggestions: vi.fn(() => [{ label: 'rrule' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRRuleSchedulingSuggestions: vi.fn(() => [{ label: 'rrule' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./timezone/get_timezone_suggestions', () => {
-      const mocked = {
-      getTimezoneSuggestions: vi.fn(() => [{ label: 'UTC' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimezoneSuggestions: vi.fn(() => [{ label: 'UTC' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./trigger_type/get_trigger_type_suggestions', () => {
-      const mocked = {
-      getTriggerTypeSuggestions: vi.fn(() => [{ label: 'scheduled' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTriggerTypeSuggestions: vi.fn(() => [{ label: 'scheduled' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./variable/get_variable_suggestions', () => {
-      const mocked = {
-      getVariableSuggestions: vi.fn(() => [{ label: '{{context.var}}' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getVariableSuggestions: vi.fn(() => [{ label: '{{context.var}}' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow/get_workflow_inputs_suggestions', () => {
-      const mocked = {
-      getWorkflowInputsSuggestions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowInputsSuggestions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow/get_workflow_outputs_suggestions', () => {
-      const mocked = {
-      getWorkflowOutputsSuggestions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowOutputsSuggestions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflow/get_workflow_suggestions', () => {
-      const mocked = {
-      getWorkflowSuggestions: vi.fn(() => [{ label: 'wf-1' }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowSuggestions: vi.fn(() => [{ label: 'wf-1' }]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../common/schema', () => {
-      const mocked = {
-      getPropertyHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPropertyHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./esql_query/get_esql_query_suggestions', () => {
-      const mocked = {
-      getEsqlQuerySuggestions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsqlQuerySuggestions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createMockContext(
   overrides: Partial<ExtendedAutocompleteContext> = {}
@@ -447,7 +447,9 @@ describe('getSuggestions', () => {
   });
 
   it('should try workflow inputs suggestions when isInWorkflowInputsContext is true', async () => {
-    const { getWorkflowInputsSuggestions } = (await vi.importMock('./workflow/get_workflow_inputs_suggestions'));
+    const { getWorkflowInputsSuggestions } = await vi.importMock(
+      './workflow/get_workflow_inputs_suggestions'
+    );
     getWorkflowInputsSuggestions.mockResolvedValueOnce([{ label: 'input-key' }]);
 
     const ctx = createMockContext({
@@ -459,7 +461,9 @@ describe('getSuggestions', () => {
   });
 
   it('should return workflow inputs suggestions for workflow-inputs match type', async () => {
-    const { getWorkflowInputsSuggestions } = (await vi.importMock('./workflow/get_workflow_inputs_suggestions'));
+    const { getWorkflowInputsSuggestions } = await vi.importMock(
+      './workflow/get_workflow_inputs_suggestions'
+    );
     getWorkflowInputsSuggestions.mockResolvedValueOnce([{ label: 'input-scaffold' }]);
 
     const ctx = createMockContext({
@@ -475,15 +479,19 @@ describe('getSuggestions', () => {
 
   describe('ES|QL query field ownership', () => {
     beforeEach(async () => {
-      const { getEsqlQuerySuggestions } = (await vi.importMock('./esql_query/get_esql_query_suggestions'));
-      const { createLiquidFilterCompletions } = (await vi.importMock('./liquid/liquid_completions'));
+      const { getEsqlQuerySuggestions } = await vi.importMock(
+        './esql_query/get_esql_query_suggestions'
+      );
+      const { createLiquidFilterCompletions } = await vi.importMock('./liquid/liquid_completions');
       getEsqlQuerySuggestions.mockReset();
       createLiquidFilterCompletions.mockClear();
     });
 
     it('returns ES|QL suggestions without falling through to Liquid when ES|QL owns the popup', async () => {
-      const { getEsqlQuerySuggestions } = (await vi.importMock('./esql_query/get_esql_query_suggestions'));
-      const { createLiquidFilterCompletions } = (await vi.importMock('./liquid/liquid_completions'));
+      const { getEsqlQuerySuggestions } = await vi.importMock(
+        './esql_query/get_esql_query_suggestions'
+      );
+      const { createLiquidFilterCompletions } = await vi.importMock('./liquid/liquid_completions');
       getEsqlQuerySuggestions.mockResolvedValueOnce([{ label: 'WHERE' }]);
 
       const ctx = createMockContext({
@@ -512,8 +520,10 @@ describe('getSuggestions', () => {
     });
 
     it('returns [] from ES|QL path without Liquid filter fallthrough when suggest has nothing', async () => {
-      const { getEsqlQuerySuggestions } = (await vi.importMock('./esql_query/get_esql_query_suggestions'));
-      const { createLiquidFilterCompletions } = (await vi.importMock('./liquid/liquid_completions'));
+      const { getEsqlQuerySuggestions } = await vi.importMock(
+        './esql_query/get_esql_query_suggestions'
+      );
+      const { createLiquidFilterCompletions } = await vi.importMock('./liquid/liquid_completions');
       getEsqlQuerySuggestions.mockResolvedValueOnce([]);
 
       const ctx = createMockContext({

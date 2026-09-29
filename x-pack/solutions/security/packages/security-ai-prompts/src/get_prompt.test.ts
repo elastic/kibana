@@ -336,9 +336,7 @@ describe('get_prompt', () => {
     });
 
     it('returns the bedrock prompt when provider is "elastic" but model does not match elasticModelDictionary', async () => {
-      const getInferenceConnectorById = vi
-        .fn()
-        .mockResolvedValue(inferenceElasticUnknownConnector);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(inferenceElasticUnknownConnector);
       const result = await getPrompt({
         savedObjectsClient,
         localPrompts,
@@ -551,9 +549,7 @@ describe('get_prompt', () => {
     });
 
     it('returns prompts using getInferenceConnectorById for inference connector with elastic provider', async () => {
-      const getInferenceConnectorById = vi
-        .fn()
-        .mockResolvedValue(inferenceElasticConnectorRainbow);
+      const getInferenceConnectorById = vi.fn().mockResolvedValue(inferenceElasticConnectorRainbow);
       const result = await getPromptsByGroupId({
         savedObjectsClient,
         localPrompts,

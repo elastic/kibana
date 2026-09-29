@@ -39,31 +39,31 @@ const initialGraphState: DefendInsightsGraphState = {
 };
 
 vi.mock('./events_retriever', () => {
-      const mocked = {
-      AnonymizedEventsRetriever: vi
-        .fn()
-        .mockImplementation(
-          ({
-            onNewReplacements,
-            replacements,
-          }: {
-            onNewReplacements?: (replacements: Replacements) => void;
-            replacements?: Replacements;
-          }) => ({
-            withConfig: vi.fn().mockReturnValue({
-              invoke: vi.fn(async () => {
-                if (onNewReplacements != null && replacements != null) {
-                  onNewReplacements(replacements);
-                }
+  const mocked = {
+    AnonymizedEventsRetriever: vi
+      .fn()
+      .mockImplementation(
+        ({
+          onNewReplacements,
+          replacements,
+        }: {
+          onNewReplacements?: (replacements: Replacements) => void;
+          replacements?: Replacements;
+        }) => ({
+          withConfig: vi.fn().mockReturnValue({
+            invoke: vi.fn(async () => {
+              if (onNewReplacements != null && replacements != null) {
+                onNewReplacements(replacements);
+              }
 
-                return mockAnonymizedEvents;
-              }),
+              return mockAnonymizedEvents;
             }),
-          })
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+          }),
+        })
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getRetrieveAnonymizedEventsNode', () => {
   const logger = {

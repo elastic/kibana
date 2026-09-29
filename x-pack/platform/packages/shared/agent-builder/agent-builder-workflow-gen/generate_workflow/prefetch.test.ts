@@ -17,11 +17,11 @@ import {
 } from './prefetch';
 
 vi.mock('@kbn/workflows-management-plugin/common/schema', () => {
-      const mocked = {
-      getAllConnectors: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getAllConnectorsMock = getAllConnectors as MockedFunction<typeof getAllConnectors>;
 

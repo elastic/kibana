@@ -25,7 +25,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
     describe('create mode', () => {
       describe('equivalent terms', () => {
         it('should be false by default in create mode', async () => {
-          const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+          const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
               useSynonymRuleFlyoutState({
@@ -44,7 +44,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
         });
 
         it('should be true when fromTerms has changes in create mode', async () => {
-          const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+          const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
               useSynonymRuleFlyoutState({
@@ -71,7 +71,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
       });
       describe('explicit terms', () => {
         it('should be false by default in create mode', async () => {
-          const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+          const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
               useSynonymRuleFlyoutState({
@@ -90,7 +90,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
         });
 
         it('should be true when fromTerms has changes ', async () => {
-          const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+          const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
               useSynonymRuleFlyoutState({
@@ -117,7 +117,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
       });
 
       it('should be true when mapToTerms has changes', async () => {
-        const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+        const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
             useSynonymRuleFlyoutState({
@@ -145,7 +145,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
     describe('edit mode', () => {
       describe('equivalent terms', () => {
         it('should be true when fromTerms has changes', async () => {
-          const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+          const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
               useSynonymRuleFlyoutState({
@@ -172,7 +172,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
 
       describe('explicit terms', () => {
         it('should be true when mapToTerms has changes', async () => {
-          const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+          const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
           const { result } = renderHook(
             () =>
               useSynonymRuleFlyoutState({
@@ -201,7 +201,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
 
   describe('reset changes', () => {
     it('should reset changes in equivalent when in edit mode', async () => {
-      const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+      const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
           useSynonymRuleFlyoutState({
@@ -242,7 +242,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
     });
 
     it('should reset changes in explicit when in edit mode', async () => {
-      const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+      const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
           useSynonymRuleFlyoutState({
@@ -276,7 +276,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
     });
 
     it('should reset changes in equivalent when in create mode', async () => {
-      const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+      const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
           useSynonymRuleFlyoutState({
@@ -310,7 +310,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
     });
 
     it('should reset changes in explicit when in create mode', async () => {
-      const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+      const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
       const { result } = renderHook(
         () =>
           useSynonymRuleFlyoutState({
@@ -349,7 +349,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
 
     describe('fromTerms validation', () => {
       it('should be invalid when fromTerms has multiple explicit separators', async () => {
-        const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+        const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
             useSynonymRuleFlyoutState({
@@ -375,7 +375,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
         });
       });
       it('should be invalid when search term exist in fromTerms', async () => {
-        const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+        const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
             useSynonymRuleFlyoutState({
@@ -400,7 +400,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
     });
     describe('mapToTerms validation', () => {
       it('shoud be invalid when mapToTerms is empty', async () => {
-        const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+        const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
             useSynonymRuleFlyoutState({
@@ -424,7 +424,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
         });
       });
       it('should be invalid when mapToTerms has explicit separators', async () => {
-        const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+        const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
             useSynonymRuleFlyoutState({
@@ -450,7 +450,7 @@ describe('useSynonymRuleFlyoutState hook', () => {
         });
       });
       it('should be invalid when mapToTerms has empty values', async () => {
-        const { useSynonymRuleFlyoutState } = (await vi.importActual('./use_flyout_state'));
+        const { useSynonymRuleFlyoutState } = await vi.importActual('./use_flyout_state');
         const { result } = renderHook(
           () =>
             useSynonymRuleFlyoutState({

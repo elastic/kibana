@@ -20,11 +20,11 @@ import { BulkAlertTagsPanel } from '../../../../../common/components/toolbar/bul
 vi.mock('../use_attacks_privileges');
 vi.mock('../apply_actions/use_apply_attack_tags');
 vi.mock('../../../../../common/components/toolbar/bulk_actions/alert_bulk_tags', () => {
-      const mocked = {
-      BulkAlertTagsPanel: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BulkAlertTagsPanel: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges

@@ -20,11 +20,11 @@ import { BehaviorSubject } from 'rxjs';
 import type { KibanaContextExtra } from '../../types';
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: (component: unknown) => component,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: (component: unknown) => component,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStorage: Mocked<Storage> = {
   get: vi.fn(),

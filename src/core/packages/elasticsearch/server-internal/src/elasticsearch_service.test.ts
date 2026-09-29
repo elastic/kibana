@@ -14,19 +14,19 @@ import type { Mock } from 'vitest';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 
 vi.mock('./is_valid_connection', () => {
-      const mocked = {
-      isValidConnection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isValidConnection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mocking this module to force different statuses to help with the unit tests
 vi.mock('./version_check/ensure_es_version', () => {
-      const mocked = {
-      pollEsNodesVersion: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pollEsNodesVersion: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   MockClusterClient,
@@ -53,7 +53,9 @@ import { duration } from 'moment';
 import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/ensure_es_version';
 
-const { pollEsNodesVersion: pollEsNodesVersionActual } = (await vi.importActual('./version_check/ensure_es_version'));
+const { pollEsNodesVersion: pollEsNodesVersionActual } = await vi.importActual(
+  './version_check/ensure_es_version'
+);
 
 const isValidConnectionMock = isValidConnection as Mock;
 

@@ -66,16 +66,16 @@ const MOCK_DATA = {
 const MOCK_DATA_VIEW_ID = 'dataViewId';
 
 vi.mock('../../hooks/use_filter', () => {
-      const mocked = {
-      useSetFilter: () => ({
-        getFilterForValueButton: vi.fn(),
-        getFilterOutValueButton: vi.fn(),
-        getCopyButton: vi.fn(),
-        filterManager: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetFilter: () => ({
+      getFilterForValueButton: vi.fn(),
+      getFilterOutValueButton: vi.fn(),
+      getCopyButton: vi.fn(),
+      filterManager: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks');
 const mockUseFetchData = useFetchContainerNameData as Mock;

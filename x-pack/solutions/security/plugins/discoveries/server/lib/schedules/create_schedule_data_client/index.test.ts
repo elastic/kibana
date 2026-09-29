@@ -19,11 +19,11 @@ import { createScheduleDataClient } from '.';
 import { ATTACK_DISCOVERY_SCHEDULE_TAG } from '../constants';
 
 vi.mock('@kbn/attack-discovery-schedules-common', () => {
-      const mocked = {
-      AttackDiscoveryScheduleDataClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttackDiscoveryScheduleDataClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createScheduleDataClient', () => {
   const mockRulesClient = rulesClientMock.create();

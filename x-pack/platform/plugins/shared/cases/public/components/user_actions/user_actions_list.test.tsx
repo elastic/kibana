@@ -38,12 +38,12 @@ const defaultProps = {
 };
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ detailName: 'case-id' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ detailName: 'case-id' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/lib/kibana');
 

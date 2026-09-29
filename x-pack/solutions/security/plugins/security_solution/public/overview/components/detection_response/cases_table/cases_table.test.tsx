@@ -18,7 +18,7 @@ import type { UseCaseItems } from './use_case_items';
 
 const mockGetAppUrl = vi.fn();
 vi.mock('../../../../common/lib/kibana/hooks', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana/hooks'));
+  const original = await vi.importActual('../../../../common/lib/kibana/hooks');
   return {
     ...original,
     useNavigation: () => ({
@@ -42,11 +42,11 @@ const mockUseCaseItemsReturn = (overrides: Partial<UseCaseItemsReturn>) => {
 };
 
 vi.mock('./use_case_items', () => {
-      const mocked = {
-      useCaseItems: () => mockUseCaseItems(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCaseItems: () => mockUseCaseItems(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = () =>
   render(

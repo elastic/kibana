@@ -14,11 +14,11 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { renderHook } from '@testing-library/react';
 
 vi.mock('../../../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useUserPrivilegesMock = useUserPrivileges as Mock;
 

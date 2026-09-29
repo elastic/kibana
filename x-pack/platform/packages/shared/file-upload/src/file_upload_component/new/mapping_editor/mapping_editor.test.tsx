@@ -16,59 +16,57 @@ import { MappingEditor } from './mapping_editor';
 import { MappingEditorService } from './mapping_editor_service';
 
 vi.mock('../../../use_file_upload', () => {
-      const mocked = {
-      useFileUploadContext: () => ({
-        fileUploadManager: {
-          getMappings: vi.fn(() => ({
-            json: {
-              properties: {
-                field1: { type: 'text' },
-                field2: { type: 'keyword' },
-              },
+  const mocked = {
+    useFileUploadContext: () => ({
+      fileUploadManager: {
+        getMappings: vi.fn(() => ({
+          json: {
+            properties: {
+              field1: { type: 'text' },
+              field2: { type: 'keyword' },
             },
-          })),
-          updateMappings: vi.fn(),
-          renamePipelineTargetFields: vi.fn(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+          },
+        })),
+        updateMappings: vi.fn(),
+        renamePipelineTargetFields: vi.fn(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/field-utils/src/components/field_select/field_select', () => {
-      const mocked = {
-      FieldSelect: ({
-        selectedType,
-        onTypeChange,
-      }: {
-        selectedType: string | null;
-        onTypeChange: (type: string) => void;
-      }) => {
-        return (
-          <select
-            data-test-subj="field-type-select"
-            value={selectedType || ''}
-            onChange={(e) => onTypeChange(e.target.value)}
-          >
-            <option value="">Select type</option>
-            <option value="text">text</option>
-            <option value="keyword">keyword</option>
-            <option value="long">long</option>
-            <option value="double">double</option>
-            <option value="boolean">boolean</option>
-            <option value="date">date</option>
-          </select>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldSelect: ({
+      selectedType,
+      onTypeChange,
+    }: {
+      selectedType: string | null;
+      onTypeChange: (type: string) => void;
+    }) => {
+      return (
+        <select
+          data-test-subj="field-type-select"
+          value={selectedType || ''}
+          onChange={(e) => onTypeChange(e.target.value)}
+        >
+          <option value="">Select type</option>
+          <option value="text">text</option>
+          <option value="keyword">keyword</option>
+          <option value="long">long</option>
+          <option value="double">double</option>
+          <option value="boolean">boolean</option>
+          <option value="date">date</option>
+        </select>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./mapping_editor_service');
 
-const MockMappingEditorService = MappingEditorService as MockedClass<
-  typeof MappingEditorService
->;
+const MockMappingEditorService = MappingEditorService as MockedClass<typeof MappingEditorService>;
 
 describe('MappingEditor', () => {
   let mockService: Mocked<MappingEditorService>;

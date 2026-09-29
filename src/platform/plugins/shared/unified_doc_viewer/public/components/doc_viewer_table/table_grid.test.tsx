@@ -20,38 +20,38 @@ import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks'
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      euiFontSize: () => ({ fontSize: '12px' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    euiFontSize: () => ({ fontSize: '12px' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: () => ({
-        toasts: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: () => ({
+      toasts: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./table_cell_actions', () => {
-      const mocked = {
-      getFieldCellActions: () => [],
-      getFieldValueCellActions: () => [],
-      getFilterExistsDisabledWarning: () => undefined,
-      getFilterInOutPairDisabledWarning: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFieldCellActions: () => [],
+    getFieldValueCellActions: () => [],
+    getFilterExistsDisabledWarning: () => undefined,
+    getFilterInOutPairDisabledWarning: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_pin_control', () => {
-      const mocked = {
-      getPinColumnControl: vi.fn(() => ({ id: 'pin_field', width: 40 })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPinColumnControl: vi.fn(() => ({ id: 'pin_field', width: 40 })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataView = buildDataViewMock({
   name: 'data-view-mock',

@@ -74,9 +74,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('always includes _id and @timestamp even when not in allowedFields', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],
@@ -91,9 +89,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('deduplicates _id and @timestamp if already in allowedFields', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['_id', '@timestamp', 'host.name'],
@@ -136,9 +132,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('excludes fields that do not exist in the index', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name', 'Ransomware.feature', 'actions.context'],
@@ -301,9 +295,7 @@ describe('buildDefaultEsqlQuery', () => {
 
   describe('query structure', () => {
     it('includes FROM with the default alerts index pattern and METADATA _id', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],
@@ -317,9 +309,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes WHERE @timestamp >= NOW() - 24 hours as the first WHERE clause', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],
@@ -334,9 +324,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes WHERE clauses for open/acknowledged and excluding building blocks', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],
@@ -353,9 +341,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes SORT by risk_score DESC and @timestamp DESC', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],
@@ -368,9 +354,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('includes LIMIT with default size of 100', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],
@@ -383,9 +367,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('uses the provided size when specified', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const customSize = 50;
 
@@ -401,9 +383,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('uses a custom alertsIndexPattern when provided', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const customPattern = '.alerts-security.alerts-my-space';
 
@@ -466,9 +446,7 @@ describe('buildDefaultEsqlQuery', () => {
     });
 
     it('uses the spaceId to construct the default alertsIndexPattern', async () => {
-      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(
-        mockFieldCapsResponse(['host.name'])
-      );
+      (mockEsClient.fieldCaps as Mock).mockResolvedValueOnce(mockFieldCapsResponse(['host.name']));
 
       const result = await buildDefaultEsqlQuery({
         allowedFields: ['host.name'],

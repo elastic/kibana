@@ -20,31 +20,31 @@ import { PipelineForm } from './pipeline_form';
 const mockUseKibana = vi.fn();
 
 vi.mock('@kbn/unsaved-changes-prompt', () => {
-      const mocked = {
-      useUnsavedChangesPrompt: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnsavedChangesPrompt: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared_imports', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../shared_imports')),
-      useKibana: () => mockUseKibana(),
-      JsonEditorField: () => <div data-test-subj="jsonEditorFieldStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../shared_imports')),
+    useKibana: () => mockUseKibana(),
+    JsonEditorField: () => <div data-test-subj="jsonEditorFieldStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Avoid mounting the real processors editor (which registers `onUpdate` in an effect)
 vi.mock('../pipeline_editor', () => {
-      const mocked = {
-      ProcessorsEditorContextProvider: ({ children }: { children?: React.ReactNode }) => (
-        <>{children}</>
-      ),
-      PipelineEditor: () => <div data-test-subj="pipelineEditorStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ProcessorsEditorContextProvider: ({ children }: { children?: React.ReactNode }) => (
+      <>{children}</>
+    ),
+    PipelineEditor: () => <div data-test-subj="pipelineEditorStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PipelineForm', () => {
   beforeEach(() => {

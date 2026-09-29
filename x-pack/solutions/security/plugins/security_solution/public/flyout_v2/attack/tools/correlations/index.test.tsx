@@ -27,37 +27,37 @@ vi.mock('../../../document/tools/correlations/hooks/use_paginated_alerts');
 vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('../../../../common/hooks/is_in_security_app');
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn().mockReturnValue({
-        openPreviewPanel: vi.fn(),
-        closeFlyout: vi.fn(),
-        openFlyout: vi.fn(),
-        openLeftPanel: vi.fn(),
-        openRightPanel: vi.fn(),
-        closeLeftPanel: vi.fn(),
-        closeRightPanel: vi.fn(),
-        closePreviewPanel: vi.fn(),
-        previousPreviewPanel: vi.fn(),
-        state: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn().mockReturnValue({
+      openPreviewPanel: vi.fn(),
+      closeFlyout: vi.fn(),
+      openFlyout: vi.fn(),
+      openLeftPanel: vi.fn(),
+      openRightPanel: vi.fn(),
+      closeLeftPanel: vi.fn(),
+      closeRightPanel: vi.fn(),
+      closePreviewPanel: vi.fn(),
+      previousPreviewPanel: vi.fn(),
+      state: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: () => ({
-        timelinePrivileges: { read: true },
-        rulesPrivileges: { rules: { read: true } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserPrivileges: () => ({
+      timelinePrivileges: { read: true },
+      rulesPrivileges: { rules: { read: true } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/document_tools_flyout_header', () => {
-      const mocked = {
-      DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentToolsFlyoutHeader: () => <div data-test-subj="mock-document-tools-flyout-header" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUsePaginatedAlerts = usePaginatedAlerts as Mock;
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;

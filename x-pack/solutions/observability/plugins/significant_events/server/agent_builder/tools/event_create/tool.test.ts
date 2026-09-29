@@ -18,25 +18,25 @@ import { eventsWriteHandler } from '../event_write/handler';
 import { createEventTool, SIGNIFICANT_EVENTS_EVENT_CREATE_TOOL_ID } from './tool';
 
 vi.mock('../../../routes/utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../routes/utils/assert_can_manage_significant_events', () => {
-      const mocked = {
-      assertCanManageSignificantEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertCanManageSignificantEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../event_write/handler', () => {
-      const mocked = {
-      eventsWriteHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    eventsWriteHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('event_create tool', () => {
   const telemetry = { trackAgentToolEventCreate: vi.fn() };

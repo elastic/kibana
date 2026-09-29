@@ -497,8 +497,7 @@ describe('fetchActionRequests()', () => {
       readEsClientMock = elasticsearchServiceMock.createElasticsearchClient();
       applyActionListEsSearchMock(readEsClientMock);
 
-      const endpointService =
-        fetchOptions.endpointService as Mocked<EndpointAppContextService>;
+      const endpointService = fetchOptions.endpointService as Mocked<EndpointAppContextService>;
       endpointService.isCpsActive.mockResolvedValue(true);
       endpointService.getReadEsClient.mockResolvedValue(readEsClientMock);
 

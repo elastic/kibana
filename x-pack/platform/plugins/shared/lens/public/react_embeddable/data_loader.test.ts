@@ -39,11 +39,11 @@ import type { LensEmbeddableStartServices } from './types';
 import { waitFor } from '@testing-library/dom';
 
 vi.mock('@kbn/interpreter', () => {
-      const mocked = {
-      toExpression: vi.fn().mockReturnValue('expression'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toExpression: vi.fn().mockReturnValue('expression'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const loggerFn = vi.spyOn(Logger, 'addLog');
 

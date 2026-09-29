@@ -67,48 +67,48 @@ import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
 import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 vi.mock('./handlers', async () => {
-      const mocked = {
-      ...(await vi.importActual('./handlers')),
-      getAgentHandler: vi.fn(),
-      deleteAgentHandler: vi.fn(),
-      getAgentsHandler: vi.fn(),
-      getAgentTagsHandler: vi.fn(),
-      getAgentStatusForAgentPolicyHandler: vi.fn(),
-      postBulkAgentReassignHandler: vi.fn(),
-      getAgentDataHandler: vi.fn(),
-      bulkUpdateAgentTagsHandler: vi.fn(),
-      getAvailableVersionsHandler: vi.fn(),
-      getActionStatusHandler: vi.fn(),
-      getAgentUploadsHandler: vi.fn(),
-      getAgentUploadFileHandler: vi.fn(),
-      deleteAgentUploadFileHandler: vi.fn(),
-      postAgentReassignHandler: vi.fn(),
-      postRetrieveAgentsByActionsHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./handlers')),
+    getAgentHandler: vi.fn(),
+    deleteAgentHandler: vi.fn(),
+    getAgentsHandler: vi.fn(),
+    getAgentTagsHandler: vi.fn(),
+    getAgentStatusForAgentPolicyHandler: vi.fn(),
+    postBulkAgentReassignHandler: vi.fn(),
+    getAgentDataHandler: vi.fn(),
+    bulkUpdateAgentTagsHandler: vi.fn(),
+    getAvailableVersionsHandler: vi.fn(),
+    getActionStatusHandler: vi.fn(),
+    getAgentUploadsHandler: vi.fn(),
+    getAgentUploadFileHandler: vi.fn(),
+    deleteAgentUploadFileHandler: vi.fn(),
+    postAgentReassignHandler: vi.fn(),
+    postRetrieveAgentsByActionsHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./migrate_handlers', () => {
-      const mocked = {
-      migrateSingleAgentHandler: vi.fn(),
-      bulkMigrateAgentsHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    migrateSingleAgentHandler: vi.fn(),
+    bulkMigrateAgentsHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./change_privilege_level_handlers', () => {
-      const mocked = {
-      changeAgentPrivilegeLevelHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    changeAgentPrivilegeLevelHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./actions_handlers', () => {
-      const mocked = {
-      postNewAgentActionHandlerBuilder: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    postNewAgentActionHandlerBuilder: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -380,11 +380,9 @@ describe('schema validation', () => {
       id: 'id',
       deleted: true,
     };
-    (deleteAgentUploadFileHandler as Mock).mockImplementation(
-      (ctx: any, req: any, res: any) => {
-        return res.ok({ body: expectedResponse });
-      }
-    );
+    (deleteAgentUploadFileHandler as Mock).mockImplementation((ctx: any, req: any, res: any) => {
+      return res.ok({ body: expectedResponse });
+    });
     await deleteAgentUploadFileHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({
@@ -494,11 +492,9 @@ describe('schema validation', () => {
     const expectedResponse: GetAvailableVersionsResponse = {
       items: ['8.15.0'],
     };
-    (getAvailableVersionsHandler as Mock).mockImplementation(
-      (ctx: any, req: any, res: any) => {
-        return res.ok({ body: expectedResponse });
-      }
-    );
+    (getAvailableVersionsHandler as Mock).mockImplementation((ctx: any, req: any, res: any) => {
+      return res.ok({ body: expectedResponse });
+    });
     await getAvailableVersionsHandler(context, {} as any, response);
 
     expect(response.ok).toHaveBeenCalledWith({

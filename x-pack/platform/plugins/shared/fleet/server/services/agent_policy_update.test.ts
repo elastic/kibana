@@ -17,29 +17,29 @@ import { getAgentById, getAgentPolicyForAgent, getAgentsByKuery } from './agents
 import * as apiKeys from './api_keys';
 
 vi.mock('./agents/crud', async () => {
-      const mocked = {
-      ...(await vi.importActual('./agents/crud')),
-      getAgentsByKuery: vi.fn(),
-      getAgentById: vi.fn(),
-      getAgentPolicyForAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./agents/crud')),
+    getAgentsByKuery: vi.fn(),
+    getAgentById: vi.fn(),
+    getAgentPolicyForAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./api_keys');
 vi.mock('./agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        deployPolicy: vi.fn().mockResolvedValue(undefined),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      deployPolicy: vi.fn().mockResolvedValue(undefined),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./secrets', () => {
-      const mocked = {
-      isActionSecretStorageEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isActionSecretStorageEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('agentPolicyUpdateEventHandler', () => {
   describe('soClient selection', () => {
@@ -108,8 +108,7 @@ describe('agentPolicyUpdateEventHandler', () => {
       appContextService.start(createAppContextStartContractMock());
       vi.mocked(apiKeys.generateEnrollmentAPIKey).mockResolvedValue({} as any);
 
-      vi
-        .mocked(getAgentsByKuery)
+      vi.mocked(getAgentsByKuery)
         .mockResolvedValueOnce({
           agents: [{ id: 'agent1' }],
         } as any)

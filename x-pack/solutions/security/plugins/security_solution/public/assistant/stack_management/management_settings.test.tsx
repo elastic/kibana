@@ -20,37 +20,37 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 // Mock the necessary hooks and components
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: vi.fn(),
-      useFetchCurrentUserConversations: vi.fn(),
-      Welcome: 'Welcome Conversation',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: vi.fn(),
+    useFetchCurrentUserConversations: vi.fn(),
+    Welcome: 'Welcome Conversation',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/elastic-assistant/impl/assistant/settings/assistant_settings_management', () => {
-      const mocked = {
-      AssistantSettingsManagement: vi.fn(() => <div data-test-subj="AssistantSettingsManagement" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantSettingsManagement: vi.fn(() => <div data-test-subj="AssistantSettingsManagement" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/elastic-assistant/impl/assistant/use_conversation', () => {
-      const mocked = {
-      useConversation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useAssistantContextMock = useAssistantContext as Mock;
 const useFetchCurrentUserConversationsMock = useFetchCurrentUserConversations as Mock;

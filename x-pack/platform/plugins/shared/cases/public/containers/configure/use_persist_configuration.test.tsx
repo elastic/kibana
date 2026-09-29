@@ -255,9 +255,9 @@ describe('usePersistConfiguration', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    vi
-      .spyOn(api, 'postCaseConfigure')
-      .mockRejectedValue(new Error('useCreateAttachments: Test error'));
+    vi.spyOn(api, 'postCaseConfigure').mockRejectedValue(
+      new Error('useCreateAttachments: Test error')
+    );
 
     const { result } = renderHook(() => usePersistConfiguration(), {
       wrapper: TestProviders,

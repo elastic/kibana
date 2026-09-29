@@ -14,18 +14,18 @@ import { useAttackDetailsContext } from '../context';
 import { getField } from '../../document_details/shared/utils';
 
 vi.mock('../context', () => {
-      const mocked = {
-      useAttackDetailsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDetailsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../document_details/shared/utils', () => {
-      const mocked = {
-      getField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useOverviewTabData', () => {
   const getFieldsDataMock = vi.fn();

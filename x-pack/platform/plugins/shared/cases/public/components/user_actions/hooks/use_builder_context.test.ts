@@ -16,12 +16,12 @@ import { casesConfigurationsMock } from '../../../containers/configure/mock';
 import { getCaseConnectorsMockResponse } from '../../../common/mock/connectors';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({ euiTheme: { colors: {}, size: {} } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({ euiTheme: { colors: {}, size: {} } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases_context/use_cases_context');
 

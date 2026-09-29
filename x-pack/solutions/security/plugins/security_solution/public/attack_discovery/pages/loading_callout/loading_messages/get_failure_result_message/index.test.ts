@@ -13,18 +13,18 @@ import { getFailureResultMessage } from '.';
 import { getFormattedDate } from '../get_formatted_time';
 
 vi.mock('../get_formatted_time', () => {
-      const mocked = {
-      getFormattedDate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormattedDate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../translations', () => {
-      const mocked = {
-      FAILED_VIA: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FAILED_VIA: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getFailureResultMessage', () => {
   const mockConnectorName = 'Test Connector';

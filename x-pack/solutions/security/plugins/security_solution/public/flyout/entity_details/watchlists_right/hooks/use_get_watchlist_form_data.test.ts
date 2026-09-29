@@ -14,17 +14,17 @@ const mockGetWatchlist = vi.fn();
 const mockListWatchlistEntitySources = vi.fn();
 
 vi.mock('../../../../entity_analytics/api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        getWatchlist: mockGetWatchlist,
-        listWatchlistEntitySources: mockListWatchlistEntitySources,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      getWatchlist: mockGetWatchlist,
+      listWatchlistEntitySources: mockListWatchlistEntitySources,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...original,
     useKibana: () => ({
@@ -41,7 +41,7 @@ vi.mock('../../../../common/lib/kibana', async () => {
 });
 
 // Wrap with QueryClientProvider
-const { QueryClient, QueryClientProvider } = (await vi.importActual('@kbn/react-query'));
+const { QueryClient, QueryClientProvider } = await vi.importActual('@kbn/react-query');
 const React = require('react');
 
 function createWrapper() {

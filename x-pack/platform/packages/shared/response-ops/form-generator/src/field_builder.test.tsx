@@ -26,7 +26,7 @@ import { getWidgetComponent } from './widgets';
 const meta = { getMeta, setMeta };
 
 vi.mock('./widgets', async () => {
-  const module = (await vi.importActual('./widgets'));
+  const module = await vi.importActual('./widgets');
   return {
     ...module,
     getWidgetComponent: vi.fn(module.getWidgetComponent),

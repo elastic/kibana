@@ -13,27 +13,27 @@ import type { EntityAnalyticsMigrationsParams } from '../../migrations';
 
 const mockShouldRunSourceMigrationFactory = vi.fn();
 vi.mock('../data_sources/migrations/check_if_entity_source_migration', () => {
-      const mocked = {
-      shouldRunSourceMigrationFactory: () => mockShouldRunSourceMigrationFactory(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    shouldRunSourceMigrationFactory: () => mockShouldRunSourceMigrationFactory(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMigrateSourceIndex = vi.fn();
 vi.mock('../data_sources/migrations/source_index_update', () => {
-      const mocked = {
-      migrateSourceIndexFactory: () => mockMigrateSourceIndex,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    migrateSourceIndexFactory: () => mockMigrateSourceIndex,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteUsersWithSourceIndex = vi.fn();
 vi.mock('../data_sources/migrations/delete_user_with_source_indices', () => {
-      const mocked = {
-      deleteUsersWithSourceIndexFactory: () => mockDeleteUsersWithSourceIndex,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteUsersWithSourceIndexFactory: () => mockDeleteUsersWithSourceIndex,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockApiKeyManager = {
   getClient: vi.fn().mockResolvedValue({
@@ -42,11 +42,11 @@ const mockApiKeyManager = {
 };
 
 vi.mock('../auth/api_key', () => {
-      const mocked = {
-      getApiKeyManager: () => mockApiKeyManager,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApiKeyManager: () => mockApiKeyManager,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = {
   info: vi.fn(),

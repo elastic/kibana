@@ -40,10 +40,10 @@ vi.mock('../tools/use_mcp_connectors');
 vi.mock('../use_agent_builder_service');
 vi.mock('../use_toasts');
 
-const { useAgentBuilderAgentById } = (await vi.importMock('../agents/use_agent_by_id'));
-const { useListConnectors } = (await vi.importMock('../tools/use_mcp_connectors'));
-const { useAgentBuilderServices } = (await vi.importMock('../use_agent_builder_service'));
-const { useToasts } = (await vi.importMock('../use_toasts'));
+const { useAgentBuilderAgentById } = await vi.importMock('../agents/use_agent_by_id');
+const { useListConnectors } = await vi.importMock('../tools/use_mcp_connectors');
+const { useAgentBuilderServices } = await vi.importMock('../use_agent_builder_service');
+const { useToasts } = await vi.importMock('../use_toasts');
 
 describe('useAgentConnectors', () => {
   let queryClient: QueryClient;

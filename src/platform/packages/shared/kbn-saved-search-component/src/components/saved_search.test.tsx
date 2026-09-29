@@ -23,17 +23,17 @@ interface CapturedParentApi {
 const mockCapturedParentApis: CapturedParentApi[] = [];
 
 vi.mock('@kbn/embeddable-plugin/public', () => {
-      const mocked = {
-      EmbeddableRenderer: ({ getParentApi }: { getParentApi: () => CapturedParentApi }) => {
-        // mirrors the real renderer, which resolves the parent API once per embeddable
-        if (mockCapturedParentApis.length === 0) {
-          mockCapturedParentApis.push(getParentApi());
-        }
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmbeddableRenderer: ({ getParentApi }: { getParentApi: () => CapturedParentApi }) => {
+      // mirrors the real renderer, which resolves the parent API once per embeddable
+      if (mockCapturedParentApis.length === 0) {
+        mockCapturedParentApis.push(getParentApi());
+      }
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createDependencies = () =>
   ({

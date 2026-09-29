@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
+import { vi } from 'vitest';
 
 import type { httpServiceMock } from '@kbn/core/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -168,26 +167,28 @@ describe('SecurityNavControlService', () => {
     });
 
     it('should register custom user menu links', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const coreStart = coreMock.createStart();
-              const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
-                core: coreStart,
-                authc,
-              });
-              const userMenuLinks$ = getUserMenuLinks$();
+        const coreStart = coreMock.createStart();
+        const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+          core: coreStart,
+          authc,
+        });
+        const userMenuLinks$ = getUserMenuLinks$();
 
-              addUserMenuLinks([
-                {
-                  label: 'link1',
-                  href: 'path-to-link1',
-                  iconType: 'empty',
-                },
-              ]);
+        addUserMenuLinks([
+          {
+            label: 'link1',
+            href: 'path-to-link1',
+            iconType: 'empty',
+          },
+        ]);
 
-              userMenuLinks$.subscribe((links) => {
-                expect(links).toMatchInlineSnapshot(`
+        userMenuLinks$.subscribe((links) => {
+          expect(links).toMatchInlineSnapshot(`
           Array [
             Object {
               "href": "path-to-link1",
@@ -196,53 +197,54 @@ describe('SecurityNavControlService', () => {
             },
           ]
         `);
-                done();
-              });
-            
-        }));
+          done();
+        });
+      }));
 
     it('should retrieve user menu links sorted by order', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const coreStart = coreMock.createStart();
-              const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
-                core: coreStart,
-                authc,
-              });
-              const userMenuLinks$ = getUserMenuLinks$();
+        const coreStart = coreMock.createStart();
+        const { getUserMenuLinks$, addUserMenuLinks } = navControlService.start({
+          core: coreStart,
+          authc,
+        });
+        const userMenuLinks$ = getUserMenuLinks$();
 
-              addUserMenuLinks([
-                {
-                  label: 'link3',
-                  href: 'path-to-link3',
-                  iconType: 'empty',
-                  order: 3,
-                },
-                {
-                  label: 'link1',
-                  href: 'path-to-link1',
-                  iconType: 'empty',
-                  order: 1,
-                },
-                {
-                  label: 'link2',
-                  href: 'path-to-link2',
-                  iconType: 'empty',
-                  order: 2,
-                },
-              ]);
-              addUserMenuLinks([
-                {
-                  label: 'link4',
-                  href: 'path-to-link4',
-                  iconType: 'empty',
-                  order: 4,
-                },
-              ]);
+        addUserMenuLinks([
+          {
+            label: 'link3',
+            href: 'path-to-link3',
+            iconType: 'empty',
+            order: 3,
+          },
+          {
+            label: 'link1',
+            href: 'path-to-link1',
+            iconType: 'empty',
+            order: 1,
+          },
+          {
+            label: 'link2',
+            href: 'path-to-link2',
+            iconType: 'empty',
+            order: 2,
+          },
+        ]);
+        addUserMenuLinks([
+          {
+            label: 'link4',
+            href: 'path-to-link4',
+            iconType: 'empty',
+            order: 4,
+          },
+        ]);
 
-              userMenuLinks$.subscribe((links) => {
-                expect(links).toMatchInlineSnapshot(`
+        userMenuLinks$.subscribe((links) => {
+          expect(links).toMatchInlineSnapshot(`
           Array [
             Object {
               "href": "path-to-link1",
@@ -270,10 +272,9 @@ describe('SecurityNavControlService', () => {
             },
           ]
         `);
-                done();
-              });
-            
-        }));
+          done();
+        });
+      }));
 
     it('should allow adding a custom profile link', () => {
       const coreStart = coreMock.createStart();

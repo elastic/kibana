@@ -18,24 +18,24 @@ let mockIsSaving = false;
 let mockIsCreating = false;
 
 vi.mock('./use_save_ai_index_automations', () => {
-      const mocked = {
-      useSaveAiIndexAutomations: () => ({
-        saveAutomations: mockSaveAutomations,
-        isSaving: mockIsSaving,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSaveAiIndexAutomations: () => ({
+      saveAutomations: mockSaveAutomations,
+      isSaving: mockIsSaving,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_create_workflow', () => {
-      const mocked = {
-      useCreateWorkflow: () => ({
-        createWorkflow: mockCreateWorkflow,
-        isCreating: mockIsCreating,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateWorkflow: () => ({
+      createWorkflow: mockCreateWorkflow,
+      isCreating: mockIsCreating,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',

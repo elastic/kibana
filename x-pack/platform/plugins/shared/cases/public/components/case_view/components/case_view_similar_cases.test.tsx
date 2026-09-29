@@ -18,11 +18,11 @@ import { renderWithTestingProviders } from '../../../common/mock';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('./sidebar/sidebar_toggle_button', () => {
-      const mocked = {
-      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const caseData: CaseUI = {
   ...basicCase,

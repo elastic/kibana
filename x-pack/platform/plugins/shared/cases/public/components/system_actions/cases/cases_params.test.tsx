@@ -32,42 +32,40 @@ vi.mock('../../../common/lib/kibana/use_application');
 vi.mock('../../../common/lib/kibana/kibana_react');
 vi.mock('../../../containers/configure/use_get_all_case_configurations');
 vi.mock('../../templates_v2/hooks/use_get_templates', () => {
-      const mocked = {
-      useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplates: (...args: unknown[]) => mockUseGetTemplates(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock TemplateSelectorV2 to control its onChange callback in isolation tests.
 // Use requireActual so the real findV2Template implementation is available to cases_params.tsx.
 vi.mock('./template_selector_v2', async () => {
-      const mocked = {
-      ...(await vi.importActual('./template_selector_v2')),
-      TemplateSelectorV2: ({
-        onChange,
-        isDisabled,
-        templateId,
-      }: {
-        onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
-        isDisabled?: boolean;
-        templateId: string | null;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="cases-connector-template-v2-select"
-          disabled={isDisabled}
-          onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
-        >
-          {`V2 Selector templateId=${templateId}`}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./template_selector_v2')),
+    TemplateSelectorV2: ({
+      onChange,
+      isDisabled,
+      templateId,
+    }: {
+      onChange: (p: { templateId: string | null; templateVersion: string | null }) => void;
+      isDisabled?: boolean;
+      templateId: string | null;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="cases-connector-template-v2-select"
+        disabled={isDisabled}
+        onClick={() => onChange({ templateId: 'tmpl-v2', templateVersion: '1' })}
+      >
+        {`V2 Selector templateId=${templateId}`}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockUseGetTemplates = vi
-  .fn()
-  .mockReturnValue({ data: { templates: [] }, isLoading: false });
+const mockUseGetTemplates = vi.fn().mockReturnValue({ data: { templates: [] }, isLoading: false });
 
 const useKibanaMock = vi.mocked(useKibana);
 const useAlertsDataViewMock = vi.mocked(useAlertsDataView);

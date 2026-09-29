@@ -21,34 +21,34 @@ vi.mock('./use_notes_tab_data');
 vi.mock('../../../../../common/components/user_privileges');
 
 vi.mock('../../../../../notes/components/notes_list', () => {
-      const mocked = {
-      NotesList: () => <div data-test-subj="mock-notes-list" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesList: () => <div data-test-subj="mock-notes-list" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../notes/components/add_note', () => {
-      const mocked = {
-      AddNote: ({ children }: { children?: React.ReactNode }) => (
-        <div data-test-subj="mock-add-note">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddNote: ({ children }: { children?: React.ReactNode }) => (
+      <div data-test-subj="mock-add-note">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../notes/participants', () => {
-      const mocked = {
-      Participants: () => <div data-test-subj="mock-participants" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Participants: () => <div data-test-subj="mock-participants" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../notes/save_timeline', () => {
-      const mocked = {
-      SaveTimelineCallout: () => <div data-test-subj="mock-save-timeline-callout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SaveTimelineCallout: () => <div data-test-subj="mock-save-timeline-callout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseNotesTabData = useNotesTabData as MockedFunction<typeof useNotesTabData>;
 

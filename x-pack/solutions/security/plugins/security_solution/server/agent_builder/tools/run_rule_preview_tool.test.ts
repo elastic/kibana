@@ -20,11 +20,11 @@ import type { RunRulePreviewDeps } from '../../lib/detection_engine/rule_preview
 import { runRulePreviewTool, SECURITY_RUN_RULE_PREVIEW_TOOL_ID } from './run_rule_preview_tool';
 
 vi.mock('../../lib/detection_engine/rule_preview/api/preview_rules/run_rule_preview', () => {
-      const mocked = {
-      runRulePreview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runRulePreview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runRulePreviewMock = runRulePreview as Mock;
 

@@ -14,62 +14,62 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { MonitoringConfig } from '../../config';
 
 vi.mock('../../lib/alerts/fetch_clusters', () => {
-      const mocked = {
-      fetchClusters: vi.fn().mockImplementation(() => {
-        return [
-          {
-            clusterUuid: '1abc',
-            clusterName: 'unitTesting',
-          },
-        ];
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusters: vi.fn().mockImplementation(() => {
+      return [
+        {
+          clusterUuid: '1abc',
+          clusterName: 'unitTesting',
+        },
+      ];
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lib/get_stack_products_usage', () => {
-      const mocked = {
-      getStackProductsUsage: vi.fn().mockImplementation(() => {
-        return {
-          elasticsearch: {
-            count: 5,
-            enabled: true,
-            metricbeatUsed: true,
-          },
-          kibana: {
-            count: 2,
-            enabled: true,
-            metricbeatUsed: false,
-          },
-          logstash: {
-            count: 0,
-            enabled: false,
-            metricbeatUsed: false,
-          },
-          beats: {
-            count: 1,
-            enabled: true,
-            metricbeatUsed: false,
-          },
-          apm: {
-            count: 1,
-            enabled: true,
-            metricbeatUsed: true,
-          },
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getStackProductsUsage: vi.fn().mockImplementation(() => {
+      return {
+        elasticsearch: {
+          count: 5,
+          enabled: true,
+          metricbeatUsed: true,
+        },
+        kibana: {
+          count: 2,
+          enabled: true,
+          metricbeatUsed: false,
+        },
+        logstash: {
+          count: 0,
+          enabled: false,
+          metricbeatUsed: false,
+        },
+        beats: {
+          count: 1,
+          enabled: true,
+          metricbeatUsed: false,
+        },
+        apm: {
+          count: 1,
+          enabled: true,
+          metricbeatUsed: true,
+        },
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lib/fetch_license_type', () => {
-      const mocked = {
-      fetchLicenseType: vi.fn().mockImplementation(() => {
-        return 'trial';
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchLicenseType: vi.fn().mockImplementation(() => {
+      return 'trial';
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getMonitoringUsageCollector', () => {
   const esClient = elasticsearchServiceMock.createClusterClient();

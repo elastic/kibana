@@ -116,11 +116,11 @@ const getResult = (
 });
 
 vi.mock('../../transform_action_params', () => {
-      const mocked = {
-      transformActionParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformActionParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let clock: sinon.SinonFakeTimers;
 

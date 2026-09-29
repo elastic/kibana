@@ -38,36 +38,36 @@ import { CloudConnectorPoliciesFlyout } from '.';
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('../hooks/use_cloud_connector_usage');
 vi.mock('../hooks/use_update_cloud_connector', () => {
-      const mocked = {
-      useUpdateCloudConnector: vi.fn(),
-      updateCloudConnector: vi.fn(() => Promise.resolve({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateCloudConnector: vi.fn(),
+    updateCloudConnector: vi.fn(() => Promise.resolve({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_delete_cloud_connector');
 vi.mock('../hooks/use_verify_iac_key');
 vi.mock('../../../hooks/use_request/cloud_connector', () => {
-      const mocked = {
-      sendVerifyCloudConnectorIacKey: vi.fn(() => Promise.resolve({ data: {}, error: undefined })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendVerifyCloudConnectorIacKey: vi.fn(() => Promise.resolve({ data: {}, error: undefined })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_cloud_connector_template');
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useIacProvisioner: vi.fn(),
-      useStartServices: vi.fn(),
-      useGetPackageInfoByKeyQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIacProvisioner: vi.fn(),
+    useStartServices: vi.fn(),
+    useGetPackageInfoByKeyQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../utils')),
-      getAnyCloudConnectorIacTemplateUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../utils')),
+    getAnyCloudConnectorIacTemplateUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseCloudConnectorUsage = useCloudConnectorUsage as MockedFunction<
@@ -94,10 +94,9 @@ const mockSendVerify = sendVerifyCloudConnectorIacKey as MockedFunction<
 const mockUseGetPackageInfoByKeyQuery = useGetPackageInfoByKeyQuery as MockedFunction<
   typeof useGetPackageInfoByKeyQuery
 >;
-const mockGetAnyCloudConnectorIacTemplateUrl =
-  getAnyCloudConnectorIacTemplateUrl as MockedFunction<
-    typeof getAnyCloudConnectorIacTemplateUrl
-  >;
+const mockGetAnyCloudConnectorIacTemplateUrl = getAnyCloudConnectorIacTemplateUrl as MockedFunction<
+  typeof getAnyCloudConnectorIacTemplateUrl
+>;
 
 const QUICK_CREATE_TEMPLATE_URL =
   'https://console.aws.amazon.com/cloudformation/home#/stacks/quickcreate?templateURL=https://elastic.example/static.yml';

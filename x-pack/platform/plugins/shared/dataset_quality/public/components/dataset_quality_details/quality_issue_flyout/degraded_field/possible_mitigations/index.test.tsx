@@ -14,25 +14,25 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { PossibleDegradedFieldMitigations } from '.';
 
 vi.mock('../../../../../hooks/use_dataset_quality_details_state', () => {
-      const mocked = {
-      useDatasetQualityDetailsState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDatasetQualityDetailsState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_quality_issues', () => {
-      const mocked = {
-      useQualityIssues: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQualityIssues: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils', () => {
-      const mocked = {
-      useKibanaContextForPlugin: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useDatasetQualityDetailsState } from '../../../../../hooks/use_dataset_quality_details_state';
 import { useQualityIssues } from '../../../../../hooks/use_quality_issues';

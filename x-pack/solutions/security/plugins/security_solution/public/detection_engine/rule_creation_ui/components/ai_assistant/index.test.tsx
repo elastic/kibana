@@ -17,11 +17,11 @@ import { useAssistantAvailability } from '../../../../assistant/use_assistant_av
 import { AiAssistant } from '.';
 
 vi.mock('../../../../assistant/use_assistant_availability', () => {
-      const mocked = {
-      useAssistantAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useAssistantAvailabilityMock = useAssistantAvailability as Mock;
 const getFieldsMock = vi.fn().mockReturnValue({ queryBar: { value: { query: 'something' } } });

@@ -25,7 +25,7 @@ vi.mock('@elastic/apm-rum');
 
 // Each callout renders through a counting wrapper, so tests can tell which one rendered and how often.
 vi.mock('@kbn/ui-callout', async () => {
-  const actual = (await vi.importActual('@kbn/ui-callout'));
+  const actual = await vi.importActual('@kbn/ui-callout');
   return {
     ...actual,
     KbnInfoCallout: vi.fn(actual.KbnInfoCallout),

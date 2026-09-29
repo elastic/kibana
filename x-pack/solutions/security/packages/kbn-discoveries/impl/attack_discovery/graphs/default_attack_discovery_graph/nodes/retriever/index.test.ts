@@ -41,31 +41,31 @@ const initialGraphState: AttackDiscoveryGraphState = {
 };
 
 vi.mock('./anonymized_alerts_retriever', () => {
-      const mocked = {
-      AnonymizedAlertsRetriever: vi
-        .fn()
-        .mockImplementation(
-          ({
-            onNewReplacements,
-            replacements,
-          }: {
-            onNewReplacements?: (replacements: Replacements) => void;
-            replacements?: Replacements;
-          }) => ({
-            withConfig: vi.fn().mockReturnValue({
-              invoke: vi.fn(async () => {
-                if (onNewReplacements != null && replacements != null) {
-                  onNewReplacements(replacements);
-                }
+  const mocked = {
+    AnonymizedAlertsRetriever: vi
+      .fn()
+      .mockImplementation(
+        ({
+          onNewReplacements,
+          replacements,
+        }: {
+          onNewReplacements?: (replacements: Replacements) => void;
+          replacements?: Replacements;
+        }) => ({
+          withConfig: vi.fn().mockReturnValue({
+            invoke: vi.fn(async () => {
+              if (onNewReplacements != null && replacements != null) {
+                onNewReplacements(replacements);
+              }
 
-                return mockAnonymizedAlerts;
-              }),
+              return mockAnonymizedAlerts;
             }),
-          })
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+          }),
+        })
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getRetrieveAnonymizedAlertsNode', () => {
   const logger = {

@@ -19,34 +19,34 @@ import { SIEM_MIGRATIONS_PATH } from '../../../../../../../../common/constants';
 import { MigrationsCallout, useShowMigrationCallout } from './migrations_callout';
 
 vi.mock('@kbn/security-solution-navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-solution-navigation')),
-      useNavigateTo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-solution-navigation')),
+    useNavigateTo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../common/components/link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateTo = vi.fn();
 const mockGetSecuritySolutionUrl = vi.fn();

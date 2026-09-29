@@ -22,13 +22,13 @@ import React from 'react';
 import { LensEmbeddableComponent } from './lens_embeddable_component';
 
 vi.mock('../expression_wrapper', () => {
-      const mocked = {
-      ExpressionWrapper: () => (
-        <div className="lnsExpressionRenderer" data-test-subj="lens-embeddable" />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpressionWrapper: () => (
+      <div className="lnsExpressionRenderer" data-test-subj="lens-embeddable" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type GetValueType<Type> = Type extends PublishingSubject<infer X> ? X : never;
 

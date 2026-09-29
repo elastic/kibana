@@ -26,11 +26,11 @@ import { mockContextValue } from '../../../../../flyout/document_details/shared/
 import { isSuppressionRuleInGA } from '../../../../../../common/detection_engine/utils';
 
 vi.mock('../../../../../../common/detection_engine/utils', () => {
-      const mocked = {
-      isSuppressionRuleInGA: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSuppressionRuleInGA: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const isSuppressionRuleInGAMock = isSuppressionRuleInGA as Mock;
 

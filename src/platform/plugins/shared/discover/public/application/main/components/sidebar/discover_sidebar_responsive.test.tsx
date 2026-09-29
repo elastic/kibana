@@ -56,37 +56,37 @@ const mockSearchBarCustomization: SearchBarCustomization = {
 let mockUseCustomizations = false;
 
 vi.mock('../../../../customizations', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../customizations')),
-      useDiscoverCustomization: vi.fn((id: DiscoverCustomizationId) => {
-        if (!mockUseCustomizations) {
-          return undefined;
-        }
+  const mocked = {
+    ...(await vi.importActual('../../../../customizations')),
+    useDiscoverCustomization: vi.fn((id: DiscoverCustomizationId) => {
+      if (!mockUseCustomizations) {
+        return undefined;
+      }
 
-        switch (id) {
-          case 'search_bar':
-            return mockSearchBarCustomization;
-          default:
-            throw new Error(`Unknown customization id: ${id}`);
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      switch (id) {
+        case 'search_bar':
+          return mockSearchBarCustomization;
+        default:
+          throw new Error(`Unknown customization id: ${id}`);
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRecommendedFieldsAccessor = vi.fn();
 
 vi.mock('../../../../context_awareness/hooks/use_profile_accessor', () => {
-      const mocked = {
-      useProfileAccessor: vi.fn((accessorId: string) => {
-        if (accessorId === 'getRecommendedFields') {
-          return mockGetRecommendedFieldsAccessor;
-        }
-        return vi.fn(() => ({}));
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfileAccessor: vi.fn((accessorId: string) => {
+      if (accessorId === 'getRecommendedFields') {
+        return mockGetRecommendedFieldsAccessor;
+      }
+      return vi.fn(() => ({}));
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('lodash', () => {
   const original = require('lodash');
@@ -98,43 +98,43 @@ vi.mock('lodash', () => {
 });
 
 vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
-      const mocked = {
-      loadFieldStats: vi.fn().mockResolvedValue({
-        totalDocuments: 1624,
-        sampledDocuments: 1624,
-        sampledValues: 3248,
-        topValues: {
-          buckets: [
-            {
-              count: 1349,
-              key: 'gif',
-            },
-            {
-              count: 1206,
-              key: 'zip',
-            },
-            {
-              count: 329,
-              key: 'css',
-            },
-            {
-              count: 164,
-              key: 'js',
-            },
-            {
-              count: 111,
-              key: 'png',
-            },
-            {
-              count: 89,
-              key: 'jpg',
-            },
-          ],
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadFieldStats: vi.fn().mockResolvedValue({
+      totalDocuments: 1624,
+      sampledDocuments: 1624,
+      sampledValues: 3248,
+      topValues: {
+        buckets: [
+          {
+            count: 1349,
+            key: 'gif',
+          },
+          {
+            count: 1206,
+            key: 'zip',
+          },
+          {
+            count: 329,
+            key: 'css',
+          },
+          {
+            count: 164,
+            key: 'js',
+          },
+          {
+            count: 111,
+            key: 'png',
+          },
+          {
+            count: 89,
+            key: 'jpg',
+          },
+        ],
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createMockServices() {
   const mockServices = {
@@ -162,11 +162,11 @@ const mockCalcFieldCounts = vi.fn(() => {
 });
 
 vi.mock('@kbn/discover-utils/src/utils/calc_field_counts', () => {
-      const mocked = {
-      calcFieldCounts: () => mockCalcFieldCounts(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    calcFieldCounts: () => mockCalcFieldCounts(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.spyOn(ExistingFieldsServiceApi, 'loadFieldExisting');
 

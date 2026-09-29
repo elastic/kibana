@@ -133,11 +133,9 @@ describe('Transaction duration anomaly alert', () => {
 
   describe('anomaly query time filter', () => {
     function runWith(previousStartedAt?: Date | null) {
-      vi
-        .spyOn(GetServiceAnomalies, 'getMLJobs')
-        .mockReturnValue(
-          Promise.resolve([{ jobId: '1', environment: 'production' }] as unknown as ApmMlJob[])
-        );
+      vi.spyOn(GetServiceAnomalies, 'getMLJobs').mockReturnValue(
+        Promise.resolve([{ jobId: '1', environment: 'production' }] as unknown as ApmMlJob[])
+      );
 
       const mlAnomalySearch = vi
         .fn()

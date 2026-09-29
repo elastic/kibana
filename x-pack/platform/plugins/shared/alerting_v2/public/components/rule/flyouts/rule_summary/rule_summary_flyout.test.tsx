@@ -25,7 +25,7 @@ const mockLocators = createMockLocators();
 // data-test-subj of its own, so the color mapping (e.g. success vs. danger) has no way to be
 // asserted through the public DOM without this. Forwards every other prop untouched.
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiHealth: ({ color, children, ...rest }: EuiHealthProps) => (
@@ -37,38 +37,38 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/alerting-v2-browser-shared', () => {
-      const mocked = {
-      useRuleAutoAttach: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleAutoAttach: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_rule_audit_metadata', () => {
-      const mocked = {
-      useRuleAuditMetadata: () => ({
-        createdByDisplay: 'Alice',
-        createdAtFormatted: 'Mar 1, 2026',
-        updatedByDisplay: 'Bob',
-        updatedAtFormatted: 'Mar 4, 2026',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleAuditMetadata: () => ({
+      createdByDisplay: 'Alice',
+      createdAtFormatted: 'Mar 1, 2026',
+      updatedByDisplay: 'Bob',
+      updatedAtFormatted: 'Mar 4, 2026',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchRuleExecutions = vi.fn();
 vi.mock('../../../../hooks/use_fetch_rule_executions', () => {
-      const mocked = {
-      useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleExecutions: (...args: unknown[]) => mockUseFetchRuleExecutions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../services/user_capabilities', () => {
-      const mocked = {
-      UserCapabilities: 'UserCapabilities',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserCapabilities: 'UserCapabilities',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', () => {
   const canRead = vi.fn(() => true);
@@ -92,34 +92,34 @@ const { mockCanRead } = (await vi.importMock('@kbn/core-di-browser')) as {
 };
 
 vi.mock('../../rule_conditions', () => {
-      const mocked = {
-      RuleConditions: ({ variant }: { variant?: string }) => (
-        <div data-test-subj="mockRuleConditions" data-variant={variant} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleConditions: ({ variant }: { variant?: string }) => (
+      <div data-test-subj="mockRuleConditions" data-variant={variant} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../rule_details/overview/artifacts/dashboard_artifacts_subsection', () => {
-      const mocked = {
-      DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifacts" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardArtifactsSubsection: () => <div data-test-subj="mockDashboardArtifacts" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => {
-      const mocked = {
-      ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPoliciesArtifactsSubsection: () => <div data-test-subj="mockActionPoliciesArtifacts" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../rule_summary/rule_summary_runbook_card', () => {
-      const mocked = {
-      RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleSummaryRunbookCard: () => <div data-test-subj="mockRunbookCard" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseRule: RuleApiResponse = {
   id: 'rule-1',

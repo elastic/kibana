@@ -20,13 +20,13 @@ const mockAddError = vi.fn();
 vi.mock('../../../api/api');
 
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFetchPersistedAiSummary', () => {
   const fetchPersistedAiSummary = vi.fn();

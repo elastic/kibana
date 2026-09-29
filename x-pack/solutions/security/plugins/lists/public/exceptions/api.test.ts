@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import {
   addEndpointExceptionList,
   addExceptionList,

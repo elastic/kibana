@@ -23,12 +23,12 @@ import type { WorkflowAttachmentValidationContext } from '../../attachment_frame
 import { createCasesWorkflowOperations } from '../../client/workflows/operations';
 
 vi.mock('../../client/cases/ensure_authorized_to_run_workflow', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../client/cases/ensure_authorized_to_run_workflow')),
-      ensureAuthorizedToRunWorkflow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../client/cases/ensure_authorized_to_run_workflow')),
+    ensureAuthorizedToRunWorkflow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ensureAuthorizedToRunWorkflow } from '../../client/cases/ensure_authorized_to_run_workflow';
 
@@ -186,9 +186,9 @@ describe('CasesWorkflowRunService', () => {
     expect(mockEnsureAuthorizedToRunWorkflow).toHaveBeenCalledWith({ ids: ['case-1'] }, clientArgs);
     expect(management.getWorkflow).toHaveBeenCalledWith('workflow-1', 'default', request);
     expect(casesClient.attachments.getAllDocumentsAttachedToCase).not.toHaveBeenCalled();
-    expect(
-      (mockEnsureAuthorizedToRunWorkflow as Mock).mock.invocationCallOrder[0]
-    ).toBeLessThan(management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]);
+    expect((mockEnsureAuthorizedToRunWorkflow as Mock).mock.invocationCallOrder[0]).toBeLessThan(
+      management.runWorkflowWithAlertPreprocessing.mock.invocationCallOrder[0]
+    );
     expect(management.runWorkflowWithAlertPreprocessing).toHaveBeenCalledWith({
       workflow: expect.objectContaining({ id: 'workflow-1', name: 'Investigate case' }),
       spaceId: 'default',

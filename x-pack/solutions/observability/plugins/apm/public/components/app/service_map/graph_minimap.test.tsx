@@ -16,7 +16,7 @@ import type { ServiceMapNode } from '../../../../common/service_map';
 import { MOCK_EUI_THEME, MOCK_EUI_THEME_FOR_USE_THEME } from './constants';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({ euiTheme: MOCK_EUI_THEME_FOR_USE_THEME }),
@@ -24,37 +24,38 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          docLinks: {
-            links: {
-              apm: {
-                supportedServiceMaps:
-                  'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
-                supportedServiceMapsLegend:
-                  'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
-              },
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        docLinks: {
+          links: {
+            apm: {
+              supportedServiceMaps:
+                'https://www.elastic.co/guide/en/kibana/current/service-maps.html',
+              supportedServiceMapsLegend:
+                'https://www.elastic.co/guide/en/kibana/current/service-maps.html#service-maps-legend',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_keyboard_navigation', () => {
-      const mocked = {
-      useKeyboardNavigation: vi.fn(() => ({
-        screenReaderAnnouncement: '',
-        setScreenReaderAnnouncement: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKeyboardNavigation: vi.fn(() => ({
+      screenReaderAnnouncement: '',
+      setScreenReaderAnnouncement: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
-vi.mock('./use_service_map_alerts_tab_href', async () =>
-  (await vi.importActual('./use_service_map_alerts_tab_href.test_mock'))
+vi.mock(
+  './use_service_map_alerts_tab_href',
+  async () => await vi.importActual('./use_service_map_alerts_tab_href.test_mock')
 );
 
 let mockMinimapProps: Record<string, unknown> = {};
@@ -98,39 +99,39 @@ vi.mock('@xyflow/react', () => {
 });
 
 vi.mock('./use_edge_highlighting', () => {
-      const mocked = {
-      useEdgeHighlighting: vi.fn(() => ({
-        applyEdgeHighlighting: vi.fn((edges: unknown) => edges),
-        colors: { primary: MOCK_EUI_THEME.colors.primary, default: '#98A2B3' },
-        markers: {},
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEdgeHighlighting: vi.fn(() => ({
+      applyEdgeHighlighting: vi.fn((edges: unknown) => edges),
+      colors: { primary: MOCK_EUI_THEME.colors.primary, default: '#98A2B3' },
+      markers: {},
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_reduced_motion', () => {
-      const mocked = {
-      useReducedMotion: vi.fn(() => ({
-        prefersReducedMotion: false,
-        getAnimationDuration: vi.fn((duration: number) => duration),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useReducedMotion: vi.fn(() => ({
+      prefersReducedMotion: false,
+      getAnimationDuration: vi.fn((duration: number) => duration),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./popover', () => {
-      const mocked = {
-      MapPopover: () => <div data-testid="service-map-popover" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MapPopover: () => <div data-testid="service-map-popover" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/service_map/layout', () => {
-      const mocked = {
-      applyServiceMapLayout: vi.fn((nodes: unknown) => nodes),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyServiceMapLayout: vi.fn((nodes: unknown) => nodes),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockServiceNode = (id: string, label: string): ServiceMapNode => ({
   id,

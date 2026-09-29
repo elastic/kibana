@@ -27,30 +27,30 @@ const mockWriteAttackDiscoveryEvent = vi.fn();
 const mockGetDurationNanoseconds = vi.fn().mockReturnValue(1000000000);
 
 vi.mock('../../persistence/event_logging', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
-      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_FAILED: 'alert-retrieval-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_STARTED: 'alert-retrieval-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_ALERT_RETRIEVAL_SUCCEEDED: 'alert-retrieval-succeeded',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_STARTED: 'generation-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_FAILED: 'validation-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_STARTED: 'validation-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_VALIDATION_SUCCEEDED: 'validation-succeeded',
+    writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/persistence', () => {
-      const mocked = {
-      getDurationNanoseconds: (...args: unknown[]) => mockGetDurationNanoseconds(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDurationNanoseconds: (...args: unknown[]) => mockGetDurationNanoseconds(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Integration tests verifying that all event log events are properly written
@@ -634,9 +634,7 @@ describe('Event Logging Integration', () => {
       };
 
       beforeEach(() => {
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockGenerationWorkflow
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockGenerationWorkflow);
         (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
           'generation-run-id'
         );
@@ -692,9 +690,7 @@ describe('Event Logging Integration', () => {
           })
         ).rejects.toThrow();
 
-        const generationFailedCalls = (
-          mockWriteAttackDiscoveryEvent as Mock
-        ).mock.calls.filter(
+        const generationFailedCalls = (mockWriteAttackDiscoveryEvent as Mock).mock.calls.filter(
           (call: unknown[]) => (call[0] as Record<string, unknown>)?.action === 'generation-failed'
         );
 
@@ -765,12 +761,8 @@ describe('Event Logging Integration', () => {
       };
 
       beforeEach(() => {
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockValidationWorkflow
-        );
-        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
-          'validation-run-id'
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockValidationWorkflow);
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('validation-run-id');
         (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution(ExecutionStatus.FAILED)
         );
@@ -909,12 +901,8 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'alert-retrieval-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockGenerationWorkflow
-        );
-        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
-          'generation-run-id'
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockGenerationWorkflow);
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('generation-run-id');
         (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createGenerationExecution()
         );
@@ -1098,12 +1086,8 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'alert-retrieval-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockGenerationWorkflow
-        );
-        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
-          'generation-run-id'
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockGenerationWorkflow);
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('generation-run-id');
         (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createGenerationExecution()
         );
@@ -1160,12 +1144,8 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'generation-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockValidationWorkflow
-        );
-        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
-          'validation-run-id'
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockValidationWorkflow);
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('validation-run-id');
         (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution()
         );
@@ -1223,12 +1203,8 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'generation-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockValidationWorkflow
-        );
-        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
-          'validation-run-id'
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockValidationWorkflow);
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('validation-run-id');
         (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution()
         );
@@ -1322,12 +1298,8 @@ describe('Event Logging Integration', () => {
           workflowRunId: 'generation-run-id',
         };
 
-        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(
-          mockValidationWorkflow
-        );
-        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue(
-          'validation-run-id'
-        );
+        (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockValidationWorkflow);
+        (mockWorkflowsManagementApi.runWorkflow as Mock).mockResolvedValue('validation-run-id');
         (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
           createValidationExecution()
         );

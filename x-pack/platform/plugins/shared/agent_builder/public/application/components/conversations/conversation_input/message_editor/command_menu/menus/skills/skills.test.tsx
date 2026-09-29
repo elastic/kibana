@@ -19,23 +19,23 @@ const mockSkills = [
 ];
 
 vi.mock('../../../../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: () => 'test-agent-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: () => 'test-agent-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/skills/use_agent_skills', () => {
-      const mocked = {
-      useAgentSkills: () => ({
-        skills: mockSkills,
-        isLoading: false,
-        error: null,
-        isError: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentSkills: () => ({
+      skills: mockSkills,
+      isLoading: false,
+      error: null,
+      isError: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProvider = (ui: React.ReactElement) => {
   return render(<EuiProvider>{ui}</EuiProvider>);
@@ -66,7 +66,9 @@ describe('Skills', () => {
   });
 
   it('shows loading state when skills are loading', async () => {
-    const useAgentSkillsMock = (await vi.importMock('../../../../../../../hooks/skills/use_agent_skills')) as {
+    const useAgentSkillsMock = (await vi.importMock(
+      '../../../../../../../hooks/skills/use_agent_skills'
+    )) as {
       useAgentSkills: () => unknown;
     };
     const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -87,9 +89,7 @@ describe('Skills', () => {
   describe('reporting content presence via onContentChange', () => {
     it('reports content when there are matching skills, for the current query', () => {
       const onContentChange = vi.fn();
-      renderWithProvider(
-        <Skills query="" onSelect={vi.fn()} onContentChange={onContentChange} />
-      );
+      renderWithProvider(<Skills query="" onSelect={vi.fn()} onContentChange={onContentChange} />);
 
       expect(onContentChange).toHaveBeenCalledWith(true, '');
     });
@@ -104,7 +104,9 @@ describe('Skills', () => {
     });
 
     it('keeps reporting content across every word of a multi-word skill name', async () => {
-      const useAgentSkillsMock = (await vi.importMock('../../../../../../../hooks/skills/use_agent_skills')) as {
+      const useAgentSkillsMock = (await vi.importMock(
+        '../../../../../../../hooks/skills/use_agent_skills'
+      )) as {
         useAgentSkills: () => unknown;
       };
       const originalImpl = useAgentSkillsMock.useAgentSkills;
@@ -130,11 +132,7 @@ describe('Skills', () => {
 
       rerender(
         <EuiProvider>
-          <Skills
-            query="Skill With Spaces"
-            onSelect={vi.fn()}
-            onContentChange={onContentChange}
-          />
+          <Skills query="Skill With Spaces" onSelect={vi.fn()} onContentChange={onContentChange} />
         </EuiProvider>
       );
       expect(onContentChange).toHaveBeenLastCalledWith(true, 'Skill With Spaces');
@@ -143,7 +141,9 @@ describe('Skills', () => {
     });
 
     it('reports content while loading, even with zero skills so far', async () => {
-      const useAgentSkillsMock = (await vi.importMock('../../../../../../../hooks/skills/use_agent_skills')) as {
+      const useAgentSkillsMock = (await vi.importMock(
+        '../../../../../../../hooks/skills/use_agent_skills'
+      )) as {
         useAgentSkills: () => unknown;
       };
       const originalImpl = useAgentSkillsMock.useAgentSkills;

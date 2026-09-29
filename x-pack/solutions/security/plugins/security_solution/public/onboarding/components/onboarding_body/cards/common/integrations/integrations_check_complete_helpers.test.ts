@@ -17,12 +17,12 @@ import {
 } from './integrations_check_complete_helpers';
 
 vi.mock('rxjs', () => {
-      const mocked = {
-      ...require('rxjs'),
-      lastValueFrom: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('rxjs'),
+    lastValueFrom: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttpGet: Mock = vi.fn();
 const mockSearch: Mock = vi.fn();

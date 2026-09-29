@@ -14,40 +14,40 @@ import { RunCaseWorkflowModal } from './run_case_workflow_modal';
 
 // Mock the RunWorkflowPanel from the workflows-ui package.
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      RunWorkflowPanel: ({
-        onClose,
-        onExecutionSettled,
-        inputs,
-        runWorkflow,
-        showSuccessToast,
-      }: {
-        onClose: () => void;
-        onExecutionSettled?: () => void;
-        inputs: unknown;
-        runWorkflow?: RunWorkflowExecutor;
-        showSuccessToast?: boolean;
-      }) => (
-        <div data-test-subj="run-workflow-panel-mock">
-          <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
-          <button data-test-subj="panel-close" type="button" onClick={onClose}>
-            {'Close'}
-          </button>
-          <button
-            data-test-subj="panel-settled"
-            type="button"
-            onClick={onExecutionSettled}
-            disabled={!onExecutionSettled}
-          >
-            {'Settled'}
-          </button>
-          <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
-          <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunWorkflowPanel: ({
+      onClose,
+      onExecutionSettled,
+      inputs,
+      runWorkflow,
+      showSuccessToast,
+    }: {
+      onClose: () => void;
+      onExecutionSettled?: () => void;
+      inputs: unknown;
+      runWorkflow?: RunWorkflowExecutor;
+      showSuccessToast?: boolean;
+    }) => (
+      <div data-test-subj="run-workflow-panel-mock">
+        <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
+        <button data-test-subj="panel-close" type="button" onClick={onClose}>
+          {'Close'}
+        </button>
+        <button
+          data-test-subj="panel-settled"
+          type="button"
+          onClick={onExecutionSettled}
+          disabled={!onExecutionSettled}
+        >
+          {'Settled'}
+        </button>
+        <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
+        <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('RunCaseWorkflowModal', () => {
   const onClose = vi.fn();

@@ -751,9 +751,7 @@ describe('RenderingService', () => {
         (mockRenderingSetupDeps.http.staticAssets.getHrefBase as Mock).mockReturnValueOnce(
           'http://cdn.example.com'
         );
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
-          true
-        );
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(true);
 
         const { body: content } = await render(createKibanaRequest(), uiSettings);
         const dom = load(content);
@@ -773,9 +771,7 @@ describe('RenderingService', () => {
         mockRenderingSetupDeps.userSettings.getUserSettings.mockResolvedValueOnce({
           locale: 'fr',
         } as UserSettings);
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
-          false
-        );
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(false);
 
         const { body: content } = await render(createKibanaRequest(), uiSettings);
         const dom = load(content);
@@ -798,9 +794,7 @@ describe('RenderingService', () => {
           en: 'MOCK_HASH',
           'fr-FR': 'MOCK_FR_HASH',
         });
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
-          false
-        );
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(false);
 
         const { body: content } = await render(
           createKibanaRequest({ headers: { 'accept-language': 'fr-FR,en;q=0.5' } }),
@@ -861,9 +855,7 @@ describe('RenderingService', () => {
           en: 'MOCK_HASH',
           'fr-FR': 'MOCK_FR_HASH',
         });
-        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(
-          false
-        );
+        (mockRenderingSetupDeps.http.staticAssets.isUsingCdn as Mock).mockReturnValueOnce(false);
 
         const { body: content, headers } = await render(
           createKibanaRequest({ headers: { 'accept-language': 'fr-FR,en;q=0.5' } }),

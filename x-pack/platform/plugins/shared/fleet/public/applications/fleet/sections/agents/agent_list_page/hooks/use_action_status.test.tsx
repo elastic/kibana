@@ -17,22 +17,22 @@ import { sendGetActionStatus, sendPostCancelAction, useStartServices } from '../
 import { useActionStatus } from './use_action_status';
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      sendGetActionStatus: vi.fn(),
-      sendPostCancelAction: vi.fn(),
-      useStartServices: vi.fn().mockReturnValue({
-        notifications: {
-          toasts: {
-            addError: vi.fn(),
-          },
+  const mocked = {
+    sendGetActionStatus: vi.fn(),
+    sendPostCancelAction: vi.fn(),
+    useStartServices: vi.fn().mockReturnValue({
+      notifications: {
+        toasts: {
+          addError: vi.fn(),
         },
-        overlays: {
-          openConfirm: vi.fn(),
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      overlays: {
+        openConfirm: vi.fn(),
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useActionStatus', () => {
   const mockSendGetActionStatus = sendGetActionStatus as Mock;

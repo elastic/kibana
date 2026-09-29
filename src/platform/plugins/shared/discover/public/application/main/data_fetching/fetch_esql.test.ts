@@ -205,9 +205,10 @@ describe('fetchEsql', () => {
       from: '2021-08-31T22:00:00.000Z',
       to: '2021-09-01T22:00:00.000Z',
     };
-    vi
-      .spyOn(discoverServiceMock.data.query.timefilter.timefilter, 'getAbsoluteTime')
-      .mockReturnValue(absoluteTimeRange);
+    vi.spyOn(
+      discoverServiceMock.data.query.timefilter.timefilter,
+      'getAbsoluteTime'
+    ).mockReturnValue(absoluteTimeRange);
 
     const result = getTextBasedQueryStateToAstProps(fetchEsqlMockProps);
 

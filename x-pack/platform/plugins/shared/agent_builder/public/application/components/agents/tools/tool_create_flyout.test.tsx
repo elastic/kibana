@@ -21,16 +21,18 @@ vi.mock('../../../hooks/tools/use_tool_form');
 vi.mock('../../tools/form/registry/tools_form_registry');
 
 vi.mock('../../tools/form/tool_form', async () => {
-  const actual = (await vi.importActual('../../tools/form/tool_form'));
+  const actual = await vi.importActual('../../tools/form/tool_form');
   return {
     ...actual,
     ToolForm: () => <div data-test-subj="toolForm" />,
   };
 });
 
-const { useCreateTool } = (await vi.importMock('../../../hooks/tools/use_create_tools'));
-const { useToolForm } = (await vi.importMock('../../../hooks/tools/use_tool_form'));
-const { getCreatePayloadFromData } = (await vi.importMock('../../tools/form/registry/tools_form_registry'));
+const { useCreateTool } = await vi.importMock('../../../hooks/tools/use_create_tools');
+const { useToolForm } = await vi.importMock('../../../hooks/tools/use_tool_form');
+const { getCreatePayloadFromData } = await vi.importMock(
+  '../../tools/form/registry/tools_form_registry'
+);
 
 const mockFormData = {
   type: ToolType.esql,

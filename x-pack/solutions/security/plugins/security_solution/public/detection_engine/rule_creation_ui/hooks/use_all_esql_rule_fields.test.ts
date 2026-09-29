@@ -15,9 +15,9 @@ import { useAllEsqlRuleFields } from './use_all_esql_rule_fields';
 import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 vi.mock('@kbn/securitysolution-utils', () => {
-      const mocked = { computeIsESQLQueryAggregating: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { computeIsESQLQueryAggregating: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/react-query', () => {
   return {
     useQuery: vi.fn(),

@@ -13,12 +13,12 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { createSetConversationMetadataTool } from './set_conversation_metadata';
 
 vi.mock('@kbn/agent-builder-server', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-server')),
-      getToolResultId: vi.fn(() => 'tool-result-id'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-server')),
+    getToolResultId: vi.fn(() => 'tool-result-id'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeTemplate = (fields: ConversationTemplate['fields'] = {}): ConversationTemplate => ({
   id: 'test-template',

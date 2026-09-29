@@ -14,21 +14,21 @@ import { INTERNAL_TIMELINES_BY_IDS_URL } from '../../../../common/constants';
 
 const mockPost = vi.fn();
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      KibanaServices: {
-        get: () => ({ http: { post: mockPost } }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaServices: {
+      get: () => ({ http: { post: mockPost } }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddError = vi.fn();
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addError: mockAddError }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addError: mockAddError }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useGetTimelinesByIds', () => {
   beforeEach(() => {

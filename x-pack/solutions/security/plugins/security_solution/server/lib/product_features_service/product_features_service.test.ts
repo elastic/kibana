@@ -29,9 +29,7 @@ import type { SecuritySolutionPluginSetupDependencies } from '../../plugin_contr
 import { coreLifecycleMock } from '@kbn/core-lifecycle-server-mocks';
 
 vi.mock('./product_features');
-const MockedProductFeatures = ProductFeatures as unknown as MockedClass<
-  typeof ProductFeatures
->;
+const MockedProductFeatures = ProductFeatures as unknown as MockedClass<typeof ProductFeatures>;
 
 const productFeature = {
   subFeaturesMap: new Map(),
@@ -40,28 +38,28 @@ const productFeature = {
 };
 const mockGetFeature = vi.fn().mockReturnValue(productFeature);
 vi.mock('@kbn/security-solution-features/product_features', () => {
-      const mocked = {
-      getSecurityFeature: () => mockGetFeature(),
-      getSecurityV2Feature: () => mockGetFeature(),
-      getSecurityV3Feature: () => mockGetFeature(),
-      getSecurityV4Feature: () => mockGetFeature(),
-      getSecurityV5Feature: () => mockGetFeature(),
-      getRulesFeature: () => mockGetFeature(),
-      getRulesV2Feature: () => mockGetFeature(),
-      getRulesV3Feature: () => mockGetFeature(),
-      getRulesV4Feature: () => mockGetFeature(),
-      getAlertsFeature: () => mockGetFeature(),
-      getCasesFeature: () => mockGetFeature(),
-      getCasesV2Feature: () => mockGetFeature(),
-      getCasesV3Feature: () => mockGetFeature(),
-      getAttackDiscoveryFeature: () => mockGetFeature(),
-      getAssistantFeature: () => mockGetFeature(),
-      getTimelineFeature: () => mockGetFeature(),
-      getNotesFeature: () => mockGetFeature(),
-      getSiemMigrationsFeature: () => mockGetFeature(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSecurityFeature: () => mockGetFeature(),
+    getSecurityV2Feature: () => mockGetFeature(),
+    getSecurityV3Feature: () => mockGetFeature(),
+    getSecurityV4Feature: () => mockGetFeature(),
+    getSecurityV5Feature: () => mockGetFeature(),
+    getRulesFeature: () => mockGetFeature(),
+    getRulesV2Feature: () => mockGetFeature(),
+    getRulesV3Feature: () => mockGetFeature(),
+    getRulesV4Feature: () => mockGetFeature(),
+    getAlertsFeature: () => mockGetFeature(),
+    getCasesFeature: () => mockGetFeature(),
+    getCasesV2Feature: () => mockGetFeature(),
+    getCasesV3Feature: () => mockGetFeature(),
+    getAttackDiscoveryFeature: () => mockGetFeature(),
+    getAssistantFeature: () => mockGetFeature(),
+    getTimelineFeature: () => mockGetFeature(),
+    getNotesFeature: () => mockGetFeature(),
+    getSiemMigrationsFeature: () => mockGetFeature(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const coreSetup = coreLifecycleMock.createCoreSetup();
 const featuresSetup = featuresPluginMock.createSetup();
@@ -358,8 +356,7 @@ describe('ProductFeaturesService', () => {
           experimentalFeatures
         );
         productFeaturesService.setup(coreSetup, pluginsSetup);
-        mockIsActionRegistered = MockedProductFeatures.mock.instances[0]
-          .isActionRegistered as Mock;
+        mockIsActionRegistered = MockedProductFeatures.mock.instances[0].isActionRegistered as Mock;
       });
 
       describe('when using security authz', () => {

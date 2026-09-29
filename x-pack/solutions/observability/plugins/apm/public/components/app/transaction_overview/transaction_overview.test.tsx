@@ -30,13 +30,13 @@ import { MockTimeRangeContextProvider } from '../../../context/time_range_metada
 
 // Mock the usePerformanceContext hook
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({
-        onPageReady: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({
+      onPageReady: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const KibanaReactContext = createKibanaReactContext({
   uiSettings: { get: () => true },

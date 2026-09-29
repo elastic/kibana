@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 import { parseArchive } from './parse_archive';
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      readFile: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFile: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReadFile = (await vi.importMock('fs/promises')).readFile;
 

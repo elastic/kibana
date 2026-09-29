@@ -11,19 +11,19 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { createQueryKnowledgeIndicatorToolHandler } from './handler';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'generated-query-id'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'generated-query-id'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/significant_events/validate_esql_query', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../lib/significant_events/validate_esql_query')),
-      validateEsqlQueryForStreamOrThrow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../lib/significant_events/validate_esql_query')),
+    validateEsqlQueryForStreamOrThrow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createQueryKnowledgeIndicatorToolHandler', () => {
   const logger = loggingSystemMock.createLogger();

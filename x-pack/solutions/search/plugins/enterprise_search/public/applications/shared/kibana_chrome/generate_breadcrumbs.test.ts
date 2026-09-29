@@ -5,19 +5,20 @@
  * 2.0.
  */
 
+import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
+
+import { mockHistory } from '../../__mocks__/react_router';
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { setMockValues, mockKibanaValues } from '../../__mocks__/kea_logic';
-import { mockHistory } from '../../__mocks__/react_router';
-
 vi.mock('../react_router_helpers', async () => {
-      const mocked = {
-      letBrowserHandleEvent: vi.fn(() => false),
-      createHref: (await vi.importActual('../react_router_helpers')).createHref,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    letBrowserHandleEvent: vi.fn(() => false),
+    createHref: (await vi.importActual('../react_router_helpers')).createHref,
+  };
+  return { ...mocked, default: mocked };
+});
 import { letBrowserHandleEvent } from '../react_router_helpers';
 
 import type { Breadcrumb } from './generate_breadcrumbs';

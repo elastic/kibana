@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import React from 'react';
 import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { createMockWorkflowApi, createMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowExecutionList } from './workflow_execution_list_stateful';
@@ -34,51 +34,51 @@ const mockUseUiSetting = vi.fn();
 vi.mock('../../../hooks/use_kibana');
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useUiSetting: (settingId: string, defaultValue?: boolean) =>
-        mockUseUiSetting(settingId, defaultValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useUiSetting: (settingId: string, defaultValue?: boolean) =>
+      mockUseUiSetting(settingId, defaultValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      getIndexSelectionHandler: vi.fn(() => vi.fn()),
-      useWorkflowsApi: () => mockWorkflowApi,
-      useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    getIndexSelectionHandler: vi.fn(() => vi.fn()),
+    useWorkflowsApi: () => mockWorkflowApi,
+    useWorkflowsCapabilities: () => mockUseWorkflowsCapabilities(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportWorkflowExecutionsCancelled: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportWorkflowExecutionsCancelled: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_serial_polling', () => {
-      const mocked = {
-      useSerialPolling: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSerialPolling: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSerialPolling = vi.mocked(useSerialPolling);
 
 vi.mock('../../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => ({
-        selectedExecutionId: null,
-        setSelectedExecution: mockSetSelectedExecution,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => ({
+      selectedExecutionId: null,
+      setSelectedExecution: mockSetSelectedExecution,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWorkflowExecutions: WorkflowExecutionListDto = {
   results: [
@@ -122,11 +122,11 @@ const mockWorkflowExecutionsWithRunning: WorkflowExecutionListDto = {
 
 const mockUseWorkflowExecutions = vi.fn();
 vi.mock('../../../entities/workflows/model/use_workflow_executions', () => {
-      const mocked = {
-      useWorkflowExecutions: (...args: unknown[]) => mockUseWorkflowExecutions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowExecutions: (...args: unknown[]) => mockUseWorkflowExecutions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowExecutionList (stateful)', () => {
   beforeEach(() => {

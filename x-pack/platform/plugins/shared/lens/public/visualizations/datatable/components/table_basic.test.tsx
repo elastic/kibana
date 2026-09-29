@@ -29,7 +29,7 @@ import { getCellColorFn } from '../../../shared_components/coloring/get_cell_col
 import { DataGridDensity } from '@kbn/unified-data-table';
 
 vi.mock('../../../shared_components/coloring/get_cell_color_fn', async () => {
-  const mod = (await vi.importActual('../../../shared_components/coloring/get_cell_color_fn'));
+  const mod = await vi.importActual('../../../shared_components/coloring/get_cell_color_fn');
   return {
     ...mod,
     getCellColorFn: vi.fn(mod.getCellColorFn),

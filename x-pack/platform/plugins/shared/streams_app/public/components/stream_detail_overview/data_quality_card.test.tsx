@@ -20,58 +20,58 @@ const mockUseStreamDetail = vi.fn();
 const mockUseStreamsAppFetch = vi.fn();
 
 vi.mock('../../hooks/use_stream_detail', () => {
-      const mocked = {
-      useStreamDetail: () => mockUseStreamDetail(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamDetail: () => mockUseStreamDetail(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: (...args: unknown[]) => mockUseStreamsAppFetch(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_streams_app_router', () => {
-      const mocked = {
-      useStreamsAppRouter: () => ({
-        link: (_path: string, params: { path: { key: string; tab: string } }) =>
-          `/streams/${params.path.key}/management/${params.path.tab}`,
-        push: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppRouter: () => ({
+      link: (_path: string, params: { path: { key: string; tab: string } }) =>
+        `/streams/${params.path.key}/management/${params.path.tab}`,
+      push: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({ rangeFrom: 'now-15m', rangeTo: 'now' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./top_failure_reasons', () => {
-      const mocked = {
-      TopFailureReasons: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TopFailureReasons: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: { application: { navigateToUrl: vi.fn() }, uiSettings: {} },
-        dependencies: {
-          start: {
-            data: { search: { search: vi.fn() } },
-            streams: { streamsRepositoryClient: { fetch: vi.fn() } },
-          },
+  const mocked = {
+    useKibana: () => ({
+      core: { application: { navigateToUrl: vi.fn() }, uiSettings: {} },
+      dependencies: {
+        start: {
+          data: { search: { search: vi.fn() } },
+          streams: { streamsRepositoryClient: { fetch: vi.fn() } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 

@@ -13,11 +13,11 @@ import { useAlertDetailsPageViewEbt } from './use_alert_details_page_view_ebt';
 import { useKibana } from '../utils/kibana_react';
 
 vi.mock('../utils/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAlertDetailsPageViewEbt', () => {
   const getServices = (reportAlertDetailsPageView: Mock) => ({

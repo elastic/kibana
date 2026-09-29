@@ -23,18 +23,18 @@ import { AlertsTable } from '../../../alerts_table';
 import { useFilteredRelatedAlertIds } from './use_filtered_related_alert_ids';
 
 vi.mock('../../../alerts_table', () => {
-      const mocked = {
-      AlertsTable: vi.fn(() => <div data-test-subj="mock-alerts-table">{'AlertsTable'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTable: vi.fn(() => <div data-test-subj="mock-alerts-table">{'AlertsTable'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_filtered_related_alert_ids', () => {
-      const mocked = {
-      useFilteredRelatedAlertIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFilteredRelatedAlertIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertsTab', () => {
   const defaultProps = {

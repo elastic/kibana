@@ -22,31 +22,31 @@ const mockSpanFactory = vi.fn((_name: string, _opts: unknown, fn: (span?: unknow
 );
 
 vi.mock('@kbn/inference-tracing', () => {
-      const mocked = {
-      withActiveInferenceSpan: (...args: unknown[]) =>
-        (mockSpanFactory as unknown as (...a: unknown[]) => unknown)(...args),
-      ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
-      GenAISemanticConventions: {
-        GenAIOperationName: 'gen_ai.operation.name',
-        GenAIWorkflowName: 'gen_ai.workflow.name',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withActiveInferenceSpan: (...args: unknown[]) =>
+      (mockSpanFactory as unknown as (...a: unknown[]) => unknown)(...args),
+    ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
+    GenAISemanticConventions: {
+      GenAIOperationName: 'gen_ai.operation.name',
+      GenAIWorkflowName: 'gen_ai.workflow.name',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_execution_state', () => {
-      const mocked = {
-      toWorkflowExecutionState: vi.fn((execution) => ({
-        execution_id: execution.id,
-        status: execution.status,
-        workflow_id: execution.workflowId,
-        started_at: execution.startedAt,
-        finished_at: execution.finishedAt,
-        workflow_name: execution.workflowDefinition.name,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toWorkflowExecutionState: vi.fn((execution) => ({
+      execution_id: execution.id,
+      status: execution.status,
+      workflow_id: execution.workflowId,
+      started_at: execution.startedAt,
+      finished_at: execution.finishedAt,
+      workflow_name: execution.workflowDefinition.name,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('executeWorkflow', () => {
   const request = httpServerMock.createKibanaRequest();

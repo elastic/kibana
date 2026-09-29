@@ -25,7 +25,7 @@ import { SubActionConnector } from './sub_action_connector';
 vi.mock('axios');
 
 vi.mock('../lib/axios_utils', async () => {
-  const originalUtils = (await vi.importActual('../lib/axios_utils'));
+  const originalUtils = await vi.importActual('../lib/axios_utils');
   return {
     ...originalUtils,
     request: vi.fn(),

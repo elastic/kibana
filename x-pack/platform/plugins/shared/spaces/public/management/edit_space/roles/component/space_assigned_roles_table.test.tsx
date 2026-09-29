@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render, screen, within } from '@testing-library/react';
 import React, { type ComponentProps } from 'react';
+import { vi } from 'vitest';
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

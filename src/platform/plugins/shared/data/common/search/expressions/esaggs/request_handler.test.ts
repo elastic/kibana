@@ -21,11 +21,11 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { handleRequest } from './request_handler';
 
 vi.mock('../../tabify', () => {
-      const mocked = {
-      tabifyAggResponse: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    tabifyAggResponse: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { tabifyAggResponse } from '../../tabify';
 import { of } from 'rxjs';
@@ -99,10 +99,7 @@ describe('esaggs expression function - public', () => {
 
     test('setField(filter)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as Mock).mock.calls[3]).toEqual([
-        'filter',
-        mockParams.filters,
-      ]);
+      expect((searchSource.setField as Mock).mock.calls[3]).toEqual(['filter', mockParams.filters]);
 
       // make sure param is passed through
       vi.clearAllMocks();
@@ -117,10 +114,7 @@ describe('esaggs expression function - public', () => {
 
     test('setField(query)', async () => {
       expect(searchSource.setField).toHaveBeenCalledTimes(5);
-      expect((searchSource.setField as Mock).mock.calls[4]).toEqual([
-        'query',
-        mockParams.query,
-      ]);
+      expect((searchSource.setField as Mock).mock.calls[4]).toEqual(['query', mockParams.query]);
 
       // make sure param is passed through
       vi.clearAllMocks();

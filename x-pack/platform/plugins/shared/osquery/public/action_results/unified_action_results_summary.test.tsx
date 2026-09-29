@@ -23,29 +23,32 @@ import { useKibana } from '../common/lib/kibana';
 vi.mock('./use_action_results');
 vi.mock('../common/lib/kibana');
 vi.mock('./use_action_results_data_view', () => {
-      const mocked = {
-      useActionResultsDataView: () => ({ id: 'osquery-status-dv' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useActionResultsDataView: () => ({ id: 'osquery-status-dv' }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/unified-data-table', () => {
-      const mocked = {
-      // `loadingState` is surfaced as an attribute so the live-polling flag it is derived from
-      // can be asserted without the real grid.
-      UnifiedDataTable: ({ loadingState }: { loadingState: string }) => (
-        <div data-test-subj="unifiedDataTable" data-loading-state={loadingState} />
-      ),
-      DataLoadingState: { loading: 'loading', loaded: 'loaded' },
-      DataGridDensity: { EXPANDED: 'expanded' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // `loadingState` is surfaced as an attribute so the live-polling flag it is derived from
+    // can be asserted without the real grid.
+    UnifiedDataTable: ({ loadingState }: { loadingState: string }) => (
+      <div data-test-subj="unifiedDataTable" data-loading-state={loadingState} />
+    ),
+    DataLoadingState: { loading: 'loading', loaded: 'loaded' },
+    DataGridDensity: { EXPANDED: 'expanded' },
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cell-actions', () => {
-      const mocked = {
-      CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellActionsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 const useActionResultsMock = useActionResultsHook.useActionResults as MockedFunction<

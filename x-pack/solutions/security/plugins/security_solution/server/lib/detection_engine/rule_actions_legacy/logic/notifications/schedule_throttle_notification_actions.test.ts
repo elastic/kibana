@@ -15,11 +15,11 @@ import type { NotificationRuleTypeParams } from './schedule_notification_actions
 import { scheduleNotificationActions } from './schedule_notification_actions';
 
 vi.mock('./schedule_notification_actions', () => {
-      const mocked = {
-      scheduleNotificationActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scheduleNotificationActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('schedule_throttle_notification_actions', () => {
   let notificationRuleParams: NotificationRuleTypeParams;

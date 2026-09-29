@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook, waitFor } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { act, renderHook, waitFor } from '@testing-library/react';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
@@ -21,12 +21,12 @@ import { useKibana } from '../../../../hooks/use_kibana';
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: () => mockDispatch,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: () => mockDispatch,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_kibana');
 const mockTelemetry = {
   reportWorkflowAiChatOpened: vi.fn(),
@@ -35,48 +35,48 @@ const mockTelemetry = {
   reportAiProposalResolved: vi.fn(),
 };
 vi.mock('../../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: () => mockTelemetry,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => mockTelemetry,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useUiSetting: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useUiSetting: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const useUiSettingMock = useUiSetting as MockedFunction<typeof useUiSetting>;
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'mock-uuid-1234' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'mock-uuid-1234' };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../features/ai_integration', async () => {
-      const mocked = {
-      AttachmentBridge: vi.fn().mockImplementation(() => ({
-        start: vi.fn(),
-        stop: vi.fn(),
-        setAttachmentId: vi.fn(),
-      })),
-      ProposalManager: vi.fn().mockImplementation(() => ({
-        initialize: vi.fn(),
-        dispose: vi.fn(),
-        getDiffHunks: vi.fn().mockReturnValue([]),
-        hasPendingProposals: vi.fn().mockReturnValue(false),
-      })),
-      setActiveProposalManager: vi.fn(),
-      setLastCreateSessionId: vi.fn(),
-      setSidebarOpen: vi.fn(),
-      consumeSidebarRestoreFor: vi.fn().mockReturnValue(false),
-      hasPersistedConversation: vi.fn().mockReturnValue(false),
-      findLinkedWorkflowAttachment: (await vi.importActual('../../../../features/ai_integration'))
-        .findLinkedWorkflowAttachment,
-      WORKFLOW_EDITOR_ATTACHMENT_ID: (await vi.importActual('../../../../features/ai_integration'))
-        .WORKFLOW_EDITOR_ATTACHMENT_ID,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentBridge: vi.fn().mockImplementation(() => ({
+      start: vi.fn(),
+      stop: vi.fn(),
+      setAttachmentId: vi.fn(),
+    })),
+    ProposalManager: vi.fn().mockImplementation(() => ({
+      initialize: vi.fn(),
+      dispose: vi.fn(),
+      getDiffHunks: vi.fn().mockReturnValue([]),
+      hasPendingProposals: vi.fn().mockReturnValue(false),
+    })),
+    setActiveProposalManager: vi.fn(),
+    setLastCreateSessionId: vi.fn(),
+    setSidebarOpen: vi.fn(),
+    consumeSidebarRestoreFor: vi.fn().mockReturnValue(false),
+    hasPersistedConversation: vi.fn().mockReturnValue(false),
+    findLinkedWorkflowAttachment: (await vi.importActual('../../../../features/ai_integration'))
+      .findLinkedWorkflowAttachment,
+    WORKFLOW_EDITOR_ATTACHMENT_ID: (await vi.importActual('../../../../features/ai_integration'))
+      .WORKFLOW_EDITOR_ATTACHMENT_ID,
+  };
+  return { ...mocked, default: mocked };
+});
 
 type AiIntegrationModule = typeof import('../../../../features/ai_integration');
 const {
@@ -90,19 +90,21 @@ const {
   consumeSidebarRestoreFor: MockedFunction<AiIntegrationModule['consumeSidebarRestoreFor']>;
   hasPersistedConversation: MockedFunction<AiIntegrationModule['hasPersistedConversation']>;
 };
-const { AttachmentBridge: mockAttachmentBridge } = (await vi.importMock('../../../../features/ai_integration')) as { AttachmentBridge: Mock };
+const { AttachmentBridge: mockAttachmentBridge } = (await vi.importMock(
+  '../../../../features/ai_integration'
+)) as { AttachmentBridge: Mock };
 vi.mock('../../../../features/ai_integration/proposal_tracker', () => {
-      const mocked = {
-      ProposalTracker: vi.fn().mockImplementation(() => ({
-        onAllResolved: vi.fn().mockReturnValue(vi.fn()),
-        updateStatus: vi.fn(),
-        cascadeDecline: vi.fn().mockReturnValue([]),
-        clearAll: vi.fn(),
-        getAllRecords: vi.fn().mockReturnValue([]),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ProposalTracker: vi.fn().mockImplementation(() => ({
+      onAllResolved: vi.fn().mockReturnValue(vi.fn()),
+      updateStatus: vi.fn(),
+      cascadeDecline: vi.fn().mockReturnValue([]),
+      clearAll: vi.fn(),
+      getAllRecords: vi.fn().mockReturnValue([]),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 

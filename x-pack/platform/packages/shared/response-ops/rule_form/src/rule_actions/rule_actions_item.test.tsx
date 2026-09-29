@@ -25,92 +25,92 @@ import type { RuleActionsSettingsProps } from './rule_actions_settings';
 import type { RuleActionsMessageProps } from './rule_actions_message';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_settings', () => {
-      const mocked = {
-      RuleActionsSettings: ({
-        onNotifyWhenChange,
-        onActionGroupChange,
-        onAlertsFilterChange,
-        onTimeframeChange,
-      }: RuleActionsSettingsProps) => (
-        <div>
-          ruleActionsSettings
-          <button
-            onClick={() =>
-              onNotifyWhenChange({
-                summary: true,
-                notifyWhen: 'onThrottleInterval',
-                throttle: '5m',
-              })
-            }
-          >
-            onNotifyWhenChange
-          </button>
-          <button onClick={() => onActionGroupChange('recovered')}>onActionGroupChange</button>
-          <button
-            onClick={() =>
-              onAlertsFilterChange({
-                kql: '',
-                filters: [],
-              })
-            }
-          >
-            onAlertsFilterChange
-          </button>
-          <button
-            onClick={() =>
-              onTimeframeChange({
-                days: [1, 2, 3],
-                timezone: 'UTC',
-                hours: {
-                  start: 'now',
-                  end: 'now',
-                },
-              })
-            }
-          >
-            onTimeframeChange
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsSettings: ({
+      onNotifyWhenChange,
+      onActionGroupChange,
+      onAlertsFilterChange,
+      onTimeframeChange,
+    }: RuleActionsSettingsProps) => (
+      <div>
+        ruleActionsSettings
+        <button
+          onClick={() =>
+            onNotifyWhenChange({
+              summary: true,
+              notifyWhen: 'onThrottleInterval',
+              throttle: '5m',
+            })
+          }
+        >
+          onNotifyWhenChange
+        </button>
+        <button onClick={() => onActionGroupChange('recovered')}>onActionGroupChange</button>
+        <button
+          onClick={() =>
+            onAlertsFilterChange({
+              kql: '',
+              filters: [],
+            })
+          }
+        >
+          onAlertsFilterChange
+        </button>
+        <button
+          onClick={() =>
+            onTimeframeChange({
+              days: [1, 2, 3],
+              timezone: 'UTC',
+              hours: {
+                start: 'now',
+                end: 'now',
+              },
+            })
+          }
+        >
+          onTimeframeChange
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_message', () => {
-      const mocked = {
-      RuleActionsMessage: ({ onParamsChange, templateFields }: RuleActionsMessageProps) => (
-        <div>
-          ruleActionsMessage
-          <button onClick={() => onParamsChange('paramsKey', { paramsKey: 'paramsValue' })}>
-            onParamsChange
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsMessage: ({ onParamsChange, templateFields }: RuleActionsMessageProps) => (
+      <div>
+        ruleActionsMessage
+        <button onClick={() => onParamsChange('paramsKey', { paramsKey: 'paramsValue' })}>
+          onParamsChange
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../validation/validate_params_for_warnings', () => {
-      const mocked = {
-      validateParamsForWarnings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateParamsForWarnings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared/src/action_variables/get_available_action_variables', () => {
-      const mocked = {
-      getAvailableActionVariables: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAvailableActionVariables: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleType = {
   id: '.es-query',
@@ -157,11 +157,15 @@ const ruleModel: RuleTypeModel = {
   requiresAppContext: false,
 };
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
-const { validateParamsForWarnings } = (await vi.importMock('../validation/validate_params_for_warnings'));
+const { validateParamsForWarnings } = await vi.importMock(
+  '../validation/validate_params_for_warnings'
+);
 
-const { getAvailableActionVariables } = (await vi.importMock('@kbn/alerts-ui-shared/src/action_variables/get_available_action_variables'));
+const { getAvailableActionVariables } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/action_variables/get_available_action_variables'
+);
 
 const mockConnectors = [getConnector('1', { id: 'action-1' })];
 

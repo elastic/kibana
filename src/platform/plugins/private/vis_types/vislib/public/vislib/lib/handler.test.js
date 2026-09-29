@@ -159,25 +159,26 @@ dateHistogramArray.forEach(function (data, i) {
 
     describe('event proxying', function () {
       test('should only pass the original event object to downstream handlers', () =>
-          new Promise((resolve, reject) => {
-          const done = Object.assign((error) => (error ? reject(error) : resolve()), { fail: reject });
+        new Promise((resolve, reject) => {
+          const done = Object.assign((error) => (error ? reject(error) : resolve()), {
+            fail: reject,
+          });
 
-                  const event = {};
-                  const chart = vis.handler.charts[0];
+          const event = {};
+          const chart = vis.handler.charts[0];
 
-                  const mockEmitter = function () {
-                    const args = Array.from(arguments);
-                    expect(args.length).toBe(2);
-                    expect(args[0]).toBe('click');
-                    expect(args[1].data).toBe(event);
-                    done();
-                  };
+          const mockEmitter = function () {
+            const args = Array.from(arguments);
+            expect(args.length).toBe(2);
+            expect(args[0]).toBe('click');
+            expect(args[1].data).toBe(event);
+            done();
+          };
 
-                  vis.emit = mockEmitter;
-                  vis.handler.enable('click', chart);
-                  chart.events.emit('click', event);
-                
-          }));
+          vis.emit = mockEmitter;
+          vis.handler.enable('click', chart);
+          chart.events.emit('click', event);
+        }));
     });
   });
 });

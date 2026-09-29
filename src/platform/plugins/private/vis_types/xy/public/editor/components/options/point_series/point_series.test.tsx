@@ -19,15 +19,15 @@ import { ChartType } from '../../../../../common';
 import { getAggs, getVis, getStateParams } from './point_series.mocks';
 
 vi.mock('../../../../services', () => {
-      const mocked = {
-      getPalettesService: vi.fn(() => {
-        return {
-          getPalettes: vi.fn(),
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPalettesService: vi.fn(() => {
+      return {
+        getPalettes: vi.fn(),
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type PointSeriesOptionsProps = Parameters<typeof PointSeriesOptions>[0];
 

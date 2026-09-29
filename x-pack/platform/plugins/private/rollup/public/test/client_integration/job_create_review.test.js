@@ -17,7 +17,7 @@ import { JOBS } from './helpers/constants';
 import { coreMock } from '@kbn/core/public/mocks';
 
 vi.mock('../../kibana_services', async () => {
-  const services = (await vi.importActual('../../kibana_services'));
+  const services = await vi.importActual('../../kibana_services');
   return {
     ...services,
     getUiStatsReporter: vi.fn(() => () => {}),

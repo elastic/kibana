@@ -20,21 +20,21 @@ import { createMemoryHistory } from 'history';
 import { SYNTHETIC_CHECK_STEPS_ROUTE } from '../../../../common/constants';
 
 vi.mock('../../state/api/journey', () => {
-      const mocked = {
-      fetchJourneySteps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchJourneySteps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // We must mock all other API calls because we're using the real store
 // in this test. Using the real store causes actions and effects to actually
 // run, which could trigger API calls.
 vi.mock('../../state/api/utils', () => {
-      const mocked = {
-      apiService: { get: vi.fn().mockResolvedValue([]) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiService: { get: vi.fn().mockResolvedValue([]) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getRelevantPageHistory = () => {
   const history = createMemoryHistory();

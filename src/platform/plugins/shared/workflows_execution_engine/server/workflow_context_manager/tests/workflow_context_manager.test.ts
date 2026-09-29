@@ -31,44 +31,44 @@ import type { WorkflowExecutionState } from '../workflow_execution_state';
 const dependencies = mockContextDependencies();
 
 vi.mock('../../lib/call_kibana_api', () => {
-      const mocked = {
-      callKibanaApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    callKibanaApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils', async () => {
-      const mocked = {
-      ...(await vi.importActual<typeof import('../../utils')>('../../utils')),
-      buildStepExecutionId: vi.fn().mockImplementation((executionId: string, stepId: string) => {
-        return `${stepId}_generated`;
-      }),
-      getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
-      buildWorkflowExecutionUrl: vi
-        .fn()
-        .mockImplementation(
-          (
-            kibanaUrl: string,
-            spaceId: string,
-            workflowId: string,
-            executionId: string,
-            stepExecutionId?: string
-          ) => {
-            const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-            const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
-            const params = new URLSearchParams({
-              executionId,
-              tab: 'executions',
-            });
-            if (stepExecutionId) {
-              params.set('stepExecutionId', stepExecutionId);
-            }
-            return `${baseUrl}?${params.toString()}`;
+  const mocked = {
+    ...(await vi.importActual<typeof import('../../utils')>('../../utils')),
+    buildStepExecutionId: vi.fn().mockImplementation((executionId: string, stepId: string) => {
+      return `${stepId}_generated`;
+    }),
+    getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
+    buildWorkflowExecutionUrl: vi
+      .fn()
+      .mockImplementation(
+        (
+          kibanaUrl: string,
+          spaceId: string,
+          workflowId: string,
+          executionId: string,
+          stepExecutionId?: string
+        ) => {
+          const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+          const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+          const params = new URLSearchParams({
+            executionId,
+            tab: 'executions',
+          });
+          if (stepExecutionId) {
+            params.set('stepExecutionId', stepExecutionId);
           }
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+          return `${baseUrl}?${params.toString()}`;
+        }
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowContextManager', () => {
   const fakeNode: AtomicGraphNode = {
@@ -843,10 +843,7 @@ describe('WorkflowContextManager', () => {
           }
           return undefined;
         });
-      (testContainer.templatingEngineMock.evaluateExpression as Mock).mockReturnValue([
-        'x',
-        'y',
-      ]);
+      (testContainer.templatingEngineMock.evaluateExpression as Mock).mockReturnValue(['x', 'y']);
       (testContainer.templatingEngineMock.render as Mock).mockReturnValue(['x', 'y']);
 
       const context = testContainer.underTest.getContext();
@@ -1622,8 +1619,7 @@ describe('WorkflowContextManager', () => {
         testContainer.underTest.renderValueAccordingToContext(
           'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
         );
-        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
-          .calls[0][1];
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock.calls[0][1];
         expect(renderArgs).toEqual(
           expect.objectContaining({
             execution: {
@@ -1669,8 +1665,7 @@ describe('WorkflowContextManager', () => {
 
         testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
 
-        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
-          .calls[0][1];
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock.calls[0][1];
         expect(renderArgs.steps).toEqual({
           fetchData: {
             output: {
@@ -1687,8 +1682,7 @@ describe('WorkflowContextManager', () => {
 
         testContainer.underTest.renderValueAccordingToContext('{{ steps.fetchData.output.total }}');
 
-        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
-          .calls[0][1];
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock.calls[0][1];
         expect(renderArgs.steps).toEqual({
           fetchData: {
             input: undefined,
@@ -1727,19 +1721,16 @@ describe('WorkflowContextManager', () => {
             }
             return undefined;
           });
-        testContainer.templatingEngineMock.extractGlobalVariableSegments = vi
-          .fn()
-          .mockReturnValue([
-            ['steps', 'fetchData', 'output', 'hits'],
-            ['steps', 'fetchData', 'output', 'hits', 0, 'id'],
-          ]);
+        testContainer.templatingEngineMock.extractGlobalVariableSegments = vi.fn().mockReturnValue([
+          ['steps', 'fetchData', 'output', 'hits'],
+          ['steps', 'fetchData', 'output', 'hits', 0, 'id'],
+        ]);
 
         testContainer.underTest.renderValueAccordingToContext(
           '{{ steps.fetchData.output.hits | size }} - {{ steps.fetchData.output.hits[0].id }}'
         );
 
-        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock
-          .calls[0][1];
+        const renderArgs = (testContainer.templatingEngineMock.render as Mock).mock.calls[0][1];
         const hits = renderArgs.steps.fetchData.output.hits;
         expect(Array.isArray(hits)).toBe(true);
         expect(hits).toEqual([{ id: 'a' }, { id: 'b' }, { id: 'c' }]);

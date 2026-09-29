@@ -26,11 +26,11 @@ const mockKibana = {
 };
 
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockKibana,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockKibana,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // EuiDataGrid relies on ColumnHeaderTruncateContainer which imports from kbn-unified-data-table.
 // Provide a lightweight stub so the module resolves without loading the full package.

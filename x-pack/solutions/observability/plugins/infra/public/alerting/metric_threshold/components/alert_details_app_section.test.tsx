@@ -28,65 +28,65 @@ const mockedLensStartContract = lensPluginMock.createStartContract();
 Date.now = vi.fn(() => new Date('2024-06-13T07:00:33.381Z').getTime());
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      useMetricsDataViewContext: () => ({
-        metricsView: { dataViewReference: 'index' },
-      }),
-      withSourceProvider:
-        <ComponentProps extends {}>(Component: React.FC<ComponentProps>) =>
-        () => {
-          return function ComponentWithSourceProvider(props: ComponentProps) {
-            return <div />;
-          };
-        },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsDataViewContext: () => ({
+      metricsView: { dataViewReference: 'index' },
+    }),
+    withSourceProvider:
+      <ComponentProps extends {}>(Component: React.FC<ComponentProps>) =>
+      () => {
+        return function ComponentWithSourceProvider(props: ComponentProps) {
+          return <div />;
+        };
+      },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-alert-details', () => {
-      const mocked = {
-      AlertAnnotation: () => {},
-      AlertActiveTimeRangeAnnotation: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertAnnotation: () => {},
+    AlertActiveTimeRangeAnnotation: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/observability-alert-details', () => {
-      const mocked = {
-      AlertAnnotation: () => {},
-      AlertActiveTimeRangeAnnotation: () => {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertAnnotation: () => {},
+    AlertActiveTimeRangeAnnotation: () => {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/observability-get-padded-alert-time-range-util', () => {
-      const mocked = {
-      getPaddedAlertTimeRange: () => ({
-        from: '2023-03-28T10:43:13.802Z',
-        to: '2023-03-29T13:14:09.581Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPaddedAlertTimeRange: () => ({
+      from: '2023-03-28T10:43:13.802Z',
+      to: '2023-03-29T13:14:09.581Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-plugin/public', () => {
-      const mocked = {
-      RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
-      getGroupFilters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
+    getGroupFilters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          ...mockCoreMock.createStart(),
-          charts: mockedChartStartContract,
-          lens: mockedLensStartContract,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        ...mockCoreMock.createStart(),
+        charts: mockedChartStartContract,
+        lens: mockedLensStartContract,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();

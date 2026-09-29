@@ -15,11 +15,11 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { deleteConnectorById } from './delete_connector';
 
 vi.mock('./cancel_syncs', () => {
-      const mocked = {
-      cancelSyncs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cancelSyncs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 import { cancelSyncs } from './cancel_syncs';
 
 describe('deleteConnector lib function', () => {

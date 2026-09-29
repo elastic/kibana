@@ -14,7 +14,7 @@ import { TimelineId } from '../../../../common/types/timeline';
 import { showTimeline } from '../actions';
 
 vi.mock('../actions', async () => {
-  const actual = (await vi.importActual('../actions'));
+  const actual = await vi.importActual('../actions');
   const showTL = vi.fn((...args) => actual.showTimeline(...args));
   (showTL as unknown as { match: Function }).match = () => false;
   (showTL as unknown as { type: string }).type = actual.showTimeline.type;

@@ -22,11 +22,11 @@ const testProps = {
   onSharedSelectionChange,
 };
 vi.mock('./share_user_select', () => {
-      const mocked = {
-      ShareUserSelect: () => <div data-test-subj="share_user_select">{'ShareUserSelect'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ShareUserSelect: () => <div data-test-subj="share_user_select">{'ShareUserSelect'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 describe('ShareSelect', () => {
   beforeEach(() => {
     vi.clearAllMocks();

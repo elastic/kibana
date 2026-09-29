@@ -57,13 +57,13 @@ const mockEsClient: MockEsClient = {
 };
 
 vi.mock('./storage', () => {
-      const mocked = {
-      createStorage: vi.fn(() => ({
-        getClient: vi.fn(() => mockEsClient),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createStorage: vi.fn(() => ({
+      getClient: vi.fn(() => mockEsClient),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SkillClient', () => {
   let client: SkillClient;

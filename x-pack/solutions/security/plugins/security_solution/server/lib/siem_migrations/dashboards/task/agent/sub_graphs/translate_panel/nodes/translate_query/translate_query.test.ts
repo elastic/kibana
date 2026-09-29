@@ -19,19 +19,19 @@ import {
 } from '../../../../../../../common/task/agent/helpers/translate_spl_to_esql';
 
 vi.mock('../../../../../../../common/task/agent/helpers/translate_spl_to_esql', () => {
-      const mocked = {
-      getTranslateSplToEsql: vi.fn(),
-      TASK_DESCRIPTION: { migrate_dashboard: 'Migrate Splunk dashboard panel to Elastic' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTranslateSplToEsql: vi.fn(),
+    TASK_DESCRIPTION: { migrate_dashboard: 'Migrate Splunk dashboard panel to Elastic' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      formatResourceWithSampledValues: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatResourceWithSampledValues: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetTranslateSplToEsql = vi.mocked(getTranslateSplToEsql);
 const mockFormatResourceWithSampledValues = vi.mocked(formatResourceWithSampledValues);

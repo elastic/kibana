@@ -23,15 +23,15 @@ import { getEntityAnomalies } from '../../../anomaly_summary';
 
 vi.mock('../../../anomaly_summary');
 vi.mock('@kbn/entity-store/common/euid_helpers', () => {
-      const mocked = {
-      euid: {
-        dsl: {
-          getEuidFilterBasedOnDocument: vi.fn(),
-        },
+  const mocked = {
+    euid: {
+      dsl: {
+        getEuidFilterBasedOnDocument: vi.fn(),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
 const soClient = savedObjectsClientMock.create();
@@ -233,8 +233,7 @@ describe('getAnomalyData', () => {
     it('issues one getEntityAnomalies call per entity and returns results in input order', async () => {
       const entryA = makeAnomalySummaryEntry({ jobId: 'job-a', recordScore: 90 });
       const entryB = makeAnomalySummaryEntry({ jobId: 'job-b', recordScore: 50 });
-      vi
-        .mocked(getEntityAnomalies)
+      vi.mocked(getEntityAnomalies)
         .mockResolvedValueOnce({ anomalies: [entryA], total: 1 })
         .mockResolvedValueOnce({ anomalies: [entryB], total: 1 });
 

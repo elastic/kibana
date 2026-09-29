@@ -9,20 +9,20 @@ import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 
 vi.mock('@kbn/inference-tracing', () => {
-      const mocked = {
-      // Avoid initializing tracing in unit tests (can keep Jest alive).
-      withInferenceContext: (fn: () => unknown) => fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // Avoid initializing tracing in unit tests (can keep Jest alive).
+    withInferenceContext: (fn: () => unknown) => fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils/tracing', () => {
-      const mocked = {
-      withTaskSpan: vi.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
-      withEvaluatorSpan: vi.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
-      getCurrentTraceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withTaskSpan: vi.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+    withEvaluatorSpan: vi.fn((_name: string, _opts: unknown, cb: () => unknown) => cb()),
+    getCurrentTraceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { ModelFamily, ModelProvider } from '@kbn/inference-common';
 import type { Model } from '@kbn/inference-common';

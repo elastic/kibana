@@ -13,14 +13,14 @@ import { settingsService } from '..';
 import { ensureDeleteUnenrolledAgentsSetting } from './delete_unenrolled_agent_setting';
 
 vi.mock('..', () => {
-      const mocked = {
-      settingsService: {
-        getSettingsOrUndefined: vi.fn(),
-        saveSettings: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    settingsService: {
+      getSettingsOrUndefined: vi.fn(),
+      saveSettings: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('delete_unenrolled_agent_setting', () => {
   beforeEach(() => {

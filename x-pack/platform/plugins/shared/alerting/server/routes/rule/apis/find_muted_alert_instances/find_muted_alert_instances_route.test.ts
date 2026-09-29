@@ -14,11 +14,11 @@ import { rulesClientMock } from '../../../../rules_client.mock';
 import type { FindMutedAlertsResult } from '../../../../application/rule/methods/find_muted_alerts';
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

@@ -16,13 +16,13 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
 
 vi.mock('../../hooks/use_put_synonyms_rule', () => {
-      const mocked = {
-      usePutSynonymsRule: vi.fn().mockReturnValue({
-        mutate: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePutSynonymsRule: vi.fn().mockReturnValue({
+      mutate: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const queryClient = new QueryClient();
 const Wrapper = ({ children }: { children: React.ReactNode }) => {

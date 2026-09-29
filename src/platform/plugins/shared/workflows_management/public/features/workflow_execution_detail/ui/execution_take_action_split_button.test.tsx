@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { ExecutionStatus } from '@kbn/workflows';
 import {
   useRunWorkflow,
@@ -29,22 +28,22 @@ const mockTestWorkflow = vi.fn();
 const mockWorkflowApi = createMockWorkflowApi();
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      useRunWorkflow: vi.fn(),
-      useTestWorkflow: vi.fn(),
-      useWorkflowsApi: vi.fn(),
-      useWorkflowsCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    useRunWorkflow: vi.fn(),
+    useTestWorkflow: vi.fn(),
+    useWorkflowsApi: vi.fn(),
+    useWorkflowsCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/navigation/use_navigate_to_execution', () => {
-      const mocked = {
-      useNavigateToExecution: () => ({ href: '/app/workflows/wf-1?executionId=exec-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateToExecution: () => ({ href: '/app/workflows/wf-1?executionId=exec-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ExecutionTakeActionSplitButton', () => {
   const services = createStartServicesMock();
@@ -62,9 +61,9 @@ describe('ExecutionTakeActionSplitButton', () => {
       mutateAsync: mockTestWorkflow,
       isLoading: false,
     } as unknown as ReturnType<typeof useTestWorkflow>);
-    vi
-      .mocked(useWorkflowsApi)
-      .mockReturnValue(mockWorkflowApi as unknown as ReturnType<typeof useWorkflowsApi>);
+    vi.mocked(useWorkflowsApi).mockReturnValue(
+      mockWorkflowApi as unknown as ReturnType<typeof useWorkflowsApi>
+    );
     vi.mocked(useWorkflowsCapabilities).mockReturnValue(createMockWorkflowsCapabilities());
     services.notifications.toasts.addSuccess = vi.fn();
     services.notifications.toasts.addError = vi.fn();

@@ -24,15 +24,12 @@ vi.mock('./fetch_duration_histogram_range_steps');
 vi.mock('./fetch_failed_events_correlation_p_values');
 vi.mock('@kbn/es-query');
 
-const mockFetchDurationHistogramRangeSteps =
-  fetchDurationHistogramRangeSteps as MockedFunction<typeof fetchDurationHistogramRangeSteps>;
-const mockFetchFailedEventsCorrelationPValues =
-  fetchFailedEventsCorrelationPValues as MockedFunction<
-    typeof fetchFailedEventsCorrelationPValues
-  >;
-const mockisNonLocalIndexName = isNonLocalIndexName as MockedFunction<
-  typeof isNonLocalIndexName
+const mockFetchDurationHistogramRangeSteps = fetchDurationHistogramRangeSteps as MockedFunction<
+  typeof fetchDurationHistogramRangeSteps
 >;
+const mockFetchFailedEventsCorrelationPValues =
+  fetchFailedEventsCorrelationPValues as MockedFunction<typeof fetchFailedEventsCorrelationPValues>;
+const mockisNonLocalIndexName = isNonLocalIndexName as MockedFunction<typeof isNonLocalIndexName>;
 
 describe('fetchPValues', () => {
   const mockApmEventClient = {

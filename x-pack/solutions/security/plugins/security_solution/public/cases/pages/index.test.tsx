@@ -20,63 +20,63 @@ import { useFetchNotes } from '../../notes/hooks/use_fetch_notes';
 import { Cases } from '.';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/lib/kibana')),
-      useKibana: vi.fn(),
-      useNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/lib/kibana')),
+    useKibana: vi.fn(),
+    useNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/user_privileges', () => {
-      const mocked = {
-      useUserPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges', () => {
-      const mocked = {
-      useAlertsPrivileges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsPrivileges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_upselling', () => {
-      const mocked = {
-      useUpsellingMessage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpsellingMessage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../notes/hooks/use_fetch_notes', () => {
-      const mocked = {
-      useFetchNotes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchNotes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/page_wrapper', () => {
-      const mocked = {
-      SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecuritySolutionPageWrapper: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/utils/route/spy_routes', () => {
-      const mocked = {
-      SpyRoute: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpyRoute: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Cases page', () => {
   const mockGetCases = vi.fn();

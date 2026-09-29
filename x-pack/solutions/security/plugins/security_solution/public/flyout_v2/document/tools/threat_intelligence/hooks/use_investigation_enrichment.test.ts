@@ -25,17 +25,17 @@ vi.mock('react-redux-v7', () => {
   };
 });
 vi.mock('../../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStorageGet = vi.fn();
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: vi.fn().mockReturnValue({

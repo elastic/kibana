@@ -65,7 +65,7 @@ import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_action_generator';
 
 vi.mock('../../action_details_by_id', async () => {
-  const originalMod = (await vi.importActual('../../action_details_by_id'));
+  const originalMod = await vi.importActual('../../action_details_by_id');
 
   return {
     ...originalMod,
@@ -2506,8 +2506,7 @@ describe('SentinelOneActionsClient class', () => {
       'should error when %s is called with agents not valid for active space',
       async (methodName) => {
         (
-          classConstructorOptions.endpointService.getInternalFleetServices().agent
-            .getByIds as Mock
+          classConstructorOptions.endpointService.getInternalFleetServices().agent.getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });

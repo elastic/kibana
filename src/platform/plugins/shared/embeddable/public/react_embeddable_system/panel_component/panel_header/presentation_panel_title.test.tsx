@@ -20,18 +20,18 @@ import { isApiCompatibleWithCustomizePanelAction } from '../../../ui_actions/cus
 import { openCustomizePanelFlyout } from '../../../ui_actions/customize_panel_action/open_customize_panel';
 
 vi.mock('../../../ui_actions/customize_panel_action', () => {
-      const mocked = {
-      isApiCompatibleWithCustomizePanelAction: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isApiCompatibleWithCustomizePanelAction: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../ui_actions/customize_panel_action/open_customize_panel', () => {
-      const mocked = {
-      openCustomizePanelFlyout: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openCustomizePanelFlyout: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PresentationPanelTitle', () => {
   const mockApi: DefaultPresentationPanelApi = {

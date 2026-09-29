@@ -17,18 +17,20 @@ import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_inte
 import { getUserInfo } from '../../lib/get_user_info';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/get_user_info', () => {
-      const mocked = {
-      getUserInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUserInfo: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('createSavedQueryRoute', () => {
   let routeHandler: RequestHandler;
@@ -58,9 +60,7 @@ describe('createSavedQueryRoute', () => {
       }),
     };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
     (getUserInfo as Mock).mockResolvedValue({ username: 'tester' });
 
     const mockRouter = createMockRouter();

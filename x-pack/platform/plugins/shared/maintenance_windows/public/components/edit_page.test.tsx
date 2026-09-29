@@ -16,27 +16,29 @@ import { createAppMockRenderer } from '../lib/test_utils';
 import { MaintenanceWindowsEditPage } from './edit_page';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({ maintenanceWindowId: 'mw-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({ maintenanceWindowId: 'mw-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_breadcrumbs', () => {
-      const mocked = {
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_get_maintenance_window');
 vi.mock('./create_maintenance_windows_form', () => {
-      const mocked = {
-      CreateMaintenanceWindowForm: () => <div data-test-subj="createMaintenanceWindowForm" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateMaintenanceWindowForm: () => <div data-test-subj="createMaintenanceWindowForm" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useGetMaintenanceWindow: useGetMaintenanceWindowMock } = (await vi.importMock('../hooks/use_get_maintenance_window'));
+const { useGetMaintenanceWindow: useGetMaintenanceWindowMock } = await vi.importMock(
+  '../hooks/use_get_maintenance_window'
+);
 
 describe('MaintenanceWindowsEditPage', () => {
   let appMockRenderer: AppMockRenderer;

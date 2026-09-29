@@ -26,40 +26,40 @@ const tsProjectsState: { projects: any[] } = {
 };
 
 vi.mock('@kbn/dev-cli-runner', () => {
-      const mocked = {
-      run: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    run: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-cli-errors', () => {
-      const mocked = {
-      createFailError: (message: string) => new Error(message),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createFailError: (message: string) => new Error(message),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/moon', () => {
-      const mocked = {
-      getAffectedMoonProjectsFromChangedFiles: vi.fn(),
-      getMoonChangedFiles: vi.fn(),
-      resolveMoonAffectedBase: vi.fn(),
-      ROOT_MOON_PROJECT_ID: 'kibana',
-      summarizeAffectedMoonProjects: vi.fn(),
-      normalizeRepoRelativePath: (pathValue: string) => pathValue.replace(/\\/g, '/'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAffectedMoonProjectsFromChangedFiles: vi.fn(),
+    getMoonChangedFiles: vi.fn(),
+    resolveMoonAffectedBase: vi.fn(),
+    ROOT_MOON_PROJECT_ID: 'kibana',
+    summarizeAffectedMoonProjects: vi.fn(),
+    normalizeRepoRelativePath: (pathValue: string) => pathValue.replace(/\\/g, '/'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/dev-utils', async () => {
-  const actual = (await vi.importActual('@kbn/dev-utils'));
+  const actual = await vi.importActual('@kbn/dev-utils');
   return {
     ...actual,
     countCommitsBetweenRefs: vi.fn().mockResolvedValue(3),
@@ -68,65 +68,65 @@ vi.mock('@kbn/dev-utils', async () => {
 });
 
 vi.mock('@kbn/std', () => {
-      const mocked = {
-      asyncForEachWithLimit: async (
-        items: any[],
-        _limit: number,
-        iterator: (item: any) => Promise<void>
-      ) => {
-        for (const item of items) {
-          await iterator(item);
-        }
-      },
-      asyncMapWithLimit: async (
-        items: any[],
-        _limit: number,
-        iterator: (item: any) => Promise<any>
-      ) => {
-        return await Promise.all(items.map((item) => iterator(item)));
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    asyncForEachWithLimit: async (
+      items: any[],
+      _limit: number,
+      iterator: (item: any) => Promise<void>
+    ) => {
+      for (const item of items) {
+        await iterator(item);
+      }
+    },
+    asyncMapWithLimit: async (
+      items: any[],
+      _limit: number,
+      iterator: (item: any) => Promise<any>
+    ) => {
+      return await Promise.all(items.map((item) => iterator(item)));
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ts-projects', () => {
-      const mocked = {
-      get TS_PROJECTS() {
-        return tsProjectsState.projects;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    get TS_PROJECTS() {
+      return tsProjectsState.projects;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./root_refs_config', () => {
-      const mocked = {
-      ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
-      updateRootRefsConfig: vi.fn(),
-      cleanupRootRefsConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ROOT_REFS_CONFIG_PATH: '/repo/tsconfig.refs.json',
+    updateRootRefsConfig: vi.fn(),
+    cleanupRootRefsConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./src/archive/archive_ts_build_artifacts', () => {
-      const mocked = {
-      archiveTSBuildArtifacts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    archiveTSBuildArtifacts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./src/archive/restore_ts_build_artifacts', () => {
-      const mocked = {
-      restoreTSBuildArtifacts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    restoreTSBuildArtifacts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./src/archive/utils', () => {
-      const mocked = {
-      isCiEnvironment: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isCiEnvironment: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('execa', () => {
   const mockExecaFn = vi.fn();
@@ -138,14 +138,14 @@ vi.mock('execa', () => {
 });
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      readFile: vi.fn(),
-      writeFile: vi.fn(),
-      rm: vi.fn(),
-      unlink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFile: vi.fn(),
+    writeFile: vi.fn(),
+    rm: vi.fn(),
+    unlink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRun = (await vi.importMock('@kbn/dev-cli-runner')).run as Mock;
 const fsPromises = (await vi.importMock('fs/promises')) as {
@@ -164,10 +164,12 @@ const mockHasStagedChanges = hasStagedChanges as unknown as Mock;
 const mockUpdateRootRefsConfig = updateRootRefsConfig as unknown as Mock;
 const mockCleanupRootRefsConfig = cleanupRootRefsConfig as unknown as Mock;
 const mockIsCiEnvironment = isCiEnvironment as unknown as Mock;
-const mockArchiveTSBuildArtifacts = (await vi.importMock('./src/archive/archive_ts_build_artifacts'))
-  .archiveTSBuildArtifacts as Mock;
-const mockRestoreTSBuildArtifacts = (await vi.importMock('./src/archive/restore_ts_build_artifacts'))
-  .restoreTSBuildArtifacts as Mock;
+const mockArchiveTSBuildArtifacts = (
+  await vi.importMock('./src/archive/archive_ts_build_artifacts')
+).archiveTSBuildArtifacts as Mock;
+const mockRestoreTSBuildArtifacts = (
+  await vi.importMock('./src/archive/restore_ts_build_artifacts')
+).restoreTSBuildArtifacts as Mock;
 const mockExeca = ((await vi.importMock('execa')) as { __mock: { mockExecaFn: Mock } }).__mock
   .mockExecaFn;
 

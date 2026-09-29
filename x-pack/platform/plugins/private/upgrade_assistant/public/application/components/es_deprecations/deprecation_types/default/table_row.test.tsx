@@ -20,7 +20,7 @@ const mockAddContent = vi.fn<void, [params: { id: string }]>();
 const mockRemoveContent = vi.fn<void, [id: string]>();
 
 vi.mock('../../../../../shared_imports', async () => {
-  const actual = (await vi.importActual('../../../../../shared_imports'));
+  const actual = await vi.importActual('../../../../../shared_imports');
 
   return {
     ...actual,

@@ -24,11 +24,11 @@ vi.mock('../../utils/normalize_time_range');
 vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
   () => {
-      const mocked = {
-        useAddBulkToTimelineAction: vi.fn().mockReturnValue([]),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAddBulkToTimelineAction: vi.fn().mockReturnValue([]),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const startDate = '2022-03-22T22:10:56.794Z';
@@ -54,11 +54,11 @@ type Props = Partial<EventsViewerProps> & {
 
 const mockGetDefaultControlColumn = vi.fn();
 vi.mock('../../../timelines/components/timeline/body/control_columns', () => {
-      const mocked = {
-      getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TEST_PREFIX = 'security_solution:sessions_viewer:sessions_view';
 

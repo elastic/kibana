@@ -30,21 +30,21 @@ import { generateExecutionTaskScope } from '../utils';
 
 // Mock uuid
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'mocked-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'mocked-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../utils', () => {
-      const mocked = {
-      generateExecutionTaskScope: vi.fn(() => [
-        'workflow',
-        'workflow:test-workflow-id',
-        'workflow:execution:test-execution-id',
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateExecutionTaskScope: vi.fn(() => [
+      'workflow',
+      'workflow:test-workflow-id',
+      'workflow:execution:test-execution-id',
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('WorkflowTaskManager', () => {
   let mockTaskManager: Mocked<TaskManagerStartContract>;

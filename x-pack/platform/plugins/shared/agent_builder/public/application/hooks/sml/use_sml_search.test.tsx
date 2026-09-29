@@ -16,35 +16,35 @@ const mockAddError = vi.fn();
 const mockSearch = vi.fn();
 
 vi.mock('../use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          notifications: {
-            toasts: {
-              addError: mockAddError,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          toasts: {
+            addError: mockAddError,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        smlService: { search: mockSearch },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      smlService: { search: mockSearch },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebouncedValue: (value: string) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebouncedValue: (value: string) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

@@ -26,24 +26,24 @@ import { DASHBOARDS_PAGE_SECTION_CUSTOM } from './translations';
 vi.mock('../../../common/containers/tags/api');
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/utils/route/spy_routes', () => {
-      const mocked = { SpyRoute: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SpyRoute: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/dashboard-plugin/public', () => {
-      const mocked = {
-      DashboardListingTable: vi.fn(() => <span data-test-subj="dashboardsTable" />),
-      DashboardTopNav: vi.fn(() => <span data-test-subj="dashboardTopNav" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardListingTable: vi.fn(() => <span data-test-subj="dashboardsTable" />),
+    DashboardTopNav: vi.fn(() => <span data-test-subj="dashboardTopNav" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseContractComponents = vi.fn(() => ({}));
 vi.mock('../../../common/hooks/use_contract_component', () => {
-      const mocked = {
-      useContractComponents: () => mockUseContractComponents(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useContractComponents: () => mockUseContractComponents(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
 const mockUseCapabilities = useCapabilities as Mock;
@@ -75,16 +75,16 @@ const URL = '/path/to/dashboards';
 
 const mockAppManageLink = vi.fn(() => APP_DASHBOARD_LINKS);
 vi.mock('../../../common/links/nav_links', () => {
-      const mocked = {
-      useRootNavLink: () => mockAppManageLink(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRootNavLink: () => mockAppManageLink(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const CREATE_DASHBOARD_LINK = { isLoading: false, url: URL };
 const mockUseCreateSecurityDashboard = vi.fn(() => CREATE_DASHBOARD_LINK);
 vi.mock('../../hooks/use_create_security_dashboard_link', async () => {
-  const actual = (await vi.importActual('../../hooks/use_create_security_dashboard_link'));
+  const actual = await vi.importActual('../../hooks/use_create_security_dashboard_link');
   return {
     ...actual,
     useCreateSecurityDashboardLink: () => mockUseCreateSecurityDashboard(),

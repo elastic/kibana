@@ -38,34 +38,34 @@ vi.mock('../../../detections/containers/detection_engine/alerts/use_query', () =
 });
 
 vi.mock('../../../flyout/entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: vi.fn(() => ({
-        entity: null,
-        entityRecord: null,
-        firstSeen: null,
-        lastSeen: null,
-        isLoading: false,
-        error: null,
-        refetch: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: vi.fn(() => ({
+      entity: null,
+      entityRecord: null,
+      firstSeen: null,
+      lastSeen: null,
+      isLoading: false,
+      error: null,
+      refetch: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/kibana', () => {
-      const mocked = {
-      useUiSetting: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/entity-store/public', () => {
-      const mocked = {
-      FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
-      useEntityStoreEuidApi: vi.fn(() => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FF_ENABLE_ENTITY_STORE_V2: 'securitySolution:entityStoreEnableV2',
+    useEntityStoreEuidApi: vi.fn(() => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const from = '2020-07-07T08:20:18.966Z';
 const to = '2020-07-08T08:20:18.966Z';
@@ -80,11 +80,11 @@ vi.mock('../../containers/use_global_time', () => {
 });
 
 vi.mock('../../../detections/containers/detection_engine/alerts/use_signal_index', () => {
-      const mocked = {
-      useSignalIndex: () => ({ signalIndexName: 'signalIndexName' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndex: () => ({ signalIndexName: 'signalIndexName' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderUseAlertCountByRuleByStatus = (
   overrides: Partial<UseAlertCountByRuleByStatusProps> = {}

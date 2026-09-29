@@ -13,12 +13,12 @@ import { render } from '../../../utils/testing/rtl_helpers';
 import { ScriptRecorderFields } from './script_recorder_fields';
 
 vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
-      htmlIdGenerator: () => () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+    htmlIdGenerator: () => () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onChange = vi.fn();
 

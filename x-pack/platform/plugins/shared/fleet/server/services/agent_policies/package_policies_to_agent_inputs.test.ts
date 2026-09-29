@@ -30,22 +30,22 @@ import {
 
 vi.mock('../app_context');
 vi.mock('../epm/packages/get', () => {
-      const mocked = {
-      getAgentTemplateAssetsMap: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentTemplateAssetsMap: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 // `package_policy` imports `recompileInputsWithAgentVersion` back from this module, so a
 // `jest.requireActual` factory here re-enters this mock while it is still being built and hands the
 // module under test a different set of mock functions than the ones these tests configure. Only
 // these two exports are used from `package_policy`, so declare them directly instead.
 vi.mock('../package_policy', () => {
-      const mocked = {
-      _compilePackagePolicyInputs: vi.fn(),
-      getPackagePolicySavedObjectType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    _compilePackagePolicyInputs: vi.fn(),
+    getPackagePolicySavedObjectType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const packageInfoCache = new Map();
 packageInfoCache.set('mock_package-0.0.0', {
@@ -1507,12 +1507,12 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
   beforeEach(() => {
     logger = loggingSystemMock.createLogger();
     vi.mocked(appContextService.getLogger).mockReturnValue(logger);
-    vi
-      .mocked(appContextService.getExperimentalFeatures)
-      .mockReturnValue({ enableVersionSpecificPolicies: true } as any);
-    vi
-      .mocked(getPackagePolicySavedObjectType)
-      .mockResolvedValue(LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE);
+    vi.mocked(appContextService.getExperimentalFeatures).mockReturnValue({
+      enableVersionSpecificPolicies: true,
+    } as any);
+    vi.mocked(getPackagePolicySavedObjectType).mockResolvedValue(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE
+    );
     vi.mocked(getAgentTemplateAssetsMap).mockResolvedValue(new Map() as any);
     vi.mocked(_compilePackagePolicyInputs).mockReturnValue(recompiledInputs);
   });

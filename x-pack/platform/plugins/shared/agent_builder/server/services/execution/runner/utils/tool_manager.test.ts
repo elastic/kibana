@@ -21,63 +21,63 @@ import { z } from '@kbn/zod/v4';
 
 // Mock dependencies
 vi.mock('@kbn/agent-builder-genai-utils/langchain', () => {
-      const mocked = {
-      createToolIdMappings: vi.fn((tools) => {
-        const map = new Map();
-        tools.forEach((tool: any) => {
-          map.set(tool.id, `langchain_${tool.id}`);
-        });
-        return map;
-      }),
-      toolToLangchain: vi.fn(async ({ tool, toolId }) => {
-        return {
-          name: toolId || tool.id,
-          description: tool.description,
-          invoke: vi.fn(),
-        } as unknown as StructuredTool;
-      }),
-      sanitizeToolId: vi.fn((toolId: string) =>
-        toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '')
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createToolIdMappings: vi.fn((tools) => {
+      const map = new Map();
+      tools.forEach((tool: any) => {
+        map.set(tool.id, `langchain_${tool.id}`);
+      });
+      return map;
+    }),
+    toolToLangchain: vi.fn(async ({ tool, toolId }) => {
+      return {
+        name: toolId || tool.id,
+        description: tool.description,
+        invoke: vi.fn(),
+      } as unknown as StructuredTool;
+    }),
+    sanitizeToolId: vi.fn((toolId: string) =>
+      toolId.replaceAll('.', '_').replace(/[^a-zA-Z0-9_-]/g, '')
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils/langchain/tools', () => {
-      const mocked = {
-      reverseMap: vi.fn((map) => {
-        const reversed = new Map();
-        map.forEach((value: string, key: string) => {
-          reversed.set(value, key);
-        });
-        return reversed;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    reverseMap: vi.fn((map) => {
+      const reversed = new Map();
+      map.forEach((value: string, key: string) => {
+        reversed.set(value, key);
+      });
+      return reversed;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../tools/browser_tool_adapter', () => {
-      const mocked = {
-      browserToolsToLangchain: vi.fn(({ browserApiTools }) => {
-        const tools = browserApiTools.map(
-          (tool: any) =>
-            ({
-              name: `browser_${tool.id}`,
-              description: tool.description,
-              invoke: vi.fn(),
-            } as unknown as StructuredTool)
-        );
+  const mocked = {
+    browserToolsToLangchain: vi.fn(({ browserApiTools }) => {
+      const tools = browserApiTools.map(
+        (tool: any) =>
+          ({
+            name: `browser_${tool.id}`,
+            description: tool.description,
+            invoke: vi.fn(),
+          } as unknown as StructuredTool)
+      );
 
-        const idMappings = new Map();
-        browserApiTools.forEach((tool: any) => {
-          idMappings.set(`browser_${tool.id}`, `browser_${tool.id}`);
-        });
+      const idMappings = new Map();
+      browserApiTools.forEach((tool: any) => {
+        idMappings.set(`browser_${tool.id}`, `browser_${tool.id}`);
+      });
 
-        return { tools, idMappings };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      return { tools, idMappings };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ToolManager', () => {
   let toolManager: ToolManager;
@@ -270,7 +270,9 @@ describe('ToolManager', () => {
 
   describe('setEventEmitter', () => {
     it('passes the event emitter to toolToLangchain when set', async () => {
-      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+      const { toolToLangchain } = (await vi.importMock(
+        '@kbn/agent-builder-genai-utils/langchain'
+      )) as {
         toolToLangchain: Mock;
       };
 
@@ -293,7 +295,9 @@ describe('ToolManager', () => {
     });
 
     it('uses the event emitter for tools added in subsequent addTools calls', async () => {
-      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+      const { toolToLangchain } = (await vi.importMock(
+        '@kbn/agent-builder-genai-utils/langchain'
+      )) as {
         toolToLangchain: Mock;
       };
       toolToLangchain.mockClear();
@@ -331,7 +335,9 @@ describe('ToolManager', () => {
     });
 
     it('does not pass event emitter when not set', async () => {
-      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+      const { toolToLangchain } = (await vi.importMock(
+        '@kbn/agent-builder-genai-utils/langchain'
+      )) as {
         toolToLangchain: Mock;
       };
 
@@ -891,7 +897,9 @@ describe('ToolManager', () => {
     ];
 
     const getBuildContent = async () => {
-      const { toolToLangchain } = (await vi.importMock('@kbn/agent-builder-genai-utils/langchain')) as {
+      const { toolToLangchain } = (await vi.importMock(
+        '@kbn/agent-builder-genai-utils/langchain'
+      )) as {
         toolToLangchain: Mock;
       };
       const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];

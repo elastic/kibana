@@ -17,30 +17,30 @@ import { createVisualizationGraph } from './graph_lens';
 import type { VisualizationConfig } from './types';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      generateEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./chart_type_registry', () => {
-      const mocked = {
-      chartTypeRegistry: new Proxy(
-        {},
-        {
-          get: () => ({
-            schema: {
-              parse: (config: unknown) => config,
-            },
-            prompt: {
-              selection: 'Mock chart description',
-            },
-          }),
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    chartTypeRegistry: new Proxy(
+      {},
+      {
+        get: () => ({
+          schema: {
+            parse: (config: unknown) => config,
+          },
+          prompt: {
+            selection: 'Mock chart description',
+          },
+        }),
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGenerateEsql = vi.mocked(generateEsql);
 

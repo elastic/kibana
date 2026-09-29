@@ -15,14 +15,14 @@ import type { CollectorFetchContext } from '@kbn/usage-collection-plugin/server'
 import { createCollectorFetchContextMock } from '@kbn/usage-collection-plugin/server/mocks';
 
 vi.mock('../../../common', () => {
-      const mocked = {
-      DEFAULT_QUERY_LANGUAGE: 'lucene',
-      UI_SETTINGS: {
-        SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DEFAULT_QUERY_LANGUAGE: 'lucene',
+    UI_SETTINGS: {
+      SEARCH_QUERY_LANGUAGE: 'search:queryLanguage',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let fetch: ReturnType<typeof fetchProvider>;
 let esClient: ElasticsearchClient;

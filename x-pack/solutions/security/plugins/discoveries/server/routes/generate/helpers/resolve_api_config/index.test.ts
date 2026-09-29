@@ -14,11 +14,11 @@ import { resolveApiConfig } from '.';
 const mockResolveConnectorDetails = vi.fn();
 
 vi.mock('../../../../workflows/helpers/resolve_connector_details', () => {
-      const mocked = {
-      resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorDetails: (...args: unknown[]) => mockResolveConnectorDetails(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resolveApiConfig', () => {
   const mockActionsClient = { get: vi.fn() };

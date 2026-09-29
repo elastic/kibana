@@ -24,12 +24,12 @@ import type { Props } from '.';
 import { AlertsTreemap } from '.';
 
 vi.mock('../../../../../common/components/cell_actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../common/components/cell_actions')),
-      SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../common/components/cell_actions')),
+    SecurityCellActions: vi.fn(() => <div data-test-subj="cell-actions-component" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: Props = {
   data: mockAlertSearchResponse,

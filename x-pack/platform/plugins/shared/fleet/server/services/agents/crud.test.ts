@@ -43,40 +43,38 @@ import {
 
 vi.mock('../audit_logging');
 vi.mock('../agent_policy', () => {
-      const mocked = {
-      agentPolicyService: {
-        list: vi.fn().mockResolvedValue({ items: [] }),
-        get: vi.fn().mockResolvedValue(null),
-        getByIds: vi.fn().mockResolvedValue([]),
-        getInactivityTimeouts: vi.fn().mockResolvedValue([]),
-        // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
-        fetchAllAgentPolicyIds: vi.fn().mockResolvedValue((async function* () {})()),
-      },
-      getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('fleet-agent-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      list: vi.fn().mockResolvedValue({ items: [] }),
+      get: vi.fn().mockResolvedValue(null),
+      getByIds: vi.fn().mockResolvedValue([]),
+      getInactivityTimeouts: vi.fn().mockResolvedValue([]),
+      // fetchAllAgentPolicyIds returns an AsyncIterable<string[]>; default to empty.
+      fetchAllAgentPolicyIds: vi.fn().mockResolvedValue((async function* () {})()),
+    },
+    getAgentPolicySavedObjectType: vi.fn().mockResolvedValue('fleet-agent-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/services/is_agent_upgradeable', () => {
-      const mocked = {
-      isAgentUpgradeAvailable: vi.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAgentUpgradeAvailable: vi.fn().mockImplementation((agent: Agent) => agent.id.includes('up')),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./versions', () => {
   return {
-    getAvailableVersions: vi
-      .fn()
-      .mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
+    getAvailableVersions: vi.fn().mockResolvedValue(['8.4.0', '8.5.0', '8.6.0', '8.7.0', '8.8.0']),
     getLatestAvailableAgentVersion: vi.fn().mockResolvedValue('8.8.0'),
   };
 });
 vi.mock('../spaces/helpers');
 vi.mock('timers/promises', () => {
-      const mocked = {
-      setTimeout: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setTimeout: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAuditLoggingService = auditLoggingService as Mocked<typeof auditLoggingService>;
 const isSpaceAwarenessEnabledMock = _isSpaceAwarenessEnabled as Mock;

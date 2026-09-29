@@ -20,28 +20,28 @@ import * as i18n from '../../translations';
 vi.mock('../../../../common/navigation/hooks');
 
 vi.mock('./case_list_item', () => {
-      const mocked = {
-      CaseListItem: ({
-        theCase,
-        isSelected,
-        hasSelection,
-        isSelectable,
-      }: {
-        theCase: { id: string };
-        isSelected: boolean;
-        hasSelection: boolean;
-        isSelectable: boolean;
-      }) => (
-        <div
-          data-test-subj={`cases-list-item-${theCase.id}`}
-          data-is-selected={isSelected}
-          data-has-selection={hasSelection}
-          data-is-selectable={isSelectable}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseListItem: ({
+      theCase,
+      isSelected,
+      hasSelection,
+      isSelectable,
+    }: {
+      theCase: { id: string };
+      isSelected: boolean;
+      hasSelection: boolean;
+      isSelectable: boolean;
+    }) => (
+      <div
+        data-test-subj={`cases-list-item-${theCase.id}`}
+        data-is-selected={isSelected}
+        data-has-selection={hasSelection}
+        data-is-selectable={isSelectable}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const alwaysSelectable = () => true;
 

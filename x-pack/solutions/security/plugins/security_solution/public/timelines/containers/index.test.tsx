@@ -41,36 +41,36 @@ vi.mock('../../common/hooks/use_experimental_features');
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as Mock;
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      }),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          application: {
-            capabilities: {
-              securitySolutionTimeline: {
-                crud: true,
-              },
+  const mocked = {
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    }),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        application: {
+          capabilities: {
+            securitySolutionTimeline: {
+              crud: true,
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRouteSpy: Mock = useRouteSpy as Mock;
 vi.mock('../../common/utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 mockUseRouteSpy.mockReturnValue([
   {

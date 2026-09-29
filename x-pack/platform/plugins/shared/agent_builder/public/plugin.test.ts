@@ -22,142 +22,142 @@ import { clearSidebarRuntimeContext, setSidebarRuntimeContext } from './sidebar'
 import { AgentBuilderAccessChecker } from './services';
 
 vi.mock('./services/access', async () => {
-      const mocked = {
-      ...(await vi.importActual('./services/access')),
-      AgentBuilderAccessChecker: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./services/access')),
+    AgentBuilderAccessChecker: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockAgentBuilderAccessChecker = vi.mocked(AgentBuilderAccessChecker);
 
 vi.mock('@kbn/shared-ux-utility', () => {
-      const mocked = {
-      dynamic: vi.fn(() => () => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    dynamic: vi.fn(() => () => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services', () => {
-      const mocked = {
-      AgentService: vi.fn(),
-      AttachmentsService: vi.fn(() => ({ addAttachmentType: vi.fn() })),
-      RenderersService: vi.fn(() => ({ register: vi.fn() })),
-      ConversationEventsService: vi.fn(() => ({
-        register: vi.fn(),
-        getUiDefinition: vi.fn(),
-        has: vi.fn(),
-        list: vi.fn().mockReturnValue([]),
-      })),
-      ChatService: vi.fn(),
-      ConversationsService: vi.fn(),
-      ConversationTemplatesService: vi.fn(() => ({
-        registerTab: vi.fn(),
-        getTab: vi.fn(),
-        registerTemplateUIDefinition: vi.fn(),
-        getTemplateUIDefinition: vi.fn(),
-      })),
-      DocLinksService: vi.fn(),
-      NavigationService: vi.fn(),
-      ToolsService: vi.fn(),
-      SkillsService: vi.fn(),
-      SmlService: vi.fn(),
-      OAuthClientsService: vi.fn(),
-      PluginsService: vi.fn(),
-      EventsService: vi.fn(),
-      SpaceSettingsService: vi.fn(),
-      AgentBuilderAccessChecker: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentService: vi.fn(),
+    AttachmentsService: vi.fn(() => ({ addAttachmentType: vi.fn() })),
+    RenderersService: vi.fn(() => ({ register: vi.fn() })),
+    ConversationEventsService: vi.fn(() => ({
+      register: vi.fn(),
+      getUiDefinition: vi.fn(),
+      has: vi.fn(),
+      list: vi.fn().mockReturnValue([]),
+    })),
+    ChatService: vi.fn(),
+    ConversationsService: vi.fn(),
+    ConversationTemplatesService: vi.fn(() => ({
+      registerTab: vi.fn(),
+      getTab: vi.fn(),
+      registerTemplateUIDefinition: vi.fn(),
+      getTemplateUIDefinition: vi.fn(),
+    })),
+    DocLinksService: vi.fn(),
+    NavigationService: vi.fn(),
+    ToolsService: vi.fn(),
+    SkillsService: vi.fn(),
+    SmlService: vi.fn(),
+    OAuthClientsService: vi.fn(),
+    PluginsService: vi.fn(),
+    EventsService: vi.fn(),
+    SpaceSettingsService: vi.fn(),
+    AgentBuilderAccessChecker: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/attachments', () => {
-      const mocked = {
-      createPublicAttachmentContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicAttachmentContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/conversation_templates', () => {
-      const mocked = {
-      createPublicConversationTemplatesContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicConversationTemplatesContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/renderers', () => {
-      const mocked = {
-      createPublicRenderersContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicRenderersContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/conversation_events', () => {
-      const mocked = {
-      createPublicConversationEventsContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicConversationEventsContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/tools', () => {
-      const mocked = {
-      createPublicToolContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicToolContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/agents', () => {
-      const mocked = {
-      createPublicAgentsContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicAgentsContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./services/events', () => {
-      const mocked = {
-      createPublicEventsContract: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPublicEventsContract: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./register', () => {
-      const mocked = {
-      registerApp: vi.fn(),
-      registerAnalytics: vi.fn(),
-      buildAgentBuilderDeepLinks: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerApp: vi.fn(),
+    registerAnalytics: vi.fn(),
+    buildAgentBuilderDeepLinks: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./locator/register_locators', () => {
-      const mocked = {
-      registerLocators: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerLocators: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./step_types', () => {
-      const mocked = {
-      registerWorkflowSteps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerWorkflowSteps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sidebar', () => {
-      const mocked = {
-      setSidebarServices: vi.fn(),
-      setSidebarRuntimeContext: vi.fn(),
-      clearSidebarRuntimeContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    setSidebarServices: vi.fn(),
+    setSidebarRuntimeContext: vi.fn(),
+    clearSidebarRuntimeContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/nav_control/lazy_agent_builder_nav_control', () => {
-      const mocked = {
-      AgentBuilderNavControlInitiator: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentBuilderNavControlInitiator: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockInitializerContext = (): PluginInitializerContext<ConfigSchema> =>
   ({

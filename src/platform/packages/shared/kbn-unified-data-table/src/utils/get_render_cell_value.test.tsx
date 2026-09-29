@@ -37,7 +37,7 @@ const mockSourceDocument = vi.spyOn(sourceDocumentModule, 'SourceDocument');
 const mockSourcePopoverContent = vi.spyOn(sourcePopoverContentModule, 'default');
 
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
 
   const CodeEditorMock = (props: CodeEditorProps) => (
     <input

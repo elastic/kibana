@@ -18,13 +18,13 @@ import type { DefaultPresentationPanelApi } from '../types';
 import { PresentationPanelHoverActionsWrapper } from './presentation_panel_hover_actions_wrapper';
 
 vi.mock('./presentation_panel_hover_actions', () => {
-      const mocked = {
-      PresentationPanelHoverActions: () => (
-        <div data-test-subj="default-hover-actions">Default hover actions</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PresentationPanelHoverActions: () => (
+      <div data-test-subj="default-hover-actions">Default hover actions</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PresentationPanelHoverActionsWrapper', () => {
   const renderWithTheme = (component: React.ReactElement) => {
@@ -61,11 +61,7 @@ describe('PresentationPanelHoverActionsWrapper', () => {
     };
 
     renderWithTheme(
-      <PresentationPanelHoverActionsWrapper
-        api={api}
-        getActions={vi.fn()}
-        setDragHandle={vi.fn()}
-      >
+      <PresentationPanelHoverActionsWrapper api={api} getActions={vi.fn()} setDragHandle={vi.fn()}>
         <Child />
       </PresentationPanelHoverActionsWrapper>
     );

@@ -22,19 +22,19 @@ vi.mock('../hooks/use_show_eis_promotional_content');
 
 const mockToursIsEnabled = vi.fn(() => true);
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          notifications: {
-            tours: {
-              isEnabled: mockToursIsEnabled,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        notifications: {
+          tours: {
+            isEnabled: mockToursIsEnabled,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EisTokenCostTour', () => {
   const promoId = 'tokenPromo';

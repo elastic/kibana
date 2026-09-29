@@ -22,11 +22,11 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/dat
 
 vi.mock('../../../common/hooks/use_experimental_features');
 vi.mock('./content', () => {
-      const mocked = {
-      AlertsPageContent: () => <div data-test-subj={'alerts-page-content'} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsPageContent: () => <div data-test-subj={'alerts-page-content'} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView: DataView = createStubDataView({ spec: {} });
 

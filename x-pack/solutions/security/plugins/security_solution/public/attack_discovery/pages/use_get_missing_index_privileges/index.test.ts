@@ -20,35 +20,35 @@ import * as i18n from './translations';
 
 const mockAddError = vi.fn();
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./translations', () => {
-      const mocked = {
-      GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE:
-        'GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE:
+      'GET_ATTACK_DISCOVERY_MISSING_PRIVILEGES_FAILURE',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHttpGet = vi.fn();
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = {
-      KibanaServices: {
-        get: () => ({
-          http: {
-            get: mockHttpGet,
-          },
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaServices: {
+      get: () => ({
+        http: {
+          get: mockHttpGet,
+        },
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let queryClient: QueryClient;
 

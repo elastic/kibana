@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
+import { vi } from 'vitest';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
@@ -17,11 +16,11 @@ import { serviceAccountsManagementApp } from './service_accounts_management_app'
 import type { ServiceAccountsAPIClient } from '../../service_accounts';
 
 vi.mock('./service_accounts_page', () => {
-      const mocked = {
-      ServiceAccountsPage: () => 'Service Accounts Page',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceAccountsPage: () => 'Service Accounts Page',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const element = document.body.appendChild(document.createElement('div'));
 const serviceAccountsAPIClient = {} as ServiceAccountsAPIClient;

@@ -25,7 +25,7 @@ import type { RuleParams } from '../../../lib/detection_engine/rule_schema';
 import type { SanitizedRule } from '@kbn/alerting-types';
 
 vi.mock('@kbn/files-plugin/server', async () => {
-  const actual = (await vi.importActual('@kbn/files-plugin/server'));
+  const actual = await vi.importActual('@kbn/files-plugin/server');
   return {
     ...actual,
     createEsFileClient: vi.fn(),

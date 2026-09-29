@@ -48,18 +48,18 @@ import { AdvancedOptions } from './advanced_options';
 import { mountWithProviders, renderWithProviders } from '../../../test_utils/test_utils';
 
 vi.mock('./reference_editor', () => {
-      const mocked = {
-      ReferenceEditor: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReferenceEditor: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../loader');
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      QueryStringInput: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryStringInput: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../operations');
 
@@ -81,17 +81,17 @@ vi.mock('../operations/definitions/formula/editor/formula_editor', () => {
 });
 
 vi.mock('@kbn/unified-field-list/src/hooks/use_existing_fields', () => {
-      const mocked = {
-      useExistingFieldsReader: vi.fn(() => {
-        return {
-          hasFieldData: (dataViewId: string, fieldName: string) => {
-            return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
-          },
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExistingFieldsReader: vi.fn(() => {
+      return {
+        hasFieldData: (dataViewId: string, fieldName: string) => {
+          return ['timestamp', 'bytes', 'memory', 'source'].includes(fieldName);
+        },
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
   wrapper

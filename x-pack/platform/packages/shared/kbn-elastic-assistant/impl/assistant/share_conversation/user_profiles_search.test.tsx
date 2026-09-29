@@ -23,21 +23,21 @@ const mockSecondUser = {
   },
 };
 vi.mock('./use_user_profiles', () => {
-      const mocked = {
-      useUserProfiles: () => ({
-        data: [MOCK_USER_PROFILE],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserProfiles: () => ({
+      data: [MOCK_USER_PROFILE],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_suggest_user_profiles', () => {
-      const mocked = {
-      useSuggestUserProfiles: () => ({
-        data: [MOCK_USER_PROFILE, mockSecondUser],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSuggestUserProfiles: () => ({
+      data: [MOCK_USER_PROFILE, mockSecondUser],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const testProps = {
   forbiddenUsers: ['user-2'],
   onUsersSelect: vi.fn(),

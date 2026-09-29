@@ -31,28 +31,28 @@ import { useGetUserProfileQuery } from '../hooks/use_get_user_profile_query';
 import { bulkEnableScheduledReports } from '../apis/bulk_enable_scheduled_reports';
 
 vi.mock('@kbn/reporting-public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      ReportingAPIClient: vi.fn().mockImplementation(() => ({
-        getScheduledList: vi.fn(),
-        disableScheduledReports: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    ReportingAPIClient: vi.fn().mockImplementation(() => ({
+      getScheduledList: vi.fn(),
+      disableScheduledReports: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./view_scheduled_report_flyout', () => {
-      const mocked = {
-      ViewScheduledReportFlyout: () => <div data-test-subj="viewScheduledReportFlyout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ViewScheduledReportFlyout: () => <div data-test-subj="viewScheduledReportFlyout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./edit_scheduled_report_flyout', () => {
-      const mocked = {
-      EditScheduledReportFlyout: () => <div data-test-subj="editScheduledReportFlyout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditScheduledReportFlyout: () => <div data-test-subj="editScheduledReportFlyout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../apis/get_scheduled_reports_list');
 vi.mock('../apis/bulk_disable_scheduled_reports');

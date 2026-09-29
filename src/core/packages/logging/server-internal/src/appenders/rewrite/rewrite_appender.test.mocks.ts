@@ -13,12 +13,12 @@ import { schema } from '@kbn/config-schema';
 
 export const createRewritePolicyMock = vi.fn();
 vi.doMock('./policies', () => {
-      const mocked = {
-      rewritePolicyConfigSchema: schema.any(),
-      createRewritePolicy: createRewritePolicyMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    rewritePolicyConfigSchema: schema.any(),
+    createRewritePolicy: createRewritePolicyMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const resetAllMocks = () => {
   createRewritePolicyMock.mockReset();

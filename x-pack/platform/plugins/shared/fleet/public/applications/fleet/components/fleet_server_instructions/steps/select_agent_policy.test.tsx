@@ -36,24 +36,24 @@ vi.mock('../../../hooks');
 // A leaf-module mock on agent_policy_select_create does not propagate reliably through
 // the re-export chain in the Jest module registry, but replacing the barrel directly works.
 vi.mock('../..', () => {
-      const mocked = {
-      SelectCreateAgentPolicy: ({
-        selectedPolicyId,
-        setSelectedPolicyId,
-      }: {
-        selectedPolicyId?: string;
-        setSelectedPolicyId: (id?: string) => void;
-      }) => (
-        <div data-test-subj="selectCreateAgentPolicy">
-          <span>{selectedPolicyId ?? 'no-policy'}</span>
-          <button data-test-subj="selectPolicy" onClick={() => setSelectedPolicyId('policy-1')}>
-            Select Policy
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SelectCreateAgentPolicy: ({
+      selectedPolicyId,
+      setSelectedPolicyId,
+    }: {
+      selectedPolicyId?: string;
+      setSelectedPolicyId: (id?: string) => void;
+    }) => (
+      <div data-test-subj="selectCreateAgentPolicy">
+        <span>{selectedPolicyId ?? 'no-policy'}</span>
+        <button data-test-subj="selectPolicy" onClick={() => setSelectedPolicyId('policy-1')}>
+          Select Policy
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const POLICIES: EnrollmentSettingsFleetServerPolicy[] = [
   { id: 'policy-1', name: 'Fleet Server Policy', is_managed: false },

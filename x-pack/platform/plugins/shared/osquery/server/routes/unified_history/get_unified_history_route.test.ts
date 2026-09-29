@@ -19,28 +19,31 @@ import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { getUnifiedHistoryRoute } from './get_unified_history_route';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({
-        find: vi.fn().mockResolvedValue({ saved_objects: [] }),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({
+      find: vi.fn().mockResolvedValue({ saved_objects: [] }),
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/ccs_utils', () => {
-      const mocked = {
-      hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
-      prefixIndexPatternsWithCcs: vi.fn((pattern: string) => pattern),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasConnectedRemoteClusters: vi.fn().mockResolvedValue(false),
+    prefixIndexPatternsWithCcs: vi.fn((pattern: string) => pattern),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/get_result_counts_for_actions', () => {
-      const mocked = {
-      getResultCountsForActions: vi.fn().mockResolvedValue(new Map()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getResultCountsForActions: vi.fn().mockResolvedValue(new Map()),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 describe('getUnifiedHistoryRoute', () => {
   let routeHandler: RequestHandler;

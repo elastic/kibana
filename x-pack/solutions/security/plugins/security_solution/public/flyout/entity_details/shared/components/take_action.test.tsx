@@ -17,20 +17,20 @@ import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_
 import { useShowTimeline } from '../../../../common/utils/timeline/use_show_timeline';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/timeline/use_investigate_in_timeline');
 
 vi.mock('../../../../common/utils/timeline/use_show_timeline', () => {
-      const mocked = {
-      useShowTimeline: vi.fn(() => [true]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShowTimeline: vi.fn(() => [true]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('<TakeAction />', () => {
   const kqlQuery = 'host.name: "test-host"';

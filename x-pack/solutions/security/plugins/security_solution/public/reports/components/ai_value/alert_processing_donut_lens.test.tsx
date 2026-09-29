@@ -20,42 +20,41 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { DonutChartWrapper } from '../../../common/components/charts/donutchart';
 
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
-      const mocked = {
-      VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationEmbeddable: vi.fn(() => <div data-test-subj="mock-visualization-embeddable" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/charts/donutchart', () => {
-      const mocked = {
-      DonutChartWrapper: vi.fn(({ children }) => (
-        <div data-test-subj="mock-donut-chart-wrapper">{children}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DonutChartWrapper: vi.fn(({ children }) => (
+      <div data-test-subj="mock-donut-chart-wrapper">{children}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../common/components/visualization_actions/lens_attributes/ai/alert_processing_donut',
   () => {
-      const mocked = {
-        getAlertProcessingDonutAttributes: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      getAlertProcessingDonutAttributes: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockGetAlertProcessingDonutAttributes =
-  getAlertProcessingDonutAttributes as MockedFunction<
-    typeof getAlertProcessingDonutAttributes
-  >;
+const mockGetAlertProcessingDonutAttributes = getAlertProcessingDonutAttributes as MockedFunction<
+  typeof getAlertProcessingDonutAttributes
+>;
 const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 
 const defaultProps = {

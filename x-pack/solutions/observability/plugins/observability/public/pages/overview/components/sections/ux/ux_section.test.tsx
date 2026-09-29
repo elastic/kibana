@@ -21,14 +21,14 @@ import {
 } from './core_web_vitals/translations';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => ({
-        pathname: '/observability/overview/',
-        search: '',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => ({
+      pathname: '/observability/overview/',
+      search: '',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('UXSection', () => {
   const bucketSize = { intervalString: '60s', bucketSize: 60, dateFormat: 'YYYY-MM-DD HH:mm' };

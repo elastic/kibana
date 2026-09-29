@@ -18,28 +18,26 @@ import { CustomContentIcon } from './custom_content_icon';
 import { apiIsPresentationContainer, hasEditCapabilities } from '@kbn/presentation-publishing';
 
 vi.mock('@kbn/presentation-publishing', () => {
-      const mocked = {
-      apiIsPresentationContainer: vi.fn(),
-      hasEditCapabilities: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiIsPresentationContainer: vi.fn(),
+    hasEditCapabilities: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTrackPanelAdded = vi.fn();
 
 vi.mock('../telemetry', () => {
-      const mocked = {
-      getTelemetry: () => ({ trackPanelAdded: mockTrackPanelAdded }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTelemetry: () => ({ trackPanelAdded: mockTrackPanelAdded }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockApiIsPresentationContainer = apiIsPresentationContainer as MockedFunction<
   typeof apiIsPresentationContainer
 >;
-const mockHasEditCapabilities = hasEditCapabilities as MockedFunction<
-  typeof hasEditCapabilities
->;
+const mockHasEditCapabilities = hasEditCapabilities as MockedFunction<typeof hasEditCapabilities>;
 
 describe('getAddCustomContentAction', () => {
   const action = getAddCustomContentAction();

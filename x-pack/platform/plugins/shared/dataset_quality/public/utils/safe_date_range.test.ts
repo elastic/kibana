@@ -11,11 +11,11 @@ import { vi } from 'vitest';
 const mockGetDateISORange = vi.fn();
 
 vi.mock('@kbn/timerange', () => {
-      const mocked = {
-      getDateISORange: (...args: unknown[]) => mockGetDateISORange(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDateISORange: (...args: unknown[]) => mockGetDateISORange(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Import after mocking
 import { getSafeDateISORange } from './safe_date_range';

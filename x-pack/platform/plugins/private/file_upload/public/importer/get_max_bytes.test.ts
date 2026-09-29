@@ -21,11 +21,11 @@ import {
 } from './get_max_bytes';
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      getUiSettings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUiSettings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getUiSettings } from '../kibana_services';
 

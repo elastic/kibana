@@ -14,26 +14,26 @@ import type { AffectedResource } from './edit_policy_modal';
 import { EditPolicyModal } from './edit_policy_modal';
 
 vi.mock('../../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        dependencies: {
-          start: {
-            share: {
-              url: {
-                locators: {
-                  get: () => ({
-                    getRedirectUrl: ({ policyName }: { policyName: string }) =>
-                      `/app/management/data/index_lifecycle_management/policies/edit/${policyName}`,
-                  }),
-                },
+  const mocked = {
+    useKibana: () => ({
+      dependencies: {
+        start: {
+          share: {
+            url: {
+              locators: {
+                get: () => ({
+                  getRedirectUrl: ({ policyName }: { policyName: string }) =>
+                    `/app/management/data/index_lifecycle_management/policies/edit/${policyName}`,
+                }),
               },
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EditPolicyModal', () => {
   const policyName = '.monitoring-8-ilm-policy';

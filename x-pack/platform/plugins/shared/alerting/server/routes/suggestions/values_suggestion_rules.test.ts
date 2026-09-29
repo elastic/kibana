@@ -27,11 +27,11 @@ vi.mock('@kbn/kql/server/autocomplete/terms_agg', () => {
 const termsAggSuggestionsMock = termsAggSuggestions as Mock;
 
 vi.mock('../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('registerRulesValueSuggestionsRoute', () => {
   const rulesClient = rulesClientMock.create();

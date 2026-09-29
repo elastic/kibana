@@ -31,14 +31,14 @@ const disableWorkflowScheduleMock = disableWorkflowSchedule as MockedFunction<
 >;
 
 const invalidateFindWorkflowSchedulesMock = vi.fn();
-const mockUseInvalidateFindWorkflowSchedules =
-  useInvalidateFindWorkflowSchedules as MockedFunction<
-    typeof useInvalidateFindWorkflowSchedules
-  >;
+const mockUseInvalidateFindWorkflowSchedules = useInvalidateFindWorkflowSchedules as MockedFunction<
+  typeof useInvalidateFindWorkflowSchedules
+>;
 
 const invalidateGetWorkflowScheduleMock = vi.fn();
-const mockUseInvalidateGetWorkflowSchedule =
-  useInvalidateGetWorkflowSchedule as MockedFunction<typeof useInvalidateGetWorkflowSchedule>;
+const mockUseInvalidateGetWorkflowSchedule = useInvalidateGetWorkflowSchedule as MockedFunction<
+  typeof useInvalidateGetWorkflowSchedule
+>;
 
 describe('useBulkDisableWorkflowSchedules', () => {
   let appToastsMock: Mocked<ReturnType<typeof useAppToastsMock.create>>;

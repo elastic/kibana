@@ -28,11 +28,11 @@ import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { documentField } from '../form_based/document_field';
 
 vi.mock('@kbn/unified-field-list/src/services/field_stats', () => {
-      const mocked = {
-      loadFieldStats: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadFieldStats: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const corePluginMock = coreMock.createStart();
 

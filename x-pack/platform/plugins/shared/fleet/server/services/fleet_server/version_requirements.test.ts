@@ -28,10 +28,9 @@ import { isFleetServerVersionRequirementMet } from './version_requirements';
 vi.mock('.'); // fleet_server/index — stubs checkFleetServerVersionsForSecretsStorage
 vi.mock('../settings'); // services barrel re-exports `import * as settingsService from './settings'`
 
-const mockedCheckFleetServerVersions =
-  checkFleetServerVersionsForSecretsStorage as MockedFunction<
-    typeof checkFleetServerVersionsForSecretsStorage
-  >;
+const mockedCheckFleetServerVersions = checkFleetServerVersionsForSecretsStorage as MockedFunction<
+  typeof checkFleetServerVersionsForSecretsStorage
+>;
 const mockedGetSettingsOrUndefined = settingsService.getSettingsOrUndefined as MockedFunction<
   typeof settingsService.getSettingsOrUndefined
 >;

@@ -17,11 +17,11 @@ import { useBulkLoadActions, useLoadActions, useLoadActionsFn } from './use_load
 const action = makeAction('action-1', 'icon', 1);
 const mockGetActions = vi.fn();
 vi.mock('../context/cell_actions_context', () => {
-      const mocked = {
-      useCellActionsContext: () => ({ getActions: mockGetActions }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCellActionsContext: () => ({ getActions: mockGetActions }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 class ErrorCatcher extends React.Component<React.PropsWithChildren> {
   state: { error: Error | null } = { error: null };

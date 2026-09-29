@@ -16,11 +16,11 @@ import { installDiscoveryAgents } from '../../agent_builder/agents/discovery';
 import { SignificantEventsDiscoveryClient } from './significant_events_discovery_client';
 
 vi.mock('../../agent_builder/agents/discovery', () => {
-      const mocked = {
-      installDiscoveryAgents: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installDiscoveryAgents: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const installDiscoveryAgentsMock = installDiscoveryAgents as MockedFunction<
   typeof installDiscoveryAgents

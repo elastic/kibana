@@ -16,13 +16,13 @@ import { useDeleteSynonymsSet } from '../../hooks/use_delete_synonyms_set';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 vi.mock('../../hooks/use_delete_synonyms_set', () => {
-      const mocked = {
-      useDeleteSynonymsSet: vi.fn(() => ({
-        mutate: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteSynonymsSet: vi.fn(() => ({
+      mutate: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DeleteSynonymsSetModal', () => {
   const queryClient = new QueryClient();

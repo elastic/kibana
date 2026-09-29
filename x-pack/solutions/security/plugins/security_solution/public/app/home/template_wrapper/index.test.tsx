@@ -15,39 +15,39 @@ import { SecurityPageName } from '../../types';
 
 const mockUseShowTimeline = vi.fn((): [boolean] => [false]);
 vi.mock('../../../common/utils/timeline/use_show_timeline', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/utils/timeline/use_show_timeline')),
-      useShowTimeline: () => mockUseShowTimeline(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/utils/timeline/use_show_timeline')),
+    useShowTimeline: () => mockUseShowTimeline(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./timeline', async () => {
-      const mocked = {
-      ...(await vi.importActual('./timeline')),
-      Timeline: () => <div>{'Timeline'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./timeline')),
+    Timeline: () => <div>{'Timeline'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const navProps = { icon: 'logoSecurity', items: [], name: 'Security' };
 const mockUseSecuritySolutionNavigation = vi.fn();
 vi.mock('../../../common/components/navigation/use_security_solution_navigation', () => {
-      const mocked = {
-      useSecuritySolutionNavigation: () => mockUseSecuritySolutionNavigation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSecuritySolutionNavigation: () => mockUseSecuritySolutionNavigation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRouteSpy = vi.fn((): [{ pageName: string }] => [
   { pageName: SecurityPageName.alerts },
 ]);
 vi.mock('../../../common/utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: () => mockUseRouteSpy(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: () => mockUseRouteSpy(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = ({
   children = <div>{'child of wrapper'}</div>,

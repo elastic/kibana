@@ -13,11 +13,11 @@ import { buildMetric } from './metric';
 import { mockDataViewsService } from './mock_utils';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => '3feeaf26-927e-448e-968f-c7e970671564'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => '3feeaf26-927e-448e-968f-c7e970671564'),
+  };
+  return { ...mocked, default: mocked };
+});
 test('generates metric chart config', async () => {
   const result = await buildMetric(
     {

@@ -45,7 +45,7 @@ const spyMsearch = vi.fn();
 const getmSearchSpy = () => spyMsearch;
 
 vi.mock('./msearch', async () => {
-  const original = (await vi.importActual('./msearch'));
+  const original = await vi.importActual('./msearch');
   class MSearchService {
     search(...args: any[]) {
       getmSearchSpy()(...args);

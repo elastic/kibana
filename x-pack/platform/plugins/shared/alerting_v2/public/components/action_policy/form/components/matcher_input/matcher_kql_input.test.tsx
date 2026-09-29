@@ -27,20 +27,20 @@ const mockQueryStringInput = vi.fn((props: Record<string, unknown>) => (
 ));
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: vi.fn(() => ({
-        QueryStringInput: (props: Record<string, unknown>) => mockQueryStringInput(props),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: vi.fn(() => ({
+      QueryStringInput: (props: Record<string, unknown>) => mockQueryStringInput(props),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di', () => {
-      const mocked = {
-      PluginStart: vi.fn((name: string) => `PluginStart(${name})`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginStart: vi.fn((name: string) => `PluginStart(${name})`),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MatcherInput', () => {
   beforeEach(() => {

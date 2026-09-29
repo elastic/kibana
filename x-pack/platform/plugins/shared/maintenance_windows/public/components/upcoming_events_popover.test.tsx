@@ -15,7 +15,7 @@ import { MaintenanceWindowStatus } from '../../common';
 
 vi.mock('../utils/kibana_react');
 
-const { useUiSetting } = (await vi.importMock('../utils/kibana_react'));
+const { useUiSetting } = await vi.importMock('../utils/kibana_react');
 
 useUiSetting.mockReturnValue('YYYY.MM.DD, h:mm:ss');
 

@@ -16,11 +16,12 @@ import { useSavedQueries } from './use_saved_queries';
 
 vi.mock('../common/lib/kibana');
 vi.mock('../common/hooks/use_error_toast', () => {
-      const mocked = {
-      useErrorToast: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorToast: () => vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as MockedFunction<typeof useKibana>;
 

@@ -35,18 +35,18 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createDiscoverServicesMock } from '../../../__mocks__/services';
 
 vi.mock('./fetch_documents', () => {
-      const mocked = {
-      fetchDocuments: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchDocuments: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./fetch_esql', () => {
-      const mocked = {
-      fetchEsql: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsql: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFetchDocuments = fetchDocuments as unknown as MockedFunction<typeof fetchDocuments>;
 const mockfetchEsql = fetchEsql as unknown as MockedFunction<typeof fetchEsql>;

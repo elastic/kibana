@@ -15,29 +15,29 @@ import { ConnectorEventLogListKPI } from './actions_connectors_event_log_list_kp
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          notifications: { toast: { addDanger: vi.fn() } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        notifications: { toast: { addDanger: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/action_connector_api/load_execution_kpi_aggregations', () => {
-      const mocked = {
-      loadGlobalConnectorExecutionKPIAggregations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadGlobalConnectorExecutionKPIAggregations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKpiResponse = {
   success: 4,

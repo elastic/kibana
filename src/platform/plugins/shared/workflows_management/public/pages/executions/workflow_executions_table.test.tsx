@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { EXECUTION_TABLE_DEFAULT_PAGE_SIZE } from './workflow_executions_page_constants';
 import { WorkflowExecutionsTable } from './workflow_executions_table';
 import { WORKFLOWS_EXECUTIONS_MAX_RESULT_WINDOW } from '../../../common';
@@ -24,27 +23,27 @@ const mockUseWorkflowUrlState = vi.fn(() => ({
   setSelectedExecution: mockSetSelectedExecution,
 }));
 vi.mock('../../hooks/use_workflow_url_state', () => {
-      const mocked = {
-      useWorkflowUrlState: () => mockUseWorkflowUrlState(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowUrlState: () => mockUseWorkflowUrlState(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_serial_polling', () => {
-      const mocked = {
-      useSerialPolling: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSerialPolling: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSerialPolling = vi.mocked(useSerialPolling);
 
 vi.mock('./workflow_executions_data_grid', () => {
-      const mocked = {
-      WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionsDataGrid: () => <div data-test-subj="workflowExecutionsDataGridStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const lastReachablePageIndex = Math.max(
   0,

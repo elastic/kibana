@@ -20,7 +20,7 @@ import { documentationService } from '../../../mappings_editor/shared_imports';
 import { StepMappingsContainer } from './step_mappings_container';
 
 vi.mock('../../../../../shared_imports', async () => {
-  const actual = (await vi.importActual('../../../../../shared_imports'));
+  const actual = await vi.importActual('../../../../../shared_imports');
   return {
     ...actual,
     Forms: {
@@ -35,12 +35,12 @@ vi.mock('../../../../../shared_imports', async () => {
 });
 
 vi.mock('../../../mappings_editor', () => {
-      const mocked = {
-      LoadMappingsFromJsonButton: vi.fn(() => null),
-      MappingsEditor: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LoadMappingsFromJsonButton: vi.fn(() => null),
+    MappingsEditor: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockMappingsEditor = vi.mocked(MappingsEditor);
 const docLinks = docLinksServiceMock.createStartContract();

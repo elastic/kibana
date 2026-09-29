@@ -30,22 +30,22 @@ const mockServices = {
 };
 
 vi.mock('@kbn/lens-embeddable-utils', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn().mockImplementation(() => ({
-        build: mockBuild,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
+      build: mockBuild,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: mockServices,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: mockServices,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleUuid = 'rule-uuid-001';
 const detection: LifecycleDetection = {

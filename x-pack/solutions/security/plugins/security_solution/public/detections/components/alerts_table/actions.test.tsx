@@ -66,11 +66,11 @@ import { timelineDefaults } from '../../../timelines/store/defaults';
 import { defaultUdtHeaders } from '../../../timelines/components/timeline/body/column_headers/default_headers';
 
 vi.mock('../../../timelines/containers/api', () => {
-      const mocked = {
-      getTimelineTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimelineTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana');
 

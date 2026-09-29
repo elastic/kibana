@@ -50,9 +50,9 @@ describe('CSV Export Search Cursor', () => {
 
     es = elasticsearchServiceMock.createScopedClusterClient();
     data = createSearchRequestHandlerContext();
-    vi
-      .spyOn(es.asCurrentUser, 'openPointInTime')
-      .mockResolvedValue({ id: 'simply-scroll-id' } as OpenPointInTimeResponse);
+    vi.spyOn(es.asCurrentUser, 'openPointInTime').mockResolvedValue({
+      id: 'simply-scroll-id',
+    } as OpenPointInTimeResponse);
 
     logger = loggingSystemMock.createLogger();
   });

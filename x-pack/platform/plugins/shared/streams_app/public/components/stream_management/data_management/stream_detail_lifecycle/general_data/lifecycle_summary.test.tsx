@@ -63,48 +63,48 @@ const mockKibana = {
 };
 
 vi.mock('../../../../../hooks/use_streams_privileges', () => {
-      const mocked = {
-      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockKibana,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockKibana,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
 vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: vi.fn(() => ({
-        value: undefined,
-        loading: false,
-        refresh: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: vi.fn(() => ({
+      value: undefined,
+      loading: false,
+      refresh: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStreamsAppFetch = useStreamsAppFetch as Mock;
 
 vi.mock('../hooks/use_ilm_phases_color_and_description', () => {
-      const mocked = {
-      useIlmPhasesColorAndDescription: () => ({
-        ilmPhases: {
-          hot: { color: '#FF0000', hoverColor: '#FF3333', description: 'Hot phase' },
-          warm: { color: '#FFA500', hoverColor: '#FFB833', description: 'Warm phase' },
-          cold: { color: '#0000FF', hoverColor: '#3333FF', description: 'Cold phase' },
-          frozen: { color: '#00FFFF', hoverColor: '#33FFFF', description: 'Frozen phase' },
-          delete: { color: '#808080', hoverColor: '#999999', description: 'Delete phase' },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmPhasesColorAndDescription: () => ({
+      ilmPhases: {
+        hot: { color: '#FF0000', hoverColor: '#FF3333', description: 'Hot phase' },
+        warm: { color: '#FFA500', hoverColor: '#FFB833', description: 'Warm phase' },
+        cold: { color: '#0000FF', hoverColor: '#3333FF', description: 'Cold phase' },
+        frozen: { color: '#00FFFF', hoverColor: '#33FFFF', description: 'Frozen phase' },
+        delete: { color: '#808080', hoverColor: '#999999', description: 'Delete phase' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FlyoutCoordinationProbe = () => {
   const { isAnyFlyoutOpen } = useLifecycleFlyoutCoordination();

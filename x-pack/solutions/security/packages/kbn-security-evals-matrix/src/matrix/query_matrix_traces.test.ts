@@ -120,12 +120,11 @@ describe('queryMatrixTraces example fetching', () => {
     } as unknown as EvaluationScoreDocument);
 
   const makeClient = (opts: { filtered: boolean }) => {
-    const getExampleScores = vi.fn(
-      async (_exampleId: string, filters?: { executionId?: string }) =>
-        // A legacy server ignores the filters and returns every execution.
-        opts.filtered
-          ? [completeDoc(filters?.executionId ?? 'exec-a')]
-          : [completeDoc('exec-a'), completeDoc('exec-b')]
+    const getExampleScores = vi.fn(async (_exampleId: string, filters?: { executionId?: string }) =>
+      // A legacy server ignores the filters and returns every execution.
+      opts.filtered
+        ? [completeDoc(filters?.executionId ?? 'exec-a')]
+        : [completeDoc('exec-a'), completeDoc('exec-b')]
     );
     const client = {
       getExperimentScores: vi.fn(

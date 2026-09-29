@@ -20,8 +20,7 @@ vi.mock('../../client/ui/get_create_case_flyout');
 vi.mock('../../client/ui/get_all_cases_selector_modal');
 
 const getCreateCaseFlyoutLazyNoProviderMock = getCreateCaseFlyoutLazyNoProvider as Mock;
-const getAllCasesSelectorModalNoProviderLazyMock =
-  getAllCasesSelectorModalNoProviderLazy as Mock;
+const getAllCasesSelectorModalNoProviderLazyMock = getAllCasesSelectorModalNoProviderLazy as Mock;
 
 describe('Cases context UI', () => {
   beforeEach(() => {

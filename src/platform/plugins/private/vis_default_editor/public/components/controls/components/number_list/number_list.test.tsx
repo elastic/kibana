@@ -18,25 +18,25 @@ import { NumberList } from './number_list';
 import { NumberRow } from './number_row';
 
 vi.mock('./number_row', () => {
-      const mocked = {
-      NumberRow: () => 'NumberRow',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NumberRow: () => 'NumberRow',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      htmlIdGenerator: vi.fn(() => {
-        let counter = 1;
-        return () => `12${counter++}`;
-      }),
-      EuiSpacer: (await vi.importActual('@elastic/eui')).EuiSpacer,
-      EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
-      EuiButtonEmpty: (await vi.importActual('@elastic/eui')).EuiButtonEmpty,
-      EuiFormErrorText: (await vi.importActual('@elastic/eui')).EuiFormErrorText,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    htmlIdGenerator: vi.fn(() => {
+      let counter = 1;
+      return () => `12${counter++}`;
+    }),
+    EuiSpacer: (await vi.importActual('@elastic/eui')).EuiSpacer,
+    EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
+    EuiButtonEmpty: (await vi.importActual('@elastic/eui')).EuiButtonEmpty,
+    EuiFormErrorText: (await vi.importActual('@elastic/eui')).EuiFormErrorText,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('NumberList', () => {
   let defaultProps: NumberListProps;

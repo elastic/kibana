@@ -251,9 +251,7 @@ describe('handleCoverageOverviewRequest', () => {
     });
 
     // Simulates the state where the managed SO has not yet been populated.
-    const emptyList = vi
-      .fn()
-      .mockResolvedValue({ tactics: [], techniques: [], subtechniques: [] });
+    const emptyList = vi.fn().mockResolvedValue({ tactics: [], techniques: [], subtechniques: [] });
     const mitreDataClient: MitreAttackDataClient = { list: emptyList, getById: vi.fn() };
 
     const result = await handleCoverageOverviewRequest({

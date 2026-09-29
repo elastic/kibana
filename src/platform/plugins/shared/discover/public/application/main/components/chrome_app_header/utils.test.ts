@@ -54,9 +54,9 @@ describe('getChromeHeaderTitle', () => {
     });
 
     it('should prefer the by-value tab label over the persisted session title', () => {
-      vi
-        .spyOn(embeddableEditor, 'getByValueTab')
-        .mockReturnValue({ label: 'Panel title' } as DiscoverSessionTab);
+      vi.spyOn(embeddableEditor, 'getByValueTab').mockReturnValue({
+        label: 'Panel title',
+      } as DiscoverSessionTab);
 
       expect(
         getChromeHeaderTitle({

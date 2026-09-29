@@ -23,12 +23,12 @@ vi.mock('../../../hooks/use_kibana');
 vi.mock('../../../hooks/use_reload_request_time');
 
 vi.mock('@kbn/data-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/data-plugin/public')),
-      waitUntilNextSessionCompletes$: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/data-plugin/public')),
+    waitUntilNextSessionCompletes$: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext

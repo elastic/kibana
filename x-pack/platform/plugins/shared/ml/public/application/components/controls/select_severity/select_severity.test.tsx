@@ -48,11 +48,11 @@ const mockSeverityOptions: SeverityOption[] = [
 
 // Mock the useSeverityOptions hook
 vi.mock('../../../explorer/hooks/use_severity_options', () => {
-      const mocked = {
-      useSeverityOptions: () => mockSeverityOptions,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSeverityOptions: () => mockSeverityOptions,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The following mock setup is necessary so that we can simulate
 // both triggering the update callback and the internal state update
@@ -61,17 +61,17 @@ const mockUpdateCallback = vi.fn();
 const mockUseState = vi.fn().mockImplementation(useState);
 
 vi.mock('@kbn/ml-url-state', () => {
-      const mocked = {
-      usePageUrlState: () => {
-        // Start with default state (all severity options selected)
-        const [severity, setSeverity] = mockUseState({
-          val: mockSeverityOptions.map((option) => option.threshold), // Default to all selected
-        });
-        return [severity, mockUpdateCallback.mockImplementation((d) => setSeverity(d))];
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePageUrlState: () => {
+      // Start with default state (all severity options selected)
+      const [severity, setSeverity] = mockUseState({
+        val: mockSeverityOptions.map((option) => option.threshold), // Default to all selected
+      });
+      return [severity, mockUpdateCallback.mockImplementation((d) => setSeverity(d))];
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SelectSeverity', () => {
   afterEach(() => {

@@ -16,11 +16,11 @@ import { GenAiTab } from './genai_tab';
 import type { GenAiFields } from './get_genai_fields';
 
 vi.mock('@kbn/shared-ux-markdown', () => {
-      const mocked = {
-      Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Markdown: ({ children }: { children: string }) => <div data-testid="markdown">{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseFields: GenAiFields = {
   operationName: 'chat',

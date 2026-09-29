@@ -14,14 +14,14 @@ import type { RuleFormState } from '../types';
 import { getAction } from '../common/test_utils/actions_test_utils';
 
 vi.mock('../validation/validate_form', () => {
-      const mocked = {
-      validateRuleBase: vi.fn(),
-      validateRuleParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateRuleBase: vi.fn(),
+    validateRuleParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { validateRuleBase, validateRuleParams } = (await vi.importMock('../validation/validate_form'));
+const { validateRuleBase, validateRuleParams } = await vi.importMock('../validation/validate_form');
 
 validateRuleBase.mockReturnValue({});
 validateRuleParams.mockReturnValue({});

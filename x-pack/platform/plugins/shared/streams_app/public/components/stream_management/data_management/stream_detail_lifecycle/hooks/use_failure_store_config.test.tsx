@@ -14,18 +14,18 @@ import { useFailureStoreConfig, transformFailureStoreConfig } from './use_failur
 let mockIsServerless = false;
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ isServerless: mockIsServerless }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ isServerless: mockIsServerless }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_failure_store_default_retention', () => {
-      const mocked = {
-      useFailureStoreDefaultRetention: vi.fn(() => ({ clusterDefaultRetention: undefined })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFailureStoreDefaultRetention: vi.fn(() => ({ clusterDefaultRetention: undefined })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createBaseDefinition = (name: string) => ({
   stream: {
@@ -235,7 +235,9 @@ describe('useFailureStoreConfig', () => {
 
     it('should use cluster default retention in Serverless when stream has no default retention', async () => {
       mockIsServerless = true;
-      const { useFailureStoreDefaultRetention } = (await vi.importMock('./use_failure_store_default_retention'));
+      const { useFailureStoreDefaultRetention } = await vi.importMock(
+        './use_failure_store_default_retention'
+      );
       useFailureStoreDefaultRetention.mockReturnValueOnce({
         clusterDefaultRetention: '90d',
       });
@@ -266,7 +268,9 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should not surface the cluster default as effective retention in stateful (infinite retention, no delete phase), but still expose it for "Restore default"', async () => {
-      const { useFailureStoreDefaultRetention } = (await vi.importMock('./use_failure_store_default_retention'));
+      const { useFailureStoreDefaultRetention } = await vi.importMock(
+        './use_failure_store_default_retention'
+      );
       useFailureStoreDefaultRetention.mockReturnValueOnce({
         clusterDefaultRetention: '90d',
       });

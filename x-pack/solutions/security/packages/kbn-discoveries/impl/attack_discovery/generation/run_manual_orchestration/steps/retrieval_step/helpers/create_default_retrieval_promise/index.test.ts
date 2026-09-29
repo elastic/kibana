@@ -14,11 +14,11 @@ import { createDefaultRetrievalPromise } from '.';
 const mockInvokeAlertRetrievalWorkflow = vi.fn();
 
 vi.mock('../../../../../invoke_alert_retrieval_workflow', () => {
-      const mocked = {
-      invokeAlertRetrievalWorkflow: (...args: unknown[]) => mockInvokeAlertRetrievalWorkflow(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    invokeAlertRetrievalWorkflow: (...args: unknown[]) => mockInvokeAlertRetrievalWorkflow(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = {
   debug: vi.fn(),

@@ -15,7 +15,7 @@ export const createIndexMock = vi.fn();
 export const populateIndexMock = vi.fn();
 
 vi.doMock('./steps', async () => {
-  const actual = (await vi.importActual('./steps'));
+  const actual = await vi.importActual('./steps');
   return {
     ...actual,
     validateArtifactArchive: validateArtifactArchiveMock,
@@ -39,7 +39,7 @@ export const logArtifactsFolderUsageMock = vi.fn();
 export const purgeArtifactsFolderMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     downloadToDisk: downloadToDiskMock,

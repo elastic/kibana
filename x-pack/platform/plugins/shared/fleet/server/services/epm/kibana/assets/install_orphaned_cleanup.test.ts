@@ -12,23 +12,23 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 
 vi.mock('timers/promises', () => {
-      const mocked = { setTimeout: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { setTimeout: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 // appContextService.getSavedObjects() is configured per-test in beforeEach via jest.mocked().
 vi.mock('../../..', () => {
-      const mocked = {
-      appContextService: {
-        getExperimentalFeatures: vi.fn().mockReturnValue({
-          enableAgentStatusAlerting: true,
-          enableSloTemplates: false,
-        }),
-        getSavedObjects: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getExperimentalFeatures: vi.fn().mockReturnValue({
+        enableAgentStatusAlerting: true,
+        enableSloTemplates: false,
+      }),
+      getSavedObjects: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { appContextService } from '../../..';
 import { KibanaSavedObjectType } from '../../../../../common/types/models/epm';

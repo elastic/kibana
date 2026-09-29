@@ -21,7 +21,7 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { usageCollectionPluginMock } from '@kbn/usage-collection-plugin/public/mocks';
 
 vi.mock('@kbn/react-kibana-mount', async () => {
-  const original = (await vi.importActual('@kbn/react-kibana-mount'));
+  const original = await vi.importActual('@kbn/react-kibana-mount');
 
   return {
     ...original,

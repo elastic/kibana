@@ -10,15 +10,15 @@ import { vi } from 'vitest';
 import { updateDeprecatedComponentTemplates } from './update_deprecated_component_templates';
 
 vi.mock('..', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: () => ({
-          debug: vi.fn(),
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getLogger: () => ({
+        debug: vi.fn(),
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('updateDeprecatedComponentTemplates', () => {
   it('should update deprecated component templates', async () => {

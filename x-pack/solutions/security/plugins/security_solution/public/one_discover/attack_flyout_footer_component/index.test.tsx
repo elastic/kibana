@@ -15,52 +15,53 @@ import { AttackFlyoutFooter } from '.';
 import type { StartServices } from '../../types';
 import type { AttackDiscoveryAlert } from '@kbn/elastic-assistant-common';
 
-const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
-  <>{children}</>
-));
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>);
 
 vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: (props: unknown) =>
+      mockFlyoutProviders(props as { children: React.ReactNode }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRefetch = vi.fn();
 const mockAttack = { id: 'attack-1' } as unknown as AttackDiscoveryAlert;
 
 vi.mock('../../flyout/attack_details/hooks/use_attack_details', () => {
-      const mocked = {
-      useAttackDetails: vi.fn(() => ({
-        attack: mockAttack,
-        loading: false,
-        refetch: mockRefetch,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDetails: vi.fn(() => ({
+      attack: mockAttack,
+      loading: false,
+      refetch: mockRefetch,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/attack/main/footer', () => {
-      const mocked = {
-      Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
-        <div data-test-subj="attackFooterMock">
-          <button type="button" data-test-subj="attackFooterUpdateBtn" onClick={onAttackUpdated}>
-            {'update'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+      <div data-test-subj="attackFooterMock">
+        <button type="button" data-test-subj="attackFooterUpdateBtn" onClick={onAttackUpdated}>
+          {'update'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/components/flyout_loading', () => {
-      const mocked = {
-      FlyoutLoading: () => <div data-test-subj="attackFlyoutFooterLoading" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutLoading: () => <div data-test-subj="attackFlyoutFooterLoading" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useAttackDetails } = (await vi.importMock('../../flyout/attack_details/hooks/use_attack_details'));
+const { useAttackDetails } = await vi.importMock(
+  '../../flyout/attack_details/hooks/use_attack_details'
+);
 
 describe('AttackFlyoutFooter', () => {
   beforeEach(() => {

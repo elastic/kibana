@@ -27,25 +27,25 @@ vi.mock('../../../../common/components/user_privileges');
 
 const testSecuritySolutionLinkHref = 'test-url';
 vi.mock('../../../../common/components/links', () => {
-      const mocked = {
-      useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionLinkProps: () => () => ({ href: testSecuritySolutionLinkHref }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_license', () => {
-      const mocked = {
-      useLicense: vi.fn().mockReturnValue({ isPlatinumPlus: () => true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: vi.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ecsRowData: Ecs = {
   _id: '1',
@@ -99,7 +99,7 @@ const mockUseKibanaReturnValue = {
   },
 };
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
 
   return {
     ...original,
@@ -115,41 +115,41 @@ vi.mock('../../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges', () => {
-      const mocked = {
-      useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertsPrivileges: vi.fn().mockReturnValue({ hasAlertsUpdate: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runAlertWorkflowPanel: [],
 });
 vi.mock('./use_run_alert_workflow_panel', () => {
-      const mocked = {
-      useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
   runDocumentWorkflowPanel: [],
 });
 vi.mock('./use_run_document_workflow_panel', () => {
-      const mocked = {
-      useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAddToChatAction = vi.fn().mockReturnValue({ addToChatActionItems: [] });
 vi.mock('./use_add_to_chat_action', () => {
-      const mocked = {
-      useAddToChatAction: (...args: unknown[]) => mockUseAddToChatAction(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddToChatAction: (...args: unknown[]) => mockUseAddToChatAction(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const actionMenuButton = 'timeline-context-menu-button';
 const addToCaseButton = 'add-to-case-action';
@@ -175,51 +175,48 @@ const documentWorkflowPanelContent = 'document-workflow-panel-content';
 vi.mock(
   '../../../../management/pages/endpoint_exceptions/view/components/endpoint_exceptions_flyout',
   () => {
-      const mocked = { EndpointExceptionsFlyout: () => null };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = { EndpointExceptionsFlyout: () => null };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock('../../osquery/osquery_flyout', () => {
-      const mocked = { OsqueryFlyout: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { OsqueryFlyout: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout', () => {
-      const mocked = {
-      AddExceptionFlyout: vi.fn().mockReturnValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddExceptionFlyout: vi.fn().mockReturnValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRuleWithFallback = vi.fn();
 vi.mock('../../../../detection_engine/rule_management/logic/use_rule_with_fallback', () => {
-      const mocked = {
-      useRuleWithFallback: (...args: unknown[]) => mockUseRuleWithFallback(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleWithFallback: (...args: unknown[]) => mockUseRuleWithFallback(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSignalIndex = vi.fn();
 vi.mock('../../../containers/detection_engine/alerts/use_signal_index', () => {
-      const mocked = {
-      useSignalIndex: () => mockUseSignalIndex(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndex: () => mockUseSignalIndex(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQueryAlerts = vi.fn();
 vi.mock('../../../containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock(
-  '../../../../management/pages/event_filters/view/components/event_filters_flyout',
-  () => {
-      const mocked = { EventFiltersFlyout: () => null };
-      return { ...mocked, default: mocked };
-    }
-);
+  const mocked = {
+    useQueryAlerts: (...args: unknown[]) => mockUseQueryAlerts(...args),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../../../management/pages/event_filters/view/components/event_filters_flyout', () => {
+  const mocked = { EventFiltersFlyout: () => null };
+  return { ...mocked, default: mocked };
+});
 
 describe('Alert table context menu', () => {
   describe('Case actions', () => {
@@ -720,7 +717,11 @@ const enrichedAlertWithoutIndex = {
   data: { hits: { hits: [{ _id: 'test-id', _index: 'test-index', _source: {} }] } },
 };
 
-const mockAddExceptionFlyout = (await vi.importMock('../../../../detection_engine/rule_exceptions/components/add_exception_flyout')).AddExceptionFlyout as Mock;
+const mockAddExceptionFlyout = (
+  await vi.importMock(
+    '../../../../detection_engine/rule_exceptions/components/add_exception_flyout'
+  )
+).AddExceptionFlyout as Mock;
 
 const wrapperDefaults = {
   exceptionListType: null as ExceptionListTypeEnum | null,

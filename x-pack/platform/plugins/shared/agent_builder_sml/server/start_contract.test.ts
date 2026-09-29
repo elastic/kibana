@@ -19,8 +19,7 @@ const buildDeps = ({ spaceFromRequest }: { spaceFromRequest?: string } = {}) => 
   const smlService = {
     indexAttachment: vi.fn().mockResolvedValue(undefined),
     deleteAttachment: vi.fn().mockResolvedValue(undefined),
-  } as unknown as Mocked<Pick<SmlService, 'indexAttachment' | 'deleteAttachment'>> &
-    SmlService;
+  } as unknown as Mocked<Pick<SmlService, 'indexAttachment' | 'deleteAttachment'>> & SmlService;
   const soClient = {};
   const savedObjects = {
     getScopedClient: vi.fn().mockReturnValue(soClient),

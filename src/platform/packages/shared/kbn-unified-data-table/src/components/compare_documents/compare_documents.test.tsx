@@ -23,7 +23,7 @@ import { useComparisonFields } from './hooks/use_comparison_fields';
 let mockLocalStorage: Record<string, string> = {};
 
 vi.mock('../../restorable_state', async () => {
-  const real = (await vi.importActual('../../restorable_state'));
+  const real = await vi.importActual('../../restorable_state');
   return {
     useRestorableLocalStorage: vi.fn((key: string, storageKey, value: unknown) => {
       mockLocalStorage[storageKey] = JSON.stringify(value);
@@ -35,18 +35,18 @@ vi.mock('../../restorable_state', async () => {
 let mockDataGridProps: EuiDataGridProps | undefined;
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiDataGrid: vi.fn((props) => {
-        mockDataGridProps = props;
-        return <></>;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiDataGrid: vi.fn((props) => {
+      mockDataGridProps = props;
+      return <></>;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_comparison_fields', async () => {
-  const originalModule = (await vi.importActual('./hooks/use_comparison_fields'));
+  const originalModule = await vi.importActual('./hooks/use_comparison_fields');
   return {
     ...originalModule,
     useComparisonFields: vi.fn(originalModule.useComparisonFields),

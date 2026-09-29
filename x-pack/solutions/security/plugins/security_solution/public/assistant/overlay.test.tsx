@@ -15,23 +15,23 @@ const mockAssistantAvailability = vi.fn(() => ({
   hasAssistantPrivilege: true,
 }));
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
-      useAssistantContext: () => ({
-        assistantAvailability: mockAssistantAvailability(),
-      }),
-      AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Mock it as a passthrough
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantOverlay: () => <div data-test-subj="assistantOverlay" />,
+    useAssistantContext: () => ({
+      assistantAvailability: mockAssistantAvailability(),
+    }),
+    AssistantSpaceIdProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>, // Mock it as a passthrough
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks/use_experimental_features');
 vi.mock('../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'space-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'space-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssistantOverlay', () => {
   const queryClient = new QueryClient({

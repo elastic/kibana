@@ -31,27 +31,27 @@ import {
 
 // Mock dependencies
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-rule-form/flyout', () => {
-      const mocked = {
-      RuleFormFlyout: () => <div data-test-subj="rule-form-flyout">Rule Form Flyout</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleFormFlyout: () => <div data-test-subj="rule-form-flyout">Rule Form Flyout</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 const mockUseSelector = redux.useSelector as MockedFunction<typeof redux.useSelector>;

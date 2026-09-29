@@ -7,30 +7,29 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 import { FormattedRelativeEnhanced } from './formatted_relative_enhanced';
 
 // Mock selectUnit from @formatjs/intl-utils
 const mockSelectUnit = vi.fn();
 vi.mock('@formatjs/intl-utils', () => {
-      const mocked = {
-      selectUnit: (...args: unknown[]) => mockSelectUnit(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    selectUnit: (...args: unknown[]) => mockSelectUnit(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useFormattedDateTime
 const mockUseFormattedDateTime = vi.fn();
 vi.mock('../use_formatted_date', () => {
-      const mocked = {
-      useFormattedDateTime: (...args: unknown[]) => mockUseFormattedDateTime(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFormattedDateTime: (...args: unknown[]) => mockUseFormattedDateTime(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithI18n = (ui: React.ReactElement) => {
   return render(<I18nProvider>{ui}</I18nProvider>);

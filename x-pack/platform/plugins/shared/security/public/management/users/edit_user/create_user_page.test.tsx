@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -19,12 +18,12 @@ import { securityMock } from '../../../mocks';
 import { Providers } from '../users_management_app';
 
 vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', () => {
-      const mocked = {
-      htmlIdGenerator: () => () => `id-${Math.random()}`,
-      useGeneratedHtmlId: () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    htmlIdGenerator: () => () => `id-${Math.random()}`,
+    useGeneratedHtmlId: () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CreateUserPage', () => {
   vi.setConfig({ testTimeout: 15_000 });

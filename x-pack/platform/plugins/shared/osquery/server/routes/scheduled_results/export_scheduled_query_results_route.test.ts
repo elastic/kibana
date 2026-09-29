@@ -22,25 +22,28 @@ const SCHEDULED_EXPORT_PATH =
   '/api/osquery/scheduled_results/{scheduleId}/{executionCount}/_export';
 
 vi.mock('../export/create_export_route_handler', () => {
-      const mocked = {
-      createExportRouteHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createExportRouteHandler: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn().mockResolvedValue({}),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../unified_history/process_scheduled_history', () => {
-      const mocked = {
-      getPacksForSpace: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPacksForSpace: vi.fn().mockResolvedValue([]),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 import { getPacksForSpace } from '../unified_history/process_scheduled_history';
@@ -114,8 +117,8 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({
@@ -150,8 +153,8 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({
@@ -200,8 +203,8 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({
@@ -238,8 +241,8 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({
@@ -274,8 +277,8 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({
@@ -306,8 +309,8 @@ describe('exportScheduledQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportScheduledQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({

@@ -17,46 +17,46 @@ import { useEsqlGlobalFilterQuery } from '../../../../../common/hooks/esql/use_e
 import { useGlobalFilterQuery } from '../../../../../common/hooks/use_global_filter_query';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      prettifyQuery: vi.fn((query) => query),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prettifyQuery: vi.fn((query) => query),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_error_toast', () => {
-      const mocked = {
-      useErrorToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/esql/use_esql_global_filter', () => {
-      const mocked = {
-      useEsqlGlobalFilterQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlGlobalFilterQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_global_filter_query', () => {
-      const mocked = {
-      useGlobalFilterQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFilterQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRiskLevelsEsqlQuery', () => {
   const mockUseKibana = useKibana as Mock;

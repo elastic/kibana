@@ -16,16 +16,16 @@ import type { SearchModalProps } from './components/types';
 let lastSearchModalProps: SearchModalProps | undefined;
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: (node: React.ReactElement) => {
-        if (node?.props) {
-          lastSearchModalProps = node.props as SearchModalProps;
-        }
-        return () => () => undefined;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: (node: React.ReactElement) => {
+      if (node?.props) {
+        lastSearchModalProps = node.props as SearchModalProps;
+      }
+      return () => () => undefined;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GlobalSearchBarPlugin', () => {
   beforeEach(() => {

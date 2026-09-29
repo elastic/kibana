@@ -22,11 +22,11 @@ import { isSuppressionRuleInGA } from '../../../../../common/detection_engine/ut
 
 vi.mock('../../../../flyout/document_details/shared/context');
 vi.mock('../../../../../common/detection_engine/utils', () => {
-      const mocked = {
-      isSuppressionRuleInGA: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isSuppressionRuleInGA: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOnShowCorrelationsDetails = vi.fn();
 

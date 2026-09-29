@@ -15,65 +15,76 @@ import { OsqueryPlugin } from './plugin';
 import type { SetupPlugins } from './types';
 
 vi.mock('./search_strategy/osquery', () => {
-      const mocked = {
-      osquerySearchStrategyProvider: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    osquerySearchStrategyProvider: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./utils/register_features', () => {
-      const mocked = { registerFeatures: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerFeatures: vi.fn() };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./saved_objects', () => {
-      const mocked = { initSavedObjects: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { initSavedObjects: vi.fn() };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./routes', () => {
-      const mocked = { defineRoutes: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { defineRoutes: vi.fn() };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./handlers/action/create_action_service', () => {
-      const mocked = {
-      createActionService: vi.fn(() => ({ stop: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createActionService: vi.fn(() => ({ stop: vi.fn() })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./create_config', () => {
-      const mocked = {
-      createConfig: vi.fn(() => ({ experimentalFeatures: { rruleScheduling: false } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createConfig: vi.fn(() => ({ experimentalFeatures: { rruleScheduling: false } })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/reconcile_schedule_ids_task', () => {
-      const mocked = {
-      RECONCILE_TASK_TYPE: 'osquery:reconcile-schedule-ids',
-      runReconcileTask: vi.fn(),
-      scheduleReconcileTask: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RECONCILE_TASK_TYPE: 'osquery:reconcile-schedule-ids',
+    runReconcileTask: vi.fn(),
+    scheduleReconcileTask: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/osquery_app_context_services', () => {
-      const mocked = {
-      OsqueryAppContextService: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OsqueryAppContextService: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/telemetry/sender', () => {
-      const mocked = {
-      TelemetryEventsSender: vi.fn(() => ({ setup: vi.fn(), start: vi.fn(), stop: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TelemetryEventsSender: vi.fn(() => ({ setup: vi.fn(), start: vi.fn(), stop: vi.fn() })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/telemetry/receiver', () => {
-      const mocked = {
-      TelemetryReceiver: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TelemetryReceiver: vi.fn(() => ({ start: vi.fn(), stop: vi.fn() })),
+  };
+
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lib/schema_service', () => {
-      const mocked = { SchemaService: vi.fn(() => ({})) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SchemaService: vi.fn(() => ({})) };
+
+  return { ...mocked, default: mocked };
+});
 
 const flushPromises = () => new Promise((resolve) => setImmediate(resolve));
 

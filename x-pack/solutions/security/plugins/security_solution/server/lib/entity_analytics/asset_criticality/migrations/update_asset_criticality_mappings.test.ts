@@ -14,14 +14,14 @@ const mockisMappingsMigrationRequired = vi.fn();
 const mockmigrateMappings = vi.fn();
 
 vi.mock('../asset_criticality_migration_client', () => {
-      const mocked = {
-      AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
-        isMappingsMigrationRequired: () => mockisMappingsMigrationRequired(),
-        migrateMappings: (spaceId?: string) => mockmigrateMappings(spaceId),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssetCriticalityMigrationClient: vi.fn().mockImplementation(() => ({
+      isMappingsMigrationRequired: () => mockisMappingsMigrationRequired(),
+      migrateMappings: (spaceId?: string) => mockmigrateMappings(spaceId),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('updateAssetCriticalityMappings', () => {
   const mockLogger = { info: vi.fn(), error: vi.fn() } as unknown as Logger;

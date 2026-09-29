@@ -16,11 +16,11 @@ import { assertWorkflowsEnabled } from '../../../lib/assert_workflows_enabled';
 import { registerCreateScheduleRoute } from './create_schedule';
 
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnalytics = coreMock.createSetup().analytics;
 import { createScheduleDataClient } from '../../../lib/schedules/create_schedule_data_client';

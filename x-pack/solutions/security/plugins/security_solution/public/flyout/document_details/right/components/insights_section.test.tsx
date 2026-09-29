@@ -41,11 +41,11 @@ import { useShowSuppressedAlerts } from '../../../../flyout_v2/document/tools/co
 
 vi.mock('../../../../flyout_v2/document/main/hooks/use_alert_prevalence');
 vi.mock('../../shared/hooks/use_event_details', () => {
-      const mocked = {
-      useEventDetails: vi.fn(() => ({ dataAsNestedObject: null, loading: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEventDetails: vi.fn(() => ({ dataAsNestedObject: null, loading: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
@@ -85,11 +85,11 @@ const mockSearchHit = {
 } as EsHitRecord;
 
 vi.mock('../../../../flyout_v2/shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGlobalTime = vi.fn().mockReturnValue({ from, to });
 vi.mock('../../../../common/containers/use_global_time', () => {

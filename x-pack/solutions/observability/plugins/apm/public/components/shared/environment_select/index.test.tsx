@@ -16,15 +16,15 @@ const DEFAULT_ENVIRONMENT = 'production';
 
 const mockOnSearchChange = vi.fn();
 vi.mock('./use_environment_select', () => {
-      const mocked = {
-      useEnvironmentSelect: vi.fn(() => ({
-        data: { terms: [] },
-        searchStatus: 'success',
-        onSearchChange: mockOnSearchChange,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnvironmentSelect: vi.fn(() => ({
+      data: { terms: [] },
+      searchStatus: 'success',
+      onSearchChange: mockOnSearchChange,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EnvironmentSelect', () => {
   async function clearInputValue(input: HTMLInputElement) {

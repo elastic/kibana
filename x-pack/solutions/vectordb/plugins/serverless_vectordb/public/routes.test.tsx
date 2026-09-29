@@ -15,22 +15,22 @@ import { GETTING_STARTED_PATH, hasSeenOnboarding } from '@kbn/vectordb-onboardin
 import { AppRoutes } from './routes';
 
 vi.mock('@kbn/vectordb-onboarding', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/vectordb-onboarding')),
-      hasSeenOnboarding: vi.fn(),
-      OnboardingLandingPage: () => <div data-test-subj="onboardingLandingPage" />,
-      IngestStep: () => <div data-test-subj="ingestStep" />,
-      SearchStep: () => <div data-test-subj="searchStep" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/vectordb-onboarding')),
+    hasSeenOnboarding: vi.fn(),
+    OnboardingLandingPage: () => <div data-test-subj="onboardingLandingPage" />,
+    IngestStep: () => <div data-test-subj="ingestStep" />,
+    SearchStep: () => <div data-test-subj="searchStep" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./home/home_page', () => {
-      const mocked = {
-      HomePage: () => <div data-test-subj="homePage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HomePage: () => <div data-test-subj="homePage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockHasSeenOnboarding = vi.mocked(hasSeenOnboarding);
 

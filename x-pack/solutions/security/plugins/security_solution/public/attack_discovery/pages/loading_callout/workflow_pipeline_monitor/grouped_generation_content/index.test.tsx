@@ -16,11 +16,11 @@ import { TestProviders } from '../../../../../common/mock';
 import type { StepExecutionWithLink } from '../../types';
 
 vi.mock('../../../use_workflow_editor_link', () => {
-      const mocked = {
-      useWorkflowEditorLink: vi.fn(() => ({ editorUrl: null, navigateToEditor: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowEditorLink: vi.fn(() => ({ editorUrl: null, navigateToEditor: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockStep = (overrides: Partial<StepExecutionWithLink> = {}): StepExecutionWithLink => ({
   error: undefined,

@@ -27,11 +27,11 @@ let mockRouteContext = {
 } as unknown as AwaitedProperties<MockWorkpadRouteContext>;
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123abc'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123abc'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('POST workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;
@@ -119,9 +119,7 @@ describe('POST workpad', () => {
       id,
     });
 
-    (mockRouteContext.core.savedObjects.client.get as Mock).mockResolvedValue(
-      mockTemplateResponse
-    );
+    (mockRouteContext.core.savedObjects.client.get as Mock).mockResolvedValue(mockTemplateResponse);
 
     const request = httpServerMock.createKibanaRequest({
       method: 'post',

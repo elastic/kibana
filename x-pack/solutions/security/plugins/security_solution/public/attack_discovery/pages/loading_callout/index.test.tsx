@@ -18,29 +18,29 @@ import { useKibana } from '../../../common/lib/kibana';
 import { WorkflowExecutionDetailsFlyout } from './workflow_execution_details_flyout';
 
 vi.mock('@kbn/react-kibana-context-theme', () => {
-      const mocked = {
-      useKibanaIsDarkMode: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaIsDarkMode: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_dismiss_attack_discovery_generations', () => {
-      const mocked = {
-      useDismissAttackDiscoveryGeneration: vi.fn(() => ({
-        mutateAsync: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDismissAttackDiscoveryGeneration: vi.fn(() => ({
+      mutateAsync: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflow_execution_details_flyout', () => {
-      const mocked = {
-      WorkflowExecutionDetailsFlyout: vi.fn(() => (
-        <div data-test-subj="workflowExecutionDetailsFlyout" />
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionDetailsFlyout: vi.fn(() => (
+      <div data-test-subj="workflowExecutionDetailsFlyout" />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana');
 

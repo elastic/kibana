@@ -49,131 +49,144 @@ function getMinimalValidJob() {
 
 describe('ML - isValidTimeField', () => {
   it('called without job config argument triggers Promise rejection', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          isValidTimeField(
-            mlClusterClientFactory(mockSearchResponse),
-            undefined as unknown as CombinedJob
-          ).then(
-            () => done(new Error('Promise should not resolve for this test without job argument.')),
-            () => done()
-          );
-        
-      }));
+      isValidTimeField(
+        mlClusterClientFactory(mockSearchResponse),
+        undefined as unknown as CombinedJob
+      ).then(
+        () => done(new Error('Promise should not resolve for this test without job argument.')),
+        () => done()
+      );
+    }));
 
   it('time_field `@timestamp`', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          isValidTimeField(mlClusterClientFactory(mockSearchResponse), getMinimalValidJob()).then(
-            (valid) => {
-              expect(valid).toBe(true);
-              done();
-            },
-            () => done(new Error('isValidTimeField Promise failed for time_field `@timestamp`.'))
-          );
-        
-      }));
+      isValidTimeField(mlClusterClientFactory(mockSearchResponse), getMinimalValidJob()).then(
+        (valid) => {
+          expect(valid).toBe(true);
+          done();
+        },
+        () => done(new Error('isValidTimeField Promise failed for time_field `@timestamp`.'))
+      );
+    }));
 
   it('time_field `metadata.timestamp`', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const mockJobConfigNestedDate = getMinimalValidJob();
-          mockJobConfigNestedDate.data_description.time_field = 'metadata.timestamp';
+      const mockJobConfigNestedDate = getMinimalValidJob();
+      mockJobConfigNestedDate.data_description.time_field = 'metadata.timestamp';
 
-          const mockSearchResponseNestedDate = {
-            fieldCaps: mockTimeFieldNested,
-            search: mockTimeRange,
-          };
+      const mockSearchResponseNestedDate = {
+        fieldCaps: mockTimeFieldNested,
+        search: mockTimeRange,
+      };
 
-          isValidTimeField(
-            mlClusterClientFactory(mockSearchResponseNestedDate),
-            mockJobConfigNestedDate
-          ).then(
-            (valid) => {
-              expect(valid).toBe(true);
-              done();
-            },
-            () => done(new Error('isValidTimeField Promise failed for time_field `metadata.timestamp`.'))
-          );
-        
-      }));
+      isValidTimeField(
+        mlClusterClientFactory(mockSearchResponseNestedDate),
+        mockJobConfigNestedDate
+      ).then(
+        (valid) => {
+          expect(valid).toBe(true);
+          done();
+        },
+        () =>
+          done(new Error('isValidTimeField Promise failed for time_field `metadata.timestamp`.'))
+      );
+    }));
 });
 
 describe('ML - validateTimeRange', () => {
   it('called without arguments', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateTimeRange(
-            mlClusterClientFactory(mockSearchResponse),
-            undefined as unknown as CombinedJob
-          ).then(
-            () => done(new Error('Promise should not resolve for this test without job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateTimeRange(
+        mlClusterClientFactory(mockSearchResponse),
+        undefined as unknown as CombinedJob
+      ).then(
+        () => done(new Error('Promise should not resolve for this test without job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #2, missing datafeed_config', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          validateTimeRange(mlClusterClientFactory(mockSearchResponse), {
-            analysis_config: {},
-          } as unknown as CombinedJob).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      validateTimeRange(mlClusterClientFactory(mockSearchResponse), {
+        analysis_config: {},
+      } as unknown as CombinedJob).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #3, missing datafeed_config.indices', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = { analysis_config: {}, datafeed_config: {} };
-          validateTimeRange(
-            mlClusterClientFactory(mockSearchResponse),
-            job as unknown as CombinedJob
-          ).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = { analysis_config: {}, datafeed_config: {} };
+      validateTimeRange(
+        mlClusterClientFactory(mockSearchResponse),
+        job as unknown as CombinedJob
+      ).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #4, missing data_description', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = { analysis_config: {}, datafeed_config: { indices: [] } };
-          validateTimeRange(
-            mlClusterClientFactory(mockSearchResponse),
-            job as unknown as CombinedJob
-          ).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = { analysis_config: {}, datafeed_config: { indices: [] } };
+      validateTimeRange(
+        mlClusterClientFactory(mockSearchResponse),
+        job as unknown as CombinedJob
+      ).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('called with non-valid job argument #5, missing data_description.time_field', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const job = { analysis_config: {}, data_description: {}, datafeed_config: { indices: [] } };
-          validateTimeRange(
-            mlClusterClientFactory(mockSearchResponse),
-            job as unknown as CombinedJob
-          ).then(
-            () => done(new Error('Promise should not resolve for this test without valid job argument.')),
-            () => done()
-          );
-        
-      }));
+      const job = { analysis_config: {}, data_description: {}, datafeed_config: { indices: [] } };
+      validateTimeRange(
+        mlClusterClientFactory(mockSearchResponse),
+        job as unknown as CombinedJob
+      ).then(
+        () =>
+          done(new Error('Promise should not resolve for this test without valid job argument.')),
+        () => done()
+      );
+    }));
 
   it('invalid time field', () => {
     const mockSearchResponseInvalid = cloneDeep(mockSearchResponse);

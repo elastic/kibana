@@ -22,33 +22,31 @@ import { TestProviders } from '../../../common/mock';
 
 vi.mock('./use_get_timelines_by_ids');
 vi.mock('../../../timelines/components/open_timeline/helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../timelines/components/open_timeline/helpers')),
-      useQueryTimelineById: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../timelines/components/open_timeline/helpers')),
+    useQueryTimelineById: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../timelines/components/open_timeline/timelines_table', () => {
-      const mocked = {
-      TimelinesTable: vi.fn(() => <div data-test-subj="timelines-table" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimelinesTable: vi.fn(() => <div data-test-subj="timelines-table" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockGetBatchItemsPopoverContent = vi.fn(() => (
-  <div data-test-subj="batch-popover-content" />
-));
+const mockGetBatchItemsPopoverContent = vi.fn(() => <div data-test-subj="batch-popover-content" />);
 
 vi.mock('../../../timelines/components/open_timeline/edit_timeline_batch_actions', () => {
-      const mocked = {
-      useEditTimelineBatchActions: vi.fn(() => ({
-        getBatchItemsPopoverContent: mockGetBatchItemsPopoverContent,
-        onCompleteBatchActions: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEditTimelineBatchActions: vi.fn(() => ({
+      getBatchItemsPopoverContent: mockGetBatchItemsPopoverContent,
+      onCompleteBatchActions: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseGetTimelinesByIds = useGetTimelinesByIds as MockedFunction<
   typeof useGetTimelinesByIds

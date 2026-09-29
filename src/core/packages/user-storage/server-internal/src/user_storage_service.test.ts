@@ -15,9 +15,9 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { UserStorageService } from './user_storage_service';
 
 vi.mock('./routes', () => {
-      const mocked = { registerRoutes: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerRoutes: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const buildRegister = () => {
   const coreContext = {

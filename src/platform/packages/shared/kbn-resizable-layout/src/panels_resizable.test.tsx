@@ -32,7 +32,7 @@ interface ResizableContainerCallbacks {
 let resizableContainerCallbacks: ResizableContainerCallbacks = {};
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const ActualEuiResizableContainer = actual.EuiResizableContainer;
 
   return {

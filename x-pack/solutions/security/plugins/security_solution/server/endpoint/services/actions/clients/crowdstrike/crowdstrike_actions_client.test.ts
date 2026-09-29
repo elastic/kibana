@@ -32,7 +32,7 @@ import {
 } from '../../../../../lib/telemetry/event_based/events';
 
 vi.mock('../../action_details_by_id', async () => {
-  const originalMod = (await vi.importActual('../../action_details_by_id'));
+  const originalMod = await vi.importActual('../../action_details_by_id');
 
   return {
     ...originalMod,
@@ -830,8 +830,7 @@ describe('CrowdstrikeActionsClient class', () => {
       'should error if %s is called with invalid agent ids',
       async (method) => {
         (
-          classConstructorOptions.endpointService.getInternalFleetServices().agent
-            .getByIds as Mock
+          classConstructorOptions.endpointService.getInternalFleetServices().agent.getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });

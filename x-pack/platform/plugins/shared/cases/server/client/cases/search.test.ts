@@ -28,11 +28,11 @@ import {
 import { search } from './search';
 
 vi.mock('@kbn/spaces-plugin/server/lib/utils/namespace', () => {
-      const mocked = {
-      spaceIdToNamespace: vi.fn().mockReturnValue('space1'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    spaceIdToNamespace: vi.fn().mockReturnValue('space1'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('search', () => {
   const configureMock = [

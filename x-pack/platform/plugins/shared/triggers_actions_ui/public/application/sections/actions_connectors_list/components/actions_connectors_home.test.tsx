@@ -24,35 +24,37 @@ import userEvent from '@testing-library/user-event';
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
 vi.mock('../../../lib/action_connector_api', () => {
-      const mocked = {
-      loadAllActions: vi.fn(),
-      loadActionTypes: vi.fn(),
-      loadConnectorAuthStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { loadAllActions, loadConnectorAuthStatus } = (await vi.importMock('../../../lib/action_connector_api'));
+  const mocked = {
+    loadAllActions: vi.fn(),
+    loadActionTypes: vi.fn(),
+    loadConnectorAuthStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { loadAllActions, loadConnectorAuthStatus } = await vi.importMock(
+  '../../../lib/action_connector_api'
+);
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../lib/capabilities', () => {
-      const mocked = {
-      hasSaveActionsCapability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { hasSaveActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
+  const mocked = {
+    hasSaveActionsCapability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { hasSaveActionsCapability } = await vi.importMock('../../../lib/capabilities');
 vi.mock('../../../../common/get_experimental_features');
 vi.mock('../../../components/health_check', () => {
-      const mocked = {
-      HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HealthCheck: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../context/health_context', () => {
-      const mocked = {
-      HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./actions_connectors_list', () => ({
   __esModule: true,

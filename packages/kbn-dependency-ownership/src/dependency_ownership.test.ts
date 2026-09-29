@@ -16,11 +16,11 @@ import { parseConfig } from './parse_config';
 import { ruleFilter } from './rule';
 
 vi.mock('./parse_config', () => {
-      const mocked = {
-      parseConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('identifyDependencyOwnership', () => {
   const mockConfig = {

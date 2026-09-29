@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { render } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 

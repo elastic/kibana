@@ -20,29 +20,29 @@ const mockGetDataViewByIndexPatternId = vi.fn();
 const mockConvertToFiltersColumn = vi.fn();
 
 vi.mock('../services', () => {
-      const mocked = {
-      getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDataViewsStart: vi.fn(() => ({ get: () => ({}), getDefault: () => ({}) })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/visualizations-plugin/public', () => {
-      const mocked = {
-      getConvertToLensModule: async () => ({
-        getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
-        convertToFiltersColumn: vi.fn(() => mockConvertToFiltersColumn()),
-      }),
-      getDataViewByIndexPatternId: vi.fn(() => mockGetDataViewByIndexPatternId()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConvertToLensModule: async () => ({
+      getColumnsFromVis: vi.fn(() => mockGetColumnsFromVis()),
+      convertToFiltersColumn: vi.fn(() => mockConvertToFiltersColumn()),
+    }),
+    getDataViewByIndexPatternId: vi.fn(() => mockGetDataViewByIndexPatternId()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./configurations', () => {
-      const mocked = {
-      getConfiguration: vi.fn(() => mockGetConfiguration()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConfiguration: vi.fn(() => mockGetConfiguration()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const params: HeatmapVisParams = {
   addTooltip: false,

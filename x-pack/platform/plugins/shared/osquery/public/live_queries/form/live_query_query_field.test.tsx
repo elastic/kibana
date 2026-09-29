@@ -20,42 +20,47 @@ import { ROLE_CAPABILITIES } from '../../__test_helpers__/create_mock_kibana_ser
 const mockUseKibana = vi.fn();
 
 vi.mock('../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/lib/kibana')),
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/lib/kibana')),
+    useKibana: () => mockUseKibana(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../editor', () => {
-      const mocked = {
-      OsqueryEditor: ({ defaultValue }: { defaultValue: string }) => (
-        <div data-test-subj="osqueryEditor">{defaultValue}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OsqueryEditor: ({ defaultValue }: { defaultValue: string }) => (
+      <div data-test-subj="osqueryEditor">{defaultValue}</div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../packs/queries/lazy_ecs_mapping_editor_field', () => {
-      const mocked = {
-      ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../saved_queries/saved_queries_dropdown', () => {
-      const mocked = {
-      SavedQueriesDropdown: () => <div data-test-subj="savedQueriesDropdown">Saved Queries</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedQueriesDropdown: () => <div data-test-subj="savedQueriesDropdown">Saved Queries</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/timeout_field', () => {
-      const mocked = {
-      TimeoutField: () => <div data-test-subj="timeoutField">Timeout</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimeoutField: () => <div data-test-subj="timeoutField">Timeout</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const setupKibana = (capabilities: Partial<OsqueryCapabilities> = {}) => {
   const osqueryCapabilities = {

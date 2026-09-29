@@ -16,11 +16,11 @@ import { GettingStartedAgentPrompt } from './agent_prompt';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
 
 vi.mock('../../contexts/usage_tracker_context', () => {
-      const mocked = {
-      useUsageTracker: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUsageTracker: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUsageTracker = useUsageTracker as Mock;
 

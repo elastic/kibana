@@ -93,9 +93,7 @@ describe('createUnackAction', () => {
 
   it('execute: POSTs per-episode UNACK items with distinct episode_ids, toasts, calls onSuccess', async () => {
     const deps = makeDeps();
-    vi
-      .spyOn(bulk, 'bulkUnackEpisodeActions')
-      .mockResolvedValue({ affected_count: 2, errors: [] });
+    vi.spyOn(bulk, 'bulkUnackEpisodeActions').mockResolvedValue({ affected_count: 2, errors: [] });
     const onSuccess = vi.fn();
     await createUnackAction(deps).execute({
       episodes: [
@@ -121,9 +119,7 @@ describe('createUnackAction', () => {
       execute: extensionExecute,
     };
 
-    vi
-      .spyOn(bulk, 'bulkUnackEpisodeActions')
-      .mockResolvedValue({ affected_count: 1, errors: [] });
+    vi.spyOn(bulk, 'bulkUnackEpisodeActions').mockResolvedValue({ affected_count: 1, errors: [] });
     const onSuccess = vi.fn();
 
     await createUnackAction(deps, extension).execute({

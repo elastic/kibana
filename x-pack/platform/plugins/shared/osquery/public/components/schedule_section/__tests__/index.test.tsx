@@ -248,11 +248,7 @@ describe('ScheduleSection', () => {
   describe('same-mode constraint (lockedScheduleType)', () => {
     it('locks the selector to the parent-supplied mode and surfaces the help text', () => {
       renderFlagOn(
-        <ScheduleSection
-          value={recurrenceState()}
-          onChange={vi.fn()}
-          lockedScheduleType="rrule"
-        />
+        <ScheduleSection value={recurrenceState()} onChange={vi.fn()} lockedScheduleType="rrule" />
       );
 
       expect(screen.getByText(SCHEDULE_TYPE_LOCKED_HELP)).toBeInTheDocument();

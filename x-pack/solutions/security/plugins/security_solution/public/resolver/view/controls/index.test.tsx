@@ -18,12 +18,12 @@ import { mockFlyoutApi } from '../../../flyout/document_details/shared/mocks/moc
 import '../../test_utilities/extend_jest';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      ExpandableFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
-      useExpandableFlyoutApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpandableFlyoutProvider: ({ children }: { children: ReactNode }) => <>{children}</>,
+    useExpandableFlyoutApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('graph controls: when relsover is loaded with an origin node', () => {
   let simulator: Simulator;

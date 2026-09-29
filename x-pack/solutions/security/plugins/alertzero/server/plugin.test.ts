@@ -21,41 +21,41 @@ import { ensureAgentSafe, registerAgentType } from './agent';
 import { registerAlertZeroInferenceFeatures } from './inference_features';
 
 vi.mock('./managed_workflows/register_owner', () => {
-      const mocked = {
-      registerOwner: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerOwner: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./inference_features', () => {
-      const mocked = {
-      registerAlertZeroInferenceFeatures: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerAlertZeroInferenceFeatures: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./managed_workflows/initialize_managed_workflows', () => {
-      const mocked = {
-      initializeManagedWorkflows: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initializeManagedWorkflows: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./agent', () => {
-      const mocked = {
-      agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
-      ensureAgentSafe: vi.fn().mockResolvedValue(undefined),
-      registerAgentType: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentType: { id: 'mock-alertzero-type', baseConfiguration: {} },
+    ensureAgentSafe: vi.fn().mockResolvedValue(undefined),
+    registerAgentType: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./routes/register_routes', () => {
-      const mocked = {
-      registerRoutes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerRoutes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createConfig = (overrides: Partial<AlertZeroConfig> = {}): AlertZeroConfig => ({
   enabled: false,

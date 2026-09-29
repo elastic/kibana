@@ -24,7 +24,7 @@ import { ProjectScopeRow } from './project_scope_row';
 vi.mock('../../../../hooks/use_plugin_context');
 vi.mock('../../../../hooks/use_kibana');
 vi.mock('@kbn/cps-utils', async () => {
-  const actual = (await vi.importActual('@kbn/cps-utils'));
+  const actual = await vi.importActual('@kbn/cps-utils');
   const mockReact = require('react');
   return {
     ...actual,

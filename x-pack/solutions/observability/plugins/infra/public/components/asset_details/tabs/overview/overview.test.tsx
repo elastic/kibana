@@ -32,9 +32,7 @@ vi.mock('../../hooks/use_data_views');
 vi.mock('../../hooks/use_date_picker');
 vi.mock('../../hooks/use_asset_details_render_props');
 
-const useKibanaMock = useKibanaContextForPlugin as MockedFunction<
-  typeof useKibanaContextForPlugin
->;
+const useKibanaMock = useKibanaContextForPlugin as MockedFunction<typeof useKibanaContextForPlugin>;
 const useRequestTimeContextMock = useReloadRequestTimeContext as MockedFunction<
   typeof useReloadRequestTimeContext
 >;
@@ -44,16 +42,13 @@ const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as Mocke
 const useMetadataStateContextMock = useMetadataStateContext as MockedFunction<
   typeof useMetadataStateContext
 >;
-const useDataViewsContextMock = useDataViewsContext as MockedFunction<
-  typeof useDataViewsContext
->;
+const useDataViewsContextMock = useDataViewsContext as MockedFunction<typeof useDataViewsContext>;
 const useDatePickerContextMock = useDatePickerContext as MockedFunction<
   typeof useDatePickerContext
 >;
-const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as MockedFunction<
-    typeof useAssetDetailsRenderPropsContext
-  >;
+const useAssetDetailsRenderPropsContextMock = useAssetDetailsRenderPropsContext as MockedFunction<
+  typeof useAssetDetailsRenderPropsContext
+>;
 
 // Test constants
 const HOST1_NAME = 'host-1';

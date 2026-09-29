@@ -73,9 +73,7 @@ describe('userSeriesStorage', function () {
         <Route path={'/app/exploratory-view/:mode'}>
           <UrlStorageContextProvider
             storage={{
-              get: vi
-                .fn()
-                .mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
+              get: vi.fn().mockImplementation((key: string) => (key === 'sr' ? seriesData : null)),
               set: vi.fn(),
             }}
           >

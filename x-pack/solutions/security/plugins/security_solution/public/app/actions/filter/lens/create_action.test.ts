@@ -15,22 +15,22 @@ import { createFilterLensAction } from './create_action';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 vi.mock('@kbn/cell-actions/actions', () => {
-      const mocked = {
-      addFilterIn: vi.fn(),
-      addFilterOut: vi.fn(),
-      addExistsFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addFilterIn: vi.fn(),
+    addFilterOut: vi.fn(),
+    addExistsFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../timelines/store', () => {
-      const mocked = {
-      timelineSelectors: {
-        getTimelineByIdSelector: vi.fn().mockReturnValue(() => ({})),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    timelineSelectors: {
+      getTimelineByIdSelector: vi.fn().mockReturnValue(() => ({})),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('createFilterLensAction', () => {
   const mockServices = {

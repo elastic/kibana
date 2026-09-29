@@ -20,21 +20,21 @@ import { SmlUnregisteredTypeError } from './sml_errors';
 import type { SmlContext, SmlEntry, SmlIndexerOriginParams, SmlTypeDefinition } from './types';
 
 vi.mock('./sml_storage', () => {
-      const mocked = {
-      smlIndexName: '.test-sml-data',
-      INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    smlIndexName: '.test-sml-data',
+    INGESTION_METHOD_FIELD: 'governance.provenance.updated_by.metadata.ingestion_method',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./sml_service', () => {
-      const mocked = {
-      isNotFoundError: vi.fn(
-        (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isNotFoundError: vi.fn(
+      (error: unknown) => (error as { statusCode?: number })?.statusCode === 404
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Shared so a test can arrange the response before `createMockEsClient()` is called.
 const bulkMock = vi.fn();

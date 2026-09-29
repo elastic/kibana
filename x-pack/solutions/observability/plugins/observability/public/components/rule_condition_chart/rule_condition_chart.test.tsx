@@ -30,7 +30,7 @@ const mockBuild = vi.fn().mockResolvedValue({
 });
 
 vi.mock('@kbn/lens-embeddable-utils', async () => {
-  const actual = (await vi.importActual('@kbn/lens-embeddable-utils'));
+  const actual = await vi.importActual('@kbn/lens-embeddable-utils');
   return {
     ...actual,
     LensConfigBuilder: vi.fn().mockImplementation(() => ({

@@ -16,9 +16,7 @@ import { SavedObjectsImportError } from '../errors';
 
 import { getNonUniqueEntries } from './get_non_unique_entries';
 vi.mock('./get_non_unique_entries');
-const mockGetNonUniqueEntries = getNonUniqueEntries as MockedFunction<
-  typeof getNonUniqueEntries
->;
+const mockGetNonUniqueEntries = getNonUniqueEntries as MockedFunction<typeof getNonUniqueEntries>;
 
 beforeEach(() => {
   vi.clearAllMocks();

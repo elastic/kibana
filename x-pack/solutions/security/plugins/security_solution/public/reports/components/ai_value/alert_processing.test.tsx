@@ -22,11 +22,11 @@ vi.mock('./alert_processing_table');
 vi.mock('./alert_processing_donut_lens');
 
 vi.mock('./metrics', () => {
-      const mocked = {
-      formatPercent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatPercent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFormatPercent = formatPercent as MockedFunction<typeof formatPercent>;
 const mockAlertProcessingKeyInsight = AlertProcessingKeyInsight as MockedFunction<

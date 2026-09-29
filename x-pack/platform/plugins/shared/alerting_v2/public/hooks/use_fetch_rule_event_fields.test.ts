@@ -15,19 +15,19 @@ import { useFetchRuleEventFields } from './use_fetch_rule_event_fields';
 const mockFetchRuleEventFields = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: () => ({ fetchRuleEventFields: mockFetchRuleEventFields }),
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: () => ({ fetchRuleEventFields: mockFetchRuleEventFields }),
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebouncedValue: <T>(value: T) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebouncedValue: <T>(value: T) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const queryClient = new QueryClient({

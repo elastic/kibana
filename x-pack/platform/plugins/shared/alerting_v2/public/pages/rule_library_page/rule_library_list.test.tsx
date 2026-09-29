@@ -22,7 +22,9 @@ let mockInstallIsLoading = false;
 let mockInstallVariables: { id: string } | undefined;
 
 vi.mock('@kbn/core-di-browser', async () => {
-  const { UserCapabilities: ActualUserCapabilities } = (await vi.importActual('../../services/user_capabilities'));
+  const { UserCapabilities: ActualUserCapabilities } = await vi.importActual(
+    '../../services/user_capabilities'
+  );
   return {
     useService: (token: unknown) => {
       if (token === ActualUserCapabilities) {
@@ -44,26 +46,26 @@ vi.mock('@kbn/core-di-browser', async () => {
 });
 
 vi.mock('./rule_templates_data_source', async () => {
-      const mocked = {
-      ...(await vi.importActual('./rule_templates_data_source')),
-      useRuleTemplatesDataSource: () => ({
-        findItems: mockFindItems,
-        debounceMs: 0,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./rule_templates_data_source')),
+    useRuleTemplatesDataSource: () => ({
+      findItems: mockFindItems,
+      debounceMs: 0,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_install_rule_template', () => {
-      const mocked = {
-      useInstallRuleTemplate: () => ({
-        mutate: mockInstallMutate,
-        isLoading: mockInstallIsLoading,
-        variables: mockInstallVariables,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInstallRuleTemplate: () => ({
+      mutate: mockInstallMutate,
+      isLoading: mockInstallIsLoading,
+      variables: mockInstallVariables,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createRulePayload = (overrides: Partial<CreateRuleData> = {}): CreateRuleData =>
   ({

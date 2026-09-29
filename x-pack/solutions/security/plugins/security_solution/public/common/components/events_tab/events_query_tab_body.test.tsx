@@ -26,24 +26,24 @@ vi.mock('../user_privileges');
 
 const mockGetDefaultControlColumn = vi.fn();
 vi.mock('../../../timelines/components/timeline/body/control_columns', () => {
-      const mocked = {
-      getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultControlColumn: (props: number) => mockGetDefaultControlColumn(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline',
   () => {
-      const mocked = {
-        useAddBulkToTimelineAction: vi.fn().mockReturnValue([]),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useAddBulkToTimelineAction: vi.fn().mockReturnValue([]),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../lib/kibana', async () => {
-  const original = (await vi.importActual('../../lib/kibana'));
+  const original = await vi.importActual('../../lib/kibana');
 
   return {
     ...original,
@@ -71,13 +71,13 @@ vi.mock('../visualization_actions/actions');
 vi.mock('../visualization_actions/lens_embeddable');
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => mockHistory,
-      useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => mockHistory,
+    useLocation: vi.fn().mockReturnValue({ pathname: '/test' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FakeStatefulEventsViewer = ({
   topRightMenuOptions,
@@ -90,18 +90,18 @@ const FakeStatefulEventsViewer = ({
   </div>
 );
 vi.mock('../events_viewer', () => {
-      const mocked = { StatefulEventsViewer: FakeStatefulEventsViewer };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { StatefulEventsViewer: FakeStatefulEventsViewer };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../containers/use_full_screen', () => {
-      const mocked = {
-      useGlobalFullScreen: vi.fn().mockReturnValue({
-        globalFullScreen: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFullScreen: vi.fn().mockReturnValue({
+      globalFullScreen: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_license', () => {
   const licenseServiceInstance = {

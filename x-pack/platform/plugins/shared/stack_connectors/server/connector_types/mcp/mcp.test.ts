@@ -62,31 +62,31 @@ import { StreamableHTTPError, UnauthorizedError } from '@kbn/mcp-client';
 
 // Mock the auth helpers
 vi.mock('./auth_helpers', () => {
-      const mocked = {
-      buildHeadersFromSecrets: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildHeadersFromSecrets: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the build_custom_fetch module
 vi.mock('./build_custom_fetch', () => {
-      const mocked = {
-      buildCustomFetch: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildCustomFetch: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { buildCustomFetch } from './build_custom_fetch';
 
 // Mock the retry utils
 vi.mock('./retry_utils', () => {
-      const mocked = {
-      retryWithRecovery: vi.fn(async (fn) => {
-        return await fn();
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    retryWithRecovery: vi.fn(async (fn) => {
+      return await fn();
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('McpConnector', () => {
   const logger = loggingSystemMock.createLogger();

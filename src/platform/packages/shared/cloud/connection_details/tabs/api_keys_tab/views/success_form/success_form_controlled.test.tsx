@@ -17,11 +17,11 @@ import { SuccessFormControlled } from './success_form_controlled';
 import type { ApiKey } from './types';
 
 vi.mock('../../components/manage_keys_link', () => {
-      const mocked = {
-      ManageKeysLink: () => <div data-test-subj="manageKeysLink" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ManageKeysLink: () => <div data-test-subj="manageKeysLink" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SuccessFormControlled', () => {
   const apiKey: ApiKey = {

@@ -17,12 +17,12 @@ import type { Agent } from '../../types';
 import { filterHostedPolicies } from './filter_hosted_agents';
 
 vi.mock('./hosted_agent', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hosted_agent')),
-      getHostedPolicies: vi.fn().mockResolvedValue({ hosted: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hosted_agent')),
+    getHostedPolicies: vi.fn().mockResolvedValue({ hosted: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('filterHostedPolicies', () => {
   let soClient: Mocked<SavedObjectsClientContract>;

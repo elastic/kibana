@@ -31,22 +31,23 @@ describe('filter manager utilities', () => {
     });
 
     test('should return undefined for none matching', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const filter = {
-                meta: { index: 'logstash-*' },
-                query: { query_string: { query: 'foo:bar' } },
-              } as Filter;
+        const filter = {
+          meta: { index: 'logstash-*' },
+          query: { query_string: { query: 'foo:bar' } },
+        } as Filter;
 
-              try {
-                mapPhrases(filter);
-              } catch (e) {
-                expect(e).toBe(filter);
-                done();
-              }
-            
-        }));
+        try {
+          mapPhrases(filter);
+        } catch (e) {
+          expect(e).toBe(filter);
+          done();
+        }
+      }));
   });
 
   describe('getPhrasesDisplayValue()', () => {

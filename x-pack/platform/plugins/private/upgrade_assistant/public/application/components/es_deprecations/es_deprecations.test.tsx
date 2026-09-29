@@ -25,7 +25,7 @@ const mockUseLoadEsDeprecations = vi.fn();
 const mockUseLoadRemoteClusters = vi.fn();
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual('../../app_context'));
+  const actual = await vi.importActual('../../app_context');
 
   return {
     ...actual,
@@ -64,11 +64,11 @@ vi.mock('../../app_context', async () => {
 });
 
 vi.mock('./es_deprecations_table', () => {
-      const mocked = {
-      EsDeprecationsTable: () => <div data-test-subj="esDeprecationsTableStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsDeprecationsTable: () => <div data-test-subj="esDeprecationsTableStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EsDeprecations', () => {
   const renderPage = () => {

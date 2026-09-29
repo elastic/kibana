@@ -24,7 +24,7 @@ import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
 vi.mock('../../hooks/use_eis_models');
 vi.mock('../../hooks/use_kibana');
 
-const { useKibana } = (await vi.importMock('../../hooks/use_kibana'));
+const { useKibana } = await vi.importMock('../../hooks/use_kibana');
 const mockUseKibana = useKibana as Mock;
 
 const mockKibanaReturn = ({
@@ -45,12 +45,12 @@ const mockKibanaReturn = ({
 // The Content List provider owns its own React Query client, so only
 // `useQueryClient` (used for endpoint-save invalidation) is stubbed.
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: () => ({ invalidateQueries: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEisModels = useEisModels as Mock;
 

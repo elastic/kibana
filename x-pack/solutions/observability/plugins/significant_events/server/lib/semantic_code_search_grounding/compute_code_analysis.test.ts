@@ -21,18 +21,18 @@ import {
 } from './semantic_code_search_tools';
 
 vi.mock('@kbn/ai-tools', () => {
-      const mocked = {
-      getSigEventsLogPatternsEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSigEventsLogPatternsEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/traced-es-client', () => {
-      const mocked = {
-      createTracedEsClient: vi.fn(({ client }) => client),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createTracedEsClient: vi.fn(({ client }) => client),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getPatternsMock = getSigEventsLogPatternsEsql as Mock;
 

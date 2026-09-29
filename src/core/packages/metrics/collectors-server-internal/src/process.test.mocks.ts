@@ -13,16 +13,16 @@ import { collectorMock } from './mocks_internal';
 
 export const mockEventLoopDelayMonitor = collectorMock.create();
 vi.doMock('./event_loop_delays_monitor', () => {
-      const mocked = {
-      EventLoopDelaysMonitor: vi.fn().mockImplementation(() => mockEventLoopDelayMonitor),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventLoopDelaysMonitor: vi.fn().mockImplementation(() => mockEventLoopDelayMonitor),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const mockEventLoopUtilizationMonitor = collectorMock.create();
 vi.doMock('./event_loop_utilization_monitor', () => {
-      const mocked = {
-      EventLoopUtilizationMonitor: vi.fn().mockImplementation(() => mockEventLoopUtilizationMonitor),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventLoopUtilizationMonitor: vi.fn().mockImplementation(() => mockEventLoopUtilizationMonitor),
+  };
+  return { ...mocked, default: mocked };
+});

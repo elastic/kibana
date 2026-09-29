@@ -25,9 +25,9 @@ vi.mock('../agents/agent_service');
 vi.mock('../build_integration/fields');
 vi.mock('../build_integration/validate_fields');
 
-const { AgentService } = (await vi.importMock('../agents/agent_service'));
-const { generateFieldMappings } = (await vi.importMock('../build_integration/fields'));
-const { validateFieldMappings } = (await vi.importMock('../build_integration/validate_fields'));
+const { AgentService } = await vi.importMock('../agents/agent_service');
+const { generateFieldMappings } = await vi.importMock('../build_integration/fields');
+const { validateFieldMappings } = await vi.importMock('../build_integration/validate_fields');
 
 describe('TaskManagerService', () => {
   it('exports DATA_STREAM_CREATION_TASK_TYPE', () => {

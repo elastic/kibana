@@ -10,13 +10,13 @@
 import { vi } from 'vitest';
 
 vi.mock('../services', () => {
-      const mocked = {
-      getFormatService: vi.fn(() => ({
-        deserialize: vi.fn(() => 'formatter'),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormatService: vi.fn(() => ({
+      deserialize: vi.fn(() => 'formatter'),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { TableContext } from '../types';

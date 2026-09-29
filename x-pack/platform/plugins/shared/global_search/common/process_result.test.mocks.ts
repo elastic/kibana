@@ -9,8 +9,8 @@ import { vi } from 'vitest';
 
 export const convertResultUrlMock = vi.fn().mockReturnValue('converted-url');
 vi.doMock('./utils', () => {
-      const mocked = {
-      convertResultUrl: convertResultUrlMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertResultUrl: convertResultUrlMock,
+  };
+  return { ...mocked, default: mocked };
+});

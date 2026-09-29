@@ -17,11 +17,11 @@ import { expectTextsInDocument } from '../../../utils/test_helpers';
 import type { SectionDescriptor } from './types';
 
 vi.mock('../../../hooks/use_adhoc_apm_data_view', () => {
-      const mocked = {
-      useAdHocApmDataView: () => ({ dataView: undefined, apmIndices: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAdHocApmDataView: () => ({ dataView: undefined, apmIndices: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

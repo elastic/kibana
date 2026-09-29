@@ -36,21 +36,21 @@ import { CasesClientFactory } from './client/factory';
 import { createCasesClientMock } from './client/mocks';
 
 vi.mock('./connectors', () => {
-      const mocked = { registerConnectorTypes: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerConnectorTypes: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./workflows', () => {
-      const mocked = { registerCaseWorkflowSteps: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerCaseWorkflowSteps: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./agent_builder', () => {
-      const mocked = { registerCasesAgentBuilderTools: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { registerCasesAgentBuilderTools: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
-const { registerConnectorTypes } = (await vi.importMock('./connectors'));
-const { registerCaseWorkflowSteps } = (await vi.importMock('./workflows'));
-const { registerCasesAgentBuilderTools } = (await vi.importMock('./agent_builder'));
+const { registerConnectorTypes } = await vi.importMock('./connectors');
+const { registerCaseWorkflowSteps } = await vi.importMock('./workflows');
+const { registerCasesAgentBuilderTools } = await vi.importMock('./agent_builder');
 
 function getConfig(overrides: Partial<ConfigType> = {}): ConfigType {
   return {

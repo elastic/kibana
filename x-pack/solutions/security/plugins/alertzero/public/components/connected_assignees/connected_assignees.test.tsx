@@ -24,18 +24,18 @@ import {
 import { ConnectedAssignees } from './connected_assignees';
 
 vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
-      useAssignEscalation: vi.fn(),
-      useAssignInvestigation: vi.fn(),
-      useUserProfiles: vi.fn(),
-      useSuggestUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+    useAssignEscalation: vi.fn(),
+    useAssignInvestigation: vi.fn(),
+    useUserProfiles: vi.fn(),
+    useSuggestUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agentic-investigations-common', async () => {
-  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
+  const actual = await vi.importActual('@kbn/agentic-investigations-common');
   return {
     ...actual,
     // eslint-disable-next-line react/display-name

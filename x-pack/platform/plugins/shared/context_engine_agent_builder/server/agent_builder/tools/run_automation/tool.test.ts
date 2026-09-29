@@ -13,16 +13,16 @@ import { CONTEXT_ENGINE_RUN_AUTOMATION_TOOL_ID } from '../../../../common/agent_
 import { createRunAutomationTool } from './tool';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', () => {
-      const mocked = {
-      hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
-      hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
-      hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasWorkflowReadPrivilege: vi.fn().mockResolvedValue(true),
+    hasWorkflowExecutePrivilege: vi.fn().mockResolvedValue(true),
+    hasWorkflowUpdatePrivilege: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const { hasWorkflowReadPrivilege, hasWorkflowExecutePrivilege, hasWorkflowUpdatePrivilege } =
-  (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
+  await vi.importMock('@kbn/agent-builder-tools-base/workflows');
 
 describe('run_automation tool', () => {
   const getWorkflowMock = vi.fn();

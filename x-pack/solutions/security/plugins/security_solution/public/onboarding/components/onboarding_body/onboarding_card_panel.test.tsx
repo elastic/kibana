@@ -16,20 +16,20 @@ import { TestProviders } from '../../../common/mock/test_providers';
 
 const mockUseDarkMode = vi.fn(() => false);
 vi.mock('@kbn/react-kibana-context-theme', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-kibana-context-theme')),
-      useKibanaIsDarkMode: () => mockUseDarkMode(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-kibana-context-theme')),
+    useKibanaIsDarkMode: () => mockUseDarkMode(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiIcon: vi.fn(({ type }: { type: string }) => <div data-test-subj={`EuiIcon-${type}`} />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiIcon: vi.fn(({ type }: { type: string }) => <div data-test-subj={`EuiIcon-${type}`} />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OnboardingCardPanel Component', () => {
   const defaultProps = {

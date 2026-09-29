@@ -230,21 +230,22 @@ describe('ML - validateJob', () => {
   });
 
   it('throws an error because job.analysis_config.influencers is not an Array', () =>
-      new Promise<void>((resolve, reject) => {
-      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-          const payload = getBasicPayload() as any;
-          delete payload.job.analysis_config.influencers;
+      const payload = getBasicPayload() as any;
+      delete payload.job.analysis_config.influencers;
 
-          validateJob(mlClusterClient, mlClient, payload).then(
-            () =>
-              done(
-                new Error('Promise should not resolve for this test when influencers is not an Array.')
-              ),
-            () => done()
-          );
-        
-      }));
+      validateJob(mlClusterClient, mlClient, payload).then(
+        () =>
+          done(
+            new Error('Promise should not resolve for this test when influencers is not an Array.')
+          ),
+        () => done()
+      );
+    }));
 
   it('detect duplicate detectors', async () => {
     const payload = getBasicPayload() as any;

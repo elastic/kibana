@@ -424,11 +424,11 @@ describe('getCustomBucketsFromSiblingAggs', () => {
 const mockConvertToSchemaConfig = vi.fn();
 
 vi.mock('../../vis_schemas', () => {
-      const mocked = {
-      convertToSchemaConfig: vi.fn(() => mockConvertToSchemaConfig()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToSchemaConfig: vi.fn(() => mockConvertToSchemaConfig()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getMetricFromParentPipelineAgg', () => {
   const metricAggId = 'agg-id-0';

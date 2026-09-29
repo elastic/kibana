@@ -28,19 +28,19 @@ const mockUseOverviewStatus = vi.fn((_opts?: { scopeStatusByLocation: boolean })
 }));
 
 vi.mock('../hooks/use_overview_status', () => {
-      const mocked = {
-      useOverviewStatus: (opts: { scopeStatusByLocation: boolean }) => mockUseOverviewStatus(opts),
-      useOverviewStatusState: vi.fn(() => ({
-        status: undefined,
-        error: undefined,
-        loading: false,
-        loaded: false,
-        settled: false,
-        allConfigs: [],
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOverviewStatus: (opts: { scopeStatusByLocation: boolean }) => mockUseOverviewStatus(opts),
+    useOverviewStatusState: vi.fn(() => ({
+      status: undefined,
+      error: undefined,
+      loading: false,
+      loaded: false,
+      settled: false,
+      allConfigs: [],
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseMonitorList = vi.fn(() => ({
   loading: false,
@@ -51,130 +51,130 @@ const mockUseMonitorList = vi.fn(() => ({
 }));
 
 vi.mock('../hooks/use_monitor_list', () => {
-      const mocked = {
-      useMonitorList: () => mockUseMonitorList(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMonitorList: () => mockUseMonitorList(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/app_header', () => {
-      const mocked = {
-      MonitorsListingPage: ({ children }: { children: React.ReactNode }) => children,
-      SyntheticsHeaderToolbar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitorsListingPage: ({ children }: { children: React.ReactNode }) => children,
+    SyntheticsHeaderToolbar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useEnablement: vi.fn(() => ({
-        isEnabled: true,
-        loading: false,
-        error: undefined,
-      })),
-      useLocations: vi.fn(() => ({
-        loading: false,
-        locationsLoaded: true,
-        locations: [],
-      })),
-      // `useSyncOverviewDateRange` (mounted by `OverviewPage`) reads the URL params
-      // via this hook, so it must be stubbed here or the render throws.
-      useUrlParams: vi.fn(() => [vi.fn(() => ({})), vi.fn()]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnablement: vi.fn(() => ({
+      isEnabled: true,
+      loading: false,
+      error: undefined,
+    })),
+    useLocations: vi.fn(() => ({
+      loading: false,
+      locationsLoaded: true,
+      locations: [],
+    })),
+    // `useSyncOverviewDateRange` (mounted by `OverviewPage`) reads the URL params
+    // via this hook, so it must be stubbed here or the render throws.
+    useUrlParams: vi.fn(() => [vi.fn(() => ({})), vi.fn()]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_synthetics_page_ready', () => {
-      const mocked = {
-      useSyntheticsPageReady: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsPageReady: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useTrackPageview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTrackPageview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_breadcrumbs', () => {
-      const mocked = {
-      useOverviewBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOverviewBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../management/disabled_callout', () => {
-      const mocked = {
-      DisabledCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DisabledCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/alerting_callout/alerting_callout', () => {
-      const mocked = {
-      AlertingCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertingCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/monitor_filters/filter_group', () => {
-      const mocked = {
-      FilterGroup: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterGroup: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/monitor_filters/selected_filter_pills', () => {
-      const mocked = {
-      SelectedFilterPills: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SelectedFilterPills: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/search_field', () => {
-      const mocked = {
-      SearchField: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SearchField: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./overview/quick_filters', () => {
-      const mocked = {
-      QuickFilters: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QuickFilters: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./overview/overview_grid', () => {
-      const mocked = {
-      OverviewGrid: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewGrid: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./overview/overview_status', () => {
-      const mocked = {
-      OverviewStatus: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewStatus: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./overview/overview_activity_chart', () => {
-      const mocked = {
-      OverviewActivityChart: () => null,
-      useOverviewActivityStats: () => [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewActivityChart: () => null,
+    useOverviewActivityStats: () => [],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/no_monitors_found', () => {
-      const mocked = {
-      NoMonitorsFound: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoMonitorsFound: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { OverviewPage } from './overview_page';
 import { setOverviewPageStateAction } from '../../../state';

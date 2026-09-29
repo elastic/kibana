@@ -13,16 +13,16 @@ import type { ValidateCustomYaraSignatureDiagnostic } from '../../../../../commo
 const mockSetModelMarkers = vi.fn();
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        editor: {
-          setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
-        },
-        MarkerSeverity: { Error: 8, Warning: 4 },
+  const mocked = {
+    monaco: {
+      editor: {
+        setModelMarkers: (...args: unknown[]) => mockSetModelMarkers(...args),
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      MarkerSeverity: { Error: 8, Warning: 4 },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   CUSTOM_YARA_SIGNATURE_EDITOR_MARKER_OWNER,

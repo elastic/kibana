@@ -25,7 +25,7 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('../../../common/components/link_to', async () => {
-  const originalModule = (await vi.importActual('../../../common/components/link_to'));
+  const originalModule = await vi.importActual('../../../common/components/link_to');
   return {
     ...originalModule,
     getTimelineTabsUrl: vi.fn(),
@@ -37,15 +37,15 @@ vi.mock('../../../common/components/link_to', async () => {
 });
 
 vi.mock('../../../common/hooks/use_selector', () => {
-      const mocked = {
-      useShallowEqualSelector: vi.fn().mockReturnValue({
-        timelineTitle: mockTimelineModel.title,
-        timelineSavedObjectId: mockTimelineModel.savedObjectId,
-        timelineId: mockTimelineModel.id,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShallowEqualSelector: vi.fn().mockReturnValue({
+      timelineTitle: mockTimelineModel.title,
+      timelineSavedObjectId: mockTimelineModel.savedObjectId,
+      timelineId: mockTimelineModel.id,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInsertTimeline', () => {
   const onChange = vi.fn();

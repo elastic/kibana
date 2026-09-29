@@ -12,11 +12,11 @@ import { useCommandMenu } from './use_command_menu';
 import { getTextBeforeCursor } from './utils/get_text_before_cursor';
 
 vi.mock('../../../../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useExperimentalFeatures: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExperimentalFeatures: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./utils/get_text_before_cursor');
 const mockGetTextBeforeCursor = vi.mocked(getTextBeforeCursor);

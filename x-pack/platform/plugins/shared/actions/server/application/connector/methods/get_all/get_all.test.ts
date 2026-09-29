@@ -36,20 +36,18 @@ import { authTypeRegistryMock } from '../../../../auth_types/auth_type_registry.
 import { connectorTypeHasInboundEvents, connectorTypeIsDual } from '@kbn/connector-specs';
 
 vi.mock('@kbn/connector-specs', async () => {
-  const actual = (await vi.importActual('@kbn/connector-specs'));
+  const actual = await vi.importActual('@kbn/connector-specs');
   return {
     ...actual,
     connectorTypeHasInboundEvents: vi.fn((actionTypeId: string) =>
       actual.connectorTypeHasInboundEvents(actionTypeId)
     ),
-    connectorTypeIsDual: vi.fn((actionTypeId: string) =>
-      actual.connectorTypeIsDual(actionTypeId)
-    ),
+    connectorTypeIsDual: vi.fn((actionTypeId: string) => actual.connectorTypeIsDual(actionTypeId)),
   };
 });
 
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -59,24 +57,24 @@ vi.mock('@kbn/core-saved-objects-utils-server', async () => {
 });
 
 vi.mock('../../../../lib/get_oauth_jwt_access_token', () => {
-      const mocked = {
-      getOAuthJwtAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthJwtAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../lib/get_oauth_client_credentials_access_token', () => {
-      const mocked = {
-      getOAuthClientCredentialsAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthClientCredentialsAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'uuidv4',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'uuidv4',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const kibanaIndices = ['.kibana'];
 const unsecuredSavedObjectsClient = savedObjectsClientMock.create();

@@ -283,9 +283,9 @@ describe('bulkChangeAgentsPrivilegeLevel kuery path — cheap count and sync/asy
   let mockChangePrivilegeActionRunner: MockInstance;
 
   beforeEach(async () => {
-    mockGetAgentsByKuery = vi.spyOn((await vi.importMock('./crud')), 'getAgentsByKuery');
+    mockGetAgentsByKuery = vi.spyOn(await vi.importMock('./crud'), 'getAgentsByKuery');
     mockOpenPointInTime = vi
-      .spyOn((await vi.importMock('./crud')), 'openPointInTime')
+      .spyOn(await vi.importMock('./crud'), 'openPointInTime')
       .mockResolvedValue('pit-id');
     mockBulkChangePrivilegeAgentsBatch = vi
       .spyOn(changePrivilegeRunner, 'bulkChangePrivilegeAgentsBatch')

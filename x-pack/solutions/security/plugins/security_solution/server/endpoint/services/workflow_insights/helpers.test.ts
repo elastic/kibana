@@ -54,14 +54,14 @@ import { createMockEndpointAppContext } from '../../mocks';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 
 vi.mock('@kbn/data-stream-adapter', () => {
-      const mocked = {
-      DataStreamSpacesAdapter: vi.fn().mockImplementation(() => ({
-        setComponentTemplate: vi.fn(),
-        setIndexTemplate: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataStreamSpacesAdapter: vi.fn().mockImplementation(() => ({
+      setComponentTemplate: vi.fn(),
+      setIndexTemplate: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getDefaultInsight(overrides?: Partial<SecurityWorkflowInsight>): SecurityWorkflowInsight {
   const defaultInsight = {

@@ -19,11 +19,11 @@ import type { FoundSavedObject } from '../../common/saved_object/types';
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/hooks');
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => ({ pathname: '/cases/case-1', search: '?tab=activity' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => ({ pathname: '/cases/case-1', search: '?tab=activity' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useIsMainApplicationMock = useIsMainApplication as Mock;

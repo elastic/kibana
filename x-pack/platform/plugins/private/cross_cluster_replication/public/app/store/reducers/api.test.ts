@@ -12,18 +12,18 @@ import { API_STATUS } from '../../constants';
 import { apiRequestStart, apiRequestEnd, setApiError } from '../actions';
 
 vi.mock('../../constants', () => {
-      const mocked = {
-      API_STATUS: {
-        IDLE: 'idle',
-        LOADING: 'loading',
-      },
-      SECTIONS: {
-        AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
-        FOLLOWER_INDEX: 'followerIndex',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    API_STATUS: {
+      IDLE: 'idle',
+      LOADING: 'loading',
+    },
+    SECTIONS: {
+      AUTO_FOLLOW_PATTERN: 'autoFollowPattern',
+      FOLLOWER_INDEX: 'followerIndex',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CCR Api reducers', () => {
   const scope = 'testSection';

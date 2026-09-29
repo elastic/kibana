@@ -36,17 +36,14 @@ const hitWithoutAlertId = {
 
 vi.mock('../../../../../common/components/user_privileges');
 vi.mock('../../../../../management/hooks/response_actions/use_get_automated_action_list');
-vi.mock(
-  '../../../../../common/components/response_actions/response_actions_empty_prompt',
-  () => {
-      const mocked = {
-        ResponseActionsEmptyPrompt: vi.fn(() => (
-          <div data-test-subj="responseActionsEmptyPromptMock" />
-        )),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../common/components/response_actions/response_actions_empty_prompt', () => {
+  const mocked = {
+    ResponseActionsEmptyPrompt: vi.fn(() => (
+      <div data-test-subj="responseActionsEmptyPromptMock" />
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetAutomatedActionListMock = useGetAutomatedActionList as Mock;
 const useUserPrivilegesMock = useUserPrivileges as Mock;

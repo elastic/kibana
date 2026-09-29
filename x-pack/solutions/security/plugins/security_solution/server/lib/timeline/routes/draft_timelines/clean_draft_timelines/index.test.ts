@@ -58,31 +58,31 @@ describe('clean draft timelines', () => {
     mockResetTimeline = vi.fn();
 
     vi.doMock('../../../saved_object/timelines', () => {
-          const mocked = {
-              getTimeline: mockGetTimeline,
-              getDraftTimeline: mockGetDraftTimeline,
-              resetTimeline: mockResetTimeline,
-              persistTimeline: mockPersistTimeline.mockReturnValue({
-                code: 200,
-                timeline: createTimelineWithTimelineId,
-              }),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        getTimeline: mockGetTimeline,
+        getDraftTimeline: mockGetDraftTimeline,
+        resetTimeline: mockResetTimeline,
+        persistTimeline: mockPersistTimeline.mockReturnValue({
+          code: 200,
+          timeline: createTimelineWithTimelineId,
+        }),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     vi.doMock('../../../saved_object/pinned_events', () => {
-          const mocked = {
-              persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        persistPinnedEventOnTimeline: mockPersistPinnedEventOnTimeline,
+      };
+      return { ...mocked, default: mocked };
+    });
 
     vi.doMock('../../../saved_object/notes', () => {
-          const mocked = {
-              persistNote: mockPersistNote,
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        persistNote: mockPersistNote,
+      };
+      return { ...mocked, default: mocked };
+    });
 
     const cleanDraftTimelinesRoute = (await vi.importActual('.')).cleanDraftTimelinesRoute;
     cleanDraftTimelinesRoute(server.router, createMockConfig(), securitySetup);

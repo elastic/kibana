@@ -16,11 +16,11 @@ import { resolveNearestMergeBase } from './resolve_nearest_merge_base';
 
 vi.mock('execa');
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/repo',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/repo',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExeca = execa as unknown as Mock;
 

@@ -8,35 +8,35 @@
 import { vi } from 'vitest';
 
 vi.mock('./spaces_grid', () => {
-      const mocked = {
-      SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpacesGridPage: (props: any) => `Spaces Page: ${JSON.stringify(props)}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./create_space', () => {
-      const mocked = {
-      CreateSpacePage: (props: any) => {
-        if (props.spacesManager && props.onLoadSpace) {
-          props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
-        }
-        return `Spaces Create Page: ${JSON.stringify(props)}`;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateSpacePage: (props: any) => {
+      if (props.spacesManager && props.onLoadSpace) {
+        props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
+      }
+      return `Spaces Create Page: ${JSON.stringify(props)}`;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_space', () => {
-      const mocked = {
-      EditSpacePage: (props: any) => {
-        if (props.spacesManager && props.onLoadSpace) {
-          props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
-        }
-        return `Spaces Edit Page: ${JSON.stringify(props)}`;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditSpacePage: (props: any) => {
+      if (props.spacesManager && props.onLoadSpace) {
+        props.spacesManager.getSpace().then((space: any) => props.onLoadSpace(space));
+      }
+      return `Spaces Edit Page: ${JSON.stringify(props)}`;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   coreMock,

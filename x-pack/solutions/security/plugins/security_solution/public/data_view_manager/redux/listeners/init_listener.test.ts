@@ -25,11 +25,11 @@ import { createDefaultDataView } from '../../utils/create_default_data_view';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 
 vi.mock('../../utils/create_default_data_view', () => {
-      const mocked = {
-      createDefaultDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createDefaultDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDataViewsService = {
   get: vi.fn(),
@@ -170,9 +170,9 @@ describe('createInitListener', () => {
 
   describe('when getIdsWithTitle fetch returns an error', () => {
     beforeEach(() => {
-      vi
-        .mocked(mockDataViewsService.getIdsWithTitle)
-        .mockRejectedValue(new Error('some loading error'));
+      vi.mocked(mockDataViewsService.getIdsWithTitle).mockRejectedValue(
+        new Error('some loading error')
+      );
     });
 
     it('should dispatch error correctly', async () => {

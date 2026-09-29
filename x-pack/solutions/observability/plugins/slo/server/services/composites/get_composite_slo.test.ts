@@ -128,9 +128,9 @@ describe('GetCompositeSLO', () => {
           burnRateWindows: DEFAULT_BURN_RATE_WINDOWS,
         },
       ]);
-      vi
-        .spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex')
-        .mockResolvedValue(new Map());
+      vi.spyOn(compositeSloSummaryIndex, 'fetchCompositeSloSummariesFromIndex').mockResolvedValue(
+        new Map()
+      );
 
       const result = await getCompositeSLO.execute(composite.id, DEFAULT_SPACE_ID);
 

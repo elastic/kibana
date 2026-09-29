@@ -31,20 +31,22 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', () => {
-      const mocked = {
-      loadAllActions: vi.fn(),
-      loadActionTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { loadActionTypes } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'));
+  const mocked = {
+    loadAllActions: vi.fn(),
+    loadActionTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { loadActionTypes } = await vi.importMock(
+  '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+);
 
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
-      const mocked = {
-      useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn().mockImplementation((_, defaultValue) => defaultValue),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const initLegacyShims = () => {
   const triggersActionsUi = {
@@ -103,7 +105,9 @@ describe('alert_form', () => {
     describe('action_form in alert', () => {
       async function setup() {
         initLegacyShims();
-        const { loadAllActions } = (await vi.importMock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'));
+        const { loadAllActions } = await vi.importMock(
+          '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+        );
         loadAllActions.mockResolvedValueOnce([
           {
             secrets: {},

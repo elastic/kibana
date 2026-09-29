@@ -15,12 +15,12 @@ import { EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { BaseCommentActions } from './base_comment_actions';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCopy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCopy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CommentActions', () => {
   beforeEach(() => {

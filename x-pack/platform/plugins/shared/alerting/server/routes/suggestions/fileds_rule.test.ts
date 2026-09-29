@@ -14,11 +14,11 @@ import { mockHandlerArguments } from '../_mock_handler_arguments';
 import { registerFieldsRoute } from './fields_rules';
 
 vi.mock('../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('registerFieldsRoute', () => {
   const mockGetFieldsForWildcard = vi.fn();

@@ -15,11 +15,11 @@ import { FieldLibraryMenuPanel } from './field_library_menu_panel';
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // EUI selectable options set `pointer-events: none` on wrappers in jsdom; disable the check.
 const user = userEvent.setup({ pointerEventsCheck: 0 });

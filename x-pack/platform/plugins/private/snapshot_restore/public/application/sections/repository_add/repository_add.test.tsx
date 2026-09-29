@@ -30,47 +30,47 @@ const mockToastNotifications = {
 };
 
 vi.mock('../../components/repository_form', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../components/repository_form')),
-      RepositoryForm: ({
-        onSave,
-        saveError,
-        onToggleDefault,
-        isDefaultRepository,
-        isDefaultRepositoryFeatureAvailable = true,
-      }: {
-        onSave: (repository: unknown) => void;
-        saveError?: React.ReactNode;
-        onToggleDefault?: (isDefault: boolean) => void;
-        isDefaultRepository?: boolean;
-        isDefaultRepositoryFeatureAvailable?: boolean;
-      }) => (
-        <div>
-          <div data-test-subj="repositoryFormIsDefault">{String(Boolean(isDefaultRepository))}</div>
-          {onToggleDefault && (
-            <button
-              data-test-subj="repositoryFormToggleDefault"
-              onClick={() => onToggleDefault(!isDefaultRepository)}
-              disabled={!isDefaultRepositoryFeatureAvailable}
-            >
-              toggle default
-            </button>
-          )}
+  const mocked = {
+    ...(await vi.importActual('../../components/repository_form')),
+    RepositoryForm: ({
+      onSave,
+      saveError,
+      onToggleDefault,
+      isDefaultRepository,
+      isDefaultRepositoryFeatureAvailable = true,
+    }: {
+      onSave: (repository: unknown) => void;
+      saveError?: React.ReactNode;
+      onToggleDefault?: (isDefault: boolean) => void;
+      isDefaultRepository?: boolean;
+      isDefaultRepositoryFeatureAvailable?: boolean;
+    }) => (
+      <div>
+        <div data-test-subj="repositoryFormIsDefault">{String(Boolean(isDefaultRepository))}</div>
+        {onToggleDefault && (
           <button
-            data-test-subj="repositoryFormSave"
-            onClick={() => onSave({ name: 'my-repo', type: 'fs', settings: { location: '/tmp' } })}
+            data-test-subj="repositoryFormToggleDefault"
+            onClick={() => onToggleDefault(!isDefaultRepository)}
+            disabled={!isDefaultRepositoryFeatureAvailable}
           >
-            save
+            toggle default
           </button>
-          <div data-test-subj="repositoryFormSaveError">{saveError}</div>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+        )}
+        <button
+          data-test-subj="repositoryFormSave"
+          onClick={() => onSave({ name: 'my-repo', type: 'fs', settings: { location: '/tmp' } })}
+        >
+          save
+        </button>
+        <div data-test-subj="repositoryFormSaveError">{saveError}</div>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/http', async () => {
-  const actual = (await vi.importActual<typeof import('../../services/http')>('../../services/http'));
+  const actual = await vi.importActual<typeof import('../../services/http')>('../../services/http');
 
   return {
     ...actual,
@@ -90,21 +90,21 @@ vi.mock('../../services/http', async () => {
 });
 
 vi.mock('../../services/use_default_repository', () => {
-      const mocked = {
-      useDefaultRepository: (...args: unknown[]) => mockUseDefaultRepository(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultRepository: (...args: unknown[]) => mockUseDefaultRepository(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/authorization', () => {
-      const mocked = {
-      useCanSetDefaultRepository: (...args: unknown[]) => mockUseCanSetDefaultRepository(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanSetDefaultRepository: (...args: unknown[]) => mockUseCanSetDefaultRepository(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual<typeof import('../../app_context')>('../../app_context'));
+  const actual = await vi.importActual<typeof import('../../app_context')>('../../app_context');
 
   return {
     ...actual,

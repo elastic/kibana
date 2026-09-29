@@ -31,42 +31,44 @@ function makeVarDef(
 }
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(),
-      useParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(),
+    useParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      sendCreateAgentlessPolicy: vi.fn(),
-      sendGetPackageInfoByKey: vi.fn(),
-      sendCreateCloudOnboardingDeployment: vi.fn(),
-      sendUpdateCloudOnboardingDeployment: vi.fn(),
-      sendGetAgentlessPolicy: vi.fn(),
-      sendUpdateCloudConnector: vi.fn(),
-      sendVerifyCloudConnectorIacKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendCreateAgentlessPolicy: vi.fn(),
+    sendGetPackageInfoByKey: vi.fn(),
+    sendCreateCloudOnboardingDeployment: vi.fn(),
+    sendUpdateCloudOnboardingDeployment: vi.fn(),
+    sendGetAgentlessPolicy: vi.fn(),
+    sendUpdateCloudConnector: vi.fn(),
+    sendVerifyCloudConnectorIacKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./policy_cleanup_managed_integrations', () => {
-      const mocked = {
-      cleanupManagedIntegrationsPolicies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cleanupManagedIntegrationsPolicies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../use_aws_service_matrix', async () => {
-  const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = (await vi.importActual('../../aws_service_matrix')) as any;
+  const { AWS_SERVICES_STATIC, buildAwsServiceMatrix } = (await vi.importActual(
+    '../../aws_service_matrix'
+  )) as any;
   const policyTemplates = (AWS_SERVICES_STATIC as any[])
     .filter((e: any) => e.packageName === 'aws')
     .map((e: any) => ({
@@ -157,11 +159,11 @@ vi.mock('../../use_aws_service_matrix', async () => {
 });
 
 vi.mock('../../onboarding_flow_context', () => {
-      const mocked = {
-      useOnboardingFlow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOnboardingFlow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useSessionStorage', () => vi.fn());
 
@@ -1507,8 +1509,7 @@ describe('useDeploy', () => {
     const setPendingIacMock = () =>
       mockUseOnboardingFlow.mock.results[0].value.setPendingIacTemplate as Mock;
     const addWarningMock = () =>
-      mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts
-        ?.addWarning as Mock;
+      mockUseKibana.mock.results[0]?.value?.services?.notifications?.toasts?.addWarning as Mock;
 
     it('writes the key and blueprint to the connector after a fully successful run, then clears the pending template details', async () => {
       setupMocks({ selectedServiceIds: ['ec2'], connectorId: 'connector-abc', pendingIacTemplate });

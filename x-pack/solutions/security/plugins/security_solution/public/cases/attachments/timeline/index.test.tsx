@@ -16,28 +16,28 @@ import { getTimelineAttachment } from '.';
 import { REMOVED_TIMELINE_LABEL, TIMELINE_DISPLAY_NAME } from './translations';
 
 vi.mock('./timeline_link', () => {
-      const mocked = {
-      TimelineLink: ({
-        savedObjectId,
-        timelineId,
-        title,
-      }: {
-        savedObjectId: string;
-        timelineId: string;
-        title: string;
-      }) => (
-        <div data-test-subj={`timeline-link-mock-${savedObjectId}`}>{`${title}|${timelineId}`}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TimelineLink: ({
+      savedObjectId,
+      timelineId,
+      title,
+    }: {
+      savedObjectId: string;
+      timelineId: string;
+      title: string;
+    }) => (
+      <div data-test-subj={`timeline-link-mock-${savedObjectId}`}>{`${title}|${timelineId}`}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./case_view_timelines', () => {
-      const mocked = {
-      CaseViewTimelines: () => <div data-test-subj="case-view-timelines-mock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseViewTimelines: () => <div data-test-subj="case-view-timelines-mock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseProps = {
   savedObjectId: 'saved-object-id-1',

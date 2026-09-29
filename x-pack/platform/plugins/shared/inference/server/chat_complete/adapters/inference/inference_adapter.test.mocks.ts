@@ -10,7 +10,7 @@ import { vi } from 'vitest';
 export const isNativeFunctionCallingSupportedMock = vi.fn();
 
 vi.doMock('../../utils/function_calling_support', async () => {
-  const actual = (await vi.importActual('../../utils/function_calling_support'));
+  const actual = await vi.importActual('../../utils/function_calling_support');
   return {
     ...actual,
     isNativeFunctionCallingSupported: isNativeFunctionCallingSupportedMock,

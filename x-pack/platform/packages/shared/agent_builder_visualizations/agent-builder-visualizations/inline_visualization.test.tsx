@@ -14,23 +14,23 @@ import { InlineVisualization } from './inline_visualization';
 import type { VisualizationServices } from './services';
 
 vi.mock('./visualize_lens', () => {
-      const mocked = {
-      VisualizeLens: () => <span data-test-subj="lens-renderer" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizeLens: () => <span data-test-subj="lens-renderer" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./visualize_vega', () => {
-      const mocked = {
-      VisualizeVega: () => <span data-test-subj="vega-renderer" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizeVega: () => <span data-test-subj="vega-renderer" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./visualize_custom_content', () => {
-      const mocked = {
-      VisualizeCustomContent: () => <span data-test-subj="custom-content-renderer" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizeCustomContent: () => <span data-test-subj="custom-content-renderer" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = {} as VisualizationServices;
 

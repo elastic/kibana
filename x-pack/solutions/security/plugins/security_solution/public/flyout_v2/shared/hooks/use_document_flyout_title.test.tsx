@@ -17,17 +17,17 @@ import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry';
 
 vi.mock('../../use_flyout_api');
 vi.mock('../../document/main/components/severity', () => {
-      const mocked = {
-      DocumentSeverity: () => <div data-test-subj="documentSeverityMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentSeverity: () => <div data-test-subj="documentSeverityMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../components/timestamp', () => {
-      const mocked = {
-      Timestamp: () => <div data-test-subj="timestampMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Timestamp: () => <div data-test-subj="timestampMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createHit = (flattened: DataTableRecord['flattened']): DataTableRecord =>
   ({

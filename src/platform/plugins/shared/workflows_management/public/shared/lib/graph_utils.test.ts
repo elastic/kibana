@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { graphlib } from '@dagrejs/dagre';
 import { vi } from 'vitest';
 
-import type { graphlib } from '@dagrejs/dagre';
 import { getAllPredecessors, getTriggerLabel } from './graph_utils';
 
 type MockGraph = Pick<graphlib.Graph, 'predecessors'>;

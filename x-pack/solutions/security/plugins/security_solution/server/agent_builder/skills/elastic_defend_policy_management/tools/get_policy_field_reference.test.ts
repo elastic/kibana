@@ -24,7 +24,7 @@ import {
 import type { ExactFieldReferenceResult } from './get_policy_field_reference';
 
 vi.mock('./create_policy_tool', async () => {
-  const actual = (await vi.importActual('./create_policy_tool'));
+  const actual = await vi.importActual('./create_policy_tool');
   return {
     ...actual,
     createPolicyTool: vi.fn((options) => actual.createPolicyTool(options)),

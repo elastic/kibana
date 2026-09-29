@@ -16,13 +16,13 @@ import type { LeftPanelPaths } from '../constants/left_panel_paths';
 import { INSIGHTS_TAB_ID, NOTES_TAB_ID } from '../constants/left_panel_paths';
 
 vi.mock('../../shared/components/flyout_body', () => {
-      const mocked = {
-      FlyoutBody: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="flyout-body">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutBody: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="flyout-body">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTabs: LeftPanelTabType[] = [
   {

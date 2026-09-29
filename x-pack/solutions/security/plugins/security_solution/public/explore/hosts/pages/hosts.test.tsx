@@ -22,37 +22,37 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn().mockReturnValue({ tabName: 'allHosts' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn().mockReturnValue({ tabName: 'allHosts' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/empty_prompt');
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 vi.mock('../../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/visualization_actions/actions');
 vi.mock('../../../common/components/visualization_actions/lens_embeddable', () => {
-      const mocked = {
-      LensEmbeddable: vi.fn(() => <div data-test-subj="mock-lens-embeddable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensEmbeddable: vi.fn(() => <div data-test-subj="mock-lens-embeddable" />),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockNavigateToApp = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
 
   return {
     ...original,
@@ -72,12 +72,12 @@ vi.mock('../../../common/lib/kibana', async () => {
 });
 
 vi.mock('./hosts_tabs', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hosts_tabs')),
-      HostsTabs: vi.fn(() => <div data-test-subj="hosts-tabs-mock" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hosts_tabs')),
+    HostsTabs: vi.fn(() => <div data-test-subj="hosts-tabs-mock" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const HostsTabsMocked = HostsTabs as MockedFunction<typeof HostsTabs>;
 

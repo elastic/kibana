@@ -10,7 +10,7 @@ steps:
       - build
     timeout_in_minutes: 60
     env:
-      CHECK_GATE: 'true'
+      CHECK_GATE: 'false' # [vitest experiment] keep test steps running when checks fail
     retry:
       automatic:
         - exit_status: '-1'

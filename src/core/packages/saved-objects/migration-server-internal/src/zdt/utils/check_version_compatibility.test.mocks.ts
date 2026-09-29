@@ -14,7 +14,7 @@ export const compareVirtualVersionsMock = vi.fn();
 export const getVirtualVersionMapMock = vi.fn();
 
 vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-base-server-internal'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-base-server-internal');
   return {
     ...actual,
     getVirtualVersionsFromMappings: getVirtualVersionsFromMappingsMock,
@@ -26,7 +26,7 @@ vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
 export const getUpdatedRootFieldsMock = vi.fn();
 
 vi.doMock('../../core/compare_mappings', async () => {
-  const actual = (await vi.importActual('../../core/compare_mappings'));
+  const actual = await vi.importActual('../../core/compare_mappings');
   return {
     ...actual,
     getUpdatedRootFields: getUpdatedRootFieldsMock,

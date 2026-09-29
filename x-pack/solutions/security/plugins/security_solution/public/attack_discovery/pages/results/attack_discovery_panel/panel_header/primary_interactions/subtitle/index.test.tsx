@@ -14,33 +14,33 @@ import { TestProviders } from '../../../../../../../common/mock/test_providers';
 import { getMockAttackDiscoveryAlerts } from '../../../../../mock/mock_attack_discovery_alerts';
 
 vi.mock('../../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
-      useKibana: vi.fn(() => ({ services: { upselling: {} } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDateFormat: vi.fn(() => 'MMM D, YYYY @ HH:mm:ss.SSS'),
+    useKibana: vi.fn(() => ({ services: { upselling: {} } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/is_attack_discovery_alert', () => {
-      const mocked = {
-      isAttackDiscoveryAlert: vi.fn((obj) => 'generationUuid' in obj),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAttackDiscoveryAlert: vi.fn((obj) => 'generationUuid' in obj),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../loading_callout/loading_messages/get_formatted_time', () => {
-      const mocked = {
-      getFormattedDate: vi.fn(({ date }) => `formatted-${date}`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormattedDate: vi.fn(({ date }) => `formatted-${date}`),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./translations', () => {
-      const mocked = {
-      CREATED_BY_USER: (user: string) => `Created by: ${user}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CREATED_BY_USER: (user: string) => `Created by: ${user}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAlert = getMockAttackDiscoveryAlerts()[0];
 const defaultProps = { attackDiscovery: mockAlert };

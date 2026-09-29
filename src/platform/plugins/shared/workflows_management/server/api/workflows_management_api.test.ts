@@ -44,21 +44,20 @@ import { WorkflowAccessControlService } from '../services/workflow_access_contro
 import { WorkflowAccessDeniedError } from '../services/workflow_access_denied_error';
 
 vi.mock('./external_resume/external_resume_service', async () => {
-      const mocked = {
-      ...(await vi.importActual('./external_resume/external_resume_service')),
-      resumeWorkflowExecutionExternallyViaGet: vi.fn(),
-      resumeWorkflowExecutionExternallyWithInput: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./external_resume/external_resume_service')),
+    resumeWorkflowExecutionExternallyViaGet: vi.fn(),
+    resumeWorkflowExecutionExternallyWithInput: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResumeExternallyViaGet = resumeWorkflowExecutionExternallyViaGet as MockedFunction<
   typeof resumeWorkflowExecutionExternallyViaGet
 >;
-const mockResumeExternallyWithInput =
-  resumeWorkflowExecutionExternallyWithInput as MockedFunction<
-    typeof resumeWorkflowExecutionExternallyWithInput
-  >;
+const mockResumeExternallyWithInput = resumeWorkflowExecutionExternallyWithInput as MockedFunction<
+  typeof resumeWorkflowExecutionExternallyWithInput
+>;
 
 vi.mock('./routes/executions/utils/preprocess_alert_inputs');
 
@@ -119,9 +118,7 @@ describe('WorkflowsManagementApi', () => {
       disableAllWorkflows: vi.fn(),
       getHistoryForWorkflow: vi.fn(),
       validateWorkflow: vi.fn(),
-      getWorkflowExecution: vi
-        .fn()
-        .mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
+      getWorkflowExecution: vi.fn().mockResolvedValue({ id: 'run-1', workflowId: 'workflow-123' }),
       getWorkflowExecutions: vi.fn(),
       getExecutionStepExecutions: vi.fn(),
       searchStepExecutions: vi.fn(),
@@ -2261,8 +2258,8 @@ steps:
 
       const engine = await mockWorkflowsService.getWorkflowsExecutionEngine();
       expect(engine.scheduleWorkflow).toHaveBeenCalledTimes(1);
-      const [passedWorkflow, passedContext, passedRequest] = (engine.scheduleWorkflow as Mock)
-        .mock.calls[0];
+      const [passedWorkflow, passedContext, passedRequest] = (engine.scheduleWorkflow as Mock).mock
+        .calls[0];
       expect(passedWorkflow).toEqual(workflow);
       expect(passedContext.triggeredBy).toBe('cases.updated');
       expect(passedContext.spaceId).toBe(spaceId);
@@ -2464,9 +2461,7 @@ steps:
     });
 
     it('resolves the waiting step and leaves channel unset when none is supplied', async () => {
-      (mockWorkflowsService.getWaitingStepExecutionId as Mock).mockResolvedValue(
-        'step-exec-9'
-      );
+      (mockWorkflowsService.getWaitingStepExecutionId as Mock).mockResolvedValue('step-exec-9');
 
       await api.resumeWorkflowExecution('run-1', 'default', { approved: true }, mockRequest);
 

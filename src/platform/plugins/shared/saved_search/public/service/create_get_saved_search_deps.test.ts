@@ -22,16 +22,14 @@ describe('createGetSavedSearchDeps', () => {
       contentManagement: contentManagementMock.createStartContract().client,
     });
 
-    vi
-      .spyOn(getSavedSearchDeps, 'getSavedSrch')
-      .mockRejectedValue(
-        new HttpFetchError(
-          'Not found',
-          'NotFound',
-          new Request(''),
-          new Response(undefined, { status: 404 })
-        )
-      );
+    vi.spyOn(getSavedSearchDeps, 'getSavedSrch').mockRejectedValue(
+      new HttpFetchError(
+        'Not found',
+        'NotFound',
+        new Request(''),
+        new Response(undefined, { status: 404 })
+      )
+    );
 
     let errorMessage = 'No error thrown.';
 

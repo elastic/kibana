@@ -13,7 +13,7 @@ import { AttackHostInsightsRow, AttackUserInsightsRow } from './attack_entity_in
 import { EuiProvider } from '@elastic/eui';
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useUiSetting: () => false,
@@ -21,37 +21,37 @@ vi.mock('../../../../common/lib/kibana', async () => {
 });
 
 vi.mock('../../../entity_details/shared/hooks/use_entity_from_store', () => {
-      const mocked = {
-      useEntityFromStore: () => ({
-        entityRecord: null,
-        isLoading: false,
-        refetch: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityFromStore: () => ({
+      entityRecord: null,
+      isLoading: false,
+      refetch: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../document_details/left/components/host_details', () => {
-      const mocked = {
-      HostDetails: (props: { hostName: string }) => (
-        <div data-test-subj="host-details-mock" data-host-name={props.hostName}>
-          {props.hostName}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostDetails: (props: { hostName: string }) => (
+      <div data-test-subj="host-details-mock" data-host-name={props.hostName}>
+        {props.hostName}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../document_details/left/components/user_details', () => {
-      const mocked = {
-      UserDetails: (props: { userName: string }) => (
-        <div data-test-subj="user-details-mock" data-user-name={props.userName}>
-          {props.userName}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserDetails: (props: { userName: string }) => (
+      <div data-test-subj="user-details-mock" data-user-name={props.userName}>
+        {props.userName}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttackHostInsightsRow', () => {
   it('uses host.name from sample _source when EUID map only exposed entity id', () => {

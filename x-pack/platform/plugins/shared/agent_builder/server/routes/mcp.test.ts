@@ -145,25 +145,25 @@ describe('filterToolsByNamespace', () => {
 
 const mockRegisterTool = vi.fn();
 vi.mock('@modelcontextprotocol/sdk/server/mcp.js', () => {
-      const mocked = {
-      McpServer: vi.fn().mockImplementation(() => ({
-        registerTool: mockRegisterTool,
-        connect: vi.fn(),
-        close: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    McpServer: vi.fn().mockImplementation(() => ({
+      registerTool: mockRegisterTool,
+      connect: vi.fn(),
+      close: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../utils/mcp/kibana_mcp_http_transport', () => {
-      const mocked = {
-      KibanaMcpHttpTransport: vi.fn().mockImplementation(() => ({
-        handleRequest: vi.fn().mockResolvedValue({ status: 200 }),
-        close: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaMcpHttpTransport: vi.fn().mockImplementation(() => ({
+      handleRequest: vi.fn().mockResolvedValue({ status: 200 }),
+      close: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MCP route — registerTool arguments', () => {
   const mockAnnotations = {
@@ -274,7 +274,8 @@ describe('MCP route — registerTool arguments', () => {
 describe('MCP route — real SDK tool registration', () => {
   it('registers an unannotated tool without throwing', () => {
     vi.restoreAllMocks();
-    const { McpServer: RealMcpServer } = (require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js'));
+    const { McpServer: RealMcpServer } =
+      require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = vi.fn().mockResolvedValue({
@@ -292,7 +293,8 @@ describe('MCP route — real SDK tool registration', () => {
 
   it('registers an annotated tool without throwing', () => {
     vi.restoreAllMocks();
-    const { McpServer: RealMcpServer } = (require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js'));
+    const { McpServer: RealMcpServer } =
+      require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = vi.fn().mockResolvedValue({
@@ -320,7 +322,8 @@ describe('MCP route — real SDK tool registration', () => {
 
   it('rejects duplicate registration (proves first registration took effect)', () => {
     vi.restoreAllMocks();
-    const { McpServer: RealMcpServer } = (require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js'));
+    const { McpServer: RealMcpServer } =
+      require('@modelcontextprotocol/sdk/server/mcp.js') as typeof import('@modelcontextprotocol/sdk/server/mcp.js');
 
     const server = new RealMcpServer({ name: 'test', version: '0.0.1' });
     const handler = vi.fn();

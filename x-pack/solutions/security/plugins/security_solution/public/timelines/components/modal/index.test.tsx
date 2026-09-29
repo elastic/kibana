@@ -19,7 +19,7 @@ import { timelineFlyoutHistoryKey } from '../../../flyout_v2/shared/constants/fl
 
 const mockCapturedFlyoutSessionContext = vi.fn();
 vi.mock('../timeline', async () => {
-  const { useFlyoutSessionContext } = (await vi.importActual('../../../flyout_v2/session_context'));
+  const { useFlyoutSessionContext } = await vi.importActual('../../../flyout_v2/session_context');
   return {
     StatefulTimeline: () => {
       mockCapturedFlyoutSessionContext(useFlyoutSessionContext());
@@ -33,11 +33,11 @@ vi.mock('../../../common/hooks/use_unmanaged_flyout_z_index');
 
 const mockIsFullScreen = vi.fn(() => false);
 vi.mock('../../../common/store/selectors', () => {
-      const mocked = {
-      inputsSelectors: { timelineFullScreenSelector: () => mockIsFullScreen() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    inputsSelectors: { timelineFullScreenSelector: () => mockIsFullScreen() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRef = {
   current: null,

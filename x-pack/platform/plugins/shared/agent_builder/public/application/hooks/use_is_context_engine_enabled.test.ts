@@ -12,13 +12,13 @@ import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids'
 import { useIsContextEngineEnabled } from './use_is_context_engine_enabled';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useUiSetting } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
+const { useUiSetting } = await vi.importMock('@kbn/kibana-react-plugin/public');
 
 describe('useIsContextEngineEnabled', () => {
   beforeEach(() => vi.clearAllMocks());

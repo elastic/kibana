@@ -41,26 +41,26 @@ const { searchSourceClientMock } = createSearchSourceClientMock();
 
 const mockFetchEsQuery = vi.fn();
 vi.mock('./lib/fetch_es_query', () => {
-      const mocked = {
-      fetchEsQuery: (...args: [FetchEsQueryOpts]) => mockFetchEsQuery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsQuery: (...args: [FetchEsQueryOpts]) => mockFetchEsQuery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockFetchSearchSourceQuery = vi.fn();
 vi.mock('./lib/fetch_search_source_query', () => {
-      const mocked = {
-      fetchSearchSourceQuery: (...args: [FetchSearchSourceQueryOpts]) =>
-        mockFetchSearchSourceQuery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchSearchSourceQuery: (...args: [FetchSearchSourceQueryOpts]) =>
+      mockFetchSearchSourceQuery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockFetchEsqlQuery = vi.fn();
 vi.mock('./lib/fetch_esql_query', () => {
-      const mocked = {
-      fetchEsqlQuery: (...args: [FetchEsqlQueryOpts]) => mockFetchEsqlQuery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchEsqlQuery: (...args: [FetchEsqlQueryOpts]) => mockFetchEsqlQuery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRecoveredAlerts = vi.fn().mockReturnValue([]);
 const mockSetLimitReached = vi.fn();

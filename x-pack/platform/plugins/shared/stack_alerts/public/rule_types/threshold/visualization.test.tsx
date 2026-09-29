@@ -25,20 +25,20 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('./index_threshold_api', () => {
-      const mocked = {
-      getThresholdRuleVisualizationData: vi.fn(() =>
-        Promise.resolve({
-          results: [
-            { group: 'a', metrics: [['b', 2]] },
-            { group: 'a', metrics: [['b', 10]] },
-          ],
-        })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getThresholdRuleVisualizationData: vi.fn(() =>
+      Promise.resolve({
+        results: [
+          { group: 'a', metrics: [['b', 2]] },
+          { group: 'a', metrics: [['b', 10]] },
+        ],
+      })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getThresholdRuleVisualizationData } = (await vi.importMock('./index_threshold_api'));
+const { getThresholdRuleVisualizationData } = await vi.importMock('./index_threshold_api');
 
 const dataMock = dataPluginMock.createStartContract();
 const chartsStartMock = chartPluginMock.createStartContract();

@@ -15,11 +15,11 @@ import { useWorkflowSummaries } from './use_workflow_summaries';
 const mockMgetWorkflows = vi.fn();
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: () => ({ mgetWorkflows: mockMgetWorkflows }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: () => ({ mgetWorkflows: mockMgetWorkflows }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderSummaries = (initialIds: string[]) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

@@ -379,9 +379,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: true },
     } as any);
     // Default doesn't exist but agentless does
-    mockedFleetServerHostService.getDefaultFleetServerHost = vi
-      .fn()
-      .mockResolvedValue(null as any);
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi.fn().mockResolvedValue(null as any);
     mockedFleetServerHostService.get.mockResolvedValue({
       id: 'existing-agentless',
     } as any);
@@ -427,9 +425,7 @@ describe('createCloudFleetServerHostsIfNeeded', () => {
       agentless: { enabled: false },
     } as any);
     // Mock both getDefaultFleetServerHost and get calls to return null
-    mockedFleetServerHostService.getDefaultFleetServerHost = vi
-      .fn()
-      .mockResolvedValue(null as any);
+    mockedFleetServerHostService.getDefaultFleetServerHost = vi.fn().mockResolvedValue(null as any);
     mockedFleetServerHostService.get.mockResolvedValue(null as any);
     soClient.create.mockResolvedValue({
       id: 'test-id',
@@ -1007,9 +1003,7 @@ describe('createOrUpdatePreconfiguredFleetServerHosts', () => {
 
 describe('cleanPreconfiguredFleetServerHosts', () => {
   beforeEach(() => {
-    mockedAppContextService.getLogger.mockReturnValue(
-      new Proxy({} as any, { get: () => vi.fn() })
-    );
+    mockedAppContextService.getLogger.mockReturnValue(new Proxy({} as any, { get: () => vi.fn() }));
   });
 
   afterEach(() => {

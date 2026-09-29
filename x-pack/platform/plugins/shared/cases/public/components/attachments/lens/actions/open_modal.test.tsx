@@ -34,20 +34,20 @@ document.body.appendChild(element);
 const mockDescription = mockLensAttributes.description as string;
 
 vi.mock('../../../all_cases/selector_modal/use_cases_add_to_existing_case_modal', () => {
-      const mocked = {
-      useCasesAddToExistingCaseModal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesAddToExistingCaseModal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      KibanaThemeProvider: vi
-        .fn()
-        .mockImplementation(({ children }: PropsWithChildren<unknown>) => <>{children}</>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaThemeProvider: vi
+      .fn()
+      .mockImplementation(({ children }: PropsWithChildren<unknown>) => <>{children}</>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', () => {
   return {

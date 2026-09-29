@@ -23,13 +23,13 @@ import { usePrebuiltRulesUpgradeState } from './use_prebuilt_rules_upgrade_state
 import { TestProviders } from '../../../../../common/mock';
 
 vi.mock('../../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: vi.fn().mockReturnValue({
-        addWarning: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: vi.fn().mockReturnValue({
+      addWarning: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePrebuiltRulesUpgradeState', () => {
   it('returns rule upgrade state', () => {

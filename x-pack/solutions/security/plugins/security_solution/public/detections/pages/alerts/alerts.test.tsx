@@ -28,19 +28,19 @@ vi.mock('../../../common/components/user_privileges');
 vi.mock('../../containers/detection_engine/lists/use_lists_config');
 vi.mock('../../hooks/use_signal_helpers');
 vi.mock('../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn().mockReturnValue({ dataView: {}, status: 'ready' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn().mockReturnValue({ dataView: {}, status: 'ready' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_missing_privileges');
 vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('../../components/alerts/wrapper', () => {
-      const mocked = {
-      Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Wrapper: () => <div data-test-subj={'alerts-page-data-view-wrapper'} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 

@@ -33,7 +33,7 @@ import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 vi.mock('../common/hooks/use_license');
 
 vi.mock('../../common/endpoint/service/authz', async () => {
-  const originalModule = (await vi.importActual('../../common/endpoint/service/authz'));
+  const originalModule = await vi.importActual('../../common/endpoint/service/authz');
   return {
     ...originalModule,
     calculateEndpointAuthz: vi.fn(),

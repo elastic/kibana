@@ -13,7 +13,7 @@ export const getDefaultUserProfileImplementationMock = vi.fn();
 export const convertUserProfileAPIMock = vi.fn();
 
 vi.doMock('./utils', async () => {
-  const actual = (await vi.importActual('./utils'));
+  const actual = await vi.importActual('./utils');
   return {
     ...actual,
     getDefaultUserProfileImplementation: getDefaultUserProfileImplementationMock,

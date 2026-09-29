@@ -27,28 +27,28 @@ import { PFX } from '@kbn/connector-specs/src/auth_types/pfx';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
 
 vi.mock('./get_custom_agents', () => {
-      const mocked = {
-      getCustomAgents: vi.fn().mockReturnValue({
-        httpAgent: undefined,
-        httpsAgent: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCustomAgents: vi.fn().mockReturnValue({
+      httpAgent: undefined,
+      httpsAgent: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./request_oauth_client_credentials_token', () => {
-      const mocked = {
-      requestOAuthClientCredentialsToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    requestOAuthClientCredentialsToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_oauth_authorization_code_access_token', () => {
-      const mocked = {
-      getOAuthAuthorizationCodeAccessToken: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getOAuthAuthorizationCodeAccessToken: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let clock: sinon.SinonFakeTimers;
 

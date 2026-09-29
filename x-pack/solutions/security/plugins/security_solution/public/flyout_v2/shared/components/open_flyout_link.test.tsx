@@ -20,39 +20,39 @@ import { FLYOUT_DESCRIPTOR_KIND } from '../url_state/flyout_v2_url_param';
 
 vi.mock('../utils/build_flyout_content');
 vi.mock('../utils/build_flyout_nav_title', () => {
-      const mocked = {
-      buildFlyoutNavTitle: vi.fn((title: string) => `NAV:${title}`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildFlyoutNavTitle: vi.fn((title: string) => `NAV:${title}`),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_default_flyout_properties', () => {
-      const mocked = {
-      useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDefaultDocumentFlyoutProperties: () => ({ outsideClickCloses: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockWriteOnOpen = vi.fn();
 const mockBuildOnClose = vi.fn(() => vi.fn());
 vi.mock('../url_state/flyout_v2_url_writer', () => {
-      const mocked = {
-      useFlyoutV2UrlWriter: vi.fn(() => ({
-        writeOnOpen: mockWriteOnOpen,
-        buildOnClose: mockBuildOnClose,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlyoutV2UrlWriter: vi.fn(() => ({
+      writeOnOpen: mockWriteOnOpen,
+      buildOnClose: mockBuildOnClose,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOpenSystemFlyout = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-  const kibanaActual = (await vi.importActual('../../../common/lib/kibana'));
+  const kibanaActual = await vi.importActual('../../../common/lib/kibana');
   return {
     ...kibanaActual,
     useKibana: () => ({

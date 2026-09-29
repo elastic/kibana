@@ -37,18 +37,18 @@ const mockUseSpanFlyoutData = vi.fn();
 const mockUseLogFlyoutData = vi.fn();
 
 vi.mock('./span_flyout', () => {
-      const mocked = {
-      useSpanFlyoutData: (params: any) => mockUseSpanFlyoutData(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpanFlyoutData: (params: any) => mockUseSpanFlyoutData(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./logs_flyout', () => {
-      const mocked = {
-      useLogFlyoutData: (params: any) => mockUseLogFlyoutData(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLogFlyoutData: (params: any) => mockUseLogFlyoutData(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDocumentFlyoutData', () => {
   const traceId = 'test-trace-id';

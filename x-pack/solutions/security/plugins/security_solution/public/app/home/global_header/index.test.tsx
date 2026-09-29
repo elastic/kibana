@@ -33,13 +33,13 @@ vi.mock('react-router-dom', () => {
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('react-reverse-portal', () => {
-      const mocked = {
-      InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      createHtmlPortalNode: () => ({ unmount: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    OutPortal: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    createHtmlPortalNode: () => ({ unmount: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('global header', () => {
   const state = {

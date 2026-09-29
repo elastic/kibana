@@ -14,13 +14,13 @@ import { SetupCloudConnect } from './setup_cloud_connect';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getServices: () => ({
-        trackUiMetric: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({
+      trackUiMetric: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const addBasePathMock = vi.fn((path: string) => (path ? path : 'path'));
 const applicationMock = {

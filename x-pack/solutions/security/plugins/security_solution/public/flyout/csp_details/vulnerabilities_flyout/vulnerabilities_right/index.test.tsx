@@ -21,29 +21,29 @@ import {
 import type { FindingsVulnerabilityPanelExpandableFlyoutProps } from '@kbn/cloud-security-posture';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      useDateFormat: vi.fn(),
-      useTimeZone: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    useDateFormat: vi.fn(),
+    useTimeZone: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      useExpandableFlyoutHistory: vi.fn(),
-      useExpandableFlyoutState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    useExpandableFlyoutHistory: vi.fn(),
+    useExpandableFlyoutState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_get_navigation_url_params', () => {
-      const mocked = {
-      useGetNavigationUrlParams: () => () => 'mocked-nav-url',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetNavigationUrlParams: () => () => 'mocked-nav-url',
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const renderComponent = (Component: any) => {

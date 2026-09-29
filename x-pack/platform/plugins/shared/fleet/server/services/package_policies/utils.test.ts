@@ -154,9 +154,10 @@ describe('Package Policy Utils', () => {
 
     it('should throw if valid license and an incompatible output_id for the package is given', async () => {
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      vi
-        .spyOn(outputService, 'get')
-        .mockResolvedValueOnce({ id: 'non-es-output', type: 'kafka' } as any);
+      vi.spyOn(outputService, 'get').mockResolvedValueOnce({
+        id: 'non-es-output',
+        type: 'kafka',
+      } as any);
 
       await expect(
         preflightCheckPackagePolicy(soClient, {
@@ -169,9 +170,10 @@ describe('Package Policy Utils', () => {
 
     it('should throw if content package is being used', async () => {
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      vi
-        .spyOn(outputService, 'get')
-        .mockResolvedValueOnce({ id: 'es-output', type: 'elasticsearch' } as any);
+      vi.spyOn(outputService, 'get').mockResolvedValueOnce({
+        id: 'es-output',
+        type: 'elasticsearch',
+      } as any);
       await expect(
         preflightCheckPackagePolicy(
           soClient,
@@ -188,9 +190,10 @@ describe('Package Policy Utils', () => {
 
     it('should not throw if valid license and valid output_id is provided and is not content package', async () => {
       vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-      vi
-        .spyOn(outputService, 'get')
-        .mockResolvedValueOnce({ id: 'es-output', type: 'elasticsearch' } as any);
+      vi.spyOn(outputService, 'get').mockResolvedValueOnce({
+        id: 'es-output',
+        type: 'elasticsearch',
+      } as any);
       await expect(
         preflightCheckPackagePolicy(
           soClient,
@@ -369,9 +372,10 @@ describe('canUseOutputForIntegration', () => {
 
   it('should reject a Logstash output_id on a package policy with an OTel input', async () => {
     vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    vi
-      .spyOn(outputService, 'get')
-      .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
+    vi.spyOn(outputService, 'get').mockResolvedValue({
+      id: 'logstash-output',
+      type: 'logstash',
+    } as any);
 
     const result = await canUseOutputForIntegration(soClient, {
       output_id: 'logstash-output',
@@ -386,9 +390,7 @@ describe('canUseOutputForIntegration', () => {
 
   it('should reject a Kafka output_id on a package policy with an OTel input', async () => {
     vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    vi
-      .spyOn(outputService, 'get')
-      .mockResolvedValue({ id: 'kafka-output', type: 'kafka' } as any);
+    vi.spyOn(outputService, 'get').mockResolvedValue({ id: 'kafka-output', type: 'kafka' } as any);
 
     const result = await canUseOutputForIntegration(soClient, {
       output_id: 'kafka-output',
@@ -403,9 +405,10 @@ describe('canUseOutputForIntegration', () => {
 
   it('should accept an Elasticsearch output_id on a package policy with an OTel input', async () => {
     vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    vi
-      .spyOn(outputService, 'get')
-      .mockResolvedValue({ id: 'es-output', type: 'elasticsearch' } as any);
+    vi.spyOn(outputService, 'get').mockResolvedValue({
+      id: 'es-output',
+      type: 'elasticsearch',
+    } as any);
 
     const result = await canUseOutputForIntegration(soClient, {
       output_id: 'es-output',
@@ -420,9 +423,10 @@ describe('canUseOutputForIntegration', () => {
 
   it('should still permit Logstash output_id on a non-OTel package policy (regression guard)', async () => {
     vi.spyOn(licenseService, 'hasAtLeast').mockReturnValue(true);
-    vi
-      .spyOn(outputService, 'get')
-      .mockResolvedValue({ id: 'logstash-output', type: 'logstash' } as any);
+    vi.spyOn(outputService, 'get').mockResolvedValue({
+      id: 'logstash-output',
+      type: 'logstash',
+    } as any);
 
     const result = await canUseOutputForIntegration(soClient, {
       output_id: 'logstash-output',

@@ -23,38 +23,38 @@ import {
 } from './upload_preflight_authz';
 
 vi.mock('../../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getSecurity: vi.fn(),
-        getConfig: vi.fn(),
-        getInternalUserSOClientForSpaceId: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    appContextService: {
+      getSecurity: vi.fn(),
+      getConfig: vi.fn(),
+      getInternalUserSOClientForSpaceId: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../archive', async () => {
-      const mocked = {
-      getPathParts: (await vi.importActual('../archive')).getPathParts,
-      traverseArchiveEntries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPathParts: (await vi.importActual('../archive')).getPathParts,
+    traverseArchiveEntries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./streaming_packages', () => {
-      const mocked = {
-      PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PACKAGES_TO_INSTALL_WITH_STREAMING: ['security_detection_engine'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../archive/parse', () => {
-      const mocked = {
-      filterAssetPathForParseAndVerifyArchive: vi.fn().mockReturnValue(false),
-      parseAndVerifyArchive: vi.fn().mockReturnValue({ name: 'mock-package', version: '1.0.0' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterAssetPathForParseAndVerifyArchive: vi.fn().mockReturnValue(false),
+    parseAndVerifyArchive: vi.fn().mockReturnValue({ name: 'mock-package', version: '1.0.0' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRequest = {} as KibanaRequest;
 const mockSpaceId = 'default';

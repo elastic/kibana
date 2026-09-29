@@ -16,18 +16,18 @@ import { useQueryableEsqlColumns } from '.';
 import { getUnifiedDocViewerServices } from '../../../../../plugin';
 
 vi.mock('../../../../../plugin', () => {
-      const mocked = {
-      getUnifiedDocViewerServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUnifiedDocViewerServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getESQLQueryColumnsRaw: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getESQLQueryColumnsRaw: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetESQLQueryColumnsRaw = getESQLQueryColumnsRaw as Mock;
 const mockSearch = vi.fn();

@@ -138,14 +138,12 @@ describe('focusAdjacentTrigger', () => {
   it('handles missing navigation root gracefully', () => {
     const { ref, triggers, unmount } = setup();
 
-    const querySpy = vi
-      .spyOn(document, 'querySelector')
-      .mockImplementation((selector: string) => {
-        if (selector === `#${NAVIGATION_ROOT_SELECTOR}`) {
-          return null;
-        }
-        return HTMLElement.prototype.querySelector.call(document, selector);
-      });
+    const querySpy = vi.spyOn(document, 'querySelector').mockImplementation((selector: string) => {
+      if (selector === `#${NAVIGATION_ROOT_SELECTOR}`) {
+        return null;
+      }
+      return HTMLElement.prototype.querySelector.call(document, selector);
+    });
 
     ref.current = triggers[0];
     focusAdjacentTrigger(ref, 1);

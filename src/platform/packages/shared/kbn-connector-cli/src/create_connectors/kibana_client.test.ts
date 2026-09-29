@@ -24,19 +24,22 @@ function createTestServer(handler: http.RequestListener): Promise<void> {
   });
 }
 
-afterEach(() =>
-new Promise<void>((resolve, reject) => {
-const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+afterEach(
+  () =>
+    new Promise<void>((resolve, reject) => {
+      const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+        fail: reject,
+      });
 
-  if (server) {
-    const s = server;
-    server = undefined;
-    s.close(done);
-  } else {
-    done();
-  }
-
-}));
+      if (server) {
+        const s = server;
+        server = undefined;
+        s.close(done);
+      } else {
+        done();
+      }
+    })
+);
 
 describe('detectKibana', () => {
   it('detects a running Kibana and returns connection info', async () => {

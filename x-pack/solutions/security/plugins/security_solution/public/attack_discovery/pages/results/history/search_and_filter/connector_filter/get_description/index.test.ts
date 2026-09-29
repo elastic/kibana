@@ -10,13 +10,13 @@ import { vi } from 'vitest';
 import { getDescription } from '.';
 
 vi.mock('../translations', () => {
-      const mocked = {
-      AMAZON_BEDROCK: 'Amazon Bedrock',
-      GOOGLE_GEMINI: 'Google Gemini',
-      OPENAI: 'OpenAI',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AMAZON_BEDROCK: 'Amazon Bedrock',
+    GOOGLE_GEMINI: 'Google Gemini',
+    OPENAI: 'OpenAI',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getDescription', () => {
   it("returns the expected description for '.bedrock'", () => {

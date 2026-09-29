@@ -29,9 +29,7 @@ import { FLYOUT_FOOTER_DROPDOWN_BUTTON_TEST_ID } from './test_ids';
 const mockReportActionClicked = vi.fn();
 vi.mock('../../../shared/hooks/use_flyout_telemetry');
 
-vi.mock(
-  '../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions'
-);
+vi.mock('../../../../detections/components/alerts_table/timeline_actions/use_add_to_case_actions');
 vi.mock('../../../../detections/components/alerts_table/timeline_actions/use_alerts_actions');
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_alert_assignees_actions'
@@ -48,76 +46,80 @@ vi.mock('../../../../common/hooks/is_in_security_app');
 // derivation with the flattened-based conversion so these fixtures/expectations stay stable; the
 // real `getTimelineEventsDetailsFromRecord` is covered by its own test.
 vi.mock('../utils/get_timeline_events_details_from_record', () => {
-      const mocked = {
-      getTimelineEventsDetailsFromRecord: vi.fn((hit: { flattened?: Record<string, unknown> }) =>
-        Object.entries(hit.flattened ?? {}).map(([field, value]) => ({
-          field,
-          values: Array.isArray(value)
-            ? value.map(String)
-            : value != null
-            ? [String(value)]
-            : undefined,
-          originalValue: value,
-          isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
-          category: field.split('.')[0],
-        }))
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimelineEventsDetailsFromRecord: vi.fn((hit: { flattened?: Record<string, unknown> }) =>
+      Object.entries(hit.flattened ?? {}).map(([field, value]) => ({
+        field,
+        values: Array.isArray(value)
+          ? value.map(String)
+          : value != null
+          ? [String(value)]
+          : undefined,
+        originalValue: value,
+        isObjectArray: Array.isArray(value) && value.length > 0 && typeof value[0] === 'object',
+        category: field.split('.')[0],
+      }))
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/use_host_isolation_action',
   () => {
-      const mocked = {
-        useHostIsolationAction: vi.fn(),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useHostIsolationAction: vi.fn(),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 vi.mock(
   '../../../../common/components/endpoint/host_isolation/from_alerts/host_isolation_flyout',
   () => {
-      const mocked = {
-        HostIsolationFlyout: ({
-          isolateAction,
-          onClose,
-        }: {
-          isolateAction: string;
-          onClose: () => void;
-        }) => (
-          <button type="button" data-test-subj={`hostIsolationMock-${isolateAction}`} onClick={onClose}>
-            {`isolation-mock-${isolateAction}`}
-          </button>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      HostIsolationFlyout: ({
+        isolateAction,
+        onClose,
+      }: {
+        isolateAction: string;
+        onClose: () => void;
+      }) => (
+        <button
+          type="button"
+          data-test-subj={`hostIsolationMock-${isolateAction}`}
+          onClick={onClose}
+        >
+          {`isolation-mock-${isolateAction}`}
+        </button>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseResponderActionItem = vi.fn().mockReturnValue([]);
 vi.mock('../../../../common/components/endpoint/responder', () => {
-      const mocked = {
-      useResponderActionItem: (...args: unknown[]) => mockUseResponderActionItem(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResponderActionItem: (...args: unknown[]) => mockUseResponderActionItem(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseExploreActions = vi.fn().mockReturnValue({ exploreActionItems: [] });
 vi.mock('../hooks/use_explore_actions', () => {
-      const mocked = {
-      useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExploreActions: (...args: unknown[]) => mockUseExploreActions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/alert_context_menu',
   () => {
-      const mocked = {
-        AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AddExceptionFlyoutWrapper: () => <div data-test-subj="addExceptionFlyoutWrapper" />,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
@@ -127,11 +129,11 @@ const mockUseRunAlertWorkflowPanel = vi.fn().mockReturnValue({
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
   () => {
-      const mocked = {
-        useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useRunAlertWorkflowPanel: (...args: unknown[]) => mockUseRunAlertWorkflowPanel(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
@@ -141,37 +143,37 @@ const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
   () => {
-      const mocked = {
-        useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockIsOsqueryAvailable = vi.fn().mockReturnValue(false);
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          osquery: {
-            isOsqueryAvailable: mockIsOsqueryAvailable,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        osquery: {
+          isOsqueryAvailable: mockIsOsqueryAvailable,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../detections/components/osquery/osquery_flyout', () => {
-      const mocked = {
-      OsqueryFlyout: ({ agentId, onClose }: { agentId: string; onClose: () => void }) => (
-        <button type="button" data-test-subj="osqueryFlyoutMock" onClick={onClose}>
-          {`osquery-mock-${agentId}`}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OsqueryFlyout: ({ agentId, onClose }: { agentId: string; onClose: () => void }) => (
+      <button type="button" data-test-subj="osqueryFlyoutMock" onClick={onClose}>
+        {`osquery-mock-${agentId}`}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAddToCaseActions = useAddToCaseActions as Mock;
 const mockUseAlertsActions = useAlertsActions as Mock;

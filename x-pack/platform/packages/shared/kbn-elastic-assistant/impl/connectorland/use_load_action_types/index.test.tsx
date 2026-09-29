@@ -13,18 +13,18 @@ import { useLoadActionTypes } from '.';
 import { mockActionTypes } from '../../mock/connectors';
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
-        try {
-          const res = await fn();
-          return Promise.resolve(res);
-        } catch (e) {
-          opts.onError(e);
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+      try {
+        const res = await fn();
+        return Promise.resolve(res);
+      } catch (e) {
+        opts.onError(e);
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const http = {
   get: vi.fn().mockResolvedValue(mockActionTypes),

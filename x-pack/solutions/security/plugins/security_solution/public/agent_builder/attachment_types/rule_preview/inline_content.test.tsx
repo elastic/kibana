@@ -18,23 +18,23 @@ import type { RulePreviewAttachment } from './types';
 import { RulePreviewInlineContent } from './inline_content';
 
 vi.mock('./providers', () => {
-      const mocked = {
-      RulePreviewAttachmentSecurityProviders: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-      RulePreviewAttachmentDataViewBootstrap: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulePreviewAttachmentSecurityProviders: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+    RulePreviewAttachmentDataViewBootstrap: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../detection_engine/rule_creation_ui/components/rule_preview/rule_preview_alerts_table',
   () => {
-      const mocked = {
-        RulePreviewAlertsTable: () => <div data-test-subj="mockAlertsTable" />,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      RulePreviewAlertsTable: () => <div data-test-subj="mockAlertsTable" />,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const makeAttachment = (previewId: string): RulePreviewAttachment =>

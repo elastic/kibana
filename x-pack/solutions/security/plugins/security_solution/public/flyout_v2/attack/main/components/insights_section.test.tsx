@@ -17,52 +17,52 @@ import { EntitiesOverview } from './entities_overview';
 import { CorrelationsOverview } from './correlations_overview';
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage }: { defaultMessage: string }) => <>{defaultMessage}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/hooks/use_expand_section', () => {
-      const mocked = {
-      useExpandSection: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandSection: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/expandable_section', () => {
-      const mocked = {
-      ExpandableSection: ({
-        title,
-        children,
-        'data-test-subj': dataTestSubj,
-      }: {
-        title: React.ReactNode;
-        children: React.ReactNode;
-        'data-test-subj'?: string;
-      }) => (
-        <section data-test-subj={dataTestSubj}>
-          <div>{title}</div>
-          {children}
-        </section>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpandableSection: ({
+      title,
+      children,
+      'data-test-subj': dataTestSubj,
+    }: {
+      title: React.ReactNode;
+      children: React.ReactNode;
+      'data-test-subj'?: string;
+    }) => (
+      <section data-test-subj={dataTestSubj}>
+        <div>{title}</div>
+        {children}
+      </section>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./entities_overview', () => {
-      const mocked = {
-      EntitiesOverview: vi.fn(() => <div data-test-subj="entities-overview" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EntitiesOverview: vi.fn(() => <div data-test-subj="entities-overview" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./correlations_overview', () => {
-      const mocked = {
-      CorrelationsOverview: vi.fn(() => <div data-test-subj="correlations-overview" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CorrelationsOverview: vi.fn(() => <div data-test-subj="correlations-overview" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseExpandSection = vi.mocked(useExpandSection);
 const mockedEntitiesOverview = vi.mocked(EntitiesOverview);

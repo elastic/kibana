@@ -19,70 +19,70 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 
 // Mock the dependencies
 vi.mock('../../../../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          notifications: {
-            toasts: {
-              addSuccess: vi.fn(),
-              addError: vi.fn(),
-            },
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        notifications: {
+          toasts: {
+            addSuccess: vi.fn(),
+            addError: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      BottomBarActions: ({ children, ...props }: any) => (
-        <div data-test-subj="bottom-bar-actions" {...props}>
-          {children}
-        </div>
-      ),
-      useUiTracker: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BottomBarActions: ({ children, ...props }: any) => (
+      <div data-test-subj="bottom-bar-actions" {...props}>
+        {children}
+      </div>
+    ),
+    useUiTracker: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./save_config', () => {
-      const mocked = {
-      saveConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    saveConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock setting definitions to provide test data
 vi.mock('../../../../../../../common/agent_configuration/setting_definitions', () => {
-      const mocked = {
-      settingDefinitions: [
-        {
-          key: 'transaction_sample_rate',
-          type: 'float',
-          category: 'Performance',
-          label: 'Transaction sample rate',
-        },
-        {
-          key: 'span_compression_enabled',
-          type: 'boolean',
-          category: 'Performance',
-          label: 'Span compression enabled',
-        },
-      ],
-      filterByAgent: () => (setting: any) => true,
-      validateSetting: () => ({ isValid: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    settingDefinitions: [
+      {
+        key: 'transaction_sample_rate',
+        type: 'float',
+        category: 'Performance',
+        label: 'Transaction sample rate',
+      },
+      {
+        key: 'span_compression_enabled',
+        type: 'boolean',
+        category: 'Performance',
+        label: 'Span compression enabled',
+      },
+    ],
+    filterByAgent: () => (setting: any) => true,
+    validateSetting: () => ({ isValid: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/elastic-agent-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/elastic-agent-utils')),
-      isRumOrMobileAgentName: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/elastic-agent-utils')),
+    isRumOrMobileAgentName: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedIsRumOrMobileAgentName = isRumOrMobileAgentName as MockedFunction<
   typeof isRumOrMobileAgentName

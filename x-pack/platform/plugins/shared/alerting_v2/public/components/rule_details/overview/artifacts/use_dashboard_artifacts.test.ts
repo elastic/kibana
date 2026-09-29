@@ -14,13 +14,13 @@ import { useDashboardArtifacts } from './use_dashboard_artifacts';
 
 const mockResolveDashboardsByIds = vi.fn();
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      getDashboardId: (artifact: { data: Record<string, unknown> }) =>
-        typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
-      resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDashboardId: (artifact: { data: Record<string, unknown> }) =>
+      typeof artifact.data.dashboard_id === 'string' ? artifact.data.dashboard_id : undefined,
+    resolveDashboardsByIds: (...args: unknown[]) => mockResolveDashboardsByIds(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDashboard = {} as DashboardStart;
 

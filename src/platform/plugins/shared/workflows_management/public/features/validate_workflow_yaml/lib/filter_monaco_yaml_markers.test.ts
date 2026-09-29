@@ -16,16 +16,16 @@ import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 
 // Mock getScalarValueAtOffset to control what scalar value is found at a given offset
 vi.mock('@kbn/workflows-yaml', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-yaml')),
-      getScalarValueAtOffset: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-yaml')),
+    getScalarValueAtOffset: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getScalarValueAtOffset } = (await vi.importMock<{
+const { getScalarValueAtOffset } = await vi.importMock<{
   getScalarValueAtOffset: Mock;
-}>('@kbn/workflows-yaml'));
+}>('@kbn/workflows-yaml');
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;

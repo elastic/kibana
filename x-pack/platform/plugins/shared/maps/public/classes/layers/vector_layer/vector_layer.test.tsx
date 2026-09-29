@@ -10,18 +10,18 @@ import { vi } from 'vitest';
 /* eslint-disable max-classes-per-file */
 
 vi.mock('../../styles/vector/vector_style', () => {
-      const mocked = {
-      VectorStyle: class MockVectorStyle {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VectorStyle: class MockVectorStyle {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('12345'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('12345'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   AGG_TYPE,

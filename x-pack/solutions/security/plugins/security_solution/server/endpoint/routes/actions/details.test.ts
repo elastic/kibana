@@ -39,9 +39,9 @@ describe('when calling the Action Details route handler', () => {
       mockContext.service.savedObjects.createInternalScopedSoClient() as Mocked<SavedObjectsClientContract>;
     mockResponse = httpServerMock.createResponseFactory();
     actionDetailsRouteHandler = getActionDetailsRequestHandler(mockContext);
-    (
-      mockContext.service.getInternalFleetServices().ensureInCurrentSpace as Mock
-    ).mockResolvedValue(undefined);
+    (mockContext.service.getInternalFleetServices().ensureInCurrentSpace as Mock).mockResolvedValue(
+      undefined
+    );
   });
 
   it('should call service using action id from request', async () => {

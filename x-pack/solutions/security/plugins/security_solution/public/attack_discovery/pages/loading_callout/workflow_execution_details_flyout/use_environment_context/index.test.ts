@@ -15,13 +15,13 @@ import { getEnvironmentContext } from '../helpers/get_environment_context';
 import { useEnvironmentContext } from '.';
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      KibanaServices: {
-        getKibanaVersion: vi.fn().mockReturnValue('8.0.0'),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaServices: {
+      getKibanaVersion: vi.fn().mockReturnValue('8.0.0'),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/get_environment_context');
 

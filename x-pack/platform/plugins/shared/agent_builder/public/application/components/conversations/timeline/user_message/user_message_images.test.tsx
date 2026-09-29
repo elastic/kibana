@@ -20,13 +20,13 @@ const THUMBNAIL_URL = 'data:image/png;base64,abc';
 
 const mockGetAttachmentUiDefinition = vi.fn();
 vi.mock('../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      attachmentsService: { getAttachmentUiDefinition: mockGetAttachmentUiDefinition },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeImageVersioned = (id: string, name: string): VersionedAttachment => ({
   id,

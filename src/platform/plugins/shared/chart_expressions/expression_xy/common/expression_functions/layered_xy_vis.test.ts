@@ -40,28 +40,28 @@ describe('layeredXyVis', () => {
     const { layers, ...rest } = args;
 
     await expect(
-            layeredXyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                markSizeRatio: 0,
-                layers: [sampleExtendedLayer],
-              },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      layeredXyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 0,
+          layers: [sampleExtendedLayer],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
 
     await expect(
-            layeredXyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                markSizeRatio: 101,
-                layers: [sampleExtendedLayer],
-              },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      layeredXyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 101,
+          layers: [sampleExtendedLayer],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 
   test('it should throw error if markSizeRatio is specified if no markSizeAccessor is present', async () => {
@@ -69,15 +69,15 @@ describe('layeredXyVis', () => {
     const { layers, ...rest } = args;
 
     await expect(
-            layeredXyVisFunction.fn(
-              data,
-              {
-                ...rest,
-                markSizeRatio: 10,
-                layers: [sampleExtendedLayer],
-              },
-              createMockExecutionContext()
-            )
-          ).rejects.toThrowErrorMatchingSnapshot();
+      layeredXyVisFunction.fn(
+        data,
+        {
+          ...rest,
+          markSizeRatio: 10,
+          layers: [sampleExtendedLayer],
+        },
+        createMockExecutionContext()
+      )
+    ).rejects.toThrowErrorMatchingSnapshot();
   });
 });

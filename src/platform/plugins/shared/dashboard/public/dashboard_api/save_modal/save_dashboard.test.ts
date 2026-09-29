@@ -18,21 +18,21 @@ const mockUpdate = vi.fn();
 const mockShowDashboardSavedToast = vi.fn();
 
 vi.mock('../../dashboard_client', () => {
-      const mocked = {
-      dashboardClient: {
-        create: (dashboardState: DashboardState) => mockCreate(dashboardState),
-        update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    dashboardClient: {
+      create: (dashboardState: DashboardState) => mockCreate(dashboardState),
+      update: (id: string, dashboardState: DashboardState) => mockUpdate(id, dashboardState),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./show_dashboard_saved_toast', () => {
-      const mocked = {
-      showDashboardSavedToast: (params: unknown) => mockShowDashboardSavedToast(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    showDashboardSavedToast: (params: unknown) => mockShowDashboardSavedToast(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Save dashboard state', () => {
   beforeEach(() => {

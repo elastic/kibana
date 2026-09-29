@@ -54,66 +54,64 @@ vi.mock('react-use/lib/useLocalStorage', () =>
   })
 );
 
-vi.mock('react-use/lib/useSessionStorage', () =>
-  vi.fn().mockReturnValue([undefined, vi.fn()])
-);
+vi.mock('react-use/lib/useSessionStorage', () => vi.fn().mockReturnValue([undefined, vi.fn()]));
 
 vi.mock(
   '@kbn/elastic-assistant/impl/assistant/api/anonymization_fields/use_fetch_anonymization_fields',
   () => {
-      const mocked = {
-        useFetchAnonymizationFields: vi.fn(() => mockFindAnonymizationFieldsResponse),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useFetchAnonymizationFields: vi.fn(() => mockFindAnonymizationFieldsResponse),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('@kbn/inference-connectors', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(() => ({
-        isFetched: true,
-        data: mockConnectors,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(() => ({
+      isFetched: true,
+      data: mockConnectors,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '@kbn/elastic-assistant/impl/connectorland/connector_selector_inline/connector_selector_inline',
   () => {
-      const mocked = {
-        ConnectorSelectorInline: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      ConnectorSelectorInline: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockSecurityCapabilities = [SECURITY_UI_SHOW_PRIVILEGE];
 
 vi.mock('../../common/links', () => {
-      const mocked = {
-      useLinkInfo: () =>
-        vi.fn().mockReturnValue({
-          capabilities: mockSecurityCapabilities,
-          globalNavPosition: 4,
-          globalSearchKeywords: ['Attack discovery'],
-          id: 'attack_discovery',
-          path: '/attack_discovery',
-          title: 'Attack discovery',
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLinkInfo: () =>
+      vi.fn().mockReturnValue({
+        capabilities: mockSecurityCapabilities,
+        globalNavPosition: 4,
+        globalSearchKeywords: ['Attack discovery'],
+        id: 'attack_discovery',
+        path: '/attack_discovery',
+        title: 'Attack discovery',
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_attack_discovery', () => {
-      const mocked = {
-      useAttackDiscovery: vi.fn().mockReturnValue({
-        fetchAttackDiscoveries: vi.fn(),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackDiscovery: vi.fn().mockReturnValue({
+      fetchAttackDiscoveries: vi.fn(),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFilterManager = createFilterManagerMock();
 
@@ -201,7 +199,7 @@ const mockUseKibanaReturnValue = {
   },
 };
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
 
   return {
     ...original,

@@ -20,48 +20,48 @@ import { useInvalidateGetMigrationTranslationStats } from '../logic/use_get_migr
 import { TestProviders } from '../../../common/mock/test_providers';
 
 vi.mock('../components/dashboard_table', () => {
-      const mocked = {
-      MigrationDashboardsTable: () => <div data-test-subj="migrationDashboardsTable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationDashboardsTable: () => <div data-test-subj="migrationDashboardsTable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./empty', () => {
-      const mocked = {
-      EmptyMigrationDashboardsPage: () => <div data-test-subj="emptyMigrationDashboards" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmptyMigrationDashboardsPage: () => <div data-test-subj="emptyMigrationDashboards" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/header_page', () => {
-      const mocked = {
-      HeaderPage: () => <div data-test-subj="headerPage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HeaderPage: () => <div data-test-subj="headerPage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/migration_panels/migration_progress_panel', () => {
-      const mocked = {
-      MigrationProgressPanel: () => <div data-test-subj="migrationProgressPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationProgressPanel: () => <div data-test-subj="migrationProgressPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/migration_status_panels/migration_ready_panel', () => {
-      const mocked = {
-      MigrationReadyPanel: () => <div data-test-subj="migrationReadyPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MigrationReadyPanel: () => <div data-test-subj="migrationReadyPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/migration_status_panels/upload_missing_panel', () => {
-      const mocked = {
-      DashboardMigrationsUploadMissingPanel: () => (
-        <div data-test-subj="dashboardMigrationsUploadMissingPanel" />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DashboardMigrationsUploadMissingPanel: () => (
+      <div data-test-subj="dashboardMigrationsUploadMissingPanel" />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../service/hooks/use_latest_stats');
 vi.mock('../../../common/lib/kibana');
@@ -110,9 +110,7 @@ const renderComponent = (migrationId?: string) => {
 describe('MigrationDashboardsPage', () => {
   beforeEach(() => {
     (useNavigation as Mock).mockReturnValue({ navigateTo });
-    (useInvalidateGetMigrationDashboards as Mock).mockReturnValue(
-      invalidateGetMigrationDashboards
-    );
+    (useInvalidateGetMigrationDashboards as Mock).mockReturnValue(invalidateGetMigrationDashboards);
     (useInvalidateGetMigrationTranslationStats as Mock).mockReturnValue(
       invalidateGetMigrationTranslationStats
     );

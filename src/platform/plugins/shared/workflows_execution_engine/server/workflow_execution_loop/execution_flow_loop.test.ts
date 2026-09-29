@@ -15,11 +15,11 @@ import { executionFlowLoop } from './execution_flow_loop';
 import { createMockWorkflowExecutionCursor } from '../workflow_context_manager/mocks/workflow_execution_cursor.mock';
 
 vi.mock('./run_node', () => {
-      const mocked = {
-      runNode: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runNode: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { runNode } = require('./run_node');

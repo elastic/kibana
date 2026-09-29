@@ -12,26 +12,30 @@ import { initializeDrilldownsManager } from './drilldowns_manager';
 describe('initializeDrilldownsManager', () => {
   describe('anyStateChange$', () => {
     test('should not emit on subscribe and emit when any state changes', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const { anyStateChange$, api, getLatestState } = initializeDrilldownsManager('embeddable1', {
-                drilldowns: [],
-              });
-              anyStateChange$.subscribe(() => {
-                try {
-                  const { drilldowns } = getLatestState();
-                  expect(drilldowns?.length).toBe(1);
-                } catch (error) {
-                  // drilldowns assertion fails when
-                  // anyStateChange$ emits on subscribe
-                  done(error);
-                  return;
-                }
-                done();
-              });
-              api.setDrilldowns([{ label: 'myDrilldown', trigger: 'on_click', type: 'test_drilldown' }]);
-            
-        }));
+        const { anyStateChange$, api, getLatestState } = initializeDrilldownsManager(
+          'embeddable1',
+          {
+            drilldowns: [],
+          }
+        );
+        anyStateChange$.subscribe(() => {
+          try {
+            const { drilldowns } = getLatestState();
+            expect(drilldowns?.length).toBe(1);
+          } catch (error) {
+            // drilldowns assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        api.setDrilldowns([{ label: 'myDrilldown', trigger: 'on_click', type: 'test_drilldown' }]);
+      }));
   });
 });

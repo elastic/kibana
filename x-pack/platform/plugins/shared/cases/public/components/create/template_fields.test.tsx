@@ -18,52 +18,52 @@ import { CASE_EXTENDED_FIELDS } from '../../../common/constants';
 const mockUseFormData = vi.fn();
 const mockUseFormContext = vi.fn();
 vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib')),
-      useFormData: (...args: unknown[]) => mockUseFormData(...args),
-      useFormContext: () => mockUseFormContext(),
-      UseField: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib')),
+    useFormData: (...args: unknown[]) => mockUseFormData(...args),
+    useFormContext: () => mockUseFormContext(),
+    UseField: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseTemplateFormSync = vi.fn();
 vi.mock('./use_template_form_sync', () => {
-      const mocked = {
-      useTemplateFormSync: (...args: unknown[]) => mockUseTemplateFormSync(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTemplateFormSync: (...args: unknown[]) => mockUseTemplateFormSync(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../templates_v2/field_types/field_types_registry', () => {
-      const mocked = {
-      controlRegistry: {
-        INPUT_TEXT: ({ name, label }: { name: string; label?: string }) => (
-          <div data-test-subj={`control-${name}`}>{label ?? name}</div>
-        ),
-        INPUT_NUMBER: ({ name, label }: { name: string; label?: string }) => (
-          <div data-test-subj={`control-${name}`}>{label ?? name}</div>
-        ),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    controlRegistry: {
+      INPUT_TEXT: ({ name, label }: { name: string; label?: string }) => (
+        <div data-test-subj={`control-${name}`}>{label ?? name}</div>
+      ),
+      INPUT_NUMBER: ({ name, label }: { name: string; label?: string }) => (
+        <div data-test-subj={`control-${name}`}>{label ?? name}</div>
+      ),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResolvedFields = vi.fn();
 vi.mock('../field_library/hooks/use_resolved_fields', () => {
-      const mocked = {
-      useResolvedFields: (...args: unknown[]) => mockUseResolvedFields(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolvedFields: (...args: unknown[]) => mockUseResolvedFields(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CreateCaseTemplateFields', () => {
   beforeEach(() => {

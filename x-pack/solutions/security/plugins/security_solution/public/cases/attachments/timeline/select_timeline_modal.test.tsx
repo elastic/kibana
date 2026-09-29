@@ -14,32 +14,32 @@ import userEvent from '@testing-library/user-event';
 import { SelectTimelineModal } from './select_timeline_modal';
 
 vi.mock('../../../timelines/components/timeline/selectable_timeline', () => {
-      const mocked = {
-      SelectableTimeline: ({
-        onTimelineChange,
-      }: {
-        onTimelineChange: (title: string, id: string | null) => void;
-      }) => (
-        <div data-test-subj="selectable-timeline-mock">
-          <button
-            type="button"
-            data-test-subj="selectable-timeline-mock-pick"
-            onClick={() => onTimelineChange('Investigation', 'so-id-1')}
-          >
-            {'pick'}
-          </button>
-          <button
-            type="button"
-            data-test-subj="selectable-timeline-mock-pick-null"
-            onClick={() => onTimelineChange('Investigation', null)}
-          >
-            {'pick-null'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SelectableTimeline: ({
+      onTimelineChange,
+    }: {
+      onTimelineChange: (title: string, id: string | null) => void;
+    }) => (
+      <div data-test-subj="selectable-timeline-mock">
+        <button
+          type="button"
+          data-test-subj="selectable-timeline-mock-pick"
+          onClick={() => onTimelineChange('Investigation', 'so-id-1')}
+        >
+          {'pick'}
+        </button>
+        <button
+          type="button"
+          data-test-subj="selectable-timeline-mock-pick-null"
+          onClick={() => onTimelineChange('Investigation', null)}
+        >
+          {'pick-null'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('SelectTimelineModal', () => {
   it('wraps the body in an EuiModal and emits { savedObjectId, title } on pick', async () => {

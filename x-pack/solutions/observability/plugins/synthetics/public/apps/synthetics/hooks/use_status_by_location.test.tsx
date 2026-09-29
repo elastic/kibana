@@ -16,41 +16,41 @@ import { MONITOR_STATUS_LOOKBACK } from '../../../../common/constants/client_def
 import { MONITOR_STATUS_ENUM } from '../../../../common/constants/monitor_management';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsSearch: vi.fn().mockReturnValue({ data: undefined, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../contexts', () => {
-      const mocked = {
-      useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRefreshContext: () => ({ lastRefresh: 0 }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUrlParams = vi.fn();
 vi.mock('./use_url_params', () => {
-      const mocked = {
-      useGetUrlParams: () => mockUrlParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: () => mockUrlParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocations = vi.fn();
 vi.mock('./use_locations', () => {
-      const mocked = {
-      useLocations: () => mockUseLocations(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocations: () => mockUseLocations(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/monitors_page/hooks/use_monitor_health_color', () => {
-      const mocked = {
-      useMonitorHealthColor: () => (status: string) => `color:${status}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMonitorHealthColor: () => (status: string) => `color:${status}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useEsSearchMock = observabilitySharedPublic.useEsSearch as Mock;
 

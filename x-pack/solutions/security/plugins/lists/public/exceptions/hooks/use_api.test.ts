@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import { act, renderHook, waitFor } from '@testing-library/react';
 import * as api from '@kbn/securitysolution-list-api';
 import { useApi } from '@kbn/securitysolution-list-hooks';
@@ -29,11 +28,11 @@ import { getCreateExceptionListItemSchemaMock } from '../../../common/schemas/re
 vi.mock('@kbn/securitysolution-list-api');
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKibanaHttpService = coreMock.createStart().http;
 

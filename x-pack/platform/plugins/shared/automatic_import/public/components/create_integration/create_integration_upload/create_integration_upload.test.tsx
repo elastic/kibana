@@ -19,69 +19,69 @@ vi.mock('jszip', () => ({
 
 const mockParseYaml = vi.fn();
 vi.mock('yaml', () => {
-      const mocked = { parse: (...args: unknown[]) => mockParseYaml(...args) };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { parse: (...args: unknown[]) => mockParseYaml(...args) };
+  return { ...mocked, default: mocked };
+});
 
 const mockEvaluateUploadedZipPackage = vi.fn();
 const mockRunInstallPackage = vi.fn();
 const mockGetIntegrationNameFromResponse = vi.fn();
 vi.mock('../../../common', () => {
-      const mocked = {
-      runInstallPackage: (...args: unknown[]) => mockRunInstallPackage(...args),
-      getIntegrationNameFromResponse: (...args: unknown[]) =>
-        mockGetIntegrationNameFromResponse(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runInstallPackage: (...args: unknown[]) => mockRunInstallPackage(...args),
+    getIntegrationNameFromResponse: (...args: unknown[]) =>
+      mockGetIntegrationNameFromResponse(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/evaluate_upload_package', () => {
-      const mocked = {
-      evaluateUploadedZipPackage: (...args: unknown[]) => mockEvaluateUploadedZipPackage(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    evaluateUploadedZipPackage: (...args: unknown[]) => mockEvaluateUploadedZipPackage(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: {},
-          application: {
-            getUrlForApp: vi.fn(() => '/app/integrations'),
-            navigateToUrl: vi.fn(),
-          },
-          licensing: { license$: { subscribe: vi.fn() } },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: {},
+        application: {
+          getUrlForApp: vi.fn(() => '/app/integrations'),
+          navigateToUrl: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        licensing: { license$: { subscribe: vi.fn() } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useObservable', () =>
   vi.fn(() => ({ isAvailable: true, isActive: true, hasAtLeast: () => true }))
 );
 
 vi.mock('../../telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({ reportCancelButtonClicked: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({ reportCancelButtonClicked: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./docs_link_subtitle', () => {
-      const mocked = {
-      DocsLinkSubtitle: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocsLinkSubtitle: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../license_paywall/license_paywall_card', () => {
-      const mocked = {
-      LicensePaywallCard: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LicensePaywallCard: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { CreateIntegrationUpload } from './create_integration_upload';
 

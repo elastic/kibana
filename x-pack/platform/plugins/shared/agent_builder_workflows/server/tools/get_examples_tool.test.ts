@@ -13,11 +13,11 @@ import { WORKFLOW_EXAMPLES } from '@kbn/workflows';
 import { registerGetExamplesTool } from './get_examples_tool';
 
 vi.mock('fs/promises', () => {
-      const mocked = {
-      readFile: vi.fn(() => Promise.resolve('name: Test Workflow\nenabled: true')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFile: vi.fn(() => Promise.resolve('name: Test Workflow\nenabled: true')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const invokeHandler = async (tool: BuiltinToolDefinition, input: unknown, context: unknown) =>
   (await tool.handler(input as never, context as never)) as ToolHandlerStandardReturn;

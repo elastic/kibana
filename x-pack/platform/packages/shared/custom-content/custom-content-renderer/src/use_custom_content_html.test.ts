@@ -20,11 +20,11 @@ vi.mock('dompurify', () => ({
 vi.mock('./fetch_esql_data');
 vi.mock('./fill_template');
 vi.mock('@kbn/data-service', () => {
-      const mocked = {
-      getEsQueryConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEsQueryConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { EuiThemeColorModeStandard } from '@elastic/eui';
 import type { HttpStart } from '@kbn/core-http-browser';

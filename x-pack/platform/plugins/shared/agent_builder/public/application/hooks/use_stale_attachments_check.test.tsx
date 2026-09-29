@@ -13,22 +13,22 @@ import { useStaleAttachments } from './use_stale_attachments_check';
 const mockCheckStale = vi.fn();
 
 vi.mock('./use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        attachmentsService: { checkStale: mockCheckStale },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      attachmentsService: { checkStale: mockCheckStale },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddErrorToast = vi.fn();
 
 vi.mock('./use_toasts', () => {
-      const mocked = {
-      useToasts: () => ({ addErrorToast: mockAddErrorToast }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: () => ({ addErrorToast: mockAddErrorToast }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-use/lib/useEvent', () => ({
   __esModule: true,
@@ -38,11 +38,11 @@ vi.mock('react-use/lib/useEvent', () => ({
 const mockActiveStreams = new Map<string, unknown>();
 
 vi.mock('../context/streaming/streaming_context', () => {
-      const mocked = {
-      useStreamingContext: () => ({ activeStreams: mockActiveStreams }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamingContext: () => ({ activeStreams: mockActiveStreams }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useStaleAttachments', () => {
   beforeEach(() => {

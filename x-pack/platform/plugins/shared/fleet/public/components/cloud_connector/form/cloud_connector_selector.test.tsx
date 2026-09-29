@@ -31,51 +31,51 @@ vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('../hooks/use_get_cloud_connectors');
 // The flyout rendered by the selector calls these hooks; mock them to avoid requiring Fleet providers.
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useIacProvisioner: vi.fn(),
-      useStartServices: vi.fn(),
-      useGetPackageInfoByKeyQuery: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIacProvisioner: vi.fn(),
+    useStartServices: vi.fn(),
+    useGetPackageInfoByKeyQuery: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_verify_iac_key', () => {
-      const mocked = {
-      useVerifyIacKey: vi.fn().mockReturnValue({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useVerifyIacKey: vi.fn().mockReturnValue({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_cloud_connector_template', () => {
-      const mocked = {
-      useCloudConnectorTemplate: vi.fn().mockReturnValue({
-        launchButtonProps: { href: undefined, target: '_blank' },
-        isDisabled: true,
-        isGeneratingTemplate: false,
-        isIacProvisionerEnabled: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudConnectorTemplate: vi.fn().mockReturnValue({
+      launchButtonProps: { href: undefined, target: '_blank' },
+      isDisabled: true,
+      isGeneratingTemplate: false,
+      isIacProvisionerEnabled: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_update_cloud_connector', () => {
-      const mocked = {
-      useUpdateCloudConnector: vi.fn().mockReturnValue({ mutate: vi.fn(), isLoading: false }),
-      updateCloudConnector: vi.fn(() => Promise.resolve({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateCloudConnector: vi.fn().mockReturnValue({ mutate: vi.fn(), isLoading: false }),
+    updateCloudConnector: vi.fn(() => Promise.resolve({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_delete_cloud_connector', () => {
-      const mocked = {
-      useDeleteCloudConnector: vi.fn().mockReturnValue({ mutate: vi.fn(), isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDeleteCloudConnector: vi.fn().mockReturnValue({ mutate: vi.fn(), isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_cloud_connector_usage', () => {
-      const mocked = {
-      useCloudConnectorUsage: vi
-        .fn()
-        .mockReturnValue({ data: undefined, isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCloudConnectorUsage: vi
+      .fn()
+      .mockReturnValue({ data: undefined, isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseGetCloudConnectors = useGetCloudConnectors as MockedFunction<

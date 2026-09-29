@@ -28,36 +28,36 @@ const StatefulYamlRuleForm = ({
 
 // Mock the yaml-rule-editor to avoid monaco editor setup
 vi.mock('@kbn/yaml-rule-editor', () => {
-      const mocked = {
-      YamlRuleEditor: ({
-        value,
-        onChange,
-        onBlur,
-        isReadOnly,
-        dataTestSubj,
-      }: {
-        value: string;
-        onChange: (value: string) => void;
-        onBlur?: () => void;
-        isReadOnly?: boolean;
-        dataTestSubj?: string;
-      }) => (
-        <textarea
-          data-test-subj={dataTestSubj}
-          value={value}
-          onChange={(e) => onChange(e.target.value)}
-          onBlur={onBlur}
-          disabled={isReadOnly}
-          aria-label="YAML Editor"
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    YamlRuleEditor: ({
+      value,
+      onChange,
+      onBlur,
+      isReadOnly,
+      dataTestSubj,
+    }: {
+      value: string;
+      onChange: (value: string) => void;
+      onBlur?: () => void;
+      isReadOnly?: boolean;
+      dataTestSubj?: string;
+    }) => (
+      <textarea
+        data-test-subj={dataTestSubj}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={onBlur}
+        disabled={isReadOnly}
+        aria-label="YAML Editor"
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock EUI components that cause act() warnings due to internal state management
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     // Simple passthrough for EuiFormRow - removes internal state management

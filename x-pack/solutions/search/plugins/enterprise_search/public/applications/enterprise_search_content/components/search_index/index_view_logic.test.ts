@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import {
   LogicMounter,
   mockFlashMessageHelpers,
   mockHttpValues,
 } from '../../../__mocks__/kea_logic';
 import { apiIndex, connectorIndex } from '../../__mocks__/view_index.mock';
+
+import { vi } from 'vitest';
 
 import { SyncStatus, IngestionMethod, IngestionStatus } from '@kbn/search-connectors';
 import { nextTick } from '@kbn/test-jest-helpers';
@@ -28,11 +28,11 @@ import { IndexNameLogic } from './index_name_logic';
 import { IndexViewLogic } from './index_view_logic';
 
 vi.mock('../../../shared/kibana/kibana_logic', () => {
-      const mocked = {
-      KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaLogic: { values: { productAccess: { hasDocumentLevelSecurityEnabled: true } } },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // We can't test fetchTimeOutId because this will get set whenever the logic is created
 // And the timeoutId is non-deterministic. We use expect.object.containing throughout this test file

@@ -18,11 +18,11 @@ import * as api from './api';
 vi.mock('../../common/lib/kibana');
 const mockRefreshCaseViewPage = vi.fn();
 vi.mock('../case_view/use_on_refresh_case_view_page', () => {
-      const mocked = {
-      useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRefreshCaseViewPage: () => mockRefreshCaseViewPage,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunCaseWorkflow = vi.spyOn(api, 'runCaseWorkflow');
 
@@ -33,7 +33,9 @@ describe('useCasesWorkflowExecutor', async () => {
     .fn()
     .mockReturnValue('/app/workflows/wf-1?tab=executions&executionId=exec-1');
 
-  const { useAppUrl, useHttp, useKibana, useToasts } = (await vi.importMock('../../common/lib/kibana'));
+  const { useAppUrl, useHttp, useKibana, useToasts } = await vi.importMock(
+    '../../common/lib/kibana'
+  );
 
   beforeEach(() => {
     vi.clearAllMocks();

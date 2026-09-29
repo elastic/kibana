@@ -18,11 +18,11 @@ import {
 } from './esql_functional_equivalence';
 
 vi.mock('@kbn/inference-prompt-utils', () => {
-      const mocked = {
-      executeUntilValid: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeUntilValid: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExecuteUntilValid = executeUntilValid as MockedFunction<typeof executeUntilValid>;
 

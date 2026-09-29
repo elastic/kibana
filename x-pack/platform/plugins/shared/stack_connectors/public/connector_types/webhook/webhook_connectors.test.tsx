@@ -20,7 +20,7 @@ import { AuthType, SSLCertType, WebhookMethods } from '@kbn/connector-schemas/co
 import { formDeserializer, formSerializer } from '../lib/webhook/form_serialization';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
+  const original = await vi.importActual('@kbn/triggers-actions-ui-plugin/public');
   return {
     ...original,
     useKibana: vi.fn(),
@@ -28,12 +28,14 @@ vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
   };
 });
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+    )),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const customQueryProviderWrapper: React.FC<React.PropsWithChildren<{}>> = ({ children }) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

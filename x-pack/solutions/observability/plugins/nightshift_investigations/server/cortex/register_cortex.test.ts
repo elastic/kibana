@@ -22,26 +22,26 @@ import { optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
 
 vi.mock('./optimize', () => {
-      const mocked = {
-      createLlmProposeCortexEdits: vi.fn(() => vi.fn()),
-      optimizeCortex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLlmProposeCortexEdits: vi.fn(() => vi.fn()),
+    optimizeCortex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./page_store', () => {
-      const mocked = {
-      createCortexPageStore: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCortexPageStore: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./materialize', () => {
-      const mocked = {
-      materializeCortex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    materializeCortex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const unavailable = () =>
   Object.assign(new Error('14 UNAVAILABLE: connect: connection refused'), { code: 14 });

@@ -40,13 +40,11 @@ describe('getFormat', () => {
   });
 
   beforeEach(() => {
-    dataViewWithoutSupportedFormatsFields.getFormatterForField = vi
-      .fn()
-      .mockImplementation(() => ({
-        type: {
-          id: 'date',
-        },
-      }));
+    dataViewWithoutSupportedFormatsFields.getFormatterForField = vi.fn().mockImplementation(() => ({
+      type: {
+        id: 'date',
+      },
+    }));
   });
 
   afterEach(() => {

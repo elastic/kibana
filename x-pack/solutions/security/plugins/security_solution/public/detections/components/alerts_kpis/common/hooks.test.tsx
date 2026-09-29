@@ -24,11 +24,11 @@ vi.mock('react-router-dom', () => {
 });
 vi.mock('../../../../data_view_manager/hooks/use_browser_fields');
 vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(() => ({ dataView: {}, status: 'ready' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(() => ({ dataView: {}, status: 'ready' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {

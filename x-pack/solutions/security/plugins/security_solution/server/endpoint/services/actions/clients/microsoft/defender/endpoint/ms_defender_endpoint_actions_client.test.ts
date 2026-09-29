@@ -42,7 +42,7 @@ import {
 } from '../../../../../../../lib/telemetry/event_based/events';
 
 vi.mock('../../../../action_details_by_id', async () => {
-  const originalMod = (await vi.importActual('../../../../action_details_by_id'));
+  const originalMod = await vi.importActual('../../../../action_details_by_id');
 
   return {
     ...originalMod,

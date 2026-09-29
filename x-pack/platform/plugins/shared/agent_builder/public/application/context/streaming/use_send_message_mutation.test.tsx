@@ -29,25 +29,25 @@ const mockAbort = vi.fn().mockResolvedValue({ acknowledged: true, terminal_persi
 const mockGet = vi.fn();
 
 vi.mock('../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        chatService: { chat: mockChat, abort: mockAbort },
-        conversationsService: { get: mockGet },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      chatService: { chat: mockChat, abort: mockAbort },
+      conversationsService: { get: mockGet },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockServices = {
   application: { currentAppId$: of(undefined) },
   plugins: {},
   notifications: {},
 };
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({ services: mockServices }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: mockServices }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const conversationId = 'conv-1';
 const vars = { message: 'hello', conversationId, agentId: 'agent-1' };

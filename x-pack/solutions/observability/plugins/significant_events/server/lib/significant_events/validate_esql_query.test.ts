@@ -80,7 +80,7 @@ describe('validateEsqlQueryForStreamOrThrow', () => {
     });
 
     it('should include "Invalid ES|QL query" in the error message for unparseable input', async () => {
-      const { Parser } = (await vi.importMock('@elastic/esql'));
+      const { Parser } = await vi.importMock('@elastic/esql');
       (Parser.parse as Mock).mockImplementationOnce(() => {
         throw new Error('parse failure');
       });

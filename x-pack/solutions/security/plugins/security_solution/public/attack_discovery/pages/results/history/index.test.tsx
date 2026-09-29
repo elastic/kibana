@@ -25,91 +25,95 @@ import { useFlyoutApi } from '../../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../../flyout_v2/use_flyout_api.mock';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      matchPath: vi.fn(),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-      withRouter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    matchPath: vi.fn(),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+    withRouter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/shared-ux-router', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/shared-ux-router')),
-      useSearchParams: vi.fn(() => [{ get: vi.fn() }]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/shared-ux-router')),
+    useSearchParams: vi.fn(() => [{ get: vi.fn() }]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useDateFormat: vi.fn(),
-      useKibana: vi.fn(() => ({
-        services: {
-          application: {
-            capabilities: {
-              siemV2: { crud_alerts: true, read_alerts: true },
-              siemV3: { configurations: true },
-              siemV4: { configurations: true },
-              siemV5: { configurations: true },
-            },
-            navigateToUrl: vi.fn(),
+  const mocked = {
+    useDateFormat: vi.fn(),
+    useKibana: vi.fn(() => ({
+      services: {
+        application: {
+          capabilities: {
+            siemV2: { crud_alerts: true, read_alerts: true },
+            siemV3: { configurations: true },
+            siemV4: { configurations: true },
+            siemV5: { configurations: true },
           },
-          cases: {
-            helpers: {
-              canUseCases: vi.fn().mockReturnValue({
-                all: true,
-                connectors: true,
-                create: true,
-                delete: true,
-                push: true,
-                read: true,
-                settings: true,
-                update: true,
-              }),
-            },
-            hooks: {
-              useCasesAddToExistingCase: vi.fn(),
-              useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
-              useCasesAddToNewCaseFlyout: vi.fn(),
-            },
-            ui: { getCasesContext: mockCasesContext },
-          },
-          featureFlags: {
-            useBooleanValue: vi.fn().mockReturnValue(false),
-          },
-          uiSettings: {
-            get: vi.fn().mockReturnValue(false),
-          },
-          theme: {
-            getTheme: vi.fn().mockReturnValue({ darkMode: false }),
-          },
+          navigateToUrl: vi.fn(),
         },
-      })),
-      useToasts: vi.fn(() => ({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+        cases: {
+          helpers: {
+            canUseCases: vi.fn().mockReturnValue({
+              all: true,
+              connectors: true,
+              create: true,
+              delete: true,
+              push: true,
+              read: true,
+              settings: true,
+              update: true,
+            }),
+          },
+          hooks: {
+            useCasesAddToExistingCase: vi.fn(),
+            useCasesAddToExistingCaseModal: vi.fn().mockReturnValue({ open: vi.fn() }),
+            useCasesAddToNewCaseFlyout: vi.fn(),
+          },
+          ui: { getCasesContext: mockCasesContext },
+        },
+        featureFlags: {
+          useBooleanValue: vi.fn().mockReturnValue(false),
+        },
+        uiSettings: {
+          get: vi.fn().mockReturnValue(false),
+        },
+        theme: {
+          getTheme: vi.fn().mockReturnValue({ darkMode: false }),
+        },
+      },
+    })),
+    useToasts: vi.fn(() => ({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../flyout_v2/use_flyout_api');
 
 vi.mock(
   '../attack_discovery_markdown_formatter/field_markdown_renderer/use_entity_euid_from_alerts',
   async () => {
-      const mocked = {
-        useEntityEuidFromAlerts: vi.fn(() => ({ euid: undefined, isLoading: false })),
-        ENTITY_TYPE_BY_FIELD: (await vi.importActual('../attack_discovery_markdown_formatter/field_markdown_renderer/helpers')).ENTITY_TYPE_BY_FIELD,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useEntityEuidFromAlerts: vi.fn(() => ({ euid: undefined, isLoading: false })),
+      ENTITY_TYPE_BY_FIELD: (
+        await vi.importActual(
+          '../attack_discovery_markdown_formatter/field_markdown_renderer/helpers'
+        )
+      ).ENTITY_TYPE_BY_FIELD,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 (mockUseKibana as Mock).mockReturnValue({
@@ -158,69 +162,69 @@ vi.mock(
 });
 
 vi.mock('../../use_dismiss_attack_discovery_generations', () => {
-      const mocked = {
-      useDismissAttackDiscoveryGeneration: vi.fn().mockReturnValue({
-        dismiss: vi.fn(),
-        mutateAsync: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDismissAttackDiscoveryGeneration: vi.fn().mockReturnValue({
+      dismiss: vi.fn(),
+      mutateAsync: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../use_find_attack_discoveries', () => {
-      const mocked = {
-      useFindAttackDiscoveries: vi.fn().mockReturnValue({
-        cancelRequest: vi.fn(),
-        data: { data: [], total: 0 },
-        isLoading: false,
-        refetch: vi.fn(),
-      }),
-      useInvalidateFindAttackDiscoveries: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAttackDiscoveries: vi.fn().mockReturnValue({
+      cancelRequest: vi.fn(),
+      data: { data: [], total: 0 },
+      isLoading: false,
+      refetch: vi.fn(),
+    }),
+    useInvalidateFindAttackDiscoveries: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../use_get_attack_discovery_generations', () => {
-      const mocked = {
-      useGetAttackDiscoveryGenerations: vi.fn().mockReturnValue({
-        cancelRequest: vi.fn(),
-        data: {
-          generations: [
-            {
-              alerts_context_count: 84,
-              connector_id: 'claudeV3Haiku',
-              discoveries: 1,
-              end: '2025-05-02T17:46:43.486Z',
-              loading_message:
-                'AI is analyzing up to 100 alerts from now-30d to now to generate discoveries.',
-              execution_uuid: '27384b25-5fc0-4d11-a04f-42b2707092fa',
-              generation_start_time: '2025-05-02T17:45:25.426Z',
-              start: '2025-05-02T17:45:25.426Z',
-              status: 'succeeded',
-              connector_stats: {
-                average_successful_duration_nanoseconds: 78060000000,
-                successful_generations: 1,
-              },
+  const mocked = {
+    useGetAttackDiscoveryGenerations: vi.fn().mockReturnValue({
+      cancelRequest: vi.fn(),
+      data: {
+        generations: [
+          {
+            alerts_context_count: 84,
+            connector_id: 'claudeV3Haiku',
+            discoveries: 1,
+            end: '2025-05-02T17:46:43.486Z',
+            loading_message:
+              'AI is analyzing up to 100 alerts from now-30d to now to generate discoveries.',
+            execution_uuid: '27384b25-5fc0-4d11-a04f-42b2707092fa',
+            generation_start_time: '2025-05-02T17:45:25.426Z',
+            start: '2025-05-02T17:45:25.426Z',
+            status: 'succeeded',
+            connector_stats: {
+              average_successful_duration_nanoseconds: 78060000000,
+              successful_generations: 1,
             },
-          ],
-        },
-        isLoading: false,
-        refetch: vi.fn(),
-      }),
-      useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+          },
+        ],
+      },
+      isLoading: false,
+      refetch: vi.fn(),
+    }),
+    useInvalidateGetAttackDiscoveryGenerations: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_ids_from_url', () => {
-      const mocked = {
-      useIdsFromUrl: vi.fn().mockReturnValue({
-        ids: ['alert-1'],
-        setIdsUrl: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIdsFromUrl: vi.fn().mockReturnValue({
+      ids: ['alert-1'],
+      setIdsUrl: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const historyMock = {
   ...mockHistory,

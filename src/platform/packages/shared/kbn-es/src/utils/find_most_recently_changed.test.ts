@@ -12,38 +12,38 @@ import { vi } from 'vitest';
 import { findMostRecentlyChanged } from './find_most_recently_changed';
 
 vi.mock('fs', () => {
-      const mocked = {
-      statSync: vi.fn().mockImplementation((path) => {
-        if (path.includes('oldest')) {
-          return {
-            ctime: new Date(2018, 2, 1),
-          };
-        }
+  const mocked = {
+    statSync: vi.fn().mockImplementation((path) => {
+      if (path.includes('oldest')) {
+        return {
+          ctime: new Date(2018, 2, 1),
+        };
+      }
 
-        if (path.includes('newest')) {
-          return {
-            ctime: new Date(2018, 2, 3),
-          };
-        }
+      if (path.includes('newest')) {
+        return {
+          ctime: new Date(2018, 2, 3),
+        };
+      }
 
-        if (path.includes('middle')) {
-          return {
-            ctime: new Date(2018, 2, 2),
-          };
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      if (path.includes('middle')) {
+        return {
+          ctime: new Date(2018, 2, 2),
+        };
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('fast-glob', () => {
-      const mocked = {
-      globSync: vi.fn().mockImplementation(() => {
-        return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    globSync: vi.fn().mockImplementation(() => {
+      return ['/data/oldest.yml', '/data/newest.yml', '/data/middle.yml'];
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 test('returns newest file', () => {
   const file = findMostRecentlyChanged('/data/*.yml');

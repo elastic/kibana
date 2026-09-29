@@ -39,65 +39,68 @@ vi.mock('../../../common/components/user_privileges');
 const mockUseUserPrivileges = useUserPrivileges as Mock;
 
 vi.mock('../../hooks/artifacts/use_host_isolation_exceptions_access');
-const mockUseHostIsolationExceptionsAccess =
-  useHostIsolationExceptionsAccess as MockedFunction<typeof useHostIsolationExceptionsAccess>;
+const mockUseHostIsolationExceptionsAccess = useHostIsolationExceptionsAccess as MockedFunction<
+  typeof useHostIsolationExceptionsAccess
+>;
 
 vi.mock('../endpoint_exceptions/view/endpoint_exceptions', () => {
-      const mocked = {
-      EndpointExceptions: () => (
-        <div data-test-subj="artifacts-stub-endpointExceptions">{'endpoint-exceptions'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EndpointExceptions: () => (
+      <div data-test-subj="artifacts-stub-endpointExceptions">{'endpoint-exceptions'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../trusted_apps/view/trusted_apps_list', () => {
-      const mocked = {
-      TrustedAppsList: () => <div data-test-subj="artifacts-stub-trustedApps">{'trusted-apps'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TrustedAppsList: () => <div data-test-subj="artifacts-stub-trustedApps">{'trusted-apps'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../trusted_devices/view/trusted_devices_list', () => {
-      const mocked = {
-      TrustedDevicesList: () => (
-        <div data-test-subj="artifacts-stub-trustedDevices">{'trusted-devices'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TrustedDevicesList: () => (
+      <div data-test-subj="artifacts-stub-trustedDevices">{'trusted-devices'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../event_filters/view/event_filters_list', () => {
-      const mocked = {
-      EventFiltersList: () => <div data-test-subj="artifacts-stub-eventFilters">{'event-filters'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventFiltersList: () => (
+      <div data-test-subj="artifacts-stub-eventFilters">{'event-filters'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../host_isolation_exceptions/view/host_isolation_exceptions_list', () => {
-      const mocked = {
-      HostIsolationExceptionsList: () => (
-        <div data-test-subj="artifacts-stub-hostIsolationExceptions">{'host-isolation'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostIsolationExceptionsList: () => (
+      <div data-test-subj="artifacts-stub-hostIsolationExceptions">{'host-isolation'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../blocklist/view/blocklist', () => {
-      const mocked = {
-      Blocklist: () => <div data-test-subj="artifacts-stub-blocklist">{'blocklist'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Blocklist: () => <div data-test-subj="artifacts-stub-blocklist">{'blocklist'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../custom_yara_signatures/view/custom_yara_signatures_list', () => {
-      const mocked = {
-      CustomYaraSignaturesList: () => (
-        <div data-test-subj="artifacts-stub-customYaraSignatures">{'custom-yara-signatures'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomYaraSignaturesList: () => (
+      <div data-test-subj="artifacts-stub-customYaraSignatures">{'custom-yara-signatures'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fullArtifactReadPrivileges: Partial<EndpointPrivileges> = {
   canReadEndpointExceptions: true,

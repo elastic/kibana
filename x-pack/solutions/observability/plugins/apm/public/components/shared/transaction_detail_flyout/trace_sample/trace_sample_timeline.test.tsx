@@ -17,25 +17,25 @@ import { TransactionDetailFlyoutTraceSampleTimeline } from './trace_sample_timel
 let capturedTraceWaterfallProps: Record<string, unknown> = {};
 
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      TraceWaterfall: (props: Record<string, unknown>) => {
-        capturedTraceWaterfallProps = props;
-        return <div data-test-subj="mock-trace-waterfall" />;
-      },
-      useGetServiceBadgeHrefFromCore: () => () => '/service',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: (props: Record<string, unknown>) => {
+      capturedTraceWaterfallProps = props;
+      return <div data-test-subj="mock-trace-waterfall" />;
+    },
+    useGetServiceBadgeHrefFromCore: () => () => '/service',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../transaction_detail_flyout_context', () => {
-      const mocked = {
-      useTransactionDetailFlyoutContext: () => ({
-        deps: { core: {} },
-        filters: { rangeFrom: 'now-15m', rangeTo: 'now' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTransactionDetailFlyoutContext: () => ({
+      deps: { core: {} },
+      filters: { rangeFrom: 'now-15m', rangeTo: 'now' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TRACE_ITEMS: TraceItem[] = [
   {

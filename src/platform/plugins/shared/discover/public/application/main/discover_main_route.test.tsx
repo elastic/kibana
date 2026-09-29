@@ -29,7 +29,7 @@ import { DATASETS_ROUTE } from '@kbn/esql-types';
 let mockCustomizationService: Promise<DiscoverCustomizationService> | undefined;
 
 vi.mock('../../customizations', async () => {
-  const originalModule = (await vi.importActual('../../customizations'));
+  const originalModule = await vi.importActual('../../customizations');
   return {
     ...originalModule,
     useDiscoverCustomizationService: () => () => mockCustomizationService,
@@ -50,11 +50,11 @@ const defaultRootProfileState: RootProfileState = {
 let mockRootProfileState: RootProfileState = defaultRootProfileState;
 
 vi.mock('../../context_awareness/hooks/use_root_profile', () => {
-      const mocked = {
-      useRootProfile: () => mockRootProfileState,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRootProfile: () => mockRootProfileState,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getServicesMock(
   hasESData = true,

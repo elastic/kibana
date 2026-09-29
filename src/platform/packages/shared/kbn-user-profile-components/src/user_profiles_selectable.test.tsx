@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
+import { vi } from 'vitest';
 
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';

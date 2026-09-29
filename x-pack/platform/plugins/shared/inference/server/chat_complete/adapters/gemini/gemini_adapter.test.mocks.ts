@@ -11,7 +11,7 @@ export const processVertexStreamMock = vi.fn();
 export const processVertexResponseMock = vi.fn();
 
 vi.doMock('./process_vertex_stream', async () => {
-  const actual = (await vi.importActual('./process_vertex_stream'));
+  const actual = await vi.importActual('./process_vertex_stream');
   return {
     ...actual,
     processVertexStream: processVertexStreamMock,

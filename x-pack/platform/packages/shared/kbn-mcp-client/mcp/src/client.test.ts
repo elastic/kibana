@@ -102,9 +102,7 @@ describe('McpClient', () => {
   let mockClient: {
     connect: MockedFunction<(transport: StreamableHTTPClientTransport) => Promise<void>>;
     close: MockedFunction<() => Promise<void>>;
-    listTools: MockedFunction<
-      (params?: { cursor?: string }) => Promise<MockListToolsResponse>
-    >;
+    listTools: MockedFunction<(params?: { cursor?: string }) => Promise<MockListToolsResponse>>;
     callTool: MockedFunction<
       (params: {
         name: string;

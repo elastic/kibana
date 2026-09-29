@@ -17,12 +17,12 @@ import { mockAttackDiscoveries } from '../__mocks__/mock_attack_discoveries';
 import { generateAttackDiscoveryAlertHash } from '../transforms/transform_to_alert_documents';
 
 vi.mock('../transforms/transform_to_alert_documents', async () => {
-      const mocked = {
-      ...(await vi.importActual('../transforms/transform_to_alert_documents')),
-      generateAttackDiscoveryAlertHash: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../transforms/transform_to_alert_documents')),
+    generateAttackDiscoveryAlertHash: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();

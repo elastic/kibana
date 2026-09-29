@@ -31,13 +31,13 @@ import { routeDefinitionParamsMock } from '../index.mock';
 import { ROUTE_TAG_AUTH_FLOW, ROUTE_TAG_CAN_REDIRECT } from '../tags';
 
 vi.mock('../../otel/instrumentation', () => {
-      const mocked = {
-      securityTelemetry: {
-        recordLogoutAttempt: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityTelemetry: {
+      recordLogoutAttempt: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Common authentication routes', () => {
   let router: Mocked<SecurityRouter>;

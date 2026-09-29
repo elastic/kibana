@@ -35,7 +35,7 @@ vi.mock('react-router-dom', () => {
   };
 });
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useNavigation: () => ({

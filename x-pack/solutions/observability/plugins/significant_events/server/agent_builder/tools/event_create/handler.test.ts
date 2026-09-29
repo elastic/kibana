@@ -12,11 +12,11 @@ import { createEventToolHandler } from './handler';
 import { eventsWriteHandler } from '../event_write/handler';
 
 vi.mock('../event_write/handler', () => {
-      const mocked = {
-      eventsWriteHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    eventsWriteHandler: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseInput = {
   stream_names: ['logs.checkout'],

@@ -18,15 +18,15 @@ import { mockAttackDiscovery } from '../../../mock/mock_attack_discovery';
 import { VIEW_IN_AI_ASSISTANT } from './translations';
 
 vi.mock('./use_view_in_ai_assistant', () => {
-      const mocked = {
-      useViewInAiAssistant: vi.fn().mockReturnValue({
-        showAssistantOverlay: vi.fn(),
-        disabled: false,
-        isAssistantVisible: true,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useViewInAiAssistant: vi.fn().mockReturnValue({
+      showAssistantOverlay: vi.fn(),
+      disabled: false,
+      isAssistantVisible: true,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ViewInAiAssistant', () => {
   it('renders the assistant avatar', () => {

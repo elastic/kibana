@@ -43,11 +43,11 @@ vi.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 
 const mockUseQuery = vi.fn();
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: (params: { queryKey: string[]; queryFn: () => Promise<any> }) => mockUseQuery(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useRelatedDashboards', () => {
   beforeEach(() => {

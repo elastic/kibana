@@ -23,13 +23,13 @@ vi.mock('../../hooks/use_save_region_policy');
 vi.mock('../../hooks/use_delete_region_policy');
 vi.mock('../../hooks/use_eis_models');
 vi.mock('../../utils/eis_utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../utils/eis_utils')),
-      getAvailableRegions: vi.fn(),
-      getAvailableGeos: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../utils/eis_utils')),
+    getAvailableRegions: vi.fn(),
+    getAvailableGeos: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAvailableRegions = vi.mocked(eisUtils.getAvailableRegions);
 const mockGetAvailableGeos = vi.mocked(eisUtils.getAvailableGeos);

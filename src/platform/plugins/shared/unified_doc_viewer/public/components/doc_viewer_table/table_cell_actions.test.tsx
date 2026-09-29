@@ -27,12 +27,12 @@ import { copyToClipboard } from '@elastic/eui';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      copyToClipboard: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    copyToClipboard: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockCopyToClipboard = vi.mocked(copyToClipboard);
 
 const toastsMock = notificationServiceMock.createSetupContract().toasts;

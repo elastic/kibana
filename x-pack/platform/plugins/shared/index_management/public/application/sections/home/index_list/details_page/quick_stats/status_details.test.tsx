@@ -16,11 +16,11 @@ import type { DocCountState } from './quick_stats';
 import { StatusDetails } from './status_details';
 
 vi.mock('../../../../../app_context', () => {
-      const mocked = {
-      useAppContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppContext = vi.mocked(useAppContext);
 

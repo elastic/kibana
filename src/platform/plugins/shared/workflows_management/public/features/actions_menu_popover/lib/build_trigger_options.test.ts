@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiThemeComputed } from '@elastic/eui';
 import { vi } from 'vitest';
 
-import type { EuiThemeComputed } from '@elastic/eui';
 import type { PublicTriggerDefinition } from '@kbn/workflows-extensions/public';
 import { z } from '@kbn/zod/v4';
 import {
@@ -29,33 +29,33 @@ function mockTrigger(
 }
 
 vi.mock('../../../widgets/workflow_yaml_editor/lib/get_stability_note', () => {
-      const mocked = {
-      getExtensionStability: vi.fn(() => 'tech_preview'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getExtensionStability: vi.fn(() => 'tech_preview'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: vi.fn(
-          (
-            key: string,
-            { defaultMessage, values }: { defaultMessage: string; values?: Record<string, string> }
-          ) => {
-            if (!values) {
-              return defaultMessage;
-            }
-            return Object.entries(values).reduce(
-              (message, [placeholder, value]) => message.replace(`{${placeholder}}`, value),
-              defaultMessage
-            );
+  const mocked = {
+    i18n: {
+      translate: vi.fn(
+        (
+          key: string,
+          { defaultMessage, values }: { defaultMessage: string; values?: Record<string, string> }
+        ) => {
+          if (!values) {
+            return defaultMessage;
           }
-        ),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          return Object.entries(values).reduce(
+            (message, [placeholder, value]) => message.replace(`{${placeholder}}`, value),
+            defaultMessage
+          );
+        }
+      ),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('build_trigger_options', () => {
   const mockEuiTheme = {

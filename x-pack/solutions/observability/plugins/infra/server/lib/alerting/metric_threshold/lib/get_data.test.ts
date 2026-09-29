@@ -17,11 +17,11 @@ import { getData } from './get_data';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 vi.mock('./metric_query', () => {
-      const mocked = {
-      getElasticsearchMetricQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getElasticsearchMetricQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGetElasticsearchMetricQuery = getElasticsearchMetricQuery as MockedFunction<
   typeof getElasticsearchMetricQuery

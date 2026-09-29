@@ -13,27 +13,24 @@ import { EsqlDashboardPanel, DEFAULT_PAGE_SIZE } from './esql_dashboard_panel';
 import { TestProviders } from '../../../../../common/mock';
 import { right, left } from 'fp-ts/Either';
 
-vi.mock(
-  '../../../../../common/components/visualization_actions/visualization_embeddable',
-  () => {
-      const mocked = {
-        VisualizationEmbeddable: vi.fn(() => (
-          <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
-        )),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+vi.mock('../../../../../common/components/visualization_actions/visualization_embeddable', () => {
+  const mocked = {
+    VisualizationEmbeddable: vi.fn(() => (
+      <div data-test-subj="mockVisualizationEmbeddable">{'Mock Visualization Embeddable'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/hooks/use_error_toast', () => {
-      const mocked = {
-      useErrorToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useErrorToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...actual,
     useKibana: vi.fn(() => ({
@@ -66,7 +63,7 @@ const mockUseQuery = vi.fn(() => ({
 }));
 
 vi.mock('@kbn/react-query', async () => {
-  const actual = (await vi.importActual('@kbn/react-query'));
+  const actual = await vi.importActual('@kbn/react-query');
   return {
     ...actual,
     useQuery: () => mockUseQuery(),

@@ -34,7 +34,7 @@ import { EditorFrameServiceProvider } from '../../editor_frame_service_context';
 vi.mock('../../../id_generator');
 
 vi.mock('@kbn/kibana-utils-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-utils-plugin/public');
   return {
     ...original,
     Storage: class Storage {

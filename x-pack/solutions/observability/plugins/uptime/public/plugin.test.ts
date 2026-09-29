@@ -20,32 +20,29 @@ import { UptimeDataHelper } from './legacy_uptime/app/uptime_overview_fetcher';
 
 vi.mock('./legacy_uptime/app/uptime_overview_fetcher');
 vi.mock('./legacy_uptime/lib/alert_types', () => {
-      const mocked = {
-      legacyAlertTypeInitializers: [],
-      uptimeAlertTypeInitializers: [],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    legacyAlertTypeInitializers: [],
+    uptimeAlertTypeInitializers: [],
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./legacy_uptime/components/fleet_package', () => {
-      const mocked = {
-      LazySyntheticsPolicyCreateExtension: () => null,
-      LazySyntheticsPolicyEditExtension: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock(
-  './legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension',
-  () => {
-      const mocked = {
-        LazySyntheticsCustomAssetsExtension: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+  const mocked = {
+    LazySyntheticsPolicyCreateExtension: () => null,
+    LazySyntheticsPolicyEditExtension: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('./legacy_uptime/components/fleet_package/lazy_synthetics_custom_assets_extension', () => {
+  const mocked = {
+    LazySyntheticsCustomAssetsExtension: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./kibana_services', () => {
-      const mocked = { setStartServices: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { setStartServices: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUptimeDataHelper = UptimeDataHelper as MockedFunction<typeof UptimeDataHelper>;
 

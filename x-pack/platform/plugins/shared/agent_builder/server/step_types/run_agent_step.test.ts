@@ -8,23 +8,23 @@
 import { vi } from 'vitest';
 
 vi.mock('@elastic/schemas/es/tools/manifest.js', () => {
-      const mocked = {
-      esManifest: [
-        { id: 'indices.create' },
-        { id: 'indices.delete' },
-        { id: 'indices.update_aliases' },
-        { id: 'bulk' },
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    esManifest: [
+      { id: 'indices.create' },
+      { id: 'indices.delete' },
+      { id: 'indices.update_aliases' },
+      { id: 'bulk' },
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/schemas/kibana/tools/manifest.js', () => {
-      const mocked = {
-      kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaManifest: [{ id: 'alerting.delete-alerting-rule-id' }],
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { of, throwError } from 'rxjs';
@@ -1095,8 +1095,7 @@ describe('ai.agent workflow step (Agent Builder)', () => {
     });
 
     it('preserves partial token counts when the event stream errors mid-execution', async () => {
-      const { concat, throwError: rxThrowError } =
-        (require('rxjs') as typeof import('rxjs'));
+      const { concat, throwError: rxThrowError } = require('rxjs') as typeof import('rxjs');
 
       // Cold observable: emits one round with tokens, then errors
       const events$ = concat(

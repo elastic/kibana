@@ -65,8 +65,7 @@ const createConfig = (
 const kibanaVersion = '1.0.0';
 const defaultHeaders = getDefaultHeaders(kibanaVersion);
 
-const createClient = () =>
-  ({ close: vi.fn(), child: vi.fn() } as unknown as Mocked<Client>);
+const createClient = () => ({ close: vi.fn(), child: vi.fn() } as unknown as Mocked<Client>);
 
 describe('ClusterClient', () => {
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
@@ -1924,56 +1923,57 @@ describe('ClusterClient', () => {
     });
 
     it('waits for both clients to close', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              expect.assertions(4);
+        expect.assertions(4);
 
-              const clusterClient = new ClusterClient({
-                config: createConfig(),
-                logger,
-                type: 'custom-type',
-                authHeaders,
-                agentFactoryProvider,
-                kibanaVersion,
-                onRequestHandlerFactory: mockOnRequestHandlerFactory,
-              });
+        const clusterClient = new ClusterClient({
+          config: createConfig(),
+          logger,
+          type: 'custom-type',
+          authHeaders,
+          agentFactoryProvider,
+          kibanaVersion,
+          onRequestHandlerFactory: mockOnRequestHandlerFactory,
+        });
 
-              let internalClientClosed = false;
-              let scopedClientClosed = false;
-              let clusterClientClosed = false;
+        let internalClientClosed = false;
+        let scopedClientClosed = false;
+        let clusterClientClosed = false;
 
-              let closeInternalClient: () => void;
-              let closeScopedClient: () => void;
+        let closeInternalClient: () => void;
+        let closeScopedClient: () => void;
 
-              internalClient.close.mockReturnValue(
-                new Promise<void>((resolve) => {
-                  closeInternalClient = resolve;
-                }).then(() => {
-                  expect(clusterClientClosed).toBe(false);
-                  internalClientClosed = true;
-                })
-              );
-              scopedClient.close.mockReturnValue(
-                new Promise<void>((resolve) => {
-                  closeScopedClient = resolve;
-                }).then(() => {
-                  expect(clusterClientClosed).toBe(false);
-                  scopedClientClosed = true;
-                })
-              );
+        internalClient.close.mockReturnValue(
+          new Promise<void>((resolve) => {
+            closeInternalClient = resolve;
+          }).then(() => {
+            expect(clusterClientClosed).toBe(false);
+            internalClientClosed = true;
+          })
+        );
+        scopedClient.close.mockReturnValue(
+          new Promise<void>((resolve) => {
+            closeScopedClient = resolve;
+          }).then(() => {
+            expect(clusterClientClosed).toBe(false);
+            scopedClientClosed = true;
+          })
+        );
 
-              clusterClient.close().then(() => {
-                clusterClientClosed = true;
-                expect(internalClientClosed).toBe(true);
-                expect(scopedClientClosed).toBe(true);
-                done();
-              });
+        clusterClient.close().then(() => {
+          clusterClientClosed = true;
+          expect(internalClientClosed).toBe(true);
+          expect(scopedClientClosed).toBe(true);
+          done();
+        });
 
-              closeInternalClient!();
-              closeScopedClient!();
-            
-        }));
+        closeInternalClient!();
+        closeScopedClient!();
+      }));
 
     it('return a rejected promise is any client rejects', async () => {
       const clusterClient = new ClusterClient({
@@ -1989,8 +1989,8 @@ describe('ClusterClient', () => {
       internalClient.close.mockRejectedValue(new Error('error closing client'));
 
       await expect(clusterClient.close()).rejects.toThrowErrorMatchingInlineSnapshot(
-                `"error closing client"`
-              );
+        `"error closing client"`
+      );
     });
 
     it('does nothing after the first call', async () => {

@@ -31,179 +31,179 @@ import { useExperimentalFeatures } from '../../../hooks/use_experimental_feature
 import { useInputDraft } from '../../../hooks/use_input_draft';
 
 vi.mock('../../../hooks/use_conversation_stream', () => {
-      const mocked = {
-      useConversationStream: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationStream: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/agents/use_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/agents/use_validate_agent_id', () => {
-      const mocked = {
-      useValidateAgentId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useValidateAgentId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: vi.fn(),
-      useConversationReadOnly: vi.fn(),
-      useConversationTitle: vi.fn(),
-      useHasActiveConversation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: vi.fn(),
+    useConversationReadOnly: vi.fn(),
+    useConversationTitle: vi.fn(),
+    useHasActiveConversation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_is_awaiting_prompt', () => {
-      const mocked = {
-      useIsAwaitingPrompt: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsAwaitingPrompt: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_submit_message', () => {
-      const mocked = {
-      useSubmitMessage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSubmitMessage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_send_user_message', () => {
-      const mocked = {
-      useSendUserMessage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSendUserMessage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_toasts', () => {
-      const mocked = {
-      useToasts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./message_editor', () => {
-      const mocked = {
-      useMessageEditor: vi.fn(),
-      MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => (
-        <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
-          submit
-        </button>
-      ),
-      CommandBadgeSerializationError: class extends Error {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMessageEditor: vi.fn(),
+    MessageEditor: ({ onSubmit }: { onSubmit: () => void }) => (
+      <button data-test-subj="mock-message-editor-submit" type="button" onClick={onSubmit}>
+        submit
+      </button>
+    ),
+    CommandBadgeSerializationError: class extends Error {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./input_actions', () => {
-      const mocked = {
-      InputActions: ({
-        showTriggerModeToggle,
-        triggerMode,
-        onTriggerModeChange,
-      }: {
-        showTriggerModeToggle: boolean;
-        triggerMode: string;
-        onTriggerModeChange: (mode: string) => void;
-      }) =>
-        showTriggerModeToggle ? (
-          <input
-            data-test-subj="mock-agent-toggle"
-            type="checkbox"
-            checked={triggerMode === 'always'}
-            onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
-          />
-        ) : null,
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('./attachment_pill', () => {
-      const mocked = {
-      AttachmentPill: ({
-        attachment,
-        onRemoveAttachment,
-      }: {
-        attachment: { id: string };
-        onRemoveAttachment?: () => void;
-      }) => (
-        <button
-          data-test-subj={`mock-remove-attachment-${attachment.id}`}
-          type="button"
-          onClick={onRemoveAttachment}
+  const mocked = {
+    InputActions: ({
+      showTriggerModeToggle,
+      triggerMode,
+      onTriggerModeChange,
+    }: {
+      showTriggerModeToggle: boolean;
+      triggerMode: string;
+      onTriggerModeChange: (mode: string) => void;
+    }) =>
+      showTriggerModeToggle ? (
+        <input
+          data-test-subj="mock-agent-toggle"
+          type="checkbox"
+          checked={triggerMode === 'always'}
+          onChange={(event) => onTriggerModeChange(event.target.checked ? 'always' : 'never')}
         />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+      ) : null,
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('./attachment_pill', () => {
+  const mocked = {
+    AttachmentPill: ({
+      attachment,
+      onRemoveAttachment,
+    }: {
+      attachment: { id: string };
+      onRemoveAttachment?: () => void;
+    }) => (
+      <button
+        data-test-subj={`mock-remove-attachment-${attachment.id}`}
+        type="button"
+        onClick={onRemoveAttachment}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attachment_group_pill', () => {
-      const mocked = {
-      AttachmentGroupPill: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentGroupPill: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useExperimentalFeatures: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExperimentalFeatures: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_current_user', () => {
-      const mocked = {
-      useCurrentUser: vi
-        .fn()
-        .mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUser: vi
+      .fn()
+      .mockReturnValue({ currentUser: { user: { username: 'test-user' } }, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../hooks/use_input_draft', () => {
-      const mocked = {
-      useInputDraft: vi
-        .fn()
-        .mockReturnValue({ draft: null, saveDraft: vi.fn(), clearDraft: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInputDraft: vi
+      .fn()
+      .mockReturnValue({ draft: null, saveDraft: vi.fn(), clearDraft: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../context/active_space_context', () => {
-      const mocked = {
-      useActiveSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useActiveSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/agent-builder-browser', () => {
-      const mocked = {
-      ConversationInputShell: ({
-        children,
-        isDisabled,
-        'data-test-subj': testSubj,
-      }: {
-        children: React.ReactNode;
-        isDisabled?: boolean;
-        'data-test-subj'?: string;
-      }) => (
-        <div data-test-subj={testSubj} aria-disabled={isDisabled}>
-          {children}
-        </div>
-      ),
-      formatAgentBuilderErrorMessage: (error: Error) => error.message,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConversationInputShell: ({
+      children,
+      isDisabled,
+      'data-test-subj': testSubj,
+    }: {
+      children: React.ReactNode;
+      isDisabled?: boolean;
+      'data-test-subj'?: string;
+    }) => (
+      <div data-test-subj={testSubj} aria-disabled={isDisabled}>
+        {children}
+      </div>
+    ),
+    formatAgentBuilderErrorMessage: (error: Error) => error.message,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseConversationStream = vi.mocked(useConversationStream);
 const mockedUseAgentBuilderAgents = vi.mocked(useAgentBuilderAgents);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter } from '../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import { Status } from '../../../../../common/types/api';
 
@@ -56,9 +56,9 @@ describe('SearchApplicationViewLogic', () => {
     describe('deleteSuccess', () => {
       it('should navigate to the search applications list when an search application is deleted', () => {
         vi.spyOn(SearchApplicationViewLogic.actions, 'deleteSuccess');
-        vi
-          .spyOn(KibanaLogic.values, 'navigateToUrl')
-          .mockImplementationOnce(() => Promise.resolve());
+        vi.spyOn(KibanaLogic.values, 'navigateToUrl').mockImplementationOnce(() =>
+          Promise.resolve()
+        );
         SearchApplicationsListLogic.actions.deleteSuccess(
           {} as DeleteSearchApplicationApiLogicResponse
         );

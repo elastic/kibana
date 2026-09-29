@@ -18,11 +18,11 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import { SentinelOneDataGenerator } from '../../../../../../common/endpoint/data_generators/sentinelone_data_generator';
 
 vi.mock('../../..', () => {
-      const mocked = {
-      getPendingActionsSummary: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPendingActionsSummary: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getPendingActionsSummaryMock = getPendingActionsSummary as Mock;
 

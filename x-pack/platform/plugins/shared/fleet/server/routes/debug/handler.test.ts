@@ -22,15 +22,15 @@ import {
 } from './handler';
 
 vi.mock('../../services/security', () => {
-      const mocked = { isDebugAuthorized: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { isDebugAuthorized: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../services/spaces/query_namespaces_filtering', () => {
-      const mocked = {
-      addNamespaceFilteringToQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addNamespaceFilteringToQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsDebugAuthorized = isDebugAuthorized as MockedFunction<typeof isDebugAuthorized>;
 const mockAddNamespaceFilteringToQuery = addNamespaceFilteringToQuery as MockedFunction<

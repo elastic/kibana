@@ -15,73 +15,82 @@ import { EuiProvider } from '@elastic/eui';
 // --- Kibana services ---
 const mockAddDanger = vi.fn();
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              osquery: {
-                writeSavedQueries: true,
-                readSavedQueries: true,
-                writeLiveQueries: true,
-                runSavedQueries: true,
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: {
+            osquery: {
+              writeSavedQueries: true,
+              readSavedQueries: true,
+              writeLiveQueries: true,
+              runSavedQueries: true,
             },
           },
-          notifications: { toasts: { addDanger: mockAddDanger } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        notifications: { toasts: { addDanger: mockAddDanger } },
+      },
+    }),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // --- Heavy child component stubs ---
 vi.mock('../../saved_queries/form/code_editor_field', () => {
-      const mocked = {
-      CodeEditorField: () => <div data-test-subj="codeEditorField">Editor</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditorField: () => <div data-test-subj="codeEditorField">Editor</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lazy_ecs_mapping_editor_field', () => {
-      const mocked = {
-      ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ECSMappingEditorField: () => <div data-test-subj="ecsMappingEditor">ECS Mapping</div>,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // Track the onChange callback from SavedQueriesDropdown
 let savedQueryOnChange: ((value: Record<string, unknown>) => void) | null = null;
 vi.mock('../../saved_queries/saved_queries_dropdown', () => {
-      const mocked = {
-      SavedQueriesDropdown: ({ onChange }: { onChange: (value: Record<string, unknown>) => void }) => {
-        savedQueryOnChange = onChange;
+  const mocked = {
+    SavedQueriesDropdown: ({
+      onChange,
+    }: {
+      onChange: (value: Record<string, unknown>) => void;
+    }) => {
+      savedQueryOnChange = onChange;
 
-        return <div data-test-subj="savedQueriesDropdown">Saved Queries</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return <div data-test-subj="savedQueriesDropdown">Saved Queries</div>;
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 // Stub ScheduleSection so the flyout tests don't pull in the full EUI form
 // tree. Render a minimal marker that surfaces the schedule type so tests can
 // assert the value the flyout passed in.
 vi.mock('../../components/schedule_section', () => {
-      const mocked = {
-      ScheduleSection: ({
-        value,
-        disabled,
-      }: {
-        value: Record<string, unknown>;
-        disabled?: boolean;
-      }) => (
-        <div data-test-subj="mocked-schedule-section" data-disabled={String(!!disabled)}>
-          {JSON.stringify(value?.scheduleType ?? 'unknown')}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ScheduleSection: ({
+      value,
+      disabled,
+    }: {
+      value: Record<string, unknown>;
+      disabled?: boolean;
+    }) => (
+      <div data-test-subj="mocked-schedule-section" data-disabled={String(!!disabled)}>
+        {JSON.stringify(value?.scheduleType ?? 'unknown')}
+      </div>
+    ),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { QueryFlyout } from './query_flyout';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';

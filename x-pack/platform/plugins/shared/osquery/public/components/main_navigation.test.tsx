@@ -19,45 +19,48 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 
 // --- Kibana services ---
 vi.mock('../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            capabilities: {
-              osquery: {
-                writeLiveQueries: true,
-                runSavedQueries: true,
-                readSavedQueries: true,
-                readPacks: true,
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          capabilities: {
+            osquery: {
+              writeLiveQueries: true,
+              runSavedQueries: true,
+              readSavedQueries: true,
+              readPacks: true,
             },
-            getUrlForApp: () => '/app/integrations/osquery_manager/policies',
-            navigateToApp: vi.fn(),
           },
+          getUrlForApp: () => '/app/integrations/osquery_manager/policies',
+          navigateToApp: vi.fn(),
         },
-      }),
-      useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
-      isModifiedEvent: () => false,
-      isLeftClickEvent: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    useRouterNavigate: (path: string) => ({ onClick: vi.fn(), href: path }),
+    isModifiedEvent: () => false,
+    isLeftClickEvent: () => true,
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../actions/history_filter_storage', () => {
-      const mocked = {
-      getHistoryFilters: () => '',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getHistoryFilters: () => '',
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      pagePathGetters: {
-        integration_details_policies: () => ['', '/integrations/osquery_manager/policies'],
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    pagePathGetters: {
+      integration_details_policies: () => ['', '/integrations/osquery_manager/policies'],
+    },
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { MainNavigation } from './main_navigation';
 import { OsqueryPageHeaderProvider, useOsquerySubpageTitle } from './osquery_page_header_context';

@@ -19,19 +19,19 @@ const mockedUseKibana = {
 
 vi.mock('../../../../attack_discovery/pages/use_find_attack_discoveries');
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => mockedUseKibana,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockedUseKibana,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      useAssistantContext: () => ({
-        assistantAvailability: { isAssistantEnabled: true },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssistantContext: () => ({
+      assistantAvailability: { isAssistantEnabled: true },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseFindAttackDiscoveries = useFindAttackDiscoveries as MockedFunction<
   typeof useFindAttackDiscoveries

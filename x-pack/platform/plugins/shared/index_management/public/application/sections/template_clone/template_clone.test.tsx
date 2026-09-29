@@ -21,23 +21,23 @@ import { TemplateClone } from './template_clone';
 import type { UseRequestResponse, Error as EsUiSharedError } from '../../../shared_imports';
 
 vi.mock('../../services/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../services/api')),
-      saveTemplate: vi.fn(),
-      useLoadIndexTemplate: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../services/api')),
+    saveTemplate: vi.fn(),
+    useLoadIndexTemplate: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../app_context')),
-      useAppContext: vi.fn(() => ({
-        config: { enableLegacyTemplates: true },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../app_context')),
+    useAppContext: vi.fn(() => ({
+      config: { enableLegacyTemplates: true },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface TemplateFormMockProps {
   defaultValue: TemplateDeserialized;
@@ -66,17 +66,17 @@ vi.mock('../../components', () => ({
 }));
 
 vi.mock('../../../shared_imports', () => {
-      const mocked = {
-      PageLoading: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="pageLoading">{children}</div>
-      ),
-      PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
-        <div data-test-subj={dataTestSubj ?? 'pageError'} />
-      ),
-      attemptToURIDecode: (value: string) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageLoading: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="pageLoading">{children}</div>
+    ),
+    PageError: ({ 'data-test-subj': dataTestSubj }: { 'data-test-subj'?: string }) => (
+      <div data-test-subj={dataTestSubj ?? 'pageError'} />
+    ),
+    attemptToURIDecode: (value: string) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
@@ -147,11 +147,9 @@ describe('TemplateClone', () => {
 
   describe('WHEN the template is loading', () => {
     it('SHOULD render the loading state', () => {
-      vi
-        .mocked(useLoadIndexTemplate)
-        .mockReturnValue(
-          getUseRequestMock<TemplateDeserialized>({ isLoading: true, error: null, data: null })
-        );
+      vi.mocked(useLoadIndexTemplate).mockReturnValue(
+        getUseRequestMock<TemplateDeserialized>({ isLoading: true, error: null, data: null })
+      );
 
       const { history, location, match } = createRouterProps({ name: 'my_template' });
       renderWithProviders(<TemplateClone match={match} location={location} history={history} />);
@@ -187,9 +185,9 @@ describe('TemplateClone', () => {
         indexMode: 'standard',
         template: { settings: { index: { number_of_shards: 1 } } },
       });
-      vi
-        .mocked(useLoadIndexTemplate)
-        .mockReturnValue(getUseRequestMock({ isLoading: false, error: null, data: template }));
+      vi.mocked(useLoadIndexTemplate).mockReturnValue(
+        getUseRequestMock({ isLoading: false, error: null, data: template })
+      );
 
       const { history, location, match } = createRouterProps({ name: template.name });
       const pushSpy = vi.spyOn(history, 'push');

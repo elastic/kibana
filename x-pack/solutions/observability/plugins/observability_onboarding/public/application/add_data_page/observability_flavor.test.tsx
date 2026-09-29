@@ -25,13 +25,14 @@ const mockUseAvailablePackages = vi.fn();
 // Stubbed rather than required from the real module, which executes Fleet's whole
 // public bundle. These tests build tiles and never search.
 vi.mock('@kbn/fleet-plugin/public', () => {
-      const mocked = {
-      LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
-      AvailablePackagesHook: () => Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
-      useGetSettingsQuery: () => ({ data: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LocalSearchHook: () => Promise.resolve({ useLocalSearch: vi.fn() }),
+    AvailablePackagesHook: () =>
+      Promise.resolve({ useAvailablePackages: mockUseAvailablePackages }),
+    useGetSettingsQuery: () => ({ data: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const plainLeftClick = (overrides: Partial<React.MouseEvent> = {}) =>
   ({
@@ -307,12 +308,9 @@ describe('useObservabilityCuratedCategories', () => {
 
 describe('useObservabilityMiniTiles', () => {
   it('builds the mini tiles with preserved data-test-subj values', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(),
+    });
     expect(result.current.map((tile) => tile.id)).toEqual([
       'prometheus',
       'supabase',
@@ -327,12 +325,9 @@ describe('useObservabilityMiniTiles', () => {
   });
 
   it('swaps the metrics-only tiles for OpenTelemetry when metrics onboarding is unavailable', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(buildServices({ metricsOnboardingEnabled: false })),
+    });
     expect(result.current.map((tile) => tile.id)).toEqual([
       'opentelemetry',
       'auto_import',
@@ -342,12 +337,9 @@ describe('useObservabilityMiniTiles', () => {
   });
 
   it('wires EPR-backed mini tiles to the integrations detail page', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(),
+    });
     const hrefById = Object.fromEntries(result.current.map((tile) => [tile.id, tile.href]));
     expect(hrefById.prometheus).toBe(
       '/app/integrations/detail/prometheus/overview?returnAppId=observabilityOnboarding&returnPath=%3F'
@@ -358,38 +350,29 @@ describe('useObservabilityMiniTiles', () => {
   });
 
   it('sends the OpenTelemetry mini tile to the OTel quickstart on serverless Logs Essentials', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(
-          buildServices({ isServerless: true, metricsOnboardingEnabled: false })
-        ),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(
+        buildServices({ isServerless: true, metricsOnboardingEnabled: false })
+      ),
+    });
     const opentelemetry = result.current.find((tile) => tile.id === 'opentelemetry');
     expect(opentelemetry?.href).toBe('/otel-apm');
     expect(opentelemetry?.onClick).toBeDefined();
   });
 
   it('wires the custom logs mini tile to the OTel logs flow route', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(),
+    });
     const customLogs = result.current.find((tile) => tile.id === 'custom_logs');
     expect(customLogs?.href).toBe('/otel-logs');
     expect(customLogs?.onClick).toBeDefined();
   });
 
   it('wires the Auto Import and Upload a file mini tiles to their apps', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(),
+    });
     const hrefById = Object.fromEntries(result.current.map((tile) => [tile.id, tile.href]));
     expect(hrefById.auto_import).toBe(
       '/app/integrations/create?returnAppId=observabilityOnboarding&returnPath=%3F'
@@ -400,12 +383,9 @@ describe('useObservabilityMiniTiles', () => {
   });
 
   it('leaves no mini tile without a destination', () => {
-    const { result } = renderHook(
-      () => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }),
-      {
-        wrapper: createWrapper(),
-      }
-    );
+    const { result } = renderHook(() => useObservabilityMiniTiles({ onOpenCollection: vi.fn() }), {
+      wrapper: createWrapper(),
+    });
     for (const tile of result.current) {
       expect(tile.href).toBeTruthy();
     }

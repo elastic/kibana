@@ -20,30 +20,30 @@ import {
 const mockUseFetchRules = vi.fn();
 
 vi.mock('../../../hooks/use_fetch_rules', () => {
-      const mocked = {
-      useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRules: (...args: unknown[]) => mockUseFetchRules(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockCanReadRules = true;
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (typeof token === 'function') {
-          return {
-            canRead: () => mockCanReadRules,
-            canWrite: () => mockCanReadRules,
-            can: () => mockCanReadRules,
-          };
-        }
-        throw new Error(`Unexpected token in useService mock: ${String(token)}`);
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (typeof token === 'function') {
+        return {
+          canRead: () => mockCanReadRules,
+          canWrite: () => mockCanReadRules,
+          can: () => mockCanReadRules,
+        };
+      }
+      throw new Error(`Unexpected token in useService mock: ${String(token)}`);
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const rule = (id: string, name: string) => ({ id, metadata: { name } });
 

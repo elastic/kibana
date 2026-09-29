@@ -21,11 +21,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { unhashUrl } from './hash_unhash_url';
 
 vi.mock('./hash_unhash_url', () => {
-      const mocked = {
-      unhashUrl: vi.fn((x) => x),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    unhashUrl: vi.fn((x) => x),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('kbnUrlTracker', () => {
   let storage: StubBrowserStorage;

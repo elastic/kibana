@@ -11,19 +11,19 @@ import { vi } from 'vitest';
 
 export const mockReadFileSync = vi.fn();
 vi.mock('fs', () => {
-      const mocked = {
-      ...require('fs'),
-      readFileSync: mockReadFileSync,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('fs'),
+    readFileSync: mockReadFileSync,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const mockReadPkcs12Keystore = vi.fn();
 export const mockReadPkcs12Truststore = vi.fn();
 vi.mock('@kbn/crypto', () => {
-      const mocked = {
-      readPkcs12Keystore: mockReadPkcs12Keystore,
-      readPkcs12Truststore: mockReadPkcs12Truststore,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readPkcs12Keystore: mockReadPkcs12Keystore,
+    readPkcs12Truststore: mockReadPkcs12Truststore,
+  };
+  return { ...mocked, default: mocked };
+});

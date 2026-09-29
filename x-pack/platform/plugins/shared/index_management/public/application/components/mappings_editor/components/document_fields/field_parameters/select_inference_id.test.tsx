@@ -20,7 +20,7 @@ import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { SelectInferenceId } from './select_inference_id';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiPopover: ({
@@ -83,56 +83,56 @@ vi.mock('@kbn/inference-endpoint-ui-common', () => {
 });
 
 vi.mock('../../../../../services/api', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../services/api')),
-      useLoadInferenceEndpoints: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../services/api')),
+    useLoadInferenceEndpoints: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateToUrl = vi.fn();
 
 vi.mock('../../../../../app_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../app_context')),
-      useAppContext: vi.fn(() => ({
-        core: {
-          application: {
-            navigateToUrl: mockNavigateToUrl,
+  const mocked = {
+    ...(await vi.importActual('../../../../../app_context')),
+    useAppContext: vi.fn(() => ({
+      core: {
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+        },
+        http: {
+          basePath: {
+            get: vi.fn().mockReturnValue('/base-path'),
           },
-          http: {
-            basePath: {
-              get: vi.fn().mockReturnValue('/base-path'),
+        },
+      },
+      config: { enforceAdaptiveAllocations: false },
+      services: {
+        notificationService: {
+          toasts: {},
+        },
+      },
+      docLinks: {
+        links: {
+          inferenceManagement: {
+            inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
+          },
+        },
+      },
+      plugins: {
+        cloud: { isCloudEnabled: false },
+        share: {
+          url: {
+            locators: {
+              get: vi.fn(() => ({ useUrl: vi.fn().mockReturnValue('https://redirect.me') })),
             },
           },
         },
-        config: { enforceAdaptiveAllocations: false },
-        services: {
-          notificationService: {
-            toasts: {},
-          },
-        },
-        docLinks: {
-          links: {
-            inferenceManagement: {
-              inferenceAPIDocumentation: 'https://abc.com/inference-api-create',
-            },
-          },
-        },
-        plugins: {
-          cloud: { isCloudEnabled: false },
-          share: {
-            url: {
-              locators: {
-                get: vi.fn(() => ({ useUrl: vi.fn().mockReturnValue('https://redirect.me') })),
-              },
-            },
-          },
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DEFAULT_ENDPOINTS: InferenceAPIConfigResponse[] = [
   {

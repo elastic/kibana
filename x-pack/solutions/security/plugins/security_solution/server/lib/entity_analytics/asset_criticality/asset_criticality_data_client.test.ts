@@ -19,11 +19,11 @@ type MockInternalEsClient = ReturnType<
   typeof elasticsearchServiceMock.createScopedClusterClient
 >['asInternalUser'];
 vi.mock('../utils/create_or_update_index', () => {
-      const mocked = {
-      createOrUpdateIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createOrUpdateIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssetCriticalityDataClient', () => {
   const esClientInternal = elasticsearchServiceMock.createScopedClusterClient().asInternalUser;

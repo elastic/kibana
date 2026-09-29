@@ -19,7 +19,7 @@ import { useMountAppended } from '../../../../../common/utils/use_mount_appended
 vi.mock('../../../../../common/lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

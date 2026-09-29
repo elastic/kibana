@@ -88,8 +88,7 @@ describe('startMlModelDeployment', () => {
   });
 
   it('should deploy model if it is downloaded', async () => {
-    vi
-      .spyOn(mockGetStatus, 'getMlModelDeploymentStatus')
+    vi.spyOn(mockGetStatus, 'getMlModelDeploymentStatus')
       .mockReturnValueOnce(
         Promise.resolve({
           deploymentState: MlModelDeploymentState.Downloaded,

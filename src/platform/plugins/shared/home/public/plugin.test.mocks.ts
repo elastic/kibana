@@ -21,12 +21,12 @@ export const tutorialMock = tutorialServiceMock.create();
 export const addDataMock = addDataServiceMock.create();
 export const welcomeMock = welcomeServiceMock.create();
 vi.doMock('./services', () => {
-      const mocked = {
-      FeatureCatalogueRegistry: vi.fn(() => registryMock),
-      EnvironmentService: vi.fn(() => environmentMock),
-      TutorialService: vi.fn(() => tutorialMock),
-      AddDataService: vi.fn(() => addDataMock),
-      WelcomeService: vi.fn(() => welcomeMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FeatureCatalogueRegistry: vi.fn(() => registryMock),
+    EnvironmentService: vi.fn(() => environmentMock),
+    TutorialService: vi.fn(() => tutorialMock),
+    AddDataService: vi.fn(() => addDataMock),
+    WelcomeService: vi.fn(() => welcomeMock),
+  };
+  return { ...mocked, default: mocked };
+});

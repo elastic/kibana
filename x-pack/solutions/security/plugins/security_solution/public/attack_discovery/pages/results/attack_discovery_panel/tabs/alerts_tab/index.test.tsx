@@ -10,21 +10,21 @@ import type { Mock } from 'vitest';
 
 // Mocks must be at the top, before imports that use them
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../../detections/components/alerts_table', () => {
-      const mocked = {
-      AlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsTable: () => <div data-test-subj="detection-engine-alerts-table" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./ease/wrapper', () => {
-      const mocked = {
-      EaseAlertsTab: () => <div data-test-subj="ease-alerts-table" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EaseAlertsTab: () => <div data-test-subj="ease-alerts-table" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { render, screen } from '@testing-library/react';
 import React from 'react';

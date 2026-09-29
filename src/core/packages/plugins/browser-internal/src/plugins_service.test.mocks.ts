@@ -21,11 +21,11 @@ export const mockPluginInitializerProvider: Mock<PluginDefinition, [PluginName]>
   });
 
 vi.mock('./plugin_reader', () => {
-      const mocked = {
-      read: mockPluginInitializerProvider,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    read: mockPluginInitializerProvider,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const runtimeResolverMock = createRuntimePluginContractResolverMock();
 

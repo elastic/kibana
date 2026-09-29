@@ -24,18 +24,18 @@ import { applyScheduledBackfillsToGap } from './apply_scheduled_backfills_to_gap
 import { backfillInitiator } from '../../../../common/constants';
 
 vi.mock('./update_gaps_in_event_log', () => {
-      const mocked = {
-      updateGapsInEventLog: vi.fn().mockResolvedValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateGapsInEventLog: vi.fn().mockResolvedValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./utils');
 vi.mock('./apply_scheduled_backfills_to_gap', () => {
-      const mocked = {
-      applyScheduledBackfillsToGap: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    applyScheduledBackfillsToGap: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const updateGapsInEventLogMock = updateGapsInEventLog as Mock;
 const findOverlappingIntervalsMock = findOverlappingIntervals as Mock;

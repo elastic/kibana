@@ -28,7 +28,7 @@ import { ConnectorTypes } from '../../../common';
 import { coreMock } from '@kbn/core/public/mocks';
 
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
   return {
     ...original,
     KibanaServices: {

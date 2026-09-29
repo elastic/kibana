@@ -20,11 +20,11 @@ import { SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE } from '@kbn/significant-ev
 import { DetectionFlyout } from './detection_flyout';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetRedirectUrl = vi.fn(() => '/app/discover#redirect');
 const mockOpenChat = vi.fn();
@@ -32,52 +32,52 @@ const mockOpenChat = vi.fn();
 const mockStreamFeatures = vi.fn();
 
 vi.mock('../hooks/use_fetch_stream_features', () => {
-      const mocked = {
-      useFetchStreamFeatures: () => mockStreamFeatures(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchStreamFeatures: () => mockStreamFeatures(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./change_point_lens_chart', () => {
-      const mocked = {
-      ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
-        <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
-          [Logs] Spike
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChangePointLensChart: ({ detection }: { detection: LifecycleDetection }) => (
+      <div data-test-subj="nightshiftDetectionLensChart" data-rule-uuid={detection.rule_uuid}>
+        [Logs] Spike
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          http: { basePath: { prepend: (path: string) => `/base${path}` } },
-          application: {
-            getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
-          },
-          charts: {
-            theme: {
-              useChartsBaseTheme: () => ({}),
-              useSparklineOverrides: () => ({}),
-            },
-          },
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-              },
-            },
-          },
-          agentBuilder: {
-            openChat: mockOpenChat,
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        http: { basePath: { prepend: (path: string) => `/base${path}` } },
+        application: {
+          getUrlForApp: (_app: string, { path }: { path: string }) => `/app/apm${path}`,
+        },
+        charts: {
+          theme: {
+            useChartsBaseTheme: () => ({}),
+            useSparklineOverrides: () => ({}),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
+            },
+          },
+        },
+        agentBuilder: {
+          openChat: mockOpenChat,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const webFrontendFeature = {
   uuid: 'feat-web-frontend',

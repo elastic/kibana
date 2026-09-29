@@ -15,20 +15,20 @@ import type { OnboardingServices } from '../services';
 
 const mockOpenWiredConnectionDetails = vi.fn();
 vi.mock('@kbn/cloud/connection_details', () => {
-      const mocked = {
-      openWiredConnectionDetails: (...args: unknown[]) => mockOpenWiredConnectionDetails(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openWiredConnectionDetails: (...args: unknown[]) => mockOpenWiredConnectionDetails(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCopy = vi.fn();
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCopy: vi.fn(({ children }) => children(mockCopy)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCopy: vi.fn(({ children }) => children(mockCopy)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = {
   notifications: { toasts: { addDanger: vi.fn() } },

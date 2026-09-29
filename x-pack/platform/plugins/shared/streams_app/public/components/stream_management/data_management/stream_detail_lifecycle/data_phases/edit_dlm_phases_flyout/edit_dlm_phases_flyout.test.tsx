@@ -15,51 +15,51 @@ import type { PhaseName } from '@kbn/streams-schema';
 import { EditDlmPhasesFlyout } from './edit_dlm_phases_flyout';
 
 vi.mock('../../../../../../hooks/use_streams_privileges', () => {
-      const mocked = {
-      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_ilm_phases_color_and_description', () => {
-      const mocked = {
-      useIlmPhasesColorAndDescription: () => ({
-        ilmPhases: {
-          hot: { color: '#FF0000', description: 'Hot desc' },
-          warm: { color: '#FFA500', description: 'Warm desc' },
-          cold: { color: '#0000FF', description: 'Cold desc' },
-          frozen: { color: '#00FFFF', description: 'Frozen desc' },
-          delete: { color: '#808080', description: 'Delete desc' },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIlmPhasesColorAndDescription: () => ({
+      ilmPhases: {
+        hot: { color: '#FF0000', description: 'Hot desc' },
+        warm: { color: '#FFA500', description: 'Warm desc' },
+        cold: { color: '#0000FF', description: 'Cold desc' },
+        frozen: { color: '#00FFFF', description: 'Frozen desc' },
+        delete: { color: '#808080', description: 'Delete desc' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../ilm_phase_select/ilm_phase_select', () => {
-      const mocked = {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      IlmPhaseSelect: ({ onSelect, renderButton, ...props }: any) => {
-        const buttonProps = {
-          disabled: false,
-          onClick: () => onSelect('frozen'),
-        };
+  const mocked = {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    IlmPhaseSelect: ({ onSelect, renderButton, ...props }: any) => {
+      const buttonProps = {
+        disabled: false,
+        onClick: () => onSelect('frozen'),
+      };
 
-        return (
-          <div>
-            {renderButton(buttonProps)}
-            {props.showEnterpriseLicenseRequiredBadge && (
-              <div data-test-subj="mockEnterpriseLicenseRequiredBadge" />
-            )}
-            {props.showDefaultRepositoryRequiredBadge && (
-              <div data-test-subj="mockDefaultRepositoryRequiredBadge" />
-            )}
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      return (
+        <div>
+          {renderButton(buttonProps)}
+          {props.showEnterpriseLicenseRequiredBadge && (
+            <div data-test-subj="mockEnterpriseLicenseRequiredBadge" />
+          )}
+          {props.showDefaultRepositoryRequiredBadge && (
+            <div data-test-subj="mockDefaultRepositoryRequiredBadge" />
+          )}
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DATA_TEST_SUBJ = 'streamsEditIlmPhasesFlyout';
 

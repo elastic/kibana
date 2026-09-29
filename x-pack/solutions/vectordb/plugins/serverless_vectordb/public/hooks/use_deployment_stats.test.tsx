@@ -23,9 +23,9 @@ import { useKibana } from './use_kibana';
 import { useDeploymentStats } from './use_deployment_stats';
 
 vi.mock('./use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 

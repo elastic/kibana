@@ -18,7 +18,7 @@ import { type LinkCategories, LinkCategoryType } from '@kbn/security-solution-na
 
 const mockUseIsWithinMinBreakpoint = vi.fn(() => true);
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useIsWithinMinBreakpoint: () => mockUseIsWithinMinBreakpoint(),

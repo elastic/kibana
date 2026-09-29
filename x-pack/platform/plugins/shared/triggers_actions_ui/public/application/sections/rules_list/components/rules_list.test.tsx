@@ -52,101 +52,101 @@ import userEvent from '@testing-library/user-event';
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => {
-      const mocked = {
-      useUiSetting: vi.fn(() => false),
-      useUiSetting$: vi.fn((value: string) => ['0,0']),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn(() => false),
+    useUiSetting$: vi.fn((value: string) => ['0,0']),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/action_connector_api', () => {
-      const mocked = {
-      loadActionTypes: vi.fn(),
-      loadAllActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadActionTypes: vi.fn(),
+    loadAllActions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/rule_api/rules_kuery_filter', () => {
-      const mocked = {
-      loadRulesWithKueryFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRulesWithKueryFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-rules-apis/apis/get_rule_types', () => {
-      const mocked = {
-      getRuleTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRuleTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/aggregate_kuery_filter', () => {
-      const mocked = {
-      loadRuleAggregationsWithKueryFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRuleAggregationsWithKueryFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/update_api_key', () => {
-      const mocked = {
-      updateAPIKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateAPIKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/aggregate', () => {
-      const mocked = {
-      loadRuleTags: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadRuleTags: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/snooze', () => {
-      const mocked = {
-      bulkSnoozeRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkSnoozeRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/unsnooze', () => {
-      const mocked = {
-      bulkUnsnoozeRules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkUnsnoozeRules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/bulk_delete', () => {
-      const mocked = {
-      bulkDeleteRules: vi.fn().mockResolvedValue({ errors: [], total: 10 }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkDeleteRules: vi.fn().mockResolvedValue({ errors: [], total: 10 }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../lib/rule_api/update_api_key', () => {
-      const mocked = {
-      bulkUpdateAPIKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkUpdateAPIKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_alerting_framework_health', () => {
-      const mocked = {
-      fetchAlertingFrameworkHealth: vi.fn(() => ({
-        isSufficientlySecure: true,
-        hasPermanentEncryptionKey: true,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchAlertingFrameworkHealth: vi.fn(() => ({
+      isSufficientlySecure: true,
+      hasPermanentEncryptionKey: true,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/rule_api/aggregate_kuery_filter');
 vi.mock('../../../lib/rule_api/rules_kuery_filter');
 
 vi.mock('@kbn/alerts-ui-shared/src/common/apis/fetch_ui_health_status', () => {
-      const mocked = {
-      fetchUiHealthStatus: vi.fn(() => ({ isRulesAvailable: true })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchUiHealthStatus: vi.fn(() => ({ isRulesAvailable: true })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/response-ops-rule-form/src/common/apis/fetch_ui_config', () => {
-      const mocked = {
-      fetchUiConfig: vi
-        .fn()
-        .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchUiConfig: vi
+      .fn()
+      .mockResolvedValue({ minimumScheduleInterval: { value: '1m', enforce: false } }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('react-router-dom', () => {
   const history = {
     push: vi.fn(),
@@ -161,31 +161,31 @@ vi.mock('react-router-dom', () => {
 });
 
 vi.mock('@kbn/alerts-ui-shared/src/maintenance_window_callout/api', () => {
-      const mocked = {
-      fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
+  };
+  return { ...mocked, default: mocked };
+});
 const fetchActiveMaintenanceWindowsMock = fetchActiveMaintenanceWindows as Mock;
 
 vi.mock('../../../lib/capabilities', () => {
-      const mocked = {
-      hasAllPrivilege: vi.fn(() => true),
-      hasSaveRulesCapability: vi.fn(() => true),
-      hasShowActionsCapability: vi.fn(() => true),
-      hasExecuteActionsCapability: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasAllPrivilege: vi.fn(() => true),
+    hasSaveRulesCapability: vi.fn(() => true),
+    hasShowActionsCapability: vi.fn(() => true),
+    hasExecuteActionsCapability: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-utils-plugin/public', async () => {
-  const originalModule = (await vi.importActual('@kbn/kibana-utils-plugin/public'));
+  const originalModule = await vi.importActual('@kbn/kibana-utils-plugin/public');
   return {
     ...originalModule,
     createKbnUrlStateStorage: vi.fn(() => ({
@@ -198,12 +198,12 @@ vi.mock('@kbn/kibana-utils-plugin/public', async () => {
 vi.mock('react-use/lib/useLocalStorage', () => vi.fn(() => [null, () => null]));
 vi.mock('@kbn/ebt-tools');
 vi.mock('@kbn/cps-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/cps-utils')),
-      useRouteBasedCpsPickerAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/cps-utils')),
+    useRouteBasedCpsPickerAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const license$ = new BehaviorSubject(
   licensingMock.createLicense({
@@ -218,13 +218,19 @@ usePerformanceContextMock.mockReturnValue({ onPageReady: vi.fn() });
 
 const ruleTags = ['a', 'b', 'c', 'd'];
 
-const { getRuleTypes } = (await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types'));
-const { bulkUpdateAPIKey } = (await vi.importMock('../../../lib/rule_api/update_api_key'));
-const { loadRuleTags } = (await vi.importMock('../../../lib/rule_api/aggregate'));
+const { getRuleTypes } = await vi.importMock('@kbn/response-ops-rules-apis/apis/get_rule_types');
+const { bulkUpdateAPIKey } = await vi.importMock('../../../lib/rule_api/update_api_key');
+const { loadRuleTags } = await vi.importMock('../../../lib/rule_api/aggregate');
 
-const { loadRuleAggregationsWithKueryFilter } = (await vi.importMock('../../../lib/rule_api/aggregate_kuery_filter'));
-const { loadRulesWithKueryFilter } = (await vi.importMock('../../../lib/rule_api/rules_kuery_filter'));
-const { loadActionTypes, loadAllActions } = (await vi.importMock('../../../lib/action_connector_api'));
+const { loadRuleAggregationsWithKueryFilter } = await vi.importMock(
+  '../../../lib/rule_api/aggregate_kuery_filter'
+);
+const { loadRulesWithKueryFilter } = await vi.importMock(
+  '../../../lib/rule_api/rules_kuery_filter'
+);
+const { loadActionTypes, loadAllActions } = await vi.importMock(
+  '../../../lib/action_connector_api'
+);
 
 const useKibanaMock = useKibana as Mocked<typeof useKibana>;
 const queryClient = new QueryClient({
@@ -997,7 +1003,7 @@ describe('rules_list ', () => {
     });
 
     it('rule list items with actions are not editable if canExecuteAction is false', async () => {
-      const { hasExecuteActionsCapability } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasExecuteActionsCapability } = await vi.importMock('../../../lib/capabilities');
       hasExecuteActionsCapability.mockReturnValue(false);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
@@ -1444,7 +1450,7 @@ describe('rules_list with show only capability', () => {
     });
 
     it('renders table of rules with delete button disabled', async () => {
-      const { hasAllPrivilege } = (await vi.importMock('../../../lib/capabilities'));
+      const { hasAllPrivilege } = await vi.importMock('../../../lib/capabilities');
       hasAllPrivilege.mockReturnValue(false);
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));

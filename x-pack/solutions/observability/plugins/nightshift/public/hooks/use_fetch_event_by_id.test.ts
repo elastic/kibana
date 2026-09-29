@@ -28,37 +28,37 @@ const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent 
   } as SignificantEvent);
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          significantEvents: {
-            significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        significantEvents: {
+          significantEventsRepositoryClient: { fetch: mockSignificantEventsFetch },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let capturedQueryFn: ((args: { signal?: AbortSignal }) => Promise<unknown>) | undefined;
 let capturedQueryKey: readonly unknown[] | undefined;
 let capturedEnabled: boolean | undefined;
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: (params: {
-        queryKey: readonly unknown[];
-        enabled: boolean;
-        queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
-      }) => {
-        capturedQueryKey = params.queryKey;
-        capturedEnabled = params.enabled;
-        capturedQueryFn = params.queryFn;
-        return { data: undefined, isFetched: false };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: (params: {
+      queryKey: readonly unknown[];
+      enabled: boolean;
+      queryFn: (args: { signal?: AbortSignal }) => Promise<unknown>;
+    }) => {
+      capturedQueryKey = params.queryKey;
+      capturedEnabled = params.enabled;
+      capturedQueryFn = params.queryFn;
+      return { data: undefined, isFetched: false };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFetchEventById', () => {
   beforeEach(() => {

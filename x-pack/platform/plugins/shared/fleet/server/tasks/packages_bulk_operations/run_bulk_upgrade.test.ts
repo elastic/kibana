@@ -48,9 +48,10 @@ describe('Bulk upgrade task', () => {
 
     vi.mocked(packagePolicyService.listIds).mockResolvedValue({ items: ['id1', 'id2'] } as any);
 
-    vi
-      .mocked(packagePolicyService.bulkUpgrade)
-      .mockResolvedValue([{ success: true }, { success: true }] as any);
+    vi.mocked(packagePolicyService.bulkUpgrade).mockResolvedValue([
+      { success: true },
+      { success: true },
+    ] as any);
   });
   describe('_runBulkUpgradeTask', () => {
     it('should work for successfull upgrade', async () => {

@@ -20,23 +20,23 @@ export const mockPackage = {
 };
 
 vi.doMock('fs', () => {
-      const mocked = {
-      ...realFs,
-      readFileSync: (filePath: string, options?: unknown) => {
-        if (filePath === kibanaPackagePath) {
-          return JSON.stringify(mockPackage.raw);
-        }
-        return realFs.readFileSync(filePath, options);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...realFs,
+    readFileSync: (filePath: string, options?: unknown) => {
+      if (filePath === kibanaPackagePath) {
+        return JSON.stringify(mockPackage.raw);
+      }
+      return realFs.readFileSync(filePath, options);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { scanPluginSearchPaths } = (await vi.importActual('./scan_plugin_search_paths'));
+const { scanPluginSearchPaths } = await vi.importActual('./scan_plugin_search_paths');
 export const scanPluginSearchPathsMock = vi.fn().mockImplementation(scanPluginSearchPaths);
 vi.doMock('./scan_plugin_search_paths', () => {
-      const mocked = {
-      scanPluginSearchPaths: scanPluginSearchPathsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scanPluginSearchPaths: scanPluginSearchPathsMock,
+  };
+  return { ...mocked, default: mocked };
+});

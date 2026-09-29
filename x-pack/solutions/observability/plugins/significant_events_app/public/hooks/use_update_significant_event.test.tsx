@@ -15,11 +15,11 @@ import { useKibana } from './use_kibana';
 import { useUpdateSignificantEvent } from './use_update_significant_event';
 
 vi.mock('./use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 

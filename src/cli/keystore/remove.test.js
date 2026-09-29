@@ -15,13 +15,13 @@ const mockKeystoreData =
   'Ry21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
-      existsSync: vi.fn().mockImplementation(() => true),
-      writeFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFileSync: vi.fn().mockImplementation(() => JSON.stringify(mockKeystoreData)),
+    existsSync: vi.fn().mockImplementation(() => true),
+    writeFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import sinon from 'sinon';
 

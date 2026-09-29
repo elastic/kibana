@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 
 import { asSpaceId } from '@kbn/core-spaces-common';
 
@@ -15,18 +14,18 @@ import { useSpaceItems } from './use_space_items';
 import type { Space } from '../../../common';
 
 vi.mock('../../space_avatar', () => {
-      const mocked = {
-      getSpaceAvatarComponent: () => Promise.resolve(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSpaceAvatarComponent: () => Promise.resolve(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../space_solution_badge', () => {
-      const mocked = {
-      SpaceSolutionBadge: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SpaceSolutionBadge: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createSpace = (overrides: Partial<Omit<Space, 'id'>> & { id?: string } = {}): Space => {
   const { id = 'test-space', ...rest } = overrides;

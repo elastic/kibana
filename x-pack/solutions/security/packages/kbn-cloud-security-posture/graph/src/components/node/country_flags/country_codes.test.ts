@@ -12,13 +12,13 @@ import { i18n } from '@kbn/i18n';
 import { getCountryName, getCountryFlag } from './country_codes';
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        getLocale: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      getLocale: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockI18n = i18n as Mocked<typeof i18n>;
 

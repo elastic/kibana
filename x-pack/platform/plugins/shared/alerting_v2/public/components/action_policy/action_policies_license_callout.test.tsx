@@ -16,22 +16,22 @@ let mockIsLicenseValid = false;
 let mockCanManageLicense = true;
 
 vi.mock('../../hooks/use_is_action_policies_license_valid', () => {
-      const mocked = {
-      useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsActionPoliciesLicenseValid: () => mockIsLicenseValid,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/core-di-browser')),
-      useService: () => ({
-        capabilities: { management: { stack: { license_management: mockCanManageLicense } } },
-        getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}/${path}`,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/core-di-browser')),
+    useService: () => ({
+      capabilities: { management: { stack: { license_management: mockCanManageLicense } } },
+      getUrlForApp: (appId: string, { path }: { path: string }) => `/app/${appId}/${path}`,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderCallout = () =>
   render(

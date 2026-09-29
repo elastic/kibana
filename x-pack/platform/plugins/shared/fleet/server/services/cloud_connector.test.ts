@@ -111,9 +111,7 @@ describe('CloudConnectorService', () => {
     };
 
     it('should create a cloud connector successfully with space awareness enabled', async () => {
-      vi
-        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-        .mockResolvedValue(true);
+      vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(true);
 
       // Mock the find call for duplicate name checking
       mockSoClient.find.mockResolvedValue({
@@ -179,9 +177,7 @@ describe('CloudConnectorService', () => {
     });
 
     it('should create a cloud connector with accountType', async () => {
-      vi
-        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-        .mockResolvedValue(true);
+      vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(true);
 
       const requestWithAccountType: CreateCloudConnectorRequest = {
         ...mockCreateRequest,
@@ -273,9 +269,7 @@ describe('CloudConnectorService', () => {
     });
 
     it('should create a cloud connector with organization accountType', async () => {
-      vi
-        .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-        .mockResolvedValue(true);
+      vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(true);
 
       const requestWithAccountType: CreateCloudConnectorRequest = {
         ...mockCreateRequest,
@@ -406,9 +400,9 @@ describe('CloudConnectorService', () => {
 
     describe('duplicate name validation', () => {
       it('should check for duplicate names using optimized query (SO_SEARCH_LIMIT and fields)', async () => {
-        vi
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-          .mockResolvedValue(true);
+        vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(
+          true
+        );
 
         const existingConnectors = {
           saved_objects: [
@@ -444,9 +438,9 @@ describe('CloudConnectorService', () => {
       });
 
       it('should throw error when duplicate name exists (case-insensitive)', async () => {
-        vi
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-          .mockResolvedValue(true);
+        vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(
+          true
+        );
 
         const existingConnectors = {
           saved_objects: [
@@ -473,9 +467,9 @@ describe('CloudConnectorService', () => {
       });
 
       it('should throw error when duplicate name exists with extra whitespace', async () => {
-        vi
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-          .mockResolvedValue(true);
+        vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(
+          true
+        );
 
         const existingConnectors = {
           saved_objects: [
@@ -502,9 +496,9 @@ describe('CloudConnectorService', () => {
       });
 
       it('should allow creation when no duplicate names exist', async () => {
-        vi
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-          .mockResolvedValue(true);
+        vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(
+          true
+        );
 
         const existingConnectors = {
           saved_objects: [
@@ -533,9 +527,9 @@ describe('CloudConnectorService', () => {
       });
 
       it('should normalize connector name by trimming and collapsing spaces', async () => {
-        vi
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-          .mockResolvedValue(true);
+        vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(
+          true
+        );
 
         const requestWithSpaces: CreateCloudConnectorRequest = {
           name: '  test   connector   with   spaces  ',
@@ -574,9 +568,9 @@ describe('CloudConnectorService', () => {
       });
 
       it('should handle large number of existing connectors efficiently', async () => {
-        vi
-          .spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled')
-          .mockResolvedValue(true);
+        vi.spyOn(await import('./spaces/helpers'), 'isSpaceAwarenessEnabled').mockResolvedValue(
+          true
+        );
 
         // Simulate 500 existing connectors
         const existingConnectors = {

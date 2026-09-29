@@ -17,7 +17,7 @@ import type { MaintenanceWindowUI } from '../../common';
 import { MaintenanceWindowStatus } from '../../common';
 
 vi.mock('../utils/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../utils/kibana_react'));
+  const originalModule = await vi.importActual('../utils/kibana_react');
   return {
     ...originalModule,
     // mocks the date format in settings

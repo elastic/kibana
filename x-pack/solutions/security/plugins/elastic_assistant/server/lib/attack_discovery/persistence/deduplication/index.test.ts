@@ -17,12 +17,12 @@ import { deduplicateAttackDiscoveries } from '.';
 import { mockAttackDiscoveries } from '../../evaluation/__mocks__/mock_attack_discoveries';
 
 vi.mock('@kbn/attack-discovery-schedules-common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/attack-discovery-schedules-common')),
-      deduplicateAttackDiscoveries: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/attack-discovery-schedules-common')),
+    deduplicateAttackDiscoveries: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
 const mockLogger = loggerMock.create();
@@ -59,8 +59,7 @@ describe('deduplicateAttackDiscoveries', () => {
   it('injects a computeSha256Hash that returns the sha256 hex digest', async () => {
     await deduplicateAttackDiscoveries(defaultProps);
 
-    const { computeSha256Hash } = (deduplicateAttackDiscoveriesShared as Mock).mock
-      .calls[0][0];
+    const { computeSha256Hash } = (deduplicateAttackDiscoveriesShared as Mock).mock.calls[0][0];
 
     expect(computeSha256Hash('some-input')).toBe(
       createHash('sha256').update('some-input').digest('hex')

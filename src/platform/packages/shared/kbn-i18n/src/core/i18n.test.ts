@@ -35,7 +35,7 @@ describe.skip('I18n engine', () => {
   let i18n: typeof i18nModule;
 
   beforeEach(async () => {
-    i18n = (await vi.importActual('./i18n'));
+    i18n = await vi.importActual('./i18n');
   });
 
   afterEach(() => {
@@ -733,7 +733,7 @@ describe('i18n.initDefault', () => {
   let i18n: typeof i18nModule;
 
   beforeEach(async () => {
-    i18n = (await vi.importActual('./i18n'));
+    i18n = await vi.importActual('./i18n');
   });
 
   afterEach(() => {

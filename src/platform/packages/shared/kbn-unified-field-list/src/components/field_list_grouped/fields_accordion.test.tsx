@@ -18,12 +18,12 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { EuiNotificationBadge } from '@elastic/eui';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiNotificationBadge: vi.fn(() => <div>MockBadge</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiNotificationBadge: vi.fn(() => <div>MockBadge</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 const MockEuiNotificationBadge = vi.mocked(EuiNotificationBadge);
 
 beforeEach(() => {

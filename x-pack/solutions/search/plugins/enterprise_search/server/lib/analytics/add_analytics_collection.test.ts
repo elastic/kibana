@@ -17,9 +17,9 @@ import { addAnalyticsCollection } from './add_analytics_collection';
 import { fetchAnalyticsCollections } from './fetch_analytics_collection';
 
 vi.mock('./fetch_analytics_collection', () => {
-      const mocked = { fetchAnalyticsCollections: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { fetchAnalyticsCollections: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 describe('add analytics collection lib function', () => {
   const mockClient = {

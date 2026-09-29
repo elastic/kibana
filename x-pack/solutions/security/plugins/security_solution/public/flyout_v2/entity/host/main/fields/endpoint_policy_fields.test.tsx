@@ -20,7 +20,9 @@ const TestWrapper = ({ el }: { el: JSX.Element | undefined }) => <>{el}</>;
 vi.mock(
   '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary',
   async () => {
-    const original = (await vi.importActual('../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'));
+    const original = await vi.importActual(
+      '../../../../../management/hooks/response_actions/use_get_endpoint_pending_actions_summary'
+    );
     return {
       ...original,
       useGetEndpointPendingActionsSummary: () => ({

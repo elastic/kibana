@@ -24,42 +24,42 @@ const mockInvalidateConversation = vi.fn();
 const mockOpenSidebarConversation = vi.fn();
 
 vi.mock('./canvas_context', () => {
-      const mocked = {
-      getAttachmentPreviewKey: (attachmentId: string, version?: number) =>
-        `${attachmentId}:${version ?? 'latest'}`,
-      useCanvasContext: () => ({
-        openCanvas: mockOpenCanvas,
-        previewedAttachmentKey: null,
-        setPreviewedAttachmentKey: mockSetPreviewedAttachmentKey,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAttachmentPreviewKey: (attachmentId: string, version?: number) =>
+      `${attachmentId}:${version ?? 'latest'}`,
+    useCanvasContext: () => ({
+      openCanvas: mockOpenCanvas,
+      previewedAttachmentKey: null,
+      setPreviewedAttachmentKey: mockSetPreviewedAttachmentKey,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: () => ({
-        conversationActions: { invalidateConversation: mockInvalidateConversation },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: () => ({
+      conversationActions: { invalidateConversation: mockInvalidateConversation },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: () => 'agent-1',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: () => 'agent-1',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        openSidebarConversation: mockOpenSidebarConversation,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      openSidebarConversation: mockOpenSidebarConversation,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dynamicActionHandler = vi.fn();
 

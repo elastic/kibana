@@ -23,9 +23,9 @@ const DOCUMENTATION_HREF = 'DOCUMENTATION_HREF';
 
 describe('<EmptyPage />', () => {
   it('should render', () => {
-    (
-      useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>
-    ).mockReturnValue(INTEGRATION_HREF);
+    (useIntegrationsPageLink as MockedFunction<typeof useIntegrationsPageLink>).mockReturnValue(
+      INTEGRATION_HREF
+    );
     (useTIDocumentationLink as MockedFunction<typeof useTIDocumentationLink>).mockReturnValue(
       DOCUMENTATION_HREF
     );

@@ -28,12 +28,12 @@ const mockCalculateAWSA4Signature = vi.fn();
 require('../../auth_types/aws_crypto_helpers');
 
 vi.mock('../../auth_types/aws_crypto_helpers', () => {
-      const mocked = {
-      sha256Hash: () => mockSha256Hash,
-      calculateAWSA4Signature: () => mockCalculateAWSA4Signature,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sha256Hash: () => mockSha256Hash,
+    calculateAWSA4Signature: () => mockCalculateAWSA4Signature,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('amazon_s3_api exports', () => {
   const mockClient = {

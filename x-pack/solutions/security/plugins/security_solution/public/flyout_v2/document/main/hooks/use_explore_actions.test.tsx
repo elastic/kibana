@@ -12,18 +12,18 @@ import type { DataTableRecord } from '@kbn/discover-utils';
 import { useExploreActions } from './use_explore_actions';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          application: {
-            getUrlForApp: (_appId: string, { path }: { path: string }) =>
-              `/app/securitySolutionUI/${path}`,
-          },
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        application: {
+          getUrlForApp: (_appId: string, { path }: { path: string }) =>
+            `/app/securitySolutionUI/${path}`,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createHit = (
   flattened: Record<string, unknown> = {},

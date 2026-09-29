@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { setMockValues } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
@@ -14,6 +12,7 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 
 import moment from 'moment';
+import { vi } from 'vitest';
 
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
@@ -22,18 +21,18 @@ import { FilterBy } from '../../../utils/get_formula_by_filter';
 import { AnalyticsCollectionChart } from './analytics_collection_chart';
 
 vi.mock('@elastic/charts', () => {
-      const mocked = {
-      ...require('@elastic/charts'),
-      AreaSeries: () => <div data-test-subj="areaSeries" />,
-      Axis: () => null,
-      Chart: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="chart">{children}</div>
-      ),
-      Settings: () => null,
-      Tooltip: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('@elastic/charts'),
+    AreaSeries: () => <div data-test-subj="areaSeries" />,
+    Axis: () => null,
+    Chart: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="chart">{children}</div>
+    ),
+    Settings: () => null,
+    Tooltip: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnalyticsCollectionChart', () => {
   const mockedData = Object.values(FilterBy).reduce(

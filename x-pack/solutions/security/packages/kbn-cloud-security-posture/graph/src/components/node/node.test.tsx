@@ -36,12 +36,12 @@ import userEvent from '@testing-library/user-event';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 vi.mock('../constants', async () => {
-      const mocked = {
-      ...(await vi.importActual('../constants')),
-      ONLY_RENDER_VISIBLE_ELEMENTS: false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../constants')),
+    ONLY_RENDER_VISIBLE_ELEMENTS: false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const nodeTypes = {
   diamond: DiamondNode,

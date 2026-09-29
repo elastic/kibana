@@ -16,9 +16,7 @@ import { NOTE_URL } from '../../../../common/constants';
 import type { getNotesInputSchema } from '../../../../common/workflows/step_types/get_notes_step/get_notes_step_common';
 
 describe('getNotesStepDefinition', () => {
-  let mockContextManager: Mocked<
-    StepHandlerContext<typeof getNotesInputSchema>['contextManager']
-  >;
+  let mockContextManager: Mocked<StepHandlerContext<typeof getNotesInputSchema>['contextManager']>;
   let mockContext: StepHandlerContext<typeof getNotesInputSchema>;
 
   beforeEach(() => {

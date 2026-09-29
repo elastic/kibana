@@ -28,11 +28,11 @@ import { getExceptionListItemSchemaMock } from '../mocks/response/exception_list
 import { COMMENTS_WITH_CREATEDAT_CREATEDBY, ENTRIES_WITH_IDS } from '../mocks/constants.mock';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Exceptions transforms', () => {
   describe('transformOutput', () => {

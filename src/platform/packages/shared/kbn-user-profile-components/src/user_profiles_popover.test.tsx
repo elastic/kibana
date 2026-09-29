@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import type { UserProfile } from '@kbn/core-user-profile-common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

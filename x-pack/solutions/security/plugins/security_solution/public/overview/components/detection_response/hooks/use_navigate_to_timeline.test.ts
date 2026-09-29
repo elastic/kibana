@@ -14,25 +14,25 @@ import { useNavigateToTimeline } from './use_navigate_to_timeline';
 import * as mock from './mock_data';
 
 vi.mock('../../../../timelines/hooks/use_create_timeline', () => {
-      const mocked = {
-      useCreateTimeline: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateTimeline: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../data_view_manager/hooks/use_signal_index_name', () => {
-      const mocked = {
-      useSignalIndexName: () => 'mock-signal-index',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignalIndexName: () => 'mock-signal-index',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../data_view_manager/hooks/use_security_default_patterns', () => {
-      const mocked = {
-      useSecurityDefaultPatterns: () => ({ id: 'someId', indexPatterns: [] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSecurityDefaultPatterns: () => ({ id: 'someId', indexPatterns: [] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
@@ -45,11 +45,11 @@ vi.mock('react-redux-v7', () => {
 });
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'mock-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'mock-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const id = 'timeline-1';
 const renderUseNavigatgeToTimeline = () => renderHook(() => useNavigateToTimeline());

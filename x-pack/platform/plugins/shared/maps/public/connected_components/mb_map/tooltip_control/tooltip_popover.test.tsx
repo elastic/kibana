@@ -8,13 +8,13 @@
 import { vi } from 'vitest';
 
 vi.mock('./features_tooltip/features_tooltip', () => {
-      const mocked = {
-      FeaturesTooltip: () => {
-        return <div>mockFeaturesTooltip</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FeaturesTooltip: () => {
+      return <div>mockFeaturesTooltip</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import sinon from 'sinon';
 import React from 'react';

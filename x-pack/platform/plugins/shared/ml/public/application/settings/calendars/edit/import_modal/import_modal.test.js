@@ -13,11 +13,11 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { ImportModal } from './import_modal';
 
 vi.mock('../../../../capabilities/check_capabilities', () => {
-      const mocked = {
-      usePermissionCheck: () => [true, true],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePermissionCheck: () => [true, true],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testProps = {
   addImportedEvents: vi.fn(),

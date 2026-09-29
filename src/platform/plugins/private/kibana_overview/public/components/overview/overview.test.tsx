@@ -44,25 +44,25 @@ vi.mock('@kbn/shared-ux-page-analytics-no-data', async () => {
 });
 
 vi.mock('../news_feed', () => {
-      const mocked = {
-      NewsFeed: () => <div data-test-subj="mockedNewsFeed" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewsFeed: () => <div data-test-subj="mockedNewsFeed" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../add_data', () => {
-      const mocked = {
-      AddData: () => <div data-test-subj="mockedAddData" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddData: () => <div data-test-subj="mockedAddData" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../manage_data', () => {
-      const mocked = {
-      ManageData: () => <div data-test-subj="mockedManageData" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ManageData: () => <div data-test-subj="mockedManageData" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNewsFetchResult = {
   error: null,

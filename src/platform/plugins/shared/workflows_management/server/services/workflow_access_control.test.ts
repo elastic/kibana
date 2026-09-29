@@ -97,9 +97,9 @@ describe('WorkflowAccessControlService', () => {
     async (username) => {
       delete document.owner_id;
       delete document.access_control;
-      vi
-        .spyOn(core.security.authc, 'getCurrentUser')
-        .mockReturnValue(securityMock.createMockAuthenticatedUser({ username }));
+      vi.spyOn(core.security.authc, 'getCurrentUser').mockReturnValue(
+        securityMock.createMockAuthenticatedUser({ username })
+      );
       const update = service.update('id', 'default', { access_mode: 'private' }, request);
 
       if (username === 'alice') {
@@ -422,9 +422,10 @@ describe('WorkflowAccessControlService', () => {
 
   it('closes the search snapshot if execution filtering fails', async () => {
     const client = core.elasticsearch.client.asInternalUser;
-    vi
-      .mocked(client.openPointInTime)
-      .mockResolvedValue({ id: 'pit', _shards: { total: 1, successful: 1, failed: 0 } });
+    vi.mocked(client.openPointInTime).mockResolvedValue({
+      id: 'pit',
+      _shards: { total: 1, successful: 1, failed: 0 },
+    });
     vi.mocked(client.search).mockRejectedValue(new Error('Search failed'));
     await expect(service.executionFilter('default', request)).rejects.toThrow('Search failed');
     expect(client.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });

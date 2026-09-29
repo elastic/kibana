@@ -25,15 +25,15 @@ import type { AvailablePackages } from './with_available_packages';
 vi.mock('../hooks/integration_context');
 vi.mock('../hooks/use_stored_state');
 vi.mock('../../kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../kibana')),
-      useNavigation: vi.fn().mockReturnValue({
-        navigateTo: vi.fn(),
-        getAppUrl: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../kibana')),
+    useNavigation: vi.fn().mockReturnValue({
+      navigateTo: vi.fn(),
+      getAppUrl: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPackageList = vi.fn<
   React.JSX.Element,
@@ -41,9 +41,9 @@ const mockPackageList = vi.fn<
 >(() => <div data-test-subj="packageList" />);
 
 vi.mock('@kbn/fleet-plugin/public');
-vi
-  .spyOn(module, 'PackageList')
-  .mockImplementation(() => Promise.resolve({ PackageListGrid: mockPackageList }));
+vi.spyOn(module, 'PackageList').mockImplementation(() =>
+  Promise.resolve({ PackageListGrid: mockPackageList })
+);
 
 const mockUseStoredIntegrationTabId = useStoredIntegrationTabId as MockedFunction<
   typeof useStoredIntegrationTabId

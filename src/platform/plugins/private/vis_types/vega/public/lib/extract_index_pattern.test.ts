@@ -20,18 +20,18 @@ import type { VegaSpec } from '../data_model/types';
 import { vegaVisType } from '../vega_type';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getIndexPatternFromESQLQuery: vi.fn(),
-      getESQLAdHocDataview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIndexPatternFromESQLQuery: vi.fn(),
+    getESQLAdHocDataview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../default_spec', () => {
-      const mocked = {
-      getDefaultSpec: vi.fn(() => ''),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultSpec: vi.fn(() => ''),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockedSpec = (mockedObj: any) => mockedObj as unknown as VegaSpec;
 

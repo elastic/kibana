@@ -49,22 +49,22 @@ import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ, SetupTechnology } from '@kbn/fleet
 
 // mock useParams
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn().mockReturnValue({
-        integration: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn().mockReturnValue({
+      integration: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/fleet-plugin/public/services/experimental_features');
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const onChange = vi.fn();
 const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);

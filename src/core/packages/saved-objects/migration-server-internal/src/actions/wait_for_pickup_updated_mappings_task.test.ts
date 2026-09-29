@@ -17,7 +17,9 @@ import * as Either from 'fp-ts/Either';
 import type { TaskCompletedWithRetriableError } from './wait_for_task';
 
 vi.mock('./catch_retryable_es_client_errors', async () => {
-  const { catchRetryableEsClientErrors: actualImplementation } = (await vi.importActual('./catch_retryable_es_client_errors'));
+  const { catchRetryableEsClientErrors: actualImplementation } = await vi.importActual(
+    './catch_retryable_es_client_errors'
+  );
   return {
     catchRetryableEsClientErrors: vi.fn(actualImplementation),
   };

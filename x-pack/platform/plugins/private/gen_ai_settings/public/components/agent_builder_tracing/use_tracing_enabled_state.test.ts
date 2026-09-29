@@ -31,11 +31,11 @@ import { useTracingEnabledState } from './use_tracing_enabled_state';
 
 vi.mock('../../contexts/settings_context');
 vi.mock('@kbn/management-settings-utilities', () => {
-      const mocked = {
-      hasUnsavedChange: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasUnsavedChange: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSettingsContext = useSettingsContext as MockedFunction<typeof useSettingsContext>;
 const mockHasUnsavedChange = hasUnsavedChange as MockedFunction<typeof hasUnsavedChange>;

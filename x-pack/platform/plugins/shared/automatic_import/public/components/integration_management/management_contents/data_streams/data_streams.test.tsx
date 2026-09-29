@@ -18,65 +18,65 @@ import { useGetIntegrationById } from '../../../../common';
 import { useIntegrationForm } from '../../forms/integration_form';
 
 vi.mock('../../../../common', () => {
-      const mocked = {
-      useGetIntegrationById: vi.fn(),
-      useDeleteDataStream: vi.fn(() => ({
-        deleteDataStreamMutation: {
-          mutate: vi.fn(),
-          isLoading: false,
-          variables: undefined,
-        },
-      })),
-      isValidNameFormat: vi.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
-      startsWithLetter: vi.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetIntegrationById: vi.fn(),
+    useDeleteDataStream: vi.fn(() => ({
+      deleteDataStreamMutation: {
+        mutate: vi.fn(),
+        isLoading: false,
+        variables: undefined,
+      },
+    })),
+    isValidNameFormat: vi.fn((v: string) => /^[a-zA-Z0-9_ ]+$/.test(v.trim())),
+    startsWithLetter: vi.fn((v: string) => /^[a-zA-Z]/.test(v.trim())),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseGetIntegrationById = useGetIntegrationById as Mock;
 
 const mockUsePackageNames = vi.fn((): Set<string> | undefined => undefined);
 vi.mock('../../forms/integration_form', () => {
-      const mocked = {
-      useIntegrationForm: vi.fn(),
-      usePackageNames: () => mockUsePackageNames(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIntegrationForm: vi.fn(),
+    usePackageNames: () => mockUsePackageNames(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseIntegrationForm = useIntegrationForm as Mock;
 
 const mockReportDataStreamFlyoutOpened = vi.fn();
 vi.mock('../../../telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportDataStreamFlyoutOpened: mockReportDataStreamFlyoutOpened,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportDataStreamFlyoutOpened: mockReportDataStreamFlyoutOpened,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./create_data_stream_flyout', () => {
-      const mocked = {
-      CreateDataStreamFlyout: vi.fn(({ onClose }) => (
-        <div data-test-subj="createDataStreamFlyoutMock">
-          <button type="button" data-test-subj="mockFlyoutClose" onClick={onClose}>
-            {'Close'}
-          </button>
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateDataStreamFlyout: vi.fn(({ onClose }) => (
+      <div data-test-subj="createDataStreamFlyoutMock">
+        <button type="button" data-test-subj="mockFlyoutClose" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./data_streams_table/data_steams_table', () => {
-      const mocked = {
-      DataStreamsTable: vi.fn(({ items }) => (
-        <div data-test-subj="dataStreamsTableMock">
-          {items.length} {'data streams'}
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataStreamsTable: vi.fn(({ items }) => (
+      <div data-test-subj="dataStreamsTableMock">
+        {items.length} {'data streams'}
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderDataStreams = (integrationId?: string) => {
   const path = integrationId ? `/edit/${integrationId}` : '/create';

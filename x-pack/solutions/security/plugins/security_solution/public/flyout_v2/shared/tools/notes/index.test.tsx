@@ -28,11 +28,11 @@ import { useTimelineConfig } from './hooks/use_timeline_config';
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 
 vi.mock('./components/notes_remote_callout', () => {
-      const mocked = {
-      NotesRemoteCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesRemoteCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_timeline_config');
 vi.mock('../../../../common/hooks/is_in_security_app');
@@ -43,13 +43,13 @@ const useUserPrivilegesMock = useUserPrivileges as Mock;
 
 const mockAddError = vi.fn();
 vi.mock('../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {

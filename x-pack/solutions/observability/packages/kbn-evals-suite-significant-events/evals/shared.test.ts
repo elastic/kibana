@@ -25,13 +25,13 @@ import {
 } from './shared';
 
 vi.mock('../src/data_generators/replay', async () => {
-      const mocked = {
-      ...(await vi.importActual('../src/data_generators/replay')),
-      replayIntoManagedStream: vi.fn(),
-      replaySignificantEventsSnapshot: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../src/data_generators/replay')),
+    replayIntoManagedStream: vi.fn(),
+    replaySignificantEventsSnapshot: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const BUCKET = 'significant-events-datasets';
 

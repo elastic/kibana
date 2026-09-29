@@ -16,26 +16,26 @@ const mockMgetWorkflows = vi.fn();
 const mockUseQuery = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: () => ({ mgetWorkflows: mockMgetWorkflows }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: () => ({ mgetWorkflows: mockMgetWorkflows }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-ui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows-ui')),
-      WorkflowApi: 'mock.WorkflowApi',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows-ui')),
+    WorkflowApi: 'mock.WorkflowApi',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: (options: unknown) => mockUseQuery(options),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: (options: unknown) => mockUseQuery(options),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const emailWorkflow = { steps: [{ type: '.email', name: 'email' }] } as unknown as WorkflowYaml;
 const slackWorkflow = { steps: [{ type: '.slack', name: 'slack' }] } as unknown as WorkflowYaml;

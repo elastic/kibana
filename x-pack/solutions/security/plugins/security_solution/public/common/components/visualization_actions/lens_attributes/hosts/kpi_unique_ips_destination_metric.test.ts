@@ -17,17 +17,17 @@ import { getMockDataViewWithMatchedIndices } from '../../../../../data_view_mana
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 
 vi.mock('../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          detailName: 'mockHost',
-          pageName: 'hosts',
-          tabName: 'events',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        detailName: 'mockHost',
+        pageName: 'hosts',
+        tabName: 'events',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('kpiUniqueIpsDestinationMetricLensAttributes', () => {
   beforeAll(() => {

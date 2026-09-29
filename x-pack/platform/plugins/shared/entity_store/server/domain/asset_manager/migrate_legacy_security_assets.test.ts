@@ -30,7 +30,7 @@ import {
 } from '../../../common/domain/entity_index';
 
 vi.mock('../../infra/elasticsearch', async () => {
-  const { assertReindexSucceeded } = (await vi.importActual('../../infra/elasticsearch/reindex'));
+  const { assertReindexSucceeded } = await vi.importActual('../../infra/elasticsearch/reindex');
   return {
     assertReindexSucceeded,
     createDataStream: vi.fn(),
@@ -51,9 +51,7 @@ const mockReindex = reindex as MockedFunction<typeof reindex>;
 const mockDeleteComponentTemplate = deleteComponentTemplate as MockedFunction<
   typeof deleteComponentTemplate
 >;
-const mockDeleteIndexTemplate = deleteIndexTemplate as MockedFunction<
-  typeof deleteIndexTemplate
->;
+const mockDeleteIndexTemplate = deleteIndexTemplate as MockedFunction<typeof deleteIndexTemplate>;
 
 describe('migrateLegacySecurityAssets', () => {
   const namespace = 'default';

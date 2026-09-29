@@ -24,40 +24,38 @@ const mockMonacoEditor = vi.fn((props: Record<string, unknown>) => (
 ));
 
 vi.mock('../../contexts', () => {
-      const mocked = {
-      useEditorReadContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEditorReadContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services', () => {
-      const mocked = {
-      getAutocompleteInfo: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAutocompleteInfo: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./monaco_editor', () => {
-      const mocked = {
-      MonacoEditor: (props: Record<string, unknown>) => mockMonacoEditor(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonacoEditor: (props: Record<string, unknown>) => mockMonacoEditor(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/editor_content_spinner', () => {
-      const mocked = {
-      EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditorContentSpinner: () => <div data-test-subj="mockEditorContentSpinner" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseEditorReadContext = useEditorReadContext as MockedFunction<
   typeof useEditorReadContext
 >;
 
-const mockGetAutocompleteInfo = getAutocompleteInfo as MockedFunction<
-  typeof getAutocompleteInfo
->;
+const mockGetAutocompleteInfo = getAutocompleteInfo as MockedFunction<typeof getAutocompleteInfo>;
 
 describe('InputPanel', () => {
   beforeEach(() => {

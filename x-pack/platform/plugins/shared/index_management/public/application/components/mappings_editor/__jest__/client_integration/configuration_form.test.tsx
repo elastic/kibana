@@ -17,14 +17,14 @@ import { WithAppDependencies } from './helpers/setup_environment';
 import { loadSyntheticSourceStatus } from '../../../../services/api';
 
 vi.mock('../../../../services/api', () => {
-      const mocked = {
-      loadSyntheticSourceStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadSyntheticSourceStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/es-ui-shared-plugin/static/forms/components', async () => {
-  const original = (await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/components'));
+  const original = await vi.importActual('@kbn/es-ui-shared-plugin/static/forms/components');
   return {
     ...original,
     // JsonEditorField pulls in the shared-ux code editor (Monaco) which requires Canvas/Suspense.

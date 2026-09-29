@@ -18,11 +18,11 @@ import type { Logger } from '@kbn/logging';
 import { recallRankingEventType } from '../../../analytics/recall_ranking';
 
 vi.mock('./score_suggestions', () => {
-      const mocked = {
-      scoreSuggestions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scoreSuggestions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const normalConversationMessages: Message[] = [
   {

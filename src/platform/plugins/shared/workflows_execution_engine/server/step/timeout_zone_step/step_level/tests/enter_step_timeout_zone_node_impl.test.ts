@@ -12,13 +12,13 @@ import type { Mock, MockedFunction } from 'vitest';
 
 // Mock parseDuration function
 vi.mock('../../../../utils', async () => {
-      const mocked = {
-      parseDuration: vi.fn(),
-      renderDuration: (await vi.importActual('../../../../utils/render_duration/render_duration'))
-        .renderDuration,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseDuration: vi.fn(),
+    renderDuration: (await vi.importActual('../../../../utils/render_duration/render_duration'))
+      .renderDuration,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';

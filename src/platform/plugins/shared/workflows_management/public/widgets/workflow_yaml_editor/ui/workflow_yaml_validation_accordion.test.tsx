@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { TestProvider } from '../../../shared/mocks/test_providers';

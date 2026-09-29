@@ -42,9 +42,7 @@ describe('groupByPackage', () => {
     });
 
     // Mock path.join to handle path concatenation
-    const mockJoin = vi
-      .fn()
-      .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
+    const mockJoin = vi.fn().mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse to handle root directory detection
     const mockParse = vi.fn().mockReturnValue({ root: '/' });
@@ -86,9 +84,7 @@ describe('groupByPackage', () => {
     });
 
     // Mock path.join for consistent behavior
-    const mockJoin = vi
-      .fn()
-      .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
+    const mockJoin = vi.fn().mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse to handle root directory detection
     const mockParse = vi.fn().mockReturnValue({ root: '/' });
@@ -120,9 +116,7 @@ describe('groupByPackage', () => {
     });
 
     // Mock path.join for path concatenation
-    const mockJoin = vi
-      .fn()
-      .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
+    const mockJoin = vi.fn().mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse for root directory
     const mockParse = vi.fn().mockReturnValue({ root: '/' });
@@ -156,9 +150,7 @@ describe('groupByPackage', () => {
     const mockDirname = vi.fn().mockReturnValue('src/package1');
 
     // Mock path.join for path concatenation
-    const mockJoin = vi
-      .fn()
-      .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
+    const mockJoin = vi.fn().mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse for root directory
     const mockParse = vi.fn().mockReturnValue({ root: '/' });
@@ -199,9 +191,7 @@ describe('groupByPackage', () => {
     });
 
     // Mock path.join to handle path concatenation
-    const mockJoin = vi
-      .fn()
-      .mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
+    const mockJoin = vi.fn().mockImplementation((...args) => args.join('/').replace(/\/\//g, '/'));
 
     // Mock path.parse to handle root directory detection
     const mockParse = vi.fn().mockReturnValue({ root: '/' });

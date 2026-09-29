@@ -15,13 +15,14 @@ import { filterHallucinatedAlerts } from '@kbn/discoveries/impl/attack_discovery
 import { filterAndValidateDiscoveries } from './filter_and_validate_discoveries';
 
 vi.mock('@kbn/discoveries/impl/attack_discovery/hallucination_detection', async () => {
-      const mocked = {
-      filterHallucinatedAlerts: vi.fn(),
-      getAlertIds: (await vi.importActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection'))
-        .getAlertIds,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    filterHallucinatedAlerts: vi.fn(),
+    getAlertIds: (
+      await vi.importActual('@kbn/discoveries/impl/attack_discovery/hallucination_detection')
+    ).getAlertIds,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFilterHallucinatedAlerts = filterHallucinatedAlerts as MockedFunction<
   typeof filterHallucinatedAlerts

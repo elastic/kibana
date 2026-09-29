@@ -23,8 +23,8 @@ export const mockPluginReader = vi.fn((() => ({
 })) as typeof read);
 
 vi.mock('./plugin_reader', () => {
-      const mocked = {
-      read: mockPluginReader,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    read: mockPluginReader,
+  };
+  return { ...mocked, default: mocked };
+});

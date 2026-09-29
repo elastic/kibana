@@ -16,15 +16,15 @@ import type { IntegrationTabId, Tab } from '../types';
 vi.mock('./integration_context');
 
 vi.mock('../../kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../kibana')),
-      useNavigation: vi.fn().mockReturnValue({
-        navigateTo: vi.fn(),
-        getAppUrl: vi.fn().mockReturnValue(''),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../kibana')),
+    useNavigation: vi.fn().mockReturnValue({
+      navigateTo: vi.fn(),
+      getAppUrl: vi.fn().mockReturnValue(''),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const selectedTab: Tab = {
   id: 'test' as IntegrationTabId,

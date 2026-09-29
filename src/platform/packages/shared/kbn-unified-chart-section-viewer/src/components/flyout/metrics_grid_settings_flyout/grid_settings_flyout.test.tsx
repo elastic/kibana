@@ -18,7 +18,7 @@ import { type MetricsGridSettings } from '@kbn/discover-utils';
 
 vi.mock('@kbn/discover-utils', async () => {
   const { METRICS_GRID_HISTOGRAM_PERCENTILES, METRICS_GRID_SIMPLE_AGGREGATIONS } =
-    (await vi.importActual('@kbn/discover-utils/src/data_types/metrics'));
+    await vi.importActual('@kbn/discover-utils/src/data_types/metrics');
 
   return {
     METRICS_GRID_HISTOGRAM_PERCENTILES,
@@ -29,13 +29,13 @@ vi.mock('@kbn/discover-utils', async () => {
 const mockTrackAggregationConfigChanged = vi.fn();
 
 vi.mock('../../../context/ebt_telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      trackAggregationConfigChanged: mockTrackAggregationConfigChanged,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultSettings: MetricsGridSettings = {
   counterAggregation: 'sum',

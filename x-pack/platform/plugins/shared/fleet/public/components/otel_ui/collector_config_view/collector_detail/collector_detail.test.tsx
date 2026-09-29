@@ -17,11 +17,11 @@ import type { Agent } from '../../../../../common/types';
 import { CollectorDetail } from './collector_detail';
 
 vi.mock('./collector_detail_logs', () => {
-      const mocked = {
-      CollectorDetailLogs: () => <div data-test-subj="collectorDetailLogs">Logs content</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CollectorDetailLogs: () => <div data-test-subj="collectorDetailLogs">Logs content</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeAgent = (overrides?: Partial<Agent>): Agent =>
   ({

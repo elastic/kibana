@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import React, { createRef } from 'react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import React, { createRef } from 'react';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
 import { setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';

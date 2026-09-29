@@ -23,12 +23,12 @@ vi.mock('../../home/hooks/use_available_packages');
 vi.mock('./url_filters');
 vi.mock('./url_categories');
 vi.mock('../../../../../hooks', () => {
-      const mocked = {
-      searchIdField: 'id',
-      useLocalSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    searchIdField: 'id',
+    useLocalSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useBrowseIntegrationHook', () => {
   const mockSetUrlCategory = vi.fn();

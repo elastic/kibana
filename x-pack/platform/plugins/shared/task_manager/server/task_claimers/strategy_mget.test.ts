@@ -43,22 +43,22 @@ import {
 } from '../kibana_discovery_service/mock_kibana_discovery_service';
 
 vi.mock('../constants', () => {
-      const mocked = {
-      CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
-        'limitedToZero',
-        'limitedToOne',
-        'anotherLimitedToZero',
-        'anotherLimitedToOne',
-        'limitedToTwo',
-        'limitedToFive',
-        'yawn',
-        'sampleTaskSharedConcurrencyType1',
-        'sampleTaskSharedConcurrencyType2',
-        'sampleTaskZeroMaxConcurrency',
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE: [
+      'limitedToZero',
+      'limitedToOne',
+      'anotherLimitedToZero',
+      'anotherLimitedToOne',
+      'limitedToTwo',
+      'limitedToFive',
+      'yawn',
+      'sampleTaskSharedConcurrencyType1',
+      'sampleTaskSharedConcurrencyType2',
+      'sampleTaskZeroMaxConcurrency',
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const taskManagerLogger = mockLogger();
 
@@ -151,8 +151,7 @@ describe('TaskClaiming', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     otelExporter?.reset();
-    vi
-      .spyOn(apm, 'startTransaction')
+    vi.spyOn(apm, 'startTransaction')
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       .mockImplementation(() => mockApmTrans as any);

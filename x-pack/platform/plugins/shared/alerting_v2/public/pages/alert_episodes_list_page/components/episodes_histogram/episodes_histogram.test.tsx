@@ -15,22 +15,22 @@ import { useEpisodesHistogramQuery } from '@kbn/alerting-v2-episodes-ui/hooks/us
 import { useSpaceId } from '@kbn/alerting-v2-episodes-ui/hooks/use_space_id';
 
 vi.mock('@kbn/unified-histogram', () => {
-      const mocked = {
-      useUnifiedHistogram: vi.fn(),
-      UnifiedHistogramChart: ({
-        renderToggleActions,
-      }: {
-        renderToggleActions: () => React.ReactNode;
-      }) => <div data-test-subj="unifiedHistogramChart">{renderToggleActions?.()}</div>,
-      UnifiedBreakdownFieldSelector: ({ breakdown }: { breakdown: { field?: { name: string } } }) => (
-        <div
-          data-test-subj="unifiedBreakdownFieldSelector"
-          data-selected-field={breakdown?.field?.name ?? ''}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedHistogram: vi.fn(),
+    UnifiedHistogramChart: ({
+      renderToggleActions,
+    }: {
+      renderToggleActions: () => React.ReactNode;
+    }) => <div data-test-subj="unifiedHistogramChart">{renderToggleActions?.()}</div>,
+    UnifiedBreakdownFieldSelector: ({ breakdown }: { breakdown: { field?: { name: string } } }) => (
+      <div
+        data-test-subj="unifiedBreakdownFieldSelector"
+        data-selected-field={breakdown?.field?.name ?? ''}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_space_id');
 vi.mock('@kbn/alerting-v2-episodes-ui/hooks/use_episodes_histogram_query');

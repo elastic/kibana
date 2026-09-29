@@ -20,11 +20,11 @@ import { getJourneySteps } from '../actions/journey';
 import { fetchJourneySteps } from '../api/journey';
 
 vi.mock('../api/journey', () => {
-      const mocked = {
-      fetchJourneySteps: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchJourneySteps: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createTestStore = (): Store => {
   const sagaMW = createSagaMiddleware();

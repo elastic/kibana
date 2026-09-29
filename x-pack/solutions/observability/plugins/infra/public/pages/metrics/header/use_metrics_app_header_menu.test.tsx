@@ -75,65 +75,65 @@ const mockActiveSpace: { space: { id: string } | undefined } = {
 };
 
 vi.mock('../../../containers/plugin_config_context', () => {
-      const mocked = {
-      usePluginConfig: () => ({
-        featureFlags: mockFeatureFlags,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePluginConfig: () => ({
+      featureFlags: mockFeatureFlags,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/ml/infra_ml_capabilities', () => {
-      const mocked = {
-      useInfraMLCapabilitiesContext: () => mockMlVisibility,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInfraMLCapabilitiesContext: () => mockMlVisibility,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          inspector: { open: mockInspectorOpen },
-          observability: {
-            useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
-          },
-          share: {
-            url: {
-              locators: {
-                get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
-              },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        inspector: { open: mockInspectorOpen },
+        observability: {
+          useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
+        },
+        share: {
+          url: {
+            locators: {
+              get: () => ({ getRedirectUrl: mockGetRedirectUrl }),
             },
           },
-          uiSettings: { get: mockUiSettingsGet },
-          application: { capabilities: mockCapabilities },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        uiSettings: { get: mockUiSettingsGet },
+        application: { capabilities: mockCapabilities },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useLinkProps: () => ({ href: '/app/metrics/settings' }),
-      useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLinkProps: () => ({ href: '/app/metrics/settings' }),
+    useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/metrics_source', () => {
-      const mocked = {
-      useMetricsDataViewContext: () => mockMetricsViewState,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsDataViewContext: () => mockMetricsViewState,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useActiveKibanaSpace: () => mockActiveSpace,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useActiveKibanaSpace: () => mockActiveSpace,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnomalyFlyoutCapture: {
   hideJobType?: boolean;
@@ -141,22 +141,22 @@ const mockAnomalyFlyoutCapture: {
 } = {};
 
 vi.mock('../../../components/ml/anomaly_detection/anomaly_detection_flyout', () => {
-      const mocked = {
-      AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
-        mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
-        mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnomalyDetectionFlyout: (props: { hideJobType?: boolean; hideSelectGroup?: boolean }) => {
+      mockAnomalyFlyoutCapture.hideJobType = props.hideJobType;
+      mockAnomalyFlyoutCapture.hideSelectGroup = props.hideSelectGroup;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alerting/common/components/metrics_alert_dropdown', () => {
-      const mocked = {
-      MetricsAlertFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricsAlertFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderMenuHook(pathname: string) {
   return renderHook(() => useMetricsAppHeaderMenu(), {

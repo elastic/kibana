@@ -97,53 +97,53 @@ const esqlResult: YamlValidationResult = {
 };
 
 vi.mock('./run_workflow_yaml_validations', () => {
-      const mocked = {
-      runWorkflowYamlValidations: vi.fn(() => [structuralResult]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runWorkflowYamlValidations: vi.fn(() => [structuralResult]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./validate_connector_ids', () => {
-      const mocked = {
-      validateConnectorIds: vi.fn(() => [connectorResult]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateConnectorIds: vi.fn(() => [connectorResult]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./validate_graph_build', () => {
-      const mocked = {
-      validateGraphBuild: vi.fn(() => [graphResult]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateGraphBuild: vi.fn(() => [graphResult]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./collect_all_step_property_items', () => {
-      const mocked = {
-      collectAllStepPropertyItems: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    collectAllStepPropertyItems: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./validate_step_properties', () => {
-      const mocked = {
-      validateStepProperties: vi.fn(async () => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateStepProperties: vi.fn(async () => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./validate_workflow_inputs', () => {
-      const mocked = {
-      validateWorkflowInputs: vi.fn(() => [workflowInputResult]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateWorkflowInputs: vi.fn(() => [workflowInputResult]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../widgets/workflow_yaml_editor/lib/esql_validation/validate_esql_steps', () => {
-      const mocked = {
-      validateEsqlSteps: vi.fn(async () => [esqlResult]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlSteps: vi.fn(async () => [esqlResult]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { collectAllStepPropertyItems } from './collect_all_step_property_items';

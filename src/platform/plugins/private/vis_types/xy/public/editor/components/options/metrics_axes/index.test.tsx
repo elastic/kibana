@@ -27,31 +27,31 @@ import { defaultValueAxisId, valueAxis, seriesParam, categoryAxis } from './mock
 import { mapPosition, mapPositionOpposite } from './utils';
 
 vi.mock('./series_panel', () => {
-      const mocked = {
-      SeriesPanel: () => 'SeriesPanel',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SeriesPanel: () => 'SeriesPanel',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./category_axis_panel', () => {
-      const mocked = {
-      CategoryAxisPanel: () => 'CategoryAxisPanel',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CategoryAxisPanel: () => 'CategoryAxisPanel',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./value_axes_panel', () => {
-      const mocked = {
-      ValueAxesPanel: () => 'ValueAxesPanel',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ValueAxesPanel: () => 'ValueAxesPanel',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../services', () => {
-      const mocked = {
-      getUISettings: vi.fn(() => ({
-        get: vi.fn((key: string, defaultOverride?: unknown) => defaultOverride),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getUISettings: vi.fn(() => ({
+      get: vi.fn((key: string, defaultOverride?: unknown) => defaultOverride),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SERIES_PARAMS = 'seriesParams';
 const VALUE_AXES = 'valueAxes';

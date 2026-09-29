@@ -44,35 +44,35 @@ const mockUseLocation = vi.fn<MockLocation, []>(() => ({
 const mockChromeStyle = vi.fn<'classic' | 'project', []>(() => 'classic');
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: () => mockUseHistory(),
-      useLocation: () => mockUseLocation(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: () => mockUseHistory(),
+    useLocation: () => mockUseLocation(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibanaContextForPlugin: () => ({
-        services: {
-          application: {
-            navigateToApp: vi.fn(),
-          },
-          chrome: {
-            getChromeStyle: () => mockChromeStyle(),
-          },
+  const mocked = {
+    useKibanaContextForPlugin: () => ({
+      services: {
+        application: {
+          navigateToApp: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        chrome: {
+          getChromeStyle: () => mockChromeStyle(),
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_tab_switcher');
 vi.mock('../../../hooks/use_profiling_integration_setting');
@@ -90,10 +90,9 @@ const useInfraMLCapabilitiesContextMock = useInfraMLCapabilitiesContext as Mocke
   typeof useInfraMLCapabilitiesContext
 >;
 const usePluginConfigMock = usePluginConfig as MockedFunction<typeof usePluginConfig>;
-const useAssetDetailsRenderPropsContextMock =
-  useAssetDetailsRenderPropsContext as MockedFunction<
-    typeof useAssetDetailsRenderPropsContext
-  >;
+const useAssetDetailsRenderPropsContextMock = useAssetDetailsRenderPropsContext as MockedFunction<
+  typeof useAssetDetailsRenderPropsContext
+>;
 const mockUseUiSetting = useUiSetting as MockedFunction<typeof useUiSetting>;
 
 const mockProfilingTab: Tab = {

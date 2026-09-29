@@ -14,39 +14,39 @@ import { registerGetTimeFieldRoute } from './get_timefield';
 import { TIMEFIELD_ROUTE } from '@kbn/esql-types';
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('logs-*'),
-      getProjectRoutingFromEsqlQuery: vi.fn().mockReturnValue(undefined),
-      parseTimeFieldFromESQLQuery: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIndexPatternFromESQLQuery: vi.fn().mockReturnValue('logs-*'),
+    getProjectRoutingFromEsqlQuery: vi.fn().mockReturnValue(undefined),
+    parseTimeFieldFromESQLQuery: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/esql', () => {
-      const mocked = {
-      Parser: { parse: vi.fn().mockReturnValue({ root: { commands: [] } }) },
-      isSubQuery: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Parser: { parse: vi.fn().mockReturnValue({ root: { commands: [] } }) },
+    isSubQuery: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-server-utils', () => {
-      const mocked = {
-      EsqlService: vi.fn().mockImplementation(() => ({
-        getViews: vi.fn().mockResolvedValue({ views: [] }),
-        getDatasets: vi.fn().mockResolvedValue({ datasets: [] }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsqlService: vi.fn().mockImplementation(() => ({
+      getViews: vi.fn().mockResolvedValue({ views: [] }),
+      getDatasets: vi.fn().mockResolvedValue({ datasets: [] }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const {
   parseTimeFieldFromESQLQuery,
   getIndexPatternFromESQLQuery,
   getProjectRoutingFromEsqlQuery,
-} = (await vi.importMock('@kbn/esql-utils'));
-const { Parser } = (await vi.importMock('@elastic/esql'));
-const { EsqlService } = (await vi.importMock('@kbn/esql-server-utils'));
+} = await vi.importMock('@kbn/esql-utils');
+const { Parser } = await vi.importMock('@elastic/esql');
+const { EsqlService } = await vi.importMock('@kbn/esql-server-utils');
 
 function buildMocks() {
   const handler = vi.fn();

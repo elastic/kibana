@@ -20,164 +20,164 @@ import { useTimeRangeUpdate } from '../../../../hooks/use_time_range_update';
 const mockUpdateTimeRange = vi.fn();
 
 vi.mock('../../../../hooks/use_fetch_significant_event_lifecycle', () => {
-      const mocked = {
-      useFetchSignificantEventLifecycle: vi.fn(() => ({
-        data: undefined,
-        isLoading: false,
-        isSuccess: false,
-        isError: false,
-        refetch: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSignificantEventLifecycle: vi.fn(() => ({
+      data: undefined,
+      isLoading: false,
+      isSuccess: false,
+      isError: false,
+      refetch: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(() => ({
-        services: {
-          focusedSignificantEventService: {
-            setFocusedEvent: vi.fn(),
-            clearFocusedEvent: vi.fn(),
-          },
+  const mocked = {
+    useKibana: vi.fn(() => ({
+      services: {
+        focusedSignificantEventService: {
+          setFocusedEvent: vi.fn(),
+          clearFocusedEvent: vi.fn(),
         },
-        core: {
-          notifications: { toasts: { addSuccess: vi.fn() } },
-          application: {
-            capabilities: {
-              nightshift: {
-                manage: true,
-              },
+      },
+      core: {
+        notifications: { toasts: { addSuccess: vi.fn() } },
+        application: {
+          capabilities: {
+            nightshift: {
+              manage: true,
             },
           },
         },
-        dependencies: {
-          start: {
-            share: {
-              url: {
-                locators: { get: vi.fn(() => ({ getRedirectUrl: vi.fn(() => undefined) })) },
-              },
-            },
-            significantEvents: {
-              significantEventsRepositoryClient: { fetch: vi.fn() },
+      },
+      dependencies: {
+        start: {
+          share: {
+            url: {
+              locators: { get: vi.fn(() => ({ getRedirectUrl: vi.fn(() => undefined) })) },
             },
           },
+          significantEvents: {
+            significantEventsRepositoryClient: { fetch: vi.fn() },
+          },
         },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_trigger_investigation', () => {
-      const mocked = {
-      useTriggerInvestigation: vi.fn(() => ({
-        triggerInvestigation: vi.fn(),
-        isTriggering: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTriggerInvestigation: vi.fn(() => ({
+      triggerInvestigation: vi.fn(),
+      isTriggering: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_update_significant_event', () => {
-      const mocked = {
-      useUpdateSignificantEvent: vi.fn(() => ({ updateEventStatus: vi.fn(), isUpdating: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateSignificantEvent: vi.fn(() => ({ updateEventStatus: vi.fn(), isUpdating: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_significant_events_maintenance', () => {
-      const mocked = {
-      useBlocksNewActivity: vi.fn(() => ({ blocksActivity: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBlocksNewActivity: vi.fn(() => ({ blocksActivity: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../util/formatters', () => {
-      const mocked = {
-      formatTimestamp: vi.fn((timestamp: string) => `formatted:${timestamp}`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    formatTimestamp: vi.fn((timestamp: string) => `formatted:${timestamp}`),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../components/flyout_components/flyout_toolbar_header', () => {
-      const mocked = {
-      FlyoutToolbarHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutToolbarHeader: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./lifecycle_timeline', () => {
-      const mocked = {
-      LifecycleTimeline: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LifecycleTimeline: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./event_investigations', () => {
-      const mocked = {
-      EventInvestigations: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventInvestigations: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_fetch_significant_events', () => {
-      const mocked = {
-      useFetchSignificantEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchSignificantEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_significant_events_url_state', () => {
-      const mocked = {
-      useSignificantEventsUrlState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsUrlState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_timefilter', () => {
-      const mocked = {
-      useTimefilter: vi.fn(() => ({
-        timeState: {
-          start: Date.parse('2026-01-01T00:00:00.000Z'),
-          end: Date.parse('2026-01-03T00:00:00.000Z'),
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimefilter: vi.fn(() => ({
+      timeState: {
+        start: Date.parse('2026-01-01T00:00:00.000Z'),
+        end: Date.parse('2026-01-03T00:00:00.000Z'),
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_time_range_update', () => {
-      const mocked = {
-      useTimeRangeUpdate: vi.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRangeUpdate: vi.fn(() => ({ updateTimeRange: mockUpdateTimeRange })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_fetch_streams', () => {
-      const mocked = {
-      useFetchStreams: vi.fn(() => ({ data: { streams: [] } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchStreams: vi.fn(() => ({ data: { streams: [] } })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../context/significant_events_page_context', () => {
-      const mocked = {
-      useSignificantEventsPageContext: vi.fn(() => ({
-        isRunning: false,
-        isCanceling: false,
-        handleRun: vi.fn(),
-        handleCancel: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsPageContext: vi.fn(() => ({
+      isRunning: false,
+      isCanceling: false,
+      handleRun: vi.fn(),
+      handleCancel: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../components/search_bar', () => {
-      const mocked = {
-      SignificantEventsSearchBar: ({ query }: { query?: { query?: string } }) => (
-        <div data-test-subj="searchBarQuery">{query?.query}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SignificantEventsSearchBar: ({ query }: { query?: { query?: string } }) => (
+      <div data-test-subj="searchBarQuery">{query?.query}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../streams_view/find_significant_events_button', () => {
-      const mocked = {
-      FindSignificantEventsButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FindSignificantEventsButton: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./filter_popover', () => {
-      const mocked = {
-      FilterPopover: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterPopover: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const event: SignificantEventResponse = {
   '@timestamp': '2026-01-02T00:00:00.000Z',
@@ -225,9 +225,7 @@ describe('SignificantEventFlyout actions menu', () => {
   });
 
   it('does not expose actions for an already dismissed event', () => {
-    render(
-      <SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={vi.fn()} />
-    );
+    render(<SignificantEventFlyout event={{ ...event, status: 'dismissed' }} onClose={vi.fn()} />);
 
     expect(screen.queryByTestId('sigEventFlyoutActionsButton')).not.toBeInTheDocument();
   });

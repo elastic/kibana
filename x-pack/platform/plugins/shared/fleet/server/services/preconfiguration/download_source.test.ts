@@ -21,9 +21,7 @@ import {
 vi.mock('../download_source');
 vi.mock('../agent_policy');
 
-const mockedDownloadSourceService = downloadSourceService as Mocked<
-  typeof downloadSourceService
->;
+const mockedDownloadSourceService = downloadSourceService as Mocked<typeof downloadSourceService>;
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 
 describe('getPreconfiguredDownloadSourcesFromConfig', () => {

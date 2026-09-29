@@ -29,7 +29,7 @@ vi.mock('../user_profiles/use_suggest_users');
 // Spied rather than stubbed: the option list is virtualised, so the rows it is asked to render
 // are only observable as props, while the tests below this one still need the real component.
 vi.mock('@kbn/user-profile-components', async () => {
-  const actual = (await vi.importActual('@kbn/user-profile-components'));
+  const actual = await vi.importActual('@kbn/user-profile-components');
   return {
     ...actual,
     UserProfilesSelectable: vi.fn((props) => actual.UserProfilesSelectable(props)),

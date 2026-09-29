@@ -17,19 +17,19 @@ import { initLogsDir } from './init_logs_dir';
 import { parseTestFlags, runTests } from '../playwright/runner';
 
 vi.mock('./init_logs_dir', () => {
-      const mocked = {
-      initLogsDir: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initLogsDir: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../playwright/runner', () => {
-      const mocked = {
-      parseTestFlags: vi.fn().mockResolvedValue({ logsDir: 'path/to/logs/directory' }),
-      runTests: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseTestFlags: vi.fn().mockResolvedValue({ logsDir: 'path/to/logs/directory' }),
+    runTests: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('runScoutPlaywrightConfig', () => {
   let flagsReader: Mocked<FlagsReader>;

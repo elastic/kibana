@@ -26,19 +26,19 @@ expect.addSnapshotSerializer(createAnyInstanceSerializer(Rx.Observable, 'Rx.Obse
 expect.addSnapshotSerializer(createAnyInstanceSerializer(TestLog));
 
 vi.mock('./watcher');
-const { Watcher } = (await vi.importMock('./watcher'));
+const { Watcher } = await vi.importMock('./watcher');
 
 vi.mock('./optimizer');
-const { Optimizer } = (await vi.importMock('./optimizer'));
+const { Optimizer } = await vi.importMock('./optimizer');
 
 vi.mock('./dev_server');
-const { DevServer } = (await vi.importMock('./dev_server'));
+const { DevServer } = await vi.importMock('./dev_server');
 
 vi.mock('./base_path_proxy');
-const { getBasePathProxyServer } = (await vi.importMock('./base_path_proxy'));
+const { getBasePathProxyServer } = await vi.importMock('./base_path_proxy');
 
 vi.mock('@kbn/ci-stats-reporter');
-const { CiStatsReporter } = (await vi.importMock('@kbn/ci-stats-reporter'));
+const { CiStatsReporter } = await vi.importMock('@kbn/ci-stats-reporter');
 
 const mockBasePathProxy = {
   targetPort: 9999,

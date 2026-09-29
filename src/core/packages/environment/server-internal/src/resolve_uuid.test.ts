@@ -18,19 +18,19 @@ import { resolveInstanceUuid, UUID_7_6_0_BUG } from './resolve_uuid';
 import type { HttpConfigType } from './types';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: () => 'NEW_UUID',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: () => 'NEW_UUID',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./fs', () => {
-      const mocked = {
-      readFile: vi.fn(() => Promise.resolve('')),
-      writeFile: vi.fn(() => Promise.resolve('')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    readFile: vi.fn(() => Promise.resolve('')),
+    writeFile: vi.fn(() => Promise.resolve('')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const DEFAULT_FILE_UUID = 'ffffffff-bbbb-0ccc-0ddd-eeeeeeeeeeee';
 const DEFAULT_CONFIG_UUID = 'cccccccc-bbbb-0ccc-0ddd-eeeeeeeeeeee';

@@ -25,38 +25,38 @@ vi.mock('../hooks/use_kibana');
 vi.mock('@kbn/ebt-tools');
 
 vi.mock('../investigation/start_investigation_panel', () => {
-      const mocked = {
-      START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
-      StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
-        <div data-test-subj="nightshiftStartInvestigationPanel">
-          <button onClick={onClose} type="button">
-            Cancel investigation
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    START_INVESTIGATION_PANEL_ID: 'nightshiftStartInvestigationPanel',
+    StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="nightshiftStartInvestigationPanel">
+        <button onClick={onClose} type="button">
+          Cancel investigation
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../investigation/investigation_detail_flyout', () => {
-      const mocked = {
-      InvestigationDetailFlyout: ({
-        investigationId,
-        onClose,
-      }: {
-        investigationId: string;
-        onClose: () => void;
-      }) => (
-        <div>
-          <span>{`Flyout: ${investigationId}`}</span>
-          <button onClick={onClose} type="button">
-            Close
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InvestigationDetailFlyout: ({
+      investigationId,
+      onClose,
+    }: {
+      investigationId: string;
+      onClose: () => void;
+    }) => (
+      <div>
+        <span>{`Flyout: ${investigationId}`}</span>
+        <button onClick={onClose} type="button">
+          Close
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInvestigationSections = useInvestigationSections as Mock;
 const mockUseKibana = useKibana as Mock;

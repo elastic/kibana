@@ -23,15 +23,15 @@ import { useInstalledIntegrationsActions } from './use_installed_integrations_ac
 
 vi.mock('@kbn/react-kibana-mount');
 vi.mock('../../../../../../../hooks/use_request/epm', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../../../../hooks/use_request/epm')),
-      sendRemovePackageForRq: vi.fn(),
-      sendBulkUninstallPackagesForRq: vi.fn(),
-      sendBulkUpgradePackagesForRq: vi.fn(),
-      sendBulkRollbackPackagesForRq: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../../../../hooks/use_request/epm')),
+    sendRemovePackageForRq: vi.fn(),
+    sendBulkUninstallPackagesForRq: vi.fn(),
+    sendBulkUpgradePackagesForRq: vi.fn(),
+    sendBulkRollbackPackagesForRq: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useInstalledIntegrationsActions', () => {
   beforeEach(() => {

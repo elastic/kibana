@@ -20,7 +20,7 @@ import {
 } from '../../../../../common/es_fields/apm';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => ({
@@ -34,20 +34,20 @@ vi.mock('@kbn/kibana-react-plugin/public', async () => {
 });
 
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => ({ data: undefined, status: 'success' }),
-      isPending: () => false,
-      FETCH_STATUS: { SUCCESS: 'success', LOADING: 'loading', FAILURE: 'failure' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => ({ data: undefined, status: 'success' }),
+    isPending: () => false,
+    FETCH_STATUS: { SUCCESS: 'success', LOADING: 'loading', FAILURE: 'failure' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../services/rest/create_call_apm_api', () => {
-      const mocked = {
-      createCallApmApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCallApmApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderRuleType = (ruleParams: Partial<ErrorRateRuleParams>, setRuleParams = vi.fn()) => {
   render(

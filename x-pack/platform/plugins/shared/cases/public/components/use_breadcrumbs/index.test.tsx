@@ -22,7 +22,7 @@ const mockGetKibanaServices = vi.fn((): unknown => ({
 }));
 
 vi.mock('../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../common/lib/kibana');
   return {
     ...originalModule,
     KibanaServices: {

@@ -13,7 +13,7 @@ import { AnomaliesField } from './anomalies_field';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('../../../../common/components/cell_actions', async () => {
-  const actual = (await vi.importActual('../../../../common/components/cell_actions'));
+  const actual = await vi.importActual('../../../../common/components/cell_actions');
   return {
     ...actual,
     SecurityCellActions: () => <></>,

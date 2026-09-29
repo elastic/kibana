@@ -72,14 +72,14 @@ const AGENTLESS_OPTION_LABEL = /elastic managed integration/i;
 
 // mock useParams
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: vi.fn().mockReturnValue({
-        integration: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: vi.fn().mockReturnValue({
+      integration: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 vi.mock('../../common/api/use_package_policy_list');
 vi.mock('../../common/hooks/use_is_subscription_status_valid');

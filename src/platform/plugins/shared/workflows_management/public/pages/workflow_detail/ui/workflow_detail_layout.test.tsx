@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { WorkflowEditorLayout } from './workflow_detail_layout';
 
 /* eslint-disable @typescript-eslint/no-var-requires */

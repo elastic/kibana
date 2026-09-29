@@ -21,8 +21,7 @@ vi.mock('../../hooks/use_create_knowledge_base_user_instruction');
 vi.mock('../../hooks/use_delete_knowledge_base_entry');
 
 const useGetUserInstructionsMock = useGetUserInstructions as Mock;
-const useCreateKnowledgeBaseUserInstructionMock =
-  useCreateKnowledgeBaseUserInstruction as Mock;
+const useCreateKnowledgeBaseUserInstructionMock = useCreateKnowledgeBaseUserInstruction as Mock;
 const useDeleteKnowledgeBaseEntryMock = useDeleteKnowledgeBaseEntry as Mock;
 
 const getUserInstructionsMock = vi.fn(() => Promise.resolve([]));

@@ -17,7 +17,7 @@ import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { createEsDeprecations } from './__fixtures__/es_deprecations';
 
 vi.mock('../../app_context', async () => {
-  const actual = (await vi.importActual('../../app_context'));
+  const actual = await vi.importActual('../../app_context');
 
   return {
     ...actual,

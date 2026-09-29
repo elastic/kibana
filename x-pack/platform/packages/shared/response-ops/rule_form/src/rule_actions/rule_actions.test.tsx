@@ -26,98 +26,99 @@ import type { RuleActionsItemProps } from './rule_actions_item';
 const http = httpServiceMock.createStartContract();
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-      useRuleFormScreenContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+    useRuleFormScreenContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_system_actions_item', () => {
-      const mocked = {
-      RuleActionsSystemActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+  const mocked = {
+    RuleActionsSystemActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+      <div>
+        RuleActionsSystemActionsItem
         <div>
-          RuleActionsSystemActionsItem
-          <div>
-            {action.id} producerId: {producerId}
-          </div>
+          {action.id} producerId: {producerId}
         </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_item', () => {
-      const mocked = {
-      RuleActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+  const mocked = {
+    RuleActionsItem: ({ action, producerId }: RuleActionsItemProps) => (
+      <div>
+        RuleActionsItem
         <div>
-          RuleActionsItem
-          <div>
-            {action.id} producerId: {producerId}
-          </div>
+          {action.id} producerId: {producerId}
         </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_connectors_modal', () => {
-      const mocked = {
-      RuleActionsConnectorsModal: ({
-        onSelectConnector,
-      }: {
-        onSelectConnector: (connector: ActionConnector) => void;
-      }) => (
-        <div>
-          RuleActionsConnectorsModal
-          <button
-            onClick={() =>
-              onSelectConnector({
-                id: 'connector-1',
-                secrets: { secret: 'secret' },
-                actionTypeId: 'actionType-1',
-                name: 'connector-1',
-                config: { config: 'config-1' },
-                isPreconfigured: false,
-                isSystemAction: false,
-                isDeprecated: false,
-                isConnectorTypeDeprecated: false,
-              })
-            }
-          >
-            select connector
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsConnectorsModal: ({
+      onSelectConnector,
+    }: {
+      onSelectConnector: (connector: ActionConnector) => void;
+    }) => (
+      <div>
+        RuleActionsConnectorsModal
+        <button
+          onClick={() =>
+            onSelectConnector({
+              id: 'connector-1',
+              secrets: { secret: 'secret' },
+              actionTypeId: 'actionType-1',
+              name: 'connector-1',
+              config: { config: 'config-1' },
+              isPreconfigured: false,
+              isSystemAction: false,
+              isDeprecated: false,
+              isConnectorTypeDeprecated: false,
+            })
+          }
+        >
+          select connector
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../common/hooks', () => {
-      const mocked = {
-      useLoadConnectors: vi.fn(),
-      useLoadConnectorTypes: vi.fn(),
-      useLoadRuleTypeAadTemplateField: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadConnectors: vi.fn(),
+    useLoadConnectorTypes: vi.fn(),
+    useLoadRuleTypeAadTemplateField: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidate = vi.fn().mockResolvedValue({
   errors: {},
 });
 
-const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } =
-  (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } = await vi.importMock(
+  '../hooks'
+);
 const { useLoadConnectors, useLoadConnectorTypes, useLoadRuleTypeAadTemplateField } =
-  (await vi.importMock('../common/hooks'));
+  await vi.importMock('../common/hooks');
 
 const mockConnectors = [getConnector('1')];
 const mockConnectorTypes = [

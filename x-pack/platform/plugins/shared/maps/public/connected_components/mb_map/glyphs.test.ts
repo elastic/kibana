@@ -10,26 +10,26 @@ import { vi } from 'vitest';
 import { getGlyphs, getCanAccessEmsFonts, testOnlyClearCanAccessEmsFontsPromise } from './glyphs';
 
 vi.mock('../../kibana_services', () => {
-      const mocked = {
-      getHttp: () => {
-        return {
-          basePath: {
-            prepend: (path: string) => `abc${path}`,
+  const mocked = {
+    getHttp: () => {
+      return {
+        basePath: {
+          prepend: (path: string) => `abc${path}`,
+        },
+      };
+    },
+    getDocLinks: () => {
+      return {
+        links: {
+          maps: {
+            connectToEms: 'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html',
           },
-        };
-      },
-      getDocLinks: () => {
-        return {
-          links: {
-            maps: {
-              connectToEms: 'https://www.elastic.co/guide/en/kibana/current/maps-connect-to-ems.html',
-            },
-          },
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        },
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedFetch = vi.spyOn(global, 'fetch');
 

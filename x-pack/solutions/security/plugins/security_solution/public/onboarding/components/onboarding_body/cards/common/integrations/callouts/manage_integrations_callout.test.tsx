@@ -12,14 +12,14 @@ import { ManageIntegrationsCallout } from './manage_integrations_callout';
 import { TestProviders } from '../../../../../../../common/mock/test_providers';
 vi.mock('../../../../../../../common/lib/integrations/hooks/integration_context');
 vi.mock('../../../../../../../common/hooks/use_add_integrations_url', () => {
-      const mocked = {
-      useAddIntegrationsUrl: vi.fn().mockReturnValue({
-        href: '/test-url',
-        onClick: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddIntegrationsUrl: vi.fn().mockReturnValue({
+      href: '/test-url',
+      onClick: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ManageIntegrationsCallout', () => {
   beforeEach(() => {

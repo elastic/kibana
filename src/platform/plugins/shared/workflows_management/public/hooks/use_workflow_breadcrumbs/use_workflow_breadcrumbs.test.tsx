@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { useSetWorkflowsBreadcrumbs, useWorkflowsBreadcrumbs } from './use_workflow_breadcrumbs';
 import { PLUGIN_ID } from '../../../common';
 import { createStartServicesMock } from '../../mocks';
@@ -22,11 +22,11 @@ const mockUseKibana = useKibana as Mock;
 
 // Mock i18n to control translations
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: { translate: vi.fn((key, { defaultMessage }) => defaultMessage) },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: { translate: vi.fn((key, { defaultMessage }) => defaultMessage) },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useWorkflowsBreadcrumbs', () => {
   let mockServices: ReturnType<typeof createStartServicesMock>;

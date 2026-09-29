@@ -21,19 +21,19 @@ import { MigrationDataInputContextProvider } from '../../../common/components';
 vi.mock('../../../../common/lib/kibana/use_kibana');
 
 vi.mock('../../logic/use_get_migration_translation_stats', () => {
-      const mocked = {
-      useGetMigrationTranslationStats: vi.fn().mockReturnValue({
-        data: {
-          dashboards: {
-            success: { result: { full: 1, partial: 2, untranslatable: 3 } },
-            failed: 4,
-          },
+  const mocked = {
+    useGetMigrationTranslationStats: vi.fn().mockReturnValue({
+      data: {
+        dashboards: {
+          success: { result: { full: 1, partial: 2, untranslatable: 3 } },
+          failed: 4,
         },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseProps = {
   migrationStats: {
@@ -48,10 +48,7 @@ const baseProps = {
 
 const mockGetMissingResources = vi.fn();
 
-const mockUseGetMissingResources = vi.spyOn(
-  useGetMissingResourcesModule,
-  'useGetMissingResources'
-);
+const mockUseGetMissingResources = vi.spyOn(useGetMissingResourcesModule, 'useGetMissingResources');
 
 mockUseGetMissingResources.mockImplementation((_, setterFn) => {
   return {

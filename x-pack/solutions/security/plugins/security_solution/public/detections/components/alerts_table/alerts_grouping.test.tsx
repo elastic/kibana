@@ -34,11 +34,11 @@ import type { AlertsGroupingAggregation } from './grouping_settings/types';
 vi.mock('../../containers/detection_engine/alerts/use_query');
 vi.mock('../../../common/utils/normalize_time_range');
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('test-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('test-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDate = {
   from: '2020-07-07T08:20:18.966Z',
@@ -63,7 +63,7 @@ const mockOptions = [
 ];
 
 vi.mock('../../../common/utils/alerts', async () => {
-  const actual = (await vi.importActual('../../../common/utils/alerts'));
+  const actual = await vi.importActual('../../../common/utils/alerts');
 
   return {
     ...actual,
@@ -82,11 +82,12 @@ vi.mock('react-redux-v7', () => {
 
 const mockUseFieldBrowserOptions = vi.fn();
 vi.mock('../../../timelines/components/fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) =>
+      mockUseFieldBrowserOptions(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResizeObserver: Mock = useResizeObserver as Mock;
 vi.mock('use-resize-observer/polyfilled');
@@ -94,7 +95,7 @@ mockUseResizeObserver.mockImplementation(() => ({}));
 const mockedUseKibana = mockUseKibana();
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
 
   return {
     ...original,
@@ -113,67 +114,67 @@ vi.mock('../../../common/lib/kibana', async () => {
 });
 
 vi.mock('./timeline_actions/use_add_bulk_to_timeline', () => {
-      const mocked = {
-      useAddBulkToTimelineAction: vi.fn(() => {}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAddBulkToTimelineAction: vi.fn(() => {}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock InspectButton to reduce rendering overhead
 vi.mock('../../../common/components/inspect', () => {
-      const mocked = {
-      InspectButton: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InspectButton: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useInspectButton hook
 vi.mock('../alerts_kpis/common/hooks', () => {
-      const mocked = {
-      useInspectButton: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInspectButton: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useInvalidFilterQuery hook
 vi.mock('../../../common/hooks/use_invalid_filter_query', () => {
-      const mocked = {
-      useInvalidFilterQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidFilterQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useBrowserFields to avoid unnecessary field processing
 vi.mock('../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock useIsExperimentalFeatureEnabled to avoid state access
 vi.mock('../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock combineQueries to avoid expensive query building
 vi.mock('../../../common/lib/kuery', () => {
-      const mocked = {
-      combineQueries: vi.fn().mockReturnValue({ filterQuery: '{}' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    combineQueries: vi.fn().mockReturnValue({ filterQuery: '{}' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock PopoverItems to simplify rendering
 vi.mock('../../../common/components/popover_items', () => {
-      const mocked = {
-      PopoverItems: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PopoverItems: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderChildComponent = (groupingFilters: Filter[]) => <p data-test-subj="alerts-table" />;
 
@@ -324,9 +325,9 @@ describe('GroupedAlertsTable', () => {
 
   it('renders empty grouping table when group is selected without data', async () => {
     mockUseQueryAlerts.mockReturnValue(mockQueryResponse);
-    vi
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+      getMockStorageState(['kibana.alert.rule.name'])
+    );
 
     const { queryByTestId } = render(
       <TestProviders store={store}>
@@ -339,9 +340,9 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('renders grouping table in first accordion level when single group is selected', async () => {
-    vi
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+      getMockStorageState(['kibana.alert.rule.name'])
+    );
 
     const { getByTestId } = render(
       <TestProviders store={store}>
@@ -357,9 +358,9 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('Query gets passed correctly', async () => {
-    vi
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+      getMockStorageState(['kibana.alert.rule.name'])
+    );
 
     render(
       <TestProviders store={store}>
@@ -379,9 +380,9 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('renders grouping table in second accordion level when 2 groups are selected', async () => {
-    vi
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
+    vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+      getMockStorageState(['kibana.alert.rule.name', 'host.name'])
+    );
     store = createMockStore({
       ...mockGlobalState,
       groups: {
@@ -414,9 +415,9 @@ describe('GroupedAlertsTable', () => {
 
   describe('pagination reset on group change', () => {
     beforeEach(() => {
-      vi
-        .spyOn(window.localStorage, 'getItem')
-        .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
+      vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+        getMockStorageState(['kibana.alert.rule.name', 'host.name'])
+      );
       store = createMockStore({
         ...mockGlobalState,
         groups: {
@@ -512,9 +513,9 @@ describe('GroupedAlertsTable', () => {
 
   describe('pagination reset on page size change', () => {
     beforeEach(() => {
-      vi
-        .spyOn(window.localStorage, 'getItem')
-        .mockReturnValue(getMockStorageState(['kibana.alert.rule.name', 'host.name']));
+      vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+        getMockStorageState(['kibana.alert.rule.name', 'host.name'])
+      );
       store = createMockStore({
         ...mockGlobalState,
         groups: {
@@ -583,9 +584,9 @@ describe('GroupedAlertsTable', () => {
   });
 
   it('sends telemetry data when selected group changes', async () => {
-    vi
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+      getMockStorageState(['kibana.alert.rule.name'])
+    );
     store = createMockStore({
       ...mockGlobalState,
       groups: {
@@ -654,9 +655,9 @@ describe('GroupedAlertsTable', () => {
 
   it('calls onAggregationsChange when aggregations are updated', async () => {
     const onAggregationsChange = vi.fn();
-    vi
-      .spyOn(window.localStorage, 'getItem')
-      .mockReturnValue(getMockStorageState(['kibana.alert.rule.name']));
+    vi.spyOn(window.localStorage, 'getItem').mockReturnValue(
+      getMockStorageState(['kibana.alert.rule.name'])
+    );
 
     render(
       <TestProviders store={store}>

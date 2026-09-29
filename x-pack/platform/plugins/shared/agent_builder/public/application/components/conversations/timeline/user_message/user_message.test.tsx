@@ -17,39 +17,39 @@ import { ResponseActions } from '../response/response_actions';
 import { UserMessageImages } from './user_message_images';
 
 vi.mock('../../../../hooks/use_current_user', () => {
-      const mocked = {
-      useCurrentUser: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCurrentUser: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_user_profiles', () => {
-      const mocked = {
-      useUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../response/response_actions', () => {
-      const mocked = {
-      ResponseActions: vi.fn(() => <div data-test-subj="agentBuilderUserMessageActions" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponseActions: vi.fn(() => <div data-test-subj="agentBuilderUserMessageActions" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../attachments/attachment_references', () => {
-      const mocked = {
-      AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentReferences: () => <div data-test-subj="agentBuilderUserMessageAttachments" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./user_message_images', () => {
-      const mocked = {
-      UserMessageImages: vi.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserMessageImages: vi.fn(() => <div data-test-subj="agentBuilderUserMessageImages" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCurrentUser = vi.mocked(useCurrentUser);
 const mockUseUserProfiles = vi.mocked(useUserProfiles);

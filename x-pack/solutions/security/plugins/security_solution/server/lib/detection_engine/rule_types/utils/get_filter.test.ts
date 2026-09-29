@@ -18,9 +18,9 @@ import { buildExceptionFilter } from '@kbn/lists-plugin/server/services/exceptio
 import { getDataTierFilter } from './get_data_tier_filter';
 
 vi.mock('./get_data_tier_filter', () => {
-      const mocked = { getDataTierFilter: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getDataTierFilter: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 const getDataTierFilterMock = getDataTierFilter as Mock;
 
 describe('get_filter', () => {

@@ -13,18 +13,18 @@ import { useQuery } from '@kbn/react-query';
 import { useFetchMaintenanceWindows } from './use_fetch_maintenance_windows';
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn().mockReturnValue({ data: undefined, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../utils/api_service', () => {
-      const mocked = {
-      apiService: { get: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apiService: { get: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useQueryMock = useQuery as Mock;
 

@@ -13,47 +13,47 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { RulePreviewAttachmentSecurityProviders } from './providers';
 
 vi.mock('../../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout', () => {
-      const mocked = {
-      SecuritySolutionFlyout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecuritySolutionFlyout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useDarkMode: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDarkMode: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/common', () => {
-      const mocked = {
-      EuiThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EuiThemeProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../data_view_manager/hooks/use_init_data_view_manager', () => {
-      const mocked = {
-      useInitDataViewManager: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInitDataViewManager: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useSelector: vi.fn(),
-      useDispatch: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelector: vi.fn(),
+    useDispatch: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderProviders = (getServices: () => Promise<unknown>, getStore: () => Promise<unknown>) =>
   render(

@@ -21,18 +21,18 @@ import { EBT_CLICK_ACTIONS } from '@kbn/ebt-click';
 import { TRACES_DOC_VIEWER_EBT_ELEMENTS, TRACES_DOC_VIEWER_EBT_DETAILS } from '../../ebt_constants';
 
 vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
-      const mocked = {
-      useDiscoverLinkAndEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoverLinkAndEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => {
-      const mocked = {
-      useDocViewerExtensionActionsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocViewerExtensionActionsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DiscoverEsqlLink', () => {
   const indexPattern = 'apm-*';

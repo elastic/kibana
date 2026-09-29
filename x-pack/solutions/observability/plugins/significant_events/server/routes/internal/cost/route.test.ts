@@ -18,26 +18,26 @@ import { resolveTokenTrackingCoverage } from '../../../lib/cost/token_tracking_c
 import { internalCostRoutes, resetCostRouteCache } from './route';
 
 vi.mock('../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/run_quotas', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../lib/run_quotas')),
-      assertCanManageRunQuotas: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../lib/run_quotas')),
+    assertCanManageRunQuotas: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/cost/token_tracking_coverage', () => {
-      const mocked = {
-      resolveTokenTrackingCoverage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveTokenTrackingCoverage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const route = internalCostRoutes['GET /internal/significant_events/cost'];
 
@@ -145,9 +145,9 @@ describe('Significant Events cost route', () => {
   it('runs both authorization checks before serving a cached response', async () => {
     await invoke();
 
-    vi
-      .mocked(assertSignificantEventsAccess)
-      .mockRejectedValueOnce(new Error('significant events forbidden'));
+    vi.mocked(assertSignificantEventsAccess).mockRejectedValueOnce(
+      new Error('significant events forbidden')
+    );
     await expect(invoke()).rejects.toThrow('significant events forbidden');
 
     vi.mocked(assertCanManageRunQuotas).mockRejectedValueOnce(new Error('quota forbidden'));

@@ -17,28 +17,28 @@ import { useDataView } from '../../../../../../data_view_manager/hooks/use_data_
 import { withIndices } from '../../../../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          pageName: 'alerts',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        pageName: 'alerts',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getAlertsByStatusAttributes', () => {
   beforeAll(() => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(['signal-index'], 'security-solution-my-test')
+    );
   });
 
   it('should render without extra options', () => {

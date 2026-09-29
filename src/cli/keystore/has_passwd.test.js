@@ -15,22 +15,22 @@ const mockKeystoreWithPassword =
   '1:j/zZA0L6cPonF6zacVTOT0qwZeXgPJOZrLHhFYg+CzchCIcjjhH/70JyHj7gPCEa/ZrBm8gCAKbcXSo8eQsHP25Qf922f/tXI9m6IiXPf6G/v/KiO0rOSjobDNFYWCxCD7aIJmYnuoPMhqc=';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn().mockImplementation((path) => {
-        if (path.includes('with_password.keystore')) {
-          return JSON.stringify(mockKeystoreWithPassword);
-        }
-        if (path.includes('without_password.keystore')) {
-          return JSON.stringify(mockKeystoreWithoutPassword);
-        }
+  const mocked = {
+    readFileSync: vi.fn().mockImplementation((path) => {
+      if (path.includes('with_password.keystore')) {
+        return JSON.stringify(mockKeystoreWithPassword);
+      }
+      if (path.includes('without_password.keystore')) {
+        return JSON.stringify(mockKeystoreWithoutPassword);
+      }
 
-        throw { code: 'ENOENT' };
-      }),
-      existsSync: vi.fn().mockImplementation(() => true),
-      writeFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      throw { code: 'ENOENT' };
+    }),
+    existsSync: vi.fn().mockImplementation(() => true),
+    writeFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import sinon from 'sinon';
 

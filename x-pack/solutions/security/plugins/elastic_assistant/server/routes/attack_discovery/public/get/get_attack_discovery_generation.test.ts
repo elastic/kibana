@@ -135,9 +135,10 @@ describe('getAttackDiscoveryGenerationRoute', () => {
     };
     mockResponse = httpServerMock.createResponseFactory();
     mockResponse.custom = vi.fn().mockReturnThis();
-    vi
-      .spyOn(helpers, 'performChecks')
-      .mockResolvedValue({ isSuccess: true, currentUser: mockAuthenticatedUser });
+    vi.spyOn(helpers, 'performChecks').mockResolvedValue({
+      isSuccess: true,
+      currentUser: mockAuthenticatedUser,
+    });
 
     addVersionMock = vi.fn();
     (router.versioned.get as Mock).mockReturnValue({ addVersion: addVersionMock });

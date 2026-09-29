@@ -14,11 +14,11 @@ import { FieldRulesPanelPagination } from './pagination';
 import { useFieldRulesPanelContext } from './context';
 
 vi.mock('./context', () => {
-      const mocked = {
-      useFieldRulesPanelContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldRulesPanelContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createRules = (count: number) =>
   Array.from({ length: count }, (_, index) => ({

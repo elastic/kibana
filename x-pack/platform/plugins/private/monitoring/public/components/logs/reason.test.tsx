@@ -12,27 +12,27 @@ import { shallow } from 'enzyme';
 import { Reason } from './reason';
 
 vi.mock('../../legacy_shims', () => {
-      const mocked = {
-      Legacy: {
-        shims: {
-          docLinks: {
-            ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
-            DOC_LINK_VERSION: 'current',
-            links: {
-              filebeat: {
-                elasticsearchModule: 'jest-metadata-mock-url',
-                installation: 'jest-metadata-mock-url',
-              },
-              monitoring: {
-                troubleshootKibana: 'jest-metadata-mock-url',
-              },
+  const mocked = {
+    Legacy: {
+      shims: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'https://www.elastic.co/',
+          DOC_LINK_VERSION: 'current',
+          links: {
+            filebeat: {
+              elasticsearchModule: 'jest-metadata-mock-url',
+              installation: 'jest-metadata-mock-url',
+            },
+            monitoring: {
+              troubleshootKibana: 'jest-metadata-mock-url',
             },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Logs', () => {
   it('should render a default message', () => {

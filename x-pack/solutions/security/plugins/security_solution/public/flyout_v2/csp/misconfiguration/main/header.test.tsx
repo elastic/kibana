@@ -13,46 +13,46 @@ import type { CspFinding } from '@kbn/cloud-security-posture-common';
 import { Header } from './header';
 
 vi.mock('@kbn/cloud-security-posture', () => {
-      const mocked = {
-      CspEvaluationBadge: ({ type }: { type?: string }) => (
-        <div data-test-subj="mockCspEvaluationBadge" data-type={type} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CspEvaluationBadge: ({ type }: { type?: string }) => (
+      <div data-test-subj="mockCspEvaluationBadge" data-type={type} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/components/flyout_title', () => {
-      const mocked = {
-      FlyoutTitle: ({ title }: { title: string }) => (
-        <div data-test-subj="mockFlyoutTitle">{title}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutTitle: ({ title }: { title: string }) => (
+      <div data-test-subj="mockFlyoutTitle">{title}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/components/formatted_date', () => {
-      const mocked = {
-      PreferenceFormattedDate: () => <span data-test-subj="mockFormattedDate" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PreferenceFormattedDate: () => <span data-test-subj="mockFormattedDate" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCspHeader = vi.fn(() => <div data-test-subj="mockCspFlyoutHeader" />);
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          cloudSecurityPosture: {
-            getCloudSecurityPostureMisconfigurationFlyout: () => ({
-              Header: mockCspHeader,
-            }),
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        cloudSecurityPosture: {
+          getCloudSecurityPostureMisconfigurationFlyout: () => ({
+            Header: mockCspHeader,
+          }),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const finding = {
   '@timestamp': '2024-01-15T10:30:00.000Z',

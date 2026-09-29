@@ -29,11 +29,11 @@ import {
 } from './mock';
 
 vi.mock('./api', () => {
-      const mocked = {
-      fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchActiveMaintenanceWindows: vi.fn(() => Promise.resolve([])),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TestProviders: FC<PropsWithChildren<unknown>> = ({ children }) => {
   const queryClient = new QueryClient();

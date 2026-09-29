@@ -13,28 +13,28 @@ import { render, screen } from '@testing-library/react';
 import { AIValueRoutes } from './routes';
 
 vi.mock('../common/components/plugin_template_wrapper', () => {
-      const mocked = {
-      PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="pluginTemplateWrapper">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginTemplateWrapper: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="pluginTemplateWrapper">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Simulate the upselling behavior: SecurityRoutePageWrapper can choose not to render children.
 vi.mock('../common/components/security_route_page_wrapper', () => {
-      const mocked = {
-      SecurityRoutePageWrapper: () => <div data-test-subj="upsellPage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecurityRoutePageWrapper: () => <div data-test-subj="upsellPage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./pages/ai_value', () => {
-      const mocked = {
-      AIValue: () => <div data-test-subj="aiValuePage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AIValue: () => <div data-test-subj="aiValuePage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AIValueRoutes', () => {
   it('renders the plugin template wrapper when the route page wrapper does not render children', () => {

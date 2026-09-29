@@ -24,18 +24,18 @@ import { renderWithTestingProviders } from '../../../common/mock';
 import * as i18n from '../translations';
 
 vi.mock('./template_form', () => {
-      const mocked = {
-      TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateYamlEditor: () => <div data-test-subj="template-yaml-editor" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./template_preview', () => {
-      const mocked = {
-      TemplatePreview: () => <div data-test-subj="template-preview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplatePreview: () => <div data-test-subj="template-preview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const capturedEditorLayoutProps: {
   onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
@@ -51,65 +51,65 @@ const capturedEditorLayoutProps: {
 } = {};
 
 vi.mock('./template_editor_layout', () => {
-      const mocked = {
-      TemplateEditorLayout: (props: {
-        onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
-        onCaseDefaultChange?: (
-          field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
-          value: string | string[] | CaseAssignees
-        ) => void;
-        onSettingsChange?: (settings: unknown) => void;
-        onConnectorChange?: (connector: unknown) => void;
-        [key: string]: unknown;
-      }) => {
-        capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
-        capturedEditorLayoutProps.onCaseDefaultChange = props.onCaseDefaultChange;
-        capturedEditorLayoutProps.onSettingsChange = props.onSettingsChange;
-        capturedEditorLayoutProps.onConnectorChange = props.onConnectorChange;
-        capturedEditorLayoutProps.metadata = props.metadata as TemplateMetadata;
-        capturedEditorLayoutProps.onMetadataChange =
-          props.onMetadataChange as typeof capturedEditorLayoutProps.onMetadataChange;
-        capturedEditorLayoutProps.yamlValue = props.yamlValue as string;
-        return (
-          <>
-            <div data-test-subj="template-yaml-editor" />
-            <div data-test-subj="template-preview" />
-          </>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateEditorLayout: (props: {
+      onFieldDefaultChange?: (fieldName: string, value: string, control: string) => void;
+      onCaseDefaultChange?: (
+        field: 'name' | 'description' | 'severity' | 'category' | 'tags' | 'assignees',
+        value: string | string[] | CaseAssignees
+      ) => void;
+      onSettingsChange?: (settings: unknown) => void;
+      onConnectorChange?: (connector: unknown) => void;
+      [key: string]: unknown;
+    }) => {
+      capturedEditorLayoutProps.onFieldDefaultChange = props.onFieldDefaultChange;
+      capturedEditorLayoutProps.onCaseDefaultChange = props.onCaseDefaultChange;
+      capturedEditorLayoutProps.onSettingsChange = props.onSettingsChange;
+      capturedEditorLayoutProps.onConnectorChange = props.onConnectorChange;
+      capturedEditorLayoutProps.metadata = props.metadata as TemplateMetadata;
+      capturedEditorLayoutProps.onMetadataChange =
+        props.onMetadataChange as typeof capturedEditorLayoutProps.onMetadataChange;
+      capturedEditorLayoutProps.yamlValue = props.yamlValue as string;
+      return (
+        <>
+          <div data-test-subj="template-yaml-editor" />
+          <div data-test-subj="template-preview" />
+        </>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateToCasesTemplates = vi.fn();
 
 vi.mock('../../../common/navigation', () => {
-      const mocked = {
-      useCasesTemplatesNavigation: () => ({
-        getCasesTemplatesUrl: vi.fn().mockReturnValue('/templates'),
-        navigateToCasesTemplates: mockNavigateToCasesTemplates,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesTemplatesNavigation: () => ({
+      getCasesTemplatesUrl: vi.fn().mockReturnValue('/templates'),
+      navigateToCasesTemplates: mockNavigateToCasesTemplates,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseCasesLocalStorage = vi.fn(
   (..._args: unknown[]): [unknown, (value: unknown) => void] => [undefined, vi.fn()]
 );
 vi.mock('../../../common/use_cases_local_storage', () => {
-      const mocked = {
-      useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseDebouncedYamlEdit = vi.fn();
 vi.mock('../hooks/use_debounced_yaml_edit', () => {
-      const mocked = {
-      useDebouncedYamlEdit: (...args: unknown[]) => mockUseDebouncedYamlEdit(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebouncedYamlEdit: (...args: unknown[]) => mockUseDebouncedYamlEdit(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Template identity (name/description/tags) is no longer part of the YAML — the editor buffer only
 // holds case defaults, settings, connector, and fields.

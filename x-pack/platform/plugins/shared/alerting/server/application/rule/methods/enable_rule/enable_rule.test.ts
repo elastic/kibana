@@ -28,18 +28,18 @@ vi.mock('../../../../rules_client/lib/siem_legacy_actions/migrate_legacy_actions
 });
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const alertsService = alertsServiceMock.create();
 const kibanaVersion = 'v7.10.0';

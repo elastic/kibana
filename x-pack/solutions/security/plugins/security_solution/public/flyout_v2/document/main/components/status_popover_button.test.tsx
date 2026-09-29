@@ -23,7 +23,7 @@ import { FLYOUT_ACTION, FLYOUT_HEADER_ITEM, FLYOUT_TYPE } from '../../../../comm
 // renders a plain `EuiBadge`, so we mock it down to that badge (preserving the click handler and the
 // `chevronSingleDown` icon the popover-open assertions rely on) to keep each render within the 5s budget.
 vi.mock('../../../../timelines/components/timeline/body/renderers/formatted_field', async () => {
-  const { EuiBadge } = (await vi.importActual('@elastic/eui'));
+  const { EuiBadge } = await vi.importActual('@elastic/eui');
   return {
     FormattedFieldValue: ({
       value,

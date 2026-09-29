@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock, MockedFunction } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import type { monaco } from '@kbn/code-editor';
 import type { YamlValidationResult } from '@kbn/workflows-yaml';
 import { useFixWithAi } from './use_fix_with_ai';
@@ -19,17 +19,17 @@ import { registerFixWithAiCodeActionProvider } from '../../lib/register_fix_with
 import { navigateToErrorPosition } from '../../lib/utils';
 
 vi.mock('../../lib/register_fix_with_ai_code_action_provider', () => {
-      const mocked = {
-      registerFixWithAiCodeActionProvider: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerFixWithAiCodeActionProvider: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/utils', () => {
-      const mocked = {
-      navigateToErrorPosition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    navigateToErrorPosition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const registerProviderMock = registerFixWithAiCodeActionProvider as MockedFunction<
   typeof registerFixWithAiCodeActionProvider

@@ -22,27 +22,27 @@ import {
 } from '../../../../../common/constants/monitor_defaults';
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_monitor_name', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_monitor_name')),
-      useMonitorName: vi.fn().mockReturnValue({ nameAlreadyExists: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_monitor_name')),
+    useMonitorName: vi.fn().mockReturnValue({ nameAlreadyExists: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_kibana_space', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks/use_kibana_space')),
-      useKibanaSpace: vi.fn().mockReturnValue({ id: 'default' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks/use_kibana_space')),
+    useKibanaSpace: vi.fn().mockReturnValue({ id: 'default' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('MonitorEditPage', () => {
   const { FETCH_STATUS } = observabilitySharedPublic;

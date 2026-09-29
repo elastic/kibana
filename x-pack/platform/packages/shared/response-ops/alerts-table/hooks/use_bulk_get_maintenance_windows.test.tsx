@@ -243,9 +243,7 @@ describe('useBulkGetMaintenanceWindowsQuery', () => {
       },
     };
 
-    const spy = vi
-      .spyOn(api, 'bulkGetMaintenanceWindows')
-      .mockRejectedValue(new Error('An error'));
+    const spy = vi.spyOn(api, 'bulkGetMaintenanceWindows').mockRejectedValue(new Error('An error'));
 
     renderHook(
       () =>

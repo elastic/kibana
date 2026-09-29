@@ -22,11 +22,11 @@ import { TestProviders } from '../../../../../common/mock';
 const mockOnSelect = vi.fn();
 
 vi.mock('../../../../../common/experimental_features_service', () => {
-      const mocked = {
-      ExperimentalFeaturesService: { get: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: { get: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 const mockExperimentalFeatures = ExperimentalFeaturesService.get as Mock;
 
 const items: CardSelectorListItem[] = [

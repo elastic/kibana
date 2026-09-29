@@ -14,14 +14,14 @@ import type { RuleFormData } from '../types';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormScreenContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormScreenContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState, useRuleFormScreenContext } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormScreenContext } = await vi.importMock('../hooks');
 
 const formData: RuleFormData = {
   params: {

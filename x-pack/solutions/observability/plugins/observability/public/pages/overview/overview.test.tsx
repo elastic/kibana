@@ -27,9 +27,9 @@ const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
 onboardingLocator.useUrl.mockReturnValue(onboardingHref);
-vi
-  .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
-  .mockReturnValue(onboardingLocator);
+vi.spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get').mockReturnValue(
+  onboardingLocator
+);
 
 vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -37,21 +37,21 @@ vi.mock('../../utils/kibana_react', () => ({
 }));
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePageReady: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePageReady: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useBreadcrumbs: vi.fn(),
-      useFetcher: vi.fn(() => ({ data: undefined })),
-      ExternalResourceLinks: () => <div data-test-subj="externalResourceLinks" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useBreadcrumbs: vi.fn(),
+    useFetcher: vi.fn(() => ({ data: undefined })),
+    ExternalResourceLinks: () => <div data-test-subj="externalResourceLinks" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_plugin_context');
 vi.mock('../../hooks/use_has_data');
@@ -59,38 +59,38 @@ vi.mock('../../hooks/use_date_picker_context');
 vi.mock('../../hooks/use_time_buckets');
 
 vi.mock('./components/header_actions/header_actions', () => {
-      const mocked = {
-      HeaderActions: () => <div data-test-subj="overviewHeaderActions" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HeaderActions: () => <div data-test-subj="overviewHeaderActions" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/data_sections', () => {
-      const mocked = {
-      DATA_SECTIONS: ['alert', 'infra_logs', 'infra_metrics', 'apm', 'ux'],
-      DataSections: () => <div data-test-subj="overviewDataSections" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DATA_SECTIONS: ['alert', 'infra_logs', 'infra_metrics', 'apm', 'ux'],
+    DataSections: () => <div data-test-subj="overviewDataSections" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/news_feed/news_feed', () => {
-      const mocked = {
-      NewsFeed: () => <div data-test-subj="overviewNewsFeed" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewsFeed: () => <div data-test-subj="overviewNewsFeed" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/observability_onboarding_callout', () => {
-      const mocked = {
-      ObservabilityOnboardingCallout: () => <div data-test-subj="overviewOnboardingCallout" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ObservabilityOnboardingCallout: () => <div data-test-subj="overviewOnboardingCallout" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { usePluginContext } = (await vi.importMock('../../hooks/use_plugin_context'));
-const { useHasData } = (await vi.importMock('../../hooks/use_has_data'));
-const { useDatePickerContext } = (await vi.importMock('../../hooks/use_date_picker_context'));
-const { useTimeBuckets } = (await vi.importMock('../../hooks/use_time_buckets'));
+const { usePluginContext } = await vi.importMock('../../hooks/use_plugin_context');
+const { useHasData } = await vi.importMock('../../hooks/use_has_data');
+const { useDatePickerContext } = await vi.importMock('../../hooks/use_date_picker_context');
+const { useTimeBuckets } = await vi.importMock('../../hooks/use_time_buckets');
 
 function completeHasDataMap(overrides: Partial<HasDataMap> = {}): HasDataMap {
   const loaded = { hasData: false, status: FETCH_STATUS.SUCCESS };

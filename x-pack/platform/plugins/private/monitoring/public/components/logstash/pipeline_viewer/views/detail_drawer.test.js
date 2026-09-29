@@ -12,11 +12,11 @@ import { DetailDrawer } from './detail_drawer';
 import { shallow } from 'enzyme';
 
 vi.mock('../../../sparkline', () => {
-      const mocked = {
-      Sparkline: () => 'Sparkline',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Sparkline: () => 'Sparkline',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DetailDrawer component', () => {
   let onHide;

@@ -22,11 +22,11 @@ import { useDocumentSummary } from '../hooks/use_document_summary';
 
 vi.mock('../hooks/use_document_summary');
 vi.mock('@kbn/security-solution-navigation', () => {
-      const mocked = {
-      useNavigateTo: () => ({ navigateTo: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigateTo: () => ({ navigateTo: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const promptContext: PromptContext = {
   category: 'alert',

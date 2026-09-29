@@ -34,7 +34,7 @@ import { openSaveModal } from '../services/save_modal';
 const waitForPromise = () => new Promise((r) => setTimeout(r));
 // mocking random id generator function
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
 
   return {
     ...original,
@@ -46,41 +46,41 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('../services/persistence', () => {
-      const mocked = {
-      lookupIndexPatternId: vi.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
-      migrateLegacyIndexPatternRef: vi.fn(() => ({ success: true })),
-      savedWorkspaceToAppState: vi.fn(() => ({
-        urlTemplates: [
-          {
-            description: 'template',
-            url: 'http://example.org/q={{gquery}}',
-          },
-        ] as UrlTemplate[],
-        advancedSettings: { minDocCount: 12 } as AdvancedSettings,
-        allFields: [
-          {
-            name: 'testfield',
-          },
-        ] as WorkspaceField[],
-      })),
-      appStateToSavedWorkspace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    lookupIndexPatternId: vi.fn(() => ({ id: '123', attributes: { title: 'test-pattern' } })),
+    migrateLegacyIndexPatternRef: vi.fn(() => ({ success: true })),
+    savedWorkspaceToAppState: vi.fn(() => ({
+      urlTemplates: [
+        {
+          description: 'template',
+          url: 'http://example.org/q={{gquery}}',
+        },
+      ] as UrlTemplate[],
+      advancedSettings: { minDocCount: 12 } as AdvancedSettings,
+      allFields: [
+        {
+          name: 'testfield',
+        },
+      ] as WorkspaceField[],
+    })),
+    appStateToSavedWorkspace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../services/save_modal', () => {
-      const mocked = {
-      openSaveModal: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    openSaveModal: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/saved_workspace_utils', () => {
-      const mocked = {
-      saveSavedWorkspace: vi.fn().mockResolvedValueOnce('123'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    saveSavedWorkspace: vi.fn().mockResolvedValueOnce('123'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('persistence sagas', () => {
   let env: MockedGraphEnvironment;

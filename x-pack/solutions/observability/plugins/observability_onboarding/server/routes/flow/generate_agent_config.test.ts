@@ -18,14 +18,14 @@ import type { InstalledIntegration } from '../types';
 
 // Mock the Fleet transformation function
 vi.mock('@kbn/fleet-plugin/server/services/output_client', () => {
-      const mocked = {
-      transformOutputToFullPolicyOutput: vi.fn((output: Output) => ({
-        ...output,
-        api_key: 'test-api-key',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformOutputToFullPolicyOutput: vi.fn((output: Output) => ({
+      ...output,
+      api_key: 'test-api-key',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('generateAgentConfigTar', () => {
   let tempDir: string;

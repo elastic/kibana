@@ -16,11 +16,12 @@ import type { SchemaService } from '../../lib/schema_service';
 import { API_VERSIONS } from '../../../common/constants';
 
 vi.mock('../../utils/get_internal_saved_object_client', () => {
-      const mocked = {
-      createInternalSavedObjectsClientForSpaceId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createInternalSavedObjectsClientForSpaceId: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { createInternalSavedObjectsClientForSpaceId } from '../../utils/get_internal_saved_object_client';
 
@@ -88,9 +89,7 @@ describe('createGetSchemasRoute', () => {
     mockRouter = createMockRouter();
     mockSavedObjectsClient = { get: vi.fn(), find: vi.fn() };
 
-    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(
-      mockSavedObjectsClient
-    );
+    (createInternalSavedObjectsClientForSpaceId as Mock).mockResolvedValue(mockSavedObjectsClient);
 
     createGetSchemasRoute(mockRouter, mockOsqueryContext, mockSchemaService);
 
@@ -231,9 +230,7 @@ describe('createGetSchemasRoute', () => {
       it('should pass the packageService from osqueryContext to SchemaService', async () => {
         const mockPackageService = { asInternalUser: { getInstallation: vi.fn() } };
 
-        (mockOsqueryContext.service.getPackageService as Mock).mockReturnValue(
-          mockPackageService
-        );
+        (mockOsqueryContext.service.getPackageService as Mock).mockReturnValue(mockPackageService);
 
         mockSchemaService.getSchema.mockResolvedValue({ version: '5.19.0', data: [] });
 

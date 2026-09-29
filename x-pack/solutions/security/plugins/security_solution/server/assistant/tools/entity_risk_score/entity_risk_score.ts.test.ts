@@ -59,18 +59,18 @@ const mockAlerts = {
 const mockGetRiskScores = vi.fn().mockResolvedValue(undefined);
 const mockGetAlertsById = vi.fn().mockResolvedValue(undefined);
 vi.mock('../../../lib/entity_analytics/risk_score/get_risk_score', () => {
-      const mocked = {
-      createGetRiskScores: () => (params: unknown) => mockGetRiskScores(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createGetRiskScores: () => (params: unknown) => mockGetRiskScores(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./get_alert_by_id', () => {
-      const mocked = {
-      createGetAlertsById: () => () => mockGetAlertsById(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createGetAlertsById: () => () => mockGetAlertsById(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ENTITY_RISK_SCORE_TOOL', () => {
   const alertsIndexPattern = 'alerts-index';

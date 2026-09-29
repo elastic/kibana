@@ -31,20 +31,20 @@ import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout'
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 vi.mock('../../../../components/discover_grid', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../components/discover_grid')),
-      DiscoverGrid: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../components/discover_grid')),
+    DiscoverGrid: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/discover_grid_flyout', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../components/discover_grid_flyout')),
-      DiscoverGridFlyout: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../components/discover_grid_flyout')),
+    DiscoverGridFlyout: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const discoverGridMock = vi.mocked(DiscoverGrid);
 const singleEsHit = esHitsMock.slice(0, 1);
@@ -111,10 +111,9 @@ async function mountComponent({
   dataStateContainer.data$.documents$.next = vi.fn();
 
   const props = {
-    renderViewModeToggle: vi.fn<
-      ReturnType<RenderViewModeToggle>,
-      Parameters<RenderViewModeToggle>
-    >(() => <div data-test-subj="viewModeToggle">test</div>),
+    renderViewModeToggle: vi.fn<ReturnType<RenderViewModeToggle>, Parameters<RenderViewModeToggle>>(
+      () => <div data-test-subj="viewModeToggle">test</div>
+    ),
     dataView: dataViewMock,
     onAddFilter: vi.fn(),
     onFieldEdited: vi.fn(),
@@ -130,16 +129,14 @@ async function mountComponent({
 describe('Discover documents layout', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
-    const discoverGrid = (await vi.importActual('../../../../components/discover_grid'));
-    const discoverGridFlyout = (await vi.importActual('../../../../components/discover_grid_flyout'));
-    vi
-      .mocked(DiscoverGrid)
-      .mockImplementation((props) => React.createElement(discoverGrid.DiscoverGrid, props));
-    vi
-      .mocked(DiscoverGridFlyout)
-      .mockImplementation((props) =>
-        React.createElement(discoverGridFlyout.DiscoverGridFlyout, props)
-      );
+    const discoverGrid = await vi.importActual('../../../../components/discover_grid');
+    const discoverGridFlyout = await vi.importActual('../../../../components/discover_grid_flyout');
+    vi.mocked(DiscoverGrid).mockImplementation((props) =>
+      React.createElement(discoverGrid.DiscoverGrid, props)
+    );
+    vi.mocked(DiscoverGridFlyout).mockImplementation((props) =>
+      React.createElement(discoverGridFlyout.DiscoverGridFlyout, props)
+    );
   });
 
   test('render loading when loading and no documents', async () => {
@@ -244,16 +241,12 @@ describe('Discover documents layout', () => {
 
   describe('external doc view', () => {
     beforeEach(() => {
-      vi
-        .mocked(DiscoverGrid)
-        .mockImplementation((props) => (
-          <div data-test-subj="discoverGridMock">{props.expandedDoc?.id ?? 'no-expanded-doc'}</div>
-        ));
-      vi
-        .mocked(DiscoverGridFlyout)
-        .mockImplementation((props) => (
-          <div data-test-subj="discoverGridFlyoutMock">{props.hit?.id ?? 'no-expanded-doc'}</div>
-        ));
+      vi.mocked(DiscoverGrid).mockImplementation((props) => (
+        <div data-test-subj="discoverGridMock">{props.expandedDoc?.id ?? 'no-expanded-doc'}</div>
+      ));
+      vi.mocked(DiscoverGridFlyout).mockImplementation((props) => (
+        <div data-test-subj="discoverGridFlyoutMock">{props.hit?.id ?? 'no-expanded-doc'}</div>
+      ));
     });
 
     it('passes expanded doc state and metadata callback to the main grid when it owns the flyout', async () => {

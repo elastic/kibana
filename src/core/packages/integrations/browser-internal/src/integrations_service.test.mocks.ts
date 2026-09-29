@@ -22,16 +22,16 @@ const createCoreServiceMock = (): Mocked<CoreService> => {
 
 export const styleServiceMock = createCoreServiceMock();
 vi.doMock('./styles', () => {
-      const mocked = {
-      StylesService: vi.fn(() => styleServiceMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StylesService: vi.fn(() => styleServiceMock),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const momentServiceMock = createCoreServiceMock();
 vi.doMock('./moment', () => {
-      const mocked = {
-      MomentService: vi.fn(() => momentServiceMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MomentService: vi.fn(() => momentServiceMock),
+  };
+  return { ...mocked, default: mocked };
+});

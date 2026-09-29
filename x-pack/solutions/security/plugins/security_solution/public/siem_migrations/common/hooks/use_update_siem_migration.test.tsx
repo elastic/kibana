@@ -25,11 +25,11 @@ const mockAddSuccess = vi.fn();
 const mockAddError = vi.fn();
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createWrapper = () => {
   const client = new QueryClient();

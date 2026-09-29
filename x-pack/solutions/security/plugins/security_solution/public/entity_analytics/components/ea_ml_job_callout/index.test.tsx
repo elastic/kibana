@@ -17,14 +17,14 @@ import { EaMlJobCallout } from '.';
 
 vi.mock('../../../common/components/ml/hooks/use_installed_security_jobs');
 vi.mock('../../../common/components/callouts/use_callout_storage', () => {
-      const mocked = {
-      useCallOutStorage: () => ({
-        isVisible: () => true,
-        dismiss: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCallOutStorage: () => ({
+      isVisible: () => true,
+      dismiss: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInstalledSecurityJobs = vi.mocked(useInstalledSecurityJobs);
 

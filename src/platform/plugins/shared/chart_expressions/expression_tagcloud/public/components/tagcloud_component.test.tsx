@@ -23,15 +23,15 @@ import type { TagCloudRendererParams } from '../../common/types';
 import { ScaleOptions, Orientation } from '../../common/constants';
 
 vi.mock('../format_service', () => {
-      const mocked = {
-      getFormatService: vi.fn(() => {
-        return {
-          deserialize: vi.fn(),
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormatService: vi.fn(() => {
+      return {
+        deserialize: vi.fn(),
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const palettesRegistry = chartPluginMock.createPaletteRegistry();
 const geoDestId = 'geo.dest';

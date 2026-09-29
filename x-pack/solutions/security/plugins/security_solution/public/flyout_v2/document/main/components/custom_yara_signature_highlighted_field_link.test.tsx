@@ -29,18 +29,18 @@ import {
 } from './custom_yara_signature_highlighted_field_link';
 
 vi.mock('../../../../management/pages/custom_yara_signatures/service/api_client', () => {
-      const mocked = {
-      CustomYaraSignaturesApiClient: {
-        getInstance: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomYaraSignaturesApiClient: {
+      getInstance: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../../../../common/lib/kibana', async () => {
-  const actual = (await vi.importActual('../../../../common/lib/kibana'));
+  const actual = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...actual,
     useAppUrl: () => ({

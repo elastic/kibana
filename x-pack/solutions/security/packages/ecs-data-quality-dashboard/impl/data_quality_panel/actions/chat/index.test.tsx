@@ -21,18 +21,18 @@ import {
 import { getFormattedCheckTime } from '../../data_quality_details/indices_details/pattern/index_check_flyout/utils/get_formatted_check_time';
 
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      NewChat: vi.fn(({ children }) => (
-        <button type="button" data-test-subj="newChatLink">
-          {children}
-        </button>
-      )),
-      useFindPrompts: vi.fn().mockReturnValue({
-        data: { prompts: [] },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NewChat: vi.fn(({ children }) => (
+      <button type="button" data-test-subj="newChatLink">
+        {children}
+      </button>
+    )),
+    useFindPrompts: vi.fn().mockReturnValue({
+      data: { prompts: [] },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useFindPromptsMock = useFindPrompts as unknown as Mock<
   Pick<ReturnType<typeof useFindPrompts>, 'data'>

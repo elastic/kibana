@@ -38,7 +38,7 @@ vi.mock('@elastic/charts', () => {
 
 const chartsMock: {
   __mockMeter: Mock<null, [MeterProps]>;
-} = (await vi.importMock('@elastic/charts'));
+} = await vi.importMock('@elastic/charts');
 const meterMock = chartsMock.__mockMeter;
 
 describe('progress bar cell helpers', () => {

@@ -18,27 +18,27 @@ import { useAnomalyTableRowActions } from './use_anomaly_table_row_actions';
 import type { TableRow } from '../../components/anomalies/table/types';
 
 vi.mock('../../../common/lib/kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/utils/timeline/use_show_timeline', () => {
-      const mocked = {
-      useShowTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShowTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/timeline/use_investigate_in_timeline', () => {
-      const mocked = {
-      useInvestigateInTimeline: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigateInTimeline: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_anomaly_single_metric_viewer_url', () => {
-      const mocked = {
-      useAnomalySingleMetricViewerUrl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnomalySingleMetricViewerUrl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseShowTimeline = useShowTimeline as Mock;

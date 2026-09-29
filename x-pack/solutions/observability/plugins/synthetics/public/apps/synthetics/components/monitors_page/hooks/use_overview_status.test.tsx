@@ -23,7 +23,7 @@ import { useOverviewStatus } from './use_overview_status';
 const refreshState = { lastRefresh: 1 };
 
 vi.mock('../../../contexts/synthetics_refresh_context', async () => {
-  const actual = (await vi.importActual('../../../contexts/synthetics_refresh_context'));
+  const actual = await vi.importActual('../../../contexts/synthetics_refresh_context');
   return {
     ...actual,
     useSyntheticsRefreshContext: () => ({

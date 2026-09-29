@@ -21,23 +21,23 @@ const mockGetBreadcrumbOptions = vi.fn(() => ({
 }));
 
 vi.mock('../../../hooks/use_parent_breadcrumb_resolver', () => {
-      const mocked = {
-      useParentBreadcrumbResolver: () => ({
-        getBreadcrumbOptions: () => mockGetBreadcrumbOptions(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useParentBreadcrumbResolver: () => ({
+      getBreadcrumbOptions: () => mockGetBreadcrumbOptions(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_metrics_app_header_menu', () => {
-      const mocked = {
-      useMetricsAppHeaderMenu: () => ({
-        menu: { items: [] },
-        flyouts: <div data-test-subj="metricsDetailAppHeaderFlyouts" />,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsAppHeaderMenu: () => ({
+      menu: { items: [] },
+      flyouts: <div data-test-subj="metricsDetailAppHeaderFlyouts" />,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderHeader = ({
   tabs,

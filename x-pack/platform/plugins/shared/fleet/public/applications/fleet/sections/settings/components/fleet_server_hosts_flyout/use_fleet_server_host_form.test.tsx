@@ -14,12 +14,12 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetServerHostsForm } from './use_fleet_server_host_form';
 
 vi.mock('../../hooks/use_confirm_modal', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_confirm_modal')),
-      useConfirmModal: () => ({ confirm: () => true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_confirm_modal')),
+    useConfirmModal: () => ({ confirm: () => true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFleetServerHostsForm', () => {
   it('should not allow to submit an invalid form', async () => {

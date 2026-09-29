@@ -63,58 +63,62 @@ vi.mock('../licensed_features', () => {
 
 describe('map embeddable', () => {
   let embeddableApi: MapApi;
-  beforeEach(() =>
-  new Promise<void>((resolve, reject) => {
-  const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+  beforeEach(
+    () =>
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-      const parent = {};
-      const uuid = '1';
-      const finalizeApi = (api: any) => ({
-        ...api,
-        uuid,
-        parent,
-        type: MAP_SAVED_OBJECT_TYPE,
-        phase$: new BehaviorSubject(undefined),
-      });
-      mapEmbeddableFactory
-        .buildEmbeddable({
-          initializeDrilldownsManager,
-          initialState: {
-            attributes: {
-              title: 'my map',
+        const parent = {};
+        const uuid = '1';
+        const finalizeApi = (api: any) => ({
+          ...api,
+          uuid,
+          parent,
+          type: MAP_SAVED_OBJECT_TYPE,
+          phase$: new BehaviorSubject(undefined),
+        });
+        mapEmbeddableFactory
+          .buildEmbeddable({
+            initializeDrilldownsManager,
+            initialState: {
+              attributes: {
+                title: 'my map',
+              },
             },
-          },
-          finalizeApi,
-          uuid: '1',
-          parentApi: {},
-        })
-        .then(({ api }) => {
-          embeddableApi = api;
-          done();
-        })
-        .catch(done);
-    
-  }));
+            finalizeApi,
+            uuid: '1',
+            parentApi: {},
+          })
+          .then(({ api }) => {
+            embeddableApi = api;
+            done();
+          })
+          .catch(done);
+      })
+  );
 
   describe('anyStateChange$', () => {
     test('should not emit on subscribe and emit when any state changes', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              embeddableApi.anyStateChange$.subscribe(() => {
-                try {
-                  const { title } = embeddableApi.serializeState();
-                  expect(title).toBe('cute puppies');
-                } catch (error) {
-                  // title assertion fails when
-                  // anyStateChange$ emits on subscribe
-                  done(error);
-                  return;
-                }
-                done();
-              });
-              embeddableApi.setTitle('cute puppies');
-            
-        }));
+        embeddableApi.anyStateChange$.subscribe(() => {
+          try {
+            const { title } = embeddableApi.serializeState();
+            expect(title).toBe('cute puppies');
+          } catch (error) {
+            // title assertion fails when
+            // anyStateChange$ emits on subscribe
+            done(error);
+            return;
+          }
+          done();
+        });
+        embeddableApi.setTitle('cute puppies');
+      }));
   });
 });

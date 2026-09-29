@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter, mockHttpValues } from '../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import { JSON_HEADER as headers } from '../../../../common/constants';
 

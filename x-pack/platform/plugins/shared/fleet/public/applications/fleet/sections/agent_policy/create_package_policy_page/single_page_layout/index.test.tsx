@@ -36,11 +36,11 @@ import {
 } from '../../../../hooks';
 
 vi.mock('../../../../../../services/use_yaml', () => {
-      const mocked = {
-      useYaml: () => require('yaml'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useYaml: () => require('yaml'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/steps/components/use_policies', async () => {
   return {
@@ -65,9 +65,7 @@ vi.mock('../../../../hooks', async () => {
       agents: { enabled: true },
     }),
     useFleetStatus: vi.fn().mockReturnValue({ isReady: true } as any),
-    sendGetStatus: vi
-      .fn()
-      .mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
+    sendGetStatus: vi.fn().mockResolvedValue({ data: { isReady: true, missing_requirements: [] } }),
     sendGetAgentStatus: vi.fn().mockResolvedValue({ data: { results: { active: 0 } } }),
     useGetAgentPolicies: vi.fn().mockReturnValue({
       data: {
@@ -149,30 +147,30 @@ vi.mock('../../../../hooks', async () => {
 });
 
 vi.mock('./components/package_documentation_modal', () => {
-      const mocked = {
-      PackageDocumentationModal: ({ onClose }: { onClose: () => void }) => (
-        <div data-test-subj="packageDocumentationModal" role="dialog">
-          <button onClick={onClose}>Close modal</button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PackageDocumentationModal: ({ onClose }: { onClose: () => void }) => (
+      <div data-test-subj="packageDocumentationModal" role="dialog">
+        <button onClick={onClose}>Close modal</button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn().mockReturnValue({ search: '' }),
-      useHistory: vi.fn().mockReturnValue({
-        push: vi.fn(),
-        listen: vi.fn(),
-        location: {
-          search: '',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn().mockReturnValue({ search: '' }),
+    useHistory: vi.fn().mockReturnValue({
+      push: vi.fn(),
+      listen: vi.fn(),
+      location: {
+        search: '',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { AgentlessDeploymentReleaseStatus } from '../../../../../../../common/types';
 import {

@@ -38,8 +38,7 @@ const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as M
 const mockUseUserPrivileges = useUserPrivileges as Mock;
 const mockUseExecuteBulkAction = useExecuteBulkAction as Mock;
 const mockUsePrebuiltRulesDeprecationReview = usePrebuiltRulesDeprecationReview as Mock;
-const mockUseBulkDuplicateExceptionsConfirmation =
-  useBulkDuplicateExceptionsConfirmation as Mock;
+const mockUseBulkDuplicateExceptionsConfirmation = useBulkDuplicateExceptionsConfirmation as Mock;
 const mockUseKibana = useKibana as Mock;
 
 const RULE_ID = savedRuleMock.id;

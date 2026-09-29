@@ -60,17 +60,17 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 const mockUseDataGridColumnsCellActions = vi.fn((_prop: unknown) => []);
 
 vi.mock('@kbn/cell-actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/cell-actions')),
-      useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/cell-actions')),
+    useDataGridColumnsCellActions: (prop: unknown) => mockUseDataGridColumnsCellActions(prop),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEuiDataGrid = vi.fn();
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const ReactActual = require('react');
 
   return {

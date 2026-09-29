@@ -16,12 +16,12 @@ import { getRuleMigrationStatsMock } from '../../__mocks__';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('@kbn/security-solution-navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-solution-navigation')),
-      useNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-solution-navigation')),
+    useNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const navigateTo = vi.fn();
 const getAppUrl = vi.fn(() => 'some/url');

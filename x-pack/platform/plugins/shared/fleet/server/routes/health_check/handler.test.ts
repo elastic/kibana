@@ -107,9 +107,10 @@ describe('Fleet server health_check handler', () => {
   });
 
   it('should return an error when host id is not found', async () => {
-    vi
-      .spyOn(fleetServerHostService, 'get')
-      .mockRejectedValue({ output: { statusCode: 404 }, isBoom: true });
+    vi.spyOn(fleetServerHostService, 'get').mockRejectedValue({
+      output: { statusCode: 404 },
+      isBoom: true,
+    });
 
     const res = await postHealthCheckHandler(
       mockContext,

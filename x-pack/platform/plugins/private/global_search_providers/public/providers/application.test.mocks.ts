@@ -9,8 +9,8 @@ import { vi } from 'vitest';
 
 export const getAppResultsMock = vi.fn();
 vi.doMock('./get_app_results', () => {
-      const mocked = {
-      getAppResults: getAppResultsMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAppResults: getAppResultsMock,
+  };
+  return { ...mocked, default: mocked };
+});

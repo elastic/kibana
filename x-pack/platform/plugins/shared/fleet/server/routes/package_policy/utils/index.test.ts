@@ -18,22 +18,22 @@ import {
 } from '.';
 
 vi.mock('../../../services/utils/agentless', () => {
-      const mocked = {
-      isAgentlessEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAgentlessEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../services', () => {
-      const mocked = {
-      agentPolicyService: {
-        get: vi.fn(),
-        getByIds: vi.fn(),
-        update: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      get: vi.fn(),
+      getByIds: vi.fn(),
+      update: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSoClient = {} as any;
 const mockEsClient = {} as any;
@@ -67,12 +67,10 @@ describe('getAgentlessAgentPolicyIds', () => {
   });
 
   it('returns only the ids of the agentless parents', async () => {
-    vi
-      .mocked(agentPolicyService.getByIds)
-      .mockResolvedValue([
-        makeAgentPolicy({ id: 'a', supports_agentless: false }),
-        makeAgentPolicy({ id: 'b', supports_agentless: true }),
-      ]);
+    vi.mocked(agentPolicyService.getByIds).mockResolvedValue([
+      makeAgentPolicy({ id: 'a', supports_agentless: false }),
+      makeAgentPolicy({ id: 'b', supports_agentless: true }),
+    ]);
 
     expect(await getAgentlessAgentPolicyIds(mockSoClient, ['a', 'a', 'b'])).toEqual(['b']);
     expect(agentPolicyService.getByIds).toHaveBeenCalledWith(mockSoClient, ['a', 'b'], {
@@ -102,17 +100,18 @@ describe('haveAgentlessAgentPolicies', () => {
   });
 
   it('returns true when any parent policy is agentless', async () => {
-    vi
-      .mocked(agentPolicyService.getByIds)
-      .mockResolvedValue([makeAgentPolicy({ supports_agentless: false }), makeAgentPolicy()]);
+    vi.mocked(agentPolicyService.getByIds).mockResolvedValue([
+      makeAgentPolicy({ supports_agentless: false }),
+      makeAgentPolicy(),
+    ]);
 
     expect(await haveAgentlessAgentPolicies(mockSoClient, ['a', 'b'])).toBe(true);
   });
 
   it('returns false when no parent policy is agentless', async () => {
-    vi
-      .mocked(agentPolicyService.getByIds)
-      .mockResolvedValue([makeAgentPolicy({ supports_agentless: false })]);
+    vi.mocked(agentPolicyService.getByIds).mockResolvedValue([
+      makeAgentPolicy({ supports_agentless: false }),
+    ]);
 
     expect(await haveAgentlessAgentPolicies(mockSoClient, ['a'])).toBe(false);
   });
@@ -146,9 +145,9 @@ describe('renameAgentlessAgentPolicy', () => {
 
   it('does not call agentPolicyService.update when the agent policy does not support agentless', async () => {
     vi.mocked(isAgentlessEnabled).mockReturnValue(true);
-    vi
-      .mocked(agentPolicyService.get)
-      .mockResolvedValue(makeAgentPolicy({ supports_agentless: false }));
+    vi.mocked(agentPolicyService.get).mockResolvedValue(
+      makeAgentPolicy({ supports_agentless: false })
+    );
 
     await renameAgentlessAgentPolicy(mockSoClient, mockEsClient, makePackagePolicy(), 'New Name');
 
@@ -158,9 +157,9 @@ describe('renameAgentlessAgentPolicy', () => {
   it('does not call agentPolicyService.update when the derived name already matches', async () => {
     vi.mocked(isAgentlessEnabled).mockReturnValue(true);
     // "Agentless policy for My Integration" is the name produced by getAgentlessAgentPolicyNameFromPackagePolicyName
-    vi
-      .mocked(agentPolicyService.get)
-      .mockResolvedValue(makeAgentPolicy({ name: 'Agentless policy for My Integration' }));
+    vi.mocked(agentPolicyService.get).mockResolvedValue(
+      makeAgentPolicy({ name: 'Agentless policy for My Integration' })
+    );
 
     await renameAgentlessAgentPolicy(
       mockSoClient,
@@ -174,9 +173,9 @@ describe('renameAgentlessAgentPolicy', () => {
 
   it('calls agentPolicyService.update with bumpRevision: false when the name changes', async () => {
     vi.mocked(isAgentlessEnabled).mockReturnValue(true);
-    vi
-      .mocked(agentPolicyService.get)
-      .mockResolvedValue(makeAgentPolicy({ name: 'Agentless policy for Old Name' }));
+    vi.mocked(agentPolicyService.get).mockResolvedValue(
+      makeAgentPolicy({ name: 'Agentless policy for Old Name' })
+    );
     vi.mocked(agentPolicyService.update).mockResolvedValue({} as any);
 
     await renameAgentlessAgentPolicy(mockSoClient, mockEsClient, makePackagePolicy(), 'New Name');
@@ -193,9 +192,9 @@ describe('renameAgentlessAgentPolicy', () => {
 
   it('does not bump the revision so that packagePolicyService.update triggers the single deployment', async () => {
     vi.mocked(isAgentlessEnabled).mockReturnValue(true);
-    vi
-      .mocked(agentPolicyService.get)
-      .mockResolvedValue(makeAgentPolicy({ name: 'Agentless policy for Old Name' }));
+    vi.mocked(agentPolicyService.get).mockResolvedValue(
+      makeAgentPolicy({ name: 'Agentless policy for Old Name' })
+    );
     vi.mocked(agentPolicyService.update).mockResolvedValue({} as any);
 
     await renameAgentlessAgentPolicy(

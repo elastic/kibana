@@ -7,35 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Action, ActionReducerMapBuilder } from 'redux-toolkit-v1';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import type { Action, ActionReducerMapBuilder } from 'redux-toolkit-v1';
 import { addLoadingStateReducers, initialLoadingState } from './loading_states';
 import type { WorkflowDetailState } from '../types';
 
 // Mock transitive dependencies required by saveYamlThunk -> slice -> schema/trigger_schemas
 vi.mock('../../../../../../common/schema', () => {
-      const mocked = {
-      getWorkflowZodSchema: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowZodSchema: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getRegisteredIds: vi.fn(() => []),
-        getRegisteredTriggersForSchema: vi.fn(() => []),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getRegisteredIds: vi.fn(() => []),
+      getRegisteredTriggersForSchema: vi.fn(() => []),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../shared/lib/query_client', () => {
-      const mocked = {
-      queryClient: { invalidateQueries: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    queryClient: { invalidateQueries: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 type MatcherEntry = [
   (action: Action) => boolean,

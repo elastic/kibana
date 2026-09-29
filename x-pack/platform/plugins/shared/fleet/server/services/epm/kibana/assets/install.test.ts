@@ -18,11 +18,11 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaSavedObjectType } from '../../../../../common/types/models/epm';
 
 vi.mock('timers/promises', () => {
-      const mocked = {
-      async setTimeout() {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    async setTimeout() {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { replaceIdsInKibanaAsset, type ArchiveAsset } from './install';
 import { createSavedObjectKibanaAsset, installKibanaSavedObjects } from './install';

@@ -23,9 +23,7 @@ describe('normalizeQuery', () => {
   const panelId = '39d49073-a924-426b-aa32-35acb40a9bb7';
   const tableRequestProcessorsParams = {} as TableRequestProcessorsParams;
 
-  const next = vi.fn((x) => x) as unknown as ReturnType<
-    ReturnType<TableRequestProcessorsFunction>
-  >;
+  const next = vi.fn((x) => x) as unknown as ReturnType<ReturnType<TableRequestProcessorsFunction>>;
 
   const getMockedDoc = (): TableSearchRequest => ({
     size: 0,

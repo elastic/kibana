@@ -16,24 +16,24 @@ import { screen, within } from '@testing-library/react';
 import { ScriptingHelpFlyout } from './help_flyout';
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: {
-            links: {
-              scriptedFields: {
-                luceneExpressions: '#',
-                painless: '#',
-                painlessApi: '#',
-                painlessSyntax: '#',
-              },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: {
+          links: {
+            scriptedFields: {
+              luceneExpressions: '#',
+              painless: '#',
+              painlessApi: '#',
+              painlessSyntax: '#',
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderFlyout = (isVisible: boolean) =>
   renderWithI18n(

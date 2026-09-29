@@ -23,7 +23,7 @@ const mockKbDataClient = {
 
 const mockedAppContextService = appContextService as Mocked<typeof appContextService>;
 mockedAppContextService.getRegisteredFeatures.mockImplementation(async () => {
-  const original = (await vi.importActual('../../../services/app_context'));
+  const original = await vi.importActual('../../../services/app_context');
   return {
     ...original.appContextService.getRegisteredFeatures(),
     defendInsightsPolicyResponseFailure: true,

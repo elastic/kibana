@@ -15,28 +15,28 @@ import { MemoryMonitor, type MemoryInfo } from './memory_monitor';
 import { MemoryUsageIndicator } from './memory_usage_indicator';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      EuiToolTip: ({ children, content }: React.PropsWithChildren<{ content: React.ReactNode }>) => (
-        <div>
-          {children}
-          <div role="tooltip">{content}</div>
-        </div>
-      ),
-      EuiBadge: ({
-        children,
-        color,
-        iconType,
-      }: React.PropsWithChildren<{ color: string; iconType?: string }>) => (
-        <span data-test-subj="memoryBadge" data-color={color} data-icon-type={iconType}>
-          {children}
-        </span>
-      ),
-      EuiTextColor: ({ children, color }: React.PropsWithChildren<{ color: string }>) => (
-        <span data-color={color}>{children}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EuiToolTip: ({ children, content }: React.PropsWithChildren<{ content: React.ReactNode }>) => (
+      <div>
+        {children}
+        <div role="tooltip">{content}</div>
+      </div>
+    ),
+    EuiBadge: ({
+      children,
+      color,
+      iconType,
+    }: React.PropsWithChildren<{ color: string; iconType?: string }>) => (
+      <span data-test-subj="memoryBadge" data-color={color} data-icon-type={iconType}>
+        {children}
+      </span>
+    ),
+    EuiTextColor: ({ children, color }: React.PropsWithChildren<{ color: string }>) => (
+      <span data-color={color}>{children}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const memoryInfo = (
   memoryUsage: number,

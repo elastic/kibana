@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockGetDescriptorNamespace } from './saved_objects_encryption_extension.test.mocks';
+
+import { vi } from 'vitest';
 
 import { savedObjectsTypeRegistryMock } from '@kbn/core/server/mocks';
 

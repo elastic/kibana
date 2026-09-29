@@ -27,8 +27,9 @@ const health = vi.fn();
 
 beforeEach(async () => {
   vi.resetAllMocks();
-  (await vi.importMock('@elastic/elasticsearch'))
-    .Client.mockImplementation(() => ({ cluster: { health } }));
+  (await vi.importMock('@elastic/elasticsearch')).Client.mockImplementation(() => ({
+    cluster: { health },
+  }));
   log.indent(-log.getIndent());
   logWriter.messages.length = 0;
 });

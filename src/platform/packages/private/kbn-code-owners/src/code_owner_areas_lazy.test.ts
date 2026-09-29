@@ -12,7 +12,7 @@ import type { MockedFunction } from 'vitest';
 
 // Wrap the real loaders so we can count reads without stubbing the registry.
 vi.mock('./teams', async () => {
-  const actual = (await vi.importActual('./teams'));
+  const actual = await vi.importActual('./teams');
   return {
     __esModule: true,
     ...actual,

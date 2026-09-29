@@ -19,11 +19,11 @@ import { getAutoFillSchedulerRoute } from './get_auto_fill_scheduler_route';
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getAutoFillSchedulerRoute', () => {
   beforeEach(() => {

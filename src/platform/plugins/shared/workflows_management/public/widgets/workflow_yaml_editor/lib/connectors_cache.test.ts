@@ -12,15 +12,15 @@ import { vi } from 'vitest';
 import { getCachedAllConnectors } from './connectors_cache';
 
 vi.mock('../../../../common/schema', () => {
-      const mocked = {
-      getAllConnectors: vi.fn(() => [{ type: 'static-connector' }]),
-      getAllConnectorsWithDynamic: vi.fn((dynamic: Record<string, unknown>) => [
-        { type: 'static-connector' },
-        { type: 'dynamic-connector' },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllConnectors: vi.fn(() => [{ type: 'static-connector' }]),
+    getAllConnectorsWithDynamic: vi.fn((dynamic: Record<string, unknown>) => [
+      { type: 'static-connector' },
+      { type: 'dynamic-connector' },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getCachedAllConnectors', () => {
   it('returns static connectors when no dynamic types are provided', () => {

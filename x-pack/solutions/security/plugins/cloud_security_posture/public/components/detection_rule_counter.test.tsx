@@ -18,17 +18,17 @@ import { useFetchDetectionRulesAlertsStatus } from '../common/api/use_fetch_dete
 import type { RuleResponse } from '@kbn/cloud-security-posture-common';
 
 vi.mock('../common/api/use_fetch_detection_rules_by_tags', () => {
-      const mocked = {
-      useFetchDetectionRulesByTags: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchDetectionRulesByTags: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/api/use_fetch_detection_rules_alerts_status', () => {
-      const mocked = {
-      useFetchDetectionRulesAlertsStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchDetectionRulesAlertsStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MOCK_TIMEOUT = 100;
 

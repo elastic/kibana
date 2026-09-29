@@ -13,18 +13,18 @@ import { useStreamingContext } from '../context/streaming/streaming_context';
 import { useIsCurrentConversationStreaming } from './use_is_current_conversation_streaming';
 
 vi.mock('../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context/streaming/streaming_context', () => {
-      const mocked = {
-      useStreamingContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamingContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationId = vi.mocked(useConversationId);
 const mockUseStreamingContext = vi.mocked(useStreamingContext);

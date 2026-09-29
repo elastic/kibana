@@ -17,19 +17,19 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { startServers, parseServerFlags } from '../servers';
 
 vi.mock('./init_logs_dir', () => {
-      const mocked = {
-      initLogsDir: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    initLogsDir: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../servers', () => {
-      const mocked = {
-      parseServerFlags: vi.fn().mockReturnValue({ logsDir: 'path/to/logs/directory' }),
-      startServers: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseServerFlags: vi.fn().mockReturnValue({ logsDir: 'path/to/logs/directory' }),
+    startServers: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('runStartServer', () => {
   let flagsReader: Mocked<FlagsReader>;

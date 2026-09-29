@@ -17,18 +17,18 @@ import { verifyCloudConnectorIacKeyHandler } from './handlers';
 
 vi.mock('../../services/app_context');
 vi.mock('../../services', () => {
-      const mocked = {
-      cloudConnectorService: {},
-      packagePolicyService: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cloudConnectorService: {},
+    packagePolicyService: {},
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../services/cloud_connectors', () => {
-      const mocked = {
-      verifyCloudConnectorIacKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyCloudConnectorIacKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedVerify = vi.mocked(verifyCloudConnectorIacKey);
 

@@ -65,9 +65,7 @@ const alertDataMock: AlertData = {
 };
 
 describe('When the add exception modal is opened', () => {
-  let defaultEndpointItems: MockInstance<
-    ReturnType<typeof helpers.defaultEndpointExceptionItems>
-  >;
+  let defaultEndpointItems: MockInstance<ReturnType<typeof helpers.defaultEndpointExceptionItems>>;
   beforeEach(() => {
     mockGetExceptionBuilderComponentLazy.mockReturnValue(
       <span data-test-subj="alertExceptionBuilder" />

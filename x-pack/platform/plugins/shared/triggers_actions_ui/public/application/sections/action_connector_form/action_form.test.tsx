@@ -26,32 +26,32 @@ import ActionForm from './action_form';
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('react-window', () => {
-      const mocked = {
-      FixedSizeList: ({ children, itemCount, itemData }: any) => (
-        <div>
-          {Array.from({ length: itemCount }, (_, index) =>
-            children({ index, style: {}, data: itemData })
-          )}
-        </div>
-      ),
-      VariableSizeList: ({ children, itemCount, itemData }: any) => (
-        <div>
-          {Array.from({ length: itemCount }, (_, index) =>
-            children({ index, style: {}, data: itemData })
-          )}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FixedSizeList: ({ children, itemCount, itemData }: any) => (
+      <div>
+        {Array.from({ length: itemCount }, (_, index) =>
+          children({ index, style: {}, data: itemData })
+        )}
+      </div>
+    ),
+    VariableSizeList: ({ children, itemCount, itemData }: any) => (
+      <div>
+        {Array.from({ length: itemCount }, (_, index) =>
+          children({ index, style: {}, data: itemData })
+        )}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../lib/action_connector_api', () => {
-      const mocked = {
-      loadAllActions: vi.fn(),
-      loadActionTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-const { loadActionTypes, loadAllActions } = (await vi.importMock('../../lib/action_connector_api'));
+  const mocked = {
+    loadAllActions: vi.fn(),
+    loadActionTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+const { loadActionTypes, loadAllActions } = await vi.importMock('../../lib/action_connector_api');
 
 const setHasActionsWithBrokenConnector = vi.fn();
 describe('action_form', () => {

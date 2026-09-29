@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { DEFAULT_INITIAL_APP_DATA } from '../../../common/__mocks__';
 import { MockRouter, mockDependencies } from '../../__mocks__';
+
+import { vi } from 'vitest';
 
 import { registerConfigDataRoute } from './config_data';
 

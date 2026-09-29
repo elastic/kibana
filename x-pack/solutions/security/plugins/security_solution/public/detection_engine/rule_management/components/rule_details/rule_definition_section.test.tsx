@@ -38,11 +38,9 @@ vi.spyOn(useGetSavedQueryMock, 'useGetSavedQuery').mockReturnValue({
   },
   savedQuery: undefined,
 });
-vi
-  .spyOn(useUpsellingMessageMock, 'useUpsellingMessage')
-  .mockReturnValue(
-    'Alert suppression is configured but will not be applied due to insufficient licensing'
-  );
+vi.spyOn(useUpsellingMessageMock, 'useUpsellingMessage').mockReturnValue(
+  'Alert suppression is configured but will not be applied due to insufficient licensing'
+);
 
 describe('RuleDefinitionSection', () => {
   describe('Alert Suppression', () => {
@@ -51,9 +49,9 @@ describe('RuleDefinitionSection', () => {
     });
 
     test('should display all suppression fields when the rule contains alert_suppression with all properties similar to a query rule', () => {
-      vi
-        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      vi.spyOn(useAlertSuppressionMock, 'useAlertSuppression').mockReturnValueOnce({
+        isSuppressionEnabled: true,
+      });
       const rule: Partial<RuleResponse> = {
         alert_suppression: {
           group_by: ['field1', 'field2'],
@@ -76,9 +74,9 @@ describe('RuleDefinitionSection', () => {
       );
     });
     test('should display the suppression duration correctly when it runs per rule execution', () => {
-      vi
-        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      vi.spyOn(useAlertSuppressionMock, 'useAlertSuppression').mockReturnValueOnce({
+        isSuppressionEnabled: true,
+      });
       const rule: Partial<RuleResponse> = {
         alert_suppression: {
           group_by: ['field1', 'field2'],
@@ -103,9 +101,9 @@ describe('RuleDefinitionSection', () => {
     });
 
     test('should render only AlertSuppressionTitle and SuppressAlertsDuration when rule type does not have group_by field like threshold', () => {
-      vi
-        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      vi.spyOn(useAlertSuppressionMock, 'useAlertSuppression').mockReturnValueOnce({
+        isSuppressionEnabled: true,
+      });
       const rule: Partial<RuleResponse> = {
         alert_suppression: {
           duration: { value: 2, unit: 'm' },
@@ -132,9 +130,9 @@ describe('RuleDefinitionSection', () => {
         },
       };
 
-      vi
-        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-        .mockReturnValueOnce({ isSuppressionEnabled: false });
+      vi.spyOn(useAlertSuppressionMock, 'useAlertSuppression').mockReturnValueOnce({
+        isSuppressionEnabled: false,
+      });
 
       render(<RuleDefinitionSection rule={rule} />);
 
@@ -148,9 +146,9 @@ describe('RuleDefinitionSection', () => {
     test('does not render suppression fields when alert_suppression property is not present in the rule', () => {
       const rule: Partial<RuleResponse> = {};
 
-      vi
-        .spyOn(useAlertSuppressionMock, 'useAlertSuppression')
-        .mockReturnValueOnce({ isSuppressionEnabled: true });
+      vi.spyOn(useAlertSuppressionMock, 'useAlertSuppression').mockReturnValueOnce({
+        isSuppressionEnabled: true,
+      });
 
       render(<RuleDefinitionSection rule={rule} />);
 

@@ -16,24 +16,24 @@ import { SyntheticsPolicyEditExtensionWrapper } from './synthetics_policy_edit_e
 
 // ensures that fields appropriately match to their label
 vi.mock('@elastic/eui/lib/services/accessibility/html_id_generator', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
-      htmlIdGenerator: () => () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui/lib/services/accessibility/html_id_generator')),
+    htmlIdGenerator: () => () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // ensures that fields appropriately match to their label
 vi.mock('@elastic/eui/lib/services/accessibility', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui/lib/services/accessibility')),
-      useGeneratedHtmlId: () => `id-${Math.random()}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui/lib/services/accessibility')),
+    useGeneratedHtmlId: () => `id-${Math.random()}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
   return {
     ...original,
     // Mocking CodeEditor, which uses React Monaco under the hood

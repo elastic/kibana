@@ -58,14 +58,14 @@ type UnifiedGridProps = ChartSectionProps & {
 let unifiedGridProps: UnifiedGridProps | undefined;
 
 vi.mock('@kbn/unified-chart-section-viewer', () => {
-      const mocked = {
-      UnifiedMetricsExperienceGrid: (props: UnifiedGridProps) => {
-        unifiedGridProps = props;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UnifiedMetricsExperienceGrid: (props: UnifiedGridProps) => {
+      unifiedGridProps = props;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createFakeMetricsStateAdapter = (initialState: MetricsState) => {
   const subject = new BehaviorSubject(initialState);
@@ -80,11 +80,11 @@ const createFakeMetricsStateAdapter = (initialState: MetricsState) => {
 };
 
 vi.mock('../../../../../application/main/state_management/redux', () => {
-      const mocked = {
-      useAppStateSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppStateSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDiscoverShared = { __sentinel: 'discoverShared' };
 const mockDataViews = { __sentinel: 'dataViews' };
@@ -103,30 +103,30 @@ const mockStorage = {
 const mockHttp = { basePath: { get: () => '' } };
 
 vi.mock('../../../../../hooks/use_discover_services', () => {
-      const mocked = {
-      useDiscoverServices: vi.fn(() => ({
-        discoverShared: mockDiscoverShared,
-        dataViews: mockDataViews,
-        notifications: {
-          showErrorDialog: mockShowErrorDialog,
-        },
-        docLinks: {
-          links: {
-            query: {
-              queryESQL: mockEsqlReferenceHref,
-            },
+  const mocked = {
+    useDiscoverServices: vi.fn(() => ({
+      discoverShared: mockDiscoverShared,
+      dataViews: mockDataViews,
+      notifications: {
+        showErrorDialog: mockShowErrorDialog,
+      },
+      docLinks: {
+        links: {
+          query: {
+            queryESQL: mockEsqlReferenceHref,
           },
         },
-        logger: mockLogger,
-        core: {
-          featureFlags: mockFeatureFlags,
-          http: mockHttp,
-        },
-        storage: mockStorage,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+      logger: mockLogger,
+      core: {
+        featureFlags: mockFeatureFlags,
+        http: mockHttp,
+      },
+      storage: mockStorage,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createChartSectionProps = (overrides: Partial<ChartSectionProps> = {}): ChartSectionProps => {
   const fetch$ = new ReplaySubject<UnifiedHistogramFetch$Arguments>(1) as UnifiedHistogramFetch$;

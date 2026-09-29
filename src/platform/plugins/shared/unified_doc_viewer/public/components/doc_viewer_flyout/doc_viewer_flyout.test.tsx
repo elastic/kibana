@@ -21,7 +21,7 @@ import { setUnifiedDocViewerServices } from '../../plugin';
 import { UnifiedDocViewerFlyout, type UnifiedDocViewerFlyoutProps } from './doc_viewer_flyout';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   const react = require('react');
   const OriginalFlyout = actual.EuiFlyout;
 

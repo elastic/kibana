@@ -20,13 +20,13 @@ import { uiSettingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 
 vi.mock('@elastic/apm-rum', () => {
-      const mocked = {
-      apm: {
-        captureError: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apm: {
+      captureError: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 async function getCurrentToasts(toasts: ToastsApi) {
   return await firstValueFrom(toasts.get$());

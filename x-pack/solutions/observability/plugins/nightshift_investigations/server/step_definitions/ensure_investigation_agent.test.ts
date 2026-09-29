@@ -15,18 +15,18 @@ import { NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID } from '../agents/decis
 import { ensureInvestigationAgentStepDefinition } from './ensure_investigation_agent';
 
 vi.mock('../lib/install_investigation_agent', () => {
-      const mocked = {
-      installInvestigationAgent: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installInvestigationAgent: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../lib/install_decision_tree_reinforcement_agent', () => {
-      const mocked = {
-      installDecisionTreeReinforcementAgent: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    installDecisionTreeReinforcementAgent: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 describe('ensureInvestigationAgentStepDefinition', () => {
   const callKibanaApi = vi.fn().mockResolvedValue(undefined);
   const agentBuilder = { agents: { ensure: vi.fn() } } as never;

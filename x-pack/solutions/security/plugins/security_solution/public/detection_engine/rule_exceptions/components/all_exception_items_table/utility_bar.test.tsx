@@ -14,10 +14,10 @@ import { ExceptionsViewerUtility } from './utility_bar';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
 
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
   const FormattedRelative = vi.fn();
   FormattedRelative.mockImplementation(() => '20 hours ago');
 

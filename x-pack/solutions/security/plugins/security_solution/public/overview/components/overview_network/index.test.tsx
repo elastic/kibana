@@ -20,7 +20,7 @@ import { useQueryToggle } from '../../../common/containers/query_toggle';
 vi.mock('../../../common/components/link_to');
 const mockNavigateToApp = vi.fn();
 vi.mock('../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../common/lib/kibana');
 
   return {
     ...original,

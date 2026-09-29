@@ -12,14 +12,16 @@ import { httpServerMock } from '@kbn/core/server/mocks';
 import { processLiveHistory } from './process_live_history';
 
 vi.mock('../../lib/get_result_counts_for_actions', () => {
-      const mocked = {
-      getResultCountsForActions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getResultCountsForActions: vi.fn(),
+  };
 
-const mockGetResultCountsForActions = (await vi.importMock('../../lib/get_result_counts_for_actions'))
-  .getResultCountsForActions as Mock;
+  return { ...mocked, default: mocked };
+});
+
+const mockGetResultCountsForActions = (
+  await vi.importMock('../../lib/get_result_counts_for_actions')
+).getResultCountsForActions as Mock;
 
 const mockRequest = httpServerMock.createKibanaRequest();
 

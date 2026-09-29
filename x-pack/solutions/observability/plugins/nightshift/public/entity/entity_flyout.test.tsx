@@ -21,17 +21,17 @@ import { EntityFlyout } from './entity_flyout';
 const mockOpenChat = vi.fn();
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          agentBuilder: {
-            openChat: mockOpenChat,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        agentBuilder: {
+          openChat: mockOpenChat,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFeature: Feature = {
   uuid: 'feature-uuid-1',

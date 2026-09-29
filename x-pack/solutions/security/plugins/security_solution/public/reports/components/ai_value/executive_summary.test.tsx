@@ -13,57 +13,57 @@ import { ExecutiveSummary } from './executive_summary';
 
 // Mocks for dependencies
 vi.mock('./cost_savings', () => {
-      const mocked = {
-      CostSavings: () => <div data-test-subj="mockCostSavings" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CostSavings: () => <div data-test-subj="mockCostSavings" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./time_saved', () => {
-      const mocked = { TimeSaved: () => <div data-test-subj="mockTimeSaved" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { TimeSaved: () => <div data-test-subj="mockTimeSaved" /> };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./compare_percentage', () => {
-      const mocked = {
-      ComparePercentage: () => <div data-test-subj="mockComparePercentage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComparePercentage: () => <div data-test-subj="mockComparePercentage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./filtering_rate', () => {
-      const mocked = {
-      FilteringRate: () => <div data-test-subj="mockFilteringRate" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilteringRate: () => <div data-test-subj="mockFilteringRate" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/user_profiles/use_get_current_user_profile', () => {
-      const mocked = {
-      useGetCurrentUserProfile: () => ({
-        data: { user: { full_name: 'Test User', username: 'testuser' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetCurrentUserProfile: () => ({
+      data: { user: { full_name: 'Test User', username: 'testuser' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/components/visualization_actions/visualization_embeddable', () => {
-      const mocked = {
-      VisualizationEmbeddable: () => <div data-test-subj="mockVisualizationEmbeddable" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VisualizationEmbeddable: () => <div data-test-subj="mockVisualizationEmbeddable" />,
+  };
+  return { ...mocked, default: mocked };
+});
 // Mock useKibana
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          settings: {
-            client: {
-              get: vi.fn(() => 'mock-connector-id'),
-              set: vi.fn(),
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        settings: {
+          client: {
+            get: vi.fn(() => 'mock-connector-id'),
+            set: vi.fn(),
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   attackAlertIds: ['alert-1', 'alert-2', 'alert-3'],

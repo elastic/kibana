@@ -64,9 +64,7 @@ vi.mock('../../../../../hooks', async () => {
   };
 });
 
-const useGetAgentPoliciesMock = useGetAgentPolicies as MockedFunction<
-  typeof useGetAgentPolicies
->;
+const useGetAgentPoliciesMock = useGetAgentPolicies as MockedFunction<typeof useGetAgentPolicies>;
 const useMultipleAgentPoliciesMock = useMultipleAgentPolicies as MockedFunction<
   typeof useMultipleAgentPolicies
 >;

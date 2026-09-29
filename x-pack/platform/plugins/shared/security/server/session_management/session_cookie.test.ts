@@ -61,8 +61,8 @@ describe('Session cookie', () => {
     });
 
     it('cookie validator properly handles cookies with different base path', () => {
-      const [[{ validate }]] = (sessionCookieOptions.createCookieSessionStorageFactory as Mock)
-        .mock.calls;
+      const [[{ validate }]] = (sessionCookieOptions.createCookieSessionStorageFactory as Mock).mock
+        .calls;
 
       expect(
         validate(sessionCookieMock.createValue({ path: sessionCookieOptions.serverBasePath }))

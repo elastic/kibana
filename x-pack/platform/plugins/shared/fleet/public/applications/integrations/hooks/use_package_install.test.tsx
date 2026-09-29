@@ -21,12 +21,12 @@ import {
 
 const mockInvalidateQueries = vi.fn();
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: () => ({ invalidateQueries: mockInvalidateQueries }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePackageInstall', () => {
   const coreStart = coreMock.createStart();

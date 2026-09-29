@@ -23,7 +23,7 @@ import type { RuleAlertsItem, UseRuleAlertsItems } from './use_rule_alerts_items
 const mockGetAppUrl = vi.fn();
 const mockNavigateTo = vi.fn();
 vi.mock('../../../../common/lib/kibana/hooks', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana/hooks'));
+  const original = await vi.importActual('../../../../common/lib/kibana/hooks');
   return {
     ...original,
     useNavigation: () => ({
@@ -57,11 +57,11 @@ const mockUseRuleAlertsItemsReturn = (param: Partial<UseRuleAlertsItemsReturn>) 
   mockUseRuleAlertsItems.mockReturnValueOnce({ ...defaultUseRuleAlertsItemsReturn, ...param });
 };
 vi.mock('./use_rule_alerts_items', () => {
-      const mocked = {
-      useRuleAlertsItems: () => mockUseRuleAlertsItems(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleAlertsItems: () => mockUseRuleAlertsItems(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/user_privileges');
 
 const defaultProps: RuleAlertsTableProps = {

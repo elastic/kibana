@@ -16,7 +16,7 @@ import { EuiIcon } from '@elastic/eui';
 import { DragDropBuckets, DraggableBucketContainer } from './buckets';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiDragDropContext: 'eui-drag-drop-context',

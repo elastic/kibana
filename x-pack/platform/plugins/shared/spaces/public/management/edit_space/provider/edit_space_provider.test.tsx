@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { renderHook } from '@testing-library/react';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import {
   httpServiceMock,

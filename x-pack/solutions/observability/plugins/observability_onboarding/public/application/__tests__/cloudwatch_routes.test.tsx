@@ -22,50 +22,50 @@ import { IS_ADD_DATA_PAGE_V2_ENABLED } from '../../../common/feature_flags';
 import { ObservabilityOnboardingFlow } from '../observability_onboarding_flow';
 
 vi.mock('../pages', () => {
-      const mocked = {
-      AutoDetectPage: () => null,
-      LandingPage: () => <div data-test-subj="landingPageStub" />,
-      OtelLogsPage: () => null,
-      FirehosePage: () => null,
-      OtelApmPage: () => null,
-      CloudForwarderPage: () => null,
-      OtelKubernetesPage: () => null,
-      KubernetesPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AutoDetectPage: () => null,
+    LandingPage: () => <div data-test-subj="landingPageStub" />,
+    OtelLogsPage: () => null,
+    FirehosePage: () => null,
+    OtelApmPage: () => null,
+    CloudForwarderPage: () => null,
+    OtelKubernetesPage: () => null,
+    KubernetesPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../pages/host', () => {
-      const mocked = {
-      HostLinuxAutoDetectPage: () => null,
-      HostLinuxOtelPage: () => null,
-      HostMacosAutoDetectPage: () => null,
-      HostMacosOtelPage: () => null,
-      HostWindowsOtelPage: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostLinuxAutoDetectPage: () => null,
+    HostLinuxOtelPage: () => null,
+    HostMacosAutoDetectPage: () => null,
+    HostMacosOtelPage: () => null,
+    HostWindowsOtelPage: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../cloudwatch_integration_redirect', () => {
-      const mocked = {
-      CloudwatchIntegrationRedirect: () => <div data-test-subj="cloudwatchIntegrationRedirectStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CloudwatchIntegrationRedirect: () => <div data-test-subj="cloudwatchIntegrationRedirectStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/use_flow_breadcrumbs', () => {
-      const mocked = {
-      useFlowBreadcrumb: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlowBreadcrumb: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/use_managed_otlp_service_availability', () => {
-      const mocked = {
-      useManagedOtlpServiceAvailability: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedOtlpServiceAvailability: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeAll(() => {
   window.scrollTo = vi.fn();

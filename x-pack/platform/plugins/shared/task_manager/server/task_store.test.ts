@@ -52,11 +52,11 @@ let mockGetValidatedTaskInstanceFromReading: MockInstance;
 let mockGetValidatedTaskInstanceForUpdating: MockInstance;
 
 vi.mock('./lib/api_key_utils', () => {
-      const mocked = {
-      getApiKeyAndUserScope: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getApiKeyAndUserScope: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createEncryptedSavedObjectsClientMock(opts?: EncryptedSavedObjectsClientOptions) {
   return {
@@ -465,9 +465,7 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getApiKeyAndUserScope as Mock).mockRejectedValueOnce(
-        new Error('Something went wrong!')
-      );
+      (getApiKeyAndUserScope as Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
 
       const request = httpServerMock.createKibanaRequest();
 
@@ -933,35 +931,33 @@ describe('TaskStore', () => {
       });
 
       let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi
-        .fn()
-        .mockImplementation(() => {
-          getApiKeysCallCount++;
-          return Promise.resolve({
-            close: vi.fn(),
-            find: function* finder() {
-              if (getApiKeysCallCount === 1) {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task1',
-                      attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
-                    },
-                  ],
-                };
-              } else {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task2',
-                      attributes: { ...mockTask, id: 'task2', apiKey: 'decryptedKey2' },
-                    },
-                  ],
-                };
-              }
-            },
-          });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockImplementation(() => {
+        getApiKeysCallCount++;
+        return Promise.resolve({
+          close: vi.fn(),
+          find: function* finder() {
+            if (getApiKeysCallCount === 1) {
+              yield {
+                saved_objects: [
+                  {
+                    id: 'task1',
+                    attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
+                  },
+                ],
+              };
+            } else {
+              yield {
+                saved_objects: [
+                  {
+                    id: 'task2',
+                    attributes: { ...mockTask, id: 'task2', apiKey: 'decryptedKey2' },
+                  },
+                ],
+              };
+            }
+          },
         });
+      });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
       mockEsClient.msearch.mockResponse({
@@ -1037,28 +1033,26 @@ describe('TaskStore', () => {
       });
 
       let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi
-        .fn()
-        .mockImplementation(() => {
-          getApiKeysCallCount++;
-          return Promise.resolve({
-            close: vi.fn(),
-            find: function* finder() {
-              if (getApiKeysCallCount === 1) {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task1',
-                      attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
-                    },
-                  ],
-                };
-              } else {
-                yield { saved_objects: [] };
-              }
-            },
-          });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockImplementation(() => {
+        getApiKeysCallCount++;
+        return Promise.resolve({
+          close: vi.fn(),
+          find: function* finder() {
+            if (getApiKeysCallCount === 1) {
+              yield {
+                saved_objects: [
+                  {
+                    id: 'task1',
+                    attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
+                  },
+                ],
+              };
+            } else {
+              yield { saved_objects: [] };
+            }
+          },
         });
+      });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
       mockEsClient.msearch.mockResponse({
@@ -1135,28 +1129,26 @@ describe('TaskStore', () => {
       });
 
       let getApiKeysCallCount = 0;
-      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi
-        .fn()
-        .mockImplementation(() => {
-          getApiKeysCallCount++;
-          return Promise.resolve({
-            close: vi.fn(),
-            find: function* finder() {
-              if (getApiKeysCallCount === 1) {
-                yield {
-                  saved_objects: [
-                    {
-                      id: 'task1',
-                      attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
-                    },
-                  ],
-                };
-              } else {
-                yield { saved_objects: [] };
-              }
-            },
-          });
+      esoClient.createPointInTimeFinderDecryptedAsInternalUser = vi.fn().mockImplementation(() => {
+        getApiKeysCallCount++;
+        return Promise.resolve({
+          close: vi.fn(),
+          find: function* finder() {
+            if (getApiKeysCallCount === 1) {
+              yield {
+                saved_objects: [
+                  {
+                    id: 'task1',
+                    attributes: { ...mockTask, id: 'task1', apiKey: 'decryptedKey1' },
+                  },
+                ],
+              };
+            } else {
+              yield { saved_objects: [] };
+            }
+          },
         });
+      });
       refreshStore.registerEncryptedSavedObjectsClient(esoClient);
 
       mockEsClient.msearch.mockResponse({
@@ -4566,9 +4558,7 @@ describe('TaskStore', () => {
         traceparent: 'apmTraceparent',
       };
 
-      (getApiKeyAndUserScope as Mock).mockRejectedValueOnce(
-        new Error('Something went wrong!')
-      );
+      (getApiKeyAndUserScope as Mock).mockRejectedValueOnce(new Error('Something went wrong!'));
 
       const request = httpServerMock.createKibanaRequest();
 

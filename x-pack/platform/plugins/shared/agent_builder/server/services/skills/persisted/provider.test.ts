@@ -13,11 +13,11 @@ import { createPersistedSkillProvider } from './provider';
 import type { SkillClient, SkillPersistedDefinition } from './client';
 
 vi.mock('./client', () => {
-      const mocked = {
-      createClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockPersistedSkill = (
   overrides: Partial<SkillPersistedDefinition> = {}
@@ -51,7 +51,7 @@ describe('createPersistedSkillProvider', () => {
   beforeEach(async () => {
     vi.clearAllMocks();
     mockClient = createMockClient();
-    const { createClient } = (await vi.importMock('./client'));
+    const { createClient } = await vi.importMock('./client');
     createClient.mockReturnValue(mockClient);
   });
 

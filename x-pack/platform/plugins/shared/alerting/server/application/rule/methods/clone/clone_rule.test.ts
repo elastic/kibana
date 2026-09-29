@@ -17,11 +17,11 @@ import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { validateScheduleLimit } from '../get_schedule_frequency';
 
 vi.mock('../get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('clone', () => {
   const kibanaVersion = 'v8.2.0';

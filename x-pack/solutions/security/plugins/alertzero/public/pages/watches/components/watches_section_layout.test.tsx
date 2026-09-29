@@ -25,34 +25,34 @@ import { WatchesSectionLayout } from './watches_section_layout';
 vi.mock('../../../hooks/use_watches_api');
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * Chrome `AppHeader` reads Kibana chrome hooks. The stub records `spacing` and `docLink` so the
  * shell test can assert compact spacing and the Documentation link without mounting that tree.
  */
 vi.mock('@kbn/app-header', () => {
-      const mocked = {
-      AppHeader: ({
-        title,
-        spacing,
-        docLink,
-      }: {
-        title: string;
-        spacing?: string;
-        docLink?: string;
-      }) => (
-        <header data-test-subj="appHeader" data-spacing={spacing} data-doc-link={docLink}>
-          <h1>{title}</h1>
-        </header>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AppHeader: ({
+      title,
+      spacing,
+      docLink,
+    }: {
+      title: string;
+      spacing?: string;
+      docLink?: string;
+    }) => (
+      <header data-test-subj="appHeader" data-spacing={spacing} data-doc-link={docLink}>
+        <h1>{title}</h1>
+      </header>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWatches = vi.mocked(useWatches);
 const mockUseKibana = vi.mocked(useKibana);

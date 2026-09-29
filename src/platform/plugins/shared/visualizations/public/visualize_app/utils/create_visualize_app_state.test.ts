@@ -18,23 +18,23 @@ const mockStartStateSync = vi.fn();
 const mockStopStateSync = vi.fn();
 
 vi.mock('@kbn/kibana-utils-plugin/public', () => {
-      const mocked = {
-      createStateContainer: vi.fn(() => 'stateContainer'),
-      syncState: vi.fn(() => ({
-        start: mockStartStateSync,
-        stop: mockStopStateSync,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createStateContainer: vi.fn(() => 'stateContainer'),
+    syncState: vi.fn(() => ({
+      start: mockStartStateSync,
+      stop: mockStopStateSync,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./migrate_app_state', () => {
-      const mocked = {
-      migrateAppState: vi.fn(() => 'migratedAppState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    migrateAppState: vi.fn(() => 'migratedAppState'),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { createStateContainer, syncState } = (await vi.importMock('@kbn/kibana-utils-plugin/public'));
+const { createStateContainer, syncState } = await vi.importMock('@kbn/kibana-utils-plugin/public');
 
 describe('createVisualizeAppState', () => {
   const kbnUrlStateStorage = {

@@ -40,7 +40,7 @@ const mockUseAssistantContext = {
 };
 
 vi.mock('../assistant_context', async () => {
-  const original = (await vi.importActual('../assistant_context'));
+  const original = await vi.importActual('../assistant_context');
   return {
     ...original,
 
@@ -58,31 +58,31 @@ const defaultProps = {
 
 const mockSetup = vi.fn();
 vi.mock('../assistant/api/knowledge_base/use_setup_knowledge_base', () => {
-      const mocked = {
-      useSetupKnowledgeBase: vi.fn(() => {
-        return {
-          mutate: mockSetup,
-          isLoading: false,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetupKnowledgeBase: vi.fn(() => {
+      return {
+        mutate: mockSetup,
+        isLoading: false,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../assistant/api/knowledge_base/use_knowledge_base_status', () => {
-      const mocked = {
-      useKnowledgeBaseStatus: vi.fn(() => {
-        return {
-          data: {
-            elser_exists: true,
-          },
-          isLoading: false,
-          isFetching: false,
-        };
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKnowledgeBaseStatus: vi.fn(() => {
+      return {
+        data: {
+          elser_exists: true,
+        },
+        isLoading: false,
+        isFetching: false,
+      };
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Knowledge base settings', () => {
   beforeEach(() => {

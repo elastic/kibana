@@ -16,7 +16,7 @@ import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_
 import type { MockedMonacoEditor } from '@kbn/code-editor-mock/monaco_mock';
 
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: ComponentProps<typeof MockedMonacoEditor>) => (
@@ -35,7 +35,7 @@ const XJson = {
 };
 
 vi.mock('@kbn/es-ui-shared-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/es-ui-shared-plugin/public'));
+  const original = await vi.importActual('@kbn/es-ui-shared-plugin/public');
   return {
     ...original,
     XJson,

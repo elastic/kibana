@@ -27,23 +27,23 @@ const mockConvertToCumulativeSumAggColumn = vi.fn();
 const mockConvertToColumnInPercentageMode = vi.fn();
 
 vi.mock('../convert', () => {
-      const mocked = {
-      convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
-        mockConvertMetricAggregationColumnWithoutSpecialParams()
-      ),
-      convertToOtherParentPipelineAggColumns: vi.fn(() =>
-        mockConvertToOtherParentPipelineAggColumns()
-      ),
-      convertToPercentileColumn: vi.fn(() => mockConvertToPercentileColumn()),
-      convertToPercentileRankColumn: vi.fn(() => mockConvertToPercentileRankColumn()),
-      convertToSiblingPipelineColumns: vi.fn(() => mockConvertToSiblingPipelineColumns()),
-      convertToStdDeviationFormulaColumns: vi.fn(() => mockConvertToStdDeviationFormulaColumns()),
-      convertToLastValueColumn: vi.fn(() => mockConvertToLastValueColumn()),
-      convertToCumulativeSumAggColumn: vi.fn(() => mockConvertToCumulativeSumAggColumn()),
-      convertToColumnInPercentageMode: vi.fn(() => mockConvertToColumnInPercentageMode()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertMetricAggregationColumnWithoutSpecialParams: vi.fn(() =>
+      mockConvertMetricAggregationColumnWithoutSpecialParams()
+    ),
+    convertToOtherParentPipelineAggColumns: vi.fn(() =>
+      mockConvertToOtherParentPipelineAggColumns()
+    ),
+    convertToPercentileColumn: vi.fn(() => mockConvertToPercentileColumn()),
+    convertToPercentileRankColumn: vi.fn(() => mockConvertToPercentileRankColumn()),
+    convertToSiblingPipelineColumns: vi.fn(() => mockConvertToSiblingPipelineColumns()),
+    convertToStdDeviationFormulaColumns: vi.fn(() => mockConvertToStdDeviationFormulaColumns()),
+    convertToLastValueColumn: vi.fn(() => mockConvertToLastValueColumn()),
+    convertToCumulativeSumAggColumn: vi.fn(() => mockConvertToCumulativeSumAggColumn()),
+    convertToColumnInPercentageMode: vi.fn(() => mockConvertToColumnInPercentageMode()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const visType = 'heatmap';
 

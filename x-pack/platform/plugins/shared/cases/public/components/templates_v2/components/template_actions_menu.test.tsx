@@ -13,22 +13,22 @@ import { screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      monaco: {
-        KeyMod: { CtrlCmd: 2048 },
-        KeyCode: { KeyK: 41 },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    monaco: {
+      KeyMod: { CtrlCmd: 2048 },
+      KeyCode: { KeyK: 41 },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('../../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (args: unknown) => mockUseGetFieldDefinitions(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { renderWithTestingProviders } from '../../../common/mock';
 

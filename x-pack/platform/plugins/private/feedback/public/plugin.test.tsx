@@ -17,14 +17,14 @@ import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/public';
 let lastMounted: React.ReactNode;
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: (node: React.ReactElement) => {
-        lastMounted = node;
-        return () => () => undefined;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: (node: React.ReactElement) => {
+      lastMounted = node;
+      return () => () => undefined;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const findGetAppDetails = (
   node: React.ReactNode

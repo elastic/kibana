@@ -17,16 +17,16 @@ import { buildDistributables } from './build_distributables';
 import * as Tasks from './tasks';
 
 vi.mock('./lib/version_info', () => {
-      const mocked = {
-      getVersionInfo: () => ({
-        buildSha: 'abc1234abcdef',
-        buildVersion: '8.0.0',
-        buildNumber: 1234,
-        buildDate: '2023-05-15T23:12:09+0000',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getVersionInfo: () => ({
+      buildSha: 'abc1234abcdef',
+      buildVersion: '8.0.0',
+      buildNumber: 1234,
+      buildDate: '2023-05-15T23:12:09+0000',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tasks', async () => {
   const actual = (await vi.importActual('./tasks')) as Record<string, unknown>;
@@ -55,9 +55,7 @@ vi.mock('./tasks', async () => {
   return result;
 });
 
-const mockBundleTaskRun = Tasks.BuildBundles.run as MockedFunction<
-  typeof Tasks.BuildBundles.run
->;
+const mockBundleTaskRun = Tasks.BuildBundles.run as MockedFunction<typeof Tasks.BuildBundles.run>;
 
 const log = new ToolingLog();
 

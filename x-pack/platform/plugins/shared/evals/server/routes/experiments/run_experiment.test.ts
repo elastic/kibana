@@ -19,19 +19,19 @@ import { generateExperimentRun } from '../../workflow_generator';
 import { findUnauthorizedTargetSpaces } from '../shared/authorize_target_spaces';
 
 vi.mock('../../workflow_generator', () => {
-      const mocked = {
-      experimentRequestToParams: vi.fn((body) => body),
-      generateExperimentRun: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    experimentRequestToParams: vi.fn((body) => body),
+    generateExperimentRun: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/authorize_target_spaces', () => {
-      const mocked = {
-      findUnauthorizedTargetSpaces: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findUnauthorizedTargetSpaces: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const generateExperimentRunMock = generateExperimentRun as Mock;
 const findUnauthorizedTargetSpacesMock = findUnauthorizedTargetSpaces as Mock;

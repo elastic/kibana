@@ -16,7 +16,9 @@ import { PrivilegeChecker } from './privilege_checker';
 const spaceId = 'default';
 
 // securityMock stubs ApiActions, so pull the real class for actionFromRouteTag.
-const { ApiActions } = (await vi.importActual('@kbn/security-authorization-core/src/actions/api')) as typeof import('@kbn/security-authorization-core/src/actions/api');
+const { ApiActions } = (await vi.importActual(
+  '@kbn/security-authorization-core/src/actions/api'
+)) as typeof import('@kbn/security-authorization-core/src/actions/api');
 const apiActions = new ApiActions();
 
 const actionFor = (privilege: string) => apiActions.actionFromRouteTag(privilege);
@@ -31,9 +33,9 @@ const createRequestMock = (grantedPrivileges: string[]) => {
 const createSecurity = (privilegesByRequest: Map<KibanaRequest, string[]>) => {
   const security = securityMock.createStart();
 
-  vi
-    .mocked(security.authz.actions.api.actionFromRouteTag)
-    .mockImplementation((tag: string) => apiActions.actionFromRouteTag(tag));
+  vi.mocked(security.authz.actions.api.actionFromRouteTag).mockImplementation((tag: string) =>
+    apiActions.actionFromRouteTag(tag)
+  );
 
   security.authz.checkPrivilegesWithRequest.mockImplementation((req: KibanaRequest) => ({
     globally: vi.fn(),

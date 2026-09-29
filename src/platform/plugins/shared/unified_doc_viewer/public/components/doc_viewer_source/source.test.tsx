@@ -24,18 +24,18 @@ import { setUnifiedDocViewerServices } from '../../plugin';
 import { useEsDocSearch } from '../../hooks/use_es_doc_search';
 
 vi.mock('../../hooks/use_es_doc_search', () => {
-      const mocked = {
-      useEsDocSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsDocSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../json_code_editor', () => {
-      const mocked = {
-      JSONCodeEditorCommonMemoized: vi.fn(() => <div>JSON code editor</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JSONCodeEditorCommonMemoized: vi.fn(() => <div>JSON code editor</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 setUnifiedDocViewerServices(mockUnifiedDocViewerServices);
 

@@ -25,7 +25,7 @@ const useSecretHeadersMock = useSecretHeaders as Mock;
 vi.setConfig({ testTimeout: 60_000 });
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {
-  const originalModule = (await vi.importActual('@kbn/triggers-actions-ui-plugin/public'));
+  const originalModule = await vi.importActual('@kbn/triggers-actions-ui-plugin/public');
   const notFoundError = Object.assign(new Error('Not Found'), {
     request: {},
     response: { status: 404 },

@@ -52,7 +52,7 @@ import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
 
 vi.mock('./helpers', async () => {
-  const original = (await vi.importActual('./helpers'));
+  const original = await vi.importActual('./helpers');
   return {
     ...original,
     createDatastream: vi.fn(),
@@ -62,7 +62,7 @@ vi.mock('./helpers', async () => {
 });
 
 vi.mock('./builders', async () => {
-  const original = (await vi.importActual('./builders'));
+  const original = await vi.importActual('./builders');
   return {
     ...original,
     buildWorkflowInsights: vi.fn(),

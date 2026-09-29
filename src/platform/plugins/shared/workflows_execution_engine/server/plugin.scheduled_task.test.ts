@@ -19,19 +19,19 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ExecutionStatus } from '@kbn/workflows';
 
 vi.mock('./repositories/data_access_layer', async () => {
-  const actual = (await vi.importActual('./repositories/data_access_layer'));
-  const { createDataClientJestMock } = (await vi.importActual('./test_utils/data_client_jest_mock'));
+  const actual = await vi.importActual('./repositories/data_access_layer');
+  const { createDataClientJestMock } = await vi.importActual('./test_utils/data_client_jest_mock');
   return {
     ...actual,
     createDataClientBundle: vi.fn(() => createDataClientJestMock()),
   };
 });
 vi.mock('./lib/check_license', () => {
-      const mocked = {
-      checkLicense: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    checkLicense: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('elastic-apm-node', () => ({
   __esModule: true,
   default: {
@@ -43,7 +43,7 @@ vi.mock('elastic-apm-node', () => ({
 const mockGetWorkflow = vi.fn();
 const mockIsWorkflowEnabledRealtime = vi.fn().mockResolvedValue(true);
 vi.mock('@kbn/workflows', async () => {
-  const actual = (await vi.importActual('@kbn/workflows'));
+  const actual = await vi.importActual('@kbn/workflows');
   return {
     ...actual,
     WorkflowRepository: vi.fn().mockImplementation(() => ({
@@ -54,16 +54,16 @@ vi.mock('@kbn/workflows', async () => {
 });
 
 vi.mock('./lib/get_user', () => {
-      const mocked = {
-      getAuthenticatedUser: vi.fn().mockResolvedValue('test-user'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAuthenticatedUser: vi.fn().mockResolvedValue('test-user'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRunWorkflow = vi.fn();
 const mockCheckAndSkipIfExistingScheduledExecution = vi.fn();
 vi.mock('./execution_functions', async () => {
-  const actual = (await vi.importActual('./execution_functions'));
+  const actual = await vi.importActual('./execution_functions');
   return {
     ...actual,
     runWorkflow: (...args: unknown[]) => mockRunWorkflow(...args),
@@ -73,44 +73,44 @@ vi.mock('./execution_functions', async () => {
 });
 
 vi.mock('./concurrency/maybe_schedule_dormant_queued_run', () => {
-      const mocked = {
-      handleConcurrencyBlockedExecution: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    handleConcurrencyBlockedExecution: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./concurrency/concurrency_queue_drainer', () => {
-      const mocked = {
-      maybeDrainConcurrencyQueueBeforeEnqueue: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    maybeDrainConcurrencyQueueBeforeEnqueue: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCheckConcurrency = vi.fn().mockResolvedValue(true);
 const mockEvaluateConcurrencyKey = vi.fn().mockReturnValue('group-1');
 vi.mock('./concurrency/concurrency_manager', () => {
-      const mocked = {
-      ConcurrencyManager: vi.fn().mockImplementation(() => ({
-        checkConcurrency: (...args: unknown[]) => mockCheckConcurrency(...args),
-        evaluateConcurrencyKey: (...args: unknown[]) => mockEvaluateConcurrencyKey(...args),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConcurrencyManager: vi.fn().mockImplementation(() => ({
+      checkConcurrency: (...args: unknown[]) => mockCheckConcurrency(...args),
+      evaluateConcurrencyKey: (...args: unknown[]) => mockEvaluateConcurrencyKey(...args),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDiscardUnstartedExecution = vi.fn().mockResolvedValue(undefined);
 const mockCreateWorkflowExecution = vi.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = vi.fn().mockResolvedValue(null);
 vi.mock('./repositories/workflow_execution_repository', () => {
-      const mocked = {
-      WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
-        createWorkflowExecution: mockCreateWorkflowExecution,
-        discardUnstartedExecution: mockDiscardUnstartedExecution,
-        getWorkflowExecutionById: mockGetWorkflowExecutionById,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionRepository: vi.fn().mockImplementation(() => ({
+      createWorkflowExecution: mockCreateWorkflowExecution,
+      discardUnstartedExecution: mockDiscardUnstartedExecution,
+      getWorkflowExecutionById: mockGetWorkflowExecutionById,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { UNKNOWN_EXECUTION_IDENTITY } from './lib/execution_identity';
 import { getAuthenticatedUser } from './lib/get_user';

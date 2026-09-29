@@ -13,17 +13,17 @@ import { TimelineModalHeader } from '.';
 import { TestProviders } from '../../../../common/mock';
 
 vi.mock('./super_timeline_modal_header', () => {
-      const mocked = {
-      SuperTimelineModalHeader: () => <div data-test-subj="super-timeline-modal-header" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SuperTimelineModalHeader: () => <div data-test-subj="super-timeline-modal-header" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./regular_timeline_modal_header', () => {
-      const mocked = {
-      RegularTimelineModalHeader: () => <div data-test-subj="regular-timeline-modal-header" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RegularTimelineModalHeader: () => <div data-test-subj="regular-timeline-modal-header" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRef = { current: null };
 

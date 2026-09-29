@@ -15,11 +15,11 @@ import { createMockRouter, routeHandlerContextMock } from './__mocks__/routes.mo
 import { createRequestMock } from './__mocks__/request.mock';
 
 vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
-      const mocked = {
-      versionCheckHandlerWrapper: () => (a: any) => a,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    versionCheckHandlerWrapper: () => (a: any) => a,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires

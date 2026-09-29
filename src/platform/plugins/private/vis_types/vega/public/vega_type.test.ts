@@ -12,11 +12,11 @@ import { vi } from 'vitest';
 import { vegaVisType } from './vega_type';
 
 vi.mock('./default_spec', () => {
-      const mocked = {
-      getDefaultSpec: vi.fn(() => ''),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultSpec: vi.fn(() => ''),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('vegaVisType.getEsqlQuery', () => {
   it('returns the ES|QL query from a single-source spec', () => {

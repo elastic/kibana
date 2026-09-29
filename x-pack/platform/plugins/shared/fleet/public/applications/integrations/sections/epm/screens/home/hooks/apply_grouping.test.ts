@@ -14,21 +14,21 @@ import { applyGrouping } from './apply_grouping';
 
 const mockMapToCard = vi.fn();
 vi.mock('../card_utils', () => {
-      const mocked = {
-      mapToCard: (...args: unknown[]) => mockMapToCard(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mapToCard: (...args: unknown[]) => mockMapToCard(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../integration_groups', () => {
-      const mocked = {
-      INTEGRATION_GROUPS: {
-        nginx: { title: 'Nginx', description: 'Nginx description', icons: [] },
-        redis: { title: 'Redis', description: 'Redis description', icons: [] },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    INTEGRATION_GROUPS: {
+      nginx: { title: 'Nginx', description: 'Nginx description', icons: [] },
+      redis: { title: 'Redis', description: 'Redis description', icons: [] },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makePackage = (overrides: Record<string, unknown> = {}): PackageListItem =>
   ({

@@ -12,29 +12,29 @@ import type { CoreSetup, KibanaRequest } from '@kbn/core/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 vi.mock('../utils/resolve_connector_id', () => {
-      const mocked = {
-      resolveConnectorId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveConnectorId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/steps/ai', () => {
-      const mocked = {
-      AiPromptStepCommonDefinition: {
-        id: 'ai.prompt',
-        inputSchema: {},
-        outputSchema: {},
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AiPromptStepCommonDefinition: {
+      id: 'ai.prompt',
+      inputSchema: {},
+      outputSchema: {},
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/workflows-extensions/server', () => {
-      const mocked = {
-      createServerStepDefinition: vi.fn((definition) => definition),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createServerStepDefinition: vi.fn((definition) => definition),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { aiPromptStepDefinition } from './step';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';

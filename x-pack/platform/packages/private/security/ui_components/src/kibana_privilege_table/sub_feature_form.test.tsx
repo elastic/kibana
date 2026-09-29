@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiButtonGroup, EuiCheckbox } from '@elastic/eui';
 import { act } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { KibanaFeature } from '@kbn/features-plugin/public';
 import type { Role } from '@kbn/security-plugin-types-common';

@@ -11,7 +11,7 @@ import { renderHook } from '@testing-library/react';
 import { useCompleteBadgeStyles } from './use_complete_status_badge_styles';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useEuiTheme: () => ({
@@ -29,12 +29,12 @@ vi.mock('@elastic/eui', async () => {
 
 const mockUseDarkMode = vi.fn(() => false);
 vi.mock('@kbn/react-kibana-context-theme', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-kibana-context-theme')),
-      useKibanaIsDarkMode: () => mockUseDarkMode(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-kibana-context-theme')),
+    useKibanaIsDarkMode: () => mockUseDarkMode(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useCompleteBadgeStyles', () => {
   it('returns the correct styles for dark mode', () => {

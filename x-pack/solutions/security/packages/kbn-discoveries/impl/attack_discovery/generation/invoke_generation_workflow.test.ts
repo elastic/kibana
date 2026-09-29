@@ -23,23 +23,23 @@ import { invokeGenerationWorkflow } from './invoke_generation_workflow';
 const mockWriteAttackDiscoveryEvent = vi.fn();
 
 vi.mock('../persistence/event_logging', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
-      ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
-      writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_FAILED: 'generate-step-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_STARTED: 'generate-step-started',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATE_STEP_SUCCEEDED: 'generate-step-succeeded',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_FAILED: 'generation-failed',
+    ATTACK_DISCOVERY_EVENT_LOG_ACTION_GENERATION_SUCCEEDED: 'generation-succeeded',
+    writeAttackDiscoveryEvent: (...args: unknown[]) => mockWriteAttackDiscoveryEvent(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../lib/persistence', () => {
-      const mocked = {
-      getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDurationNanoseconds: vi.fn().mockReturnValue(1000000),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('invokeGenerationWorkflow', () => {
   const mockLogger = {
@@ -203,9 +203,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when workflow executes successfully', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -569,9 +567,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecution
       );
@@ -609,9 +605,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockContextLengthExecution
       );
@@ -637,9 +631,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockSkippedExecution
       );
@@ -678,9 +670,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCancelledExecution
       );
@@ -714,9 +704,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockTimedOutExecution
       );
@@ -745,9 +733,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when execution is not found during polling', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(null);
     });
 
@@ -766,9 +752,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithoutStep
       );
@@ -822,9 +806,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithNoOutput
       );
@@ -904,9 +886,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithStringReplacements
       );
@@ -932,9 +912,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithEmptyOutput
       );
@@ -973,9 +951,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock)
         .mockResolvedValueOnce(mockRunningExecution)
         .mockResolvedValue(mockCompletedExecution);
@@ -1016,9 +992,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when writeAttackDiscoveryEvent fails for succeeded event', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -1113,9 +1087,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockExecutionWithInvalidReplacements
       );
@@ -1131,9 +1103,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when filter is not provided', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -1159,9 +1129,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when end and start are not provided', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );
@@ -1194,9 +1162,7 @@ describe('invokeGenerationWorkflow', () => {
 
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'workflow-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('workflow-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockFailedExecutionNoMessage
       );
@@ -1212,9 +1178,7 @@ describe('invokeGenerationWorkflow', () => {
   describe('when scheduleWorkflow is used to acquire execution ID before the workflow runs', () => {
     beforeEach(() => {
       (mockWorkflowsManagementApi.getWorkflow as Mock).mockResolvedValue(mockWorkflow);
-      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue(
-        'scheduled-run-id'
-      );
+      (mockWorkflowsManagementApi.scheduleWorkflow as Mock).mockResolvedValue('scheduled-run-id');
       (mockWorkflowsManagementApi.getWorkflowExecution as Mock).mockResolvedValue(
         mockCompletedExecution
       );

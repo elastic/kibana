@@ -25,13 +25,13 @@ import {
 
 vi.mock('../../hooks/use_kibana');
 vi.mock('./kubernetes_asset_image', () => {
-      const mocked = {
-      KubernetesAssetImage: ({ type }: { type: string }) => (
-        <div data-test-subj={`kubernetes-asset-image-${type}`}>Mock Image</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KubernetesAssetImage: ({ type }: { type: string }) => (
+      <div data-test-subj={`kubernetes-asset-image-${type}`}>Mock Image</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaContextForPluginMock = useKibanaContextForPlugin as MockedFunction<
   typeof useKibanaContextForPlugin

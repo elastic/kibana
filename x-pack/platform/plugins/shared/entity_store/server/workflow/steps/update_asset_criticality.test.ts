@@ -94,9 +94,7 @@ describe('updateAssetCriticalityStepDefinition', () => {
       } as unknown as WorkflowsExtensionsServerPluginStart)
   );
   const getLicense = vi.fn().mockResolvedValue({ hasAtLeast: () => true });
-  const getLicensingStart = vi.fn(
-    async () => ({ getLicense } as unknown as LicensingPluginStart)
-  );
+  const getLicensingStart = vi.fn(async () => ({ getLicense } as unknown as LicensingPluginStart));
   const checkPrivileges = vi.fn().mockResolvedValue(buildCheckPrivilegesResponse(true));
   const checkPrivilegesDynamicallyWithRequest = vi.fn().mockReturnValue(checkPrivileges);
   const getSecurityStart = vi.fn(

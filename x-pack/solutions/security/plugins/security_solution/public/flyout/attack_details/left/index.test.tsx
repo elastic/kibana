@@ -17,29 +17,29 @@ import { useUserPrivileges } from '../../../common/components/user_privileges';
 import { NOTES_DETAILS_TEST_ID } from '../../../flyout_v2/shared/tools/notes/test_ids';
 
 vi.mock('../../shared/components/flyout_header', () => {
-      const mocked = {
-      FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="flyout-header">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutHeader: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="flyout-header">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../shared/components/flyout_body', () => {
-      const mocked = {
-      FlyoutBody: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="flyout-body">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutBody: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="flyout-body">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_attack_details', () => {
   return {
@@ -70,51 +70,51 @@ vi.mock('../hooks/use_attack_details', () => {
 });
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({
-        openLeftPanel: vi.fn(),
-      }),
-      useExpandableFlyoutState: () => ({
-        left: { path: { tab: 'insights', subTab: 'entity' } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({
+      openLeftPanel: vi.fn(),
+    }),
+    useExpandableFlyoutState: () => ({
+      left: { path: { tab: 'insights', subTab: 'entity' } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/shared/tools/notes/components/notes_details_content', () => {
-      const mocked = {
-      NotesDetailsContent: () => (
-        <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesDetailsContent: () => (
+      <div data-test-subj="attack-details-flyout-left-notes-tab-content">{'Notes content'}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_header_data', () => {
-      const mocked = {
-      useHeaderData: vi.fn().mockReturnValue({ timestamp: '' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHeaderData: vi.fn().mockReturnValue({ timestamp: '' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_original_alert_ids', () => {
-      const mocked = {
-      useOriginalAlertIds: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOriginalAlertIds: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/attack/tools/entities/hooks/use_attack_entities_lists', () => {
-      const mocked = {
-      useAttackEntitiesLists: vi.fn().mockReturnValue({
-        userEntityEntries: [],
-        hostEntityEntries: [],
-        loading: false,
-        error: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackEntitiesLists: vi.fn().mockReturnValue({
+      userEntityEntries: [],
+      hostEntityEntries: [],
+      loading: false,
+      error: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/user_privileges');
 const useUserPrivilegesMock = useUserPrivileges as Mock;

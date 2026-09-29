@@ -16,7 +16,7 @@ import { useGetMaintenanceWindow } from './use_get_maintenance_window';
 const mockAddDanger = vi.fn();
 
 vi.mock('../utils/kibana_react', async () => {
-  const originalModule = (await vi.importActual('../utils/kibana_react'));
+  const originalModule = await vi.importActual('../utils/kibana_react');
   return {
     ...originalModule,
     useKibana: () => {
@@ -31,19 +31,19 @@ vi.mock('../utils/kibana_react', async () => {
   };
 });
 vi.mock('../services/get', () => {
-      const mocked = {
-      getMaintenanceWindow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMaintenanceWindow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../helpers/convert_from_maintenance_window_to_form', () => {
-      const mocked = {
-      convertFromMaintenanceWindowToForm: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertFromMaintenanceWindowToForm: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getMaintenanceWindow } = (await vi.importMock('../services/get'));
+const { getMaintenanceWindow } = await vi.importMock('../services/get');
 
 let appMockRenderer: AppMockRenderer;
 

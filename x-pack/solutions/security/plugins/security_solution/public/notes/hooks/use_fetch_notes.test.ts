@@ -15,25 +15,25 @@ import { useFetchNotes } from './use_fetch_notes';
 import { useUserPrivileges } from '../../common/components/user_privileges';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../store/notes.slice', () => {
-      const mocked = {
-      fetchNotesByDocumentIds: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchNotesByDocumentIds: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/user_privileges');
 

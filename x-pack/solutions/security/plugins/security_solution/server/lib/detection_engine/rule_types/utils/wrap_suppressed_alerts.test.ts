@@ -25,9 +25,9 @@ import { ruleExecutionLogMock } from '../../rule_monitoring/mocks';
 import { getSharedParamsMock } from '../__mocks__/shared_params';
 
 vi.mock('../factories/utils/transform_hit_to_alert', () => {
-      const mocked = { transformHitToAlert: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { transformHitToAlert: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const transformHitToAlertMock = transformHitToAlert as Mock;
 

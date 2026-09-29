@@ -29,102 +29,102 @@ const mockToasts = {
 let mockQuery: Record<string, unknown> = {};
 
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: { notifications: { toasts: mockToasts } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      core: { notifications: { toasts: mockToasts } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_significant_events_app_params', () => {
-      const mocked = {
-      useSignificantEventsAppParams: () => ({ query: mockQuery }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsAppParams: () => ({ query: mockQuery }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_significant_events_app_router', () => {
-      const mocked = {
-      useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSignificantEventsAppRouter: () => ({ push: mockPush, replace: mockReplace }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockKnowledgeIndicators: KnowledgeIndicator[] = [];
 let mockIsLoading = false;
 const mockRefetch = vi.fn();
 
 vi.mock('../../../../hooks/use_fetch_knowledge_indicators', () => {
-      const mocked = {
-      useFetchKnowledgeIndicators: () => ({
-        knowledgeIndicators: mockKnowledgeIndicators,
-        occurrencesByQueryId: {},
-        isLoading: mockIsLoading,
-        isEmpty: !mockIsLoading && mockKnowledgeIndicators.length === 0,
-        refetch: mockRefetch,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchKnowledgeIndicators: () => ({
+      knowledgeIndicators: mockKnowledgeIndicators,
+      occurrencesByQueryId: {},
+      isLoading: mockIsLoading,
+      isEmpty: !mockIsLoading && mockKnowledgeIndicators.length === 0,
+      refetch: mockRefetch,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExcludeFeaturesInBulk = vi.fn();
 const mockRestoreFeaturesInBulk = vi.fn();
 
 vi.mock('../../../../hooks/use_discovery_features_api', () => {
-      const mocked = {
-      useDiscoveryFeaturesApi: () => ({
-        excludeFeaturesInBulk: mockExcludeFeaturesInBulk,
-        restoreFeaturesInBulk: mockRestoreFeaturesInBulk,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoveryFeaturesApi: () => ({
+      excludeFeaturesInBulk: mockExcludeFeaturesInBulk,
+      restoreFeaturesInBulk: mockRestoreFeaturesInBulk,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockPromote = vi.fn();
 
 vi.mock('../../../../hooks/use_queries_api', () => {
-      const mocked = {
-      useQueriesApi: () => ({
-        promote: mockPromote,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueriesApi: () => ({
+      promote: mockPromote,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvalidatePromoteRelatedQueries = vi.fn().mockResolvedValue(undefined);
 
 vi.mock('../../../../hooks/use_invalidate_promote_queries', () => {
-      const mocked = {
-      useInvalidatePromoteRelatedQueries: () => mockInvalidatePromoteRelatedQueries,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidatePromoteRelatedQueries: () => mockInvalidatePromoteRelatedQueries,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteKnowledgeIndicatorsInBulk = vi.fn();
 let mockIsDeleting = false;
 
 vi.mock('../../../../hooks/use_knowledge_indicators_bulk_delete', () => {
-      const mocked = {
-      useKnowledgeIndicatorsBulkDelete: ({ onSuccess }: { onSuccess?: () => void }) => {
-        mockBulkDeleteOnSuccess = onSuccess;
-        return {
-          deleteKnowledgeIndicatorsInBulk: mockDeleteKnowledgeIndicatorsInBulk,
-          isDeleting: mockIsDeleting,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKnowledgeIndicatorsBulkDelete: ({ onSuccess }: { onSuccess?: () => void }) => {
+      mockBulkDeleteOnSuccess = onSuccess;
+      return {
+        deleteKnowledgeIndicatorsInBulk: mockDeleteKnowledgeIndicatorsInBulk,
+        isDeleting: mockIsDeleting,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockBulkDeleteOnSuccess: (() => void) | undefined;
 
 vi.mock('@kbn/react-hooks', () => {
-      const mocked = {
-      useDebouncedValue: (value: string) => value,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDebouncedValue: (value: string) => value,
+  };
+  return { ...mocked, default: mocked };
+});
 
 let mockIsMutatingValue = 0;
 const mockMutate = vi.fn();
@@ -134,22 +134,22 @@ let mockMutationCallbacks: {
 } = {};
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useIsMutating: () => mockIsMutatingValue,
-      useMutation: (config: {
-        mutationFn: (ids: string[]) => Promise<unknown>;
-        onSuccess?: (result: PromoteResult) => Promise<void>;
-        onError?: (e: Error) => void;
-      }) => {
-        mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
-        return {
-          mutate: mockMutate,
-          isLoading: false,
-        };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsMutating: () => mockIsMutatingValue,
+    useMutation: (config: {
+      mutationFn: (ids: string[]) => Promise<unknown>;
+      onSuccess?: (result: PromoteResult) => Promise<void>;
+      onError?: (e: Error) => void;
+    }) => {
+      mockMutationCallbacks = { onSuccess: config.onSuccess, onError: config.onError };
+      return {
+        mutate: mockMutate,
+        isLoading: false,
+      };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function makeFeature(
   overrides: Partial<Feature> & { id: string; stream_name: string } & Record<string, unknown>

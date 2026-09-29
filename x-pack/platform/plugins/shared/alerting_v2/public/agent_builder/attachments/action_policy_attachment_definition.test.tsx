@@ -13,18 +13,18 @@ import { ACTION_POLICY_ATTACHMENT_TYPE } from '@kbn/alerting-v2-schemas';
 import { createActionPolicyAttachmentDefinition } from './action_policy_attachment_definition';
 
 vi.mock('./action_policy_inline_content', () => {
-      const mocked = {
-      ActionPolicyInlineContent: () => <div data-test-subj="mockInlineContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyInlineContent: () => <div data-test-subj="mockInlineContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./action_policy_canvas_content', () => {
-      const mocked = {
-      ActionPolicyCanvasContent: () => <div data-test-subj="mockCanvasContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionPolicyCanvasContent: () => <div data-test-subj="mockCanvasContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockServices = () => ({
   container: {} as any,

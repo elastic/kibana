@@ -23,115 +23,115 @@ import { initialUserPrivilegesState } from '../../../../../common/components/use
 
 // Mock components not needed in this test suite
 vi.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => {
-      const mocked = {
-      RuleDetailsFlyout: vi.fn(() => <></>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleDetailsFlyout: vi.fn(() => <></>),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../rules_changelog_link', () => {
-      const mocked = {
-      RulesChangelogLink: vi.fn(() => <></>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RulesChangelogLink: vi.fn(() => <></>),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./add_prebuilt_rules_table_filters', () => {
-      const mocked = {
-      AddPrebuiltRulesTableFilters: vi.fn(() => <></>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AddPrebuiltRulesTableFilters: vi.fn(() => <></>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../rule_management/logic/prebuilt_rules/use_perform_rule_install', () => {
-      const mocked = {
-      usePerformInstallAllRules: () => ({
-        performInstallAll: vi.fn(),
-        isLoading: false,
-      }),
-      usePerformInstallSpecificRules: () => ({
-        performInstallSpecific: vi.fn(),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformInstallAllRules: () => ({
+      performInstallAll: vi.fn(),
+      isLoading: false,
+    }),
+    usePerformInstallSpecificRules: () => ({
+      performInstallSpecific: vi.fn(),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useUiSetting$: vi.fn().mockReturnValue([false]),
-      useKibana: vi.fn().mockReturnValue({
-        services: {
-          docLinks: { links: { siem: { ruleChangeLog: '' } } },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting$: vi.fn().mockReturnValue([false]),
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        docLinks: { links: { siem: { ruleChangeLog: '' } } },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../common/components/links', () => {
-      const mocked = {
-      useGetSecuritySolutionLinkProps: () =>
-        vi.fn().mockReturnValue({
-          onClick: vi.fn(),
-        }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionLinkProps: () =>
+      vi.fn().mockReturnValue({
+        onClick: vi.fn(),
+      }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query',
   () => {
-      const mocked = {
-        useFetchPrebuiltRulesStatusQuery: vi.fn().mockReturnValue({
-          data: {
-            prebuiltRulesStatus: {
-              num_prebuilt_rules_total_in_package: 1,
-            },
+    const mocked = {
+      useFetchPrebuiltRulesStatusQuery: vi.fn().mockReturnValue({
+        data: {
+          prebuiltRulesStatus: {
+            num_prebuilt_rules_total_in_package: 1,
           },
-        }),
-        useInvalidateFetchPrebuiltRulesStatusQuery: vi.fn().mockReturnValue(vi.fn()),
-      };
-      return { ...mocked, default: mocked };
-    }
+        },
+      }),
+      useInvalidateFetchPrebuiltRulesStatusQuery: vi.fn().mockReturnValue(vi.fn()),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock(
   '../../../../../common/components/initialization/use_security_solution_initialization',
   () => {
-      const mocked = {
-        useSecuritySolutionInitialization: vi.fn().mockReturnValue({
-          'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useSecuritySolutionInitialization: vi.fn().mockReturnValue({
+        'init-prebuilt-rules': { loading: false, result: { status: 'ready' } },
+      }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock(
   '../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review',
   () => {
-      const mocked = {
-        usePrebuiltRulesInstallReview: vi.fn().mockReturnValue({
-          data: {
-            rules: [
-              {
-                id: 'rule-1',
-                name: 'rule-1',
-                tags: [],
-                risk_score: 1,
-                severity: 'low',
-              },
-            ],
-            stats: {
-              num_rules_to_install: 1,
+    const mocked = {
+      usePrebuiltRulesInstallReview: vi.fn().mockReturnValue({
+        data: {
+          rules: [
+            {
+              id: 'rule-1',
+              name: 'rule-1',
               tags: [],
+              risk_score: 1,
+              severity: 'low',
             },
+          ],
+          stats: {
+            num_rules_to_install: 1,
+            tags: [],
           },
-          isLoading: false,
-          isFetched: true,
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
+        },
+        isLoading: false,
+        isFetched: true,
+      }),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../../common/components/user_privileges');

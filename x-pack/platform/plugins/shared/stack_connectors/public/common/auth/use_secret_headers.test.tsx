@@ -18,11 +18,11 @@ import { useSecretHeaders } from './use_secret_headers';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const customWrapper = () => {
   const queryClient = new QueryClient({

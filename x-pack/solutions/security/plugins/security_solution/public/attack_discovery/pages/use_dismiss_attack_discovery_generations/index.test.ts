@@ -29,39 +29,39 @@ import { TestProviders } from '../../../common/mock/test_providers';
 const mockAddSuccessToast = vi.fn();
 const mockAddError = vi.fn();
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: (): MockUseAppToasts => ({
-        addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
-        addError: (...args: unknown[]) => mockAddError(...args),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: (): MockUseAppToasts => ({
+      addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
+      addError: (...args: unknown[]) => mockAddError(...args),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockInvalidateGenerations = vi.fn();
 vi.mock('../use_get_attack_discovery_generations', () => {
-      const mocked = {
-      useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: vi.fn((key, { defaultMessage }) => defaultMessage),
-        getIsInitialized: vi.fn(() => true),
-        getTranslation: vi.fn(() => ({
-          messages: {},
-          formats: {},
-          locale: 'en',
-          defaultLocale: 'en',
-          defaultFormats: {},
-        })),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: vi.fn((key, { defaultMessage }) => defaultMessage),
+      getIsInitialized: vi.fn(() => true),
+      getTranslation: vi.fn(() => ({
+        messages: {},
+        formats: {},
+        locale: 'en',
+        defaultLocale: 'en',
+        defaultFormats: {},
+      })),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface MockHttp {
   post: (...args: unknown[]) => unknown;
@@ -85,31 +85,28 @@ interface MockUseKibanaReturn {
 }
 
 const mockHttpFetch = vi.fn();
-vi.mock(
-  '../../../common/lib/kibana',
-  () => {
-      const mocked = {
-        KibanaServices: {
-          get: vi.fn().mockReturnValue({
-            http: {
-              post: (...args: unknown[]) => mockHttpFetch(...args),
-              fetch: (...args: unknown[]) => mockHttpFetch(...args),
-            },
-          }),
+vi.mock('../../../common/lib/kibana', () => {
+  const mocked = {
+    KibanaServices: {
+      get: vi.fn().mockReturnValue({
+        http: {
+          post: (...args: unknown[]) => mockHttpFetch(...args),
+          fetch: (...args: unknown[]) => mockHttpFetch(...args),
         },
-        useKibana: vi.fn().mockReturnValue({
-          services: {
-            http: {
-              post: (...args: unknown[]) => mockHttpFetch(...args),
-              fetch: (...args: unknown[]) => mockHttpFetch(...args),
-            },
-            upselling: {}, // Add any other required services here
-          },
-        }),
-      };
-      return { ...mocked, default: mocked };
-    }
-);
+      }),
+    },
+    useKibana: vi.fn().mockReturnValue({
+      services: {
+        http: {
+          post: (...args: unknown[]) => mockHttpFetch(...args),
+          fetch: (...args: unknown[]) => mockHttpFetch(...args),
+        },
+        upselling: {}, // Add any other required services here
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface MockUseAppToasts {
   addSuccessToast: (...args: unknown[]) => unknown;
@@ -117,21 +114,21 @@ interface MockUseAppToasts {
 }
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: (): MockUseAppToasts => ({
-        addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
-        addError: (...args: unknown[]) => mockAddError(...args),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: (): MockUseAppToasts => ({
+      addSuccessToast: (...args: unknown[]) => mockAddSuccessToast(...args),
+      addError: (...args: unknown[]) => mockAddError(...args),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../use_get_attack_discovery_generations', () => {
-      const mocked = {
-      useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateGetAttackDiscoveryGenerations: () => mockInvalidateGenerations,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDismissAttackDiscoveryGeneration', () => {
   beforeEach(() => {

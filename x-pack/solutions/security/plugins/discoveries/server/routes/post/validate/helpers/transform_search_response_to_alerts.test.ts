@@ -14,11 +14,11 @@ import { transformSearchResponseToAlerts } from './transform_search_response_to_
 import { transformAttackDiscoveryAlertDocumentToApi } from './transform_attack_discovery_alert_document_to_api';
 
 vi.mock('./transform_attack_discovery_alert_document_to_api', () => {
-      const mocked = {
-      transformAttackDiscoveryAlertDocumentToApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformAttackDiscoveryAlertDocumentToApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformSearchResponseToAlerts', () => {
   it('returns an empty array when the hit is missing required fields', () => {

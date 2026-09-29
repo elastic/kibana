@@ -20,41 +20,41 @@ const mockUnprotectedKeystoreData =
   'I4lzJ9MRy21UcAJki2qFUTj4TYuvhta3LId+RM5UX/dJ2468hQ==';
 
 vi.mock('fs', () => {
-      const mocked = {
-      readFileSync: vi.fn().mockImplementation((path) => {
-        if (path.includes('data/unprotected')) {
-          return JSON.stringify(mockUnprotectedKeystoreData);
-        }
+  const mocked = {
+    readFileSync: vi.fn().mockImplementation((path) => {
+      if (path.includes('data/unprotected')) {
+        return JSON.stringify(mockUnprotectedKeystoreData);
+      }
 
-        if (path.includes('data/protected')) {
-          return JSON.stringify(mockProtectedKeystoreData);
-        }
+      if (path.includes('data/protected')) {
+        return JSON.stringify(mockProtectedKeystoreData);
+      }
 
-        if (path.includes('keystore_correct_password_file')) {
-          return 'changeme';
-        }
+      if (path.includes('keystore_correct_password_file')) {
+        return 'changeme';
+      }
 
-        if (path.includes('keystore_incorrect_password_file')) {
-          return 'wrongpassword';
-        }
+      if (path.includes('keystore_incorrect_password_file')) {
+        return 'wrongpassword';
+      }
 
-        if (path.includes('data/test') || path.includes('data/nonexistent')) {
-          throw { code: 'ENOENT' };
-        }
+      if (path.includes('data/test') || path.includes('data/nonexistent')) {
+        throw { code: 'ENOENT' };
+      }
 
-        throw { code: 'EACCES' };
-      }),
-      existsSync: vi.fn().mockImplementation((path) => {
-        return (
-          path.includes('data/unprotected') ||
-          path.includes('data/protected') ||
-          path.includes('inaccessible')
-        );
-      }),
-      writeFileSync: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+      throw { code: 'EACCES' };
+    }),
+    existsSync: vi.fn().mockImplementation((path) => {
+      return (
+        path.includes('data/unprotected') ||
+        path.includes('data/protected') ||
+        path.includes('inaccessible')
+      );
+    }),
+    writeFileSync: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import sinon from 'sinon';
 import { readFileSync } from 'fs';

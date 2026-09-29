@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import * as rt from 'io-ts';
 import type { RouteValidationResultFactory } from '@kbn/core/server';
 

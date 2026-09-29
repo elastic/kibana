@@ -23,40 +23,40 @@ import { useUserProfiles } from '../../../../hooks/use_user_profiles';
 import { ConversationShareButton } from './conversation_share_button';
 
 vi.mock('../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useConversation: vi.fn(),
-      useConversationPermissions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversation: vi.fn(),
+    useConversationPermissions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_suggest_users', () => {
-      const mocked = {
-      useSuggestUsers: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSuggestUsers: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_conversation_access_control', () => {
-      const mocked = {
-      useUpdateConversationAccessControl: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateConversationAccessControl: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_user_profiles', () => {
-      const mocked = {
-      useUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/agents/use_agent_by_id', () => {
-      const mocked = {
-      useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversation = vi.mocked(useConversation);
 const mockUseConversationPermissions = vi.mocked(useConversationPermissions);

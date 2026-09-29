@@ -8,11 +8,11 @@
 import { vi } from 'vitest';
 import type { Mock, Mocked } from 'vitest';
 vi.mock('axios', () => {
-      const mocked = {
-      create: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    create: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';

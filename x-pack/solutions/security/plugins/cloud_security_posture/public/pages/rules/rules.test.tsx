@@ -26,21 +26,21 @@ import * as TEST_SUBJECTS from './test_subjects';
 import { SECURITY_FEATURE_ID } from '../../test/constants';
 
 vi.mock('@kbn/app-header', () => {
-      const mocked = {
-      AppHeader: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AppHeader: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api');
 vi.mock('../../common/api/use_license_management_locator_api');
 vi.mock('../../common/hooks/use_is_subscription_status_valid');
 vi.mock('../../common/navigation/use_csp_integration_link');
 vi.mock('../benchmarks/use_csp_benchmark_integrations', () => {
-      const mocked = {
-      useCspBenchmarkIntegrationsV2: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCspBenchmarkIntegrationsV2: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const chance = new Chance();
 

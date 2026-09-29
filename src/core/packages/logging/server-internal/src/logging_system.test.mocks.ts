@@ -13,19 +13,19 @@ import { merge, getFlattenedObject } from '@kbn/std';
 
 export const mockStreamWrite = vi.fn();
 vi.doMock('fs', () => {
-      const mocked = {
-      ...(require('fs') as any),
-      constants: {},
-      createWriteStream: vi.fn(() => ({ write: mockStreamWrite })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(require('fs') as any),
+    constants: {},
+    createWriteStream: vi.fn(() => ({ write: mockStreamWrite })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const mockGetFlattenedObject = vi.fn().mockImplementation(getFlattenedObject);
 vi.doMock('@kbn/std', () => {
-      const mocked = {
-      merge: vi.fn().mockImplementation(merge),
-      getFlattenedObject: mockGetFlattenedObject,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    merge: vi.fn().mockImplementation(merge),
+    getFlattenedObject: mockGetFlattenedObject,
+  };
+  return { ...mocked, default: mocked };
+});

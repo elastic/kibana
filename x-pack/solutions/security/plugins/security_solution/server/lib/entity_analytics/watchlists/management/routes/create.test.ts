@@ -25,36 +25,38 @@ const mockAddEntitySourceReference = vi.fn();
 const mockSyncWatchlist = vi.fn();
 
 vi.mock('../watchlist_config', () => {
-      const mocked = {
-      WatchlistConfigClient: vi.fn().mockImplementation(() => ({
-        create: mockWatchlistCreate,
-        delete: mockWatchlistDelete,
-        addEntitySourceReference: mockAddEntitySourceReference,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WatchlistConfigClient: vi.fn().mockImplementation(() => ({
+      create: mockWatchlistCreate,
+      delete: mockWatchlistDelete,
+      addEntitySourceReference: mockAddEntitySourceReference,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_sources/infra/entity_source_client');
 vi.mock('../../entity_sources/entity_sources_service', () => {
-      const mocked = {
-      createEntitySourcesService: vi.fn(() => ({
-        syncWatchlist: mockSyncWatchlist,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createEntitySourcesService: vi.fn(() => ({
+      syncWatchlist: mockSyncWatchlist,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateIndexPermissions = vi.fn();
 
 vi.mock('../../entity_sources/entity_source_api_key', () => {
-      const mocked = {
-      validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateIndexPermissions: (...args: unknown[]) => mockValidateIndexPermissions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { mockCreateEntitySource } = (await vi.importMock('../../entity_sources/infra/entity_source_client')) as {
+const { mockCreateEntitySource } = (await vi.importMock(
+  '../../entity_sources/infra/entity_source_client'
+)) as {
   mockCreateEntitySource: Mock;
 };
 

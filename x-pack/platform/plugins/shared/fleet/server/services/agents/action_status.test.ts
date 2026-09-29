@@ -16,11 +16,11 @@ import { getPage, getPerPage, hasRolloutPeriodPassed, getActionStatuses } from '
 
 // Needed by getActionStatuses → getActions → addNamespaceFilteringToQuery
 vi.mock('../spaces/query_namespaces_filtering', () => {
-      const mocked = {
-      addNamespaceFilteringToQuery: vi.fn((query: object) => Promise.resolve(query)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    addNamespaceFilteringToQuery: vi.fn((query: object) => Promise.resolve(query)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getPage', () => {
   it('should return the default value when there are no pagination options', () => {

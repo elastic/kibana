@@ -21,13 +21,13 @@ import type { HuntCoordinatorResult } from '../../services/watches/hunt/hunt_coo
 import { emptyHuntForThreatResult } from '../../services/watches/hunt/tier1/hunt_for_threat';
 
 vi.mock('./lib/scoped_model', () => {
-      const mocked = { resolveScopedModel: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { resolveScopedModel: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../services/watches/hunt/hunt_coordinator', () => {
-      const mocked = { huntCoordinator: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { huntCoordinator: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const resolveScopedModelMock = resolveScopedModel as MockedFunction<typeof resolveScopedModel>;
 const huntCoordinatorMock = huntCoordinator as MockedFunction<typeof huntCoordinator>;

@@ -12,11 +12,11 @@ import type { Mock, MockedFunction } from 'vitest';
 
 // Mock parseDuration function
 vi.mock('../../../../utils', () => {
-      const mocked = {
-      parseDuration: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseDuration: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { EnterTimeoutZoneNode } from '@kbn/workflows/graph';
 import { parseDuration } from '../../../../utils';

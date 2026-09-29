@@ -33,7 +33,7 @@ import { ScriptsLibraryMock } from '../../../scripts_library/mocks';
 import type { ActionDetails } from '../../../../../../common/endpoint/types';
 
 vi.mock('../../action_details_by_id', async () => {
-  const originalMod = (await vi.importActual('../../action_details_by_id'));
+  const originalMod = await vi.importActual('../../action_details_by_id');
   return {
     ...originalMod,
     getActionDetailsById: vi.fn(originalMod.getActionDetailsById),
@@ -1153,8 +1153,7 @@ describe('EndpointActionsClient', () => {
       'should error when %s is called with agents not valid for active space',
       async (methodName) => {
         (
-          classConstructorOptions.endpointService.getInternalFleetServices().agent
-            .getByIds as Mock
+          classConstructorOptions.endpointService.getInternalFleetServices().agent.getByIds as Mock
         ).mockImplementation(async () => {
           throw new AgentNotFoundError('Agent some-id not found');
         });

@@ -9,18 +9,18 @@ import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
 
 vi.mock('@elastic/schemas/es/tools/manifest.js', () => {
-      const mocked = {
-      esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    esManifest: [{ id: 'indices.create' }, { id: 'indices.delete' }],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/schemas/kibana/tools/manifest.js', () => {
-      const mocked = {
-      kibanaManifest: [{ id: 'cases.create' }],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaManifest: [{ id: 'cases.create' }],
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { loggerMock } from '@kbn/logging-mocks';
 import { ToolType } from '@kbn/agent-builder-common';

@@ -18,25 +18,25 @@ import { procedureNames } from '../common/rpc';
 import { MSearchService } from './core/msearch';
 
 vi.mock('./core', async () => {
-      const mocked = {
-      ...(await vi.importActual('./core')),
-      Core: class {
-        setup() {
-          return {
-            contentRegistry: 'mockedContentRegistry',
-            api: {
-              register: vi.fn().mockReturnValue('mockedRegister'),
-              crud: vi.fn().mockReturnValue('mockedCrud'),
-              eventBus: {
-                emit: vi.fn().mockReturnValue('mockedEventBusEmit'),
-              },
+  const mocked = {
+    ...(await vi.importActual('./core')),
+    Core: class {
+      setup() {
+        return {
+          contentRegistry: 'mockedContentRegistry',
+          api: {
+            register: vi.fn().mockReturnValue('mockedRegister'),
+            crud: vi.fn().mockReturnValue('mockedCrud'),
+            eventBus: {
+              emit: vi.fn().mockReturnValue('mockedEventBusEmit'),
             },
-          };
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+          },
+        };
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGet = vi.fn().mockResolvedValue('getMocked');
 const mockBulkGet = vi.fn().mockResolvedValue('bulkGetMocked');

@@ -28,65 +28,65 @@ import { useEvalsPermissions } from '../../hooks/use_evals_permissions';
 vi.mock('../../hooks/use_evals_api');
 vi.mock('../../hooks/use_evals_permissions');
 vi.mock('@kbn/code-editor', () => {
-      const mocked = { CodeEditor: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { CodeEditor: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/llm-trace-waterfall', () => {
-      const mocked = {
-      TraceWaterfall: () => null,
-      useTraceSpans: () => ({
-        spans: [],
-        durationMs: 0,
-        isLoading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: () => null,
+    useTraceSpans: () => ({
+      spans: [],
+      durationMs: 0,
+      isLoading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/copy_dataset_flyout', () => {
-      const mocked = {
-      CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
-        <div data-test-subj="copyDatasetFlyoutMock">
-          {datasetId}: {datasetName}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CopyDatasetFlyout: ({ datasetId, datasetName }: { datasetId: string; datasetName: string }) => (
+      <div data-test-subj="copyDatasetFlyoutMock">
+        {datasetId}: {datasetName}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/import_dataset_flyout', () => {
-      const mocked = {
-      ImportDatasetFlyout: ({
-        initialDataset,
-        onClose,
-      }: {
-        initialDataset?: { id: string };
-        onClose: () => void;
-      }) => (
-        <div data-test-subj="importDatasetFlyoutMock">
-          <span>{initialDataset?.id}</span>
-          <button type="button" onClick={onClose}>
-            Close import
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ImportDatasetFlyout: ({
+      initialDataset,
+      onClose,
+    }: {
+      initialDataset?: { id: string };
+      onClose: () => void;
+    }) => (
+      <div data-test-subj="importDatasetFlyoutMock">
+        <span>{initialDataset?.id}</span>
+        <button type="button" onClick={onClose}>
+          Close import
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/dataset_spaces', () => {
-      const mocked = {
-      DatasetSharedNotice: () => null,
-      DatasetSpacesBadge: () => null,
-      DatasetSpacesPicker: () => null,
-      SharedChangeConfirmModal: () => null,
-      getRemovedSpaceIds: () => [],
-      useDatasetSharing: () => ({
-        isEnabled: false,
-        isShared: false,
-        activeSpaceId: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DatasetSharedNotice: () => null,
+    DatasetSpacesBadge: () => null,
+    DatasetSpacesPicker: () => null,
+    SharedChangeConfirmModal: () => null,
+    getRemovedSpaceIds: () => [],
+    useDatasetSharing: () => ({
+      isEnabled: false,
+      isShared: false,
+      activeSpaceId: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseDataset = vi.mocked(useDataset);
 const mockedUseDatasetTagSuggestions = vi.mocked(useDatasetTagSuggestions);

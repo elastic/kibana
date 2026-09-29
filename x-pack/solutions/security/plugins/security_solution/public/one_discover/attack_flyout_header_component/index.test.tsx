@@ -39,66 +39,65 @@ const mockAttackHeader = vi.fn((props: unknown) => {
 const mockReportEvent = vi.fn();
 
 vi.mock('../../flyout_v2/attack/main/header', () => {
-      const mocked = {
-      Header: (props: unknown) => mockAttackHeader(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Header: (props: unknown) => mockAttackHeader(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/shared/tools/notes', () => {
-      const mocked = {
-      NotesDetails: () => <div>{'MockNotesDetails'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesDetails: () => <div>{'MockNotesDetails'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/user_privileges/user_privileges_context', () => {
-      const mocked = {
-      UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UserPrivilegesProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/discover_in_timeline/provider', () => {
-      const mocked = {
-      DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <>{children}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiscoverInTimelineContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <>{children}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases/components/provider/provider', () => {
-      const mocked = {
-      CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../assistant/provider', () => {
-      const mocked = {
-      AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
-  <>{children}</>
-));
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>);
 
 vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: (props: unknown) =>
+      mockFlyoutProviders(props as { children: React.ReactNode }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttackFlyoutHeader', () => {
   const mockUseIsInSecurityApp = vi.mocked(useIsInSecurityApp);

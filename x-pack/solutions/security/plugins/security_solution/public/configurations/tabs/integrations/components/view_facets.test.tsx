@@ -15,11 +15,11 @@ import { useNavigation } from '../../../../common/lib/kibana';
 import { SecurityPageName } from '@kbn/deeplinks-security';
 
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('IntegrationViewFacets', () => {
   const mockNavigateTo = vi.fn();

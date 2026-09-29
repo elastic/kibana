@@ -21,19 +21,19 @@ import {
 } from './run_validation_command';
 
 vi.mock('@kbn/dev-utils', () => {
-      const mocked = {
-      parseAndResolveValidationContract: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseAndResolveValidationContract: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./resolve_validation_run_context', () => {
-      const mocked = {
-      assertNoValidationRunFlagsForDirectTarget: vi.fn(),
-      resolveValidationRunContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertNoValidationRunFlagsForDirectTarget: vi.fn(),
+    resolveValidationRunContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAssertNoValidationRunFlagsForDirectTarget =
   assertNoValidationRunFlagsForDirectTarget as Mock;

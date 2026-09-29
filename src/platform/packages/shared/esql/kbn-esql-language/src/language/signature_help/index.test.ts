@@ -14,11 +14,11 @@ import type { ESQLCallbacks } from '@kbn/esql-types';
 import { getSignatureHelp } from '.';
 
 vi.mock('../shared/columns_retrieval_helpers', () => {
-      const mocked = {
-      getColumnsByTypeRetriever: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getColumnsByTypeRetriever: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getColumnsByTypeRetriever } from '../shared/columns_retrieval_helpers';
 

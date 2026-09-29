@@ -19,18 +19,18 @@ import { useCloudConnectorSetup } from './use_cloud_connector_setup';
 
 // Mock utility functions
 vi.mock('../utils', () => {
-      const mocked = {
-      updateInputVarsWithCredentials: vi.fn(),
-      isAzureCloudConnectorVars: vi.fn(),
-      isGcpCloudConnectorVars: vi.fn(),
-      isCloudConnectorNameValid: vi.fn((name: string | undefined) => {
-        if (!name) return false;
-        const trimmedLength = name.trim().length;
-        return trimmedLength > 0 && name.length <= 255;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateInputVarsWithCredentials: vi.fn(),
+    isAzureCloudConnectorVars: vi.fn(),
+    isGcpCloudConnectorVars: vi.fn(),
+    isCloudConnectorNameValid: vi.fn((name: string | undefined) => {
+      if (!name) return false;
+      const trimmedLength = name.trim().length;
+      return trimmedLength > 0 && name.length <= 255;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsAzureCloudConnectorVars = isAzureCloudConnectorVars as MockedFunction<
   typeof isAzureCloudConnectorVars

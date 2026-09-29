@@ -375,9 +375,9 @@ describe('Space awareness migration', () => {
     });
 
     it('should handle case where integration policy might not exist', async () => {
-      (
-        endpointServiceMock.getInternalFleetServices().packagePolicy.list as Mock
-      ).mockResolvedValue({ items: [] });
+      (endpointServiceMock.getInternalFleetServices().packagePolicy.list as Mock).mockResolvedValue(
+        { items: [] }
+      );
 
       await expect(
         migrateEndpointDataToSupportSpaces(endpointServiceMock)

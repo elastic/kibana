@@ -19,7 +19,7 @@ import { createRequest } from './create_request';
 import { getData } from './get_data';
 
 vi.mock('./create_request', async () => {
-  const actual = (await vi.importActual('./create_request'));
+  const actual = await vi.importActual('./create_request');
   return {
     ...actual,
     createRequest: vi.fn(),
@@ -27,7 +27,7 @@ vi.mock('./create_request', async () => {
 });
 
 vi.mock('../../common/utils', async () => {
-  const actual = (await vi.importActual('../../common/utils'));
+  const actual = await vi.importActual('../../common/utils');
   return {
     ...actual,
     doFieldsExist: vi.fn(),

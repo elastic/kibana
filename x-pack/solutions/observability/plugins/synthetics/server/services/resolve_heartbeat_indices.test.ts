@@ -103,9 +103,9 @@ describe('resolveHeartbeatIndices', () => {
   });
 
   it('passes the default settings shape when the repository returns nullish CCS attributes', async () => {
-    vi
-      .spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get')
-      .mockResolvedValue({ spaces: ['default'] } satisfies SyntheticsMultiSpaceSettingsWithSpaces);
+    vi.spyOn(DefaultSyntheticsMultiSpaceSettingsRepository.prototype, 'get').mockResolvedValue({
+      spaces: ['default'],
+    } satisfies SyntheticsMultiSpaceSettingsWithSpaces);
     const getIndicesSpy = vi
       .spyOn(getSyntheticsIndicesModule, 'getSyntheticsIndices')
       .mockResolvedValue({ indices: SYNTHETICS_INDEX_PATTERN });

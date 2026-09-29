@@ -983,9 +983,7 @@ describe('DispatcherService', () => {
   // skipping the deferred tail permanently. After the fix, nextWatermark must be
   // the last returned episode's timestamp so the tail is re-read next tick.
   describe('rna-program#436 regression: truncated tick must not advance watermark past deferred tail', () => {
-    function buildMockTruncatedPipeline(
-      lastEpisodeTs: string
-    ): Mocked<DispatcherPipelineContract> {
+    function buildMockTruncatedPipeline(lastEpisodeTs: string): Mocked<DispatcherPipelineContract> {
       const episodes = [
         createAlertEpisode({ episode_id: 'e1', last_event_timestamp: '2026-01-22T07:21:00.000Z' }),
         createAlertEpisode({ episode_id: 'e2', last_event_timestamp: lastEpisodeTs }),

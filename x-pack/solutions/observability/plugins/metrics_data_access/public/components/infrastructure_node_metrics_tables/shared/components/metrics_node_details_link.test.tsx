@@ -29,13 +29,13 @@ const mockGetAssetDetailUrl = vi.fn(() => ({
 }));
 
 vi.mock('../../../../pages/link_to/use_asset_details_redirect', () => {
-      const mocked = {
-      useAssetDetailsRedirect: () => ({
-        getAssetDetailUrl: mockGetAssetDetailUrl,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetDetailsRedirect: () => ({
+      getAssetDetailUrl: mockGetAssetDetailUrl,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function createDiscoverLocatorMock() {
   const getRedirectUrl = vi.fn(

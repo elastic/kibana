@@ -16,25 +16,25 @@ import {
 } from './apm_index_settings_context';
 
 vi.mock('../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => ({
-        data: {
-          apmIndexSettings: [
-            { configurationName: 'transaction', defaultValue: 'traces-apm*', savedValue: undefined },
-          ],
-        },
-        status: 'success',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => ({
+      data: {
+        apmIndexSettings: [
+          { configurationName: 'transaction', defaultValue: 'traces-apm*', savedValue: undefined },
+        ],
+      },
+      status: 'success',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({ services: { apmSourcesAccess: { getApmIndexSettings: vi.fn() } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({ services: { apmSourcesAccess: { getApmIndexSettings: vi.fn() } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ApmIndexSettingsContext', () => {
   it('provides fetched index settings to consumers', () => {

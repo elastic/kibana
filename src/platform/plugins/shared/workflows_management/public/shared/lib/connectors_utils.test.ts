@@ -20,13 +20,13 @@ import {
 import { stepSchemas } from '../../../common/step_schemas';
 
 vi.mock('../../../common/step_schemas', () => {
-      const mocked = {
-      stepSchemas: {
-        getStepDefinition: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stepSchemas: {
+      getStepDefinition: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetStepDefinition = stepSchemas.getStepDefinition as MockedFunction<
   typeof stepSchemas.getStepDefinition

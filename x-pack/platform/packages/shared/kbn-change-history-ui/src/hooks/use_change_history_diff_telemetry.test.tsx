@@ -15,11 +15,11 @@ import { useChangeHistoryDiffTelemetry } from './use_change_history_diff_telemet
 import { useChangeHistoryConfig } from '../provider/use_change_history_config';
 
 vi.mock('../provider/use_change_history_config', () => {
-      const mocked = {
-      useChangeHistoryConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeHistoryConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseChangeHistoryConfig = useChangeHistoryConfig as Mock;
 

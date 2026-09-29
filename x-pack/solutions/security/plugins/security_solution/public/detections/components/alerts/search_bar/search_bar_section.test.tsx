@@ -15,18 +15,18 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 
 vi.mock('../../../../common/components/filters_global', () => {
-      const mocked = {
-      FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FiltersGlobal: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/search_bar', () => {
-      const mocked = {
-      // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
-      SiemSearchBar: () => <div data-test-subj={'alerts-page-search-bar'} />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // The module factory of `jest.mock()` is not allowed to reference any out-of-scope variables so we can't use SEARCH_BAR_TEST_ID
+    SiemSearchBar: () => <div data-test-subj={'alerts-page-search-bar'} />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView: DataView = createStubDataView({ spec: {} });
 

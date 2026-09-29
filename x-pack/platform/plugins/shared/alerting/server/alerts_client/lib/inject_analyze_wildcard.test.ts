@@ -10,11 +10,11 @@ import { vi } from 'vitest';
 import { injectAnalyzeWildcard } from './inject_analyze_wildcard';
 
 vi.mock('./constants', () => {
-      const mocked = {
-      MAX_QUERIES: 25,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MAX_QUERIES: 25,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getQuery = (query?: string) => {
   return {

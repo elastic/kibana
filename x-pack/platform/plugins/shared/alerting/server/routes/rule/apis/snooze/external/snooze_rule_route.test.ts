@@ -18,18 +18,18 @@ import { snoozeRuleRoute } from './snooze_rule_route';
 const rulesClient = rulesClientMock.create();
 const mockedUUID = 'schedule-id-1';
 vi.mock('../../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('schedule-id-1'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('schedule-id-1'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const schedule = {
   custom: {

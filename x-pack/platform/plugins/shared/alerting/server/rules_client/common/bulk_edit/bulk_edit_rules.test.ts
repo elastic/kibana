@@ -40,11 +40,11 @@ import type { SavedObject } from '@kbn/core/server';
 import { nodeBuilder, toKqlExpression } from '@kbn/es-query';
 
 vi.mock('../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const actionsAuthorization = actionsAuthorizationMock.create() as unknown as ActionsAuthorization;
 const auditLogger = auditLoggerMock.create();

@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { useLocation } from 'react-router-dom';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import type { WorkflowListDto, WorkflowListItemDto, WorkflowsSearchParams } from '@kbn/workflows';
 import { createMockWorkflowsCapabilities as mockCreateMockWorkflowsCapabilities } from '@kbn/workflows-ui/mocks';
 import { WorkflowList } from './workflow_list';
@@ -28,7 +27,7 @@ vi.mock('../../../hooks/use_kibana');
 const mockUseWorkflows = vi.fn();
 
 vi.mock('@kbn/workflows-ui', async () => {
-  const actual = (await vi.importActual('@kbn/workflows-ui'));
+  const actual = await vi.importActual('@kbn/workflows-ui');
   return {
     ...actual,
     useWorkflows: (...args: unknown[]) => mockUseWorkflows(...args),
@@ -42,31 +41,31 @@ const { application: mockApplication } = mockKibanaValue.services;
 (mockApplication.getUrlForApp as Mock).mockReturnValue('/app/workflows/wf-1');
 
 vi.mock('../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportWorkflowListViewed: vi.fn(),
-        reportWorkflowExported: vi.fn(),
-        reportWorkflowDeleted: vi.fn(),
-        reportWorkflowUpdated: vi.fn(),
-        reportWorkflowCloned: vi.fn(),
-        reportWorkflowRunInitiated: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportWorkflowListViewed: vi.fn(),
+      reportWorkflowExported: vi.fn(),
+      reportWorkflowDeleted: vi.fn(),
+      reportWorkflowUpdated: vi.fn(),
+      reportWorkflowCloned: vi.fn(),
+      reportWorkflowRunInitiated: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRefetch = vi.fn().mockResolvedValue({ data: null });
 
 vi.mock('./use_event_driven_execution_status', () => {
-      const mocked = {
-      useEventDrivenExecutionStatus: () => ({
-        eventDrivenExecutionEnabled: true,
-        isLoading: false,
-        error: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEventDrivenExecutionStatus: () => ({
+      eventDrivenExecutionEnabled: true,
+      isLoading: false,
+      error: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDeleteWorkflows = { mutate: vi.fn() };
 const mockRunWorkflow = { mutate: vi.fn() };
@@ -78,99 +77,101 @@ interface WorkflowExecuteModalMockProps {
 }
 
 vi.mock('../../../entities/workflows/model/use_workflow_actions', () => {
-      const mocked = {
-      useWorkflowActions: () => ({
-        deleteWorkflows: mockDeleteWorkflows,
-        runWorkflow: mockRunWorkflow,
-        cloneWorkflow: mockCloneWorkflow,
-        updateWorkflow: mockUpdateWorkflow,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowActions: () => ({
+      deleteWorkflows: mockDeleteWorkflows,
+      runWorkflow: mockRunWorkflow,
+      cloneWorkflow: mockCloneWorkflow,
+      updateWorkflow: mockUpdateWorkflow,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_export_with_references', () => {
-      const mocked = {
-      useExportWithReferences: () => ({
-        exportModalState: null,
-        startExport: vi.fn(),
-        handleIgnore: vi.fn(),
-        handleAddDirect: vi.fn(),
-        handleAddAll: vi.fn(),
-        handleCancel: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportWithReferences: () => ({
+      exportModalState: null,
+      startExport: vi.fn(),
+      handleIgnore: vi.fn(),
+      handleAddDirect: vi.fn(),
+      handleAddAll: vi.fn(),
+      handleCancel: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components to keep tests focused
 vi.mock('./export_references_modal', () => {
-      const mocked = {
-      ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExportReferencesModal: () => <div data-test-subj="export-references-modal" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./workflows_utility_bar', () => {
-      const mocked = {
-      WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowsUtilityBar: () => <div data-test-subj="workflows-utility-bar">{'Utility Bar'}</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components', () => {
-      const mocked = {
-      WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
-        <div data-test-subj="workflows-empty-state">
-          <button type="button" onClick={onCreateWorkflow}>
-            {'Create Workflow'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowsEmptyState: ({ onCreateWorkflow }: { onCreateWorkflow?: () => void }) => (
+      <div data-test-subj="workflows-empty-state">
+        <button type="button" onClick={onCreateWorkflow}>
+          {'Create Workflow'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../components/workflows_empty_state/workflows_empty_state', () => {
-      const mocked = {
-      WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowsEmptyStateReadOnly: () => <div data-test-subj="workflows-empty-state-readonly" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../run_workflow/ui/workflow_execute_modal', () => {
-      const mocked = {
-      WorkflowExecuteModal: ({ onSubmit }: WorkflowExecuteModalMockProps) => (
-        <button
-          type="button"
-          data-test-subj="workflow-execute-modal"
-          onClick={() => onSubmit({}, 'manual')}
-        >
-          {'Run workflow'}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecuteModal: ({ onSubmit }: WorkflowExecuteModalMockProps) => (
+      <button
+        type="button"
+        data-test-subj="workflow-execute-modal"
+        onClick={() => onSubmit({}, 'manual')}
+      >
+        {'Run workflow'}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui', () => {
-      const mocked = {
-      getRunTooltipContent: () => 'Run',
-      ManagedWorkflowBadge: ({ dataTestSubj = 'managedWorkflowBadge' }: { dataTestSubj?: string }) => (
-        <span data-test-subj={dataTestSubj}>{'Managed'}</span>
-      ),
-      StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
-      WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRunTooltipContent: () => 'Run',
+    ManagedWorkflowBadge: ({
+      dataTestSubj = 'managedWorkflowBadge',
+    }: {
+      dataTestSubj?: string;
+    }) => <span data-test-subj={dataTestSubj}>{'Managed'}</span>,
+    StatusBadge: ({ status }: { status: string }) => <span>{status}</span>,
+    WorkflowStatus: ({ valid }: { valid: boolean }) => <span>{valid ? 'Valid' : 'Invalid'}</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../widgets/worflows_triggers_list/worflows_triggers_list', () => {
-      const mocked = {
-      WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowsTriggersList: () => <span>{'Triggers'}</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // --- Test helpers ---
 

@@ -59,9 +59,7 @@ const buildEntity = ({
   };
 };
 
-const relationshipsClient: Mocked<
-  Pick<RelationshipsClient, 'getEarliestObservationByTarget'>
-> = {
+const relationshipsClient: Mocked<Pick<RelationshipsClient, 'getEarliestObservationByTarget'>> = {
   getEarliestObservationByTarget: vi.fn(),
 };
 

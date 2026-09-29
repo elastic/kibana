@@ -47,9 +47,8 @@ describe('accessesFrequentlyMaintainer', () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    vi
-      .spyOn(engineModule, 'runRelationshipMaintainer')
-      .mockImplementation(async ({ telemetryCollector }) => {
+    vi.spyOn(engineModule, 'runRelationshipMaintainer').mockImplementation(
+      async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push(
             { id: 'elastic_defend', scanned: 10, qualified: 8, outcome: 'producing' },
@@ -71,7 +70,8 @@ describe('accessesFrequentlyMaintainer', () => {
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
         };
-      });
+      }
+    );
 
     await accessesFrequentlyMaintainer.run(ctx);
 
@@ -108,9 +108,8 @@ describe('accessesFrequentlyMaintainer', () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    vi
-      .spyOn(engineModule, 'runRelationshipMaintainer')
-      .mockImplementation(async ({ telemetryCollector }) => {
+    vi.spyOn(engineModule, 'runRelationshipMaintainer').mockImplementation(
+      async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push({
             id: 'elastic_defend',
@@ -133,7 +132,8 @@ describe('accessesFrequentlyMaintainer', () => {
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
         };
-      });
+      }
+    );
 
     await accessesFrequentlyMaintainer.run(ctx);
 
@@ -172,9 +172,8 @@ describe('accessesFrequentlyMaintainer', () => {
     const telemetry = makeTelemetry();
     const ctx = makeContext({ telemetry: telemetry as unknown as Ctx['telemetry'] });
 
-    vi
-      .spyOn(engineModule, 'runRelationshipMaintainer')
-      .mockImplementation(async ({ telemetryCollector }) => {
+    vi.spyOn(engineModule, 'runRelationshipMaintainer').mockImplementation(
+      async ({ telemetryCollector }) => {
         if (telemetryCollector) {
           telemetryCollector.sources.push({
             id: 'elastic_defend',
@@ -197,7 +196,8 @@ describe('accessesFrequentlyMaintainer', () => {
           truncated: false,
           lastRunTimestamp: '2026-05-21T00:00:00.000Z',
         };
-      });
+      }
+    );
 
     await accessesFrequentlyMaintainer.run(ctx);
 

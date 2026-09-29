@@ -61,184 +61,191 @@ describe('stream handler', () => {
 
   describe('findChangedStatusJobs', () => {
     it('finds no changed status jobs from empty', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              const findJobs = sh.testFindChangedStatusJobs([]);
-              findJobs.subscribe((data) => {
-                expect(data).toEqual({ completed: [], failed: [] });
-                done();
-              });
-            
-        }));
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        const findJobs = sh.testFindChangedStatusJobs([]);
+        findJobs.subscribe((data) => {
+          expect(data).toEqual({ completed: [], failed: [] });
+          done();
+        });
+      }));
 
     it('finds changed status jobs', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              const findJobs = sh.testFindChangedStatusJobs([
-                'job-source-mock1',
-                'job-source-mock2',
-                'job-source-mock3',
-                'job-source-mock4',
-              ]);
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        const findJobs = sh.testFindChangedStatusJobs([
+          'job-source-mock1',
+          'job-source-mock2',
+          'job-source-mock3',
+          'job-source-mock4',
+        ]);
 
-              findJobs.subscribe((data) => {
-                expect(data).toMatchSnapshot();
-                done();
-              });
-            
-        }));
+        findJobs.subscribe((data) => {
+          expect(data).toMatchSnapshot();
+          done();
+        });
+      }));
   });
 
   describe('showNotifications', () => {
     it('show success', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              sh.testShowNotifications({
-                completed: [
-                  {
-                    id: 'yas1',
-                    title: 'Yas',
-                    jobtype: 'yas',
-                    status: 'completed',
-                  } as JobSummary,
-                ],
-                failed: [],
-              }).subscribe(() => {
-                expect(mockShowDanger).not.toHaveBeenCalled();
-                expect(mockShowSuccess).toHaveBeenCalledTimes(1);
-                expect(mockShowWarning).not.toHaveBeenCalled();
-                expect(mockShowSuccess.mock.calls).toMatchSnapshot();
-                done();
-              });
-            
-        }));
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        sh.testShowNotifications({
+          completed: [
+            {
+              id: 'yas1',
+              title: 'Yas',
+              jobtype: 'yas',
+              status: 'completed',
+            } as JobSummary,
+          ],
+          failed: [],
+        }).subscribe(() => {
+          expect(mockShowDanger).not.toHaveBeenCalled();
+          expect(mockShowSuccess).toHaveBeenCalledTimes(1);
+          expect(mockShowWarning).not.toHaveBeenCalled();
+          expect(mockShowSuccess.mock.calls).toMatchSnapshot();
+          done();
+        });
+      }));
 
     it('show max length warning', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              sh.testShowNotifications({
-                completed: [
-                  {
-                    id: 'yas2',
-                    title: 'Yas',
-                    jobtype: 'yas',
-                    status: 'completed',
-                    maxSizeReached: true,
-                  } as JobSummary,
-                ],
-                failed: [],
-              }).subscribe(() => {
-                expect(mockShowDanger).not.toHaveBeenCalled();
-                expect(mockShowSuccess).not.toHaveBeenCalled();
-                expect(mockShowWarning).toHaveBeenCalledTimes(1);
-                expect(mockShowWarning.mock.calls).toMatchSnapshot();
-                done();
-              });
-            
-        }));
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        sh.testShowNotifications({
+          completed: [
+            {
+              id: 'yas2',
+              title: 'Yas',
+              jobtype: 'yas',
+              status: 'completed',
+              maxSizeReached: true,
+            } as JobSummary,
+          ],
+          failed: [],
+        }).subscribe(() => {
+          expect(mockShowDanger).not.toHaveBeenCalled();
+          expect(mockShowSuccess).not.toHaveBeenCalled();
+          expect(mockShowWarning).toHaveBeenCalledTimes(1);
+          expect(mockShowWarning.mock.calls).toMatchSnapshot();
+          done();
+        });
+      }));
 
     it('show csv formulas warning', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              sh.testShowNotifications({
-                completed: [
-                  {
-                    id: 'yas3',
-                    title: 'Yas',
-                    jobtype: 'yas',
-                    status: 'completed',
-                    csvContainsFormulas: true,
-                  } as JobSummary,
-                ],
-                failed: [],
-              }).subscribe(() => {
-                expect(mockShowDanger).not.toHaveBeenCalled();
-                expect(mockShowSuccess).not.toHaveBeenCalled();
-                expect(mockShowWarning).toHaveBeenCalledTimes(1);
-                expect(mockShowWarning.mock.calls).toMatchSnapshot();
-                done();
-              });
-            
-        }));
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        sh.testShowNotifications({
+          completed: [
+            {
+              id: 'yas3',
+              title: 'Yas',
+              jobtype: 'yas',
+              status: 'completed',
+              csvContainsFormulas: true,
+            } as JobSummary,
+          ],
+          failed: [],
+        }).subscribe(() => {
+          expect(mockShowDanger).not.toHaveBeenCalled();
+          expect(mockShowSuccess).not.toHaveBeenCalled();
+          expect(mockShowWarning).toHaveBeenCalledTimes(1);
+          expect(mockShowWarning.mock.calls).toMatchSnapshot();
+          done();
+        });
+      }));
 
     it('show failed job toast', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              sh.testShowNotifications({
-                completed: [],
-                failed: [
-                  {
-                    id: 'yas7',
-                    title: 'Yas 7',
-                    jobtype: 'yas',
-                    status: 'failed',
-                  } as JobSummary,
-                ],
-              }).subscribe(() => {
-                expect(mockShowSuccess).not.toHaveBeenCalled();
-                expect(mockShowWarning).not.toHaveBeenCalled();
-                expect(mockShowDanger).toHaveBeenCalledTimes(1);
-                expect(mockShowDanger.mock.calls).toMatchSnapshot();
-                done();
-              });
-            
-        }));
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        sh.testShowNotifications({
+          completed: [],
+          failed: [
+            {
+              id: 'yas7',
+              title: 'Yas 7',
+              jobtype: 'yas',
+              status: 'failed',
+            } as JobSummary,
+          ],
+        }).subscribe(() => {
+          expect(mockShowSuccess).not.toHaveBeenCalled();
+          expect(mockShowWarning).not.toHaveBeenCalled();
+          expect(mockShowDanger).toHaveBeenCalledTimes(1);
+          expect(mockShowDanger.mock.calls).toMatchSnapshot();
+          done();
+        });
+      }));
 
     it('show multiple toast', () =>
-        new Promise<void>((resolve, reject) => {
-        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), { fail: reject });
+      new Promise<void>((resolve, reject) => {
+        const done = Object.assign((error?: unknown) => (error ? reject(error) : resolve()), {
+          fail: reject,
+        });
 
-              const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
-              sh.testShowNotifications({
-                completed: [
-                  {
-                    id: 'yas8',
-                    title: 'Yas 8',
-                    jobtype: 'yas',
-                    status: 'completed',
-                  } as JobSummary,
-                  {
-                    id: 'yas9',
-                    title: 'Yas 9',
-                    jobtype: 'yas',
-                    status: 'completed',
-                    csvContainsFormulas: true,
-                  } as JobSummary,
-                  {
-                    id: 'yas10',
-                    title: 'Yas 10',
-                    jobtype: 'yas',
-                    status: 'completed',
-                    maxSizeReached: true,
-                  } as JobSummary,
-                ],
-                failed: [
-                  {
-                    id: 'yas13',
-                    title: 'Yas 13',
-                    jobtype: 'yas',
-                    status: 'failed',
-                  } as JobSummary,
-                ],
-              }).subscribe(() => {
-                expect(mockShowSuccess).toHaveBeenCalledTimes(1);
-                expect(mockShowWarning).toHaveBeenCalledTimes(2);
-                expect(mockShowDanger).toHaveBeenCalledTimes(1);
-                done();
-              });
-            
-        }));
+        const sh = new TestReportingNotifierStreamHandler(jobQueueClientMock, core);
+        sh.testShowNotifications({
+          completed: [
+            {
+              id: 'yas8',
+              title: 'Yas 8',
+              jobtype: 'yas',
+              status: 'completed',
+            } as JobSummary,
+            {
+              id: 'yas9',
+              title: 'Yas 9',
+              jobtype: 'yas',
+              status: 'completed',
+              csvContainsFormulas: true,
+            } as JobSummary,
+            {
+              id: 'yas10',
+              title: 'Yas 10',
+              jobtype: 'yas',
+              status: 'completed',
+              maxSizeReached: true,
+            } as JobSummary,
+          ],
+          failed: [
+            {
+              id: 'yas13',
+              title: 'Yas 13',
+              jobtype: 'yas',
+              status: 'failed',
+            } as JobSummary,
+          ],
+        }).subscribe(() => {
+          expect(mockShowSuccess).toHaveBeenCalledTimes(1);
+          expect(mockShowWarning).toHaveBeenCalledTimes(2);
+          expect(mockShowDanger).toHaveBeenCalledTimes(1);
+          done();
+        });
+      }));
   });
 });

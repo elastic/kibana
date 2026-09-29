@@ -20,46 +20,46 @@ import {
 } from '../../entity_analytics/components/home/constants';
 
 vi.mock('@kbn/entity-store/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/entity-store/public')),
-      useEntityStoreEuidApi: vi.fn().mockReturnValue({ euid: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/entity-store/public')),
+    useEntityStoreEuidApi: vi.fn().mockReturnValue({ euid: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations', () => {
-      const mocked = {
-      useHasMisconfigurations: vi.fn().mockReturnValue({
-        hasMisconfigurationFindings: false,
-        passedFindings: 0,
-        failedFindings: 0,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasMisconfigurations: vi.fn().mockReturnValue({
+      hasMisconfigurationFindings: false,
+      passedFindings: 0,
+      failedFindings: 0,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_has_vulnerabilities', () => {
-      const mocked = {
-      useHasVulnerabilities: vi.fn().mockReturnValue({ hasVulnerabilitiesFindings: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasVulnerabilities: vi.fn().mockReturnValue({ hasVulnerabilitiesFindings: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({ to: '2023-01-01', from: '2022-01-01' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_non_closed_alerts', () => {
-      const mocked = {
-      useNonClosedAlerts: vi
-        .fn()
-        .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useNonClosedAlerts: vi
+      .fn()
+      .mockReturnValue({ hasNonClosedAlerts: false, filteredAlertsData: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EntityInsight', () => {
   const defaultProps = {

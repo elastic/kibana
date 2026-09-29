@@ -31,11 +31,12 @@ import { computePaginationCursors, decodeCursor, encodeCursor } from './cursor_u
 
 // ── mock result-count enrichment (not relevant to pagination) ──────────
 vi.mock('../../lib/get_result_counts_for_actions', () => {
-      const mocked = {
-      getResultCountsForActions: vi.fn().mockResolvedValue(new Map()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getResultCountsForActions: vi.fn().mockResolvedValue(new Map()),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 const mockOsqueryContext = {
   getStartServices: vi

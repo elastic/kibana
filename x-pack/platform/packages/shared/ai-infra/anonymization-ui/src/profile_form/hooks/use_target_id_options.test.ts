@@ -18,17 +18,17 @@ import { useResolveIndex } from '../../common/services/target_lookup/hooks/use_r
 import { useTargetIdOptions } from './use_target_id_options';
 
 vi.mock('../../common/services/target_lookup/hooks/use_data_views_list', () => {
-      const mocked = {
-      useDataViewsList: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataViewsList: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/services/target_lookup/hooks/use_resolve_index', () => {
-      const mocked = {
-      useResolveIndex: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useResolveIndex: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const targetLookupClient = {
   getDataViews: vi.fn(),

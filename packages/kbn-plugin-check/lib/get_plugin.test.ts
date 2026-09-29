@@ -15,13 +15,13 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { getPlugin } from './get_plugin';
 
 vi.mock('@kbn/docs-utils', () => {
-      const mocked = {
-      findPlugins: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findPlugins: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { findPlugins } = (await vi.importMock('@kbn/docs-utils'));
+const { findPlugins } = await vi.importMock('@kbn/docs-utils');
 
 interface MockPlugin {
   id: string;

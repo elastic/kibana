@@ -51,20 +51,18 @@ vi.mock('@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview');
 vi.mock('@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview');
 
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-router-dom', () => {
   const actual = require('react-router-dom');
   return { ...actual, useLocation: vi.fn().mockReturnValue({ pathname: '' }) };
 });
 
-vi.mock(
-  '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status'
-);
+vi.mock('../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status');
 const mockAlertData = {
   open: {
     total: 2,
@@ -77,7 +75,7 @@ const mockAlertData = {
 
 const mockedTelemetry = createTelemetryServiceMock();
 vi.mock('../../../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: () => ({

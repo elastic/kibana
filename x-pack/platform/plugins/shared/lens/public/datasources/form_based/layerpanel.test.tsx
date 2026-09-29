@@ -20,10 +20,12 @@ Object.defineProperty(HTMLElement.prototype, 'scrollWidth', { value: 400 });
 Object.defineProperty(HTMLElement.prototype, 'offsetWidth', { value: 200 });
 
 vi.mock('@kbn/unified-search-plugin/public', async () => {
-  const actual = (await vi.importActual('@kbn/unified-search-plugin/public'));
+  const actual = await vi.importActual('@kbn/unified-search-plugin/public');
   return {
     ...actual,
-    DataViewsList: (await vi.importActual('@kbn/unified-search-plugin/public/dataview_picker/dataview_list')).DataViewsList,
+    DataViewsList: (
+      await vi.importActual('@kbn/unified-search-plugin/public/dataview_picker/dataview_list')
+    ).DataViewsList,
   };
 });
 

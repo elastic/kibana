@@ -43,20 +43,20 @@ const mockKibana = {
 };
 
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => mockKibana,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockKibana,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useStreamsAppFetch } from '../../../../../hooks/use_streams_app_fetch';
 
 vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseStreamsAppFetch = useStreamsAppFetch as Mock;
 

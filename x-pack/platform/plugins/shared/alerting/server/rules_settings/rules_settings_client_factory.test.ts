@@ -52,7 +52,7 @@ test('creates a rules settings client with proper constructor arguments when sec
     includedHiddenTypes: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
   });
 
-  const { RulesSettingsClient } = (await vi.importMock('./rules_settings_client'));
+  const { RulesSettingsClient } = await vi.importMock('./rules_settings_client');
 
   expect(RulesSettingsClient).toHaveBeenCalledWith({
     logger: rulesSettingsClientFactoryParams.logger,
@@ -75,7 +75,7 @@ test('creates a rules settings client with proper constructor arguments', async 
     includedHiddenTypes: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
   });
 
-  const { RulesSettingsClient } = (await vi.importMock('./rules_settings_client'));
+  const { RulesSettingsClient } = await vi.importMock('./rules_settings_client');
 
   expect(RulesSettingsClient).toHaveBeenCalledWith({
     logger: rulesSettingsClientFactoryParams.logger,
@@ -99,7 +99,7 @@ test('creates an unauthorized rules settings client', async () => {
     includedHiddenTypes: [RULES_SETTINGS_SAVED_OBJECT_TYPE],
   });
 
-  const { RulesSettingsClient } = (await vi.importMock('./rules_settings_client'));
+  const { RulesSettingsClient } = await vi.importMock('./rules_settings_client');
 
   expect(RulesSettingsClient).toHaveBeenCalledWith({
     logger: rulesSettingsClientFactoryParams.logger,
@@ -115,8 +115,8 @@ test('getUserName() returns null when security is disabled', async () => {
   const request = mockRouter.createKibanaRequest();
 
   factory.createWithAuthorization(request);
-  const constructorCall =
-    (await vi.importMock('./rules_settings_client')).RulesSettingsClient.mock.calls[0][0];
+  const constructorCall = (await vi.importMock('./rules_settings_client')).RulesSettingsClient.mock
+    .calls[0][0];
 
   const userNameResult = await constructorCall.getUserName();
   expect(userNameResult).toEqual(null);
@@ -129,8 +129,8 @@ test('getUserName() returns a name when security is enabled', async () => {
 
   factory.createWithAuthorization(request);
 
-  const constructorCall =
-    (await vi.importMock('./rules_settings_client')).RulesSettingsClient.mock.calls[0][0];
+  const constructorCall = (await vi.importMock('./rules_settings_client')).RulesSettingsClient.mock
+    .calls[0][0];
 
   securityService.authc.getCurrentUser.mockReturnValueOnce({
     username: 'testname',

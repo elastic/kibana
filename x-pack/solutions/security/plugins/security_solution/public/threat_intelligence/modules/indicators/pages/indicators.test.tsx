@@ -24,19 +24,17 @@ vi.mock('../hooks/use_indicators');
 vi.mock('../hooks/use_aggregated_indicators');
 
 vi.mock('../../../../common/components/filters_global', () => {
-      const mocked = {
-      FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FiltersGlobal: () => <div data-test-subj="SiemSearchBar" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const stub = () => {};
 
 describe('<IndicatorsPage />', () => {
   beforeAll(() => {
-    (
-      useAggregatedIndicators as MockedFunction<typeof useAggregatedIndicators>
-    ).mockReturnValue({
+    (useAggregatedIndicators as MockedFunction<typeof useAggregatedIndicators>).mockReturnValue({
       dateRange: { min: moment(), max: moment() },
       series: [],
       selectedField: { label: 'threat.feed.name', value: 'string' },

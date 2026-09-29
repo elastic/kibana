@@ -14,11 +14,11 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { transformPinnedPanelsIn } from './transform_pinned_panels_in';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'mock-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'mock-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformPinnedPanelsIn', () => {
   beforeAll(() => {

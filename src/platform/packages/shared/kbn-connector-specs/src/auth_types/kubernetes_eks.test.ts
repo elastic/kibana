@@ -15,12 +15,12 @@ import { KubernetesEksAuth } from './kubernetes_eks_server';
 
 // The jest environment has no Web Crypto; fake the hash/signature primitives.
 vi.mock('./aws_crypto_helpers', () => {
-      const mocked = {
-      sha256Hash: vi.fn(async () => 'aa'.repeat(32)),
-      calculateAWSA4Signature: vi.fn(async () => 'bb'.repeat(32)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sha256Hash: vi.fn(async () => 'aa'.repeat(32)),
+    calculateAWSA4Signature: vi.fn(async () => 'bb'.repeat(32)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SECRET = {
   accessKeyId: 'AKIAIOSFODNN7EXAMPLE',

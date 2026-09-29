@@ -33,7 +33,7 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 const mockNavigateToApp = vi.fn();
 vi.mock('../../common/components/empty_prompt');
 vi.mock('../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../common/lib/kibana'));
+  const original = await vi.importActual('../../common/lib/kibana');
 
   return {
     ...original,
@@ -54,31 +54,31 @@ vi.mock('../../common/lib/kibana', async () => {
 vi.mock('../../common/containers/source');
 vi.mock('../../common/components/visualization_actions/lens_embeddable');
 vi.mock('../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: vi.fn().mockReturnValue({
-        from: '2020-07-07T08:20:18.966Z',
-        isInitializing: false,
-        to: '2020-07-08T08:20:18.966Z',
-        setQuery: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: vi.fn().mockReturnValue({
+      from: '2020-07-07T08:20:18.966Z',
+      isInitializing: false,
+      to: '2020-07-08T08:20:18.966Z',
+      setQuery: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Test will fail because we will to need to mock some core services to make the test work
 // For now let's forget about SiemSearchBar and QueryBar
 vi.mock('../../common/components/search_bar', () => {
-      const mocked = {
-      SiemSearchBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SiemSearchBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/components/query_bar', () => {
-      const mocked = {
-      QueryBar: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueryBar: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/components/user_privileges');
 vi.mock('../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('../../common/containers/local_storage/use_messages_storage');

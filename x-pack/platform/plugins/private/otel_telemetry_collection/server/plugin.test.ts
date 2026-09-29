@@ -38,7 +38,7 @@ describe('OtelTelemetryCollectionPlugin', () => {
 
       plugin.setup(coreSetup, { taskManager });
 
-      const { OtelTelemetryService } = (await vi.importMock('./lib/services/otel_telemetry'));
+      const { OtelTelemetryService } = await vi.importMock('./lib/services/otel_telemetry');
       const serviceInstance = OtelTelemetryService.mock.instances[0];
       expect(serviceInstance.setup).toHaveBeenCalledWith(taskManager);
     });
@@ -49,7 +49,7 @@ describe('OtelTelemetryCollectionPlugin', () => {
 
       plugin.setup(coreSetup, { taskManager });
 
-      const { OtelTelemetryService } = (await vi.importMock('./lib/services/otel_telemetry'));
+      const { OtelTelemetryService } = await vi.importMock('./lib/services/otel_telemetry');
       const serviceInstance = OtelTelemetryService.mock.instances[0];
       expect(serviceInstance.setup).not.toHaveBeenCalled();
     });

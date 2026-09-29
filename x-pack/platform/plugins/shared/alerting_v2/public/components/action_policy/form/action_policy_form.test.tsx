@@ -23,20 +23,20 @@ const mockGetUrlForApp = vi.fn(
 let mockWorkflowsEnabled = true;
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return { getUrlForApp: mockGetUrlForApp };
-        }
-        if (token === 'uiSettings') {
-          return { get: () => mockWorkflowsEnabled };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return { getUrlForApp: mockGetUrlForApp };
+      }
+      if (token === 'uiSettings') {
+        return { get: () => mockWorkflowsEnabled };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const INLINE_DEFS = [
   {
@@ -56,74 +56,74 @@ const INLINE_DEFS = [
 ];
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
-      getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
-      InlineWorkflowEditor: ({
-        value,
-        connectorCreationConfig,
-      }: {
-        value: { id: string };
-        connectorCreationConfig?: { mode: string; href?: string };
-      }) => (
-        <div
-          data-test-subj={`inlineWorkflowEditor-${value.id}`}
-          data-connector-creation-mode={connectorCreationConfig?.mode}
-        />
-      ),
-      isActionValid: () => true,
-      buildInlineWorkflowYaml: () => 'workflow: yaml',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    INLINE_ACTION_STEP_DEFINITIONS: INLINE_DEFS,
+    getInlineActionStepDefinition: (id: string) => INLINE_DEFS.find((d) => d.id === id),
+    InlineWorkflowEditor: ({
+      value,
+      connectorCreationConfig,
+    }: {
+      value: { id: string };
+      connectorCreationConfig?: { mode: string; href?: string };
+    }) => (
+      <div
+        data-test-subj={`inlineWorkflowEditor-${value.id}`}
+        data-connector-creation-mode={connectorCreationConfig?.mode}
+      />
+    ),
+    isActionValid: () => true,
+    buildInlineWorkflowYaml: () => 'workflow: yaml',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./components/matcher_input', () => {
-      const mocked = {
-      MatcherInput: (props: {
-        value: string;
-        onChange: (v: string) => void;
-        'data-test-subj'?: string;
-      }) => (
-        <input
-          data-test-subj={props['data-test-subj']}
-          value={props.value}
-          onChange={(e) => props.onChange(e.target.value)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MatcherInput: (props: {
+      value: string;
+      onChange: (v: string) => void;
+      'data-test-subj'?: string;
+    }) => (
+      <input
+        data-test-subj={props['data-test-subj']}
+        value={props.value}
+        onChange={(e) => props.onChange(e.target.value)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_rule_event_fields', () => {
-      const mocked = {
-      useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleEventFields: (_matcher?: string) => ({ data: undefined, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_rules', () => {
-      const mocked = {
-      useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRules: () => ({ data: { items: [], total: 0 }, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_rule_tags', () => {
-      const mocked = {
-      useFetchRuleTags: () => ({ data: [], isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRuleTags: () => ({ data: [], isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_workflows', () => {
-      const mocked = {
-      useFetchWorkflows: () => ({
-        data: { results: [], total: 0, page: 1, size: 100 },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchWorkflows: () => ({
+      data: { results: [], total: 0, page: 1, size: 100 },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderForm = (
   defaultValues: ActionPolicyFormState = DEFAULT_FORM_STATE,

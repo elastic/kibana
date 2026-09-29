@@ -13,12 +13,12 @@ import type { ToolHandlerStandardReturn } from '@kbn/agent-builder-server/tools'
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 
 vi.mock('@kbn/agent-builder-genai-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-genai-utils')),
-      getIndexFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-genai-utils')),
+    getIndexFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import { getIndexMappingsTool } from './get_index_mapping';

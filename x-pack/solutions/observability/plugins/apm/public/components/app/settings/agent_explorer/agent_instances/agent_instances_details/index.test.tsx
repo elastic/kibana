@@ -33,49 +33,49 @@ const mockUseAnyOfApmParams = vi.fn();
 const mockGetComparisonEnabled = vi.fn();
 
 vi.mock('../../../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => mockUseAnyOfApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => mockUseAnyOfApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../shared/time_comparison/get_comparison_enabled', () => {
-      const mocked = {
-      getComparisonEnabled: () => mockGetComparisonEnabled(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getComparisonEnabled: () => mockGetComparisonEnabled(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock child components
 vi.mock('../../../../../shared/environment_badge', () => {
-      const mocked = {
-      EnvironmentBadge: ({ environments }: { environments: string[] }) => (
-        <div data-test-subj="environment-badge">{environments.join(', ')}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EnvironmentBadge: ({ environments }: { environments: string[] }) => (
+      <div data-test-subj="environment-badge">{environments.join(', ')}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../shared/item_badge', () => {
-      const mocked = {
-      ItemsBadge: ({ items }: { items: string[] }) => (
-        <div data-test-subj="items-badge">{items.join(', ')}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ItemsBadge: ({ items }: { items: string[] }) => (
+      <div data-test-subj="items-badge">{items.join(', ')}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../shared/popover_tooltip', () => {
-      const mocked = {
-      PopoverTooltip: ({ children }: { children: ReactNode }) => (
-        <div data-test-subj="popover-tooltip">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PopoverTooltip: ({ children }: { children: ReactNode }) => (
+      <div data-test-subj="popover-tooltip">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/apm-ui-shared', async () => {
-  const original = (await vi.importActual('@kbn/apm-ui-shared'));
+  const original = await vi.importActual('@kbn/apm-ui-shared');
 
   return {
     ...original,
@@ -89,18 +89,18 @@ vi.mock('@kbn/apm-ui-shared', async () => {
 });
 
 vi.mock('../../../../../shared/links/apm/metric_overview_link', () => {
-      const mocked = {
-      MetricOverviewLink: ({ children, serviceName, query }: any) => (
-        <a
-          data-test-subj="metric-overview-link"
-          href={`/services/${serviceName}/metrics?${new URLSearchParams(query)}`}
-        >
-          {children}
-        </a>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MetricOverviewLink: ({ children, serviceName, query }: any) => (
+      <a
+        data-test-subj="metric-overview-link"
+        href={`/services/${serviceName}/metrics?${new URLSearchParams(query)}`}
+      >
+        {children}
+      </a>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function Wrapper({ children }: { children?: ReactNode }) {
   return (

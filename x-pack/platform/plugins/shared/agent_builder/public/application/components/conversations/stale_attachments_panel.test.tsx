@@ -16,11 +16,11 @@ const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);
 
 vi.mock('./conversation_input/attachment_pills_row', () => {
-      const mocked = {
-      AttachmentPillsRow: () => <div data-test-subj="stalePanelPills" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentPillsRow: () => <div data-test-subj="stalePanelPills" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('StaleAttachmentsPanel', () => {
   it('renders nothing when there are no attachment inputs', () => {

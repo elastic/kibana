@@ -21,49 +21,49 @@ import { ControlsContent } from './controls_content';
 const capturedProps: { current?: ControlGroupRendererProps } = {};
 
 vi.mock('@kbn/control-group-renderer', () => {
-      const mocked = {
-      ControlGroupRenderer: vi.fn().mockImplementation((props) => {
-        capturedProps.current = props;
-        return <div data-test-subj="control-group-renderer" />;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ControlGroupRenderer: vi.fn().mockImplementation((props) => {
+      capturedProps.current = props;
+      return <div data-test-subj="control-group-renderer" />;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useControlPanels: vi.fn(() => [{}, vi.fn()]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useControlPanels: vi.fn(() => [{}, vi.fn()]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_unified_search', () => {
-      const mocked = {
-      useUnifiedSearchContext: vi.fn(() => ({ onPreferredSchemaChange: vi.fn() })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedSearchContext: vi.fn(() => ({ onPreferredSchemaChange: vi.fn() })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_time_range_metadata', () => {
-      const mocked = {
-      useTimeRangeMetadataContext: vi.fn(() => ({ status: 'success' })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRangeMetadataContext: vi.fn(() => ({ status: 'success' })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../components/schema_selector', () => {
-      const mocked = {
-      SchemaSelector: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SchemaSelector: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 

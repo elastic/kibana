@@ -20,12 +20,12 @@ import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
 vi.mock('@kbn/langchain/server');
 vi.mock('@kbn/langchain/server/tracers/langsmith');
 vi.mock('.', async () => {
-      const mocked = {
-      ...(await vi.importActual('.')),
-      getDefaultAttackDiscoveryGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('.')),
+    getDefaultAttackDiscoveryGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./throw_if_error_counts_exceeded');
 
 describe('invokeAttackDiscoveryGraphWithAlerts', () => {

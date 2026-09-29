@@ -13,12 +13,12 @@ import { ProposalDismissForm } from './proposal_dismiss_form';
 import type { ProposalDismissFormProps } from './proposal_dismiss_form';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useEuiTheme: () => ({ euiTheme: { size: { m: '16px' } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useEuiTheme: () => ({ euiTheme: { size: { m: '16px' } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps: ProposalDismissFormProps = {
   dismissReason: 'wrong',

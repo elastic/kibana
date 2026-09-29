@@ -16,11 +16,11 @@ import type { InfraBackendLibs } from '../infra_types';
 import { getApmDataAccessClient } from './get_apm_data_access_client';
 
 vi.mock('@kbn/apm-data-access-plugin/server', () => {
-      const mocked = {
-      APMEventClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    APMEventClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockApmEventClient = APMEventClient as MockedClass<typeof APMEventClient>;
 

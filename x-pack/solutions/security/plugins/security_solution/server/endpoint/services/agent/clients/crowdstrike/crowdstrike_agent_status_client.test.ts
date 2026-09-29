@@ -23,12 +23,12 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { RawCrowdstrikeInfo } from './types';
 
 vi.mock('../../..', () => {
-      const mocked = {
-      NormalizedExternalConnectorClient: vi.fn(),
-      getPendingActionsSummary: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NormalizedExternalConnectorClient: vi.fn(),
+    getPendingActionsSummary: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseResponse = {
   took: 1,

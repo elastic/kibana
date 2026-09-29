@@ -37,12 +37,12 @@ import type { UninstallCommandTarget } from './types';
 import userEvent from '@testing-library/user-event';
 
 vi.mock('../../hooks/use_request/uninstall_tokens', () => {
-      const mocked = {
-      useGetUninstallToken: vi.fn(),
-      useGetUninstallTokens: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUninstallToken: vi.fn(),
+    useGetUninstallTokens: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type MockResponseType<DataType> = Pick<
   UseRequestResponse<DataType, RequestError>,

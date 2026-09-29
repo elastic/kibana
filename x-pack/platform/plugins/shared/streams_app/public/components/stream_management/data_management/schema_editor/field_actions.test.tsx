@@ -28,23 +28,23 @@ import type {
 const mockOverlaysOpenFlyout = vi.fn();
 
 vi.mock('../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        dependencies: {
-          start: {},
+  const mocked = {
+    useKibana: () => ({
+      dependencies: {
+        start: {},
+      },
+      core: {
+        overlays: {
+          openFlyout: mockOverlaysOpenFlyout,
         },
-        core: {
-          overlays: {
-            openFlyout: mockOverlaysOpenFlyout,
-          },
-          i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
-          theme: { theme$: { subscribe: () => ({ unsubscribe: () => {} }) } },
-        },
-        services: {},
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        i18n: { Context: ({ children }: { children: React.ReactNode }) => children },
+        theme: { theme$: { subscribe: () => ({ unsubscribe: () => {} }) } },
+      },
+      services: {},
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockWiredStream = (name: string) =>
   ({

@@ -24,21 +24,21 @@ import { createCustomContentTemplateResolver } from '@kbn/custom-content-server'
 import { createVisualizationTool } from './create_visualization';
 
 vi.mock('@kbn/agent-builder-visualizations-server', () => {
-      const mocked = {
-      buildLensConfig: vi.fn(),
-      buildVegaConfig: vi.fn(),
-      generateVisualizationEsql: vi.fn(),
-      selectDefaultTimeRange: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildLensConfig: vi.fn(),
+    buildVegaConfig: vi.fn(),
+    generateVisualizationEsql: vi.fn(),
+    selectDefaultTimeRange: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/custom-content-server', () => {
-      const mocked = {
-      createCustomContentTemplateResolver: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createCustomContentTemplateResolver: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockBuildLens = buildLensConfig as Mock;
 const mockBuildVega = buildVegaConfig as Mock;

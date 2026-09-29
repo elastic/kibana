@@ -19,7 +19,7 @@ import {
 } from './report_failure';
 
 vi.mock('./github_api');
-const { GithubApi } = (await vi.importMock('./github_api'));
+const { GithubApi } = await vi.importMock('./github_api');
 
 function createGithubApi(comments: Array<{ body: string }> = []) {
   const api = new GithubApi();

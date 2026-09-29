@@ -14,11 +14,11 @@ import { TransactionDetailFlyoutFooter } from '.';
 
 const mockUseTransactionDetailFlyoutLinks = vi.fn();
 vi.mock('../hooks/use_transaction_detail_flyout_links', () => {
-      const mocked = {
-      useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTransactionDetailFlyoutLinks: () => mockUseTransactionDetailFlyoutLinks(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function makeLinks(
   overrides: {

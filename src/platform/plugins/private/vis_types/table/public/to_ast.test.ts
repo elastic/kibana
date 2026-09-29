@@ -37,19 +37,19 @@ const mockTableExpression = {
 };
 
 vi.mock('@kbn/visualizations-plugin/public', () => {
-      const mocked = {
-      getVisSchemas: () => mockSchemas,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getVisSchemas: () => mockSchemas,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expressions-plugin/public', () => {
-      const mocked = {
-      buildExpression: vi.fn(() => mockTableExpression),
-      buildExpressionFunction: vi.fn(() => mockTableExpressionFunction),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildExpression: vi.fn(() => mockTableExpression),
+    buildExpressionFunction: vi.fn(() => mockTableExpressionFunction),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('table vis toExpressionAst function', () => {
   let vis: Vis<TableVisParams>;

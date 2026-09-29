@@ -14,11 +14,11 @@ import { useFetchInvestigations } from './use_fetch_investigations';
 import { useInvestigationSections } from './use_investigation_sections';
 
 vi.mock('./use_fetch_investigations', () => {
-      const mocked = {
-      useFetchInvestigations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchInvestigations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseInvestigationSection = useFetchInvestigations as MockedFunction<
   typeof useFetchInvestigations

@@ -27,17 +27,17 @@ import type {
 } from './types';
 
 vi.mock('./agent_builder/tools', () => {
-      const mocked = {
-      registerAgentBuilderTools: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerAgentBuilderTools: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./attachment_types', () => {
-      const mocked = {
-      registerAttachmentTypes: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerAttachmentTypes: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const request = {} as KibanaRequest;
 
@@ -114,7 +114,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
 
   it('registers the tools with a Context Engine start accessor', async () => {
     const { getAiIndexDataReadService } = setup({ aiIndices: [] });
-    const { registerAgentBuilderTools } = (await vi.importMock('./agent_builder/tools'));
+    const { registerAgentBuilderTools } = await vi.importMock('./agent_builder/tools');
 
     const [{ getContextEngineStart }] = registerAgentBuilderTools.mock.calls.at(-1);
 

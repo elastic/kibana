@@ -20,11 +20,11 @@ import {
 } from '../../application/sections/rules_list/translations';
 
 vi.mock('../get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTheme = {
   colors: {

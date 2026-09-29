@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
@@ -28,24 +27,24 @@ const renderWithIntl = (component: React.ReactElement) => {
 };
 
 vi.mock('./step_execution_data_view', () => {
-      const mocked = {
-      StepExecutionDataView: ({ stepExecution, mode }: any) => (
-        <div data-test-subj="mocked-step-execution-data-view">
-          {`Mode: ${mode}, Step: ${stepExecution.stepId}`}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StepExecutionDataView: ({ stepExecution, mode }: any) => (
+      <div data-test-subj="mocked-step-execution-data-view">
+        {`Mode: ${mode}, Step: ${stepExecution.stepId}`}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => {
-      const mocked = {
-      FormattedRelativeEnhanced: ({ value }: { value: string }) => (
-        <span data-test-subj="formatted-relative">{value}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedRelativeEnhanced: ({ value }: { value: string }) => (
+      <span data-test-subj="formatted-relative">{value}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockStepExecution = (
   overrides?: Partial<WorkflowStepExecutionDto>

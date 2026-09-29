@@ -17,7 +17,7 @@ import { mockIndexSettingDeprecation } from '../../__fixtures__/es_deprecations'
 import { RemoveIndexSettingsFlyout } from './flyout';
 
 vi.mock('../../../../lib/ui_metric', async () => {
-  const actual = (await vi.importActual('../../../../lib/ui_metric'));
+  const actual = await vi.importActual('../../../../lib/ui_metric');
 
   return {
     ...actual,

@@ -12,17 +12,17 @@ import '../../../__mocks__/kea_logic';
 import React from 'react';
 
 vi.mock('./action_column', () => {
-      const mocked = {
-      ActionColumn: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionColumn: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./editing_column', () => {
-      const mocked = {
-      EditingColumn: vi.fn(() => null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditingColumn: vi.fn(() => null),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { render } from '@testing-library/react';
 

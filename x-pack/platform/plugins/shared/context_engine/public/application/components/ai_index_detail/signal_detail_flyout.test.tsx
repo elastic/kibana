@@ -18,13 +18,13 @@ import { SignalDetailFlyout } from './signal_detail_flyout';
 import { buildSignal } from './signal_test_fixtures';
 
 vi.mock('@kbn/llm-trace-waterfall', () => {
-      const mocked = {
-      TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
-      createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
-      useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TraceWaterfall: () => <div data-test-subj="mockTraceWaterfall" />,
+    createEsTraceFetcher: () => async () => ({ spans: [], durationMs: 0 }),
+    useTraceSpans: () => ({ spans: [], durationMs: 0, isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const services = {
   ...coreMock.createStart(),

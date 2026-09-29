@@ -18,27 +18,27 @@ import { ServiceBadges } from './service_badges';
 const mockNavigateToUrl = vi.fn();
 const mockUseServiceFlyoutContext = vi.fn();
 vi.mock('../service_flyout_context', () => {
-      const mocked = {
-      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseServiceBadgesData = vi.fn();
 vi.mock('../hooks/use_service_badges_data', () => {
-      const mocked = {
-      useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceBadgesData: (...args: unknown[]) => mockUseServiceBadgesData(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseServiceFlyoutLinks = vi.fn();
 vi.mock('../hooks/use_service_flyout_links', () => {
-      const mocked = {
-      useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutLinks: (...args: unknown[]) => mockUseServiceFlyoutLinks(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const baseNodeData: ServiceFlyoutService = {
   name: 'opbeans-java',

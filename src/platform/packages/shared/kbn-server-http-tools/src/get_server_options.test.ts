@@ -49,7 +49,9 @@ const createConfig = (parts: Partial<IHttpConfig>): IHttpConfig => ({
 
 describe('getServerOptions', () => {
   beforeEach(async () => {
-    (await vi.importMock('fs')).readFileSync.mockImplementation((path: string) => `content-${path}`);
+    (await vi.importMock('fs')).readFileSync.mockImplementation(
+      (path: string) => `content-${path}`
+    );
     getServerListenerMock.mockReset();
   });
 

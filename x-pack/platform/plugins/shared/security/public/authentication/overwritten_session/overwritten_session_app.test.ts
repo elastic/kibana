@@ -60,7 +60,8 @@ describe('overwrittenSessionApp', () => {
     };
     await (mount as AppMount)(appMountParams);
 
-    const mockRenderApp = (await vi.importMock('./overwritten_session_page')).renderOverwrittenSessionPage;
+    const mockRenderApp = (await vi.importMock('./overwritten_session_page'))
+      .renderOverwrittenSessionPage;
     expect(mockRenderApp).toHaveBeenCalledTimes(1);
     expect(mockRenderApp).toHaveBeenCalledWith(
       coreStartMock,

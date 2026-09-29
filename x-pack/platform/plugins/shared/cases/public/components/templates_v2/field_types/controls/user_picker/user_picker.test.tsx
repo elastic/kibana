@@ -25,11 +25,11 @@ vi.mock('../../../../../containers/user_profiles/use_suggest_user_profiles');
 vi.mock('../../../../../containers/user_profiles/use_bulk_get_user_profiles');
 vi.mock('../../../../app/use_available_owners');
 vi.mock('../../../../../containers/user_profiles/api', () => {
-      const mocked = {
-      bulkGetUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkGetUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../cases_context/use_cases_context');
 
 const useSuggestUserProfilesMock = useSuggestUserProfiles as Mock;

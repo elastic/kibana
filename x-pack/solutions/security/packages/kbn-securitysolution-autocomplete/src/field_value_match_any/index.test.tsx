@@ -21,18 +21,18 @@ import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete
 import { autocompleteStartMock } from '../autocomplete/index.mock';
 
 vi.mock('../hooks/use_field_value_autocomplete', async () => {
-  const actual = (await vi.importActual('../hooks/use_field_value_autocomplete'));
+  const actual = await vi.importActual('../hooks/use_field_value_autocomplete');
   return {
     ...actual,
     useFieldValueAutocomplete: vi.fn(),
   };
 });
 vi.mock('../translations', () => {
-      const mocked = {
-      FIELD_SPACE_WARNING: 'Warning: there is a space',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FIELD_SPACE_WARNING: 'Warning: there is a space',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AutocompleteFieldMatchAnyComponent', () => {
   let wrapper: ReactWrapper;

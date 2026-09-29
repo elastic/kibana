@@ -22,9 +22,7 @@ describe('Search', () => {
   test('it renders the "current" search value in the input when searchInput is not empty', () => {
     const searchInput = 'aFieldName';
 
-    render(
-      <Search isSearching={false} onSearchInputChange={vi.fn()} searchInput={searchInput} />
-    );
+    render(<Search isSearching={false} onSearchInputChange={vi.fn()} searchInput={searchInput} />);
 
     expect(screen.getByRole('searchbox')).toHaveValue(searchInput);
   });

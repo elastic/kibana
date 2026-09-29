@@ -171,8 +171,7 @@ describe('initialize - versioning logic', () => {
 
       // Verify index template was updated with new version
       expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(2);
-      const updateCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
-        .calls[1][0];
+      const updateCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock.calls[1][0];
       expect(updateCall?._meta?.version).toBe(2);
       expect(updateCall?._meta?.previousVersions).toEqual([1]);
 
@@ -347,8 +346,7 @@ describe('initialize - versioning logic', () => {
       });
 
       // Verify previous versions include both 1 and 2
-      const updateCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
-        .calls[0][0];
+      const updateCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock.calls[0][0];
       expect(updateCall?._meta?.version).toBe(3);
       expect(updateCall?._meta?.previousVersions).toEqual([2, 1]);
     });
@@ -584,8 +582,7 @@ describe('initialize - versioning logic', () => {
 
       // Verify index template was created
       expect(elasticsearchClient.indices.putIndexTemplate).toHaveBeenCalledTimes(1);
-      const createCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
-        .calls[0][0];
+      const createCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock.calls[0][0];
       expect(createCall?._meta?.version).toBe(1);
       expect(createCall?._meta?.previousVersions).toEqual([]);
 
@@ -650,8 +647,7 @@ describe('initialize - versioning logic', () => {
         lazyCreation: false,
       });
 
-      const createCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock
-        .calls[0][0];
+      const createCall = (elasticsearchClient.indices.putIndexTemplate as Mock).mock.calls[0][0];
       expect(createCall?.template?.lifecycle).toEqual({
         data_retention: '30d',
       });

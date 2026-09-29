@@ -14,11 +14,11 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 
 const mockSetBreadcrumbs = vi.fn();
 vi.mock('../application/breadcrumb_context', () => {
-      const mocked = {
-      useSetBreadcrumbs: () => mockSetBreadcrumbs,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetBreadcrumbs: () => mockSetBreadcrumbs,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/core-di-browser');
 

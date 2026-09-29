@@ -14,19 +14,19 @@ import type { getDashboardStateSchema } from '../dashboard_state_schemas';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 vi.mock('../transforms', () => {
-      const mocked = {
-      transformDashboardIn: vi.fn(),
-      transformDashboardOut: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    transformDashboardIn: vi.fn(),
+    transformDashboardOut: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../scope_tooling', () => {
-      const mocked = {
-      stripUnmappedKeys: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    stripUnmappedKeys: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { stripUnmappedKeys } from '../scope_tooling';
 import { transformDashboardIn, transformDashboardOut } from '../transforms';

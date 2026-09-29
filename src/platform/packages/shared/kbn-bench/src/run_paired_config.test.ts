@@ -21,9 +21,7 @@ import type { GlobalRunContext } from './types';
 vi.mock('./runner/from_module_benchmark');
 vi.mock('./runner/run_benchmark');
 
-const mockedFromModuleBenchmark = fromModuleBenchmark as MockedFunction<
-  typeof fromModuleBenchmark
->;
+const mockedFromModuleBenchmark = fromModuleBenchmark as MockedFunction<typeof fromModuleBenchmark>;
 const mockedCreateBenchmarkExecutor = createBenchmarkExecutor as MockedFunction<
   typeof createBenchmarkExecutor
 >;

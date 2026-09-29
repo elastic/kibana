@@ -20,12 +20,12 @@ const mockGetFieldByName = vi.fn();
 const mockGetLabel = vi.fn();
 
 vi.mock('../utils', () => {
-      const mocked = {
-      getFieldNameFromField: vi.fn(() => mockGetFieldNameFromField()),
-      getLabel: vi.fn(() => mockGetLabel()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFieldNameFromField: vi.fn(() => mockGetFieldNameFromField()),
+    getLabel: vi.fn(() => mockGetLabel()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('convertToStdDeviationFormulaColumns', () => {
   const visType = 'heatmap';

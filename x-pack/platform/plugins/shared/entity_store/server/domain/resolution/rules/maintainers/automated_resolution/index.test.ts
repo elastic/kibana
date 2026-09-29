@@ -26,25 +26,25 @@ const ALIAS_RESOLUTION_RULE = RESOLUTION_RULE_IDS.RELATED_USER_ALIAS_RESOLUTION;
 const NAMESPACE = 'default';
 
 vi.mock('../related_user_alias_resolution', () => {
-      const mocked = {
-      runRelatedUserAliasResolution: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runRelatedUserAliasResolution: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../matcher', () => {
-      const mocked = {
-      runEsqlMatcherRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runEsqlMatcherRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../asset_manager/resolve_entity_store_indices', () => {
-      const mocked = {
-      resolveLatestEntitiesIndexName: vi.fn().mockResolvedValue('.entities.v2.latest.default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    resolveLatestEntitiesIndexName: vi.fn().mockResolvedValue('.entities.v2.latest.default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const matcherState = {
   lastProcessedTimestamp: '2026-03-10T00:00:00Z',

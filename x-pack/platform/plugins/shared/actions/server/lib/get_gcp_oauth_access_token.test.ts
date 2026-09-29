@@ -46,13 +46,13 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     });
 
     vi.doMock('google-auth-library', () => {
-          const mocked = {
-              GoogleAuth: vi.fn().mockImplementation(() => ({
-                getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
-              })),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        GoogleAuth: vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
+        })),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
@@ -107,13 +107,13 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     });
 
     vi.doMock('google-auth-library', () => {
-          const mocked = {
-              GoogleAuth: vi.fn().mockImplementation(() => ({
-                getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
-              })),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        GoogleAuth: vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
+        })),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
@@ -133,13 +133,13 @@ describe('getGoogleOAuthJwtAccessToken', () => {
     const mockError = new Error('Failed to fetch token');
     connectorTokenClient.get.mockRejectedValue(mockError); // Simulate failure
     vi.doMock('google-auth-library', () => {
-          const mocked = {
-              GoogleAuth: vi.fn().mockImplementation(() => ({
-                getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
-              })),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        GoogleAuth: vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockResolvedValue('mocked_access_token'), // Success case
+        })),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     // Dynamically import the function after mocking
     const { getGoogleOAuthJwtAccessToken } = await import('./get_gcp_oauth_access_token');
@@ -158,13 +158,13 @@ describe('getGoogleOAuthJwtAccessToken', () => {
 
   it('throws an error when Google Auth fails', async () => {
     vi.doMock('google-auth-library', () => {
-          const mocked = {
-              GoogleAuth: vi.fn().mockImplementation(() => ({
-                getAccessToken: vi.fn().mockRejectedValue(new Error('Google Auth Error')),
-              })),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        GoogleAuth: vi.fn().mockImplementation(() => ({
+          getAccessToken: vi.fn().mockRejectedValue(new Error('Google Auth Error')),
+        })),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     connectorTokenClient.get.mockResolvedValue({ connectorToken: null, hasErrors: false });
 

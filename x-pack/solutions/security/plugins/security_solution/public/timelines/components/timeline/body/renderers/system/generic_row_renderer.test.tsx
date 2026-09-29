@@ -93,14 +93,14 @@ const extractEuiIconText = (str: string) => {
 vi.mock('../../../../../../common/lib/kibana');
 
 vi.mock('../host_name', () => {
-      const mocked = {
-      HostName: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HostName: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,
@@ -110,13 +110,13 @@ vi.mock('@elastic/eui', async () => {
 vi.mock('../../../../../../common/components/link_to');
 vi.mock('../../../../../../overview/components/events_by_dataset');
 vi.mock('../../../../../../flyout/shared/components/flyout_link', () => {
-      const mocked = {
-      FlyoutLink: ({ children, value }: { children?: React.ReactNode; value: string }) => (
-        <>{children ?? value}</>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutLink: ({ children, value }: { children?: React.ReactNode; value: string }) => (
+      <>{children ?? value}</>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('GenericRowRenderer', () => {
   const mount = useMountAppended();

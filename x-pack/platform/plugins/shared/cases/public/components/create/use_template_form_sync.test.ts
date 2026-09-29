@@ -22,44 +22,44 @@ const mockUseFormContext = vi.fn(() => ({
 const mockUseFormData = vi.fn();
 
 vi.mock('@kbn/es-ui-shared-plugin/static/forms/hook_form_lib', () => {
-      const mocked = {
-      useFormContext: () => mockUseFormContext(),
-      useFormData: (...args: unknown[]) => mockUseFormData(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFormContext: () => mockUseFormContext(),
+    useFormData: (...args: unknown[]) => mockUseFormData(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetTemplate = vi.fn();
 vi.mock('../templates_v2/hooks/use_get_template', () => {
-      const mocked = {
-      useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetTemplate: (...args: unknown[]) => mockUseGetTemplate(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetFieldDefinitions = vi.fn();
 vi.mock('../field_library/hooks/use_get_field_definitions', () => {
-      const mocked = {
-      useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFieldDefinitions: (...args: unknown[]) => mockUseGetFieldDefinitions(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetSupportedActionConnectors = vi.fn();
 vi.mock('../../containers/configure/use_get_supported_action_connectors', () => {
-      const mocked = {
-      useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSupportedActionConnectors: () => mockUseGetSupportedActionConnectors(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetAllCaseConfigurations = vi.fn();
 vi.mock('../../containers/configure/use_get_all_case_configurations', () => {
-      const mocked = {
-      useGetAllCaseConfigurations: () => mockUseGetAllCaseConfigurations(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetAllCaseConfigurations: () => mockUseGetAllCaseConfigurations(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const jiraConnector = { id: 'jira-1', actionTypeId: '.jira', name: 'My Jira' };
 

@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 // eslint-disable-next-line max-classes-per-file
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
+import { vi } from 'vitest';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
@@ -18,25 +17,25 @@ import { usersManagementApp } from './users_management_app';
 import { securityMock } from '../../mocks';
 
 vi.mock('./users_grid', () => {
-      const mocked = { UsersGridPage: () => 'Users Page' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { UsersGridPage: () => 'Users Page' };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./edit_user', () => {
-      const mocked = {
-      CreateUserPage: () => 'Create User Page',
-      EditUserPage: () => 'Edit User Page',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CreateUserPage: () => 'Create User Page',
+    EditUserPage: () => 'Edit User Page',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./user_api_client', () => {
-      const mocked = { UserAPIClient: class {} };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { UserAPIClient: class {} };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../roles', () => {
-      const mocked = { RolesAPIClient: class {} };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { RolesAPIClient: class {} };
+  return { ...mocked, default: mocked };
+});
 
 const element = document.body.appendChild(document.createElement('div'));
 

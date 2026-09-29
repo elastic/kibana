@@ -23,20 +23,20 @@ const mockUpdateAgentPolicy = vi.fn();
 const mockUpdateAdvancedSettingsHasErrors = vi.fn();
 
 vi.mock('../../sections/agent_policy/components/agent_policy_form', () => {
-      const mocked = {
-      useAgentPolicyFormContext: () => ({
-        updateAdvancedSettingsHasErrors: mockUpdateAdvancedSettingsHasErrors,
-        updateAgentPolicy: mockUpdateAgentPolicy,
-        agentPolicy: {
-          advanced_settings: {
-            agent_limits_go_max_procs: 0,
-            agent_download_timeout: '120s',
-          },
+  const mocked = {
+    useAgentPolicyFormContext: () => ({
+      updateAdvancedSettingsHasErrors: mockUpdateAdvancedSettingsHasErrors,
+      updateAgentPolicy: mockUpdateAgentPolicy,
+      agentPolicy: {
+        advanced_settings: {
+          agent_limits_go_max_procs: 0,
+          agent_download_timeout: '120s',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ConfiguredSettings', () => {
   const testRenderer = createFleetTestRendererMock();

@@ -17,7 +17,7 @@ import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 const getKnowledgeBaseStatusMock = _getKnowledgeBaseStatus as Mock;
 
 vi.mock('./api', async () => {
-  const actual = (await vi.importActual('./api'));
+  const actual = await vi.importActual('./api');
   return {
     ...actual,
     getKnowledgeBaseStatus: vi.fn((...args) => actual.getKnowledgeBaseStatus(...args)),
@@ -25,18 +25,18 @@ vi.mock('./api', async () => {
 });
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
-        try {
-          const res = await fn({});
-          return Promise.resolve(res);
-        } catch (e) {
-          opts.onError(e);
-        }
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn().mockImplementation(async (queryKey, fn, opts) => {
+      try {
+        const res = await fn({});
+        return Promise.resolve(res);
+      } catch (e) {
+        opts.onError(e);
+      }
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const statusResponse = {
   elser_exists: true,

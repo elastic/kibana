@@ -22,37 +22,37 @@ const mockUseFetchExecutionHistory = vi.fn();
 const mockRefetch = vi.fn();
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
-        }
-        if (token === 'settings') {
-          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-        }
-        if (typeof token === 'function') {
-          return { canRead: () => true, canWrite: () => true, can: () => true };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+      }
+      if (token === 'settings') {
+        return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+      }
+      if (typeof token === 'function') {
+        return { canRead: () => true, canWrite: () => true, can: () => true };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_execution_history', () => {
-      const mocked = {
-      useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchExecutionHistory: (...args: unknown[]) => mockUseFetchExecutionHistory(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetch_rules', () => {
-      const mocked = {
-      useFetchRules: () => ({ data: { items: [] }, isFetching: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchRules: () => ({ data: { items: [] }, isFetching: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The policies table renders on UnifiedDataTable; stub the grid (rendering each row through the
 // custom renderers) and the ad-hoc data view / services helpers so the test needs no real
@@ -88,47 +88,47 @@ vi.mock('@kbn/unified-data-table', () => {
 });
 
 vi.mock('@kbn/cell-actions', () => {
-      const mocked = {
-      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../execution_history_page/data_view', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../execution_history_page/data_view')),
-      usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../execution_history_page/data_view')),
+    usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../execution_history_page/hooks/use_unified_data_table_services', () => {
-      const mocked = {
-      useUnifiedDataTableServices: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedDataTableServices: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../components/action_policy/details_flyout/action_policy_details_flyout_container',
   () => {
-      const mocked = {
-        ActionPolicyDetailsFlyoutContainer: ({
-          policyId,
-          onClose,
-        }: {
-          policyId: string;
-          onClose: () => void;
-        }) => (
-          <div data-test-subj={`mockFlyout-${policyId}`}>
-            <button data-test-subj="mockFlyoutClose" onClick={onClose} type="button">
-              close
-            </button>
-          </div>
-        ),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      ActionPolicyDetailsFlyoutContainer: ({
+        policyId,
+        onClose,
+      }: {
+        policyId: string;
+        onClose: () => void;
+      }) => (
+        <div data-test-subj={`mockFlyout-${policyId}`}>
+          <button data-test-subj="mockFlyoutClose" onClick={onClose} type="button">
+            close
+          </button>
+        </div>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const buildItem = (

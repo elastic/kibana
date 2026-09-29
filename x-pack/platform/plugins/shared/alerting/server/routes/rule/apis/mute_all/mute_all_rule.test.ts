@@ -17,18 +17,18 @@ import { trackDeprecatedRouteUsage } from '../../../../lib/track_deprecated_rout
 
 const rulesClient = rulesClientMock.create();
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../lib/track_deprecated_route_usage', () => {
-      const mocked = {
-      trackDeprecatedRouteUsage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    trackDeprecatedRouteUsage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

@@ -13,11 +13,11 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 vi.mock('../lib/get_default_query_language', () => {
-      const mocked = {
-      getDefaultQueryLanguage: () => 'kuery',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultQueryLanguage: () => 'kuery',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { GaugePanelConfig } from './gauge';
 import type { PanelConfigProps } from './types';

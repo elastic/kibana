@@ -19,19 +19,19 @@ const min = 1498968000000; // 2017-07-02T04:00:00.000Z
 const max = 1499054399999; // 2017-07-03T03:59:59.999Z
 
 vi.mock('../../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          config: {
-            ui: {
-              ccs: { enabled: true },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        config: {
+          ui: {
+            ccs: { enabled: true },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 function getMockReq(metricsBuckets = []) {
   return {

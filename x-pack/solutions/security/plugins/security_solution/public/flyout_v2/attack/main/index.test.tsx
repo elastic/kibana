@@ -18,62 +18,62 @@ import { useSharedToolsFlyoutApi } from '../../shared/tools/use_shared_tools_fly
 vi.mock('../../shared/tools/use_shared_tools_flyout_api');
 
 vi.mock('./footer', () => {
-      const mocked = {
-      Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
-        <button
-          type="button"
-          data-test-subj="mock-footer"
-          data-has-on-attack-updated={String(onAttackUpdated != null)}
-          onClick={onAttackUpdated}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Footer: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+      <button
+        type="button"
+        data-test-subj="mock-footer"
+        data-has-on-attack-updated={String(onAttackUpdated != null)}
+        onClick={onAttackUpdated}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./header', () => {
-      const mocked = {
-      Header: ({
-        onAttackUpdated,
-        onShowNotes,
-      }: {
-        onAttackUpdated: () => void;
-        onShowNotes: () => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="mock-header"
-          data-has-on-attack-updated={String(onAttackUpdated != null)}
-          onClick={onShowNotes}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Header: ({
+      onAttackUpdated,
+      onShowNotes,
+    }: {
+      onAttackUpdated: () => void;
+      onShowNotes: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mock-header"
+        data-has-on-attack-updated={String(onAttackUpdated != null)}
+        onClick={onShowNotes}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tabs/overview_tab', () => {
-      const mocked = {
-      OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
-        <div
-          data-test-subj="mock-overview-tab"
-          data-has-on-attack-updated={String(onAttackUpdated != null)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewTab: ({ onAttackUpdated }: { onAttackUpdated: () => void }) => (
+      <div
+        data-test-subj="mock-overview-tab"
+        data-has-on-attack-updated={String(onAttackUpdated != null)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tabs/table_tab', () => {
-      const mocked = {
-      TableTab: () => <div data-test-subj="mock-table-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableTab: () => <div data-test-subj="mock-table-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../shared/components/json_tab', () => {
-      const mocked = {
-      JsonTab: () => <div data-test-subj="mock-json-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JsonTab: () => <div data-test-subj="mock-json-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAttackHit = (extra: DataTableRecord['flattened'] = {}): DataTableRecord =>
   ({

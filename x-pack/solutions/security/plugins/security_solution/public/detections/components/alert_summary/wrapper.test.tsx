@@ -32,28 +32,28 @@ import { useCreateEaseAlertsDataView } from '../../hooks/alert_summary/use_creat
 // The child sections render heavy chart/table trees whose async data hooks never settle within
 // the per-test timeout, so we stub them and exercise only the Wrapper's loading/error/content branching.
 vi.mock('./integrations/integration_section', async () => {
-  const actual = (await vi.importActual('./integrations/integration_section'));
+  const actual = await vi.importActual('./integrations/integration_section');
   return {
     ...actual,
     IntegrationSection: () => <div data-test-subj={actual.ADD_INTEGRATIONS_BUTTON_TEST_ID} />,
   };
 });
 vi.mock('./search_bar/search_bar_section', async () => {
-  const actual = (await vi.importActual('./search_bar/search_bar_section'));
+  const actual = await vi.importActual('./search_bar/search_bar_section');
   return {
     ...actual,
     SearchBarSection: () => <div data-test-subj={actual.SEARCH_BAR_TEST_ID} />,
   };
 });
 vi.mock('./kpis/kpis_section', async () => {
-  const actual = (await vi.importActual('./kpis/kpis_section'));
+  const actual = await vi.importActual('./kpis/kpis_section');
   return {
     ...actual,
     KPIsSection: () => <div data-test-subj={actual.KPIS_SECTION} />,
   };
 });
 vi.mock('./table/table_section', async () => {
-  const actual = (await vi.importActual('./table/table_section'));
+  const actual = await vi.importActual('./table/table_section');
   return {
     ...actual,
     TableSection: () => <div data-test-subj={actual.GROUPED_TABLE_TEST_ID} />,

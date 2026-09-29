@@ -13,22 +13,22 @@ import { prettifyQuery } from '@kbn/esql-utils';
 import { addPrettifyAction } from './esql_prettify_action';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      monaco: {
-        KeyMod: { CtrlCmd: 2048 },
-        KeyCode: { KeyI: 39 },
-        editor: { EditorOption: { fontInfo: 0 } },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    monaco: {
+      KeyMod: { CtrlCmd: 2048 },
+      KeyCode: { KeyI: 39 },
+      editor: { EditorOption: { fontInfo: 0 } },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-utils', () => {
-      const mocked = {
-      prettifyQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    prettifyQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fullRange = { startLineNumber: 1, startColumn: 1, endLineNumber: 1, endColumn: 10 };
 
@@ -48,8 +48,7 @@ const makeEditor = (value: string) => {
   };
 };
 
-const getRegisteredRun = (editor: { addAction: Mock }) =>
-  editor.addAction.mock.calls[0][0].run;
+const getRegisteredRun = (editor: { addAction: Mock }) => editor.addAction.mock.calls[0][0].run;
 
 describe('addPrettifyAction', () => {
   beforeEach(() => vi.clearAllMocks());

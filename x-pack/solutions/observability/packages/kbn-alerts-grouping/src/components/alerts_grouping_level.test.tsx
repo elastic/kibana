@@ -17,11 +17,11 @@ import { mockGroupingProps } from '../mocks/grouping_props.mock';
 import { groupingSearchResponse } from '../mocks/grouping_query.mock';
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_get_alerts_group_aggregations_query', () => {
-      const mocked = {
-      useGetAlertsGroupAggregationsQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetAlertsGroupAggregationsQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetAlertsGroupAggregationsQuery = useGetAlertsGroupAggregationsQuery as Mock;
 mockUseGetAlertsGroupAggregationsQuery.mockReturnValue({
@@ -30,14 +30,14 @@ mockUseGetAlertsGroupAggregationsQuery.mockReturnValue({
 });
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view', () => {
-      const mocked = {
-      useAlertDataView: vi.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertDataView: vi.fn().mockReturnValue({ dataViews: [{ fields: [] }] }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../contexts/alerts_grouping_context', async () => {
-  const original = (await vi.importActual('../contexts/alerts_grouping_context'));
+  const original = await vi.importActual('../contexts/alerts_grouping_context');
   return {
     ...original,
     useAlertsGroupingState: vi.fn(),

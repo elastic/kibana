@@ -12,33 +12,33 @@ import { isNeverCondition } from '@kbn/streamlang';
 import { Streams } from '@kbn/streams-schema';
 
 vi.mock('@kbn/streamlang', () => {
-      const mocked = {
-      isNeverCondition: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isNeverCondition: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./migrate_to_streamlang_on_read', () => {
-      const mocked = {
-      migrateRoutingIfConditionToStreamlang: vi.fn((definition) => definition),
-      migrateOldProcessingArrayToStreamlang: vi.fn((definition) => definition),
-      migrateWhereBlocksToCondition: vi.fn((steps) => ({ steps, migrated: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    migrateRoutingIfConditionToStreamlang: vi.fn((definition) => definition),
+    migrateOldProcessingArrayToStreamlang: vi.fn((definition) => definition),
+    migrateWhereBlocksToCondition: vi.fn((steps) => ({ steps, migrated: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/streams-schema', () => {
-      const mocked = {
-      Streams: {
-        all: {
-          Definition: {
-            asserts: vi.fn(),
-          },
+  const mocked = {
+    Streams: {
+      all: {
+        Definition: {
+          asserts: vi.fn(),
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsNeverCondition = isNeverCondition as MockedFunction<typeof isNeverCondition>;
 const mockStreamsAsserts = Streams.all.Definition.asserts as MockedFunction<

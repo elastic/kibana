@@ -16,11 +16,11 @@ import { createDataFolder } from './create_data_folder';
 import { mkdir } from './fs';
 
 vi.mock('./fs', () => {
-      const mocked = {
-      mkdir: vi.fn(() => Promise.resolve('')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    mkdir: vi.fn(() => Promise.resolve('')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mkdirMock = mkdir as Mock;
 

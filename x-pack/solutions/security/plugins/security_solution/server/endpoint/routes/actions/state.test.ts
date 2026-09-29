@@ -53,9 +53,7 @@ describe('when calling the Action state route handler', () => {
         username: 'superuser',
         roles: ['superuser'],
       };
-      (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(
-        () => superUser
-      );
+      (startContract.security.authc.getCurrentUser as Mock).mockImplementationOnce(() => superUser);
 
       // @ts-expect-error upgrade typescript v5.9.3
       const ctx = createRouteHandlerContext(mockScopedEsClient, mockSavedObjectClient);

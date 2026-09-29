@@ -22,11 +22,11 @@ import { BehaviorSubject } from 'rxjs';
 const DEFAULT_NPRE_VALUE = '_alias:*';
 
 vi.mock('./async_services', async () => {
-      const mocked = {
-      ...(await vi.importActual('./async_services')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./async_services')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('CPSManager', () => {
   let mockHttp: Mocked<HttpSetup>;

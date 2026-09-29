@@ -38,7 +38,7 @@ import type { CreateRuleParams } from './types';
 import { ALERTING_LOG_CODES } from '../errors/error_codes';
 
 vi.mock('../rule_executor/schedule', async () => {
-  const actual = (await vi.importActual('../rule_executor/schedule'));
+  const actual = await vi.importActual('../rule_executor/schedule');
   return {
     ...actual,
     ensureRuleExecutorTaskScheduled: vi.fn(),

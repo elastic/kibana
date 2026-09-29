@@ -15,11 +15,11 @@ import { resolveRegisteredStepIcon } from './resolve_registered_step_icon';
 import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 
 vi.mock('@kbn/connector-specs/icons', () => {
-      const mocked = {
-      ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ConnectorIconsMap: new Map([['.abuseipdb', 'plugs']]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('resolveRegisteredStepIcon', () => {
   it('prefers a workflows extensions step definition icon', () => {
@@ -39,12 +39,10 @@ describe('resolveRegisteredStepIcon', () => {
 
   it('falls back to a family sibling registered under the base type', () => {
     const { workflowsExtensions, triggersActionsUi } = createMockWorkflowsUiServices();
-    vi
-      .mocked(workflowsExtensions.getAllStepDefinitions)
-      .mockReturnValue([
-        { id: 'cases.noop' },
-        { id: 'cases.createCase', icon: 'briefcase' },
-      ] as unknown as PublicStepDefinition[]);
+    vi.mocked(workflowsExtensions.getAllStepDefinitions).mockReturnValue([
+      { id: 'cases.noop' },
+      { id: 'cases.createCase', icon: 'briefcase' },
+    ] as unknown as PublicStepDefinition[]);
 
     expect(
       resolveRegisteredStepIcon('cases', {

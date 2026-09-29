@@ -26,18 +26,18 @@ import { fromQuery } from '../../../shared/links/url_helpers';
 import { isInfraTabHidden, isMetricsTabHidden, useTabs } from './use_tabs';
 
 vi.mock('../../../../hooks/use_profiling_integration_setting', () => {
-      const mocked = {
-      useProfilingPluginSetting: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProfilingPluginSetting: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../alerting/utils/get_alerting_capabilities', () => {
-      const mocked = {
-      getAlertingCapabilities: () => ({ isAlertingAvailable: true, canReadAlerts: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAlertingCapabilities: () => ({ isAlertingAvailable: true, canReadAlerts: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const KibanaReactContext = createKibanaReactContext({
   settings: { client: { get: () => {} } },

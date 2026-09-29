@@ -21,20 +21,20 @@ import { RuleActionsAlertsFilter } from './rule_actions_alerts_filter';
 const http = httpServiceMock.createStartContract();
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerts-ui-shared', () => {
-      const mocked = {
-      AlertsSearchBar: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertsSearchBar: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { useRuleFormState } = (await vi.importMock('../hooks'));
+const { useRuleFormState } = await vi.importMock('../hooks');
 
 const mockOnChange = vi.fn();
 

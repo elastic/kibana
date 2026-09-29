@@ -215,9 +215,7 @@ describe('getUpdateKiStepDefinition', () => {
       references: [{ uri: 'index://old-*' }],
     };
     const esClient = {
-      search: vi
-        .fn()
-        .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
+      search: vi.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
       index: vi.fn().mockResolvedValue({ _id: 'new' }),
       update: vi.fn(),
     };
@@ -338,9 +336,7 @@ describe('getUpdateKiStepDefinition', () => {
       },
     };
     const esClient = {
-      search: vi
-        .fn()
-        .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
+      search: vi.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
       index: vi.fn().mockResolvedValue({ _id: 'new' }),
       update: vi.fn(),
     };
@@ -488,9 +484,7 @@ describe('getUpdateKiStepDefinition', () => {
   it('appends a data stream revision without the null attribute', async () => {
     const existing = { ...storedKi, attributes: { unit: 'sku-1' } };
     const esClient = {
-      search: vi
-        .fn()
-        .mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
+      search: vi.fn().mockResolvedValue(searchHit('.ds-ai-index-ds-my-ai-index-000001', existing)),
       index: vi.fn().mockResolvedValue({ _id: 'new' }),
       update: vi.fn(),
     };

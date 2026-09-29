@@ -32,32 +32,32 @@ const LocationProbe: React.FC = () => {
 };
 
 vi.mock('../..', () => {
-      const mocked = {
-      AutoDetectPage: () => null,
-      LandingPage: () => <div data-test-subj="landingPageStub" />,
-      OtelLogsPage: () => null,
-      FirehosePage: () => null,
-      OtelApmPage: () => null,
-      CloudForwarderPage: () => null,
-      KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,
-      KubernetesPage: () => <div data-test-subj="kubernetesEaPageStub" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AutoDetectPage: () => null,
+    LandingPage: () => <div data-test-subj="landingPageStub" />,
+    OtelLogsPage: () => null,
+    FirehosePage: () => null,
+    OtelApmPage: () => null,
+    CloudForwarderPage: () => null,
+    KubernetesOtelPage: () => <div data-test-subj="kubernetesOtelPageStub" />,
+    KubernetesPage: () => <div data-test-subj="kubernetesEaPageStub" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/use_flow_breadcrumbs', () => {
-      const mocked = {
-      useFlowBreadcrumb: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFlowBreadcrumb: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/use_managed_otlp_service_availability', () => {
-      const mocked = {
-      useManagedOtlpServiceAvailability: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useManagedOtlpServiceAvailability: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeAll(() => {
   window.scrollTo = vi.fn();

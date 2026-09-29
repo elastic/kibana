@@ -31,56 +31,54 @@ import {
 
 // Mock dependencies
 vi.mock('../../services/app_context', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({
-          get: vi.fn().mockReturnValue({
-            info: vi.fn(),
-            error: vi.fn(),
-            warn: vi.fn(),
-            debug: vi.fn(),
-          }),
+  const mocked = {
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({
+        get: vi.fn().mockReturnValue({
+          info: vi.fn(),
+          error: vi.fn(),
+          warn: vi.fn(),
+          debug: vi.fn(),
         }),
-        getConfig: vi.fn().mockReturnValue({
-          internal: {
-            fleetServerStandalone: false,
-          },
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+      }),
+      getConfig: vi.fn().mockReturnValue({
+        internal: {
+          fleetServerStandalone: false,
+        },
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services', () => {
-      const mocked = {
-      cloudConnectorService: {
-        create: vi.fn(),
-        getList: vi.fn(),
-        getById: vi.fn(),
-        update: vi.fn(),
-        delete: vi.fn(),
-      },
-      packagePolicyService: {
-        list: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cloudConnectorService: {
+      create: vi.fn(),
+      getList: vi.fn(),
+      getById: vi.fn(),
+      update: vi.fn(),
+      delete: vi.fn(),
+    },
+    packagePolicyService: {
+      list: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/secrets', () => {
-      const mocked = {
-      createSecrets: vi.fn(),
-      deleteSecrets: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSecrets: vi.fn(),
+    deleteSecrets: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Cloud Connector API', () => {
   let context: FleetRequestHandlerContext;
   let response: ReturnType<typeof httpServerMock.createResponseFactory>;
-  const mockCloudConnectorService = cloudConnectorService as Mocked<
-    typeof cloudConnectorService
-  >;
+  const mockCloudConnectorService = cloudConnectorService as Mocked<typeof cloudConnectorService>;
   const mockPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
   const mockCreateSecrets = createSecrets as MockedFunction<typeof createSecrets>;
   const mockDeleteSecrets = deleteSecrets as MockedFunction<typeof deleteSecrets>;

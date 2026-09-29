@@ -23,34 +23,34 @@ vi.mock('../../api');
 vi.mock('../../../assistant_context');
 vi.mock('../../settings/use_settings_updater/use_conversations_updater');
 vi.mock('../conversation_settings/conversation_settings_editor', () => {
-      const mocked = {
-      ConversationSettingsEditor: ({
-        selectedConversation,
-        setConversationsSettingsBulkActions,
-      }: {
-        selectedConversation: typeof alertConvo;
-        setConversationsSettingsBulkActions: Mock;
-      }) => (
-        <button
-          data-test-subj="change-sharing"
-          onClick={() =>
-            setConversationsSettingsBulkActions({
-              update: {
-                [selectedConversation.id]: {
-                  id: selectedConversation.id,
-                  users: [],
-                },
+  const mocked = {
+    ConversationSettingsEditor: ({
+      selectedConversation,
+      setConversationsSettingsBulkActions,
+    }: {
+      selectedConversation: typeof alertConvo;
+      setConversationsSettingsBulkActions: Mock;
+    }) => (
+      <button
+        data-test-subj="change-sharing"
+        onClick={() =>
+          setConversationsSettingsBulkActions({
+            update: {
+              [selectedConversation.id]: {
+                id: selectedConversation.id,
+                users: [],
               },
-            })
-          }
-          type="button"
-        >
-          {mockChangeSharing}
-        </button>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+            },
+          })
+        }
+        type="button"
+      >
+        {mockChangeSharing}
+      </button>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSaveConversationsSettings = vi.fn().mockResolvedValue(true);
 const mockSetConversationsSettingsBulkActions = vi.fn();

@@ -18,11 +18,11 @@ import {
 } from './use_transform_cps_picker_access';
 
 vi.mock('../app_dependencies', () => {
-      const mocked = {
-      useAppDependencies: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppDependencies: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAppDependencies = useAppDependencies as Mock;
 

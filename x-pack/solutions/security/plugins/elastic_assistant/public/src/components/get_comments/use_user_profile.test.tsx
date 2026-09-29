@@ -19,11 +19,11 @@ const mockUseKibana = vi
   .mockReturnValue({ services: { userProfile: mockUserProfileService } });
 
 vi.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
-      const mocked = {
-      useKibana: () => mockUseKibana(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => mockUseKibana(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUserProfile', () => {
   const wrapper = ({ children }: { children: React.ReactNode }) => (

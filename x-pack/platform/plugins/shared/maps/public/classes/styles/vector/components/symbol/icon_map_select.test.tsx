@@ -10,13 +10,13 @@ import { vi } from 'vitest';
 /* eslint-disable max-classes-per-file */
 
 vi.mock('./icon_stops', () => {
-      const mocked = {
-      IconStops: () => {
-        return <div>mockIconStops</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IconStops: () => {
+      return <div>mockIconStops</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../symbol_utils', () => {
   return {

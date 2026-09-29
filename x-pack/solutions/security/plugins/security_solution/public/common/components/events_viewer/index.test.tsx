@@ -45,11 +45,12 @@ vi.mock('../../utils/normalize_time_range');
 
 const mockUseFieldBrowserOptions = vi.fn();
 vi.mock('../../../timelines/components/fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) =>
+      mockUseFieldBrowserOptions(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResizeObserver: Mock = useResizeObserver as Mock;
 vi.mock('use-resize-observer/polyfilled');

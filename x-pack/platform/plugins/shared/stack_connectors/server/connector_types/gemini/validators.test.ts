@@ -12,13 +12,13 @@ import type { Secrets } from '@kbn/connector-schemas/gemini';
 
 // Mock i18n
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: (id: string, { defaultMessage }: { defaultMessage: string }) => defaultMessage,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('validateGeminiSecrets', () => {
   const validServiceAccount = {

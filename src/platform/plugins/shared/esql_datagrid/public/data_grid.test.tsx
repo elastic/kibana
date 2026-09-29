@@ -19,7 +19,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import DataGrid from './data_grid';
 
 vi.mock('@kbn/unified-data-table', async () => {
-  const actual = (await vi.importActual('@kbn/unified-data-table'));
+  const actual = await vi.importActual('@kbn/unified-data-table');
   return {
     ...actual,
     UnifiedDataTable: (props: { columns: string[] }) => (

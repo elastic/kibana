@@ -39,52 +39,52 @@ const mockTableTab = vi.fn(
   )
 );
 vi.mock('./tabs/table_tab', () => {
-      const mocked = {
-      TableTab: (props: { renderFlyoutLink?: OpenFlyoutLinkRenderer }) => mockTableTab(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TableTab: (props: { renderFlyoutLink?: OpenFlyoutLinkRenderer }) => mockTableTab(props),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tabs/json_tab', () => {
-      const mocked = {
-      JsonTab: () => <div data-test-subj="mock-json-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    JsonTab: () => <div data-test-subj="mock-json-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./header', () => {
-      const mocked = {
-      Header: ({
-        onAlertUpdated,
-        onShowNotes,
-      }: {
-        onAlertUpdated: () => void;
-        onShowNotes: () => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="mock-header"
-          data-has-on-assignees-updated={String(onAlertUpdated != null)}
-          onClick={onShowNotes}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Header: ({
+      onAlertUpdated,
+      onShowNotes,
+    }: {
+      onAlertUpdated: () => void;
+      onShowNotes: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mock-header"
+        data-has-on-assignees-updated={String(onAlertUpdated != null)}
+        onClick={onShowNotes}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./tabs/overview_tab', () => {
-      const mocked = {
-      OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewTab: () => <div data-test-subj="mock-overview-tab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./footer', () => {
-      const mocked = { Footer: () => <div data-test-subj="mock-footer" /> };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Footer: () => <div data-test-subj="mock-footer" /> };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../shared/tools/notes', () => {
-      const mocked = {
-      NotesDetails: () => <div data-test-subj="mock-notes-details" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NotesDetails: () => <div data-test-subj="mock-notes-details" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createAlertHit = (
   extra: DataTableRecord['flattened'] = {},

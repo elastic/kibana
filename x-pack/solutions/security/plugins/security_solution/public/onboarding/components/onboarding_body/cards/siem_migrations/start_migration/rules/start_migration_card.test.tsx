@@ -29,10 +29,7 @@ const useGetMigrationTranslationStatsSpy = vi.spyOn(
   'useGetMigrationTranslationStats'
 );
 
-const useGetMissingResourcesMock = vi.spyOn(
-  useGetMissingResourcesModule,
-  'useGetMissingResources'
-);
+const useGetMissingResourcesMock = vi.spyOn(useGetMissingResourcesModule, 'useGetMissingResources');
 
 const MockUpsellingComponent = () => {
   return <div data-test-subj="mockUpsellSection">{`Start Migrations Upselling Component`}</div>;

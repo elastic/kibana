@@ -14,18 +14,18 @@ import { useGetUrlParams } from './use_url_params';
 import { useUrlSpaceId } from './use_url_space_id';
 
 vi.mock('../../../hooks/use_kibana_space', () => {
-      const mocked = {
-      useKibanaSpace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaSpace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_url_params', () => {
-      const mocked = {
-      useGetUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUrlSpaceId', () => {
   beforeEach(() => {

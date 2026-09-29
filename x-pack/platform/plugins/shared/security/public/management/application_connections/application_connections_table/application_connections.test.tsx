@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, waitFor, within } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import React from 'react';
+import { vi } from 'vitest';
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
@@ -24,7 +23,7 @@ vi.mock('../assets/illustration_empty_state.svg', () => 'illustration-empty-stat
 });
 
 vi.mock('@kbn/core-user-profile-browser-hooks', async () => {
-  const actual = (await vi.importActual('@kbn/core-user-profile-browser-hooks'));
+  const actual = await vi.importActual('@kbn/core-user-profile-browser-hooks');
   return {
     ...actual,
     useCurrentUser: vi.fn(() => ({

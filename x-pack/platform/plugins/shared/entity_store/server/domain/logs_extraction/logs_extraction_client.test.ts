@@ -248,9 +248,7 @@ describe('LogsExtractionClient', () => {
   let mockLogger: ReturnType<typeof loggerMock.create>;
   let mockEsClient: Mocked<ElasticsearchClient>;
   let mockDataViewsService: Mocked<DataViewsService>;
-  let mockEngineDescriptorClient: Mocked<
-    Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
-  >;
+  let mockEngineDescriptorClient: Mocked<Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>>;
   let mockGlobalStateClient: ReturnType<typeof createMockGlobalStateClient>;
 
   beforeEach(() => {
@@ -2079,12 +2077,11 @@ function createContextWithMode(mode: ExtractionMode) {
   const mockDataViewsService = {
     get: vi.fn().mockResolvedValue({ getIndexPattern: vi.fn().mockReturnValue('logs-*') }),
   } as unknown as Mocked<DataViewsService>;
-  const mockEngineDescriptorClient: Mocked<
-    Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>
-  > = {
-    findOrThrow: vi.fn(),
-    update: vi.fn().mockResolvedValue({}),
-  };
+  const mockEngineDescriptorClient: Mocked<Pick<EngineDescriptorClient, 'findOrThrow' | 'update'>> =
+    {
+      findOrThrow: vi.fn(),
+      update: vi.fn().mockResolvedValue({}),
+    };
   const mockGlobalStateClient = createMockGlobalStateClient();
 
   const client = new LogsExtractionClient({

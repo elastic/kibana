@@ -24,7 +24,7 @@ const SEARCH_BAR_TOUR_TITLE = 'Refine your view with search';
 
 const mockToursIsEnabled = vi.fn(() => true);
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const { notificationServiceMock } = (await vi.importActual('@kbn/core/public/mocks'));
+  const { notificationServiceMock } = await vi.importActual('@kbn/core/public/mocks');
 
   return {
     useKibana: () => ({

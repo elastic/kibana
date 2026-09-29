@@ -17,60 +17,60 @@ import { BehaviorSubject } from 'rxjs';
 
 const mockRoots: Array<{ unmount: Mock }> = [];
 vi.mock('react-dom/client', () => {
-      const mocked = {
-      createRoot: vi.fn((container: HTMLElement) => {
-        const { createRoot: actualCreateRoot } = require('react-dom/client');
-        const root = actualCreateRoot(container);
-        const mockRoot = {
-          render: (element: React.ReactNode) => root.render(element),
-          unmount: vi.fn(() => root.unmount()),
-        };
-        mockRoots.push(mockRoot);
-        return mockRoot;
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRoot: vi.fn((container: HTMLElement) => {
+      const { createRoot: actualCreateRoot } = require('react-dom/client');
+      const root = actualCreateRoot(container);
+      const mockRoot = {
+        render: (element: React.ReactNode) => root.render(element),
+        unmount: vi.fn(() => root.unmount()),
+      };
+      mockRoots.push(mockRoot);
+      return mockRoot;
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLegacyRender = vi.fn();
 vi.mock('react-dom', () => {
-      const mocked = {
-      ...require('react-dom'),
-      render: (...args: unknown[]) => {
-        mockLegacyRender(...args);
-        return require('react-dom').render(...args);
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-dom'),
+    render: (...args: unknown[]) => {
+      mockLegacyRender(...args);
+      return require('react-dom').render(...args);
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-context-render', () => {
-      const mocked = {
-      KibanaRenderContextProvider: vi.fn(({ children }) => (
-        <div data-test-subj="kibana-render-context">{children}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaRenderContextProvider: vi.fn(({ children }) => (
+      <div data-test-subj="kibana-render-context">{children}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/core-chrome-browser-components', () => {
-      const mocked = {
-      ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      ClassicHeader: () => <div>Hello chrome!</div>,
-      ChromeHeader: () => <div>Project chrome!</div>,
-      ChromeAppHeaderRenderer: () => null,
-      GridLayoutProjectSideNav: () => <div>Side nav!</div>,
-      HeaderTopBanner: () => <div>Banner!</div>,
-      ChromelessHeader: () => <div>Chromeless!</div>,
-      Sidebar: () => <div>Sidebar!</div>,
-      useHasInlineAppHeader: () => false,
-      useHasChromeAppHeaderContent: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ChromeComponentsProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    ClassicHeader: () => <div>Hello chrome!</div>,
+    ChromeHeader: () => <div>Project chrome!</div>,
+    ChromeAppHeaderRenderer: () => null,
+    GridLayoutProjectSideNav: () => <div>Side nav!</div>,
+    HeaderTopBanner: () => <div>Banner!</div>,
+    ChromelessHeader: () => <div>Chromeless!</div>,
+    Sidebar: () => <div>Sidebar!</div>,
+    useHasInlineAppHeader: () => false,
+    useHasChromeAppHeaderContent: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockChromeVisible$ = new BehaviorSubject(false);
 vi.mock('@kbn/core-chrome-browser-hooks', async () => {
-  const { useObservable } = (await vi.importActual('@kbn/use-observable'));
+  const { useObservable } = await vi.importActual('@kbn/use-observable');
   return {
     useChromeStyle: () => 'classic',
     useIsChromeVisible: () => useObservable(mockChromeVisible$, mockChromeVisible$.getValue()),
@@ -79,14 +79,14 @@ vi.mock('@kbn/core-chrome-browser-hooks', async () => {
   };
 });
 vi.mock('@kbn/core-chrome-browser-hooks/internal', () => {
-      const mocked = {
-      useGlobalFooter: () => null,
-      useHasHeaderBanner: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFooter: () => null,
+    useHasHeaderBanner: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@elastic/eui', async () => {
-  const actualEui = (await vi.importActual('@elastic/eui'));
+  const actualEui = await vi.importActual('@elastic/eui');
   return {
     ...actualEui,
     EuiLoadingSpinner: vi.fn(() => <div>Loading...</div>),
@@ -247,7 +247,7 @@ describe('RenderingService', () => {
     });
 
     it('uses createRoot when isCoreRenderingInReactConcurrentMode is true', async () => {
-      const { createRoot } = (await vi.importMock('react-dom/client'));
+      const { createRoot } = await vi.importMock('react-dom/client');
       (createRoot as Mock).mockClear();
 
       const service = startService({ isCoreRenderingInReactConcurrentMode: true });
@@ -260,7 +260,7 @@ describe('RenderingService', () => {
     });
 
     it('uses legacy ReactDOM.render when isCoreRenderingInReactConcurrentMode is false', async () => {
-      const { createRoot } = (await vi.importMock('react-dom/client'));
+      const { createRoot } = await vi.importMock('react-dom/client');
       (createRoot as Mock).mockClear();
 
       const service = startService({ isCoreRenderingInReactConcurrentMode: false });

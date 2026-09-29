@@ -25,19 +25,19 @@ import { stubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import type { Filter, Query } from '@kbn/es-query';
 
 vi.mock('../../hooks/use_query_subscriber', () => {
-      const mocked = {
-      useQuerySubscriber: vi.fn(),
-      hasQuerySubscriberData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuerySubscriber: vi.fn(),
+    hasQuerySubscriberData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components/field_stats', () => {
-      const mocked = {
-      FieldStats: vi.fn(() => <div data-testid="mock-field-stats" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FieldStats: vi.fn(() => <div data-testid="mock-field-stats" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuerySubscriber = vi.mocked(useQuerySubscriber);
 const mockHasQuerySubscriberData = vi.mocked(hasQuerySubscriberData);

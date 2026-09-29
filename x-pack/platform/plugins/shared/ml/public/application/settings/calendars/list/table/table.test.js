@@ -15,11 +15,11 @@ import { MemoryRouter } from 'react-router-dom';
 import { CalendarsListTable } from './table';
 
 vi.mock('../../../../contexts/kibana/use_create_url', () => {
-      const mocked = {
-      useCreateAndNavigateToManagementMlLink: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateAndNavigateToManagementMlLink: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const calendars = [
   {

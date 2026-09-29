@@ -36,21 +36,21 @@ import { fetchRiskScoreGrounding } from './risk_score_grounding';
 import { searchEntitiesTool, SECURITY_SEARCH_ENTITIES_TOOL_ID } from './search_entities_tool';
 
 vi.mock('../../utils/get_agent_builder_resource_availability', () => {
-      const mocked = {
-      getAgentBuilderResourceAvailability: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentBuilderResourceAvailability: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      executeEsql: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    executeEsql: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./risk_score_grounding', async () => {
-  const actual = (await vi.importActual('./risk_score_grounding'));
+  const actual = await vi.importActual('./risk_score_grounding');
   return {
     ...actual,
     fetchRiskScoreGrounding: vi.fn().mockResolvedValue(undefined),

@@ -26,36 +26,36 @@ import type { LeftPanelTabsType } from '../shared/components/left_panel/left_pan
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(() => ({
-        openLeftPanel: vi.fn(),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(() => ({
+      openLeftPanel: vi.fn(),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/hooks/use_has_entity_resolution_license', () => {
-      const mocked = {
-      useHasEntityResolutionLicense: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHasEntityResolutionLicense: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../entity_analytics/components/entity_details_flyout', () => {
-      const mocked = {
-      getRiskInputTab: vi.fn(),
-      getInsightsInputTab: vi.fn(),
-      getResolutionGroupTab: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRiskInputTab: vi.fn(),
+    getInsightsInputTab: vi.fn(),
+    getResolutionGroupTab: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../shared/components/left', () => {
-      const mocked = {
-      getGraphViewTab: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getGraphViewTab: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // `useTabs` calls these factory functions to build the tab objects. The
 // mocks return placeholder shapes with the correct `id` so inclusion/order

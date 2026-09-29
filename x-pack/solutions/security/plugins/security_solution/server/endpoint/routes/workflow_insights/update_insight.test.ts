@@ -16,14 +16,14 @@ import { NotFoundError } from '../../errors';
 import type { EndpointAppContext } from '../../types';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      securityWorkflowInsightsService: {
-        update: vi.fn(),
-        fetch: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    securityWorkflowInsightsService: {
+      update: vi.fn(),
+      fetch: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const updateMock = (await vi.importMock('../../services')).securityWorkflowInsightsService
   .update as Mock;
@@ -424,9 +424,7 @@ describe('Update Insights Route Handler', () => {
         core: {
           security: {
             authc: {
-              getCurrentUser: vi
-                .fn()
-                .mockReturnValue({ username: 'test-user', roles: ['admin'] }),
+              getCurrentUser: vi.fn().mockReturnValue({ username: 'test-user', roles: ['admin'] }),
             },
           },
         },

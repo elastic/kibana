@@ -15,14 +15,14 @@ import { OnboardingHubEventTypes } from '../../common/lib/telemetry';
 import type { OnboardingCardId } from '../constants';
 
 vi.mock('../config', () => {
-      const mocked = {
-      onboardingConfig: [
-        { id: 'default', body: [{ cards: [{ id: 'testCard' }] }] },
-        { id: 'testTopic', body: [{ cards: [{ id: 'testCard2' }] }] },
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    onboardingConfig: [
+      { id: 'default', body: [{ cards: [{ id: 'testCard' }] }] },
+      { id: 'testTopic', body: [{ cards: [{ id: 'testCard2' }] }] },
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/lib/kibana/kibana_react');
 const telemetryMock = { reportEvent: vi.fn() };

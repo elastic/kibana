@@ -12,13 +12,13 @@ import { vi } from 'vitest';
 const mockDeserialize = vi.fn(() => ({}));
 
 vi.mock('../services', () => {
-      const mocked = {
-      getFormatService: vi.fn(() => ({
-        deserialize: mockDeserialize,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormatService: vi.fn(() => ({
+      deserialize: mockDeserialize,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { AggTypes } from '../../common';

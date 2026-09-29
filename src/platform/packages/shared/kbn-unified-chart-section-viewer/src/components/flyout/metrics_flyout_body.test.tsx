@@ -19,19 +19,19 @@ import { useMetricsExperienceState } from '../observability/metrics/context/metr
 import type { FlyoutState } from '../../restorable_state';
 
 vi.mock('../observability/metrics/context/metrics_experience_state_provider', () => {
-      const mocked = {
-      useMetricsExperienceState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMetricsExperienceState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tabs', () => {
-      const mocked = {
-      OverviewTab: vi.fn(() => <div data-test-subj="overviewTab" />),
-      EsqlQueryTab: vi.fn(() => <div data-test-subj="esqlQueryTab" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewTab: vi.fn(() => <div data-test-subj="overviewTab" />),
+    EsqlQueryTab: vi.fn(() => <div data-test-subj="esqlQueryTab" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useMetricsExperienceStateMock = useMetricsExperienceState as Mock;
 

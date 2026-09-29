@@ -11,24 +11,24 @@ import type { MockedFunction } from 'vitest';
 import type { RelatedAlertsGraphOutput } from './types';
 
 vi.mock('./graph_builder', () => {
-      const mocked = {
-      buildRelatedAlertsGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildRelatedAlertsGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./time_window', () => {
-      const mocked = {
-      parseTimeWindowToMs: vi.fn((v: string) => {
-        const match = v.match(/^(\d+)([hmd])$/);
-        if (!match) return 3600000;
-        const [, num, unit] = match;
-        const multipliers: Record<string, number> = { h: 3600000, m: 60000, d: 86400000 };
-        return Number(num) * (multipliers[unit] ?? 3600000);
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parseTimeWindowToMs: vi.fn((v: string) => {
+      const match = v.match(/^(\d+)([hmd])$/);
+      if (!match) return 3600000;
+      const [, num, unit] = match;
+      const multipliers: Record<string, number> = { h: 3600000, m: 60000, d: 86400000 };
+      return Number(num) * (multipliers[unit] ?? 3600000);
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import {
   buildAlertEntityGraphInputSchema,
@@ -37,9 +37,7 @@ import {
 import { buildRelatedAlertsGraph } from './graph_builder';
 import { parseTimeWindowToMs } from './time_window';
 
-const mockBuildGraph = buildRelatedAlertsGraph as MockedFunction<
-  typeof buildRelatedAlertsGraph
->;
+const mockBuildGraph = buildRelatedAlertsGraph as MockedFunction<typeof buildRelatedAlertsGraph>;
 const mockParseWindow = parseTimeWindowToMs as MockedFunction<typeof parseTimeWindowToMs>;
 
 const createMockContext = (input: Record<string, unknown>) => ({

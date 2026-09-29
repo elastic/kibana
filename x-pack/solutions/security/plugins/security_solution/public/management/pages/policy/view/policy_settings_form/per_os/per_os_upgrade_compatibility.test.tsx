@@ -44,8 +44,7 @@ vi.mock('../hooks/use_get_protections_unavailable_component');
 vi.setConfig({ testTimeout: 15_000 }); // Costly: each case drives several popover cycles
 
 const useLicenseMock = _useLicense as Mock;
-const useGetProtectionsUnavailableComponentMock =
-  _useGetProtectionsUnavailableComponent as Mock;
+const useGetProtectionsUnavailableComponentMock = _useGetProtectionsUnavailableComponent as Mock;
 const Platinum = licensingMock.createLicense({ license: { type: 'platinum', mode: 'platinum' } });
 
 describe('per-OS form upgrade compatibility with 9.4 policies', () => {

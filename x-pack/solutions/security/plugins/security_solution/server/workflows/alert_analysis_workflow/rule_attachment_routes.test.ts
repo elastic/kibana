@@ -36,13 +36,13 @@ import {
 vi.mock(
   '../../lib/detection_engine/prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client',
   () => {
-      const mocked = {
-        createPrebuiltRuleAssetsClient: vi.fn(() => ({
-          fetchAssetsByVersion: vi.fn().mockResolvedValue({ assets: [] }),
-        })),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      createPrebuiltRuleAssetsClient: vi.fn(() => ({
+        fetchAssetsByVersion: vi.fn().mockResolvedValue({ assets: [] }),
+      })),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 // The workflow is installed once in the global space, so rule actions reference the bare id (no

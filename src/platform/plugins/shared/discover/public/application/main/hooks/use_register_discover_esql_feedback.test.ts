@@ -21,9 +21,7 @@ import type { DiscoverServices } from '../../../build_services';
 vi.mock('../../../hooks/use_discover_services');
 vi.mock('./use_is_esql_mode');
 
-const mockUseDiscoverServices = useDiscoverServices as MockedFunction<
-  typeof useDiscoverServices
->;
+const mockUseDiscoverServices = useDiscoverServices as MockedFunction<typeof useDiscoverServices>;
 const mockUseIsEsqlMode = useIsEsqlMode as MockedFunction<typeof useIsEsqlMode>;
 
 const mockServices = (feedback?: DiscoverServices['feedback']) => {

@@ -17,35 +17,35 @@ import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import type { ReactFlowServiceMapResponse } from '../../../../common/service_map';
 
 vi.mock('../../../context/license/use_license_context', () => {
-      const mocked = {
-      useLicenseContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicenseContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = vi.fn();
 vi.mock('../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/service_map', async () => {
-  const original = (await vi.importActual('../../../../common/service_map'));
+  const original = await vi.importActual('../../../../common/service_map');
   return {
     ...original,
     transformToReactFlow: vi.fn(),

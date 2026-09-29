@@ -25,51 +25,51 @@ const mockSearch = vi.fn();
 const mockPostInstallAssetInventoryDataView = vi.fn();
 
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          data: {
-            search: { search: mockSearch },
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        data: {
+          search: { search: mockSearch },
         },
-      }),
-      useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+    useUiSetting: (...args: unknown[]) => mockUseUiSetting(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
-        mockIsExperimentalFeatureEnabled(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: (...args: unknown[]) =>
+      mockIsExperimentalFeatureEnabled(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_analytics/components/entity_store/hooks/use_entity_store', () => {
-      const mocked = {
-      useEntityStoreStatus: () => mockEntityStoreStatusQuery,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityStoreStatus: () => mockEntityStoreStatusQuery,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../entity_analytics/api/api', () => {
-      const mocked = {
-      useEntityAnalyticsRoutes: () => ({
-        fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEntityAnalyticsRoutes: () => ({
+      fetchEntityStoreV2Privileges: mockFetchEntityStoreV2Privileges,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_asset_inventory_routes', () => {
-      const mocked = {
-      useAssetInventoryRoutes: () => ({
-        postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetInventoryRoutes: () => ({
+      postInstallAssetInventoryDataView: mockPostInstallAssetInventoryDataView,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SECURITY_SOLUTION_ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInventory';
 

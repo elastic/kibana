@@ -38,14 +38,14 @@ const ExpandableFlyoutTestProviders: FC<PropsWithChildren<{}>> = ({ children }) 
 };
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: vi.fn(),
-      useExpandableFlyoutState: vi.fn(),
-      useExpandableFlyoutHistory: vi.fn(),
-      ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: vi.fn(),
+    useExpandableFlyoutState: vi.fn(),
+    useExpandableFlyoutHistory: vi.fn(),
+    ExpandableFlyoutProvider: ({ children }: React.PropsWithChildren<{}>) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const flyoutContextValue = {
   closeLeftPanel: vi.fn(),
@@ -73,9 +73,9 @@ describe('<FlyoutNavigation />', () => {
   });
 
   it('should render collapse button', () => {
-    vi
-      .mocked(useExpandableFlyoutState)
-      .mockReturnValue({ left: {} } as unknown as ExpandableFlyoutState);
+    vi.mocked(useExpandableFlyoutState).mockReturnValue({
+      left: {},
+    } as unknown as ExpandableFlyoutState);
 
     const { getByTestId, queryByTestId } = render(
       <ExpandableFlyoutTestProviders>

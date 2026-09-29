@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { LogicMounter } from '../../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import type { RefreshInterval } from '@kbn/data-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -18,24 +18,24 @@ import type { AnalyticsCollectionToolbarLogicValues } from './analytics_collecti
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar_logic';
 
 vi.mock('../../../../shared/kibana/kibana_logic', () => {
-      const mocked = {
-      KibanaLogic: {
-        values: {
-          data: {
-            dataViews: {
-              find: vi.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
-            },
-            search: {
-              session: {
-                start: vi.fn(() => 'some-search-session-id'),
-              },
+  const mocked = {
+    KibanaLogic: {
+      values: {
+        data: {
+          dataViews: {
+            find: vi.fn(() => Promise.resolve([{ id: 'some-data-view-id' }])),
+          },
+          search: {
+            session: {
+              start: vi.fn(() => 'some-search-session-id'),
             },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AnalyticsCollectionToolbarLogic', () => {
   const { mount } = new LogicMounter(AnalyticsCollectionToolbarLogic);

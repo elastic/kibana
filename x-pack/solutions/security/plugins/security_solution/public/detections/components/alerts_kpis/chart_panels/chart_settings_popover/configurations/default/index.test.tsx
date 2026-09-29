@@ -17,11 +17,11 @@ import { useChartSettingsPopoverConfiguration } from '.';
 const mockHandleClick = vi.fn();
 
 vi.mock('../../../../../../../common/components/inspect/use_inspect', () => {
-      const mocked = {
-      useInspect: () => ({ handleClick: mockHandleClick }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInspect: () => ({ handleClick: mockHandleClick }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useChartSettingsPopoverConfiguration', () => {
   const onResetStackByFields = vi.fn();

@@ -26,11 +26,11 @@ import {
 import { authenticatedUser } from '../../__mocks__/user';
 
 vi.mock('./get_knowledge_base_entry', () => {
-      const mocked = {
-      getKnowledgeBaseEntry: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getKnowledgeBaseEntry: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const telemetry = coreMock.createSetup().analytics;
 

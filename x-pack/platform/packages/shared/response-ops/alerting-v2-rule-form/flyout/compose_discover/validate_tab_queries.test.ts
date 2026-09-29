@@ -12,11 +12,11 @@ import { validateQuery } from '@kbn/esql-language';
 import { validateTabQueries } from './validate_tab_queries';
 
 vi.mock('@kbn/esql-language', () => {
-      const mocked = {
-      validateQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockValidateQuery = validateQuery as Mock;
 const callbacks = {};

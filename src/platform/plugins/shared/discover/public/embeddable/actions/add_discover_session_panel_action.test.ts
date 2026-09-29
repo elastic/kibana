@@ -21,11 +21,11 @@ import { AddDiscoverSessionPanelAction } from './add_discover_session_panel_acti
 import { mockControlState } from '../../__mocks__/esql_controls';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn(() => 'generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn(() => 'generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createEsqlControlApi = (uuid: string, state: OptionsListESQLControlState) => ({
   uuid,

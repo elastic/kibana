@@ -29,11 +29,11 @@ vi.mock('../../lib/kibana');
 
 const mockUpdateUrlParam = vi.fn();
 vi.mock('../../utils/global_query_string', () => {
-      const mocked = {
-      useUpdateUrlParam: () => mockUpdateUrlParam,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateUrlParam: () => mockUpdateUrlParam,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataView: DataView = createStubDataView({ spec: {} });
 const dataViewSpec: DataViewSpec = dataView.toSpec();

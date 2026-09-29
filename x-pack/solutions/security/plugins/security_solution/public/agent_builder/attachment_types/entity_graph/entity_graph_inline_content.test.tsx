@@ -20,30 +20,30 @@ import {
 import type { EntityGraphAttachment, EntityGraphAttachmentData } from './types';
 
 vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
-      const mocked = {
-      useFetchGraphData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGraphData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../flyout_v2/shared/components/graph_preview', () => {
-      const mocked = {
-      GraphPreview: ({
-        isLoading,
-        isError,
-        data,
-      }: {
-        isLoading: boolean;
-        isError: boolean;
-        data?: { nodes: unknown[] };
-      }) => (
-        <div data-test-subj="mockGraphPreview">
-          {isLoading ? 'loading' : isError ? 'error' : `nodes:${data?.nodes?.length ?? 0}`}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GraphPreview: ({
+      isLoading,
+      isError,
+      data,
+    }: {
+      isLoading: boolean;
+      isError: boolean;
+      data?: { nodes: unknown[] };
+    }) => (
+      <div data-test-subj="mockGraphPreview">
+        {isLoading ? 'loading' : isError ? 'error' : `nodes:${data?.nodes?.length ?? 0}`}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetchGraphData = useFetchGraphData as Mock;
 

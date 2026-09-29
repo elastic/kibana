@@ -48,7 +48,7 @@ describe('VisitorBreakdownChart', () => {
   });
 
   describe('component', async () => {
-    const mockUuid = (await vi.importMock('uuid'));
+    const mockUuid = await vi.importMock('uuid');
     mockUuid.v4 = vi.fn().mockReturnValue('xxxx-xxxxxxxxxxx-xxxx');
     const mockEmbeddableComponent = vi.fn((_) => <></>);
 

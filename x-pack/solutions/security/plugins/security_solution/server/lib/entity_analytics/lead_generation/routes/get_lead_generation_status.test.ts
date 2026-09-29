@@ -21,11 +21,11 @@ import {
 
 const mockGetStatus = vi.fn();
 vi.mock('../lead_data_client', () => {
-      const mocked = {
-      createLeadDataClient: () => ({ getStatus: mockGetStatus }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createLeadDataClient: () => ({ getStatus: mockGetStatus }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const makeEsSecurityException = () => ({
   statusCode: 403,
@@ -34,12 +34,12 @@ const makeEsSecurityException = () => ({
 });
 
 vi.mock('../tasks', () => {
-      const mocked = {
-      getLeadGenerationTaskId: (spaceId: string) =>
-        `entity_analytics:lead_generation:engine:${spaceId}:1.0.0`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getLeadGenerationTaskId: (spaceId: string) =>
+      `entity_analytics:lead_generation:engine:${spaceId}:1.0.0`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getLeadGenerationStatusRoute', () => {
   let server: ReturnType<typeof serverMock.create>;

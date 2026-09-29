@@ -32,12 +32,14 @@ vi.mock('../../../../../common/lib/kibana');
 vi.mock(
   '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel',
   async () => {
-      const mocked = {
-        ...(await vi.importActual('../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel')),
-        AlertWorkflowsPanel: () => null,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      ...(await vi.importActual(
+        '../../../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
+      )),
+      AlertWorkflowsPanel: () => null,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseWorkflowsCapabilities = useWorkflowsCapabilities as MockedFunction<

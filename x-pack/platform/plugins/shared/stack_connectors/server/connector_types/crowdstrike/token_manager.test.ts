@@ -50,49 +50,45 @@ describe('CrowdStrikeTokenManager', () => {
     // Apply connector token client mock behavior
     let cachedTokenMock: ConnectorToken | null = null;
 
-    vi
-      .spyOn(
-        connectorTokenClientMock as unknown as { create: ConnectorTokenClientContract['create'] },
-        'create'
-      )
-      .mockImplementation((async ({
+    vi.spyOn(
+      connectorTokenClientMock as unknown as { create: ConnectorTokenClientContract['create'] },
+      'create'
+    ).mockImplementation((async ({
+      connectorId,
+      token,
+      expiresAtMillis: expiresAt,
+      tokenType = 'access_token',
+    }: {
+      connectorId: string;
+      token?: string;
+      expiresAtMillis?: string;
+      tokenType?: string;
+    }) => {
+      cachedTokenMock = createConnectorTokenMock({
         connectorId,
-        token,
-        expiresAtMillis: expiresAt,
-        tokenType = 'access_token',
-      }: {
-        connectorId: string;
-        token?: string;
-        expiresAtMillis?: string;
-        tokenType?: string;
-      }) => {
-        cachedTokenMock = createConnectorTokenMock({
-          connectorId,
-          token: token ?? '',
-          expiresAt,
-          tokenType,
-        });
-        return cachedTokenMock;
-      }) as unknown as ConnectorTokenClientContract['create']);
+        token: token ?? '',
+        expiresAt,
+        tokenType,
+      });
+      return cachedTokenMock;
+    }) as unknown as ConnectorTokenClientContract['create']);
 
-    vi
-      .spyOn(
-        connectorTokenClientMock as unknown as { update: ConnectorTokenClientContract['update'] },
-        'update'
-      )
-      .mockImplementation(
-        async ({ token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
-          if (cachedTokenMock) {
-            cachedTokenMock = {
-              ...cachedTokenMock,
-              token: token ?? cachedTokenMock.token,
-              expiresAt,
-              tokenType,
-            };
-          }
-          return cachedTokenMock;
+    vi.spyOn(
+      connectorTokenClientMock as unknown as { update: ConnectorTokenClientContract['update'] },
+      'update'
+    ).mockImplementation(
+      async ({ token, expiresAtMillis: expiresAt, tokenType = 'access_token' }) => {
+        if (cachedTokenMock) {
+          cachedTokenMock = {
+            ...cachedTokenMock,
+            token: token ?? cachedTokenMock.token,
+            expiresAt,
+            tokenType,
+          };
         }
-      );
+        return cachedTokenMock;
+      }
+    );
 
     vi.spyOn(connectorTokenClientMock, 'get').mockImplementation(async () => {
       return { hasErrors: !cachedTokenMock, connectorToken: cachedTokenMock };

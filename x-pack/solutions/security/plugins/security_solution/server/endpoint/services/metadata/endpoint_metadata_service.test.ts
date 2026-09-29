@@ -824,9 +824,7 @@ describe('EndpointMetadataService', () => {
         const localAgent = new FleetAgentGenerator('seed').generate({
           id: endpointMetadataDoc.agent.id,
         });
-        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([
-          localAgent,
-        ]);
+        (testMockedContext.fleetServices.fetchAgentsById as Mock).mockResolvedValue([localAgent]);
 
         const scoped = await testMockedContext.endpointAppContextService.asScoped(request);
         await expect(

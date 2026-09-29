@@ -10,59 +10,59 @@ import { vi } from 'vitest';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
 vi.mock('../application/methods/create/create_maintenance_window', () => {
-      const mocked = {
-      createMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/get/get_maintenance_window', () => {
-      const mocked = {
-      getMaintenanceWindow: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getMaintenanceWindow: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/update/update_maintenance_window', () => {
-      const mocked = {
-      updateMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/find/find_maintenance_windows', () => {
-      const mocked = {
-      findMaintenanceWindows: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findMaintenanceWindows: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/delete/delete_maintenance_window', () => {
-      const mocked = {
-      deleteMaintenanceWindow: vi.fn().mockResolvedValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    deleteMaintenanceWindow: vi.fn().mockResolvedValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/archive/archive_maintenance_window', () => {
-      const mocked = {
-      archiveMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    archiveMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/finish/finish_maintenance_window', () => {
-      const mocked = {
-      finishMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    finishMaintenanceWindow: vi.fn().mockResolvedValue({ id: 'mw-1' }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/get_active/get_active_maintenance_windows', () => {
-      const mocked = {
-      getActiveMaintenanceWindows: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getActiveMaintenanceWindows: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../application/methods/bulk_get/bulk_get_maintenance_windows', () => {
-      const mocked = {
-      bulkGetMaintenanceWindows: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkGetMaintenanceWindows: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { MaintenanceWindowClient } from './maintenance_window_client';
 
@@ -87,7 +87,9 @@ describe('MaintenanceWindowClient notifyChange', () => {
   });
 
   it('does not notify when create fails', async () => {
-    const { createMaintenanceWindow } = (await vi.importMock('../application/methods/create/create_maintenance_window'));
+    const { createMaintenanceWindow } = await vi.importMock(
+      '../application/methods/create/create_maintenance_window'
+    );
     createMaintenanceWindow.mockRejectedValueOnce(new Error('create failed'));
 
     const notifyChange = vi.fn();

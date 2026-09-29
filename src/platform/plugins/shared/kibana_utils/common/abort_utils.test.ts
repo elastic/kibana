@@ -13,8 +13,7 @@ import { AbortError, abortSignalToPromise } from './abort_utils';
 
 vi.useFakeTimers({ legacyFakeTimers: true });
 
-const flushPromises = () =>
-  new Promise((resolve) => require('timers').setImmediate(resolve));
+const flushPromises = () => new Promise((resolve) => require('timers').setImmediate(resolve));
 
 describe('AbortUtils', () => {
   describe('AbortError', () => {

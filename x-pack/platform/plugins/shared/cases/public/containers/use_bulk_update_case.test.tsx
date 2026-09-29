@@ -18,18 +18,18 @@ import { casesQueriesKeys } from './constants';
 import { basicCaseFixture } from './test_fixtures';
 
 vi.mock('./api', () => {
-      const mocked = {
-      getCase: vi.fn(),
-      updateCases: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCase: vi.fn(),
+    updateCases: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../common/use_cases_toast', () => {
-      const mocked = {
-      useCasesToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUpdateCases', () => {
   const showSuccessToast = vi.fn();

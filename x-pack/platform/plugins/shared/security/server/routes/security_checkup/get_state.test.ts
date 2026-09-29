@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 // eslint-disable-next-line import/order
 import { mockCreateClusterDataCheck } from './get_state.test.mock';
 
 import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
+import { vi } from 'vitest';
 
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';

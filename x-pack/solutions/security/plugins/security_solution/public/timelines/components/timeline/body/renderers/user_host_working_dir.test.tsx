@@ -19,7 +19,7 @@ import { SecurityCellActions } from '../../../../../common/components/cell_actio
 vi.mock('../../../../../common/lib/kibana');
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     EuiScreenReaderOnly: () => <></>,

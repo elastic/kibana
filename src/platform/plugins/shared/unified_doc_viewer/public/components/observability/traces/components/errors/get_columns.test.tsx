@@ -24,34 +24,34 @@ import { useDocViewerExtensionActionsContext } from '../../../../../hooks/use_do
 
 // Mock the i18n module
 vi.mock('@kbn/i18n', () => {
-      const mocked = {
-      i18n: {
-        translate: vi.fn((key, options) => options?.defaultMessage || key),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    i18n: {
+      translate: vi.fn((key, options) => options?.defaultMessage || key),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_discover_link_and_esql_query', () => {
-      const mocked = {
-      useDiscoverLinkAndEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDiscoverLinkAndEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_data_sources', () => {
-      const mocked = {
-      useDataSourcesContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataSourcesContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_doc_viewer_extension_actions', () => {
-      const mocked = {
-      useDocViewerExtensionActionsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDocViewerExtensionActionsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getColumns', () => {
   const traceId = 'trace-123';

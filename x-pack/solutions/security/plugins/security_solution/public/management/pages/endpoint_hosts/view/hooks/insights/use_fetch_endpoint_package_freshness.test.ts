@@ -13,30 +13,32 @@ import { useFetchEndpointPackageFreshness } from './use_fetch_endpoint_package_f
 const mockHttpGet = vi.fn();
 
 vi.mock('../../../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: { http: { get: mockHttpGet } },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: { http: { get: mockHttpGet } },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../services/policies/ingest', () => {
-      const mocked = {
-      sendGetEndpointSecurityPackage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetEndpointSecurityPackage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseQuery = (await vi.importMock('@kbn/react-query')).useQuery;
-const mockSendGetEndpointSecurityPackage = (await vi.importMock('../../../../../services/policies/ingest')).sendGetEndpointSecurityPackage;
+const mockSendGetEndpointSecurityPackage = (
+  await vi.importMock('../../../../../services/policies/ingest')
+).sendGetEndpointSecurityPackage;
 
 describe('useFetchEndpointPackageFreshness', () => {
   beforeEach(() => {

@@ -24,36 +24,36 @@ import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_st
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 vi.mock('../hooks/use_data_connectors', () => {
-      const mocked = {
-      useDataConnectors: () => ({
-        connectors: [],
-        connectorNameById: new Map(),
-        connectorActionTypeById: new Map(),
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataConnectors: () => ({
+      connectors: [],
+      connectorNameById: new Map(),
+      connectorActionTypeById: new Map(),
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_agent_builder_agents', () => {
-      const mocked = {
-      useAgentBuilderAgents: () => ({
-        agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
-        isLoading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgents: () => ({
+      agents: [{ id: 'agent-1', name: 'Loyalty Support Agent' }],
+      isLoading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIndices = vi.fn();
 
 vi.mock('../hooks/use_indices', () => {
-      const mocked = {
-      useIndices: (args: { search: string; enabled: boolean }) => mockUseIndices(args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIndices: (args: { search: string; enabled: boolean }) => mockUseIndices(args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

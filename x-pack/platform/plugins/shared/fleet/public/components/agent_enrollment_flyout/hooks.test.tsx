@@ -18,34 +18,34 @@ import { getYamlFormatters } from '../../services/yaml_formatters';
 import { useFetchFullPolicy } from './hooks';
 
 vi.mock('../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks')),
-      useStartServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks')),
+    useStartServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_request/agent_policy', () => {
-      const mocked = {
-      sendGetOneAgentPolicyFull: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendGetOneAgentPolicyFull: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_request', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_request')),
-      sendCreateStandaloneAgentAPIKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_request')),
+    sendCreateStandaloneAgentAPIKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/yaml_formatters', () => {
-      const mocked = {
-      getYamlFormatters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getYamlFormatters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNotificationsToasts = { addError: vi.fn() };
 
@@ -70,11 +70,9 @@ describe('useFetchFullPolicy — downloadYaml', () => {
   function mockAnchorElement() {
     const mockLink = { href: '', download: '', click: vi.fn() };
     const original = document.createElement.bind(document);
-    vi
-      .spyOn(document, 'createElement')
-      .mockImplementation((tag, ...args) =>
-        tag === 'a' ? (mockLink as any) : original(tag, ...args)
-      );
+    vi.spyOn(document, 'createElement').mockImplementation((tag, ...args) =>
+      tag === 'a' ? (mockLink as any) : original(tag, ...args)
+    );
     return mockLink;
   }
 

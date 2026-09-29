@@ -15,17 +15,17 @@ import { getMockAttackDiscoveryAlerts } from '../../../../../mock/mock_attack_di
 
 // Mock child badge components to isolate Badges
 vi.mock('./workflow_badge', () => {
-      const mocked = {
-      WorkflowBadge: () => <div data-test-subj="workflowBadge" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowBadge: () => <div data-test-subj="workflowBadge" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./shared_badge', () => {
-      const mocked = {
-      SharedBadge: () => <div data-test-subj="sharedBadge" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SharedBadge: () => <div data-test-subj="sharedBadge" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAttackDiscoveryAlert = getMockAttackDiscoveryAlerts()[0];
 const defaultProps = { attackDiscovery: mockAttackDiscoveryAlert };

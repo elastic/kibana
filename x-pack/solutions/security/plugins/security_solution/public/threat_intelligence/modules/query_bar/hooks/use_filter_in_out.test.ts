@@ -20,17 +20,17 @@ import { useFilterInOut } from './use_filter_in_out';
 import { FilterIn, updateFiltersArray } from '../utils/filter';
 
 vi.mock('../utils/filter', () => {
-      const mocked = { updateFiltersArray: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { updateFiltersArray: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../indicators/hooks/use_ti_data_view', () => {
-      const mocked = {
-      useTIDataView: vi
-        .fn()
-        .mockReturnValue({ sourcererDataView: { id: 'security-solution-default' } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTIDataView: vi
+      .fn()
+      .mockReturnValue({ sourcererDataView: { id: 'security-solution-default' } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useFilterInOut()', () => {
   let hookResult: RenderHookResult<UseFilterInValue, unknown>;

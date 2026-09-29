@@ -16,7 +16,7 @@ import { useUpdateUserProfile } from '@kbn/user-profile-components';
 import { AppearanceModal } from './appearance_modal';
 
 vi.mock('@kbn/user-profile-components', async () => {
-  const original = (await vi.importActual('@kbn/user-profile-components'));
+  const original = await vi.importActual('@kbn/user-profile-components');
   return {
     ...original,
     useUpdateUserProfile: vi.fn().mockImplementation(() => ({
@@ -34,24 +34,24 @@ vi.mock('@kbn/user-profile-components', async () => {
 });
 
 vi.mock('./values_group', () => {
-      const mocked = {
-      ValuesGroup: vi.fn().mockImplementation(({ title, selectedValue, onChange }) => (
-        <div data-test-subj={`values-group-${title}`}>
-          <h3>{title}</h3>
-          <div>
-            <button data-test-subj={`option-dark-${title}`} onClick={() => onChange('dark')}>
-              Dark
-            </button>
-            <button data-test-subj={`option-high-${title}`} onClick={() => onChange('high')}>
-              High
-            </button>
-          </div>
-          <div>Selected: {selectedValue}</div>
+  const mocked = {
+    ValuesGroup: vi.fn().mockImplementation(({ title, selectedValue, onChange }) => (
+      <div data-test-subj={`values-group-${title}`}>
+        <h3>{title}</h3>
+        <div>
+          <button data-test-subj={`option-dark-${title}`} onClick={() => onChange('dark')}>
+            Dark
+          </button>
+          <button data-test-subj={`option-high-${title}`} onClick={() => onChange('high')}>
+            High
+          </button>
         </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+        <div>Selected: {selectedValue}</div>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AppearanceModal', () => {
   const closeModal = vi.fn();

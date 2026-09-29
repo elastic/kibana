@@ -43,23 +43,24 @@ vi.mock('../../tasks/history_snapshot_task');
 vi.mock('../../tasks/status_report_task');
 vi.mock('../../tasks/resilience_task');
 vi.mock('../../tasks/entity_maintainers', () => {
-      const mocked = {
-      removeEntityMaintainer: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    removeEntityMaintainer: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../tasks/entity_maintainers/entity_maintainers_registry', () => {
-      const mocked = {
-      entityMaintainersRegistry: {
-        getAll: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    entityMaintainersRegistry: {
+      getAll: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../infra/remove_v1');
 
-const mockInstallSharedElasticsearchAssets =
-  installSharedElasticsearchAssets as MockedFunction<typeof installSharedElasticsearchAssets>;
+const mockInstallSharedElasticsearchAssets = installSharedElasticsearchAssets as MockedFunction<
+  typeof installSharedElasticsearchAssets
+>;
 const mockInstallIndicesAndDataStreams = installIndicesAndDataStreams as MockedFunction<
   typeof installIndicesAndDataStreams
 >;
@@ -808,25 +809,19 @@ describe('AssetManagerClient.getStatus component name resolution', () => {
       return {};
     });
 
-    const getComponentTemplate = vi
-      .fn()
-      .mockImplementation(async ({ name }: { name: string }) => {
-        const exists =
-          (name.includes('security_') &&
-            name.includes('latest') &&
-            legacyLatestComponentTemplateExists) ||
-          (!name.includes('security_') &&
-            name.includes('latest') &&
-            latestComponentTemplateExists) ||
-          (name.includes('security_') &&
-            name.includes('updates') &&
-            legacyUpdatesComponentTemplateExists) ||
-          (!name.includes('security_') &&
-            name.includes('updates') &&
-            updatesComponentTemplateExists);
-        if (!exists) throw new Error('component_template not found [404]');
-        return {};
-      });
+    const getComponentTemplate = vi.fn().mockImplementation(async ({ name }: { name: string }) => {
+      const exists =
+        (name.includes('security_') &&
+          name.includes('latest') &&
+          legacyLatestComponentTemplateExists) ||
+        (!name.includes('security_') && name.includes('latest') && latestComponentTemplateExists) ||
+        (name.includes('security_') &&
+          name.includes('updates') &&
+          legacyUpdatesComponentTemplateExists) ||
+        (!name.includes('security_') && name.includes('updates') && updatesComponentTemplateExists);
+      if (!exists) throw new Error('component_template not found [404]');
+      return {};
+    });
 
     // Stub the minimum ES surface getStatus/getComponentsForEngine needs.
     // index and dataStream probes are not under test here — return "found" for all of them

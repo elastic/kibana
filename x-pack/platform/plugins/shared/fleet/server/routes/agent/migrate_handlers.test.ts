@@ -47,7 +47,7 @@ vi.mock('../../services', () => {
 });
 
 vi.mock('../../services/app_context', async () => {
-  const { loggerMock } = (await vi.importActual('@kbn/logging-mocks'));
+  const { loggerMock } = await vi.importActual('@kbn/logging-mocks');
   return {
     appContextService: {
       getLogger: () => loggerMock.create(),

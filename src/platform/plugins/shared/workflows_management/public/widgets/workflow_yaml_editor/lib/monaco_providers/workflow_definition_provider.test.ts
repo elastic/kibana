@@ -16,7 +16,9 @@ import type { WorkflowLookup } from '../../../../entities/workflows/store/workfl
 
 vi.mock('../template_expression/parse_template_at_position');
 
-const { parseTemplateAtPosition } = (await vi.importMock('../template_expression/parse_template_at_position'));
+const { parseTemplateAtPosition } = await vi.importMock(
+  '../template_expression/parse_template_at_position'
+);
 
 const WORKFLOW_YAML = `name: test-workflow
 enabled: false
@@ -395,9 +397,7 @@ steps:
       const outputDoc = YAML.parseDocument(outputYaml);
       const outputModel = {
         ...model,
-        getLineContent: vi.fn(
-          (lineNumber: number) => outputYaml.split('\n')[lineNumber - 1] || ''
-        ),
+        getLineContent: vi.fn((lineNumber: number) => outputYaml.split('\n')[lineNumber - 1] || ''),
         getPositionAt: vi.fn((offset: number) => {
           const lines = outputYaml.split('\n');
           let remaining = offset;

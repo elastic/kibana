@@ -37,25 +37,25 @@ const mockMapTransforms = {
 };
 
 vi.mock('../kibana_services', () => {
-      const mocked = {
-      embeddableService: {
-        getTransforms: vi.fn((type: string) => {
-          switch (type) {
-            case 'lens-dashboard-app':
-              return mockLensTransforms;
-            case 'legacy_vis':
-              return mockVisualizationTransforms;
-            case 'map':
-              return mockMapTransforms;
-          }
-        }),
-      },
-      logger: {
-        warn: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    embeddableService: {
+      getTransforms: vi.fn((type: string) => {
+        switch (type) {
+          case 'lens-dashboard-app':
+            return mockLensTransforms;
+          case 'legacy_vis':
+            return mockVisualizationTransforms;
+          case 'map':
+            return mockMapTransforms;
+        }
+      }),
+    },
+    logger: {
+      warn: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('transformWorkpadOut', () => {
   beforeEach(() => {

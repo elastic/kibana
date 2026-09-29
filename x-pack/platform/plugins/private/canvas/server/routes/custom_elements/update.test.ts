@@ -31,11 +31,11 @@ const now = new Date();
 const nowIso = now.toISOString();
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123abc'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123abc'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type CustomElementPayload = CustomElement & {
   '@timestamp': string;

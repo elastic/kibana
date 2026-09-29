@@ -17,19 +17,19 @@ import { mockTelemetryClient } from '../../../../services/telemetry/__mocks__/te
 
 const mockUseServiceSloContext = vi.fn();
 vi.mock('../../../../context/service_slo/use_service_slo_context', () => {
-      const mocked = {
-      useServiceSloContext: () => mockUseServiceSloContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceSloContext: () => mockUseServiceSloContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseApmPluginContext = vi.fn();
 vi.mock('../../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => mockUseApmPluginContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: () => mockUseApmPluginContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Production `getRedirectUrl` builds `/app/r?...`. The mock must return that path so
 // tests fail if the badge uses it instead of `getUrl` (in-app `/app/apm/...`).
@@ -57,58 +57,58 @@ const mockShare = {
 };
 
 vi.mock('../../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({
-        link: (path: string, { path: pathParams, query }: any) =>
-          `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
-            query
-          ).toString()}`,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({
+      link: (path: string, { path: pathParams, query }: any) =>
+        `${path.replace('{serviceName}', pathParams.serviceName)}?${new URLSearchParams(
+          query
+        ).toString()}`,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseApmParams = vi.fn();
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: () => mockUseApmParams(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: () => mockUseApmParams(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseApmServiceContext = vi.fn();
 vi.mock('../../../../context/apm_service/use_apm_service_context', () => {
-      const mocked = {
-      useApmServiceContext: () => mockUseApmServiceContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmServiceContext: () => mockUseApmServiceContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseApmRoutePath = vi.fn();
 vi.mock('../../../../hooks/use_apm_route_path', () => {
-      const mocked = {
-      useApmRoutePath: () => mockUseApmRoutePath(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRoutePath: () => mockUseApmRoutePath(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseFetcher = vi.fn();
 vi.mock('../../../../hooks/use_fetcher', () => {
-      const mocked = {
-      useFetcher: () => mockUseFetcher(),
-      FETCH_STATUS: {
-        LOADING: 'loading',
-        SUCCESS: 'success',
-        FAILURE: 'failure',
-        NOT_INITIATED: 'not_initiated',
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetcher: () => mockUseFetcher(),
+    FETCH_STATUS: {
+      LOADING: 'loading',
+      SUCCESS: 'success',
+      FAILURE: 'failure',
+      NOT_INITIATED: 'not_initiated',
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockKibanaServices = vi.fn();
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-  const original = (await vi.importActual('@kbn/kibana-react-plugin/public'));
+  const original = await vi.importActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
     useKibana: () => mockKibanaServices(),

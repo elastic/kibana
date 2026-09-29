@@ -61,11 +61,11 @@ import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachme
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 
 vi.mock('@kbn/agent-builder-server/tools', () => {
-      const mocked = {
-      getToolResultId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getToolResultId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetToolResultId = getToolResultId as MockedFunction<typeof getToolResultId>;
 

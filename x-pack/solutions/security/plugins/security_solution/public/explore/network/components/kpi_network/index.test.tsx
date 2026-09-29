@@ -14,11 +14,11 @@ import { TestProviders, createMockStore } from '../../../../common/mock';
 import { NetworkKpiComponent } from '.';
 
 vi.mock('../../../../common/components/visualization_actions/lens_embeddable', () => {
-      const mocked = {
-      LensEmbeddable: vi.fn(() => <div data-test-subj="mock-lens-embeddable" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensEmbeddable: vi.fn(() => <div data-test-subj="mock-lens-embeddable" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('NetworkKpiComponent', () => {
   const props = {

@@ -19,34 +19,34 @@ const mockUseSetUrlCategory = vi.fn();
 const mockUseUrlDefaultCategories = vi.fn();
 
 vi.mock('../hooks/url_filters', () => {
-      const mocked = {
-      useUrlFilters: () => mockUseUrlFilters(),
-      useAddUrlFilters: () => mockUseAddUrlFilters(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUrlFilters: () => mockUseUrlFilters(),
+    useAddUrlFilters: () => mockUseAddUrlFilters(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/url_categories', () => {
-      const mocked = {
-      useUrlCategories: () => mockUseUrlCategories(),
-      useSetUrlCategory: () => mockUseSetUrlCategory(),
-      useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUrlCategories: () => mockUseUrlCategories(),
+    useSetUrlCategory: () => mockUseSetUrlCategory(),
+    useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks', () => {
-      const mocked = {};
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {};
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAgentless = vi.fn();
 vi.mock(
   '../../../../../../fleet/sections/agent_policy/create_package_policy_page/single_page_layout/hooks/setup_technology',
   () => {
-      const mocked = { useAgentless: () => mockUseAgentless() };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = { useAgentless: () => mockUseAgentless() };
+    return { ...mocked, default: mocked };
+  }
 );
 
 import { SearchAndFiltersBar } from './search_and_filters_bar';

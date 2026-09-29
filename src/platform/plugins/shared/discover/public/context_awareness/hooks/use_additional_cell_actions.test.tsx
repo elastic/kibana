@@ -37,9 +37,9 @@ let mockScopedEbtManager: ScopedDiscoverEBTManager;
 let mockUuid = 0;
 
 vi.mock('uuid', () => {
-      const mocked = { ...require('uuid'), v4: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { ...require('uuid'), v4: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockActions: string[] = [];
 const mockTriggerActions: Record<string, string[]> = { [DISCOVER_CELL_ACTIONS_TRIGGER_ID]: [] };
@@ -48,11 +48,11 @@ vi.spyOn(discoverServiceMock.uiActions, 'registerActionAsync').mockImplementatio
   mockActions.push(actionId);
 });
 
-vi
-  .spyOn(discoverServiceMock.uiActions, 'attachAction')
-  .mockImplementation((triggerId, actionId) => {
+vi.spyOn(discoverServiceMock.uiActions, 'attachAction').mockImplementation(
+  (triggerId, actionId) => {
     mockTriggerActions[triggerId].push(actionId);
-  });
+  }
+);
 
 vi.spyOn(discoverServiceMock.uiActions, 'unregisterAction').mockImplementation((id) => {
   mockActions.splice(
@@ -61,14 +61,14 @@ vi.spyOn(discoverServiceMock.uiActions, 'unregisterAction').mockImplementation((
   );
 });
 
-vi
-  .spyOn(discoverServiceMock.uiActions, 'detachAction')
-  .mockImplementation((triggerId, actionId) => {
+vi.spyOn(discoverServiceMock.uiActions, 'detachAction').mockImplementation(
+  (triggerId, actionId) => {
     mockTriggerActions[triggerId].splice(
       mockTriggerActions[triggerId].findIndex((action) => action === actionId),
       1
     );
-  });
+  }
+);
 
 describe('useAdditionalCellActions', () => {
   const initialProps: React.PropsWithChildren<Parameters<typeof useAdditionalCellActions>[0]> = {

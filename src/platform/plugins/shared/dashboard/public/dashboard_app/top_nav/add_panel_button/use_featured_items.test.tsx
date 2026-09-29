@@ -17,7 +17,7 @@ import { useFeaturedItems } from './use_featured_items';
 const mockGetTriggerCompatibleActions = vi.fn();
 
 vi.mock('../../../services/kibana_services', async () => {
-  const actual = (await vi.importActual('../../../services/kibana_services'));
+  const actual = await vi.importActual('../../../services/kibana_services');
   return {
     ...actual,
     uiActionsService: {

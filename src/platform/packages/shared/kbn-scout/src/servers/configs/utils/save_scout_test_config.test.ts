@@ -21,18 +21,18 @@ const MOCKED_SCOUT_SERVERS_ROOT = '/mock/repo/root/scout/servers';
 vi.mock('fs');
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      REPO_ROOT: '/mock/repo/root',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    REPO_ROOT: '/mock/repo/root',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/scout-info', () => {
-      const mocked = {
-      SCOUT_SERVERS_ROOT: '/mock/repo/root/scout/servers',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SCOUT_SERVERS_ROOT: '/mock/repo/root/scout/servers',
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testServersConfig = {
   hosts: {
@@ -59,12 +59,12 @@ const testServersConfig = {
 const expectedSerializedConfig = JSON.stringify(testServersConfig, null, 2);
 
 vi.mock('path', () => {
-      const mocked = {
-      ...require('path'),
-      join: vi.fn((...args) => args.join('/')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('path'),
+    join: vi.fn((...args) => args.join('/')),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('saveScoutTestConfigOnDisk', () => {
   let mockLog: ToolingLog;

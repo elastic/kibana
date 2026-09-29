@@ -37,16 +37,16 @@ const mockResponseWithHeaders = {
   },
 };
 vi.mock('@kbn/ml-response-stream/server', () => {
-      const mocked = {
-      streamFactory: vi.fn().mockImplementation(() => ({
-        DELIMITER: '\n',
-        end: vi.fn(),
-        push: mockPush,
-        responseWithHeaders: mockResponseWithHeaders,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    streamFactory: vi.fn().mockImplementation(() => ({
+      DELIMITER: '\n',
+      end: vi.fn(),
+      push: mockPush,
+      responseWithHeaders: mockResponseWithHeaders,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('streamGraph', () => {
   const mockRequest = {} as KibanaRequest<unknown, unknown, ExecuteConnectorRequestBody>;

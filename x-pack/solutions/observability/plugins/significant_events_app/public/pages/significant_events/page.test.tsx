@@ -18,153 +18,153 @@ import { SignificantEventsPage } from './page';
 
 vi.mock('../../hooks/use_developer_mode');
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          application: {
-            getUrlForApp: vi.fn(() => '/app/nightshift'),
-            capabilities: {
-              nightshift: {
-                show: true,
-                manage: true,
-                configure: true,
-              },
-            },
-          },
-          chrome: {
-            setBreadcrumbs: vi.fn(),
-          },
-          notifications: {
-            toasts: {
-              addError: vi.fn(),
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        application: {
+          getUrlForApp: vi.fn(() => '/app/nightshift'),
+          capabilities: {
+            nightshift: {
+              show: true,
+              manage: true,
+              configure: true,
             },
           },
         },
-        dependencies: {
-          start: {},
+        chrome: {
+          setBreadcrumbs: vi.fn(),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../hooks/use_significant_events_app_params', () => {
-      const mocked = {
-      useSignificantEventsAppParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../hooks/use_significant_events_app_router', () => {
-      const mocked = {
-      useSignificantEventsAppRouter: () => ({
-        link: (path: string, params?: { path: { tab: string } }) =>
-          params ? `/${params.path.tab}` : path,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../hooks/use_significant_events_availability', () => {
-      const mocked = {
-      useSignificantEventsAvailability: () => ({
-        availability: { available: true },
-        isLoading: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../hooks/use_significant_events_maintenance', () => {
-      const mocked = {
-      useBlocksNewActivity: () => ({
-        isBlocked: false,
-        isLoading: false,
-        isError: false,
-        status: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
-vi.mock('../../components/page_template', () => {
-      const mocked = {
-      SignificantEventsAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
-        <div data-test-subj="app-header-tabs">
-          {tabs.map((tab) => (
-            <div key={tab.id} data-test-subj={`app-header-tab-${tab.id}`}>
-              {tab.label}
-              {typeof tab.badge === 'object' && (
-                <span data-test-subj={`app-header-badge-${tab.id}`}>{tab.badge.iconType}</span>
-              )}
-            </div>
-          ))}
-        </div>
-      ),
-      SignificantEventsAppPageTemplate: {
-        Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+        notifications: {
+          toasts: {
+            addError: vi.fn(),
+          },
+        },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+      dependencies: {
+        start: {},
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../hooks/use_significant_events_app_params', () => {
+  const mocked = {
+    useSignificantEventsAppParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../hooks/use_significant_events_app_router', () => {
+  const mocked = {
+    useSignificantEventsAppRouter: () => ({
+      link: (path: string, params?: { path: { tab: string } }) =>
+        params ? `/${params.path.tab}` : path,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../hooks/use_significant_events_availability', () => {
+  const mocked = {
+    useSignificantEventsAvailability: () => ({
+      availability: { available: true },
+      isLoading: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../hooks/use_significant_events_maintenance', () => {
+  const mocked = {
+    useBlocksNewActivity: () => ({
+      isBlocked: false,
+      isLoading: false,
+      isError: false,
+      status: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
+vi.mock('../../components/page_template', () => {
+  const mocked = {
+    SignificantEventsAppHeader: ({ tabs }: { tabs: AppHeaderTab[] }) => (
+      <div data-test-subj="app-header-tabs">
+        {tabs.map((tab) => (
+          <div key={tab.id} data-test-subj={`app-header-tab-${tab.id}`}>
+            {tab.label}
+            {typeof tab.badge === 'object' && (
+              <span data-test-subj={`app-header-badge-${tab.id}`}>{tab.badge.iconType}</span>
+            )}
+          </div>
+        ))}
+      </div>
+    ),
+    SignificantEventsAppPageTemplate: {
+      Body: ({ children }: { children: React.ReactNode }) => <div>{children}</div>,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/redirect_to', () => {
-      const mocked = {
-      RedirectTo: ({ params }: { params?: { path?: { tab?: string } } }) => (
-        <div data-test-subj="redirect-to">{params?.path?.tab}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RedirectTo: ({ params }: { params?: { path?: { tab?: string } } }) => (
+      <div data-test-subj="redirect-to">{params?.path?.tab}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/cortex/use_cortex', () => {
-      const mocked = {
-      useCortexEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCortexEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/decision_trees/use_decision_trees', () => {
-      const mocked = {
-      useDecisionTreesEnabled: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDecisionTreesEnabled: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/knowledge_indicators_table', () => {
-      const mocked = {
-      KnowledgeIndicatorsTable: () => null,
-      KiGenerationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KnowledgeIndicatorsTable: () => null,
+    KiGenerationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/queries_table/queries_table', () => {
-      const mocked = {
-      QueriesTable: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QueriesTable: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/streams_view/streams_view', () => {
-      const mocked = {
-      StreamsView: () => <div data-test-subj="streams-tab-content" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StreamsView: () => <div data-test-subj="streams-tab-content" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/detections_tab', () => {
-      const mocked = {
-      DetectionsTab: () => <div data-test-subj="detections-tab-content" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DetectionsTab: () => <div data-test-subj="detections-tab-content" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/significant_events_tab', () => {
-      const mocked = {
-      SignificantEventsTab: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SignificantEventsTab: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/run_limits_banner', () => {
-      const mocked = {
-      RunLimitsBanner: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunLimitsBanner: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./context/significant_events_page_context', () => {
-      const mocked = {
-      SignificantEventsPageProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SignificantEventsPageProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseDeveloperMode = useDeveloperMode as MockedFunction<typeof useDeveloperMode>;
 const mockUseSignificantEventsAppParams = useSignificantEventsAppParams as MockedFunction<

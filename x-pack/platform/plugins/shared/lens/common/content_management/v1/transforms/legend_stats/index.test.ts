@@ -13,17 +13,17 @@ import { convertPartitionToLegendStats } from './partition';
 import { convertXYToLegendStats } from './xy';
 
 vi.mock('./xy', () => {
-      const mocked = {
-      convertXYToLegendStats: vi.fn().mockReturnValue('new xyVisState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertXYToLegendStats: vi.fn().mockReturnValue('new xyVisState'),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./partition', () => {
-      const mocked = {
-      convertPartitionToLegendStats: vi.fn().mockReturnValue('new partitionVisState'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertPartitionToLegendStats: vi.fn().mockReturnValue('new partitionVisState'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Legend stat transforms', () => {
   beforeEach(() => {

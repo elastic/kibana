@@ -17,66 +17,66 @@ import type { SchemaField } from '../types';
 
 // Mock the useKibana hook
 vi.mock('../../../../../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        core: {
-          docLinks: {
-            links: {
-              elasticsearch: {
-                mappingParameters: 'https://elastic.co/docs/mapping-parameters',
-              },
+  const mocked = {
+    useKibana: () => ({
+      core: {
+        docLinks: {
+          links: {
+            elasticsearch: {
+              mappingParameters: 'https://elastic.co/docs/mapping-parameters',
             },
           },
         },
-        dependencies: {
-          start: {
-            streams: {
-              streamsRepositoryClient: {
-                fetch: vi.fn(),
-              },
-            },
-            fieldsMetadata: {
-              useFieldsMetadata: () => ({
-                fieldsMetadata: {},
-                loading: false,
-              }),
+      },
+      dependencies: {
+        start: {
+          streams: {
+            streamsRepositoryClient: {
+              fetch: vi.fn(),
             },
           },
+          fieldsMetadata: {
+            useFieldsMetadata: () => ({
+              fieldsMetadata: {},
+              loading: false,
+            }),
+          },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the useStreamsAppRouter hook
 vi.mock('../../../../../hooks/use_streams_app_router', () => {
-      const mocked = {
-      useStreamsAppRouter: () => ({
-        link: vi.fn(() => '/mock-link'),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppRouter: () => ({
+      link: vi.fn(() => '/mock-link'),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the useStreamsAppFetch hook used by SamplePreviewTable
 vi.mock('../../../../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: () => ({
-        value: null,
-        loading: false,
-        error: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: () => ({
+      value: null,
+      loading: false,
+      error: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock CodeEditor to avoid Monaco initialization in tests
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CodeEditor: () => <div data-testid="mock-code-editor">CodeEditor</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderFlyout = (
   fieldOverrides: Partial<SchemaField> = {},

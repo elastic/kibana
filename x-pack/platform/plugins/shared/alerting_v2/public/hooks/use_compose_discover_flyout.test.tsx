@@ -20,67 +20,67 @@ let capturedFlyoutProps: Record<string, unknown> = {};
 const mockParseState = vi.fn();
 
 vi.mock('@kbn/alerting-v2-rule-form', () => {
-      const mocked = {
-      ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
-        capturedFlyoutProps = props;
-        return <div data-test-subj="mockComposeDiscoverFlyout" />;
-      },
-      RULE_BUILDER_REGISTRY: {
-        threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ComposeDiscoverFlyout: (props: Record<string, unknown>) => {
+      capturedFlyoutProps = props;
+      return <div data-test-subj="mockComposeDiscoverFlyout" />;
+    },
+    RULE_BUILDER_REGISTRY: {
+      threshold: { parseState: (...args: unknown[]) => mockParseState(...args) },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/alerting-v2-schemas', () => {
-      const mocked = {
-      getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
-        query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
-      getRecoverEsqlQuery: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBreachEsqlQuery: (query: { base?: string; breach?: { segment: string } } | null) =>
+      query?.breach ? `${query.base} | ${query.breach.segment}` : query?.base ?? '',
+    getRecoverEsqlQuery: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_create_rule', () => {
-      const mocked = {
-      useCreateRule: () => ({ mutate: mockCreateMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCreateRule: () => ({ mutate: mockCreateMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_update_rule', () => {
-      const mocked = {
-      useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateRule: () => ({ mutate: mockUpdateMutate, isLoading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateToUrl = vi.fn();
 const mockAddWarning = vi.fn();
 
 vi.mock('@kbn/core-di', () => {
-      const mocked = {
-      PluginStart: (key: string) => `plugin:${key}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PluginStart: (key: string) => `plugin:${key}`,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => `core:${key}`,
-      useService: (key: unknown) => {
-        switch (key) {
-          case 'core:http':
-            return { basePath: { prepend: (path: string) => path } };
-          case 'core:notifications':
-            return { toasts: { addWarning: mockAddWarning, addInfo: vi.fn() } };
-          case 'core:application':
-            return { navigateToUrl: mockNavigateToUrl };
-          default:
-            return {};
-        }
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => `core:${key}`,
+    useService: (key: unknown) => {
+      switch (key) {
+        case 'core:http':
+          return { basePath: { prepend: (path: string) => path } };
+        case 'core:notifications':
+          return { toasts: { addWarning: mockAddWarning, addInfo: vi.fn() } };
+        case 'core:application':
+          return { navigateToUrl: mockNavigateToUrl };
+        default:
+          return {};
+      }
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useComposeDiscoverFlyout } from './use_compose_discover_flyout';
 

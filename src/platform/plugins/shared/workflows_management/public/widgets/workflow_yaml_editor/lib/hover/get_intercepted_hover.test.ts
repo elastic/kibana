@@ -15,13 +15,13 @@ import { getInterceptedHover } from './get_intercepted_hover';
 const mockedMonacoYamlHoverProvideHover = vi.fn();
 
 vi.mock('./intercept_monaco_yaml_hover_provider', () => {
-      const mocked = {
-      getAllYamlHoverProviders: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAllYamlHoverProviders: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getAllYamlHoverProviders } = (await vi.importMock('./intercept_monaco_yaml_hover_provider'));
+const { getAllYamlHoverProviders } = await vi.importMock('./intercept_monaco_yaml_hover_provider');
 
 describe('useEnhancedMonacoYamlHoverProvider', () => {
   beforeEach(() => {

@@ -40,9 +40,7 @@ describe('useAttackDiscoveryBulk', () => {
       addSuccess: mockAddSuccess,
       addError: mockAddError,
     });
-    (invalidateModule.useInvalidateFindAttackDiscoveries as Mock).mockReturnValue(
-      mockInvalidate
-    );
+    (invalidateModule.useInvalidateFindAttackDiscoveries as Mock).mockReturnValue(mockInvalidate);
     (kibanaModule.KibanaServices.get as Mock).mockReturnValue({
       http: { post: mockHttpPost },
     });

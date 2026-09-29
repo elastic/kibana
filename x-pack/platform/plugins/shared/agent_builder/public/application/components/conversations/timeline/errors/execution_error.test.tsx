@@ -26,22 +26,22 @@ import {
 import { ExecutionError } from './execution_error';
 
 vi.mock('../../../../hooks/use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({
-        docLinksService: { limitationsKnownIssuesConversationLengthExceeded: 'https://docs' },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({
+      docLinksService: { limitationsKnownIssuesConversationLengthExceeded: 'https://docs' },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./reasoning_error_panel', () => {
-      const mocked = {
-      ReasoningErrorPanel: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="reasoningErrorPanel">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ReasoningErrorPanel: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="reasoningErrorPanel">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithIntl = (ui: React.ReactElement) =>
   render(<IntlProvider locale="en">{ui}</IntlProvider>);

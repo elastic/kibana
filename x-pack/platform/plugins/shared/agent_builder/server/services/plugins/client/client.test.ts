@@ -57,7 +57,7 @@ const mockEsClient: MockEsClient = {
 };
 
 vi.mock('./storage', async () => {
-  const actual = (await vi.importActual('./storage'));
+  const actual = await vi.importActual('./storage');
   return {
     ...actual,
     createStorage: vi.fn(() => ({
@@ -67,11 +67,11 @@ vi.mock('./storage', async () => {
 });
 
 vi.mock('crypto', () => {
-      const mocked = {
-      randomUUID: vi.fn(() => 'generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    randomUUID: vi.fn(() => 'generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PluginClient', () => {
   let client: PluginClient;

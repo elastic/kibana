@@ -16,8 +16,9 @@ import type { AlertsFiltersFormItemProps } from './alerts_filters_form_item';
 import { AlertsFiltersFormItem } from './alerts_filters_form_item';
 
 vi.mock('../filters_metadata', async () => {
-  const original: { alertsFiltersMetadata: typeof alertsFiltersMetadata } =
-    (await vi.importActual('../filters_metadata'));
+  const original: { alertsFiltersMetadata: typeof alertsFiltersMetadata } = await vi.importActual(
+    '../filters_metadata'
+  );
   return {
     alertsFiltersMetadata: Object.fromEntries(
       Object.entries(original.alertsFiltersMetadata).map(([key, value]) => [

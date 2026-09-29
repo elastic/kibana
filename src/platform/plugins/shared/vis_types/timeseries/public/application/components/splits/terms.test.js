@@ -14,18 +14,18 @@ import { shallow } from 'enzyme';
 import { SplitByTermsUI } from './terms';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      htmlIdGenerator: vi.fn(() => () => '42'),
-      EuiFlexGroup: (await vi.importActual('@elastic/eui')).EuiFlexGroup,
-      EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
-      EuiFormRow: (await vi.importActual('@elastic/eui')).EuiFormRow,
-      EuiFieldNumber: (await vi.importActual('@elastic/eui')).EuiFieldNumber,
-      EuiComboBox: (await vi.importActual('@elastic/eui')).EuiComboBox,
-      EuiFieldText: (await vi.importActual('@elastic/eui')).EuiFieldText,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    htmlIdGenerator: vi.fn(() => () => '42'),
+    EuiFlexGroup: (await vi.importActual('@elastic/eui')).EuiFlexGroup,
+    EuiFlexItem: (await vi.importActual('@elastic/eui')).EuiFlexItem,
+    EuiFormRow: (await vi.importActual('@elastic/eui')).EuiFormRow,
+    EuiFieldNumber: (await vi.importActual('@elastic/eui')).EuiFieldNumber,
+    EuiComboBox: (await vi.importActual('@elastic/eui')).EuiComboBox,
+    EuiFieldText: (await vi.importActual('@elastic/eui')).EuiFieldText,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('src/legacy/core_plugins/metrics/public/components/splits/terms.test.js', () => {
   let props;

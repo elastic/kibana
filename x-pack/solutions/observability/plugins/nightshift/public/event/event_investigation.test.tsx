@@ -20,25 +20,25 @@ const mockOpenChat = vi.fn();
 const mockGetRedirectUrl = vi.fn<string | undefined, [unknown]>();
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUiSetting: () => 'MMM D, YYYY @ HH:mm:ss.SSS',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          agentBuilder: { openChat: mockOpenChat },
-          share: {
-            url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } },
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        agentBuilder: { openChat: mockOpenChat },
+        share: {
+          url: { locators: { get: () => ({ getRedirectUrl: mockGetRedirectUrl }) } },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockEvent = (overrides: Partial<SignificantEvent> = {}): SignificantEvent => ({
   '@timestamp': '2026-07-10T12:00:00Z',

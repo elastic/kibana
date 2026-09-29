@@ -10,21 +10,21 @@ import { vi } from 'vitest';
 import { getSuccessResultMessage } from '.';
 
 vi.mock('../get_formatted_time', () => {
-      const mocked = {
-      getFormattedDate: vi.fn(() => 'mocked-date'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getFormattedDate: vi.fn(() => 'mocked-date'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../translations', () => {
-      const mocked = {
-      NO_MATCHING_ALERTS_VIA: vi.fn(() => 'no-matching-alerts'),
-      RAN_SUCCESSFULLY_VIA_WITH_DISCOVERIES_COUNT: vi.fn(() => 'with-discoveries'),
-      RAN_SUCCESSFULLY_VIA_NO_DISCOVERIES_COUNT: vi.fn(() => 'no-discoveries'),
-      RAN_SUCCESSFULLY_VIA_WITH_SUMMARY: vi.fn(() => 'with-summary'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NO_MATCHING_ALERTS_VIA: vi.fn(() => 'no-matching-alerts'),
+    RAN_SUCCESSFULLY_VIA_WITH_DISCOVERIES_COUNT: vi.fn(() => 'with-discoveries'),
+    RAN_SUCCESSFULLY_VIA_NO_DISCOVERIES_COUNT: vi.fn(() => 'no-discoveries'),
+    RAN_SUCCESSFULLY_VIA_WITH_SUMMARY: vi.fn(() => 'with-summary'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultProps = {
   alertsContextCount: 1,
@@ -72,7 +72,7 @@ describe('getSuccessResultMessage', () => {
     });
 
     it('passes hallucinationsFilteredCount when provided', async () => {
-      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = (await vi.importMock('../../translations'));
+      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = await vi.importMock('../../translations');
 
       getSuccessResultMessage({ ...summaryProps, hallucinationsFilteredCount: 1 });
 
@@ -82,7 +82,7 @@ describe('getSuccessResultMessage', () => {
     });
 
     it('passes hallucinationsFilteredCount as undefined when not provided (custom workflow)', async () => {
-      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = (await vi.importMock('../../translations'));
+      const { RAN_SUCCESSFULLY_VIA_WITH_SUMMARY } = await vi.importMock('../../translations');
 
       getSuccessResultMessage(summaryProps);
 

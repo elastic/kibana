@@ -19,9 +19,9 @@ vi.mock('../../stats');
 vi.mock('../../count_eslint_disable');
 vi.mock('../../count_enzyme_imports');
 
-const { collectApiStatsForPlugin } = (await vi.importMock('../../stats'));
-const { countEslintDisableLines } = (await vi.importMock('../../count_eslint_disable'));
-const { countEnzymeImports } = (await vi.importMock('../../count_enzyme_imports'));
+const { collectApiStatsForPlugin } = await vi.importMock('../../stats');
+const { countEslintDisableLines } = await vi.importMock('../../count_eslint_disable');
+const { countEnzymeImports } = await vi.importMock('../../count_enzyme_imports');
 
 describe('collectStats', () => {
   let log: ToolingLog;

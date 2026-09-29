@@ -87,9 +87,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        true
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(true);
     });
 
     it('should loop back to the start node', () => {
@@ -117,9 +115,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        false
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(false);
     });
 
     it('should finish the step', () => {
@@ -228,9 +224,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean true condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        true
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(true);
 
       underTest.run();
 
@@ -238,9 +232,7 @@ describe('ExitWhileNodeImpl', () => {
     });
 
     it('should handle boolean false condition', () => {
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        false
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(false);
 
       underTest.run();
 
@@ -270,9 +262,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 1,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        true
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(true);
 
       underTest.run();
 
@@ -301,9 +291,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        false
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(false);
 
       underTest.run();
 
@@ -331,9 +319,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 2,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        false
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(false);
 
       underTest.run();
 
@@ -367,9 +353,7 @@ describe('ExitWhileNodeImpl', () => {
       (stepExecutionRuntime.getCurrentStepState as Mock).mockReturnValue({
         iteration: 0,
       });
-      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(
-        true
-      );
+      (stepExecutionRuntime.contextManager.renderValueWithContext as Mock).mockReturnValue(true);
 
       underTest.run();
 

@@ -21,18 +21,18 @@ import type { BulkMuteUnmuteAlertsRequestBodyV1 } from '../../../../../common/ro
 const rulesClient = rulesClientMock.create();
 
 vi.mock('../../../../lib/license_api_access', () => {
-      const mocked = {
-      verifyApiAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    verifyApiAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../validation', () => {
-      const mocked = {
-      validateMaxMuteUnmuteInstancesV1: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateMaxMuteUnmuteInstancesV1: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   vi.resetAllMocks();

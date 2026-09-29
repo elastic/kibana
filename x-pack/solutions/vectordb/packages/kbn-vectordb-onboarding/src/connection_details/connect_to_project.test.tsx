@@ -17,12 +17,12 @@ import type { OnboardingServices } from '../services';
 
 const mockCopy = vi.fn();
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCopy: vi.fn(({ children }) => children(mockCopy)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCopy: vi.fn(({ children }) => children(mockCopy)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const KIBANA_URL = 'https://kibana.example.com';
 const ELASTICSEARCH_URL = 'https://elasticsearch.example.com:443';

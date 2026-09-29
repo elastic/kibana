@@ -27,37 +27,37 @@ import { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
 
 vi.mock('../../utils', async () => {
-      const mocked = {
-      ...(await vi.importActual<typeof import('../../utils')>('../../utils')),
-      buildStepExecutionId: vi.fn().mockImplementation((executionId: string, stepId: string) => {
-        return `${stepId}_generated`;
-      }),
-      getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
-      buildWorkflowExecutionUrl: vi
-        .fn()
-        .mockImplementation(
-          (
-            kibanaUrl: string,
-            spaceId: string,
-            workflowId: string,
-            executionId: string,
-            stepExecutionId?: string
-          ) => {
-            const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-            const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
-            const params = new URLSearchParams({
-              executionId,
-              tab: 'executions',
-            });
-            if (stepExecutionId) {
-              params.set('stepExecutionId', stepExecutionId);
-            }
-            return `${baseUrl}?${params.toString()}`;
+  const mocked = {
+    ...(await vi.importActual<typeof import('../../utils')>('../../utils')),
+    buildStepExecutionId: vi.fn().mockImplementation((executionId: string, stepId: string) => {
+      return `${stepId}_generated`;
+    }),
+    getKibanaUrl: vi.fn().mockReturnValue('http://localhost:5601'),
+    buildWorkflowExecutionUrl: vi
+      .fn()
+      .mockImplementation(
+        (
+          kibanaUrl: string,
+          spaceId: string,
+          workflowId: string,
+          executionId: string,
+          stepExecutionId?: string
+        ) => {
+          const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+          const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+          const params = new URLSearchParams({
+            executionId,
+            tab: 'executions',
+          });
+          if (stepExecutionId) {
+            params.set('stepExecutionId', stepExecutionId);
           }
-        ),
-    };
-      return { ...mocked, default: mocked };
-    });
+          return `${baseUrl}?${params.toString()}`;
+        }
+      ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dependencies = mockContextDependencies();
 

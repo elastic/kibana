@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockHttpValues } from '../../../__mocks__/kea_logic';
+
+import { vi } from 'vitest';
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { generateApiKey } from './generate_connector_api_key_api_logic';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      createConnectorSecret: vi.fn(),
-      updateConnectorSecret: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createConnectorSecret: vi.fn(),
+    updateConnectorSecret: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('generateConnectorApiKeyApiLogic', () => {
   const { http } = mockHttpValues;

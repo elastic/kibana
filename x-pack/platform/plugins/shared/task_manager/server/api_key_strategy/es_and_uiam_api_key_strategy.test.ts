@@ -27,15 +27,15 @@ import {
 // `getUiamApiKeySecret` is a pure format helper the assertions below rely on, so it keeps its real
 // implementation while the credential-minting helpers are stubbed.
 vi.mock('../lib/api_key_utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../lib/api_key_utils')),
-      createApiKey: vi.fn(),
-      hasApiKey: vi.fn(),
-      getApiKeyFromRequest: vi.fn(),
-      shouldCloneApiKeyFromRequest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../lib/api_key_utils')),
+    createApiKey: vi.fn(),
+    hasApiKey: vi.fn(),
+    getApiKeyFromRequest: vi.fn(),
+    shouldCloneApiKeyFromRequest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const createApiKeyMock = createApiKey as MockedFunction<typeof createApiKey>;
 const hasApiKeyMock = hasApiKey as MockedFunction<typeof hasApiKey>;
 const getApiKeyFromRequestMock = getApiKeyFromRequest as MockedFunction<

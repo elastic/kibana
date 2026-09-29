@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const getServerTLSOptionsMock = vi.fn();
 
 vi.doMock('./get_tls_options', async () => {
-  const actual = (await vi.importActual('./get_tls_options'));
+  const actual = await vi.importActual('./get_tls_options');
   return {
     ...actual,
     getServerTLSOptions: getServerTLSOptionsMock,

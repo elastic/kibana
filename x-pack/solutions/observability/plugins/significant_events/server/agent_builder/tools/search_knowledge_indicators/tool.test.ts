@@ -21,11 +21,11 @@ import {
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 
 vi.mock('../../../routes/utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ki_search tool', () => {
   const logger = loggingSystemMock.createLogger();

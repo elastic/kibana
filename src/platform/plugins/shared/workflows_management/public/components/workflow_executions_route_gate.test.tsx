@@ -25,11 +25,11 @@ const setExecutionsViewEnabled = (services: StartServicesMock, enabled: boolean)
 };
 
 vi.mock('../pages/executions', () => {
-      const mocked = {
-      WorkflowExecutionsPage: () => <div data-test-subj="workflowExecutionsPage" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowExecutionsPage: () => <div data-test-subj="workflowExecutionsPage" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const WorkflowsHomeStub = () => <div data-test-subj="workflowsHomeStub" />;
 

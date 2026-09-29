@@ -18,36 +18,36 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 const RealDate = Date;
 
 vi.mock('../lib/alerts/fetch_logstash_versions', () => {
-      const mocked = {
-      fetchLogstashVersions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchLogstashVersions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../lib/alerts/fetch_clusters', () => {
-      const mocked = {
-      fetchClusters: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    fetchClusters: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../static_globals', () => {
-      const mocked = {
-      Globals: {
-        app: {
-          url: 'UNIT_TEST_URL',
-          getLogger: () => ({ debug: vi.fn() }),
-          config: {
-            ui: {
-              show_license_expiration: true,
-              ccs: { enabled: true },
-              container: { elasticsearch: { enabled: false } },
-            },
+  const mocked = {
+    Globals: {
+      app: {
+        url: 'UNIT_TEST_URL',
+        getLogger: () => ({ debug: vi.fn() }),
+        config: {
+          ui: {
+            show_license_expiration: true,
+            ccs: { enabled: true },
+            container: { elasticsearch: { enabled: false } },
           },
         },
       },
-    };
-      return { ...mocked, default: mocked };
-    });
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('LogstashVersionMismatchRule', () => {
   it('should have defaults', () => {

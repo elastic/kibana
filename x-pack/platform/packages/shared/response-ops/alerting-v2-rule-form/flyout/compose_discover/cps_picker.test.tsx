@@ -14,19 +14,19 @@ import { useRuleFormServices } from '../../form/contexts/rule_form_context';
 import { CpsPicker } from './cps_picker';
 
 vi.mock('../../form/contexts/rule_form_context', () => {
-      const mocked = {
-      useRuleFormServices: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormServices: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cps-utils', () => {
-      const mocked = {
-      useFetchProjects: vi.fn(() => []),
-      ProjectPickerContent: () => <div data-test-subj="projectPickerContent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchProjects: vi.fn(() => []),
+    ProjectPickerContent: () => <div data-test-subj="projectPickerContent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRuleFormServices = vi.mocked(useRuleFormServices);
 

@@ -26,41 +26,39 @@ import { getMappedNonEcsValue } from './utils';
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: () => mockDispatch,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: () => mockDispatch,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockUseDataGridColumnsCellActions = vi.fn(
-  (_: object): Array<Array<() => JSX.Element>> => []
-);
+const mockUseDataGridColumnsCellActions = vi.fn((_: object): Array<Array<() => JSX.Element>> => []);
 vi.mock('@kbn/cell-actions', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/cell-actions')),
-      useDataGridColumnsCellActions: (params: object) => mockUseDataGridColumnsCellActions(params),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/cell-actions')),
+    useDataGridColumnsCellActions: (params: object) => mockUseDataGridColumnsCellActions(params),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const headersJustTimestamp = defaultHeaders.filter((h) => h.id === '@timestamp');
 const mockGetColumnHeaders = vi.fn(() => headersJustTimestamp);
 vi.mock('./column_headers/helpers', async () => {
-      const mocked = {
-      ...(await vi.importActual('./column_headers/helpers')),
-      getColumnHeaders: () => mockGetColumnHeaders(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./column_headers/helpers')),
+    getColumnHeaders: () => mockGetColumnHeaders(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_selector', () => {
-      const mocked = {
-      useShallowEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
-      useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useShallowEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
+    useDeepEqualSelector: () => mockGlobalState.dataTable.tableById['table-test'],
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataViewId = 'security-solution-default';
 

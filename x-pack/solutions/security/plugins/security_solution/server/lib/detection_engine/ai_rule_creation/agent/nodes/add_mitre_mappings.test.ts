@@ -20,51 +20,51 @@ import { resetResolveMitreBucketsCache } from '../../../mitre/resolve_mitre_buck
 
 // Mock the prompt so the LangChain chain doesn't need real models or prompt templates.
 vi.mock('./prompts', () => {
-      const mocked = {
-      MITRE_MAPPING_SELECTION_PROMPT: {
-        pipe: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MITRE_MAPPING_SELECTION_PROMPT: {
+      pipe: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // 3-entity fixture for the legacy blob path. Uses the legacy MitreTactic/MitreTechnique/MitreSubTechnique
 // shape so the real transformLegacyMitreData adapter can be exercised without loading the 8.4k-line blob.
 vi.mock('../../../../../../common/detection_engine/mitre/mitre_tactics_techniques', () => {
-      const mocked = {
-      tactics: [
-        {
-          id: 'TA0001',
-          name: 'Initial Access',
-          reference: 'https://attack.mitre.org/tactics/TA0001/',
-          value: 'initialAccess',
-          label: 'Initial Access (TA0001)',
-        },
-      ],
-      techniques: [
-        {
-          id: 'T1078',
-          name: 'Valid Accounts',
-          reference: 'https://attack.mitre.org/techniques/T1078/',
-          value: 'validAccounts',
-          label: 'Valid Accounts (T1078)',
-          tactics: ['initial-access'],
-        },
-      ],
-      subtechniques: [
-        {
-          id: 'T1078.001',
-          name: 'Default Accounts',
-          reference: 'https://attack.mitre.org/techniques/T1078/001/',
-          value: 'defaultAccounts',
-          label: 'Default Accounts (T1078.001)',
-          tactics: ['initial-access'],
-          techniqueId: 'T1078',
-        },
-      ],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    tactics: [
+      {
+        id: 'TA0001',
+        name: 'Initial Access',
+        reference: 'https://attack.mitre.org/tactics/TA0001/',
+        value: 'initialAccess',
+        label: 'Initial Access (TA0001)',
+      },
+    ],
+    techniques: [
+      {
+        id: 'T1078',
+        name: 'Valid Accounts',
+        reference: 'https://attack.mitre.org/techniques/T1078/',
+        value: 'validAccounts',
+        label: 'Valid Accounts (T1078)',
+        tactics: ['initial-access'],
+      },
+    ],
+    subtechniques: [
+      {
+        id: 'T1078.001',
+        name: 'Default Accounts',
+        reference: 'https://attack.mitre.org/techniques/T1078/001/',
+        value: 'defaultAccounts',
+        label: 'Default Accounts (T1078.001)',
+        tactics: ['initial-access'],
+        techniqueId: 'T1078',
+      },
+    ],
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { MITRE_MAPPING_SELECTION_PROMPT } from './prompts';
 

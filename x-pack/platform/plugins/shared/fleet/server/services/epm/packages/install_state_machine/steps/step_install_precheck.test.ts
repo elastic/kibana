@@ -19,14 +19,14 @@ import { ensureFleetGlobalEsAssets } from '../../../../setup/ensure_fleet_global
 vi.mock('../../../..');
 vi.mock('../../../../setup/ensure_fleet_global_es_assets');
 vi.mock('../../../elasticsearch/template/default_settings', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../elasticsearch/template/default_settings')),
-      getILMMigrationStatus: vi.fn().mockResolvedValue(new Map()),
-      getILMPolicies: vi.fn().mockResolvedValue(new Map()),
-      saveILMMigrationChanges: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../elasticsearch/template/default_settings')),
+    getILMMigrationStatus: vi.fn().mockResolvedValue(new Map()),
+    getILMPolicies: vi.fn().mockResolvedValue(new Map()),
+    saveILMMigrationChanges: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('stepInstallPrecheck', () => {
   const mockGetILMPolicies = getILMPolicies as Mock;

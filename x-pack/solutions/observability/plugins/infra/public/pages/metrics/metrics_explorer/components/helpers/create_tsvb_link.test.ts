@@ -16,11 +16,11 @@ import {
 import type { MetricsExplorerOptions } from '../../hooks/use_metrics_explorer_options';
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('test-id'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('test-id'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const indexPattern = 'metricbeat-*';
 const series = { id: 'example-01', rows: [], columns: [] };

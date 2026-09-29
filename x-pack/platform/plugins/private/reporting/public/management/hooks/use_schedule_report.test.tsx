@@ -19,11 +19,11 @@ import type { HttpSetup } from '@kbn/core/public';
 const mockHttp = {} as HttpSetup;
 
 vi.mock('../apis/schedule_report', () => {
-      const mocked = {
-      scheduleReport: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    scheduleReport: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={testQueryClient}>{children}</QueryClientProvider>

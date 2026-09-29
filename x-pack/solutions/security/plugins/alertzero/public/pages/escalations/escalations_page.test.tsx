@@ -29,35 +29,35 @@ import { EscalationsPage } from './escalations_page';
 
 // These hooks open the Agent Builder flyout and manage the URL; stub them out here.
 vi.mock('../conversations/use_investigation_details', () => {
-      const mocked = {
-      useInvestigationDetails: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvestigationDetails: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../conversations/conversations_url_params', () => {
-      const mocked = {
-      useConversationsUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationsUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/agentic-investigations-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
-      useAssignEscalation: vi.fn(),
-      useListEscalations: vi.fn(),
-      useUserProfiles: vi.fn(),
-      useSuggestUserProfiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agentic-investigations-plugin/public')),
+    useAssignEscalation: vi.fn(),
+    useListEscalations: vi.fn(),
+    useUserProfiles: vi.fn(),
+    useSuggestUserProfiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Replace AssignToUsers with a minimal stub: clicking the "assign" button calls
 // onChange with a known profile. This isolates the page-level mutation wiring from the
 // internals of the EUI UserProfilesPopover (which renders in a portal difficult to drive
 // in JSDOM tests).
 vi.mock('@kbn/agentic-investigations-common', async () => {
-  const actual = (await vi.importActual('@kbn/agentic-investigations-common'));
+  const actual = await vi.importActual('@kbn/agentic-investigations-common');
   return {
     ...actual,
     // eslint-disable-next-line react/display-name
@@ -87,11 +87,11 @@ vi.mock('@kbn/agentic-investigations-common', async () => {
 
 // Doc-title hook has a DOM side-effect irrelevant to these tests.
 vi.mock('../../hooks/use_alertzero_doc_title', () => {
-      const mocked = {
-      useAlertZeroDocTitle: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertZeroDocTitle: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAssignEscalation = useAssignEscalation as Mock;
 const mockUseListEscalations = useListEscalations as Mock;

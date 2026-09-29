@@ -14,36 +14,36 @@ import { renderingServiceMock } from '@kbn/core-rendering-browser-mocks';
 import { openSnoozeExpiryModal } from './snooze_expiry_modal';
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: (node: unknown) => (element: HTMLElement) => {
-        // eslint-disable-next-line @typescript-eslint/no-var-requires
-        const { createRoot } = require('react-dom/client');
-        const root = createRoot(element);
-        root.render(node);
-        return () => root.unmount();
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: (node: unknown) => (element: HTMLElement) => {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      const { createRoot } = require('react-dom/client');
+      const root = createRoot(element);
+      root.render(node);
+      return () => root.unmount();
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/response-ops-alert-snooze', () => {
-      const mocked = {
-      QuickSnoozePanel: ({
-        onScheduleChange,
-      }: {
-        onScheduleChange: (endDate: string | null | undefined) => void;
-      }) => (
-        <input
-          data-test-subj="snoozeFormInput"
-          onChange={(e) => {
-            const raw = (e.target as HTMLInputElement).value;
-            onScheduleChange(raw === '' ? null : raw);
-          }}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    QuickSnoozePanel: ({
+      onScheduleChange,
+    }: {
+      onScheduleChange: (endDate: string | null | undefined) => void;
+    }) => (
+      <input
+        data-test-subj="snoozeFormInput"
+        onChange={(e) => {
+          const raw = (e.target as HTMLInputElement).value;
+          onScheduleChange(raw === '' ? null : raw);
+        }}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockOverlays = overlayServiceMock.createStartContract();
 const mockRendering = renderingServiceMock.create();

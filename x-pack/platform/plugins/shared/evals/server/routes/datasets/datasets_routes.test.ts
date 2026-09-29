@@ -20,7 +20,7 @@ import { createEvaluatorRegistryMock } from '../../evaluators/registry.mock';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 
 vi.mock('../../remote_kibana/forward_to_remote_kibana', async () => {
-  const actual = (await vi.importActual('../../remote_kibana/forward_to_remote_kibana'));
+  const actual = await vi.importActual('../../remote_kibana/forward_to_remote_kibana');
   return {
     ...actual,
     forwardToRemoteKibana: vi.fn(),
@@ -1531,8 +1531,7 @@ describe('dataset routes', () => {
         logger,
         canEncrypt,
         evaluatorRegistry: createEvaluatorRegistryMock(),
-        getInferenceStart: async () =>
-          ({ getClient: vi.fn() } as unknown as InferenceServerStart),
+        getInferenceStart: async () => ({ getClient: vi.fn() } as unknown as InferenceServerStart),
         getEncryptedSavedObjectsStart: async () => encryptedSavedObjectsMock.createStart(),
         getInternalRemoteConfigsSoClient: async () => savedObjectsClientMock.create(),
       });

@@ -13,15 +13,15 @@ import { render } from '@testing-library/react';
 import { ServiceNameWithIcon } from '.';
 
 vi.mock('@kbn/custom-icons', () => {
-      const mocked = {
-      AgentIcon: ({ agentName, size }: any) => (
-        <span data-test-subj="agent-icon">
-          {agentName}-{size}
-        </span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentIcon: ({ agentName, size }: any) => (
+      <span data-test-subj="agent-icon">
+        {agentName}-{size}
+      </span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ServiceNameWithIcon', () => {
   afterAll(() => {

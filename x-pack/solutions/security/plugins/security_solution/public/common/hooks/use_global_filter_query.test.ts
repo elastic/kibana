@@ -19,7 +19,7 @@ const mockGlobalQuerySelector = vi.fn();
 const mockUseInvalidFilterQuery = vi.fn();
 
 vi.mock('../store', async () => {
-  const original = (await vi.importActual('../store'));
+  const original = await vi.importActual('../store');
   return {
     ...original,
     inputsSelectors: {
@@ -31,11 +31,11 @@ vi.mock('../store', async () => {
 });
 
 vi.mock('./use_invalid_filter_query', () => {
-      const mocked = {
-      useInvalidFilterQuery: (...args: unknown[]) => mockUseInvalidFilterQuery(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidFilterQuery: (...args: unknown[]) => mockUseInvalidFilterQuery(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useGlobalFilterQuery', () => {
   beforeEach(() => {

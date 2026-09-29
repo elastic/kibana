@@ -48,10 +48,7 @@ const redactNamespacesSpy = vi.spyOn(
 );
 const authorizeSpy = vi.spyOn(SavedObjectsSecurityExtension.prototype as any, 'authorize');
 const auditHelperSpy = vi.spyOn(SavedObjectsSecurityExtension.prototype as any, 'auditHelper');
-const addAuditEventSpy = vi.spyOn(
-  SavedObjectsSecurityExtension.prototype as any,
-  'addAuditEvent'
-);
+const addAuditEventSpy = vi.spyOn(SavedObjectsSecurityExtension.prototype as any, 'addAuditEvent');
 const getCurrentUser = vi.fn();
 
 const accessControlServiceMock = {
@@ -118,9 +115,9 @@ function setupSimpleCheckPrivsMockResolve(
 
 function setup({ includeSavedObjectNames = true }: { includeSavedObjectNames?: boolean } = {}) {
   const actions = new Actions();
-  vi
-    .spyOn(actions.savedObject, 'get')
-    .mockImplementation((type: string, action: string) => `mock-saved_object:${type}/${action}`);
+  vi.spyOn(actions.savedObject, 'get').mockImplementation(
+    (type: string, action: string) => `mock-saved_object:${type}/${action}`
+  );
   const auditLogger = auditLoggerMock.create();
   // @ts-expect-error
   auditLogger.includeSavedObjectNames = includeSavedObjectNames;

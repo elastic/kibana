@@ -20,21 +20,21 @@ import { useAlertsPrivileges } from '../../containers/detection_engine/alerts/us
 import * as i18n from '../../components/alerts_table/translations';
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsCapabilities: vi.fn(),
-      useWorkflowsUIEnabledSetting: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsCapabilities: vi.fn(),
+    useWorkflowsUIEnabledSetting: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUseCaseAttachmentWorkflowRouting = vi.fn();
 vi.mock('@kbn/cases-plugin/public', () => {
-      const mocked = {
-      useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCaseAttachmentWorkflowRouting: () => mockUseCaseAttachmentWorkflowRouting(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useWorkflowsCapabilitiesMock = useWorkflowsCapabilities as MockedFunction<
   typeof useWorkflowsCapabilities
@@ -57,7 +57,9 @@ const createCapabilities = (
 };
 
 vi.mock('../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel', async () => {
-  const actual = (await vi.importActual('../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'));
+  const actual = await vi.importActual(
+    '../../components/alerts_table/timeline_actions/use_run_alert_workflow_panel'
+  );
   const MockAlertWorkflowsPanel = ({
     alertIds,
   }: {

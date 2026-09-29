@@ -20,12 +20,12 @@ const validatePlaywrightConfigMock = vi.spyOn(configValidator, 'validatePlaywrig
 
 // Mock the entire module to avoid spy redefinition issues
 vi.mock('../../common/utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../common/utils')),
-      validateAndProcessTestFiles: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../common/utils')),
+    validateAndProcessTestFiles: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const validateAndProcessTestFilesMock =
   testFilesUtils.validateAndProcessTestFiles as MockedFunction<

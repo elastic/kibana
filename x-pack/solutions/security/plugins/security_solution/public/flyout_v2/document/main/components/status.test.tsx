@@ -15,30 +15,30 @@ import { Status } from './status';
 import { STATUS_TITLE_TEST_ID } from './test_ids';
 
 vi.mock('./status_popover_button', () => {
-      const mocked = {
-      StatusPopoverButton: ({
-        eventId,
-        contextId,
-        onStatusUpdated,
-        disabled,
-      }: {
-        eventId: string;
-        contextId: string;
-        onStatusUpdated?: () => void;
-        disabled?: boolean;
-      }) => (
-        <button
-          data-test-subj="mockStatusPopoverButton"
-          data-event-id={eventId}
-          data-context-id={contextId}
-          data-disabled={String(disabled ?? false)}
-          onClick={onStatusUpdated}
-          type="button"
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StatusPopoverButton: ({
+      eventId,
+      contextId,
+      onStatusUpdated,
+      disabled,
+    }: {
+      eventId: string;
+      contextId: string;
+      onStatusUpdated?: () => void;
+      disabled?: boolean;
+    }) => (
+      <button
+        data-test-subj="mockStatusPopoverButton"
+        data-event-id={eventId}
+        data-context-id={contextId}
+        data-disabled={String(disabled ?? false)}
+        onClick={onStatusUpdated}
+        type="button"
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockHit = (
   flattened: DataTableRecord['flattened'],

@@ -638,9 +638,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = vi
-        .fn()
-        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -681,9 +679,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = vi
-        .fn()
-        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -788,9 +784,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = vi
-        .fn()
-        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -873,9 +867,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = vi
-        .fn()
-        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -943,9 +935,7 @@ describe('current status route', () => {
         },
       };
       const service = new OverviewStatusService(routeContext);
-      service.getMonitorConfigs = vi
-        .fn()
-        .mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
+      service.getMonitorConfigs = vi.fn().mockResolvedValue([makeMonitor('mon1', [usLoc, euLoc])]);
 
       const result = await service.getOverviewStatus();
 
@@ -2652,9 +2642,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = vi
-            .fn()
-            .mockResolvedValue(testMonitors as any);
+          overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
           const result = await overviewStatusService.getOverviewStatus();
 
@@ -2707,9 +2695,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = vi
-            .fn()
-            .mockResolvedValue(testMonitors as any);
+          overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
           const result = await overviewStatusService.getOverviewStatus();
           if (!result.configs || !result.pendingIds) {
@@ -2757,9 +2743,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = vi
-            .fn()
-            .mockResolvedValue(testMonitors as any);
+          overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
           const result = await overviewStatusService.getOverviewStatus();
           if (!result.configs || !result.staleIds || !result.pendingIds) {
@@ -2790,9 +2774,7 @@ describe('current status route', () => {
               syntheticsEsClient
             )
           );
-          overviewStatusService.getMonitorConfigs = vi
-            .fn()
-            .mockResolvedValue(testMonitors as any);
+          overviewStatusService.getMonitorConfigs = vi.fn().mockResolvedValue(testMonitors as any);
 
           const result = await overviewStatusService.getOverviewStatus();
 

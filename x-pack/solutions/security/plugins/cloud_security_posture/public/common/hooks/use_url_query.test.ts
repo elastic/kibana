@@ -14,12 +14,12 @@ import { useLocation, useHistory } from 'react-router-dom';
 import { encodeQuery } from '@kbn/cloud-security-posture';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUrlQuery', () => {
   it('uses default query when no query is provided', () => {

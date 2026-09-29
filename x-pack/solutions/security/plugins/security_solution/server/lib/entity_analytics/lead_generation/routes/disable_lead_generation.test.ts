@@ -21,11 +21,11 @@ import {
 
 const mockRemoveTask = vi.fn();
 vi.mock('../tasks', () => {
-      const mocked = {
-      removeLeadGenerationTask: (...args: unknown[]) => mockRemoveTask(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    removeLeadGenerationTask: (...args: unknown[]) => mockRemoveTask(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('disableLeadGenerationRoute', () => {
   let server: ReturnType<typeof serverMock.create>;

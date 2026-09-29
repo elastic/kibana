@@ -25,42 +25,42 @@ import { queryKeys } from '../query_keys';
 import { useConversation, useConversationReadOnly } from './use_conversation';
 
 vi.mock('../context/conversation/use_conversation_id', () => {
-      const mocked = {
-      useConversationId: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationId: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context/streaming/streaming_context', () => {
-      const mocked = {
-      useStreamingContext: vi.fn(),
-      useStreamRecord: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamingContext: vi.fn(),
+    useStreamRecord: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGet = vi.fn();
 
 vi.mock('./use_agent_builder_service', () => {
-      const mocked = {
-      useAgentBuilderServices: () => ({ conversationsService: { get: mockGet } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderServices: () => ({ conversationsService: { get: mockGet } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../context/conversation/conversation_context', () => {
-      const mocked = {
-      useConversationContext: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationContext: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_last_agent_id', () => {
-      const mocked = {
-      useLastAgentId: () => ({ agentId: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLastAgentId: () => ({ agentId: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const stubConversationStreamService = new ConversationStreamService({
   getChatEvents$: () => NEVER,

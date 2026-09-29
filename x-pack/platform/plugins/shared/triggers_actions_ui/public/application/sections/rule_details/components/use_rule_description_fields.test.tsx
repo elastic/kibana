@@ -20,11 +20,11 @@ import { existsFilter } from '@kbn/es-query/src/filters/stubs';
 vi.mock('../../../../common/lib/kibana/kibana_react');
 
 vi.mock('@kbn/unified-search-plugin/public', () => {
-      const mocked = {
-      FilterItems: () => <div data-test-subj="filter-items-mock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FilterItems: () => <div data-test-subj="filter-items-mock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataViewGetMock = vi.fn();
 

@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { mockLogger } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { mockLogger } from '../../__mocks__';
-
 vi.mock('@kbn/core/server', () => {
-      const mocked = {
-      SavedObjectsErrorHelpers: {
-        isNotFoundError: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SavedObjectsErrorHelpers: {
+      isNotFoundError: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { getSavedObjectAttributesFromRepo, incrementUICounter } from './telemetry';

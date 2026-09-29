@@ -737,12 +737,14 @@ vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana', () => ({
 }));
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+    )),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@faker-js/faker', () => {
   const originalModule = require('@faker-js/faker');
@@ -759,13 +761,13 @@ vi.mock('@faker-js/faker', () => {
 });
 
 vi.mock('@kbn/inference-endpoint-ui-common/src/hooks/use_providers', () => {
-      const mocked = {
-      useProviders: vi.fn(() => ({
-        data: providersSchemas,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProviders: vi.fn(() => ({
+      data: providersSchemas,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const openAiConnector = createMockActionConnector({
   actionTypeId: '.inference',

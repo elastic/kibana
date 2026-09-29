@@ -14,12 +14,12 @@ import { WrappedHelper } from '../../../../utils/testing';
 import { fetchMonitorFiltersAction } from '../../../../state';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useMonitorListFilters', () => {
   vi.useFakeTimers();

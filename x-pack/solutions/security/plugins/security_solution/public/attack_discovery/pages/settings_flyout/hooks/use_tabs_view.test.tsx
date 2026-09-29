@@ -21,32 +21,32 @@ import type { AlertsSelectionSettings } from '../types';
 import { SETTINGS_TAB_ID } from '../constants';
 
 vi.mock('react-router', () => {
-      const mocked = {
-      ...require('react-router'),
-      useLocation: vi.fn().mockReturnValue({
-        search: '',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn().mockReturnValue({
+      search: '',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_settings_view', () => {
-      const mocked = {
-      useSettingsView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSettingsView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_schedule_view', () => {
-      const mocked = {
-      useScheduleView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useScheduleView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../schedule/logic/use_find_schedules', () => {
-      const mocked = {
-      useFindAttackDiscoverySchedules: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFindAttackDiscoverySchedules: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSettingsView = useSettingsView as Mock;
 const mockUseScheduleView = useScheduleView as Mock;

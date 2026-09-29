@@ -17,18 +17,18 @@ import { useInvalidateListWorkflows } from '../use_list_workflows';
 
 vi.mock('../../../../../../common/lib/kibana');
 vi.mock('../use_list_workflows', () => {
-      const mocked = {
-      useInvalidateListWorkflows: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateListWorkflows: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn((node: unknown) => node),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn((node: unknown) => node),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as MockedFunction<typeof useKibana>;
 const mockUseInvalidateListWorkflows = useInvalidateListWorkflows as MockedFunction<
@@ -40,15 +40,15 @@ const mockAddError = vi.fn();
 const mockAddInfo = vi.fn();
 
 vi.mock('../../../../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({
-        addError: mockAddError,
-        addInfo: mockAddInfo,
-        addSuccess: mockAddSuccess,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({
+      addError: mockAddError,
+      addInfo: mockAddInfo,
+      addSuccess: mockAddSuccess,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const GENERATE_WORKFLOW_URL = '/internal/attack_discovery/_generate_workflow';
 

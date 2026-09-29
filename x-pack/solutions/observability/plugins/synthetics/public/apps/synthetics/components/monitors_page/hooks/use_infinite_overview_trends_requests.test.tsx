@@ -15,20 +15,20 @@ import type { OverviewStatusMetaData } from '../overview/types';
 import * as reduxHooks from 'react-redux-v7';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-      useSelector: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+    useSelector: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_overview_trends_requests', () => {
-      const mocked = {
-      useOverviewTrendsRequests: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useOverviewTrendsRequests: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useOverviewTrendsRequests } from './use_overview_trends_requests';
 

@@ -25,9 +25,7 @@ vi.mock('./check_for_unknown_docs');
 vi.mock('./calculate_exclude_filters');
 vi.mock('./delete_by_query');
 
-const mockCheckForUnknownDocs = checkForUnknownDocs as MockedFunction<
-  typeof checkForUnknownDocs
->;
+const mockCheckForUnknownDocs = checkForUnknownDocs as MockedFunction<typeof checkForUnknownDocs>;
 
 const mockCalculateExcludeFilters = calculateExcludeFilters as MockedFunction<
   typeof calculateExcludeFilters

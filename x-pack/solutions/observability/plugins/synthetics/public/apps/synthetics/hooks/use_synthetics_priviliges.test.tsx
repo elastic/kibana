@@ -13,11 +13,11 @@ import { render, WrappedHelper } from '../utils/testing';
 import { useSyntheticsPrivileges } from './use_synthetics_priviliges';
 
 vi.mock('../../../hooks/use_capabilities', () => {
-      const mocked = {
-      useCanReadSyntheticsIndex: vi.fn().mockReturnValue({ canRead: true, loading: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanReadSyntheticsIndex: vi.fn().mockReturnValue({ canRead: true, loading: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
   const actual = require('react-redux-v7');

@@ -19,20 +19,20 @@ import * as appToastsModule from '../../../../../common/hooks/use_app_toasts';
 vi.mock('../../../../../common/components/toolbar/bulk_actions/update_alerts');
 vi.mock('../../../../../common/hooks/use_app_toasts');
 vi.mock('../../../use_find_attack_discoveries', () => {
-      const mocked = {
-      useInvalidateFindAttackDiscoveries: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInvalidateFindAttackDiscoveries: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./translations', () => {
-      const mocked = {
-      SUCCESSFULLY_MARKED_ALERTS: vi.fn(() => 'success'),
-      UPDATED_ALERTS_WITH_VERSION_CONFLICTS: vi.fn(() => 'version conflict'),
-      PARTIALLY_UPDATED_ALERTS: vi.fn(() => 'partial'),
-      ERROR_UPDATING_ALERTS: 'error',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SUCCESSFULLY_MARKED_ALERTS: vi.fn(() => 'success'),
+    UPDATED_ALERTS_WITH_VERSION_CONFLICTS: vi.fn(() => 'version conflict'),
+    PARTIALLY_UPDATED_ALERTS: vi.fn(() => 'partial'),
+    ERROR_UPDATING_ALERTS: 'error',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useUpdateAlertsStatus', () => {
   let addSuccess: Mock;

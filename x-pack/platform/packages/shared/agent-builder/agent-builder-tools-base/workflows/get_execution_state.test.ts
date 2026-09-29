@@ -14,11 +14,11 @@ import { getExecutionState, toWorkflowExecutionState } from './get_execution_sta
 import { getWorkflowOutput } from './get_workflow_output';
 
 vi.mock('./get_workflow_output', () => {
-      const mocked = {
-      getWorkflowOutput: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getWorkflowOutput: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getWorkflowOutputMock = vi.mocked(getWorkflowOutput);
 

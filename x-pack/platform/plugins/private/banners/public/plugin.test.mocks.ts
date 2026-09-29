@@ -9,8 +9,8 @@ import { vi } from 'vitest';
 
 export const getBannerInfoMock = vi.fn();
 vi.doMock('./get_banner_info', () => {
-      const mocked = {
-      getBannerInfo: getBannerInfoMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBannerInfo: getBannerInfoMock,
+  };
+  return { ...mocked, default: mocked };
+});

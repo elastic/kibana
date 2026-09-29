@@ -31,29 +31,29 @@ import { useUpsellingComponent } from '../../../../common/hooks/use_upselling';
 vi.mock('../../../../common/hooks/use_upselling');
 vi.mock('../hooks/use_graph_preview');
 vi.mock('@kbn/cloud-security-posture-graph/src/hooks', () => {
-      const mocked = {
-      useFetchGraphData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFetchGraphData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: { trackUiMetric: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: { trackUiMetric: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('@kbn/cloud-security-posture-graph', () => {
-      const mocked = {
-      Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Graph: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../shared/components/graph_preview', () => {
-      const mocked = {
-      GraphPreview: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    GraphPreview: () => <div data-test-subj="securitySolutionFlyoutGraphPreview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUpsellingComponent = useUpsellingComponent as Mock;
 const mockUseGraphPreview = useGraphPreview as Mock;

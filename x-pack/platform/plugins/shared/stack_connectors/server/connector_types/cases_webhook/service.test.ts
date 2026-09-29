@@ -26,7 +26,7 @@ import type { ExternalService } from './types';
 const logger = loggingSystemMock.create().get() as Mocked<Logger>;
 
 vi.mock('@kbn/actions-plugin/server/lib/axios_utils', async () => {
-  const originalUtils = (await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils'));
+  const originalUtils = await vi.importActual('@kbn/actions-plugin/server/lib/axios_utils');
   return {
     ...originalUtils,
     request: vi.fn(),

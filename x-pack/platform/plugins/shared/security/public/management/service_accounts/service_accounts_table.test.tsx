@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { EuiProvider } from '@elastic/eui';
 import { act, screen, within } from '@testing-library/react';
 import user from '@testing-library/user-event';
 import React, { useState } from 'react';
+import { vi } from 'vitest';
 
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 

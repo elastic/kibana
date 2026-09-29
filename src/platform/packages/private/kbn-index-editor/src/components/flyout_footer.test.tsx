@@ -21,12 +21,12 @@ import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 vi.mock('@kbn/kibana-react-plugin/public');
 vi.mock('@kbn/file-upload', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/file-upload')),
-      useFileUploadContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/file-upload')),
+    useFileUploadContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockUseFileUploadContext = useFileUploadContext as Mock;

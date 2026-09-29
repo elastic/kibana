@@ -18,25 +18,25 @@ import { StepLogistics } from './step_logistics';
 let mockIsServerless = false;
 
 vi.mock('../../../app_context', () => {
-      const mocked = {
-      useAppContext: () => ({
-        config: { isServerless: mockIsServerless, enableIndexMode: true },
-        plugins: { cloud: undefined },
-        core: {
-          application: { capabilities: { management: { stack: { license_management: true } } } },
-          getUrlForApp: () => 'http://localhost/app/management',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppContext: () => ({
+      config: { isServerless: mockIsServerless, enableIndexMode: true },
+      plugins: { cloud: undefined },
+      core: {
+        application: { capabilities: { management: { stack: { license_management: true } } } },
+        getUrlForApp: () => 'http://localhost/app/management',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_license', () => {
-      const mocked = {
-      useLicense: () => ({ isAtLeastEnterprise: () => true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: () => ({ isAtLeastEnterprise: () => true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLoadSnapshotRepositories = vi.fn(() => ({
   data: {
@@ -49,11 +49,11 @@ const mockUseLoadSnapshotRepositories = vi.fn(() => ({
 }));
 
 vi.mock('../../../services/api', () => {
-      const mocked = {
-      useLoadSnapshotRepositories: () => mockUseLoadSnapshotRepositories(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLoadSnapshotRepositories: () => mockUseLoadSnapshotRepositories(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('StepLogistics', () => {
   const baseDefaultValue = {

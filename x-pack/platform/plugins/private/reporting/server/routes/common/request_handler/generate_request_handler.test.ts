@@ -9,9 +9,9 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 vi.mock('uuid', () => {
-      const mocked = { v4: () => 'mock-report-id' };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { v4: () => 'mock-report-id' };
+  return { ...mocked, default: mocked };
+});
 
 import rison from '@kbn/rison';
 
@@ -33,13 +33,13 @@ import type {
 import { GenerateRequestHandler } from './generate_request_handler';
 
 vi.mock('@kbn/reporting-server/crypto', () => {
-      const mocked = {
-      cryptoFactory: () => ({
-        encrypt: () => `hello mock cypher text`,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cryptoFactory: () => ({
+      encrypt: () => `hello mock cypher text`,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getMockContext = () =>
   ({

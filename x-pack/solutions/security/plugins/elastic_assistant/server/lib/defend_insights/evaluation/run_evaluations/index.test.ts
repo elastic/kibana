@@ -20,31 +20,31 @@ import { getLlmType } from '../../../../routes/utils';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
 
 vi.mock('langsmith/evaluation', () => {
-      const mocked = {
-      evaluate: vi.fn(async (predict: Function) =>
-        predict({
-          overrides: {
-            data: 'test',
-          },
-        })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    evaluate: vi.fn(async (predict: Function) =>
+      predict({
+        overrides: {
+          data: 'test',
+        },
+      })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/get_custom_evaluator', () => {
-      const mocked = {
-      getDefendInsightsCustomEvaluator: vi.fn().mockReturnValue('mocked-evaluator'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefendInsightsCustomEvaluator: vi.fn().mockReturnValue('mocked-evaluator'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../helpers/get_graph_input_overrides', () => {
-      const mocked = {
-      getDefendInsightsGraphInputOverrides: vi.fn((input) => input.overrides ?? {}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefendInsightsGraphInputOverrides: vi.fn((input) => input.overrides ?? {}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockExperimentConnector: InferenceConnector = {
   type: InferenceConnectorType.Gemini,

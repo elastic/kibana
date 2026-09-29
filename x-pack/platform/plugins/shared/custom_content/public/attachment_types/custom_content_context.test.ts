@@ -18,19 +18,19 @@ import { customContentContextAttachmentUiDefinition } from './custom_content_con
 
 const mockPreviewPanelVersion = vi.fn();
 vi.mock('../utils/panel_preview_registry', () => {
-      const mocked = {
-      previewPanelVersion: (...args: unknown[]) => mockPreviewPanelVersion(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    previewPanelVersion: (...args: unknown[]) => mockPreviewPanelVersion(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAddWarning = vi.fn();
 vi.mock('../services', () => {
-      const mocked = {
-      getServices: () => ({ core: { notifications: { toasts: { addWarning: mockAddWarning } } } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getServices: () => ({ core: { notifications: { toasts: { addWarning: mockAddWarning } } } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 type CustomContentAttachment = Attachment<
   typeof CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,

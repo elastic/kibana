@@ -46,25 +46,25 @@ let mockUseSmlAutocompleteReturn: {
 const mockUseSmlAutocomplete = vi.fn(() => mockUseSmlAutocompleteReturn);
 
 vi.mock('../../../../../../../hooks/sml/use_sml_autocomplete', () => {
-      const mocked = {
-      useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSmlAutocomplete: (...args: unknown[]) => mockUseSmlAutocomplete(...(args as [])),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/use_conversation', () => {
-      const mocked = {
-      useAgentId: () => 'test-agent-id',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentId: () => 'test-agent-id',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks/agents/use_agent_by_id', () => {
-      const mocked = {
-      useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 beforeEach(() => {
   mockUseSmlAutocompleteReturn = {

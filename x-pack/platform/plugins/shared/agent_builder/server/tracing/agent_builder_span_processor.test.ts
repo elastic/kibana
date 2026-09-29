@@ -53,9 +53,9 @@ describe('AgentBuilderSpanProcessor', () => {
     context.setGlobalContextManager(contextManager);
     contextManager.enable();
 
-    vi
-      .spyOn(elasticTracing, 'BatchSpanProcessor')
-      .mockReturnValue(mockBatch as elasticTracing.BatchSpanProcessor);
+    vi.spyOn(elasticTracing, 'BatchSpanProcessor').mockReturnValue(
+      mockBatch as elasticTracing.BatchSpanProcessor
+    );
 
     (mockBatch.onStart as Mock).mockClear();
     (mockBatch.onEnd as Mock).mockClear();

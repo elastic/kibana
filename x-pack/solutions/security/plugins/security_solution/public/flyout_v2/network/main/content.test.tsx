@@ -21,25 +21,25 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../data_view_manager/hooks/use_selected_patterns';
 
 vi.mock('../../../explore/network/components/details', () => {
-      const mocked = {
-      IpOverview: () => <div data-test-subj="ip-overview" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IpOverview: () => <div data-test-subj="ip-overview" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/empty_prompt', () => {
-      const mocked = {
-      EmptyPrompt: () => <div data-test-subj="empty-prompt" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EmptyPrompt: () => <div data-test-subj="empty-prompt" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/components/page_loader', () => {
-      const mocked = {
-      PageLoader: () => <div data-test-subj="page-loader" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    PageLoader: () => <div data-test-subj="page-loader" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../explore/network/containers/details');
 vi.mock('../../../common/components/ml/anomaly/use_anomalies_table_data');
@@ -49,11 +49,11 @@ vi.mock('../../../data_view_manager/hooks/use_data_view');
 vi.mock('../../../data_view_manager/hooks/use_selected_patterns');
 vi.mock('../../../common/hooks/use_invalid_filter_query');
 vi.mock('../../../common/lib/kuery', () => {
-      const mocked = {
-      convertToBuildEsQuery: vi.fn().mockReturnValue([undefined, undefined]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertToBuildEsQuery: vi.fn().mockReturnValue([undefined, undefined]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseNetworkDetails = useNetworkDetails as Mock;
 const mockUseAnomaliesTableData = useAnomaliesTableData as Mock;

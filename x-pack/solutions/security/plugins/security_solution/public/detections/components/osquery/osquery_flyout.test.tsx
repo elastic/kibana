@@ -16,7 +16,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { useAddToTimeline } from '../../../common/hooks/use_add_to_timeline';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiFlyout: ({
@@ -36,21 +36,21 @@ vi.mock('@elastic/eui', async () => {
 });
 
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: () => ({ invalidateQueries: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: () => ({ invalidateQueries: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana');
 vi.mock('../../../common/hooks/use_add_to_timeline');
 vi.mock('./osquery_flyout_footer', () => {
-      const mocked = {
-      OsqueryEventDetailsFooter: () => <div data-test-subj="osquery-footer" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OsqueryEventDetailsFooter: () => <div data-test-subj="osquery-footer" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('OsqueryFlyout', () => {
   beforeEach(() => {

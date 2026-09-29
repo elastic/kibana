@@ -36,9 +36,7 @@ vi.mock('../../../elasticsearch/ingest_pipeline');
 const mockedDeletePreviousPipelines = deletePreviousPipelines as MockedFunction<
   typeof deletePreviousPipelines
 >;
-const mockedIsTopLevelPipeline = isTopLevelPipeline as MockedFunction<
-  typeof isTopLevelPipeline
->;
+const mockedIsTopLevelPipeline = isTopLevelPipeline as MockedFunction<typeof isTopLevelPipeline>;
 
 describe('stepDeletePreviousPipelines', () => {
   let soClient: Mocked<SavedObjectsClientContract>;

@@ -36,8 +36,9 @@ vi.mock('../../../archive/storage', async () => {
   };
 });
 
-const mockedSaveArchiveEntriesFromAssetsMap =
-  saveArchiveEntriesFromAssetsMap as MockedFunction<typeof saveArchiveEntriesFromAssetsMap>;
+const mockedSaveArchiveEntriesFromAssetsMap = saveArchiveEntriesFromAssetsMap as MockedFunction<
+  typeof saveArchiveEntriesFromAssetsMap
+>;
 
 const mockedRemoveArchiveEntries = removeArchiveEntries as MockedFunction<
   typeof removeArchiveEntries
@@ -260,9 +261,8 @@ describe('stepSaveArchiveEntries', () => {
     });
     expect(
       [
-        ...(vi
-          .mocked(mockedSaveArchiveEntriesFromAssetsMap)
-          .mock.lastCall?.[0].assetsMap?.keys() ?? []),
+        ...(vi.mocked(mockedSaveArchiveEntriesFromAssetsMap).mock.lastCall?.[0].assetsMap?.keys() ??
+          []),
       ].sort()
     ).toMatchInlineSnapshot(`
       Array [

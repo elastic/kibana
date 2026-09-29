@@ -13,12 +13,12 @@ import { useNavigateToAlertsPageWithFilters } from './use_navigate_to_alerts_pag
 
 const mockNavigateTo = vi.fn();
 vi.mock('@kbn/security-solution-navigation', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/security-solution-navigation')),
-      useNavigation: () => ({ navigateTo: mockNavigateTo }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/security-solution-navigation')),
+    useNavigation: () => ({ navigateTo: mockNavigateTo }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useNavigateToAlertsPageWithFilters', () => {
   it('navigates to alerts page with single filter', () => {

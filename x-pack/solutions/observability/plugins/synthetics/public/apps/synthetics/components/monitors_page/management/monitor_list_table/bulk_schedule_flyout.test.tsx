@@ -24,20 +24,20 @@ import { fetchBulkUpdateMonitors } from '../../../../state';
 import { BulkScheduleFlyout } from './bulk_schedule_flyout';
 
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useGetUrlParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useGetUrlParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../state')),
-      fetchBulkUpdateMonitors: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../state')),
+    fetchBulkUpdateMonitors: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetUrlParamsMock = useGetUrlParams as MockedFunction<typeof useGetUrlParams>;
 const fetchBulkUpdateMonitorsMock = fetchBulkUpdateMonitors as MockedFunction<

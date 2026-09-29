@@ -20,21 +20,21 @@ const mockGetUrlForApp = vi.fn(
 const mockReportEvent = vi.fn();
 
 vi.mock('../../common/hooks/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          application: {
-            navigateToUrl: mockNavigateToUrl,
-            getUrlForApp: mockGetUrlForApp,
-          },
-          telemetry: {
-            reportEvent: mockReportEvent,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        application: {
+          navigateToUrl: mockNavigateToUrl,
+          getUrlForApp: mockGetUrlForApp,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        telemetry: {
+          reportEvent: mockReportEvent,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderComponent = () =>
   render(

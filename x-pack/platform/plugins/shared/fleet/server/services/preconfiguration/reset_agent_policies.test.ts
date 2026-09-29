@@ -27,9 +27,7 @@ vi.mock('../agents');
 vi.mock('../api_keys');
 
 const mockedSetupFleet = setupFleet as MockedFunction<typeof setupFleet>;
-const mockedForceUnenrollAgent = forceUnenrollAgent as MockedFunction<
-  typeof forceUnenrollAgent
->;
+const mockedForceUnenrollAgent = forceUnenrollAgent as MockedFunction<typeof forceUnenrollAgent>;
 const mockedDeleteEnrollmentApiKeys = deleteEnrollmentApiKeys as MockedFunction<
   typeof deleteEnrollmentApiKeys
 >;
@@ -43,37 +41,38 @@ const mockedPackagePolicyService = packagePolicyService as Mocked<typeof package
 const mockedGetAgentPolicySavedObjectType = getAgentPolicySavedObjectType as MockedFunction<
   typeof getAgentPolicySavedObjectType
 >;
-const mockedGetPackagePolicySavedObjectType =
-  getPackagePolicySavedObjectType as MockedFunction<typeof getPackagePolicySavedObjectType>;
+const mockedGetPackagePolicySavedObjectType = getPackagePolicySavedObjectType as MockedFunction<
+  typeof getPackagePolicySavedObjectType
+>;
 
 vi.mock('../app_context', () => {
-      const mocked = {
-      appContextService: {
-        getLogger: () =>
-          new Proxy(
-            {},
-            {
-              get(_, property) {
-                if (property === 'get') {
-                  return () =>
-                    new Proxy(
-                      {},
-                      {
-                        get() {
-                          return vi.fn();
-                        },
-                      }
-                    );
-                }
+  const mocked = {
+    appContextService: {
+      getLogger: () =>
+        new Proxy(
+          {},
+          {
+            get(_, property) {
+              if (property === 'get') {
+                return () =>
+                  new Proxy(
+                    {},
+                    {
+                      get() {
+                        return vi.fn();
+                      },
+                    }
+                  );
+              }
 
-                return vi.fn();
-              },
-            }
-          ),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+              return vi.fn();
+            },
+          }
+        ),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('reset agent policies', () => {
   it('should not unenroll agents or revoke enrollment api keys if there is no existing policies', async () => {

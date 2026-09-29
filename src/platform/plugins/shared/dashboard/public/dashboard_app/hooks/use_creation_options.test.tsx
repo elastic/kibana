@@ -29,22 +29,22 @@ const mockKbnUrlStateStorage = {
 } as unknown as IKbnUrlStateStorage;
 
 vi.mock('../url', () => {
-      const mocked = {
-      extractDashboardState: vi.fn(),
-      loadAndRemoveDashboardState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractDashboardState: vi.fn(),
+    loadAndRemoveDashboardState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../url/search_sessions_integration', () => {
-      const mocked = {
-      createSessionRestorationDataProvider: vi.fn(),
-      getSearchSessionIdFromURL: vi.fn(),
-      getSessionURLObservable: vi.fn(),
-      removeSearchSessionIdFromURL: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createSessionRestorationDataProvider: vi.fn(),
+    getSearchSessionIdFromURL: vi.fn(),
+    getSessionURLObservable: vi.fn(),
+    removeSearchSessionIdFromURL: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useCreationOptions', () => {
   const validateOutcome = vi.fn().mockReturnValue('valid');

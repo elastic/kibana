@@ -15,7 +15,7 @@ import type { getFileInfo } from './fs';
 export const getFileInfoMock: MockedFunction<typeof getFileInfo> = vi.fn();
 
 vi.doMock('./fs', async () => {
-  const actual = (await vi.importActual('./fs'));
+  const actual = await vi.importActual('./fs');
   return {
     ...actual,
     getFileInfo: getFileInfoMock,

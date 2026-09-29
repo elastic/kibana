@@ -17,16 +17,16 @@ import { PaletteService } from './service';
 import { buildPalettes } from './palettes';
 
 vi.mock('./palettes', () => {
-      const mocked = {
-      buildPalettes: vi.fn((theme: CoreTheme) => ({
-        default: {
-          id: 'default',
-          title: `default-${theme.darkMode ? 'dark' : 'light'}`,
-        },
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildPalettes: vi.fn((theme: CoreTheme) => ({
+      default: {
+        id: 'default',
+        title: `default-${theme.darkMode ? 'dark' : 'light'}`,
+      },
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildPalettesMock = buildPalettes as MockedFunction<typeof buildPalettes>;
 

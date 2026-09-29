@@ -21,11 +21,11 @@ import {
 
 const mockUseCasesLocalStorage = vi.fn();
 vi.mock('../../../../../common/use_cases_local_storage', () => {
-      const mocked = {
-      useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesLocalStorage: (...args: unknown[]) => mockUseCasesLocalStorage(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const pointerDown = (clientX: number) =>
   ({

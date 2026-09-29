@@ -21,7 +21,7 @@ import { convertDataViewIntoLensIndexPattern } from '../../../../../data_views_s
 import moment from 'moment';
 
 vi.mock('./parse', async () => {
-  const original = (await vi.importActual('./parse'));
+  const original = await vi.importActual('./parse');
   return {
     ...original,
     insertOrReplaceFormulaColumn: vi.fn((...args) =>
@@ -31,11 +31,11 @@ vi.mock('./parse', async () => {
 });
 
 vi.mock('../../../../../data_views_service/loader', () => {
-      const mocked = {
-      convertDataViewIntoLensIndexPattern: vi.fn((v) => v),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    convertDataViewIntoLensIndexPattern: vi.fn((v) => v),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const getBaseLayer = (): PersistedIndexPatternLayer => ({
   columnOrder: ['col1'],

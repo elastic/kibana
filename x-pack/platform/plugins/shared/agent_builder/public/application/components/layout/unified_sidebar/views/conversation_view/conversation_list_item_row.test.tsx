@@ -16,18 +16,18 @@ import { useConversationListMutations } from '../../../../../hooks/use_conversat
 import { ConversationListItemRow } from './conversation_list_item_row';
 
 vi.mock('../../../../../hooks/use_conversation_list_mutations', () => {
-      const mocked = {
-      useConversationListMutations: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useConversationListMutations: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_toasts', () => {
-      const mocked = {
-      useToasts: () => ({ addSuccessToast: vi.fn(), addErrorToast: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useToasts: () => ({ addSuccessToast: vi.fn(), addErrorToast: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseConversationListMutations = vi.mocked(useConversationListMutations);
 

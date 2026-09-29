@@ -21,40 +21,40 @@ vi.mock('./map_config');
 vi.mock('../../../containers/fields');
 vi.mock('../../../../common/hooks/use_experimental_features');
 vi.mock('./index_patterns_missing_prompt', () => {
-      const mocked = {
-      IndexPatternsMissingPrompt: vi.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IndexPatternsMissingPrompt: vi.fn(() => <div data-test-subj="IndexPatternsMissingPrompt" />),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          docLinks: {
-            ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
-            links: {
-              siem: { networkMap: '' },
-            },
-          },
-          maps: {
-            Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
-          },
-          storage: {
-            get: mockGetStorage,
-            set: mockSetStorage,
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        docLinks: {
+          ELASTIC_WEBSITE_URL: 'ELASTIC_WEBSITE_URL',
+          links: {
+            siem: { networkMap: '' },
           },
         },
-      }),
-      useToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        maps: {
+          Map: () => <div data-test-subj="MapPanel">{'mockMap'}</div>,
+        },
+        storage: {
+          get: mockGetStorage,
+          set: mockSetStorage,
+        },
+      },
+    }),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseIsFieldInIndexPattern = useIsFieldInIndexPattern as Mock;
 const mockGetStorage = vi.fn();

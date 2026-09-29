@@ -18,7 +18,7 @@ import type { ServiceNodeData } from '../../../../common/service_map';
 import { MOCK_EUI_THEME_FOR_USE_THEME } from './test_helpers';
 
 vi.mock('@elastic/eui', async () => {
-  const original = (await vi.importActual('@elastic/eui'));
+  const original = await vi.importActual('@elastic/eui');
   return {
     ...original,
     useEuiTheme: () => ({
@@ -30,45 +30,45 @@ vi.mock('@elastic/eui', async () => {
 
 // Mock the agent icon
 vi.mock('@kbn/custom-icons', () => {
-      const mocked = {
-      getAgentIcon: vi.fn(() => 'mock-icon-url.svg'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentIcon: vi.fn(() => 'mock-icon-url.svg'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          application: {
-            capabilities: {
-              slo: { read: true },
-            },
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        application: {
+          capabilities: {
+            slo: { read: true },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./service_map_alerts_navigate_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('./service_map_alerts_navigate_context')),
-      useServiceMapAlertsNavigate: vi.fn(() => vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./service_map_alerts_navigate_context')),
+    useServiceMapAlertsNavigate: vi.fn(() => vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./service_map_search_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('./service_map_search_context')),
-      useServiceMapSearchHighlight: vi.fn(() => ({
-        isSearchMatch: false,
-        isActiveSearchMatch: false,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./service_map_search_context')),
+    useServiceMapSearchHighlight: vi.fn(() => ({
+      isSearchMatch: false,
+      isActiveSearchMatch: false,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const defaultNodeProps = {
   id: 'test-service',

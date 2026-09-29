@@ -26,75 +26,75 @@ const MockTraceWaterfall = vi.fn((props: any) => {
 });
 
 vi.mock('../../../../../context/kibana_context/use_kibana', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          apmShared: {
-            TraceWaterfall: MockTraceWaterfall,
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        apmShared: {
+          TraceWaterfall: MockTraceWaterfall,
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateToUrl = vi.fn();
 
 vi.mock('../../../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: () => ({
-        core: {
-          application: { navigateToUrl: mockNavigateToUrl },
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: () => ({
+      core: {
+        application: { navigateToUrl: mockNavigateToUrl },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRouterLink = vi.fn().mockReturnValue('/mock-service-overview-url');
 
 vi.mock('../../../../../hooks/use_apm_router', () => {
-      const mocked = {
-      useApmRouter: () => ({
-        link: mockRouterLink,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmRouter: () => ({
+      link: mockRouterLink,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useAnyOfApmParams: () => ({
-        query: {
-          flyoutDetailTab: 'metadata',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAnyOfApmParams: () => ({
+      query: {
+        flyoutDetailTab: 'metadata',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_time_range', () => {
-      const mocked = {
-      useTimeRange: () => ({
-        start: '2025-01-15T11:00:00.000Z',
-        end: '2025-01-15T13:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRange: () => ({
+      start: '2025-01-15T11:00:00.000Z',
+      end: '2025-01-15T13:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUnifiedWaterfallFlyout = vi.fn((props: any) => (
   <div data-test-subj="mock-unified-waterfall-flyout" />
 ));
 
 vi.mock('./unified_waterfall_flyout', () => {
-      const mocked = {
-      UnifiedWaterfallFlyout: (props: any) => mockUnifiedWaterfallFlyout(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UnifiedWaterfallFlyout: (props: any) => mockUnifiedWaterfallFlyout(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockTraceItems = (): TraceItem[] => [
   {

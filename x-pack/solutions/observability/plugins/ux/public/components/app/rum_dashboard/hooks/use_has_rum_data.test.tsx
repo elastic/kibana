@@ -15,18 +15,18 @@ import { useDataView } from '../local_uifilters/use_data_view';
 import { useHasRumData } from './use_has_rum_data';
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useEsSearch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsSearch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../local_uifilters/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const TIERED = 'UXHasRumDataInHotOrWarmTiers';
 const UNBOUNDED = 'UXHasRumDataUnbounded';

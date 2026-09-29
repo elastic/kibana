@@ -12,11 +12,11 @@ vi.mock('@kbn/kibana-react-plugin/public');
 
 const mockUseMutation = vi.fn();
 vi.mock('@kbn/react-query', () => {
-      const mocked = {
-      useMutation: (...args: unknown[]) => mockUseMutation(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useMutation: (...args: unknown[]) => mockUseMutation(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { renderHook, act } from '@testing-library/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

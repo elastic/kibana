@@ -15,22 +15,22 @@ import { EventTabContent } from './event_tab_content';
 import type { Event } from './table';
 
 vi.mock('./table', () => {
-      const mocked = {
-      EventsTableForCases: ({ events }: { events: Event[] }) => (
-        <div data-test-subj="events-table-mock">
-          {events.length} {'events'}
-          {events.map((e) => (
-            <span key={String(e.eventId)} data-test-subj={`event-${String(e.eventId)}`}>
-              {e.eventId}
-              {':'}
-              {e.index}
-            </span>
-          ))}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EventsTableForCases: ({ events }: { events: Event[] }) => (
+      <div data-test-subj="events-table-mock">
+        {events.length} {'events'}
+        {events.map((e) => (
+          <span key={String(e.eventId)} data-test-subj={`event-${String(e.eventId)}`}>
+            {e.eventId}
+            {':'}
+            {e.index}
+          </span>
+        ))}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('EventTabContent', () => {
   it('renders events table with unified event attachments', () => {

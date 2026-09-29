@@ -13,59 +13,59 @@ import { renderHook, act } from '@testing-library/react';
 import { usePreviewClone } from './use_preview_clone';
 
 vi.mock('../../../../edit_engine/create_preview_clone', () => {
-      const mocked = {
-      createPreviewClone: (target: HTMLElement) => {
-        const clone = target.cloneNode(true) as HTMLElement;
-        const elementMap = new Map<Element, Element>([[target, clone]]);
-        return { clone, elementMap };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPreviewClone: (target: HTMLElement) => {
+      const clone = target.cloneNode(true) as HTMLElement;
+      const elementMap = new Map<Element, Element>([[target, clone]]);
+      return { clone, elementMap };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../edit_engine/collect_text_nodes', () => {
-      const mocked = {
-      collectAllTextNodes: (root: HTMLElement) => {
-        const nodes: Text[] = [];
-        const walk = (el: globalThis.Node) => {
-          const children = Array.from(el.childNodes);
-          children.forEach((child) => {
-            if (child.nodeType === 3) nodes.push(child as Text);
-            else walk(child);
-          });
-        };
-        walk(root);
-        return nodes;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    collectAllTextNodes: (root: HTMLElement) => {
+      const nodes: Text[] = [];
+      const walk = (el: globalThis.Node) => {
+        const children = Array.from(el.childNodes);
+        children.forEach((child) => {
+          if (child.nodeType === 3) nodes.push(child as Text);
+          else walk(child);
+        });
+      };
+      walk(root);
+      return nodes;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../edit_engine/collect_media_elements', () => {
-      const mocked = {
-      collectMediaElements: vi.fn().mockResolvedValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    collectMediaElements: vi.fn().mockResolvedValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../edit_engine/managed_element', () => {
-      const mocked = {
-      getContentRoot: (el: HTMLElement) => el,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getContentRoot: (el: HTMLElement) => el,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_element_selection', () => {
-      const mocked = {
-      useElementSelection: () => ({
-        selectedElement: null,
-        color: '',
-        setColor: vi.fn(),
-        handleSelect: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useElementSelection: () => ({
+      selectedElement: null,
+      color: '',
+      setColor: vi.fn(),
+      handleSelect: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('usePreviewClone', () => {
   const createTarget = () => {

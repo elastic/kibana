@@ -14,12 +14,12 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 const mockWriteFileSync = vi.fn();
 vi.mock('fs', () => {
-      const mocked = {
-      ...require('fs'),
-      writeFileSync: (...args: unknown[]) => mockWriteFileSync(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('fs'),
+    writeFileSync: (...args: unknown[]) => mockWriteFileSync(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { configureMockIdpSamlRealm } from './configure_mock_idp_saml_realm';
 

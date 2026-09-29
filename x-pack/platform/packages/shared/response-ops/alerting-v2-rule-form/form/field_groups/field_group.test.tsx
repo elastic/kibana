@@ -16,11 +16,11 @@ import { useRuleFormMeta } from '../contexts';
 import { FieldGroup } from './field_group';
 
 vi.mock('../contexts', () => {
-      const mocked = {
-      useRuleFormMeta: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormMeta: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRuleFormMeta = useRuleFormMeta as MockedFunction<typeof useRuleFormMeta>;
 

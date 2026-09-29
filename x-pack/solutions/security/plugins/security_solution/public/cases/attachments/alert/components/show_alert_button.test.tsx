@@ -30,21 +30,21 @@ const mockOpenFlyout = vi.fn();
 const mockReportEvent = vi.fn();
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openFlyout: mockOpenFlyout }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kibana');
 
 vi.mock('@kbn/cases-plugin/public', () => {
-      const mocked = {
-      useCaseViewNavigation: vi.fn(),
-      useCaseViewParams: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCaseViewNavigation: vi.fn(),
+    useCaseViewParams: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../flyout_v2/use_flyout_api');
 vi.mock('../../../../common/hooks/use_is_new_flyout_enabled');

@@ -15,7 +15,7 @@ import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_interna
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 
 vi.mock('./create_queries', async () => {
-  const actual = (await vi.importActual('./create_queries'));
+  const actual = await vi.importActual('./create_queries');
 
   return {
     ...actual,
@@ -28,9 +28,7 @@ vi.mock('../../utils/get_internal_saved_object_client');
 const mockedCreateDynamicQueries = createDynamicQueries as MockedFunction<
   typeof createDynamicQueries
 >;
-const mockedParseAgentSelection = parseAgentSelection as MockedFunction<
-  typeof parseAgentSelection
->;
+const mockedParseAgentSelection = parseAgentSelection as MockedFunction<typeof parseAgentSelection>;
 const mockedGetInternalSOClient = getInternalSavedObjectsClientForSpaceId as MockedFunction<
   typeof getInternalSavedObjectsClientForSpaceId
 >;

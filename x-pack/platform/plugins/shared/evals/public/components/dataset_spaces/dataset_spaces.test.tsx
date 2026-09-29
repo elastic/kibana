@@ -23,9 +23,7 @@ import { getRemovedSpaceIds } from './use_dataset_sharing';
 
 vi.mock('../../hooks/use_spaces');
 
-const mockUseAccessibleSpaces = useAccessibleSpaces as MockedFunction<
-  typeof useAccessibleSpaces
->;
+const mockUseAccessibleSpaces = useAccessibleSpaces as MockedFunction<typeof useAccessibleSpaces>;
 
 const setSpaces = (overrides: Partial<AccessibleSpacesResult> = {}) => {
   mockUseAccessibleSpaces.mockReturnValue({

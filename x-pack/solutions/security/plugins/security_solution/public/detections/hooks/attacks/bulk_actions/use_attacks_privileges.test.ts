@@ -19,9 +19,7 @@ import { useGetMissingIndexPrivileges } from '../../../../attack_discovery/pages
 vi.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('../../../../attack_discovery/pages/use_get_missing_index_privileges');
 
-const mockUseAlertsPrivileges = useAlertsPrivileges as MockedFunction<
-  typeof useAlertsPrivileges
->;
+const mockUseAlertsPrivileges = useAlertsPrivileges as MockedFunction<typeof useAlertsPrivileges>;
 const mockUseGetMissingIndexPrivileges = useGetMissingIndexPrivileges as MockedFunction<
   typeof useGetMissingIndexPrivileges
 >;

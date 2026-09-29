@@ -18,29 +18,29 @@ import { TroubleshootWithAi } from '../troubleshoot_with_ai';
 import { DiagnosticReport } from '../diagnostic_report';
 
 vi.mock('../failure_actions', () => {
-      const mocked = {
-      FailureActions: vi.fn(() => <div data-test-subj="failureActions">{'Mock FailureActions'}</div>),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FailureActions: vi.fn(() => <div data-test-subj="failureActions">{'Mock FailureActions'}</div>),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../troubleshoot_with_ai', () => {
-      const mocked = {
-      TroubleshootWithAi: vi.fn(() => (
-        <div data-test-subj="troubleshootWithAi">{'Mock TroubleshootWithAi'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TroubleshootWithAi: vi.fn(() => (
+      <div data-test-subj="troubleshootWithAi">{'Mock TroubleshootWithAi'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../diagnostic_report', () => {
-      const mocked = {
-      DiagnosticReport: vi.fn(() => (
-        <div data-test-subj="diagnosticReport">{'Mock DiagnosticReport'}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DiagnosticReport: vi.fn(() => (
+      <div data-test-subj="diagnosticReport">{'Mock DiagnosticReport'}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const MockTroubleshootWithAi = TroubleshootWithAi as MockedFunction<typeof TroubleshootWithAi>;
 const MockDiagnosticReport = DiagnosticReport as MockedFunction<typeof DiagnosticReport>;

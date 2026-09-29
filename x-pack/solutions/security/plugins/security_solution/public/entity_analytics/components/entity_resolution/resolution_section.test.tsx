@@ -18,11 +18,11 @@ import { useResolutionGroup } from './hooks/use_resolution_group';
 
 vi.mock('./hooks/use_resolution_group');
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      useExpandableFlyoutApi: () => ({ openFlyout: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutApi: () => ({ openFlyout: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseResolutionGroup = useResolutionGroup as Mock;
 

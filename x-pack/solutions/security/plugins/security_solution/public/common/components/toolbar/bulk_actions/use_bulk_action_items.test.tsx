@@ -19,11 +19,11 @@ vi.mock('../../../hooks/use_app_toasts');
 vi.mock('../../../lib/kibana');
 vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 vi.mock('../../../hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
   runWorkflowMenuItem: [],
@@ -32,11 +32,11 @@ const mockUseRunDocumentWorkflowPanel = vi.fn().mockReturnValue({
 vi.mock(
   '../../../../detections/components/alerts_table/timeline_actions/use_run_document_workflow_panel',
   () => {
-      const mocked = {
-        useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      useRunDocumentWorkflowPanel: (...args: unknown[]) => mockUseRunDocumentWorkflowPanel(...args),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;

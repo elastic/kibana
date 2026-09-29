@@ -19,11 +19,11 @@ import * as allRetry from './retry_if_conflicts';
 import { actionsConfigMock } from '../actions_config.mock';
 
 vi.mock('./ears/revoke_ears_credentials', () => {
-      const mocked = {
-      revokeEarsCredentials: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    revokeEarsCredentials: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRevokeEarsCredentials = revokeEarsCredentials as MockedFunction<
   typeof revokeEarsCredentials
@@ -35,7 +35,7 @@ const logger = {
   get: () => rootLogger,
 } as unknown as Mocked<Logger>;
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {

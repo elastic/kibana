@@ -28,13 +28,13 @@ vi.mock('../../../../../../hooks/use_authz');
 vi.mock('../../../../../../hooks/use_core');
 vi.mock('../../components/agent_reassign_policy_modal');
 vi.mock('../hooks/export_csv', () => {
-      const mocked = {
-      useExportCSV: vi.fn().mockReturnValue({
-        generateReportingJobCSV: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExportCSV: vi.fn().mockReturnValue({
+      generateReportingJobCSV: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseLicence = useLicense as MockedFunction<typeof useLicense>;
 const mockedExperimentalFeaturesService = vi.mocked(ExperimentalFeaturesService);

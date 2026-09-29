@@ -18,52 +18,52 @@ import { TestProviders } from '../../../../common/mock';
 // Mock all dependencies
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../../../../data_view_manager/hooks/use_data_view', () => {
-      const mocked = {
-      useDataView: vi.fn().mockReturnValue({
-        dataView: { getRuntimeMappings: vi.fn().mockReturnValue({}) },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataView: vi.fn().mockReturnValue({
+      dataView: { getRuntimeMappings: vi.fn().mockReturnValue({}) },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../data_view_manager/hooks/use_browser_fields', () => {
-      const mocked = {
-      useBrowserFields: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowserFields: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../data_view_manager/hooks/use_selected_patterns', () => {
-      const mocked = {
-      useSelectedPatterns: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSelectedPatterns: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_experimental_features', () => {
-      const mocked = {
-      useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../timelines/containers', () => {
-      const mocked = {
-      useTimelineEventsHandler: vi.fn().mockReturnValue([null, null, vi.fn()]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEventsHandler: vi.fn().mockReturnValue([null, null, vi.fn()]),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kuery', () => {
-      const mocked = {
-      combineQueries: vi.fn().mockReturnValue({ filterQuery: '' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    combineQueries: vi.fn().mockReturnValue({ filterQuery: '' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_send_bulk_to_timeline', () => {
-      const mocked = {
-      useSendBulkToTimeline: vi.fn().mockReturnValue({
-        sendBulkEventsToTimelineHandler: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSendBulkToTimeline: vi.fn().mockReturnValue({
+      sendBulkEventsToTimelineHandler: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseUserPrivileges = useUserPrivileges as Mock;
 

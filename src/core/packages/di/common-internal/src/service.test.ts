@@ -12,12 +12,12 @@ import { vi } from 'vitest';
 const pluginModuleMock = {};
 
 vi.mock('./modules/plugin', async () => {
-      const mocked = {
-      ...(await vi.importActual('./modules/plugin')),
-      PluginModule: vi.fn().mockReturnValue(pluginModuleMock),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./modules/plugin')),
+    PluginModule: vi.fn().mockReturnValue(pluginModuleMock),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { Container } from 'inversify';
 import { CoreInjectionService } from './service';

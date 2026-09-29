@@ -23,25 +23,25 @@ const mockNavigateToUrl = vi.fn();
 const mockHistoryPush = vi.fn();
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useHistory: () => ({
-        push: mockHistoryPush,
-        location: { pathname: '/management', search: '', hash: '' },
-        listen: vi.fn(),
-        replace: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useHistory: () => ({
+      push: mockHistoryPush,
+      location: { pathname: '/management', search: '', hash: '' },
+      listen: vi.fn(),
+      replace: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_kibana');
 vi.mock('../../hooks/use_license');
 vi.mock('../../hooks/use_permissions');
@@ -49,45 +49,45 @@ vi.mock('../../hooks/use_fetch_slo_definitions');
 vi.mock('../../hooks/use_fetch_slo_templates');
 vi.mock('../../hooks/use_fetch_slo_template_tags');
 vi.mock('./components/slo_definitions/slo_management_table', () => {
-      const mocked = {
-      SloManagementTable: () => <div data-test-subj="sloManagementTable">SLO Management Table</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloManagementTable: () => <div data-test-subj="sloManagementTable">SLO Management Table</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/slo_definitions/slo_management_outdated_filter_callout', () => {
-      const mocked = {
-      SloOutdatedFilterCallout: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SloOutdatedFilterCallout: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/header_menu/header_menu', () => {
-      const mocked = {
-      HeaderMenu: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    HeaderMenu: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./context/bulk_operation', () => {
-      const mocked = {
-      BulkOperationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    BulkOperationProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../context/action_modal', () => {
-      const mocked = {
-      ActionModalProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      useActionModal: () => ({ triggerAction: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ActionModalProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+    useActionModal: () => ({ triggerAction: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./hooks/use_templates_url_search_state', () => {
-      const mocked = {
-      useTemplatesUrlSearchState: () => ({
-        state: { search: '', tags: [], page: 0, perPage: 20 },
-        onStateChange: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTemplatesUrlSearchState: () => ({
+      state: { search: '', tags: [], page: 0, perPage: 20 },
+      onStateChange: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 const useLicenseMock = useLicense as Mock;

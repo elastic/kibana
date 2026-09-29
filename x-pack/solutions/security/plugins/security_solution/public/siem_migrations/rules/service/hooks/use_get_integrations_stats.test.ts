@@ -13,11 +13,11 @@ import { useGetIntegrationsStats } from './use_get_integrations_stats';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 vi.mock('../../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useKibanaMock = useKibana as Mock;
 

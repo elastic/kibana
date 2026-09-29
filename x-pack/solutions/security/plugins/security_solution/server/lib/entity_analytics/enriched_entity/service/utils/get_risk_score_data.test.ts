@@ -162,9 +162,9 @@ describe('getRiskScoreData', () => {
       const input = makeInput('alert-1', '.alerts-security.alerts-default');
       const riskScore = makeRiskScore({ inputs: [input] });
       vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
-      vi
-        .mocked(esClient.mget)
-        .mockResolvedValue({ docs: [makeFoundDoc('alert-1')] } as MgetResponse);
+      vi.mocked(esClient.mget).mockResolvedValue({
+        docs: [makeFoundDoc('alert-1')],
+      } as MgetResponse);
 
       await getRiskScoreData({
         ...baseOptions,
@@ -182,9 +182,9 @@ describe('getRiskScoreData', () => {
       const riskScore = makeRiskScore({ inputs: [input] });
       const alertSource = { kibana: { alert: { rule: { name: 'test' } } } };
       vi.mocked(esClient.search).mockResolvedValue(makeSearchResponse(riskScore));
-      vi
-        .mocked(esClient.mget)
-        .mockResolvedValue({ docs: [makeFoundDoc('alert-1', alertSource)] } as MgetResponse);
+      vi.mocked(esClient.mget).mockResolvedValue({
+        docs: [makeFoundDoc('alert-1', alertSource)],
+      } as MgetResponse);
 
       const result = await getRiskScoreData({
         ...baseOptions,
@@ -224,8 +224,7 @@ describe('getRiskScoreData', () => {
     it('fetches risk scores in parallel and issues a single mget for all inputs', async () => {
       const riskScoreA = makeRiskScore({ id_value: 'user:alice', inputs: [makeInput('alert-a')] });
       const riskScoreB = makeRiskScore({ id_value: 'user:bob', inputs: [makeInput('alert-b')] });
-      vi
-        .mocked(esClient.search)
+      vi.mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
         .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
       vi.mocked(esClient.mget).mockResolvedValue({
@@ -256,8 +255,7 @@ describe('getRiskScoreData', () => {
         id_value: 'user:bob',
         inputs: [makeInput('shared-id', '.alerts-security.alerts-space2')],
       });
-      vi
-        .mocked(esClient.search)
+      vi.mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
         .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
 
@@ -282,8 +280,7 @@ describe('getRiskScoreData', () => {
     it('correctly assigns alert documents to each entity when inputs share the same index', async () => {
       const riskScoreA = makeRiskScore({ id_value: 'user:alice', inputs: [makeInput('alert-a')] });
       const riskScoreB = makeRiskScore({ id_value: 'user:bob', inputs: [makeInput('alert-b')] });
-      vi
-        .mocked(esClient.search)
+      vi.mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(riskScoreA))
         .mockResolvedValueOnce(makeSearchResponse(riskScoreB));
 
@@ -316,8 +313,7 @@ describe('getRiskScoreData', () => {
     });
 
     it('returns empty results for all entities when any search in a parallel batch throws', async () => {
-      vi
-        .mocked(esClient.search)
+      vi.mocked(esClient.search)
         .mockResolvedValueOnce(makeSearchResponse(makeRiskScore({ id_value: 'user:alice' })))
         .mockRejectedValueOnce(new Error('search failed for bob'));
 

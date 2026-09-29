@@ -38,11 +38,11 @@ import { workflowExecutionLoop } from '../workflow_execution_loop';
 
 vi.mock('./setup_dependencies');
 vi.mock('../workflow_execution_loop', () => {
-      const mocked = {
-      workflowExecutionLoop: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    workflowExecutionLoop: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSetupDependencies = setupDependencies as MockedFunction<typeof setupDependencies>;
 const mockWorkflowExecutionLoop = workflowExecutionLoop as MockedFunction<
@@ -56,11 +56,12 @@ describe('resumeWorkflow', () => {
     vi.clearAllMocks();
     const dependencies = mockContextDependencies();
     vi.spyOn(dependencies.coreStart.security.serviceAccounts, 'isEnabled').mockReturnValue(true);
-    vi
-      .spyOn(dependencies.coreStart.security.serviceAccounts, 'withScopedRequestForWorkload')
-      .mockRejectedValue(
-        new Error('The workload binding does not match the expected service account.')
-      );
+    vi.spyOn(
+      dependencies.coreStart.security.serviceAccounts,
+      'withScopedRequestForWorkload'
+    ).mockRejectedValue(
+      new Error('The workload binding does not match the expected service account.')
+    );
     const workflowExecutionRepository = new WorkflowExecutionRepository(
       createMockWorkflowDataClient()
     );
@@ -94,12 +95,15 @@ describe('resumeWorkflow', () => {
       'default'
     );
     if (!execution) throw new Error('Missing test execution');
-    vi
-      .spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion')
-      .mockResolvedValue({ execution, seqNo: 1, primaryTerm: 1 });
-    vi
-      .spyOn(workflowExecutionRepository, 'tryUpdateWorkflowExecutionWithVersion')
-      .mockResolvedValue(true);
+    vi.spyOn(workflowExecutionRepository, 'getWorkflowExecutionWithVersion').mockResolvedValue({
+      execution,
+      seqNo: 1,
+      primaryTerm: 1,
+    });
+    vi.spyOn(
+      workflowExecutionRepository,
+      'tryUpdateWorkflowExecutionWithVersion'
+    ).mockResolvedValue(true);
     const stepExecutionRepository = createMockStepExecutionRepository();
     stepExecutionRepository.markNonTerminalStepsFailed.mockImplementation(async () => {
       expect(
@@ -165,9 +169,7 @@ describe('resumeWorkflow', () => {
       mockGetLastFailedStepContext = vi.fn().mockReturnValue(undefined);
       mockGetWorkflowExecutionStatus = vi.fn();
       mockGetWorkflowExecution = vi.fn();
-      mockStateGetWorkflowExecution = vi
-        .fn()
-        .mockReturnValue({ status: ExecutionStatus.WAITING });
+      mockStateGetWorkflowExecution = vi.fn().mockReturnValue({ status: ExecutionStatus.WAITING });
 
       mockSetupDependencies.mockResolvedValue({
         workflowRuntime: {

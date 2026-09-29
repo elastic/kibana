@@ -35,12 +35,12 @@ vi.mock('./crud');
 vi.mock('../audit_logging');
 vi.mock('../agent_policy');
 vi.mock('../secrets', () => {
-      const mocked = {
-      isActionSecretStorageEnabled: vi.fn(),
-      toCompiledSecretRef: vi.fn((id: string) => `$co.elastic.secret{${id}}`),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isActionSecretStorageEnabled: vi.fn(),
+    toCompiledSecretRef: vi.fn((id: string) => `$co.elastic.secret{${id}}`),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 

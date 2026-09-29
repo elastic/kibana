@@ -28,9 +28,7 @@ describe('useFetchScheduleRuleType', () => {
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as Mock).mockReturnValue(appToastsMock);
 
-    fetchRuleTypesMock.mockReturnValue(
-      [] as unknown as Mocked<ReturnType<typeof fetchRuleTypes>>
-    );
+    fetchRuleTypesMock.mockReturnValue([] as unknown as Mocked<ReturnType<typeof fetchRuleTypes>>);
   });
 
   it('should invoke `addError`', async () => {

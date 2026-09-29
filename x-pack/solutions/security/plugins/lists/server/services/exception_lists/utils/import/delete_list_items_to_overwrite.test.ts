@@ -7,7 +7,6 @@
 
 import { vi } from 'vitest';
 import type { Mocked } from 'vitest';
-
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { NamespaceType } from '@kbn/securitysolution-io-ts-list-types';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';

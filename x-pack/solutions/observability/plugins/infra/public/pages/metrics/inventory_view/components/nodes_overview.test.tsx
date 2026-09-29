@@ -18,118 +18,122 @@ import type { InfraWaffleMapOptions } from '../../../../common/inventory/types';
 import { NodesOverview } from './nodes_overview';
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({ onPageReady: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({ onPageReady: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      useCurrentEuiBreakpoint: () => 'l',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    useCurrentEuiBreakpoint: () => 'l',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_waffle_options', () => {
-      const mocked = {
-      useWaffleOptionsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWaffleOptionsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_waffle_time', () => {
-      const mocked = {
-      useWaffleTimeContext: () => ({ jumpToTime: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWaffleTimeContext: () => ({ jumpToTime: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_asset_details_flyout_url_state', () => {
-      const mocked = {
-      useAssetDetailsFlyoutState: () => [{ detailsItemId: null, entityType: null }, vi.fn()],
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAssetDetailsFlyoutState: () => [{ detailsItemId: null, entityType: null }, vi.fn()],
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_time_range_metadata', () => {
-      const mocked = {
-      useTimeRangeMetadataContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimeRangeMetadataContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_is_pod_schema_selector_enabled', () => {
-      const mocked = {
-      useIsPodSchemaSelectorEnabled: vi.fn(() => false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsPodSchemaSelectorEnabled: vi.fn(() => false),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/empty_states', () => {
-      const mocked = {
-      NoData: ({
-        bodyText,
-        testString,
-        refetchText,
-        onRefetch,
-      }: {
-        bodyText: React.ReactNode;
-        testString?: string;
-        refetchText?: string;
-        onRefetch?: () => void;
-      }) => (
-        <div data-test-subj={testString}>
-          {bodyText}
-          {refetchText && onRefetch ? (
-            <button type="button" data-test-subj="infraNoDataButton" onClick={onRefetch}>
-              {refetchText}
-            </button>
-          ) : null}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NoData: ({
+      bodyText,
+      testString,
+      refetchText,
+      onRefetch,
+    }: {
+      bodyText: React.ReactNode;
+      testString?: string;
+      refetchText?: string;
+      onRefetch?: () => void;
+    }) => (
+      <div data-test-subj={testString}>
+        {bodyText}
+        {refetchText && onRefetch ? (
+          <button type="button" data-test-subj="infraNoDataButton" onClick={onRefetch}>
+            {refetchText}
+          </button>
+        ) : null}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/loading', () => {
-      const mocked = {
-      InfraLoadingPanel: () => <div data-test-subj="infraNodesOverviewLoadingPanel" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    InfraLoadingPanel: () => <div data-test-subj="infraNodesOverviewLoadingPanel" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./waffle/map', () => {
-      const mocked = { Map: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Map: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./table_view', () => {
-      const mocked = { TableView: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { TableView: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./waffle/legend', () => {
-      const mocked = { Legend: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Legend: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./waffle/asset_details_flyout', () => {
-      const mocked = { AssetDetailsFlyout: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { AssetDetailsFlyout: () => null };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../components/supported_data_tooltip_link', () => {
-      const mocked = {
-      INTEGRATIONS: {
-        pod: { documentation: 'https://example.test/pods' },
-        host: { documentation: 'https://example.test/hosts' },
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    INTEGRATIONS: {
+      pod: { documentation: 'https://example.test/pods' },
+      host: { documentation: 'https://example.test/hosts' },
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseWaffleOptionsContext =
   // Intentional `as jest.Mock` type assertion as jest.requireMock returns an untyped factory for the waffle options hook;
   (await vi.importMock('../hooks/use_waffle_options')).useWaffleOptionsContext as Mock;
 // Intentional `as jest.Mock` type assertion as jest.requireMock returns an untyped factory for time-range metadata;
-const mockedUseTimeRangeMetadataContext = (await vi.importMock('../../../../hooks/use_time_range_metadata')).useTimeRangeMetadataContext as Mock;
+const mockedUseTimeRangeMetadataContext = (
+  await vi.importMock('../../../../hooks/use_time_range_metadata')
+).useTimeRangeMetadataContext as Mock;
 // Intentional `as jest.Mock` type assertion as jest.requireMock returns an untyped factory for the pod schema flag hook;
-const mockedUseIsPodSchemaSelectorEnabled = (await vi.importMock('../../../../hooks/use_is_pod_schema_selector_enabled')).useIsPodSchemaSelectorEnabled as Mock;
+const mockedUseIsPodSchemaSelectorEnabled = (
+  await vi.importMock('../../../../hooks/use_is_pod_schema_selector_enabled')
+).useIsPodSchemaSelectorEnabled as Mock;
 
 const options: InfraWaffleMapOptions = {
   formatter: InfraFormatterType.percent,

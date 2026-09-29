@@ -16,31 +16,31 @@ import { createAttachmentItem, createCustomEventItem } from './items/timeline_it
 import { Timeline } from './timeline';
 
 vi.mock('./items/user_message_event', () => {
-      const mocked = { UserMessageEvent: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { UserMessageEvent: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./items/attachment_event', () => {
-      const mocked = {
-      AttachmentEvent: () => <div data-test-subj="attachmentEvent" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AttachmentEvent: () => <div data-test-subj="attachmentEvent" />,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./items/custom_event', () => {
-      const mocked = {
-      CustomEvent: ({ isStreaming }: { isStreaming?: boolean }) => (
-        <div data-test-subj="customEvent" data-streaming={String(isStreaming)} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CustomEvent: ({ isStreaming }: { isStreaming?: boolean }) => (
+      <div data-test-subj="customEvent" data-streaming={String(isStreaming)} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./agent_turn', () => {
-      const mocked = {
-      AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
-        <div data-test-subj="agentTurn" data-resuming={String(isResuming)} />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AgentTurn: ({ isResuming }: { isResuming?: boolean }) => (
+      <div data-test-subj="agentTurn" data-resuming={String(isResuming)} />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('Timeline', () => {
   it('marks each item with its key so the scroll anchor can find it', () => {

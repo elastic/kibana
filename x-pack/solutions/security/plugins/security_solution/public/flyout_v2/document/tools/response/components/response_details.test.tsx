@@ -20,7 +20,7 @@ import { useUserPrivileges } from '../../../../../common/components/user_privile
 vi.mock('../../../../../common/components/user_privileges');
 vi.mock('../../../../../common/hooks/use_experimental_features');
 vi.mock('../../../../../common/lib/kibana', async () => {
-  const originalModule = (await vi.importActual('../../../../../common/lib/kibana'));
+  const originalModule = await vi.importActual('../../../../../common/lib/kibana');
   return {
     ...originalModule,
     useKibana: vi.fn().mockReturnValue({

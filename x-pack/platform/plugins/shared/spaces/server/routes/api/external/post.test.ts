@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import * as Rx from 'rxjs';
+import { vi } from 'vitest';
 
 import { AIChatExperience } from '@kbn/ai-assistant-common';
 import type { ObjectType } from '@kbn/config-schema';

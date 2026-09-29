@@ -18,13 +18,13 @@ import {
 const mockToAPIFormat = vi.fn();
 
 vi.mock('@kbn/lens-embeddable-utils', () => {
-      const mocked = {
-      LensConfigBuilder: vi.fn().mockImplementation(() => ({
-        toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LensConfigBuilder: vi.fn().mockImplementation(() => ({
+      toAPIFormat: (...args: unknown[]) => mockToAPIFormat(...args),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('lens_reference helpers', () => {
   beforeEach(() => {

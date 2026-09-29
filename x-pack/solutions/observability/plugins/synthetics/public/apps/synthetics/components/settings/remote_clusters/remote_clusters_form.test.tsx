@@ -17,12 +17,12 @@ import * as settingsHooks from '../../../contexts/synthetics_settings_context';
 import type { SyntheticsSettingsContextValues } from '../../../contexts';
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSaveSettings = vi.fn();
 
@@ -33,26 +33,26 @@ const mockCCSSettingsData = {
 };
 
 vi.mock('./hooks/use_get_ccs_settings', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks/use_get_ccs_settings')),
-      useGetCCSSettings: () => ({
-        data: mockCCSSettingsData,
-        loading: false,
-        error: undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks/use_get_ccs_settings')),
+    useGetCCSSettings: () => ({
+      data: mockCCSSettingsData,
+      loading: false,
+      error: undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/use_put_ccs_settings', () => {
-      const mocked = {
-      usePutCCSSettings: () => ({
-        saveSettings: mockSaveSettings,
-        isSaving: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePutCCSSettings: () => ({
+      saveSettings: mockSaveSettings,
+      isSaving: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRemoteClusters = [
   { name: 'cluster-a', isConnected: true },
@@ -60,12 +60,12 @@ const mockRemoteClusters = [
 ];
 
 vi.mock('../../../contexts/synthetics_settings_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../contexts/synthetics_settings_context')),
-      useSyntheticsSettingsContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../contexts/synthetics_settings_context')),
+    useSyntheticsSettingsContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildSpacesService = () => ({
   ui: {

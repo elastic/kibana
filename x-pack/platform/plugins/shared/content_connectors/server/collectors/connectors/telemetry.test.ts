@@ -15,11 +15,11 @@ import { collectConnectorStats } from '@kbn/search-connectors';
 import type { ConnectorStats } from '@kbn/search-connectors';
 
 vi.mock('@kbn/search-connectors', () => {
-      const mocked = {
-      collectConnectorStats: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    collectConnectorStats: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockLogger = loggingSystemMock.createLogger().get();
 

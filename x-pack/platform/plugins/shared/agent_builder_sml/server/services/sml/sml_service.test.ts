@@ -20,7 +20,7 @@ import { smlIndexName } from './sml_storage';
 import type { SmlTypeDefinition } from './types';
 
 vi.mock('./sml_storage', async () => {
-  const actual = (await vi.importActual('./sml_storage'));
+  const actual = await vi.importActual('./sml_storage');
   return {
     ...actual,
   };

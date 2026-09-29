@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const getBaseMappingsMock = vi.fn();
 
 vi.doMock('../../core/build_active_mappings', async () => {
-  const actual = (await vi.importActual('../../core/build_active_mappings'));
+  const actual = await vi.importActual('../../core/build_active_mappings');
   return {
     ...actual,
     getBaseMappings: getBaseMappingsMock,
@@ -22,7 +22,7 @@ vi.doMock('../../core/build_active_mappings', async () => {
 export const getUpdatedRootFieldsMock = vi.fn();
 
 vi.doMock('../../core/compare_mappings', async () => {
-  const actual = (await vi.importActual('../../core/compare_mappings'));
+  const actual = await vi.importActual('../../core/compare_mappings');
   return {
     ...actual,
     getUpdatedRootFields: getUpdatedRootFieldsMock,

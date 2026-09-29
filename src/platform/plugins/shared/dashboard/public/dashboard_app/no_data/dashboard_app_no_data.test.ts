@@ -16,13 +16,13 @@ import { isDashboardAppInNoDataState } from './dashboard_app_no_data';
 import { DATASETS_ROUTE } from '@kbn/esql-types';
 
 vi.mock('../../dashboard_client', () => {
-      const mocked = {
-      dashboardClient: {
-        search: vi.fn().mockResolvedValue({ meta: { total: 0 } }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    dashboardClient: {
+      search: vi.fn().mockResolvedValue({ meta: { total: 0 } }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { dashboardClient } from '../../dashboard_client';
 

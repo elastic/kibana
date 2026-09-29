@@ -25,11 +25,11 @@ import { GET_POLICY_TOOL_ID, createGetPolicyTool, getPolicySchema } from './get_
 import { estimateGuardedEnvelopeTokens, toPresentationHash } from './trim_policy_result';
 
 vi.mock('./create_policy_tool', () => {
-      const mocked = {
-      createPolicyTool: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createPolicyTool: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const SPACE_ID = 'space-marketing';
 const getStartServices = vi.fn() as unknown as StartServicesAccessor;

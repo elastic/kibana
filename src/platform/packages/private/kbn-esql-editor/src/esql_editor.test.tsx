@@ -30,38 +30,38 @@ import type { ESQLEditorProps } from './types';
 const mockValidate = vi.fn().mockResolvedValue({ errors: [], warnings: [] });
 
 vi.mock('@kbn/code-editor', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/code-editor')),
-      ESQLLang: {
-        ...(await vi.importActual('@kbn/code-editor')).ESQLLang,
-        getEsqlLanguage: vi.fn(() => ({
-          id: 'esql',
-          name: 'ESQL',
-          extensions: ['.esql'],
-          aliases: ['ESQL', 'esql'],
-          mimetypes: ['application/esql'],
-        })),
-        validate: async () => mockValidate(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/code-editor')),
+    ESQLLang: {
+      ...(await vi.importActual('@kbn/code-editor')).ESQLLang,
+      getEsqlLanguage: vi.fn(() => ({
+        id: 'esql',
+        name: 'ESQL',
+        extensions: ['.esql'],
+        aliases: ['ESQL', 'esql'],
+        mimetypes: ['application/esql'],
+      })),
+      validate: async () => mockValidate(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('monaco-promql', () => {
-      const mocked = {
-      promLanguageDefinition: {
-        id: 'promql',
-        extensions: ['.promql'],
-        aliases: [],
-        mimetypes: [],
-        loader: vi.fn().mockResolvedValue({
-          language: { tokenizer: { root: [] } },
-          languageConfiguration: {},
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    promLanguageDefinition: {
+      id: 'promql',
+      extensions: ['.promql'],
+      aliases: [],
+      mimetypes: [],
+      loader: vi.fn().mockResolvedValue({
+        language: { tokenizer: { root: [] } },
+        languageConfiguration: {},
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lookup_join', () => {
   return {

@@ -30,11 +30,11 @@ import React from 'react';
 import { TimeCache } from './data_model/time_cache';
 
 vi.mock('./default_spec', () => {
-      const mocked = {
-      getDefaultSpec: async () => (await vi.importActual('./test_utils/default.spec.json')),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getDefaultSpec: async () => await vi.importActual('./test_utils/default.spec.json'),
+  };
+  return { ...mocked, default: mocked };
+});
 const theme = { darkMode: false, name: 'borealis' };
 
 describe('VegaVisualizations', () => {
@@ -57,9 +57,7 @@ describe('VegaVisualizations', () => {
     mockedHeightValue = height;
 
     // rtl does not update client dimensions on element, see https://github.com/testing-library/react-testing-library/issues/353
-    vi
-      .spyOn(Element.prototype, 'clientHeight', 'get')
-      .mockImplementation(() => mockedHeightValue);
+    vi.spyOn(Element.prototype, 'clientHeight', 'get').mockImplementation(() => mockedHeightValue);
     vi.spyOn(Element.prototype, 'clientWidth', 'get').mockImplementation(() => mockedWidthValue);
   };
 

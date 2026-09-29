@@ -14,42 +14,42 @@ import { useRuleChangeHistoryModal } from './use_rule_change_history_modal';
 const mockOpenModal = vi.fn();
 
 vi.mock('@kbn/change-history-ui', () => {
-      const mocked = {
-      useChangeHistoryModal: () => ({ openModal: mockOpenModal, closeModal: vi.fn(), isOpen: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useChangeHistoryModal: () => ({ openModal: mockOpenModal, closeModal: vi.fn(), isOpen: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockProviderRenders: Array<{ ruleId: string; ruleName: string; analytics: unknown }> = [];
 
 vi.mock('./rule_change_history_provider', () => {
-      const mocked = {
-      RuleChangeHistoryProvider: (props: {
-        ruleId: string;
-        ruleName: string;
-        analytics: unknown;
-        children: React.ReactNode;
-      }) => {
-        mockProviderRenders.push({
-          ruleId: props.ruleId,
-          ruleName: props.ruleName,
-          analytics: props.analytics,
-        });
-        return <div data-test-subj="provider">{props.children}</div>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleChangeHistoryProvider: (props: {
+      ruleId: string;
+      ruleName: string;
+      analytics: unknown;
+      children: React.ReactNode;
+    }) => {
+      mockProviderRenders.push({
+        ruleId: props.ruleId,
+        ruleName: props.ruleName,
+        analytics: props.analytics,
+      });
+      return <div data-test-subj="provider">{props.children}</div>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockAnalyticsStub = { reportEvent: vi.fn() };
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      CoreStart: (key: string) => `CoreStart:${key}`,
-      useService: (token: unknown) => (token === 'CoreStart:analytics' ? mockAnalyticsStub : {}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CoreStart: (key: string) => `CoreStart:${key}`,
+    useService: (token: unknown) => (token === 'CoreStart:analytics' ? mockAnalyticsStub : {}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const Harness = () => {
   const { openChangeHistory, changeHistoryModal } = useRuleChangeHistoryModal();

@@ -15,11 +15,11 @@ import { wrapMiddlewares, type Middleware } from '.';
 import type { EntityStoreRequestHandlerContext } from '../../types';
 
 vi.mock('../../telemetry/traces', () => {
-      const mocked = {
-      runWithSpan: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    runWithSpan: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('wrapMiddlewares', () => {
   let mockContext: EntityStoreRequestHandlerContext;

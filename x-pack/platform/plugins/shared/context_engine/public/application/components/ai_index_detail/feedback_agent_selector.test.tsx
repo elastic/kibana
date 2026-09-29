@@ -18,13 +18,13 @@ import { useUpdateFeedbackAgent } from '../../hooks/use_update_feedback_agent';
 import { FeedbackAgentSelector } from './feedback_agent_selector';
 
 vi.mock('../../hooks/use_agent_builder_agents', () => {
-      const mocked = { useAgentBuilderAgents: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useAgentBuilderAgents: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../hooks/use_update_feedback_agent', () => {
-      const mocked = { useUpdateFeedbackAgent: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useUpdateFeedbackAgent: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseAgents = vi.mocked(useAgentBuilderAgents);
 const mockUseUpdate = vi.mocked(useUpdateFeedbackAgent);

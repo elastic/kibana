@@ -15,13 +15,13 @@ import { useSpaceId } from '../../hooks/space_id/use_space_id';
 vi.mock('../../hooks/space_id/use_space_id');
 const mockUseSpaceId = useSpaceId as MockedFunction<typeof useSpaceId>;
 vi.mock('@kbn/elastic-assistant', () => {
-      const mocked = {
-      AssistantSpaceIdProvider: vi.fn(({ children }) => (
-        <div data-test-subj="elastic-assistant-provider">{children}</div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssistantSpaceIdProvider: vi.fn(({ children }) => (
+      <div data-test-subj="elastic-assistant-provider">{children}</div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AssistantSpaceIdProvider', () => {
   beforeEach(() => {

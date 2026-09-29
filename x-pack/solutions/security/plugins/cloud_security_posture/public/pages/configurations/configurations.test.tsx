@@ -31,11 +31,11 @@ import {
 import { useExpandableFlyoutCsp } from '../../common/hooks/use_expandable_flyout_csp';
 
 vi.mock('../../common/hooks/use_expandable_flyout_csp', () => {
-      const mocked = {
-      useExpandableFlyoutCsp: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useExpandableFlyoutCsp: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const server = setupMockServer();
 

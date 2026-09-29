@@ -40,55 +40,55 @@ import { createAgentAction } from './actions';
 import { RollbackActionRunner, rollbackBatch } from './rollback_action_runner';
 
 vi.mock('./crud', () => {
-      const mocked = {
-      getAgentPolicyForAgent: vi.fn(),
-      getAgentsById: vi.fn(),
-      getAgentsByKuery: vi.fn(),
-      openPointInTime: vi.fn(),
-      updateAgent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAgentPolicyForAgent: vi.fn(),
+    getAgentsById: vi.fn(),
+    getAgentsByKuery: vi.fn(),
+    openPointInTime: vi.fn(),
+    updateAgent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./actions', () => {
-      const mocked = {
-      createAgentAction: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createAgentAction: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rollback_action_runner', () => {
-      const mocked = {
-      RollbackActionRunner: vi.fn(),
-      rollbackBatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RollbackActionRunner: vi.fn(),
+    rollbackBatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../spaces/get_current_namespace', () => {
-      const mocked = {
-      getCurrentNamespace: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentNamespace: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../spaces/agent_namespaces', async () => {
-      const mocked = {
-      agentsKueryNamespaceFilter: vi.fn(),
-      buildFilterWithNamespace: (await vi.importActual('../spaces/agent_namespaces'))
-        .buildFilterWithNamespace,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentsKueryNamespaceFilter: vi.fn(),
+    buildFilterWithNamespace: (await vi.importActual('../spaces/agent_namespaces'))
+      .buildFilterWithNamespace,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../license', () => {
-      const mocked = {
-      licenseService: {
-        hasAtLeast: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    licenseService: {
+      hasAtLeast: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetAgentPolicyForAgent = getAgentPolicyForAgent as MockedFunction<
   typeof getAgentPolicyForAgent
@@ -99,12 +99,8 @@ const mockOpenPointInTime = openPointInTime as MockedFunction<typeof openPointIn
 const mockUpdateAgent = updateAgent as MockedFunction<typeof updateAgent>;
 const mockCreateAgentAction = createAgentAction as MockedFunction<typeof createAgentAction>;
 const mockRollbackBatch = rollbackBatch as MockedFunction<typeof rollbackBatch>;
-const mockRollbackActionRunner = RollbackActionRunner as MockedClass<
-  typeof RollbackActionRunner
->;
-const mockGetCurrentNamespace = getCurrentNamespace as MockedFunction<
-  typeof getCurrentNamespace
->;
+const mockRollbackActionRunner = RollbackActionRunner as MockedClass<typeof RollbackActionRunner>;
+const mockGetCurrentNamespace = getCurrentNamespace as MockedFunction<typeof getCurrentNamespace>;
 const mockAgentsKueryNamespaceFilter = agentsKueryNamespaceFilter as MockedFunction<
   typeof agentsKueryNamespaceFilter
 >;

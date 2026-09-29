@@ -18,11 +18,11 @@ import { getAlertDeletePreview } from './get_alert_delete_preview';
 const http = httpServiceMock.createStartContract();
 
 vi.mock('./get_alert_delete_preview', () => {
-      const mocked = {
-      getAlertDeletePreview: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getAlertDeletePreview: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAlertDeletePreview', () => {
   const queryClient = new QueryClient();

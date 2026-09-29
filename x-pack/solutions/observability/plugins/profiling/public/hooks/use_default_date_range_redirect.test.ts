@@ -11,12 +11,12 @@ import type { Mock } from 'vitest';
 import qs from 'query-string';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useHistory: vi.fn(),
-      useLocation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useHistory: vi.fn(),
+    useLocation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../components/contexts/profiling_dependencies/use_profiling_dependencies');
 

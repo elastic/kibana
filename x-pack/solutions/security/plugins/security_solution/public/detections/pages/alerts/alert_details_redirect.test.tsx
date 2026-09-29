@@ -23,14 +23,14 @@ vi.mock('../../../common/hooks/use_is_new_flyout_enabled');
 
 const testAlertId = 'test-alert-id';
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useParams: () => ({
-        alertId: testAlertId,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useParams: () => ({
+      alertId: testAlertId,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testIndex = '.someTestIndex';
 const testTimestamp = '2023-04-20T12:00:00.000Z';

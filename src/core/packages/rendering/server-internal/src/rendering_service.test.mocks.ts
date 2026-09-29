@@ -14,12 +14,12 @@ export const registerBootstrapRouteMock = vi.fn();
 export const bootstrapRendererFactoryMock = vi.fn(() => bootstrapRendererMock);
 
 vi.doMock('./bootstrap', () => {
-      const mocked = {
-      registerBootstrapRoute: registerBootstrapRouteMock,
-      bootstrapRendererFactory: bootstrapRendererFactoryMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    registerBootstrapRoute: registerBootstrapRouteMock,
+    bootstrapRendererFactory: bootstrapRendererFactoryMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getSettingValueMock = vi.fn();
 export const getCommonStylesheetPathsMock = vi.fn();
@@ -29,15 +29,15 @@ export const getBrowserLoggingConfigMock = vi.fn();
 export const getBundlesHrefMock = vi.fn((baseHref: string) => `${baseHref}/bundles`);
 
 vi.doMock('./render_utils', () => {
-      const mocked = {
-      getSettingValue: getSettingValueMock,
-      getBundlesHref: getBundlesHrefMock,
-      getCommonStylesheetPaths: getCommonStylesheetPathsMock,
-      getThemeStylesheetPaths: getThemeStylesheetPathsMock,
-      getBrowserLoggingConfig: getBrowserLoggingConfigMock,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getSettingValue: getSettingValueMock,
+    getBundlesHref: getBundlesHrefMock,
+    getCommonStylesheetPaths: getCommonStylesheetPathsMock,
+    getThemeStylesheetPaths: getThemeStylesheetPathsMock,
+    getBrowserLoggingConfig: getBrowserLoggingConfigMock,
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getApmConfigMock = vi.fn();
 vi.doMock('./get_apm_config', () => {

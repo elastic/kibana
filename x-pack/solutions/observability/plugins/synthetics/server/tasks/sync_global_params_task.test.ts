@@ -80,18 +80,19 @@ describe('SyncGlobalParamsPrivateLocationsTask.runTask', () => {
       } as any
     );
 
-    vi
-      .spyOn(getPrivateLocationsModule, 'getPrivateLocations')
-      .mockResolvedValue([{ id: 'pl-1' }] as any);
+    vi.spyOn(getPrivateLocationsModule, 'getPrivateLocations').mockResolvedValue([
+      { id: 'pl-1' },
+    ] as any);
     vi.spyOn(task.deployPackagePolicies, 'getAllMonitorConfigs').mockResolvedValue({
       configsBySpaces: { space1: [{ id: 'm1' }] },
       monitorSpaceIds: new Set(['space1']),
       paramsBySpace: {},
       maintenanceWindows: [],
     } as any);
-    vi
-      .spyOn(task.deployPackagePolicies, 'parseLocations')
-      .mockReturnValue({ privateLocations: [{ id: 'pl-1' }], publicLocations: [] } as any);
+    vi.spyOn(task.deployPackagePolicies, 'parseLocations').mockReturnValue({
+      privateLocations: [{ id: 'pl-1' }],
+      publicLocations: [],
+    } as any);
 
     return { task, serverSetup };
   };

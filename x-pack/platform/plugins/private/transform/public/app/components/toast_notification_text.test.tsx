@@ -18,11 +18,11 @@ import { ToastNotificationText, useToastNotificationText } from './toast_notific
 
 vi.mock('../app_dependencies');
 vi.mock('@kbn/react-kibana-mount', () => {
-      const mocked = {
-      toMountPoint: vi.fn((element: React.ReactElement) => element),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    toMountPoint: vi.fn((element: React.ReactElement) => element),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ToastNotificationText', () => {
   test('should render the text as plain text', () => {

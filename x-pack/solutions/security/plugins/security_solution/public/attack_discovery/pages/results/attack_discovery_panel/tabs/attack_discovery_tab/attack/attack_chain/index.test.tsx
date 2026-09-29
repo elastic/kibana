@@ -16,11 +16,11 @@ import { getTacticMetadata } from '@kbn/elastic-assistant-common/impl/utils/atta
 import { mockAttackDiscovery } from '../../../../../../mock/mock_attack_discovery';
 
 vi.mock('@kbn/elastic-assistant-common/impl/utils/attack_discovery_helpers', () => {
-      const mocked = {
-      getTacticMetadata: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTacticMetadata: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedGetTacticMetadata = getTacticMetadata as Mock;
 

@@ -23,11 +23,11 @@ import { parseEcsFieldPath } from '../../../../common/lib/endpoint';
 
 vi.mock('../../../../common/experimental_features_service');
 vi.mock('../utils/get_timeline_events_details_from_record', () => {
-      const mocked = {
-      getTimelineEventsDetailsFromRecord: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimelineEventsDetailsFromRecord: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const dataFormattedForFieldBrowser = mockDataFormattedForFieldBrowser;
 

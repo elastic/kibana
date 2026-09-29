@@ -39,7 +39,7 @@ vi.mock('react-router-dom', () => {
 
 const mockNavigateToApp = vi.fn();
 vi.mock('../../../../common/lib/kibana/kibana_react', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana/kibana_react'));
+  const original = await vi.importActual('../../../../common/lib/kibana/kibana_react');
 
   return {
     ...original,
@@ -72,7 +72,7 @@ vi.mock('../../../../common/lib/kibana/kibana_react', async () => {
 });
 
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...original,
     useUiSetting$: vi.fn().mockReturnValue([]),
@@ -83,21 +83,29 @@ vi.mock('../../../../common/lib/kibana', async () => {
 vi.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
 vi.mock('../common/hooks', async () => {
-  const actual = (await vi.importActual('../common/hooks'));
+  const actual = await vi.importActual('../common/hooks');
   return {
     ...actual,
     useInspectButton: vi.fn(),
   };
 });
 
-vi.mock('../../../../common/components/visualization_actions/use_visualization_response', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response')),
-      useVisualizationResponse: (await vi.importActual('../../../../common/components/visualization_actions/use_visualization_response.mock'))
-        .useVisualizationResponseMock.create(),
+vi.mock(
+  '../../../../common/components/visualization_actions/use_visualization_response',
+  async () => {
+    const mocked = {
+      ...(await vi.importActual(
+        '../../../../common/components/visualization_actions/use_visualization_response'
+      )),
+      useVisualizationResponse: (
+        await vi.importActual(
+          '../../../../common/components/visualization_actions/use_visualization_response.mock'
+        )
+      ).useVisualizationResponseMock.create(),
     };
-      return { ...mocked, default: mocked };
-    });
+    return { ...mocked, default: mocked };
+  }
+);
 
 const mockSetIsExpanded = vi.fn();
 const defaultProps = {
@@ -345,13 +353,13 @@ describe('AlertsHistogramPanel', () => {
   describe('Query', () => {
     it('it render with a illegal KQL', () => {
       vi.doMock('@kbn/es-query', () => {
-            const mocked = {
-                  buildEsQuery: vi.fn().mockImplementation(() => {
-                    throw new Error('Something went wrong');
-                  }),
-                };
-            return { ...mocked, default: mocked };
-          });
+        const mocked = {
+          buildEsQuery: vi.fn().mockImplementation(() => {
+            throw new Error('Something went wrong');
+          }),
+        };
+        return { ...mocked, default: mocked };
+      });
       const props = { ...defaultProps, query: { query: 'host.name: "', language: 'kql' } };
       const wrapper = mount(
         <TestProviders>
@@ -536,9 +544,7 @@ describe('AlertsHistogramPanel', () => {
         </TestProviders>
       );
 
-      expect((VisualizationEmbeddable as unknown as Mock).mock.calls[0][0].height).toEqual(
-        155
-      );
+      expect((VisualizationEmbeddable as unknown as Mock).mock.calls[0][0].height).toEqual(155);
       wrapper.unmount();
     });
 

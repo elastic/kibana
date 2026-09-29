@@ -15,48 +15,48 @@ import { INSIGHTS_ENTITIES_TEST_ID } from '../constants/test_ids';
 import { useAttackEntitiesCounts } from '../hooks/use_attack_entities_counts';
 
 vi.mock('@kbn/i18n-react', () => {
-      const mocked = {
-      FormattedMessage: ({ defaultMessage, id }: { defaultMessage: string; id: string }) => (
-        <span data-testid={id}>{defaultMessage}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedMessage: ({ defaultMessage, id }: { defaultMessage: string; id: string }) => (
+      <span data-testid={id}>{defaultMessage}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./section_panel', () => {
-      const mocked = {
-      SectionPanel: ({
-        children,
-        title,
-        'data-test-subj': dataTestSubj,
-        link,
-      }: {
-        children: React.ReactNode;
-        title: React.ReactNode;
-        'data-test-subj'?: string;
-        link?: { callback: () => void; tooltip: React.ReactNode } | undefined;
-      }) => (
-        <div data-test-subj={dataTestSubj}>
-          {link ? (
-            <button data-test-subj={`${dataTestSubj}TitleLink`} onClick={link.callback} type="button">
-              {title}
-            </button>
-          ) : (
-            <div data-test-subj={`${dataTestSubj}TitleText`}>{title}</div>
-          )}
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SectionPanel: ({
+      children,
+      title,
+      'data-test-subj': dataTestSubj,
+      link,
+    }: {
+      children: React.ReactNode;
+      title: React.ReactNode;
+      'data-test-subj'?: string;
+      link?: { callback: () => void; tooltip: React.ReactNode } | undefined;
+    }) => (
+      <div data-test-subj={dataTestSubj}>
+        {link ? (
+          <button data-test-subj={`${dataTestSubj}TitleLink`} onClick={link.callback} type="button">
+            {title}
+          </button>
+        ) : (
+          <div data-test-subj={`${dataTestSubj}TitleText`}>{title}</div>
+        )}
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_attack_entities_counts', () => {
-      const mocked = {
-      useAttackEntitiesCounts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAttackEntitiesCounts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithEui = (ui: React.ReactElement) => render(<EuiProvider>{ui}</EuiProvider>);
 

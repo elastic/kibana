@@ -13,11 +13,11 @@ import { getTimelineFieldsDataFromHit } from '@kbn/timelines-plugin/common';
 import { getTimelineEventsDetailsFromRecord } from './get_timeline_events_details_from_record';
 
 vi.mock('@kbn/timelines-plugin/common', () => {
-      const mocked = {
-      getTimelineFieldsDataFromHit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTimelineFieldsDataFromHit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getTimelineEventsDetailsFromRecord', () => {
   beforeEach(() => {

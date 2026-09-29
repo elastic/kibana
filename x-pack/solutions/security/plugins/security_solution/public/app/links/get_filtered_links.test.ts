@@ -10,11 +10,11 @@ import type { MockedFunction } from 'vitest';
 
 // Mock the dependencies before imports
 vi.mock('../../management/links', () => {
-      const mocked = {
-      getManagementFilteredLinks: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getManagementFilteredLinks: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { getFilteredLinks } from './app_links';
 import type { LinkItem } from '../../common/links/types';

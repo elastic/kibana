@@ -33,7 +33,7 @@ let mockValidationOverride: {
   isDateTimeMissing: boolean;
 } | null = null;
 vi.mock('../utils/duration_validation', async () => {
-  const actual = (await vi.importActual('../utils/duration_validation'));
+  const actual = await vi.importActual('../utils/duration_validation');
   return {
     ...actual,
     validateDuration: (...args: unknown[]) =>

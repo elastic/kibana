@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook, waitFor } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { renderHook, waitFor } from '@testing-library/react';
 import type { QueryClient } from '@kbn/react-query';
 import type { WorkflowExecutionListDto } from '@kbn/workflows';
 import { ExecutionStatus, ExecutionType } from '@kbn/workflows/types/v1';
@@ -20,11 +20,11 @@ import { useWorkflowExecutions } from './use_workflow_executions';
 import { createQueryClientWrapper, createTestQueryClient } from '../../../shared/test_utils';
 
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      useWorkflowsApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useWorkflowsApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseWorkflowsApi = useWorkflowsApi as MockedFunction<typeof useWorkflowsApi>;
 

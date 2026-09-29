@@ -19,29 +19,29 @@ const mockDeleteRuleMigration = vi.fn();
 const mockDeleteDashboardMigration = vi.fn();
 
 vi.mock('../../../common/hooks/use_app_toasts', () => {
-      const mocked = {
-      useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAppToasts: () => ({ addSuccess: mockAddSuccess, addError: mockAddError }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          siemMigrations: {
-            rules: {
-              deleteMigration: mockDeleteRuleMigration,
-            },
-            dashboards: {
-              deleteMigration: mockDeleteDashboardMigration,
-            },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        siemMigrations: {
+          rules: {
+            deleteMigration: mockDeleteRuleMigration,
+          },
+          dashboards: {
+            deleteMigration: mockDeleteDashboardMigration,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useDeleteMigration', () => {
   const defaultMigrationStats = {

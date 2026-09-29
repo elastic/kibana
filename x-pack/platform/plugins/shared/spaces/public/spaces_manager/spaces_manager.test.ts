@@ -92,10 +92,10 @@ describe('SpacesManager', () => {
       const spacesManager = new SpacesManager(coreStart.http);
 
       await expect(() =>
-                spacesManager.getActiveSpace({ forceRefresh: true })
-              ).rejects.toThrowErrorMatchingInlineSnapshot(
-                `"Cannot retrieve the active space for anonymous paths"`
-              );
+        spacesManager.getActiveSpace({ forceRefresh: true })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot retrieve the active space for anonymous paths"`
+      );
     });
   });
 

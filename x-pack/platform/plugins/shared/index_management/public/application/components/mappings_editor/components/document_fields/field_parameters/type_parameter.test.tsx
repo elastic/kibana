@@ -16,16 +16,16 @@ import { TYPE_ONLY_ALLOWED_AT_ROOT_LEVEL } from '../../../constants';
 import { TypeParameter } from './type_parameter';
 
 vi.mock('../../../../../services/documentation', () => {
-      const mocked = {
-      documentationService: {
-        getTypeDocLink: (type: string) => `/docs/${type}`,
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    documentationService: {
+      getTypeDocLink: (type: string) => `/docs/${type}`,
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
 
   return {
     ...actual,

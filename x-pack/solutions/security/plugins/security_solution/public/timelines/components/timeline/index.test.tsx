@@ -27,26 +27,26 @@ import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { withIndices } from '../../../data_view_manager/hooks/__mocks__/use_data_view';
 
 vi.mock('../../containers', () => {
-      const mocked = {
-      useTimelineEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./tabs', () => {
-      const mocked = {
-      TabsContent: () => <div data-test-subj="tabs-content" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TabsContent: () => <div data-test-subj="tabs-content" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../common/lib/kibana');
 
 vi.mock('../../../common/utils/normalize_time_range');
 vi.mock('@kbn/i18n-react', async () => {
-  const { i18n } = (await vi.importActual('@kbn/i18n'));
+  const { i18n } = await vi.importActual('@kbn/i18n');
   i18n.init({ locale: 'en' });
-  const originalModule = (await vi.importActual('@kbn/i18n-react'));
+  const originalModule = await vi.importActual('@kbn/i18n-react');
   const FormattedRelative = vi.fn().mockImplementation(() => '20 hours ago');
 
   return {
@@ -95,14 +95,12 @@ describe('StatefulTimeline', () => {
   };
 
   beforeEach(() => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(
-        withIndices(
-          mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
-          mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId as string
-        )
-      );
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(
+        mockGlobalState.timeline.timelineById[TimelineId.test]?.indexNames,
+        mockGlobalState.timeline.timelineById[TimelineId.test]?.dataViewId as string
+      )
+    );
 
     vi.clearAllMocks();
     (useTimelineEvents as Mock).mockReturnValue([

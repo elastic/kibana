@@ -21,12 +21,12 @@ vi.mock('../../../lib/kibana');
 
 const mockDispatch = vi.fn();
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: () => mockDispatch,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: () => mockDispatch,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const link1Id = 'link-1' as SecurityPageName;
 const link2Id = 'link-2' as SecurityPageName;
@@ -49,46 +49,46 @@ const mockSecuritySolutionUrl: GetSecuritySolutionUrl = vi.fn(
     allLinks.find((link) => link.id === deepLinkId)?.path ?? deepLinkId
 );
 vi.mock('../../link_to', () => {
-      const mocked = {
-      useGetSecuritySolutionUrl: () => mockSecuritySolutionUrl,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetSecuritySolutionUrl: () => mockSecuritySolutionUrl,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUpdateBreadcrumbsNav = vi.fn((_param: BreadcrumbsNav) => {});
 vi.mock('../../../breadcrumbs', () => {
-      const mocked = {
-      updateBreadcrumbsNav: (param: BreadcrumbsNav) => mockUpdateBreadcrumbsNav(param),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    updateBreadcrumbsNav: (param: BreadcrumbsNav) => mockUpdateBreadcrumbsNav(param),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseRouteSpy = vi.fn((): [{ pageName: string }] => [{ pageName: link1Id }]);
 vi.mock('../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: () => mockUseRouteSpy(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: () => mockUseRouteSpy(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetParentLinks = vi.fn((_id: unknown): LinkInfo[] => parentsLinks);
 vi.mock('../../../links/links_hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../links/links_hooks')),
-      useParentLinks: (id: unknown) => mockGetParentLinks(id),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../links/links_hooks')),
+    useParentLinks: (id: unknown) => mockGetParentLinks(id),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetTrailingBreadcrumbs = vi.fn((): ChromeBreadcrumb[] =>
   trailingLinks.map(({ title: text, path: href }) => ({ text, href }))
 );
 vi.mock('./trailing_breadcrumbs', () => {
-      const mocked = {
-      getTrailingBreadcrumbs: () => mockGetTrailingBreadcrumbs(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getTrailingBreadcrumbs: () => mockGetTrailingBreadcrumbs(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const landingBreadcrumb = {
   href: 'launchpad',

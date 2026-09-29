@@ -18,20 +18,20 @@ import { reportAwsOnboardingDeployClicked } from '@kbn/fleet-plugin/common';
 import { ElbLogsPanel } from './elb_logs_panel';
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(() => ({ state: null })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(() => ({ state: null })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/fleet-plugin/common', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/fleet-plugin/common')),
-      reportAwsOnboardingDeployClicked: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/fleet-plugin/common')),
+    reportAwsOnboardingDeployClicked: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockFlowData = {
   onboardingId: 'test-id',

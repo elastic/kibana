@@ -85,8 +85,8 @@ describe('KibanaSocket', () => {
       const socket = new KibanaSocket(new Socket());
 
       await expect(() => socket.renegotiate({})).rejects.toThrowErrorMatchingInlineSnapshot(
-                `"Cannot renegotiate a connection when TLS is not enabled."`
-              );
+        `"Cannot renegotiate a connection when TLS is not enabled."`
+      );
     });
 
     it('delegates a call to tls.Socket instance', async () => {

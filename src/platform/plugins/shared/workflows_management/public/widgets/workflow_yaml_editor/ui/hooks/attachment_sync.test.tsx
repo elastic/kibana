@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { act, renderHook } from '@testing-library/react';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
-import { act, renderHook } from '@testing-library/react';
-import { BehaviorSubject, Subject } from 'rxjs';
 import type { ActiveConversation, BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
@@ -25,40 +25,40 @@ import { useKibana } from '../../../../hooks/use_kibana';
 
 vi.mock('../../../../hooks/use_kibana');
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: () => vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: () => vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../hooks/use_telemetry', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        reportWorkflowAiChatOpened: vi.fn(),
-        reportWorkflowAiSessionCompleted: vi.fn(),
-        reportAiProposalReceived: vi.fn(),
-        reportAiProposalResolved: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      reportWorkflowAiChatOpened: vi.fn(),
+      reportWorkflowAiSessionCompleted: vi.fn(),
+      reportAiProposalReceived: vi.fn(),
+      reportAiProposalResolved: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Everything but the Monaco-bound proposal manager stays real: this covers the
 // attachment and event wiring between the editor and agent_builder.
 const appliedYaml: string[] = [];
 vi.mock('../../../../features/ai_integration', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../features/ai_integration')),
-      ProposalManager: vi.fn().mockImplementation(() => ({
-        initialize: vi.fn(),
-        dispose: vi.fn(),
-        getDiffHunks: () => [],
-        hasPendingProposals: () => false,
-        applyAfterYaml: (yaml: string) => appliedYaml.push(yaml),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../features/ai_integration')),
+    ProposalManager: vi.fn().mockImplementation(() => ({
+      initialize: vi.fn(),
+      dispose: vi.fn(),
+      getDiffHunks: () => [],
+      hasPendingProposals: () => false,
+      applyAfterYaml: (yaml: string) => appliedYaml.push(yaml),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
   let counter = 0;

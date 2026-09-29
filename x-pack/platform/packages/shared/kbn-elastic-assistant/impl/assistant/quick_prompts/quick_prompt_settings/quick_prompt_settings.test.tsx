@@ -42,53 +42,53 @@ const mockContext = {
 };
 
 vi.mock('../../../assistant_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../assistant_context')),
-      useAssistantContext: () => mockContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../assistant_context')),
+    useAssistantContext: () => mockContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../quick_prompt_selector/quick_prompt_selector', () => {
-      const mocked = {
-      // @ts-ignore
-      QuickPromptSelector: ({ onQuickPromptDeleted, onQuickPromptSelectionChange }) => (
-        <>
-          <button
-            type="button"
-            data-test-subj="delete-qp"
-            onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION')}
-          />
-          <button
-            type="button"
-            data-test-subj="change-qp"
-            onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3])}
-          />
-          <button
-            type="button"
-            data-test-subj="change-qp-custom"
-            onClick={() => onQuickPromptSelectionChange('sooper custom prompt')}
-          />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    QuickPromptSelector: ({ onQuickPromptDeleted, onQuickPromptSelectionChange }) => (
+      <>
+        <button
+          type="button"
+          data-test-subj="delete-qp"
+          onClick={() => onQuickPromptDeleted('A_CUSTOM_OPTION')}
+        />
+        <button
+          type="button"
+          data-test-subj="change-qp"
+          onClick={() => onQuickPromptSelectionChange(MOCK_QUICK_PROMPTS[3])}
+        />
+        <button
+          type="button"
+          data-test-subj="change-qp-custom"
+          onClick={() => onQuickPromptSelectionChange('sooper custom prompt')}
+        />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../prompt_context_selector/prompt_context_selector', () => {
-      const mocked = {
-      // @ts-ignore
-      PromptContextSelector: ({ onPromptContextSelectionChange }) => (
-        <>
-          <button
-            type="button"
-            data-test-subj="change-pc"
-            onClick={() => onPromptContextSelectionChange(mockPromptContexts)}
-          />
-        </>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    // @ts-ignore
+    PromptContextSelector: ({ onPromptContextSelectionChange }) => (
+      <>
+        <button
+          type="button"
+          data-test-subj="change-pc"
+          onClick={() => onPromptContextSelectionChange(mockPromptContexts)}
+        />
+      </>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('QuickPromptSettings', () => {
   beforeEach(() => {

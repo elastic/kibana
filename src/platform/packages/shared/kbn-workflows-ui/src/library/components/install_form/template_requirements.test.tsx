@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public';
 import type { InstallFormField } from '@kbn/workflows-library';
 import { TemplateRequirements } from './template_requirements';

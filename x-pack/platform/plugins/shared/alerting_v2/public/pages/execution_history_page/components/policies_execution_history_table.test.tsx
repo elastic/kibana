@@ -20,25 +20,25 @@ let mockCanReadRules = true;
 let mockCanReadActionPolicies = true;
 
 vi.mock('@kbn/core-di-browser', () => {
-      const mocked = {
-      useService: (token: unknown) => {
-        if (token === 'application') {
-          return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
-        }
-        if (token === 'settings') {
-          return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
-        }
-        if (typeof token === 'function') {
-          const canRead = (feature: string) =>
-            feature === 'actionPolicies' ? mockCanReadActionPolicies : mockCanReadRules;
-          return { canRead, canWrite: canRead, can: () => true };
-        }
-        return {};
-      },
-      CoreStart: (key: string) => key,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useService: (token: unknown) => {
+      if (token === 'application') {
+        return { getUrlForApp: (app: string, opts: { path: string }) => `/app/${app}${opts.path}` };
+      }
+      if (token === 'settings') {
+        return { client: { get: () => 'YYYY-MM-DD HH:mm' } };
+      }
+      if (typeof token === 'function') {
+        const canRead = (feature: string) =>
+          feature === 'actionPolicies' ? mockCanReadActionPolicies : mockCanReadRules;
+        return { canRead, canWrite: canRead, can: () => true };
+      }
+      return {};
+    },
+    CoreStart: (key: string) => key,
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Render each row's cells through the custom renderers the component supplies, so the cell
 // renderers stay covered without mounting the real virtualized data grid.
@@ -73,26 +73,26 @@ vi.mock('@kbn/unified-data-table', () => {
 });
 
 vi.mock('@kbn/cell-actions', () => {
-      const mocked = {
-      CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellActionsProvider: ({ children }: { children: React.ReactNode }) => children,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../data_view', async () => {
-      const mocked = {
-      ...(await vi.importActual('../data_view')),
-      usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../data_view')),
+    usePolicyExecutionsDataView: () => ({ dataView: {}, error: undefined }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_unified_data_table_services', () => {
-      const mocked = {
-      useUnifiedDataTableServices: () => ({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUnifiedDataTableServices: () => ({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const buildItem = (
   overrides: Partial<PolicyExecutionHistoryItem> = {}

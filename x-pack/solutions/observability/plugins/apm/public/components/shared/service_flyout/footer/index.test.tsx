@@ -14,19 +14,19 @@ import { ServiceFlyoutFooter } from '.';
 
 const mockUseServiceFlyoutLinks = vi.fn();
 vi.mock('../hooks/use_service_flyout_links', () => {
-      const mocked = {
-      useServiceFlyoutLinks: () => mockUseServiceFlyoutLinks(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutLinks: () => mockUseServiceFlyoutLinks(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseServiceFlyoutContext = vi.fn();
 vi.mock('../service_flyout_context', () => {
-      const mocked = {
-      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 function makeLinks({
   tracesHref = '/app/discover/traces',

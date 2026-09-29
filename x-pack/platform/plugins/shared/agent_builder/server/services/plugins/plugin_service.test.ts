@@ -18,46 +18,46 @@ import type { AnalyticsService, TrackingService } from '../../telemetry';
 
 const mockRandomUUID = vi.fn().mockReturnValue('test-plugin-uuid');
 vi.mock('crypto', () => {
-      const mocked = {
-      ...require('crypto'),
-      randomUUID: () => mockRandomUUID(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('crypto'),
+    randomUUID: () => mockRandomUUID(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockParsePluginFromUrl = vi.fn();
 const mockParsePluginFromFile = vi.fn();
 vi.mock('./utils', () => {
-      const mocked = {
-      parsePluginFromUrl: (...args: unknown[]) => mockParsePluginFromUrl(...args),
-      parsePluginFromFile: (...args: unknown[]) => mockParsePluginFromFile(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    parsePluginFromUrl: (...args: unknown[]) => mockParsePluginFromUrl(...args),
+    parsePluginFromFile: (...args: unknown[]) => mockParsePluginFromFile(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateClient = vi.fn();
 vi.mock('./client', async () => {
-      const mocked = {
-      ...(await vi.importActual('./client')),
-      createClient: (...args: unknown[]) => mockCreateClient(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./client')),
+    createClient: (...args: unknown[]) => mockCreateClient(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCreateSkillClient = vi.fn();
 vi.mock('../skills/persisted/client', () => {
-      const mocked = {
-      createClient: (...args: unknown[]) => mockCreateSkillClient(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createClient: (...args: unknown[]) => mockCreateSkillClient(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/spaces', () => {
-      const mocked = {
-      getCurrentSpaceId: vi.fn(() => 'default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentSpaceId: vi.fn(() => 'default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockParsedArchive = (
   overrides?: Partial<ParsedPluginArchive>

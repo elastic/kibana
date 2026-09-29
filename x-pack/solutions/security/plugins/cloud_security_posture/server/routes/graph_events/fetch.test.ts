@@ -34,9 +34,7 @@ describe('fetchEvents', () => {
     });
 
     // Default: index does not exist (no enrichment)
-    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
-      .fn()
-      .mockResolvedValue(false);
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi.fn().mockResolvedValue(false);
   });
 
   afterEach(() => {
@@ -75,9 +73,7 @@ describe('fetchEvents', () => {
     const indexName = getEntitiesLatestIndexName('default');
 
     // Mock index exists → enrichment via LOOKUP JOIN is enabled
-    (esClient.asInternalUser.indices as Mocked<any>).exists = vi
-      .fn()
-      .mockResolvedValueOnce(true);
+    (esClient.asInternalUser.indices as Mocked<any>).exists = vi.fn().mockResolvedValueOnce(true);
 
     await fetchEvents({
       esClient,

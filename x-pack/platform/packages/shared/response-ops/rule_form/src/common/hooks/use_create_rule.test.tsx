@@ -70,13 +70,13 @@ const wrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 vi.mock('../apis/create_rule/create_rule', () => {
-      const mocked = {
-      createRule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createRule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { createRule } = (await vi.importMock('../apis/create_rule/create_rule'));
+const { createRule } = await vi.importMock('../apis/create_rule/create_rule');
 
 const httpMock = vi.fn();
 const onSuccessMock = vi.fn();

@@ -24,21 +24,21 @@ import { useInvalidateGetWorkflowSchedule } from './use_get_workflow_schedule';
 import { updateWorkflowSchedule } from '../api/internal';
 
 vi.mock('@kbn/react-query', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/react-query')),
-      useQueryClient: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/react-query')),
+    useQueryClient: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_find_workflow_schedules');
 vi.mock('./use_get_workflow_schedule');
 vi.mock('../api/internal', async () => {
-      const mocked = {
-      ...(await vi.importActual('../api/internal')),
-      updateWorkflowSchedule: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../api/internal')),
+    updateWorkflowSchedule: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/hooks/use_app_toasts');
 
 const updateWorkflowScheduleMock = updateWorkflowSchedule as MockedFunction<
@@ -49,14 +49,14 @@ const setQueryDataMock = vi.fn();
 const useQueryClientMock = useQueryClient as MockedFunction<typeof useQueryClient>;
 
 const invalidateFindWorkflowSchedulesMock = vi.fn();
-const mockUseInvalidateFindWorkflowSchedules =
-  useInvalidateFindWorkflowSchedules as MockedFunction<
-    typeof useInvalidateFindWorkflowSchedules
-  >;
+const mockUseInvalidateFindWorkflowSchedules = useInvalidateFindWorkflowSchedules as MockedFunction<
+  typeof useInvalidateFindWorkflowSchedules
+>;
 
 const invalidateGetWorkflowScheduleMock = vi.fn();
-const mockUseInvalidateGetWorkflowSchedule =
-  useInvalidateGetWorkflowSchedule as MockedFunction<typeof useInvalidateGetWorkflowSchedule>;
+const mockUseInvalidateGetWorkflowSchedule = useInvalidateGetWorkflowSchedule as MockedFunction<
+  typeof useInvalidateGetWorkflowSchedule
+>;
 
 const mockScheduleToUpdate: AttackDiscoveryScheduleUpdateProps = {
   name: 'Updated Workflow Schedule',

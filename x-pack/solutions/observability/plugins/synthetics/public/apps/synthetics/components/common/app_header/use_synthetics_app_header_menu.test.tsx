@@ -29,103 +29,103 @@ const mockOverviewStatus = {
 };
 
 vi.mock('@kbn/kibana-react-plugin/public', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: {
-          inspector: { open: mockInspectorOpen },
-          uiSettings: { get: mockUiSettingsGet },
-          observability: {
-            useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
-          },
-          application: {
-            capabilities: { uptime: { save: true } },
-            getUrlForApp: () => '/app/synthetics',
-          },
+  const mocked = {
+    useKibana: () => ({
+      services: {
+        inspector: { open: mockInspectorOpen },
+        uiSettings: { get: mockUiSettingsGet },
+        observability: {
+          useRulesLink: () => ({ href: '/app/observability/alerts/rules' }),
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        application: {
+          capabilities: { uptime: { save: true } },
+          getUrlForApp: () => '/app/synthetics',
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-shared-plugin/public', () => {
-      const mocked = {
-      useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInspectorContext: () => ({ inspectorAdapters: { requests: {} } }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/exploratory-view-plugin/public', () => {
-      const mocked = {
-      createExploratoryViewUrl: () => '/app/exploratory-view',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createExploratoryViewUrl: () => '/app/exploratory-view',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../contexts', () => {
-      const mocked = {
-      useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsSettingsContext: () => ({ basePath: '', isDev: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks', () => {
-      const mocked = {
-      useEnablement: () => ({ isEnabled: true, isServiceAllowed: true }),
-      useGetUrlParams: () => ({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEnablement: () => ({ isEnabled: true, isServiceAllowed: true }),
+    useGetUrlParams: () => ({ dateRangeStart: 'now-24h', dateRangeEnd: 'now' }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../hooks/use_capabilities', () => {
-      const mocked = {
-      useCanEditSynthetics: () => true,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCanEditSynthetics: () => true,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-      useSelector: (selector: (state: unknown) => unknown) => selector({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDispatch: () => mockDispatch,
+    useSelector: (selector: (state: unknown) => unknown) => selector({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state', () => {
-      const mocked = {
-      selectMonitorListState: () => mockMonitorList,
-      selectAlertFlyoutVisibility: () => null,
-      setAlertFlyoutVisible: (payload: unknown) => payload,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    selectMonitorListState: () => mockMonitorList,
+    selectAlertFlyoutVisibility: () => null,
+    setAlertFlyoutVisible: (payload: unknown) => payload,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../state/overview_status', () => {
-      const mocked = {
-      selectOverviewStatus: () => mockOverviewStatus,
-      isExternalOverviewMonitor: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    selectOverviewStatus: () => mockOverviewStatus,
+    isExternalOverviewMonitor: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../alerts/hooks/use_synthetics_rules', () => {
-      const mocked = {
-      useSyntheticsRules: () => ({
-        loading: false,
-        defaultRules: { statusRule: { id: 's' }, tlsRule: { id: 't' } },
-        EditAlertFlyout: null,
-        NewRuleFlyout: null,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSyntheticsRules: () => ({
+      loading: false,
+      defaultRules: { statusRule: { id: 's' }, tlsRule: { id: 't' } },
+      EditAlertFlyout: null,
+      NewRuleFlyout: null,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../settings/synthetics_diagnostics_flyout', () => {
-      const mocked = {
-      SyntheticsDiagnosticsFlyoutLauncher: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SyntheticsDiagnosticsFlyoutLauncher: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 function renderMenuHook(options?: SyntheticsAppHeaderMenuOptions) {
   return renderHook(() => useSyntheticsAppHeaderMenu(options), {

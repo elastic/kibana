@@ -33,21 +33,21 @@ vi.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_ins
 vi.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query');
 vi.mock('../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id');
 vi.mock('../../../../rule_gaps/context/gap_auto_fill_scheduler_context', () => {
-      const mocked = {
-      useGapAutoFillSchedulerContext: vi.fn().mockReturnValue({
-        canAccessGapAutoFill: false,
-        canEditGapAutoFill: false,
-        hasEnterpriseLicense: false,
-        scheduler: undefined,
-        isSchedulerLoading: false,
-        isSchedulerFetching: false,
-        hasErrors: false,
-        latestErrorTimestamp: undefined,
-        totalErrors: 0,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGapAutoFillSchedulerContext: vi.fn().mockReturnValue({
+      canAccessGapAutoFill: false,
+      canEditGapAutoFill: false,
+      hasEnterpriseLicense: false,
+      scheduler: undefined,
+      isSchedulerLoading: false,
+      isSchedulerFetching: false,
+      hasErrors: false,
+      latestErrorTimestamp: undefined,
+      totalErrors: 0,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext({

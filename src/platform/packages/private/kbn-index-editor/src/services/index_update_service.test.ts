@@ -30,7 +30,7 @@ import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
 
 vi.mock('@kbn/esql-utils', async () => {
-  const actual = (await vi.importActual('@kbn/esql-utils'));
+  const actual = await vi.importActual('@kbn/esql-utils');
   return {
     ...actual,
     getESQLAdHocDataview: vi.fn(),

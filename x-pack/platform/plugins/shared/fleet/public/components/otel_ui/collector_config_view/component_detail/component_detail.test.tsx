@@ -18,11 +18,11 @@ import type { OTelCollectorConfig, ComponentHealth } from '../../../../../common
 import { OTelComponentDetail } from './component_detail';
 
 vi.mock('../../../../services/use_yaml', () => {
-      const mocked = {
-      useYaml: () => require('yaml'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useYaml: () => require('yaml'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const config: OTelCollectorConfig = {
   receivers: {

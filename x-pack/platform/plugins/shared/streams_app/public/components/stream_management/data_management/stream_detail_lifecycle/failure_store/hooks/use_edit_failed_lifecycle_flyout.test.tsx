@@ -23,29 +23,29 @@ let mockInheritedValue: unknown = null;
 let mockInheritedLoading = false;
 
 vi.mock('../../../../../../hooks/use_streams_privileges', () => {
-      const mocked = {
-      useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsPrivileges: vi.fn(() => ({ features: { canvas: { enabled: false } } })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../hooks/use_streams_app_fetch', () => {
-      const mocked = {
-      useStreamsAppFetch: () => ({
-        value: mockInheritedValue,
-        loading: mockInheritedLoading,
-        refresh: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsAppFetch: () => ({
+      value: mockInheritedValue,
+      loading: mockInheritedLoading,
+      refresh: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/use_inherit_link', () => {
-      const mocked = {
-      useInheritLink: () => undefined,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInheritLink: () => undefined,
+  };
+  return { ...mocked, default: mocked };
+});
 
 type FailureStoreConfig = ReturnType<typeof useFailureStoreConfig>;
 
@@ -73,10 +73,7 @@ const createDefinition = (): Streams.ingest.all.GetResponse =>
     },
   } as unknown as Streams.ingest.all.GetResponse);
 
-const createKibana = (
-  isServerless: boolean,
-  toasts: { addSuccess: Mock; addError: Mock }
-) =>
+const createKibana = (isServerless: boolean, toasts: { addSuccess: Mock; addError: Mock }) =>
   ({
     core: {
       notifications: { toasts },

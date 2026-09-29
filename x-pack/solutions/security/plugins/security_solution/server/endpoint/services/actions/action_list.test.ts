@@ -44,26 +44,26 @@ describe('action list services', () => {
     applyActionListEsSearchMock(esClient, actionRequests, actionResponses);
 
     const fleetAgentGenerator = new FleetAgentGenerator('seed');
-    (
-      endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock
-    ).mockResolvedValue([
-      fleetAgentGenerator.generate({
-        id: 'agent-a',
-        local_metadata: {
-          host: {
-            name: 'Host-agent-a',
+    (endpointAppContextService.getInternalFleetServices().agent.getByIds as Mock).mockResolvedValue(
+      [
+        fleetAgentGenerator.generate({
+          id: 'agent-a',
+          local_metadata: {
+            host: {
+              name: 'Host-agent-a',
+            },
           },
-        },
-      }),
-      fleetAgentGenerator.generate({
-        id: 'agent-b',
-        local_metadata: {
-          host: {
-            name: 'Host-agent-b',
+        }),
+        fleetAgentGenerator.generate({
+          id: 'agent-b',
+          local_metadata: {
+            host: {
+              name: 'Host-agent-b',
+            },
           },
-        },
-      }),
-    ]);
+        }),
+      ]
+    );
   });
 
   describe('When using `getActionList()', () => {

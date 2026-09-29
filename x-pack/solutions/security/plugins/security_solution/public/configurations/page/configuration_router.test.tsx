@@ -21,18 +21,18 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 
 vi.mock('../../agent_builder/hooks/use_agent_builder_availability');
 vi.mock('../../common/lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      useNavigation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    useNavigation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockNavigateTo = vi.fn();
 

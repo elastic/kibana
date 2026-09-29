@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { ExecutionStatus } from '@kbn/workflows';
 import { WorkflowExecutionListItem } from './workflow_execution_list_item';
 
 vi.mock('../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced', () => {
-      const mocked = {
-      FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FormattedRelativeEnhanced: ({ value }: { value: Date }) => <span>{value.toISOString()}</span>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../shared/ui/use_formatted_date', () => {
-      const mocked = {
-      useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetFormattedDateTime: () => (date: Date) => date.toISOString(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const executedByProfile: UserProfileWithAvatar = {
   uid: 'u_tal',

@@ -24,11 +24,11 @@ import * as fetcherHook from '../../../../hooks/use_fetcher';
 import { useServiceIconBadges } from './use_service_icon_badges';
 
 vi.mock('@kbn/react-kibana-context-theme', () => {
-      const mocked = {
-      useKibanaIsDarkMode: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibanaIsDarkMode: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const KibanaReactContext = createKibanaReactContext({
   usageCollection: { reportUiCounter: () => {} },

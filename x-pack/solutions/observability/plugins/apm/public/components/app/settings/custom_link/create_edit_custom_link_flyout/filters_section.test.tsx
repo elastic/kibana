@@ -40,20 +40,20 @@ describe('FiltersSections', () => {
 
   it('clears SuggestionsSelect value when EuiSelect value changes', async () => {
     vi.doMock('../../../../shared/suggestions_select', () => {
-          const mocked = {
-              SuggestionsSelect: (props: {
-                defaultValue: string | undefined;
-                onChange: (arg0: string | undefined) => void;
-              }) => (
-                <input
-                  data-testid="comboBoxSearchInput"
-                  value={props.defaultValue}
-                  onChange={(e) => props.onChange(e.target.value)}
-                />
-              ),
-            };
-          return { ...mocked, default: mocked };
-        });
+      const mocked = {
+        SuggestionsSelect: (props: {
+          defaultValue: string | undefined;
+          onChange: (arg0: string | undefined) => void;
+        }) => (
+          <input
+            data-testid="comboBoxSearchInput"
+            value={props.defaultValue}
+            onChange={(e) => props.onChange(e.target.value)}
+          />
+        ),
+      };
+      return { ...mocked, default: mocked };
+    });
 
     const initialFilters: Filter[] = [{ key: 'service.name', value: 'foo', id: '123' }];
     const setFilters = vi.fn();

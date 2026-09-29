@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import {
   mockSingleIndexWithAliasesResponse,
   mockMultiIndexResponse,
 } from '../../../__mocks__/fetch_indices.mock';
+
+import { vi } from 'vitest';
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 

@@ -23,16 +23,16 @@ const mockUseStoredCompletedCardIds = vi.fn(() => [
   mockSetStoredCompletedCardIds,
 ]);
 vi.mock('../../hooks/use_stored_state', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../hooks/use_stored_state')),
-      useStoredCompletedCardIds: () => mockUseStoredCompletedCardIds(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../hooks/use_stored_state')),
+    useStoredCompletedCardIds: () => mockUseStoredCompletedCardIds(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../onboarding_context');
 vi.mock('../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../common/lib/kibana');
   return {
     ...original,
     useKibana: vi.fn().mockReturnValue({
@@ -74,9 +74,7 @@ const cardIncompleteAdditionalBadges = {
 const cardMetadata = {
   id: 'card-metadata' as OnboardingCardId,
   title: 'card metadata',
-  checkComplete: vi
-    .fn()
-    .mockResolvedValue({ isComplete: true, metadata: { custom: 'metadata' } }),
+  checkComplete: vi.fn().mockResolvedValue({ isComplete: true, metadata: { custom: 'metadata' } }),
 };
 const mockAddError = vi.fn();
 const mockError = new Error('Failed to check complete');

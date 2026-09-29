@@ -18,36 +18,36 @@ import { mockCase, mockObservables } from '../../containers/mock';
 import { OBSERVABLES_WORKFLOW_ORIGIN_TYPE } from '../../../common/types/domain/user_action/workflow/constants';
 
 vi.mock('../workflows/use_cases_workflow_executor', () => {
-      const mocked = {
-      useCasesWorkflowExecutor: vi.fn().mockReturnValue(vi.fn()),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCasesWorkflowExecutor: vi.fn().mockReturnValue(vi.fn()),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Stub RunWorkflowPanel (which RunCaseWorkflowModal renders) so it does not need
 // useKibana / react-query HTTP. The modal's own test-subj is still exercised.
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      RunWorkflowPanel: ({
-        onClose,
-        runWorkflow,
-        showSuccessToast,
-      }: {
-        onClose: () => void;
-        runWorkflow?: RunWorkflowExecutor;
-        showSuccessToast?: boolean;
-      }) => (
-        <div data-test-subj="run-workflow-panel-mock">
-          <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
-          <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
-          <button data-test-subj="panel-close" type="button" onClick={onClose}>
-            {'Close'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RunWorkflowPanel: ({
+      onClose,
+      runWorkflow,
+      showSuccessToast,
+    }: {
+      onClose: () => void;
+      runWorkflow?: RunWorkflowExecutor;
+      showSuccessToast?: boolean;
+    }) => (
+      <div data-test-subj="run-workflow-panel-mock">
+        <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
+        <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
+        <button data-test-subj="panel-close" type="button" onClick={onClose}>
+          {'Close'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ObservablesBulkActions', () => {
   let user: ReturnType<typeof userEvent.setup>;
@@ -63,7 +63,9 @@ describe('ObservablesBulkActions', () => {
   beforeEach(async () => {
     user = userEvent.setup({ advanceTimers: vi.advanceTimersByTime, pointerEventsCheck: 0 });
     vi.clearAllMocks();
-    const { useCasesWorkflowExecutor } = (await vi.importMock('../workflows/use_cases_workflow_executor'));
+    const { useCasesWorkflowExecutor } = await vi.importMock(
+      '../workflows/use_cases_workflow_executor'
+    );
     (useCasesWorkflowExecutor as Mock).mockReturnValue(vi.fn());
   });
 
@@ -106,7 +108,9 @@ describe('ObservablesBulkActions', () => {
     renderWithTestingProviders(
       <ObservablesBulkActions caseData={mockCase} selectedObservables={mockObservables} />
     );
-    const { useCasesWorkflowExecutor } = (await vi.importMock('../workflows/use_cases_workflow_executor'));
+    const { useCasesWorkflowExecutor } = await vi.importMock(
+      '../workflows/use_cases_workflow_executor'
+    );
     expect(useCasesWorkflowExecutor).toHaveBeenCalledWith(
       expect.objectContaining({
         caseId: mockCase.id,

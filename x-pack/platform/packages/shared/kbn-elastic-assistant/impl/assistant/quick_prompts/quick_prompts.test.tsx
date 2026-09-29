@@ -49,12 +49,12 @@ vi.mock('react-use/lib/useMeasure', () => () => [
 ]);
 
 vi.mock('../../assistant_context', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../assistant_context')),
-      useAssistantContext: () => mockUseAssistantContext,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../assistant_context')),
+    useAssistantContext: () => mockUseAssistantContext,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('QuickPrompts', () => {
   beforeEach(() => {

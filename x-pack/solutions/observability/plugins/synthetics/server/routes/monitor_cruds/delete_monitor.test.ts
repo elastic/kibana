@@ -10,14 +10,14 @@ import { vi } from 'vitest';
 import { deleteSyntheticsMonitorRoute } from './delete_monitor';
 
 vi.mock('./services/delete_monitor_api', () => {
-      const mocked = {
-      DeleteMonitorAPI: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DeleteMonitorAPI: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const installExecuteResult = async (executeResult: any, result: unknown = []) => {
-  const { DeleteMonitorAPI } = (await vi.importMock('./services/delete_monitor_api'));
+  const { DeleteMonitorAPI } = await vi.importMock('./services/delete_monitor_api');
   const execute = vi.fn().mockResolvedValue(executeResult);
   DeleteMonitorAPI.mockImplementation(() => ({ execute, result }));
   return { execute };

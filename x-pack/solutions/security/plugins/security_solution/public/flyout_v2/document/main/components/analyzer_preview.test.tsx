@@ -18,11 +18,11 @@ import { ANALYZER_PREVIEW_LOADING_TEST_ID, ANALYZER_PREVIEW_TEST_ID } from './te
 import * as mock from '../../../../flyout/document_details/right/mocks/mock_analyzer_data';
 
 vi.mock('../hooks/use_alert_prevalence_from_process_tree', () => {
-      const mocked = {
-      useAlertPrevalenceFromProcessTree: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useAlertPrevalenceFromProcessTree: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 const mockUseAlertPrevalenceFromProcessTree = useAlertPrevalenceFromProcessTree as Mock;
 
 const mockTreeValues = {

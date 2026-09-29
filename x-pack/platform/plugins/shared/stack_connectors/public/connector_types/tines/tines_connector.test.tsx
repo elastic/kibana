@@ -16,12 +16,14 @@ import TinesConnectorFields from './tines_connector';
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
 vi.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api')),
-      checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual(
+      '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
+    )),
+    checkConnectorIdAvailability: vi.fn().mockResolvedValue({ isAvailable: true }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const url = 'https://example.com';
 const email = 'some.email@test.com';

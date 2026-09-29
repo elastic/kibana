@@ -14,43 +14,42 @@ import { createStore } from 'redux-v4';
 import { AttackFlyoutOverviewTab } from '.';
 import type { StartServices } from '../../types';
 
-const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => (
-  <>{children}</>
-));
+const mockFlyoutProviders = vi.fn(({ children }: { children: React.ReactNode }) => <>{children}</>);
 
 vi.mock('../../flyout_v2/shared/components/flyout_provider', () => {
-      const mocked = {
-      flyoutProviders: (props: unknown) => mockFlyoutProviders(props as { children: React.ReactNode }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flyoutProviders: (props: unknown) =>
+      mockFlyoutProviders(props as { children: React.ReactNode }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../flyout_v2/attack/main/tabs/overview_tab', () => {
-      const mocked = {
-      OverviewTab: () => (
-        <div data-test-subj="attackOverviewTabMock">
-          <div data-test-subj="mock-ai-summary-section" />
-          <div data-test-subj="mock-visualizations-section" />
-          <div data-test-subj="mock-insights-section" />
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    OverviewTab: () => (
+      <div data-test-subj="attackOverviewTabMock">
+        <div data-test-subj="mock-ai-summary-section" />
+        <div data-test-subj="mock-visualizations-section" />
+        <div data-test-subj="mock-insights-section" />
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/hooks/is_in_security_app', () => {
-      const mocked = {
-      useIsInSecurityApp: () => false,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useIsInSecurityApp: () => false,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../alert_flyout_overview_tab_component/data_view_manager_bootstrap', () => {
-      const mocked = {
-      DataViewManagerBootstrap: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataViewManagerBootstrap: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AttackFlyoutOverviewTab', () => {
   beforeEach(() => {

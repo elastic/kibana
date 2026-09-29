@@ -21,9 +21,9 @@ const mockUseKibanaReturnValue = kibanaStartMock.startContract();
 const onboardingHref = '/app/observabilityOnboarding';
 const onboardingLocator = sharePluginMock.createLocator();
 onboardingLocator.useUrl.mockReturnValue(onboardingHref);
-vi
-  .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
-  .mockReturnValue(onboardingLocator);
+vi.spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get').mockReturnValue(
+  onboardingLocator
+);
 
 vi.mock('../../utils/kibana_react', () => ({
   __esModule: true,
@@ -31,24 +31,24 @@ vi.mock('../../utils/kibana_react', () => ({
 }));
 
 vi.mock('@kbn/observability-shared-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/observability-shared-plugin/public')),
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_plugin_context');
 vi.mock('./annotations_privileges');
 vi.mock('./annotations_list', () => {
-      const mocked = {
-      AnnotationsList: () => <div data-test-subj="annotationsList" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AnnotationsList: () => <div data-test-subj="annotationsList" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { usePluginContext } = (await vi.importMock('../../hooks/use_plugin_context'));
-const { useAnnotationsPrivileges } = (await vi.importMock('./annotations_privileges'));
+const { usePluginContext } = await vi.importMock('../../hooks/use_plugin_context');
+const { useAnnotationsPrivileges } = await vi.importMock('./annotations_privileges');
 
 function ObservabilityPageTemplate({
   children,
@@ -77,9 +77,9 @@ describe('AnnotationsPage', () => {
     usePluginContext.mockReturnValue({
       ObservabilityPageTemplate,
     });
-    vi
-      .spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get')
-      .mockReturnValue(onboardingLocator);
+    vi.spyOn(mockUseKibanaReturnValue.services.share.url.locators, 'get').mockReturnValue(
+      onboardingLocator
+    );
     onboardingLocator.useUrl.mockReturnValue(onboardingHref);
   });
 

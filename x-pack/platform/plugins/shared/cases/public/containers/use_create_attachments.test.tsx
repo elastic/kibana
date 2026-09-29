@@ -78,9 +78,9 @@ describe('useCreateAttachments', () => {
   });
 
   it('shows a toast error when the api return an error', async () => {
-    vi
-      .spyOn(api, 'createAttachments')
-      .mockRejectedValue(new Error('useCreateAttachments: Test error'));
+    vi.spyOn(api, 'createAttachments').mockRejectedValue(
+      new Error('useCreateAttachments: Test error')
+    );
 
     const { result } = renderHook(() => useCreateAttachments(), {
       wrapper: TestProviders,

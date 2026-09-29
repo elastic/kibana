@@ -15,7 +15,7 @@ import { createIntegrationsTestRendererMock } from '../../../../../../../mock';
 import type { InstalledPackageUIPackageListItem } from '../types';
 
 vi.mock('../../../../../../../hooks', async () => {
-  const originalModule = (await vi.importActual('../../../../../../../hooks'));
+  const originalModule = await vi.importActual('../../../../../../../hooks');
   return {
     ...originalModule,
     useAuthz: vi.fn(),
@@ -27,45 +27,45 @@ vi.mock('../../../../../../../hooks', async () => {
 });
 
 vi.mock('../hooks/use_url_filters', () => {
-      const mocked = {
-      useViewPolicies: vi.fn().mockReturnValue({
-        addViewPolicies: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useViewPolicies: vi.fn().mockReturnValue({
+      addViewPolicies: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_installed_integrations_actions', () => {
-      const mocked = {
-      useInstalledIntegrationsActions: vi.fn().mockReturnValue({
-        actions: {
-          bulkUninstallIntegrationsWithConfirmModal: vi.fn(),
-          bulkUpgradeIntegrationsWithConfirmModal: vi.fn(),
-          bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
-        },
-        rollingbackIntegrations: [],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useInstalledIntegrationsActions: vi.fn().mockReturnValue({
+      actions: {
+        bulkUninstallIntegrationsWithConfirmModal: vi.fn(),
+        bulkUpgradeIntegrationsWithConfirmModal: vi.fn(),
+        bulkRollbackIntegrationsWithConfirmModal: vi.fn(),
+      },
+      rollingbackIntegrations: [],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_rollback_available', () => {
-      const mocked = {
-      useRollbackAvailablePackages: vi.fn(),
-      hasPreviousVersion: vi.fn((item) => !!item.installationInfo?.previous_version),
-      isRollbackTTLExpired: vi.fn((item) => item.installationInfo?.is_rollback_ttl_expired ?? false),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRollbackAvailablePackages: vi.fn(),
+    hasPreviousVersion: vi.fn((item) => !!item.installationInfo?.previous_version),
+    isRollbackTTLExpired: vi.fn((item) => item.installationInfo?.is_rollback_ttl_expired ?? false),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../services', () => {
-      const mocked = {
-      ExperimentalFeaturesService: {
-        get: vi.fn().mockReturnValue({ enablePackageRollback: true }),
-      },
-      doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExperimentalFeaturesService: {
+      get: vi.fn().mockReturnValue({ enablePackageRollback: true }),
+    },
+    doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { useAuthz, useLicense } from '../../../../../../../hooks';
 import { useRollbackAvailablePackages } from '../hooks/use_rollback_available';

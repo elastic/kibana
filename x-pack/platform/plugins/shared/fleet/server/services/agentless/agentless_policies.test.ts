@@ -592,9 +592,9 @@ describe('AgentlessPoliciesService', () => {
     });
 
     it('should roll back the package and agent policy when the deploy fails', async () => {
-      vi
-        .mocked(agentPolicyService.deployPolicy)
-        .mockRejectedValueOnce(new Error('Error calling agentless API'));
+      vi.mocked(agentPolicyService.deployPolicy).mockRejectedValueOnce(
+        new Error('Error calling agentless API')
+      );
 
       await expect(() =>
         createService().updateAgentlessPolicy('agentless-policy-id', buildUpdateRequest())
@@ -635,9 +635,7 @@ describe('AgentlessPoliciesService', () => {
         supports_agentless: true,
         agentless: { cluster_id: 'cluster-456' },
       } as any);
-      vi
-        .mocked(agentPolicyService.deployPolicy)
-        .mockRejectedValueOnce(new Error('deploy failure'));
+      vi.mocked(agentPolicyService.deployPolicy).mockRejectedValueOnce(new Error('deploy failure'));
 
       await expect(() =>
         createService().updateAgentlessPolicy(legacyPackagePolicyId, buildUpdateRequest())
@@ -1079,9 +1077,9 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'orphaned-pp-1', supports_agentless: true },
@@ -1142,9 +1140,9 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'agentless-pp', supports_agentless: true },
@@ -1192,9 +1190,9 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'managed-pp', supports_agentless: true, is_managed: true },
@@ -1234,9 +1232,9 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'managed-pp', supports_agentless: true, is_managed: true },
@@ -1271,9 +1269,9 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([]);
 
@@ -1307,9 +1305,9 @@ describe('AgentlessPoliciesService', () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ id: packagePolicyId, policy_ids: [agentPolicyId] })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'agentless-pp-1', supports_agentless: true },
@@ -1354,9 +1352,9 @@ describe('AgentlessPoliciesService', () => {
           policy_ids: [legacyAgentPolicyId],
         })
       );
-      vi
-        .mocked(agentPolicyService.get)
-        .mockRejectedValueOnce(SavedObjectsErrorHelpers.createGenericNotFoundError('test'));
+      vi.mocked(agentPolicyService.get).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.createGenericNotFoundError('test')
+      );
 
       packagePolicyService.findAllForAgentPolicy.mockResolvedValueOnce([
         { id: 'legacy-agentless-pp', supports_agentless: true },

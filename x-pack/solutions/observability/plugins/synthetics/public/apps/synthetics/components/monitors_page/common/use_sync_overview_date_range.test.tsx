@@ -17,12 +17,12 @@ import { setOverviewPageStateAction } from '../../../state';
 import { useSyncOverviewDateRange } from './use_sync_overview_date_range';
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      ...require('react-redux-v7'),
-      useDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-redux-v7'),
+    useDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 /**
  * The overview always scopes status by the page-level date picker, so the URL

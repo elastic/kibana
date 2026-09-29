@@ -25,7 +25,7 @@ import { createMockConnector } from '@kbn/actions-plugin/server/application/conn
 import { getRulesClientMockParams } from '../../../../test_utils';
 
 vi.mock('@kbn/core-saved-objects-utils-server', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-utils-server'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-utils-server');
   return {
     ...actual,
     SavedObjectsUtils: {
@@ -35,11 +35,11 @@ vi.mock('@kbn/core-saved-objects-utils-server', async () => {
 });
 
 vi.mock('../../../../invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation', () => {
-      const mocked = {
-      bulkMarkApiKeysForInvalidation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    bulkMarkApiKeysForInvalidation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('uuid', () => {
   let uuid = 100;
@@ -47,11 +47,11 @@ vi.mock('uuid', () => {
 });
 
 vi.mock('../get_schedule_frequency', () => {
-      const mocked = {
-      validateScheduleLimit: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateScheduleLimit: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const bulkMarkApiKeysForInvalidationMock = bulkMarkApiKeysForInvalidation as Mock;
 

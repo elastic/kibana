@@ -19,11 +19,11 @@ import { registerResolutionRulesEnable } from './enable';
 import { registerResolutionRulesDisable } from './disable';
 
 vi.mock('../../../middleware', () => {
-      const mocked = {
-      wrapMiddlewares: vi.fn((handler) => handler),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    wrapMiddlewares: vi.fn((handler) => handler),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedWrapMiddlewares = wrapMiddlewares as MockedFunction<typeof wrapMiddlewares>;
 

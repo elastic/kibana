@@ -33,11 +33,11 @@ const workpad = workpads[0];
 const now = new Date();
 
 vi.mock('uuid', () => {
-      const mocked = {
-      v4: vi.fn().mockReturnValue('123abc'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    v4: vi.fn().mockReturnValue('123abc'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('PUT workpad', () => {
   let routeHandler: RequestHandler<any, any, any>;

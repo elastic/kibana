@@ -18,35 +18,37 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import * as capabilities from '../../../lib/capabilities';
 
 vi.mock('./rule_actions', () => {
-      const mocked = {
-      RuleActions: () => {
-        return <></>;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActions: () => {
+      return <></>;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/get_experimental_features', () => {
-      const mocked = {
-      getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getIsExperimentalFeatureEnabled: vi.fn().mockReturnValue(true),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/capabilities', () => {
-      const mocked = {
-      hasAllPrivilege: vi.fn(() => true),
-      hasSaveRulesCapability: vi.fn(() => true),
-      hasShowActionsCapability: vi.fn(() => true),
-      hasExecuteActionsCapability: vi.fn(() => true),
-      hasManageApiKeysCapability: vi.fn(() => true),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    hasAllPrivilege: vi.fn(() => true),
+    hasSaveRulesCapability: vi.fn(() => true),
+    hasShowActionsCapability: vi.fn(() => true),
+    hasExecuteActionsCapability: vi.fn(() => true),
+    hasManageApiKeysCapability: vi.fn(() => true),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 
 vi.mock('@kbn/alerts-ui-shared/src/common/hooks');
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks'));
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks'
+);
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({

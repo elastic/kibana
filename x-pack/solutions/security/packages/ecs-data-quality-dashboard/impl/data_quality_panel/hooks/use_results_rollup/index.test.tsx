@@ -24,12 +24,12 @@ import { getPatternRollupStub } from '../../stub/get_pattern_rollup_stub';
 import { formatBytes, formatNumber } from '../../mock/test_providers/utils/format';
 
 vi.mock('./hooks/use_stored_pattern_results', async () => {
-      const mocked = {
-      ...(await vi.importActual('./hooks/use_stored_pattern_results')),
-      useStoredPatternResults: vi.fn().mockReturnValue([]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./hooks/use_stored_pattern_results')),
+    useStoredPatternResults: vi.fn().mockReturnValue([]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useResultsRollup', () => {
   const httpFetch = vi.fn();

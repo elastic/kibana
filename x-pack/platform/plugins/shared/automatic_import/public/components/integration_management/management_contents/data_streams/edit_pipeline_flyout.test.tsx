@@ -15,63 +15,63 @@ import type { DataStreamResponse } from '../../../../../common';
 import type { GetDataStreamResultsResponse } from '../../../../common/lib/api';
 
 vi.mock('@kbn/code-editor', () => {
-      const mocked = {
-      CodeEditor: vi.fn(({ value, onChange }) => (
-        <div>
-          <div data-test-subj="code-editor">{value}</div>
-          <button
-            type="button"
-            data-test-subj="code-editor-change"
-            onClick={() =>
-              onChange?.(
-                JSON.stringify(
-                  {
-                    processors: [
-                      {
-                        set: {
-                          field: 'test.field',
-                          value: 'updated',
-                        },
+  const mocked = {
+    CodeEditor: vi.fn(({ value, onChange }) => (
+      <div>
+        <div data-test-subj="code-editor">{value}</div>
+        <button
+          type="button"
+          data-test-subj="code-editor-change"
+          onClick={() =>
+            onChange?.(
+              JSON.stringify(
+                {
+                  processors: [
+                    {
+                      set: {
+                        field: 'test.field',
+                        value: 'updated',
                       },
-                    ],
-                  },
-                  null,
-                  2
-                )
+                    },
+                  ],
+                },
+                null,
+                2
               )
-            }
-          >
-            {'Change editor value'}
-          </button>
-          <button
-            type="button"
-            className="euiCodeBlock__copyButton"
-            data-test-subj="code-editor-copy"
-            aria-label="Copy"
-          >
-            {'Copy'}
-          </button>
-        </div>
-      )),
-    };
-      return { ...mocked, default: mocked };
-    });
+            )
+          }
+        >
+          {'Change editor value'}
+        </button>
+        <button
+          type="button"
+          className="euiCodeBlock__copyButton"
+          data-test-subj="code-editor-copy"
+          aria-label="Copy"
+        >
+          {'Copy'}
+        </button>
+      </div>
+    )),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseGetDataStreamResults = vi.fn();
 const mockMutateAsync = vi.fn();
 vi.mock('../../../../common', () => {
-      const mocked = {
-      useGetDataStreamResults: (integrationId: string, dataStreamId: string) =>
-        mockUseGetDataStreamResults(integrationId, dataStreamId),
-      useUpdateDataStreamPipeline: () => ({
-        updateDataStreamPipelineMutation: {
-          mutateAsync: mockMutateAsync,
-          isLoading: false,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetDataStreamResults: (integrationId: string, dataStreamId: string) =>
+      mockUseGetDataStreamResults(integrationId, dataStreamId),
+    useUpdateDataStreamPipeline: () => ({
+      updateDataStreamPipelineMutation: {
+        mutateAsync: mockMutateAsync,
+        isLoading: false,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSelectPipelineTab = vi.fn();
 const mockUIState = {
@@ -80,29 +80,29 @@ const mockUIState = {
 };
 
 vi.mock('../../contexts', () => {
-      const mocked = {
-      useUIState: () => mockUIState,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUIState: () => mockUIState,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockReportCodeEditorCopyClicked = vi.fn();
 const mockReportPipelineEdited = vi.fn();
 const mockReportEditPipelineTabOpened = vi.fn();
 vi.mock('../../../telemetry_context', () => {
-      const mocked = {
-      useTelemetry: () => ({
-        sessionId: 'test-session-id',
-        reportDataStreamFlyoutOpened: vi.fn(),
-        reportEditDataStreamFlyoutOpened: vi.fn(),
-        reportAnalyzeLogsTriggered: vi.fn(),
-        reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
-        reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
-        reportPipelineEdited: mockReportPipelineEdited,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTelemetry: () => ({
+      sessionId: 'test-session-id',
+      reportDataStreamFlyoutOpened: vi.fn(),
+      reportEditDataStreamFlyoutOpened: vi.fn(),
+      reportAnalyzeLogsTriggered: vi.fn(),
+      reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
+      reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
+      reportPipelineEdited: mockReportPipelineEdited,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const createMockDataStream = (overrides: Partial<DataStreamResponse> = {}): DataStreamResponse => ({
   dataStreamId: 'ds-1',

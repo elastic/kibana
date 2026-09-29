@@ -16,11 +16,11 @@ import { useGlobalTime } from '../../../../../common/containers/use_global_time'
 import { useInspectButton } from '../../../alerts_kpis/common/hooks';
 
 vi.mock('../../../../containers/detection_engine/alerts/use_query', () => {
-      const mocked = {
-      useQueryAlerts: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useQueryAlerts: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../../common/containers/use_global_time');
 vi.mock('../../../alerts_kpis/common/hooks');
 

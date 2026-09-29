@@ -14,40 +14,40 @@ import { renderWithContext } from '../../../../utils/test_helpers';
 
 // Mock the breadcrumb hook
 vi.mock('../../../../context/breadcrumbs/use_breadcrumb', () => {
-      const mocked = {
-      useBreadcrumb: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBreadcrumb: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the data source hook
 vi.mock('../../../../hooks/use_preferred_data_source_and_bucket_size', () => {
-      const mocked = {
-      usePreferredDataSourceAndBucketSize: vi.fn().mockReturnValue({
-        source: {
-          documentType: 'metrics',
-          rollupInterval: '1m',
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePreferredDataSourceAndBucketSize: vi.fn().mockReturnValue({
+      source: {
+        documentType: 'metrics',
+        rollupInterval: '1m',
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_apm_params', () => {
-      const mocked = {
-      useApmParams: vi.fn().mockReturnValue({
-        query: {
-          environment: 'ENVIRONMENT_ALL',
-          rangeFrom: 'now-15m',
-          rangeTo: 'now',
-          kuery: '',
-          serviceGroup: '',
-          comparisonEnabled: false,
-        },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmParams: vi.fn().mockReturnValue({
+      query: {
+        environment: 'ENVIRONMENT_ALL',
+        rangeFrom: 'now-15m',
+        rangeTo: 'now',
+        kuery: '',
+        serviceGroup: '',
+        comparisonEnabled: false,
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('ServiceNodeMetrics', () => {
   it('renders without errors', async () => {

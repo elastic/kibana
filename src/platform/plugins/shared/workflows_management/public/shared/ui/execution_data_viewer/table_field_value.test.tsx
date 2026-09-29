@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { render, screen } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import { IgnoredReason } from '@kbn/discover-utils';
 import { DOC_VIEWER_DEFAULT_TRUNCATE_MAX_HEIGHT, TableFieldValue } from './table_field_value';
 
 // Mock useResizeObserver to control scrollHeight behavior
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     useResizeObserver: vi.fn(() => ({ width: 800, height: 600 })),

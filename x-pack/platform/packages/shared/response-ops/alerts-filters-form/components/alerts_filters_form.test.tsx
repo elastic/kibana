@@ -37,7 +37,9 @@ const TAG_2 = 'tag2';
 const TAG_3 = 'tag3';
 
 vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query');
-const { useGetRuleTagsQuery: mockUseGetRuleTagsQuery } = (await vi.importMock('@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'));
+const { useGetRuleTagsQuery: mockUseGetRuleTagsQuery } = await vi.importMock(
+  '@kbn/response-ops-rules-apis/hooks/use_get_rule_tags_query'
+);
 mockUseGetRuleTagsQuery.mockReturnValue({
   tags: [TAG_1, TAG_2, TAG_3],
   isLoading: false,
@@ -48,7 +50,9 @@ mockUseGetRuleTagsQuery.mockReturnValue({
 });
 
 vi.mock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query');
-const { useGetInternalRuleTypesQuery: mockUseGetInternalRuleTypesQuery } = (await vi.importMock('@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query'));
+const { useGetInternalRuleTypesQuery: mockUseGetInternalRuleTypesQuery } = await vi.importMock(
+  '@kbn/response-ops-rules-apis/hooks/use_get_internal_rule_types_query'
+);
 mockUseGetInternalRuleTypesQuery.mockReturnValue({
   data: [{ id: 'testType', name: 'Test Type', solution: 'stack' }],
   isLoading: false,

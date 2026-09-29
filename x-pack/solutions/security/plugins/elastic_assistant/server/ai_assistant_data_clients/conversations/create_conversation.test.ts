@@ -16,11 +16,11 @@ import { authenticatedUser } from '../../__mocks__/user';
 import type { ConversationCreateProps, ConversationResponse } from '@kbn/elastic-assistant-common';
 
 vi.mock('./get_conversation', () => {
-      const mocked = {
-      getConversation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConversation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUser1 = authenticatedUser;
 

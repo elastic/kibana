@@ -22,11 +22,12 @@ const LIVE_EXPORT_PATH = '/api/osquery/live_queries/{id}/results/{actionId}/_exp
 
 // Mock createExportRouteHandler so we can assert on the params it receives
 vi.mock('../export/create_export_route_handler', () => {
-      const mocked = {
-      createExportRouteHandler: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createExportRouteHandler: vi.fn(),
+  };
+
+  return { ...mocked, default: mocked };
+});
 
 import { createExportRouteHandler } from '../export/create_export_route_handler';
 
@@ -101,8 +102,8 @@ describe('exportLiveQueryResultsRoute', () => {
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
     // Retrieve the registered handler function
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const request = {
       ...httpServerMock.createKibanaRequest({
@@ -142,8 +143,8 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const searchMock = buildSearchMock([{ action_id: 'action-abc', query: 'SELECT * FROM users' }]);
 
@@ -181,8 +182,8 @@ describe('exportLiveQueryResultsRoute', () => {
     const router = httpServiceMock.createRouter();
     exportLiveQueryResultsRoute(router as never, createOsqueryContext());
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const ecsMap = { custom: { field: 'host.name' } };
     const searchMock = buildSearchMock([
@@ -226,8 +227,8 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     // actionDetails returns successfully but with a different action_id — mismatch
     const searchMock = buildSearchMock([{ action_id: 'something-else', query: 'SELECT 1' }]);
@@ -263,8 +264,8 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const context = {
       core: Promise.resolve({}),
@@ -298,8 +299,8 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     // An unknown or out-of-space parent id resolves to no actionDetails at all, which must
     // not fall through to the export with a caller-supplied actionId.
@@ -334,8 +335,8 @@ describe('exportLiveQueryResultsRoute', () => {
 
     exportLiveQueryResultsRoute(router as never, osqueryContext);
 
-    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion
-      .mock.calls[0][1];
+    const registeredHandler = (router.versioned.post as Mock).mock.results[0].value.addVersion.mock
+      .calls[0][1];
 
     const context = {
       core: Promise.resolve({}),

@@ -9,7 +9,7 @@ import { vi } from 'vitest';
 import type { MockedFunction } from 'vitest';
 
 vi.mock('../../../../../../usage/constants', async () => {
-  const actual = (await vi.importActual('../../../../../../usage/constants'));
+  const actual = await vi.importActual('../../../../../../usage/constants');
   return { ...actual, MAX_RESULTS_WINDOW: 2 };
 });
 

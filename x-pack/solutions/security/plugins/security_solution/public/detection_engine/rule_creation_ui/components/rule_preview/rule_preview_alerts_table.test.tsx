@@ -20,37 +20,39 @@ import type { EventsViewerProps } from '../../../../common/components/events_vie
 
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/containers/use_full_screen', () => {
-      const mocked = {
-      useGlobalFullScreen: vi.fn().mockReturnValue({ globalFullScreen: false }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalFullScreen: vi.fn().mockReturnValue({ globalFullScreen: false }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/hooks/use_license', () => {
-      const mocked = {
-      useLicense: vi.fn(() => ({
-        isPlatinumPlus: vi.fn(() => false),
-        isEnterprise: vi.fn(() => false),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicense: vi.fn(() => ({
+      isPlatinumPlus: vi.fn(() => false),
+      isEnterprise: vi.fn(() => false),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockStatefulEventsViewer = vi.fn((_props: EventsViewerProps) => null);
 vi.mock('../../../../common/components/events_viewer', () => {
-      const mocked = {
-      StatefulEventsViewer: (props: EventsViewerProps) => mockStatefulEventsViewer(props),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    StatefulEventsViewer: (props: EventsViewerProps) => mockStatefulEventsViewer(props),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../../detections/configurations/security_solution_detections/cell_value_context',
   () => {
-      const mocked = {
-        AlertTableCellContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      AlertTableCellContextProvider: ({ children }: { children: React.ReactNode }) => (
+        <>{children}</>
+      ),
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../common/utils/normalize_time_range');

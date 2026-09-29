@@ -27,11 +27,11 @@ import type { SyntheticsServerSetup } from '../../types';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
 
 vi.mock('@kbn/fleet-plugin/server/services/package_policy', () => {
-      const mocked = {
-      getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPackagePolicySavedObjectType: vi.fn().mockResolvedValue('fleet-package-policies'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const testMonitors = [
   {

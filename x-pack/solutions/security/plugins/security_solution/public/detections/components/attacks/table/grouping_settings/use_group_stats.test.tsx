@@ -18,17 +18,17 @@ import type { AlertsGroupingAggregation } from '../../../alerts_table/grouping_s
 import { useGroupStats } from './use_group_stats';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: () => ({
-        euiTheme: {
-          colors: {
-            danger: 'red',
-          },
+  const mocked = {
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: {
+          danger: 'red',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useGroupStats', () => {
   describe('aggregations', () => {

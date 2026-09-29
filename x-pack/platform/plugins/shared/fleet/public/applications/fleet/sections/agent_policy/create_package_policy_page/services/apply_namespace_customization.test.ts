@@ -13,11 +13,11 @@ import { sendUpdatePackage } from '../../../../hooks';
 import { applyNamespaceCustomizationChange } from './apply_namespace_customization';
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      sendUpdatePackage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    sendUpdatePackage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockSendUpdatePackage = sendUpdatePackage as Mock;
 

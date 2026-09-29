@@ -16,11 +16,11 @@ import { useAttacksKpiState } from './use_attacks_kpi_state';
 
 // Mock useLocalStorage
 vi.mock('../../../../../common/components/local_storage', () => {
-      const mocked = {
-      useLocalStorage: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocalStorage: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useAttacksKpiState', () => {
   const mockSetViewSelection = vi.fn();

@@ -50,11 +50,11 @@ describe('OpenAPI Merger - different OpenAPI versions', () => {
     });
 
     await expect(
-            mergeSpecs({
-              1: spec1,
-              2: spec2,
-            })
-          ).rejects.toThrow(/OpenAPI specs must use the same OpenAPI version/);
+      mergeSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    ).rejects.toThrow(/OpenAPI specs must use the same OpenAPI version/);
   });
 
   it('throws an error when different OAS 3.1.x patch versions encountered', async () => {
@@ -72,10 +72,10 @@ describe('OpenAPI Merger - different OpenAPI versions', () => {
     });
 
     await expect(
-            mergeSpecs({
-              1: spec1,
-              2: spec2,
-            })
-          ).rejects.toThrow(/OpenAPI specs must use the same OpenAPI version/);
+      mergeSpecs({
+        1: spec1,
+        2: spec2,
+      })
+    ).rejects.toThrow(/OpenAPI specs must use the same OpenAPI version/);
   });
 });

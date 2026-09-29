@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { act } from '@testing-library/react';
 import { noop } from 'lodash';
+import { vi } from 'vitest';
 
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
@@ -16,28 +15,28 @@ import type { Unmount } from '@kbn/management-plugin/public/types';
 import { roleMappingsManagementApp } from './role_mappings_management_app';
 
 vi.mock('./role_mappings_grid', () => {
-      const mocked = {
-      RoleMappingsGridPage: (props: any) =>
-        // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-        `Role Mappings Page: ${JSON.stringify({
-          ...props,
-          docLinks: props.docLinks ? {} : undefined,
-    })}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RoleMappingsGridPage: (props: any) =>
+      // `docLinks` object is too big to include into test snapshot, so we just check its existence.
+      `Role Mappings Page: ${JSON.stringify({
+        ...props,
+        docLinks: props.docLinks ? {} : undefined,
+      })}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./edit_role_mapping', () => {
-      const mocked = {
-      EditRoleMappingPage: (props: any) =>
-        // `docLinks` object is too big to include into test snapshot, so we just check its existence.
-        `Role Mapping Edit Page: ${JSON.stringify({
-          ...props,
-          docLinks: props.docLinks ? {} : undefined,
-    })}`,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EditRoleMappingPage: (props: any) =>
+      // `docLinks` object is too big to include into test snapshot, so we just check its existence.
+      `Role Mapping Edit Page: ${JSON.stringify({
+        ...props,
+        docLinks: props.docLinks ? {} : undefined,
+      })}`,
+  };
+  return { ...mocked, default: mocked };
+});
 
 async function mountApp(
   basePath: string,

@@ -28,14 +28,14 @@ import {
 } from './use_report_chart_section_error';
 
 vi.mock('@elastic/apm-rum', () => {
-      const mocked = {
-      apm: {
-        captureError: vi.fn(),
-        getCurrentTransaction: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    apm: {
+      captureError: vi.fn(),
+      getCurrentTransaction: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const captureErrorMock = apm.captureError as MockedFunction<typeof apm.captureError>;
 const getCurrentTransactionMock = apm.getCurrentTransaction as MockedFunction<

@@ -44,7 +44,7 @@ const mockResult = { ...getFoundListsBySizeSchemaMock() };
 mockResult.smallLists = [...mockResult.smallLists, mockKeywordList];
 mockResult.largeLists = [];
 vi.mock('@kbn/securitysolution-list-hooks', async () => {
-  const originalModule = (await vi.importActual('@kbn/securitysolution-list-hooks'));
+  const originalModule = await vi.importActual('@kbn/securitysolution-list-hooks');
 
   return {
     ...originalModule,

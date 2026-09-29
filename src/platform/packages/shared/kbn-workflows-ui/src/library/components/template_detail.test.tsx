@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
+import { vi } from 'vitest';
 import type { TemplateBody } from '@kbn/workflows-library';
 import { TemplateDetail } from './template_detail';
 import { WorkflowsUiServicesProvider } from '../../context';
@@ -18,14 +17,14 @@ import { createMockWorkflowsUiServices } from '../../context/__mocks__/mocks';
 
 const mockUseTemplate = vi.fn();
 vi.mock('../hooks/use_template', () => {
-      const mocked = {
-      useTemplate: (slug: string) => mockUseTemplate(slug),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTemplate: (slug: string) => mockUseTemplate(slug),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../components', async () => {
-  const actual = (await vi.importActual('../../components'));
+  const actual = await vi.importActual('../../components');
 
   return {
     ...actual,
@@ -90,48 +89,48 @@ vi.mock('../../components', async () => {
 
 // Stub the Monaco-backed preview so the test does not depend on the editor.
 vi.mock('./template_yaml_preview', () => {
-      const mocked = {
-      WorkflowYamlPreview: ({ yaml, 'data-test-subj': dataTestSubj }: any) => (
-        <pre data-test-subj={dataTestSubj}>{yaml}</pre>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowYamlPreview: ({ yaml, 'data-test-subj': dataTestSubj }: any) => (
+      <pre data-test-subj={dataTestSubj}>{yaml}</pre>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // The install section has its own test (it needs kibana services and a query
 // client); the stub exposes the preview-values and step callbacks and echoes
 // the `previewYaml` prop so their wiring through TemplateDetail can be asserted.
 vi.mock('./install_form', () => {
-      const mocked = {
-      TemplateInstallSection: ({
-        step,
-        onStepChange,
-        onPreviewValuesChange,
-        previewYaml,
-      }: {
-        step: string;
-        onStepChange: (step: 'details' | 'setup') => void;
-        onPreviewValuesChange?: (values: Record<string, unknown>) => void;
-        previewYaml: string;
-      }) => (
-        <div data-test-subj="mockInstallSection">
-          <button
-            type="button"
-            data-test-subj="mockInstallSectionCommit"
-            onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
-          />
-          <button
-            type="button"
-            data-test-subj="mockInstallSectionSetup"
-            onClick={() => onStepChange('setup')}
-          />
-          <pre data-test-subj="mockInstallSectionStep">{step}</pre>
-          <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TemplateInstallSection: ({
+      step,
+      onStepChange,
+      onPreviewValuesChange,
+      previewYaml,
+    }: {
+      step: string;
+      onStepChange: (step: 'details' | 'setup') => void;
+      onPreviewValuesChange?: (values: Record<string, unknown>) => void;
+      previewYaml: string;
+    }) => (
+      <div data-test-subj="mockInstallSection">
+        <button
+          type="button"
+          data-test-subj="mockInstallSectionCommit"
+          onClick={() => onPreviewValuesChange?.({ 'max-age': 42 })}
+        />
+        <button
+          type="button"
+          data-test-subj="mockInstallSectionSetup"
+          onClick={() => onStepChange('setup')}
+        />
+        <pre data-test-subj="mockInstallSectionStep">{step}</pre>
+        <pre data-test-subj="mockInstallSectionPreviewYaml">{previewYaml}</pre>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const RAW = `template-metadata:
   slug: my-template

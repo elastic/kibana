@@ -18,11 +18,11 @@ const versionService = { getMajorVersion: () => 8 } as unknown as Version;
 
 // Mock the getReindexWarnings function
 vi.mock('@kbn/upgrade-assistant-pkg-server/src/index_settings', () => {
-      const mocked = {
-      getReindexWarnings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getReindexWarnings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ackResponseMock = {
   acknowledged: true,

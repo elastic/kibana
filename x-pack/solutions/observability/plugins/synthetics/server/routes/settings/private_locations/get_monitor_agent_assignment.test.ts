@@ -20,9 +20,7 @@ vi.mock('../../../synthetics_service/private_location/package_policy_service');
 
 const mockGetLocations = getPrivateLocationsAndAgentPolicies as Mock;
 const mockGetByIds = vi.fn();
-const mockPackagePolicyService = PackagePolicyService as MockedClass<
-  typeof PackagePolicyService
->;
+const mockPackagePolicyService = PackagePolicyService as MockedClass<typeof PackagePolicyService>;
 
 const agent = (over: Record<string, unknown> = {}) => ({
   id: 'agent-1',

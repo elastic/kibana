@@ -15,23 +15,23 @@ import userEvent from '@testing-library/user-event';
 import { VegaEditorFlyout } from './vega_editor_flyout';
 
 vi.mock('../components/vega_vis_editor', () => {
-      const mocked = {
-      VegaSpecEditor: ({
-        editorValue,
-        onChange,
-      }: {
-        editorValue: string;
-        onChange: (value: string) => void;
-      }) => (
-        <textarea
-          aria-label="Vega spec"
-          value={editorValue}
-          onChange={(event) => onChange(event.target.value)}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    VegaSpecEditor: ({
+      editorValue,
+      onChange,
+    }: {
+      editorValue: string;
+      onChange: (value: string) => void;
+    }) => (
+      <textarea
+        aria-label="Vega spec"
+        value={editorValue}
+        onChange={(event) => onChange(event.target.value)}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('VegaEditorFlyout', () => {
   const renderFlyout = ({ isNewPanel = false }: { isNewPanel?: boolean } = {}) => {

@@ -26,19 +26,19 @@ import React from 'react';
 vi.mock('../../../common/use_cases_features');
 vi.mock('../../../containers/configure/use_get_case_configuration');
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useCasesConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useCasesConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_global_inline_fields', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_global_inline_fields')),
-      useGlobalInlineFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_global_inline_fields')),
+    useGlobalInlineFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as Mock;
 const useCasesFeaturesMock = useCasesFeatures as Mock;

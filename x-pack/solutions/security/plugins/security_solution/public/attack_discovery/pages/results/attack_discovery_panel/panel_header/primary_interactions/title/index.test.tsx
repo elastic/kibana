@@ -20,7 +20,7 @@ import { TestProviders } from '../../../../../../../common/mock';
 
 const mockReportEvent = vi.fn();
 vi.mock('../../../../../../../common/lib/kibana', async () => {
-  const original = (await vi.importActual('../../../../../../../common/lib/kibana'));
+  const original = await vi.importActual('../../../../../../../common/lib/kibana');
   return {
     ...original,
     useKibana: () => {
@@ -39,41 +39,41 @@ vi.mock('../../../../../../../common/lib/kibana', async () => {
 });
 
 vi.mock('@kbn/elastic-assistant-common', () => {
-      const mocked = {
-      ATTACK_DISCOVERY_AD_HOC_RULE_ID: 'ad-hoc-rule-id',
-      API_VERSIONS: {
-        public: {
-          v1: '2023-10-31',
-        },
-        internal: {
-          v1: '1',
-        },
+  const mocked = {
+    ATTACK_DISCOVERY_AD_HOC_RULE_ID: 'ad-hoc-rule-id',
+    API_VERSIONS: {
+      public: {
+        v1: '2023-10-31',
       },
-      replaceAnonymizedValuesWithOriginalValues: vi.fn((params) => params.messageContent),
-    };
-      return { ...mocked, default: mocked };
-    });
+      internal: {
+        v1: '1',
+      },
+    },
+    replaceAnonymizedValuesWithOriginalValues: vi.fn((params) => params.messageContent),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../settings_flyout/schedule/details_flyout', () => {
-      const mocked = {
-      DetailsFlyout: ({ scheduleId, onClose }: { scheduleId: string; onClose: () => void }) => (
-        <div data-test-subj="detailsFlyout">
-          {scheduleId}
-          <button type="button" onClick={onClose} data-test-subj="closeFlyout">
-            {'Close'}
-          </button>
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DetailsFlyout: ({ scheduleId, onClose }: { scheduleId: string; onClose: () => void }) => (
+      <div data-test-subj="detailsFlyout">
+        {scheduleId}
+        <button type="button" onClick={onClose} data-test-subj="closeFlyout">
+          {'Close'}
+        </button>
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/is_attack_discovery_alert', () => {
-      const mocked = {
-      isAttackDiscoveryAlert: vi.fn((discovery) => !!discovery.alertRuleUuid),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAttackDiscoveryAlert: vi.fn((discovery) => !!discovery.alertRuleUuid),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Test wrapper with QueryClient and TestProviders
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => {

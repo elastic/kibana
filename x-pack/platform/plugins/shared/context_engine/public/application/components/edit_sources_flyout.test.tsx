@@ -19,23 +19,23 @@ import type { GetAiIndexResponse } from '../../../common/http_api/ai_indices';
 import { EditSourcesFlyout } from './edit_sources_flyout';
 
 vi.mock('@kbn/esql/public', () => {
-      const mocked = {
-      ESQLLangEditor: ({
-        query,
-        onTextLangQueryChange,
-      }: {
-        query: { esql: string };
-        onTextLangQueryChange: (query: { esql: string }) => void;
-      }) => (
-        <textarea
-          data-test-subj="mockEsqlEditor"
-          value={query.esql}
-          onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ESQLLangEditor: ({
+      query,
+      onTextLangQueryChange,
+    }: {
+      query: { esql: string };
+      onTextLangQueryChange: (query: { esql: string }) => void;
+    }) => (
+      <textarea
+        data-test-subj="mockEsqlEditor"
+        value={query.esql}
+        onChange={(event) => onTextLangQueryChange({ esql: event.target.value })}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',

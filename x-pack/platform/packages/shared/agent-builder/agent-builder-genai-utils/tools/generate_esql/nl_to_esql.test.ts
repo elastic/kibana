@@ -13,51 +13,51 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
 
 vi.mock('@kbn/inference-tracing', () => {
-      const mocked = {
-      withActiveInferenceSpan: vi.fn((_name: string, _opts: unknown, fn: () => unknown) => fn()),
-      ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    withActiveInferenceSpan: vi.fn((_name: string, _opts: unknown, fn: () => unknown) => fn()),
+    ElasticGenAIAttributes: { InferenceSpanKind: 'InferenceSpanKind' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base', () => {
-      const mocked = {
-      EsqlDocumentBase: { load: vi.fn() },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    EsqlDocumentBase: { load: vi.fn() },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-server-utils', () => {
-      const mocked = {
-      buildServerESQLCallbacks: vi.fn().mockReturnValue({}),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildServerESQLCallbacks: vi.fn().mockReturnValue({}),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./graph', () => {
-      const mocked = {
-      createNlToEsqlGraph: vi.fn(),
-      requestDocumentationSchema: {},
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createNlToEsqlGraph: vi.fn(),
+    requestDocumentationSchema: {},
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../index_explorer', () => {
-      const mocked = {
-      indexExplorer: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    indexExplorer: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./documentation', () => {
-      const mocked = {
-      loadDocumentation: vi.fn(),
-      // EsqlDocEntry is imported by prompts.ts (not nl_to_esql.ts); the mock must export it
-      // so that createRequestDocumentationPromptNoResource can call documentation.getDocContent(entry).
-      EsqlDocEntry: { syntax: 'syntax', tsQueries: 'tsQueries', examples: 'examples' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    loadDocumentation: vi.fn(),
+    // EsqlDocEntry is imported by prompts.ts (not nl_to_esql.ts); the mock must export it
+    // so that createRequestDocumentationPromptNoResource can call documentation.getDocContent(entry).
+    EsqlDocEntry: { syntax: 'syntax', tsQueries: 'tsQueries', examples: 'examples' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { EsqlDocumentBase } from '@kbn/inference-plugin/server/tasks/nl_to_esql/doc_base';
 import { createNlToEsqlGraph } from './graph';

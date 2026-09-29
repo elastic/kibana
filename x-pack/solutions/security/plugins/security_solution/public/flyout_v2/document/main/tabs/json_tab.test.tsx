@@ -20,12 +20,12 @@ import {
 import { PREFIX } from '../../../../flyout/shared/test_ids';
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const hit = buildDataTableRecord({
   _id: '1',

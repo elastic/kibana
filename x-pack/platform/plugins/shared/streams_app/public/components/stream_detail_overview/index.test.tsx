@@ -20,46 +20,46 @@ const mockUseStreamDetail = vi.fn();
 const mockUseStreamsPrivileges = vi.fn();
 
 vi.mock('../../hooks/use_stream_detail', () => {
-      const mocked = {
-      useStreamDetail: () => mockUseStreamDetail(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamDetail: () => mockUseStreamDetail(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../hooks/use_streams_privileges', () => {
-      const mocked = {
-      useStreamsPrivileges: () => mockUseStreamsPrivileges(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStreamsPrivileges: () => mockUseStreamsPrivileges(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./data_quality_card', () => {
-      const mocked = {
-      DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DataQualityCard: () => <div data-test-subj="mockDataQualityCard">Dataset quality</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./about_panel', () => {
-      const mocked = {
-      AboutPanel: () => <div data-test-subj="mockAboutPanel">About this stream</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AboutPanel: () => <div data-test-subj="mockAboutPanel">About this stream</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./ingest_rate_chart', () => {
-      const mocked = {
-      IngestRateChart: () => <div data-test-subj="mockIngestRateChart">Ingest chart</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    IngestRateChart: () => <div data-test-subj="mockIngestRateChart">Ingest chart</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./import_export_panel', () => {
-      const mocked = {
-      ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ImportExportPanel: () => <div data-test-subj="mockImportExportPanel">Import & export</div>,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderWithI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 

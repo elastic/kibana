@@ -15,11 +15,11 @@ import type { MappingField } from '../utils/mappings';
 import { performMatchSearch } from './perform_match_search';
 
 vi.mock('./extract_snippets', () => {
-      const mocked = {
-      extractSnippetsBatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    extractSnippetsBatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { extractSnippetsBatch } from './extract_snippets';
 

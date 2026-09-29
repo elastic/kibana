@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mkdtempSync, rmSync } from 'fs';
 import type { Socket } from 'net';
 import { tmpdir } from 'os';
 import { join } from 'path';
 import { BehaviorSubject, Observable } from 'rxjs';
+import { vi } from 'vitest';
 
 import type { LoggerContextConfigInput, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';

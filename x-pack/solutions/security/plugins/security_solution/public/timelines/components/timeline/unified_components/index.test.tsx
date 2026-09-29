@@ -42,35 +42,35 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 vi.mock('../../../containers', () => {
-      const mocked = {
-      useTimelineEvents: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useTimelineEvents: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../containers/details');
 
 vi.mock('../../fields_browser', () => {
-      const mocked = {
-      useFieldBrowserOptions: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useFieldBrowserOptions: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../common/lib/kuery');
 
 vi.mock('../../../../common/hooks/use_experimental_features');
 
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      ...require('react-router-dom'),
-      useLocation: vi.fn(() => ({
-        pathname: '',
-        search: '',
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('react-router-dom'),
+    useLocation: vi.fn(() => ({
+      pathname: '',
+      search: '',
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useIsExperimentalFeatureEnabledMock = vi.fn((feature: keyof ExperimentalFeatures) => {
   return allowedExperimentalValues[feature];

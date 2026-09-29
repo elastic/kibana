@@ -16,11 +16,11 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getConversationResponseMock } from '../../__mocks__/response';
 
 vi.mock('./get_conversation', () => {
-      const mocked = {
-      getConversation: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getConversation: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 export const getDeleteConversationOptionsMock = (): DeleteConversationParams => ({
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,

@@ -12,7 +12,7 @@ import { vi } from 'vitest';
 export const convertModelVersionBackwardConversionSchemaMock = vi.fn();
 
 vi.doMock('@kbn/core-saved-objects-base-server-internal', async () => {
-  const actual = (await vi.importActual('@kbn/core-saved-objects-base-server-internal'));
+  const actual = await vi.importActual('@kbn/core-saved-objects-base-server-internal');
   return {
     ...actual,
     convertModelVersionBackwardConversionSchema: convertModelVersionBackwardConversionSchemaMock,

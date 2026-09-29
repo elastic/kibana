@@ -25,7 +25,7 @@ const storageContextGetTransforms = vi.fn();
 const spy = () => storageContextGetTransforms;
 
 vi.mock('@kbn/object-versioning', async () => {
-  const original = (await vi.importActual('@kbn/object-versioning'));
+  const original = await vi.importActual('@kbn/object-versioning');
   return {
     ...original,
     getContentManagementServicesTransforms: (...args: any[]) => {

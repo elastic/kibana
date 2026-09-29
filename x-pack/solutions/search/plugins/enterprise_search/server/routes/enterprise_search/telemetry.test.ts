@@ -5,19 +5,19 @@
  * 2.0.
  */
 
+import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
+
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
-
-import { MockRouter, mockLogger, mockDependencies } from '../../__mocks__';
 
 import { savedObjectsServiceMock } from '@kbn/core/server/mocks';
 
 vi.mock('../../collectors/lib/telemetry', () => {
-      const mocked = {
-      incrementUICounter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    incrementUICounter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 import { incrementUICounter } from '../../collectors/lib/telemetry';
 
 import { registerTelemetryRoute } from './telemetry';

@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import React from 'react';
+import { vi } from 'vitest';
 
 import type { BuildFlavor } from '@kbn/config';
 import { coreMock } from '@kbn/core/public/mocks';

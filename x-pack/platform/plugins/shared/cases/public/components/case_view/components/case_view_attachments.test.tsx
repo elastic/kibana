@@ -29,17 +29,17 @@ import userEvent from '@testing-library/user-event';
 vi.mock('../../../containers/use_get_case_file_stats');
 vi.mock('../../../common/navigation/hooks');
 vi.mock('../use_case_observables', () => {
-      const mocked = {
-      useCaseObservables: vi.fn(() => ({ observables: [], isLoading: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useCaseObservables: vi.fn(() => ({ observables: [], isLoading: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./sidebar/sidebar_toggle_button', () => {
-      const mocked = {
-      SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SidebarToggleButton: () => <div data-test-subj="case-view-sidebar-toggle" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useGetCaseFileStatsMock = useGetCaseFileStats as Mock;
 

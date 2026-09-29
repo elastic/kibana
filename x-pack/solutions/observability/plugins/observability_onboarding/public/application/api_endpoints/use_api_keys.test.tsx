@@ -15,15 +15,15 @@ import { ApiEndpointId } from '../../../common/api_endpoints';
 import { useApiKeys } from './use_api_keys';
 
 vi.mock('../../hooks/use_kibana', () => {
-      const mocked = { useKibana: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useKibana: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../services/rest/create_call_api', () => {
-      const mocked = {
-      callObservabilityOnboardingApi: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    callObservabilityOnboardingApi: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseKibana = useKibana as Mock;
 const mockCallApi = callObservabilityOnboardingApi as Mock;

@@ -21,32 +21,28 @@ import { useUnifiedSearchContext } from '../hooks/use_unified_search';
 import { useTimeRangeMetadataContext } from '../../../../hooks/use_time_range_metadata';
 
 vi.mock('@kbn/ebt-tools', () => {
-      const mocked = {
-      usePerformanceContext: () => ({ onPageReady: vi.fn() }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    usePerformanceContext: () => ({ onPageReady: vi.fn() }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../hooks/use_hosts_table');
 vi.mock('../hooks/use_hosts_view');
 vi.mock('../hooks/use_host_count');
 vi.mock('../hooks/use_unified_search');
 vi.mock('../../../../hooks/use_time_range_metadata');
 vi.mock('./host_details_flyout/flyout_wrapper', () => {
-      const mocked = {
-      FlyoutWrapper: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FlyoutWrapper: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseHostsTableContext = useHostsTableContext as MockedFunction<
   typeof useHostsTableContext
 >;
-const mockUseHostsViewContext = useHostsViewContext as MockedFunction<
-  typeof useHostsViewContext
->;
-const mockUseHostCountContext = useHostCountContext as MockedFunction<
-  typeof useHostCountContext
->;
+const mockUseHostsViewContext = useHostsViewContext as MockedFunction<typeof useHostsViewContext>;
+const mockUseHostCountContext = useHostCountContext as MockedFunction<typeof useHostCountContext>;
 const mockUseUnifiedSearchContext = useUnifiedSearchContext as MockedFunction<
   typeof useUnifiedSearchContext
 >;

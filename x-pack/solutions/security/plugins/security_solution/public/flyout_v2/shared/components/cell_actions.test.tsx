@@ -24,12 +24,12 @@ const mockSecurityCellActions = vi.fn((props: Record<string, unknown>) => (
 ));
 
 vi.mock('../../../common/components/cell_actions', () => {
-      const mocked = {
-      SecurityCellActions: (props: Record<string, unknown>) => mockSecurityCellActions(props),
-      CellActionsMode: { HOVER_DOWN: 'hover-down' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    SecurityCellActions: (props: Record<string, unknown>) => mockSecurityCellActions(props),
+    CellActionsMode: { HOVER_DOWN: 'hover-down' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const renderCellAction = (renderer: ReturnType<typeof createCellActionRenderer>, scopeId: string) =>
   render(

@@ -15,13 +15,13 @@ import { chatPayloadSchema, registerChatApiRoutes } from './chat_api';
 
 const mockObservableIntoEventSourceStream = vi.fn();
 vi.mock('@kbn/sse-utils-server', () => {
-      const mocked = {
-      observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
-        mockObservableIntoEventSourceStream(observable, options),
-      cloudProxyBufferSize: 4096,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    observableIntoEventSourceStream: (observable: unknown, options: unknown) =>
+      mockObservableIntoEventSourceStream(observable, options),
+    cloudProxyBufferSize: 4096,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const conversationCreatedEvent = {
   type: ChatEventType.conversationCreated,
@@ -98,9 +98,7 @@ describe('registerChatApiRoutes', () => {
 
   it('returns the conversation with its timeline after a sync converse', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = vi
-      .fn()
-      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const maybeExecuteAgent = vi.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
     const conversation = { id: 'conv-1', events: [{ id: 'e1' }], rounds: [] };
     const get = vi.fn().mockResolvedValue(conversation);
     const getScopedClient = vi.fn().mockResolvedValue({ get });
@@ -130,9 +128,7 @@ describe('registerChatApiRoutes', () => {
 
   it('serves the sync route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = vi
-      .fn()
-      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const maybeExecuteAgent = vi.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
     const conversation = { id: 'conv-1', events: [], rounds: [] };
     const getScopedClient = vi
       .fn()
@@ -295,9 +291,7 @@ describe('registerChatApiRoutes', () => {
 
   it('serves the streaming route when the experimental feature flag is disabled', async () => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = vi
-      .fn()
-      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const maybeExecuteAgent = vi.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
     mockObservableIntoEventSourceStream.mockReset();
     mockObservableIntoEventSourceStream.mockReturnValue('BODY');
 
@@ -337,9 +331,7 @@ describe('user message requests', () => {
 
   const converse = async (body: Record<string, unknown>) => {
     const { router, handlers } = captureHandlers();
-    const maybeExecuteAgent = vi
-      .fn()
-      .mockResolvedValue({ events$: of(conversationCreatedEvent) });
+    const maybeExecuteAgent = vi.fn().mockResolvedValue({ events$: of(conversationCreatedEvent) });
     const get = vi.fn().mockResolvedValue(conversation);
 
     registerChatApiRoutes({

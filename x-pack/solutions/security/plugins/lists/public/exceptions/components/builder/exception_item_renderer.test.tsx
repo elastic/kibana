@@ -6,7 +6,6 @@
  */
 
 import { vi } from 'vitest';
-
 import React from 'react';
 import { mount } from 'enzyme';
 import { kqlPluginMock } from '@kbn/kql/public/mocks';

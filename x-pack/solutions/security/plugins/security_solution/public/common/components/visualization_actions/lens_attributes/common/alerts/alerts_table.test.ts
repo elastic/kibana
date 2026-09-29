@@ -24,29 +24,29 @@ interface VisualizationState {
 }
 
 vi.mock('uuid', () => {
-      const mocked = {
-      ...require('uuid'),
-      v4: vi.fn().mockReturnValue('generated-uuid'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('uuid'),
+    v4: vi.fn().mockReturnValue('generated-uuid'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../utils/route/use_route_spy', () => {
-      const mocked = {
-      useRouteSpy: vi.fn().mockReturnValue([
-        {
-          pageName: 'alerts',
-        },
-      ]),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRouteSpy: vi.fn().mockReturnValue([
+      {
+        pageName: 'alerts',
+      },
+    ]),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('getAlertsTableLensAttributes', () => {
   beforeAll(() => {
-    vi
-      .mocked(useDataView)
-      .mockReturnValue(withIndices(['signal-index'], 'security-solution-my-test'));
+    vi.mocked(useDataView).mockReturnValue(
+      withIndices(['signal-index'], 'security-solution-my-test')
+    );
   });
 
   it('should render without extra options', () => {

@@ -24,34 +24,34 @@ import { RuleActionsSystemActionsItem } from './rule_actions_system_actions_item
 import { I18nProvider } from '@kbn/i18n-react';
 
 vi.mock('../hooks', () => {
-      const mocked = {
-      useRuleFormState: vi.fn(),
-      useRuleFormDispatch: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRuleFormState: vi.fn(),
+    useRuleFormDispatch: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./rule_actions_message', () => {
-      const mocked = {
-      RuleActionsMessage: ({ onParamsChange, warning }: RuleActionsMessageProps) => (
-        <div>
-          RuleActionsMessage
-          <button onClick={() => onParamsChange('param', { paramKey: 'someValue' })}>
-            RuleActionsMessageButton
-          </button>
-          {warning && <div>{warning}</div>}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleActionsMessage: ({ onParamsChange, warning }: RuleActionsMessageProps) => (
+      <div>
+        RuleActionsMessage
+        <button onClick={() => onParamsChange('param', { paramKey: 'someValue' })}>
+          RuleActionsMessageButton
+        </button>
+        {warning && <div>{warning}</div>}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../validation/validate_params_for_warnings', () => {
-      const mocked = {
-      validateParamsForWarnings: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateParamsForWarnings: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ruleType = {
   id: '.es-query',
@@ -85,9 +85,11 @@ const ruleType = {
   enabledInLicense: true,
 } as unknown as RuleType;
 
-const { useRuleFormState, useRuleFormDispatch } = (await vi.importMock('../hooks'));
+const { useRuleFormState, useRuleFormDispatch } = await vi.importMock('../hooks');
 
-const { validateParamsForWarnings } = (await vi.importMock('../validation/validate_params_for_warnings'));
+const { validateParamsForWarnings } = await vi.importMock(
+  '../validation/validate_params_for_warnings'
+);
 
 const mockConnectors = [getConnector('1', { id: 'action-1', isSystemAction: true })];
 

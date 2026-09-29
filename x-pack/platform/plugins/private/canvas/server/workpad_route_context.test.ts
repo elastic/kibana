@@ -21,29 +21,29 @@ import type { CanvasWorkpad } from '../types';
 import { createWorkpadRouteContext } from './workpad_route_context';
 
 vi.mock('./kibana_services', () => {
-      const mocked = {
-      embeddableService: {
-        getTransforms: () => ({
-          transformIn: vi.fn((config: any) => {
-            const { savedObjectId, ...remainingConfig } = config;
-            return {
-              state: { ...remainingConfig },
-              references: [
-                { id: savedObjectId, name: 'savedObjectRef', type: 'lens' },
-              ] as SavedObjectReference[],
-            };
-          }),
-          transformOut: vi.fn((config: any, references: SavedObjectReference[]) => {
-            return { ...config, savedObjectId: references![0].id };
-          }),
+  const mocked = {
+    embeddableService: {
+      getTransforms: () => ({
+        transformIn: vi.fn((config: any) => {
+          const { savedObjectId, ...remainingConfig } = config;
+          return {
+            state: { ...remainingConfig },
+            references: [
+              { id: savedObjectId, name: 'savedObjectRef', type: 'lens' },
+            ] as SavedObjectReference[],
+          };
         }),
-      },
-      logger: {
-        error: vi.fn(),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+        transformOut: vi.fn((config: any, references: SavedObjectReference[]) => {
+          return { ...config, savedObjectId: references![0].id };
+        }),
+      }),
+    },
+    logger: {
+      error: vi.fn(),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const runtimeExpression = `embeddable type="vis" 
   config="${encode({

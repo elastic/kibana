@@ -14,63 +14,63 @@ import { ENTRA_INSIGHTS_TOOL_TEST_ID } from './test_ids';
 import type { ManagedUserHit } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 
 vi.mock('../../../../shared/components/tools_flyout_header', () => {
-      const mocked = {
-      ToolsFlyoutHeader: ({
-        title,
-        label,
-        iconType,
-        onTitleClick,
-      }: {
-        title: string;
-        label?: string;
-        iconType?: string;
-        onTitleClick?: () => void;
-      }) => (
-        <button
-          type="button"
-          data-test-subj="mockToolsFlyoutHeader"
-          data-title={title}
-          data-label={label}
-          data-icon-type={iconType}
-          onClick={onTitleClick}
-        />
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ToolsFlyoutHeader: ({
+      title,
+      label,
+      iconType,
+      onTitleClick,
+    }: {
+      title: string;
+      label?: string;
+      iconType?: string;
+      onTitleClick?: () => void;
+    }) => (
+      <button
+        type="button"
+        data-test-subj="mockToolsFlyoutHeader"
+        data-title={title}
+        data-label={label}
+        data-icon-type={iconType}
+        onClick={onTitleClick}
+      />
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../flyout/entity_details/user_details_left/tabs/asset_document', () => {
-      const mocked = {
-      AssetDocumentTab: () => <div data-test-subj="mockAssetDocumentTab" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AssetDocumentTab: () => <div data-test-subj="mockAssetDocumentTab" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../flyout/document_details/shared/context', () => {
-      const mocked = {
-      DocumentDetailsProvider: ({
-        id,
-        indexName,
-        scopeId,
-        children,
-      }: {
-        id: string;
-        indexName: string;
-        scopeId: string;
-        children: React.ReactNode;
-      }) => (
-        <div
-          data-test-subj="mockDocumentDetailsProvider"
-          data-id={id}
-          data-index-name={indexName}
-          data-scope-id={scopeId}
-        >
-          {children}
-        </div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    DocumentDetailsProvider: ({
+      id,
+      indexName,
+      scopeId,
+      children,
+    }: {
+      id: string;
+      indexName: string;
+      scopeId: string;
+      children: React.ReactNode;
+    }) => (
+      <div
+        data-test-subj="mockDocumentDetailsProvider"
+        data-id={id}
+        data-index-name={indexName}
+        data-scope-id={scopeId}
+      >
+        {children}
+      </div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockManagedUserHit: ManagedUserHit = {
   _id: 'entra-doc-id',

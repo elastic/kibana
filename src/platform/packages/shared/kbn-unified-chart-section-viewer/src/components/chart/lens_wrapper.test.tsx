@@ -38,15 +38,13 @@ const mockEmbeddableComponent = vi.fn((props) => (
 
 // Mock useLensExtraActions
 vi.mock('./hooks/use_lens_extra_actions', () => {
-      const mocked = {
-      useLensExtraActions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLensExtraActions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const useLensExtraActionsMock = useLensExtraActions as MockedFunction<
-  typeof useLensExtraActions
->;
+const useLensExtraActionsMock = useLensExtraActions as MockedFunction<typeof useLensExtraActions>;
 
 describe('LensWrapper', () => {
   const mockLensProps = {

@@ -13,8 +13,7 @@ import { ensureIndicesExistsForPolicies } from './ensure_indices_exists_for_poli
 import { createPolicyDataStreamsIfNeeded as _createPolicyDataStreamsIfNeeded } from '../../fleet_integration/handlers/create_policy_datastreams';
 
 vi.mock('../../fleet_integration/handlers/create_policy_datastreams');
-const createPolicyDataStreamsIfNeededMock =
-  _createPolicyDataStreamsIfNeeded as unknown as Mock;
+const createPolicyDataStreamsIfNeededMock = _createPolicyDataStreamsIfNeeded as unknown as Mock;
 
 describe('Ensure indices exists for policies migration', () => {
   let endpointAppContextServicesMock: ReturnType<typeof createMockEndpointAppContextService>;

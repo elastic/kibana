@@ -11,17 +11,17 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 vi.mock('../stats', () => {
-      const mocked = {
-      Stats: () => 'Stats',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Stats: () => 'Stats',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../chart', () => {
-      const mocked = {
-      MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    MonitoringTimeseriesContainer: () => 'MonitoringTimeseriesContainer',
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { BeatsOverview } from './overview';
 

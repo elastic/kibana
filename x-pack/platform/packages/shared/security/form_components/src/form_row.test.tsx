@@ -5,18 +5,17 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { EuiFormRow } from '@elastic/eui';
 import { render } from '@testing-library/react';
 import { Formik } from 'formik';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 
 import { FormRow } from './form_row';
 
 vi.mock('@elastic/eui', async () => {
-  const actual = (await vi.importActual('@elastic/eui'));
+  const actual = await vi.importActual('@elastic/eui');
   return {
     ...actual,
     EuiFormRow: vi.fn(({ children }: any) => <div>{children}</div>),

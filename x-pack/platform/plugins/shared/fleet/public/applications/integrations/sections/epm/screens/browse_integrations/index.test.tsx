@@ -19,72 +19,72 @@ const mockUseUrlDefaultCategories = vi.fn();
 const mockUseStartServices = vi.fn();
 
 vi.mock('./hooks', () => {
-      const mocked = {
-      useBrowseIntegrationHook: () => mockUseBrowseIntegrationHook(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBrowseIntegrationHook: () => mockUseBrowseIntegrationHook(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./hooks/url_categories', () => {
-      const mocked = {
-      useSetUrlCategory: () => mockUseSetUrlCategory(),
-      useSetUrlDefaultCategories: () => mockUseSetUrlDefaultCategories(),
-      useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSetUrlCategory: () => mockUseSetUrlCategory(),
+    useSetUrlDefaultCategories: () => mockUseSetUrlDefaultCategories(),
+    useUrlDefaultCategories: () => mockUseUrlDefaultCategories(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks', () => {
-      const mocked = {
-      useStartServices: () => mockUseStartServices(),
-      useBreadcrumbs: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useStartServices: () => mockUseStartServices(),
+    useBreadcrumbs: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseLocation = vi.fn();
 const mockHistoryReplace = vi.fn();
 vi.mock('react-router-dom', () => {
-      const mocked = {
-      useLocation: () => mockUseLocation(),
-      useHistory: () => ({ push: vi.fn(), replace: mockHistoryReplace }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLocation: () => mockUseLocation(),
+    useHistory: () => ({ push: vi.fn(), replace: mockHistoryReplace }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Capture the items prop so tests can invoke injected onCardClick handlers directly.
 let capturedFilteredCards: Array<{ isCollectionCard?: boolean; onCardClick?: () => void }> = [];
 vi.mock('./components/responsive_package_grid', () => {
-      const mocked = {
-      ResponsivePackageGrid: ({ items }: { items: any[] }) => {
-        capturedFilteredCards = items;
-        return null;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ResponsivePackageGrid: ({ items }: { items: any[] }) => {
+      capturedFilteredCards = items;
+      return null;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/search_and_filters_bar', () => {
-      const mocked = { SearchAndFiltersBar: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { SearchAndFiltersBar: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/side_bar', () => {
-      const mocked = { Sidebar: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { Sidebar: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/no_data_prompt', () => {
-      const mocked = { NoDataPrompt: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { NoDataPrompt: () => null };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./components/manage_integrations_table', () => {
-      const mocked = {
-      ManageIntegrationsTable: () => null,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ManageIntegrationsTable: () => null,
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../components/no_epr_callout', () => {
-      const mocked = { NoEprCallout: () => null };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { NoEprCallout: () => null };
+  return { ...mocked, default: mocked };
+});
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
 import { BrowseIntegrationsPage } from '.';

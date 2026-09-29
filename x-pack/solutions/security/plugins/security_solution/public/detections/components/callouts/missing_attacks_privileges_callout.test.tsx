@@ -18,7 +18,7 @@ import { TestProviders } from '../../../common/mock/test_providers';
 vi.mock('../../../common/hooks/use_missing_privileges');
 vi.mock('../../../attack_discovery/pages/use_get_missing_index_privileges');
 vi.mock('../../../common/components/callouts', async () => {
-  const original = (await vi.importActual('../../../common/components/callouts'));
+  const original = await vi.importActual('../../../common/components/callouts');
   return {
     ...original,
     CallOutSwitcher: vi.fn(({ message }) => (

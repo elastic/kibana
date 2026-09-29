@@ -58,14 +58,14 @@ const getWrapper =
   };
 
 vi.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => {
-      const mocked = {
-      uiMetricService: {
-        trackUiMetric: vi.fn(),
-      },
-      CHANGE_RULE_STATE: 'cloud_security_posture.rule.change_state',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    uiMetricService: {
+      trackUiMetric: vi.fn(),
+    },
+    CHANGE_RULE_STATE: 'cloud_security_posture.rule.change_state',
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./use_change_csp_rule_state');
 

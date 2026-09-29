@@ -18,22 +18,22 @@ const mockGetWorkflows = vi.fn();
 
 // Mock WorkflowApi class used by the thunk
 vi.mock('@kbn/workflows-ui', () => {
-      const mocked = {
-      WorkflowApi: vi.fn().mockImplementation(() => ({
-        getWorkflows: mockGetWorkflows,
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowApi: vi.fn().mockImplementation(() => ({
+      getWorkflows: mockGetWorkflows,
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock normalizeFieldsToJsonSchema; keep real getInputsFromDefinition for thunk behavior
 vi.mock('@kbn/workflows/spec/lib/field_conversion', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
-      getInputsFromDefinition: vi.fn((fields) => (fields ? { type: 'object' } : undefined)),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/workflows/spec/lib/field_conversion')),
+    getInputsFromDefinition: vi.fn((fields) => (fields ? { type: 'object' } : undefined)),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('loadWorkflowsThunk', () => {
   let store: MockStore;

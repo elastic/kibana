@@ -20,19 +20,19 @@ import { ruleFormKeys } from '../../form/hooks/query_key_factory';
 import { useResolveTimeField } from './use_resolve_time_field';
 
 vi.mock('@kbn/esql-utils', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/esql-utils')),
-      getESQLTimeField: vi.fn(async () => undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/esql-utils')),
+    getESQLTimeField: vi.fn(async () => undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../form/hooks/use_data_fields', () => {
-      const mocked = {
-      useDataFields: vi.fn(() => ({ data: {}, isLoading: false })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useDataFields: vi.fn(() => ({ data: {}, isLoading: false })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const FLIGHTS_QUERY =
   'FROM kibana_sample_data_flights | STATS COUNT(*) BY timestamp | WHERE Cancelled == "true"';

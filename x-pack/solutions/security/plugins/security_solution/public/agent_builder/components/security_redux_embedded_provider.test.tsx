@@ -17,67 +17,67 @@ import type {
 import { SecurityReduxEmbeddedProvider } from './security_redux_embedded_provider';
 
 vi.mock('../../common/lib/kibana/kibana_react', () => {
-      const mocked = {
-      KibanaContextProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="kibanaContextProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    KibanaContextProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="kibanaContextProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../common/components/upselling_provider', () => {
-      const mocked = {
-      UpsellingProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="upsellingProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    UpsellingProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="upsellingProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../cases/components/provider/provider', () => {
-      const mocked = {
-      CaseProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="caseProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CaseProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="caseProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/cell-actions', () => {
-      const mocked = {
-      CellActionsProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="cellActionsProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    CellActionsProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="cellActionsProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/expandable-flyout', () => {
-      const mocked = {
-      ExpandableFlyoutProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="expandableFlyoutProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ExpandableFlyoutProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="expandableFlyoutProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/security-solution-navigation', () => {
-      const mocked = {
-      NavigationProvider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="navigationProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    NavigationProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="navigationProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('react-redux-v7', () => {
-      const mocked = {
-      Provider: ({ children }: { children: React.ReactNode }) => (
-        <div data-test-subj="reduxProviderMock">{children}</div>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Provider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="reduxProviderMock">{children}</div>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const fakeBundle = (): SecurityCanvasEmbeddedBundle =>
   ({

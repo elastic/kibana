@@ -14,34 +14,34 @@ import { TestProviders } from '../../../../../common/mock';
 import { act } from 'react-dom/test-utils';
 
 vi.mock('../../../../../common/containers/use_global_time', () => {
-      const mocked = {
-      useGlobalTime: () => ({
-        from: '2023-01-01T00:00:00.000Z',
-        to: '2023-01-02T00:00:00.000Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGlobalTime: () => ({
+      from: '2023-01-01T00:00:00.000Z',
+      to: '2023-01-02T00:00:00.000Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock(
   '../../../privileged_user_monitoring_onboarding/components/esql_dashboard_panel/esql_dashboard_panel',
   () => {
-      const mocked = {
-        EsqlDashboardPanel: () => <div data-test-subj="esql-dashboard-panel" />,
-      };
-      return { ...mocked, default: mocked };
-    }
+    const mocked = {
+      EsqlDashboardPanel: () => <div data-test-subj="esql-dashboard-panel" />,
+    };
+    return { ...mocked, default: mocked };
+  }
 );
 
 vi.mock('../../../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../queries/helpers', async () => {
-  const originalModule = (await vi.importActual('../../queries/helpers'));
+  const originalModule = await vi.importActual('../../queries/helpers');
   return {
     ...originalModule,
     removeInvalidForkBranchesFromESQL: vi.fn((fields, esql) => esql),

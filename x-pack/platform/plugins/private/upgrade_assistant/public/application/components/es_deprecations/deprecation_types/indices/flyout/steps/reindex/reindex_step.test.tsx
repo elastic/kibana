@@ -19,8 +19,8 @@ import { ReindexFlyoutStep } from './reindex_step';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 vi.mock('../../../../../../../app_context', async () => {
-  const actual = (await vi.importActual('../../../../../../../app_context'));
-  const { docLinksServiceMock } = (await vi.importActual('@kbn/core-doc-links-browser-mocks'));
+  const actual = await vi.importActual('../../../../../../../app_context');
+  const { docLinksServiceMock } = await vi.importActual('@kbn/core-doc-links-browser-mocks');
 
   return {
     ...actual,

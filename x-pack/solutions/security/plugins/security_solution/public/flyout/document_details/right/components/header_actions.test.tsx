@@ -21,12 +21,12 @@ vi.mock('../../../../common/lib/kibana');
 vi.mock('../hooks/use_get_flyout_link');
 
 vi.mock('@elastic/eui', async () => {
-      const mocked = {
-      ...(await vi.importActual('@elastic/eui')),
-      EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@elastic/eui')),
+    EuiCopy: vi.fn(({ children: functionAsChild }) => functionAsChild(vi.fn())),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const alertUrl = 'https://example.com/alert';
 const mockContextValue = {

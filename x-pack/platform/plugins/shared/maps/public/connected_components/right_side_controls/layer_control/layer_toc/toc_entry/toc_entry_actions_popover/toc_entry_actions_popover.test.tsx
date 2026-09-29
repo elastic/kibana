@@ -10,20 +10,20 @@ import { vi } from 'vitest';
 /* eslint-disable max-classes-per-file */
 
 vi.mock('../../../../../../kibana_services', () => {
-      const mocked = {
-      getEMSSettings() {
-        return {
-          isEMSUrlSet() {
-            return false;
-          },
-        };
-      },
-      getMapsCapabilities() {
-        return { save: true };
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEMSSettings() {
+      return {
+        isEMSUrlSet() {
+          return false;
+        },
+      };
+    },
+    getMapsCapabilities() {
+      return { save: true };
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 import React from 'react';
 import { shallow } from 'enzyme';

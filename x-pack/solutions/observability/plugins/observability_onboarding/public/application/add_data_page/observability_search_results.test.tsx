@@ -23,7 +23,7 @@ const mockAvailablePackagesHook = vi.fn();
 
 vi.mock('@kbn/fleet-plugin/public', async () => {
   const ReactActual = require('react');
-  const { LocalSearchHook } = (await vi.importActual('@kbn/fleet-plugin/public'));
+  const { LocalSearchHook } = await vi.importActual('@kbn/fleet-plugin/public');
   return {
     LocalSearchHook,
     AvailablePackagesHook: () => mockAvailablePackagesHook(),

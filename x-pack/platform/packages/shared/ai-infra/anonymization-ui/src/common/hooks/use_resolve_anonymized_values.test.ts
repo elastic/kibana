@@ -12,11 +12,11 @@ import { useGetReplacements } from '../services/replacements/hooks/use_get_repla
 import { useResolveAnonymizedValues } from './use_resolve_anonymized_values';
 
 vi.mock('../services/replacements/hooks/use_get_replacements', () => {
-      const mocked = {
-      useGetReplacements: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGetReplacements: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const client = {
   getReplacements: vi.fn(),

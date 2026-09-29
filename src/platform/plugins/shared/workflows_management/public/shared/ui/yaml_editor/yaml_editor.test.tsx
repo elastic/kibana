@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { vi } from 'vitest';
-import type { Mock } from 'vitest';
-
 import { fireEvent, render } from '@testing-library/react';
 import type { MonacoYamlOptions } from 'monaco-yaml';
 import React from 'react';
+import type { Mock } from 'vitest';
+import { vi } from 'vitest';
 import type { CodeEditorProps, monaco } from '@kbn/code-editor';
 import { YamlEditor } from './yaml_editor';
 import { yamlLanguageService } from './yaml_language_service';
@@ -29,14 +28,14 @@ vi.mock('./yaml_language_service', () => {
   return {
     yamlLanguageService: {
       initialize: vi.fn().mockImplementation(async () => {
-        const { configureMonacoYamlSchema } = (await vi.importMock('@kbn/monaco'));
+        const { configureMonacoYamlSchema } = await vi.importMock('@kbn/monaco');
         mockState.instance = await configureMonacoYamlSchema();
         return mockState.instance;
       }),
       update: vi.fn().mockImplementation(async (schemas) => {
         if (!mockState.instance) {
           // Initialize if not already done
-          const { configureMonacoYamlSchema } = (await vi.importMock('@kbn/monaco'));
+          const { configureMonacoYamlSchema } = await vi.importMock('@kbn/monaco');
           // eslint-disable-next-line require-atomic-updates
           mockState.instance = await configureMonacoYamlSchema(schemas);
           // @ts-expect-error - mockState.instance is not typed
@@ -78,7 +77,7 @@ vi.mock('./yaml_language_service', () => {
 
 // Mock the CodeEditor component
 vi.mock('@kbn/code-editor', async () => {
-  const original = (await vi.importActual('@kbn/code-editor'));
+  const original = await vi.importActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: CodeEditorProps) => {
@@ -113,30 +112,30 @@ vi.mock('@kbn/code-editor', async () => {
 
 // Mock lodash debounce to execute immediately in tests
 vi.mock('lodash', () => {
-      const mocked = {
-      ...require('lodash'),
-      debounce: (fn: Function) => {
-        const debouncedFn = fn as Function & { flush: () => void; cancel: () => void };
-        debouncedFn.flush = () => {};
-        debouncedFn.cancel = () => {};
-        return debouncedFn;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...require('lodash'),
+    debounce: (fn: Function) => {
+      const debouncedFn = fn as Function & { flush: () => void; cancel: () => void };
+      debouncedFn.flush = () => {};
+      debouncedFn.cancel = () => {};
+      return debouncedFn;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Mock the configureMonacoYamlSchema function
 vi.mock('@kbn/monaco', () => {
-      const mocked = {
-      configureMonacoYamlSchema: vi.fn(() =>
-        Promise.resolve({
-          dispose: mockDispose,
-          update: mockUpdate,
-        })
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    configureMonacoYamlSchema: vi.fn(() =>
+      Promise.resolve({
+        dispose: mockDispose,
+        update: mockUpdate,
+      })
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('YamlEditor', () => {
   beforeEach(() => {
@@ -191,7 +190,7 @@ describe('YamlEditor', () => {
       const onChange = vi.fn();
 
       // Mock configureMonacoYamlSchema to never resolve
-      const monaco = (await vi.importMock('@kbn/monaco'));
+      const monaco = await vi.importMock('@kbn/monaco');
       (monaco.configureMonacoYamlSchema as Mock).mockReturnValue(new Promise(() => {}));
 
       // Render the component
@@ -296,7 +295,9 @@ describe('YamlEditor', () => {
 
       // Both should use same singleton
       expect(yamlLanguageService.getInstance()).toBe(firstSingleton);
-      expect((await vi.importMock('@kbn/monaco')).configureMonacoYamlSchema).toHaveBeenCalledTimes(1);
+      expect((await vi.importMock('@kbn/monaco')).configureMonacoYamlSchema).toHaveBeenCalledTimes(
+        1
+      );
 
       // Unmount first component - schemas are cleared but singleton persists
       unmount1();
@@ -367,7 +368,7 @@ describe('YamlEditor', () => {
 
       // Clear mocks to ensure clean count
       vi.clearAllMocks();
-      const monaco = (await vi.importMock('@kbn/monaco'));
+      const monaco = await vi.importMock('@kbn/monaco');
 
       // Render first instance
       const { unmount: unmount1 } = render(

@@ -15,7 +15,7 @@ import { MaintenanceWindowSyncTasks } from './sync_tasks';
 
 // Use 0ms delays so retry tests run synchronously without fake timers.
 vi.mock('p-retry', () => {
-  const actual = (require('p-retry') as typeof import('p-retry'));
+  const actual = require('p-retry') as typeof import('p-retry');
   const mockFn = vi
     .fn()
     .mockImplementation((fn: Parameters<typeof actual.default>[0], options: any) =>

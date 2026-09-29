@@ -13,12 +13,12 @@ import * as d3 from 'd3';
 import { useMetricAnimation } from './use_metric_animation';
 
 vi.mock('d3', () => {
-      const mocked = {
-      select: vi.fn(),
-      interpolateNumber: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    select: vi.fn(),
+    interpolateNumber: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGetComputedStyle = vi.fn();
 Object.defineProperty(window, 'getComputedStyle', {

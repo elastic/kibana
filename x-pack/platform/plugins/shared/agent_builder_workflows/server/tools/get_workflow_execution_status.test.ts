@@ -13,14 +13,14 @@ import { platformCoreTools } from '@kbn/agent-builder-common';
 import { getWorkflowExecutionStatusTool } from './get_workflow_execution_status';
 
 vi.mock('@kbn/agent-builder-tools-base/workflows', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/agent-builder-tools-base/workflows')),
-      getExecutionState: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/agent-builder-tools-base/workflows')),
+    getExecutionState: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getExecutionState } = (await vi.importMock('@kbn/agent-builder-tools-base/workflows'));
+const { getExecutionState } = await vi.importMock('@kbn/agent-builder-tools-base/workflows');
 
 const createWorkflowsManagement = () => ({
   management: {

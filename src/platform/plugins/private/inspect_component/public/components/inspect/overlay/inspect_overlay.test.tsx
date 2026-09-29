@@ -23,34 +23,34 @@ import { isEscapeKey } from '../../../lib/keyboard_shortcut/keyboard_shortcut';
 import { mockBranch } from '../../../__mocks__/mocks';
 
 vi.mock('../../../lib/dom/get_element_from_point', () => {
-      const mocked = {
-      getElementFromPoint: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getElementFromPoint: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/fiber/find_source_component', () => {
-      const mocked = {
-      findSourceComponent: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    findSourceComponent: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/get_inspected_element_data', () => {
-      const mocked = {
-      getInspectedElementData: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getInspectedElementData: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../lib/keyboard_shortcut/keyboard_shortcut', () => {
-      const mocked = {
-      isKeyboardShortcut: vi.fn(),
-      isMac: vi.fn(),
-      isEscapeKey: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isKeyboardShortcut: vi.fn(),
+    isMac: vi.fn(),
+    isEscapeKey: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('InspectOverlay', () => {
   let mockCoreStart: CoreStart;

@@ -34,8 +34,7 @@ describe('bundledPackages', () => {
     vi.mocked(appContextService.getLogger).mockReturnValue(loggingSystemMock.createLogger());
     _purgeBundledPackagesCache();
     vi.mocked(fs.stat).mockResolvedValue({} as any);
-    vi
-      .mocked(fs.readdir)
+    vi.mocked(fs.readdir)
       .mockReset()
       .mockResolvedValue(['apm-8.8.0.zip', 'test-1.0.0.zip'] as any);
 

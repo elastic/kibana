@@ -28,47 +28,47 @@ import AlertDetailsAppSection from './alert_details_app_section';
 const mockedChartStartContract = chartPluginMock.createStartContract();
 
 vi.mock('@kbn/observability-alert-details', () => {
-      const mocked = {
-      AlertAnnotation: () => {},
-      AlertActiveTimeRangeAnnotation: () => {},
-      useAlertsHistory: () => ({
-        data: {
-          histogramTriggeredAlerts: [
-            { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 2 },
-          ],
-          avgTimeToRecoverUS: 0,
-          totalTriggeredAlerts: 2,
-        },
-        isLoading: false,
-        isError: false,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    AlertAnnotation: () => {},
+    AlertActiveTimeRangeAnnotation: () => {},
+    useAlertsHistory: () => ({
+      data: {
+        histogramTriggeredAlerts: [
+          { key_as_string: '2023-04-10T00:00:00.000Z', key: 1681084800000, doc_count: 2 },
+        ],
+        avgTimeToRecoverUS: 0,
+        totalTriggeredAlerts: 2,
+      },
+      isLoading: false,
+      isError: false,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/observability-get-padded-alert-time-range-util', () => {
-      const mocked = {
-      getPaddedAlertTimeRange: () => ({
-        from: '2023-03-28T10:43:13.802Z',
-        to: '2023-03-29T13:14:09.581Z',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getPaddedAlertTimeRange: () => ({
+      from: '2023-03-28T10:43:13.802Z',
+      to: '2023-03-29T13:14:09.581Z',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../rule_condition_chart/rule_condition_chart', () => {
-      const mocked = {
-      RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    RuleConditionChart: vi.fn(() => <div data-test-subj="RuleConditionChart" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./log_rate_analysis', () => {
-      const mocked = {
-      LogRateAnalysis: vi.fn(() => <div data-test-subj="LogRateAnalysis" />),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    LogRateAnalysis: vi.fn(() => <div data-test-subj="LogRateAnalysis" />),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockServices = {
   ...coreMock.createStart(),
@@ -104,13 +104,13 @@ const mockServices = {
 };
 
 vi.mock('../../../../utils/kibana_react', () => {
-      const mocked = {
-      useKibana: () => ({
-        services: mockServices,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: () => ({
+      services: mockServices,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('AlertDetailsAppSection', () => {
   const queryClient = new QueryClient();

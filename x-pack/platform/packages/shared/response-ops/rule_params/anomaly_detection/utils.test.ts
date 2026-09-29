@@ -15,18 +15,18 @@ import { validateKQLStringFilter } from '../common/utils';
 import { validateAnomalyDetectionCustomFilter } from './utils';
 
 vi.mock('../common/utils', () => {
-      const mocked = {
-      validateKQLStringFilter: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateKQLStringFilter: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/ml-anomaly-utils', () => {
-      const mocked = {
-      validateCustomFilterFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateCustomFilterFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockResultType = 'record' as MlAnomalyResultType;
 

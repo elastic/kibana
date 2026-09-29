@@ -14,11 +14,11 @@ import { CensysConnector } from './censys';
 import { CensEyeCreateAnalysisJobInputSchema } from './types';
 
 vi.mock('@kbn/repo-info', () => {
-      const mocked = {
-      kibanaPackageJson: { version: '9.4.0' },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    kibanaPackageJson: { version: '9.4.0' },
+  };
+  return { ...mocked, default: mocked };
+});
 
 const ORGANIZATION_ID = '11111111-2222-3333-4444-555555555555';
 

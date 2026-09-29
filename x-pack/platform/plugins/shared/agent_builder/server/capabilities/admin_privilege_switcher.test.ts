@@ -28,11 +28,11 @@ const minimalCapabilities: Capabilities = {
 };
 
 vi.mock('../services/utils', () => {
-      const mocked = {
-      isAdminFromRequest: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    isAdminFromRequest: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockIsAdminFromRequest = vi.mocked(isAdminFromRequest);
 

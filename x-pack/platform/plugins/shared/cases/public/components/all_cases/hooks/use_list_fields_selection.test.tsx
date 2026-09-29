@@ -21,19 +21,19 @@ import { useGlobalInlineFields } from './use_global_inline_fields';
 
 vi.mock('./use_cases_columns_configuration');
 vi.mock('../../../common/lib/kibana', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../common/lib/kibana')),
-      useCasesConfig: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../common/lib/kibana')),
+    useCasesConfig: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_global_inline_fields', async () => {
-      const mocked = {
-      ...(await vi.importActual('./use_global_inline_fields')),
-      useGlobalInlineFields: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('./use_global_inline_fields')),
+    useGlobalInlineFields: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const useCasesColumnsConfigurationMock = useCasesColumnsConfiguration as Mock;
 const useCasesConfigMock = useCasesConfig as Mock;

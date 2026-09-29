@@ -17,25 +17,25 @@ import { createVegaGraph } from './graph';
 import { buildVegaConfig } from './build_config';
 
 vi.mock('@kbn/agent-builder-genai-utils', () => {
-      const mocked = {
-      validateEsqlQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    validateEsqlQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/esql-server-utils', () => {
-      const mocked = {
-      buildServerESQLCallbacks: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildServerESQLCallbacks: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./graph', () => {
-      const mocked = {
-      createVegaGraph: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    createVegaGraph: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedValidateEsqlQuery = vi.mocked(validateEsqlQuery);
 const mockedBuildCallbacks = vi.mocked(buildServerESQLCallbacks);

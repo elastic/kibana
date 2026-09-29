@@ -23,18 +23,18 @@ vi.mock('./crud');
 vi.mock('./actions');
 vi.mock('../api_keys');
 vi.mock('../spaces/get_current_namespace', () => {
-      const mocked = {
-      getCurrentNamespace: () => 'default',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getCurrentNamespace: () => 'default',
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../spaces/agent_namespaces', () => {
-      const mocked = {
-      agentsKueryNamespaceFilter: vi.fn().mockResolvedValue(undefined),
-      buildFilterWithNamespace: vi.fn((_filter, kuery) => kuery),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentsKueryNamespaceFilter: vi.fn().mockResolvedValue(undefined),
+    buildFilterWithNamespace: vi.fn((_filter, kuery) => kuery),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedCrud = crud as Mocked<typeof crud>;
 const mockedActions = actions as Mocked<typeof actions>;

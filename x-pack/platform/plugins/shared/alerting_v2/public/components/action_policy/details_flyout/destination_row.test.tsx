@@ -12,13 +12,13 @@ import { render, screen } from '@testing-library/react';
 import { DestinationRow } from './destination_row';
 
 vi.mock('../workflow_destination_link', () => {
-      const mocked = {
-      WorkflowDestinationLink: ({ id }: { id: string }) => (
-        <span data-test-subj="mockWorkflowLink">{id}</span>
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    WorkflowDestinationLink: ({ id }: { id: string }) => (
+      <span data-test-subj="mockWorkflowLink">{id}</span>
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('DestinationRow', () => {
   it('renders a workflow destination with WorkflowDestinationLink', () => {

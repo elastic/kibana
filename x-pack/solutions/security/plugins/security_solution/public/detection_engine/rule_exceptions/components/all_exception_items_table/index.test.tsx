@@ -44,8 +44,7 @@ vi.mock('react', () => {
 });
 
 const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as Mock;
-const mockUseGetEndpointExceptionsPerPolicyOptIn =
-  useGetEndpointExceptionsPerPolicyOptIn as Mock;
+const mockUseGetEndpointExceptionsPerPolicyOptIn = useGetEndpointExceptionsPerPolicyOptIn as Mock;
 const mockUseEndpointExceptionsCapability = useEndpointExceptionsCapability as Mock;
 
 const sampleExceptionItem = {

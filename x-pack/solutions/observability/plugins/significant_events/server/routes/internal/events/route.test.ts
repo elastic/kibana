@@ -13,18 +13,18 @@ import { internalEventsRoutes } from './route';
 const mockCleanupStaleEvents = vi.fn();
 
 vi.mock('../../../lib/significant_events/events/cleanup_stale_events', () => {
-      const mocked = {
-      cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    cleanupStaleEvents: (...args: unknown[]) => mockCleanupStaleEvents(...args),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../utils/assert_significant_events_access', () => {
-      const mocked = {
-      assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertSignificantEventsAccess: vi.fn().mockResolvedValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const investigateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];

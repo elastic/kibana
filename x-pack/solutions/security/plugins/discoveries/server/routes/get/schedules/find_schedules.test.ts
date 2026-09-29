@@ -16,11 +16,11 @@ import { registerFindSchedulesRoute } from './find_schedules';
 import { createScheduleDataClient } from '../../../lib/schedules/create_schedule_data_client';
 
 vi.mock('../../../lib/assert_workflows_enabled', () => {
-      const mocked = {
-      assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    assertWorkflowsEnabled: vi.fn().mockResolvedValue(null),
+  };
+  return { ...mocked, default: mocked };
+});
 import { transformScheduleToApi } from '@kbn/discoveries/impl/lib/schedules/transforms/transform_schedule_to_api';
 
 vi.mock('../../../lib/schedules/create_schedule_data_client');

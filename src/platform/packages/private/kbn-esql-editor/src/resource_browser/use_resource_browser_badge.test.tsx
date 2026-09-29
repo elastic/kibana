@@ -16,18 +16,22 @@ import { useSourcesBadge } from './use_resource_browser_badge';
 import { IndicesBrowserOpenMode } from './types';
 
 vi.mock('@elastic/eui', () => {
-      const mocked = {
-      useEuiTheme: () => ({
-        euiTheme: {
-          colors: { primary: '#07C', backgroundBasePrimary: '#FFF', backgroundLightPrimary: '#E0F0FF' },
-          size: { xs: '4px', s: '8px', xl: '24px' },
-          font: { scale: { s: '0.875rem' }, weight: { medium: '500' } },
-          animation: { fast: '150ms' },
+  const mocked = {
+    useEuiTheme: () => ({
+      euiTheme: {
+        colors: {
+          primary: '#07C',
+          backgroundBasePrimary: '#FFF',
+          backgroundLightPrimary: '#E0F0FF',
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        size: { xs: '4px', s: '8px', xl: '24px' },
+        font: { scale: { s: '0.875rem' }, weight: { medium: '500' } },
+        animation: { fast: '150ms' },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useSourcesBadge', () => {
   const mockOpenIndicesBrowser = vi.fn();

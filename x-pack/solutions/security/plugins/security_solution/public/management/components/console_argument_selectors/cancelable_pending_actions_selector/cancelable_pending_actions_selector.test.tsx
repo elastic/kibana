@@ -41,20 +41,20 @@ type PendingActionOption = EuiSelectableOption<Partial<{ description: string }>>
 vi.mock('../../../hooks/response_actions/use_get_endpoint_action_list');
 vi.mock('../../console/hooks/state_selectors/use_console_state_dispatch');
 vi.mock('../shared/hooks', () => {
-      const mocked = {
-      useGenericErrorToast: vi.fn(),
-      useBaseSelectorHandlers: vi.fn(() => ({
-        handleOpenPopover: vi.fn(),
-        handleClosePopover: vi.fn(),
-        setIsPopoverOpen: vi.fn(),
-      })),
-      useBaseSelectorState: vi.fn((store, value) => store ?? { isPopoverOpen: !value }),
-      useRenderDelay: vi.fn(() => false),
-      useFocusManagement: vi.fn(),
-      usePendingActionsOptions: vi.fn(() => []),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useGenericErrorToast: vi.fn(),
+    useBaseSelectorHandlers: vi.fn(() => ({
+      handleOpenPopover: vi.fn(),
+      handleClosePopover: vi.fn(),
+      setIsPopoverOpen: vi.fn(),
+    })),
+    useBaseSelectorState: vi.fn((store, value) => store ?? { isPopoverOpen: !value }),
+    useRenderDelay: vi.fn(() => false),
+    useFocusManagement: vi.fn(),
+    usePendingActionsOptions: vi.fn(() => []),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/lib/kibana');
 vi.mock('../../../../common/components/user_privileges');
 vi.mock('../../../../common/experimental_features_service');
@@ -71,9 +71,7 @@ describe('CancelablePendingActionsSelector', () => {
   const mockUseBaseSelectorHandlers = useBaseSelectorHandlers as MockedFunction<
     typeof useBaseSelectorHandlers
   >;
-  const mockUseFocusManagement = useFocusManagement as MockedFunction<
-    typeof useFocusManagement
-  >;
+  const mockUseFocusManagement = useFocusManagement as MockedFunction<typeof useFocusManagement>;
   const mockUsePendingActionsOptions = usePendingActionsOptions as MockedFunction<
     typeof usePendingActionsOptions
   >;

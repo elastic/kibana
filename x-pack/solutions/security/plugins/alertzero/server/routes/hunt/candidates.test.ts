@@ -20,15 +20,13 @@ import type {
 } from '../../services/watches/hunt/common/build_candidate_query';
 
 vi.mock('../../services/watches/hunt/common/build_candidate_query', () => {
-      const mocked = {
-      buildCandidateQuery: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    buildCandidateQuery: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const buildCandidateQueryMock = buildCandidateQuery as MockedFunction<
-  typeof buildCandidateQuery
->;
+const buildCandidateQueryMock = buildCandidateQuery as MockedFunction<typeof buildCandidateQuery>;
 
 const candidatesResult: CandidateQueryResult = {
   ids: [],

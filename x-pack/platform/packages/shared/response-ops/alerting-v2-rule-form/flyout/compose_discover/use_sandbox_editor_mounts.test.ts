@@ -15,19 +15,19 @@ import { useSplitQueryValidation } from './use_split_query_validation';
 import { useSandboxEditorMounts } from './use_sandbox_editor_mounts';
 
 vi.mock('./use_split_query_completion', () => {
-      const mocked = { useSplitQueryCompletion: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useSplitQueryCompletion: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_split_query_validation', () => {
-      const mocked = { useSplitQueryValidation: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { useSplitQueryValidation: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../form/hooks/use_esql_callbacks', () => {
-      const mocked = {
-      useEsqlCallbacks: vi.fn(() => ({})),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useEsqlCallbacks: vi.fn(() => ({})),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const editor = {} as monaco.editor.IStandaloneCodeEditor;
 const services = {
@@ -46,12 +46,12 @@ describe('useSandboxEditorMounts', () => {
     vi.clearAllMocks();
     let c = 0;
     let v = 0;
-    vi
-      .mocked(useSplitQueryCompletion)
-      .mockImplementation(() => ({ onEditorMount: completionMounts[c++] }));
-    vi
-      .mocked(useSplitQueryValidation)
-      .mockImplementation(() => ({ onEditorMount: validationMounts[v++] }));
+    vi.mocked(useSplitQueryCompletion).mockImplementation(() => ({
+      onEditorMount: completionMounts[c++],
+    }));
+    vi.mocked(useSplitQueryValidation).mockImplementation(() => ({
+      onEditorMount: validationMounts[v++],
+    }));
   });
 
   it('composes completion + validation for alert and recovery editors', () => {

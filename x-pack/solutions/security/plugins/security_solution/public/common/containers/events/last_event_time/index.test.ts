@@ -32,18 +32,18 @@ const mockUseKibana = {
 };
 
 vi.mock('../../../lib/kibana', () => {
-      const mocked = {
-      useKibana: vi.fn(),
-      useToasts: vi.fn().mockReturnValue({
-        addError: vi.fn(),
-        addSuccess: vi.fn(),
-        addWarning: vi.fn(),
-        addInfo: vi.fn(),
-        remove: vi.fn(),
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useKibana: vi.fn(),
+    useToasts: vi.fn().mockReturnValue({
+      addError: vi.fn(),
+      addSuccess: vi.fn(),
+      addWarning: vi.fn(),
+      addInfo: vi.fn(),
+      remove: vi.fn(),
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('useTimelineLastEventTime', () => {
   let searchStrategy$: BehaviorSubject<{ lastSeen: string | null; errorMessage?: string }>;

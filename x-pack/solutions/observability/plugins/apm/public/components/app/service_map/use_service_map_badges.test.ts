@@ -18,26 +18,26 @@ import type { ServiceMapNode } from '../../../../common/service_map';
 import type { ServiceMapBadgesApiResponse } from './merge_service_map_nodes_with_badges';
 
 vi.mock('../../../context/license/use_license_context', () => {
-      const mocked = {
-      useLicenseContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useLicenseContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../context/apm_plugin/use_apm_plugin_context', () => {
-      const mocked = {
-      useApmPluginContext: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useApmPluginContext: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../hooks/use_fetcher', async () => {
-      const mocked = {
-      FETCH_STATUS: (await vi.importActual('../../../hooks/use_fetcher')).FETCH_STATUS,
-      useFetcher: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    FETCH_STATUS: (await vi.importActual('../../../hooks/use_fetcher')).FETCH_STATUS,
+    useFetcher: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseLicenseContext = vi.mocked(useLicenseContext);
 const mockedUseApmPluginContext = vi.mocked(useApmPluginContext);

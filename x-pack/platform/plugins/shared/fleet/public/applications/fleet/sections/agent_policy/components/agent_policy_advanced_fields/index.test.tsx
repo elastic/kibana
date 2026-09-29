@@ -32,12 +32,12 @@ import { AgentPolicyAdvancedOptionsContent } from '.';
 
 vi.mock('../../../../../../hooks/use_license');
 vi.mock('../../../../hooks', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../../../hooks')),
-      useFleetStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../../../hooks')),
+    useFleetStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockedUseLicence = useLicense as MockedFunction<typeof useLicense>;
 const mockedUseFleetStatus = useFleetStatus as MockedFunction<typeof useFleetStatus>;

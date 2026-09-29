@@ -66,7 +66,7 @@ vi.mock('./edit_tags_action', () => {
 });
 
 vi.mock('../contexts/individual_tags_action_context', async () => {
-  const actual = (await vi.importActual('../contexts/individual_tags_action_context'));
+  const actual = await vi.importActual('../contexts/individual_tags_action_context');
   return {
     ...actual,
     useIndividualTagsActionContext: () => ({
@@ -80,7 +80,9 @@ vi.mock('../contexts/individual_tags_action_context', async () => {
   };
 });
 
-const { useGetRuleTypesPermissions } = (await vi.importMock('@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'));
+const { useGetRuleTypesPermissions } = await vi.importMock(
+  '@kbn/alerts-ui-shared/src/common/hooks/use_get_rule_types_permissions'
+);
 
 const http = httpServiceMock.createStartContract();
 const notifications = notificationServiceMock.createStartContract();

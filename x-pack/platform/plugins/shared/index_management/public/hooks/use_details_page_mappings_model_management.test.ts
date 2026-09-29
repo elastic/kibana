@@ -12,131 +12,131 @@ import type { NormalizedFields } from '../application/components/mappings_editor
 import { useDetailsPageMappingsModelManagement } from './use_details_page_mappings_model_management';
 
 vi.mock('../application/app_context', () => {
-      const mocked = {
-      useAppContext: () => ({
-        plugins: {
-          ml: {
-            mlApi: {
-              trainedModels: {
-                getModelsDownloadStatus: vi.fn().mockResolvedValue({
-                  '.elser_model_2_linux-x86_64': {},
-                }),
-                getTrainedModelStats: vi.fn().mockResolvedValue({
-                  trained_model_stats: [
-                    {
+  const mocked = {
+    useAppContext: () => ({
+      plugins: {
+        ml: {
+          mlApi: {
+            trainedModels: {
+              getModelsDownloadStatus: vi.fn().mockResolvedValue({
+                '.elser_model_2_linux-x86_64': {},
+              }),
+              getTrainedModelStats: vi.fn().mockResolvedValue({
+                trained_model_stats: [
+                  {
+                    model_id: '.elser_model_2-x86_64',
+                    deployment_stats: {
+                      deployment_id: 'elser_model_2',
                       model_id: '.elser_model_2-x86_64',
-                      deployment_stats: {
-                        deployment_id: 'elser_model_2',
-                        model_id: '.elser_model_2-x86_64',
-                        state: 'not started',
-                      },
+                      state: 'not started',
                     },
-                    {
+                  },
+                  {
+                    model_id: '.multilingual-e5-small',
+                    deployment_stats: {
+                      deployment_id: 'e5',
                       model_id: '.multilingual-e5-small',
-                      deployment_stats: {
-                        deployment_id: 'e5',
-                        model_id: '.multilingual-e5-small',
-                        state: 'started',
-                      },
+                      state: 'started',
                     },
-                  ],
-                }),
-              },
+                  },
+                ],
+              }),
             },
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../application/services/api', () => {
-      const mocked = {
-      getInferenceEndpoints: vi.fn().mockResolvedValue({
-        data: [
-          {
-            inference_id: 'e5',
-            task_type: 'text_embedding',
-            service: 'elasticsearch',
-            service_settings: {
-              num_allocations: 1,
-              num_threads: 1,
-              model_id: '.multilingual-e5-small',
-            },
-            task_settings: {},
+  const mocked = {
+    getInferenceEndpoints: vi.fn().mockResolvedValue({
+      data: [
+        {
+          inference_id: 'e5',
+          task_type: 'text_embedding',
+          service: 'elasticsearch',
+          service_settings: {
+            num_allocations: 1,
+            num_threads: 1,
+            model_id: '.multilingual-e5-small',
           },
-        ],
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+          task_settings: {},
+        },
+      ],
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../application/components/mappings_editor/mappings_state_context', () => {
-      const mocked = {
-      useDispatch: () => mockDispatch,
-      useMappingsState: () => ({
-        fields: {
-          byId: {
-            '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
-              id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
-              isMultiField: false,
-              source: {
-                name: 'title',
-                type: 'text',
-                copy_to: ['semantic'],
-              },
-              path: ['title'],
-              nestedDepth: 0,
-              childFieldsName: 'fields',
-              canHaveChildFields: false,
-              hasChildFields: false,
-              canHaveMultiFields: true,
-              hasMultiFields: false,
-              isExpanded: false,
+  const mocked = {
+    useDispatch: () => mockDispatch,
+    useMappingsState: () => ({
+      fields: {
+        byId: {
+          '88ebcfdb-19b7-4458-9ea2-9488df54453d': {
+            id: '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+            isMultiField: false,
+            source: {
+              name: 'title',
+              type: 'text',
+              copy_to: ['semantic'],
             },
-            'c5d86c82-ea07-4457-b469-3ffd4b96db81': {
-              id: 'c5d86c82-ea07-4457-b469-3ffd4b96db81',
-              isMultiField: false,
-              source: {
-                name: 'semantic',
-                inference_id: 'elser_model_2',
-                type: 'semantic_text',
-              },
-              path: ['semantic'],
-              nestedDepth: 0,
-              childFieldsName: 'fields',
-              canHaveChildFields: false,
-              hasChildFields: false,
-              canHaveMultiFields: true,
-              hasMultiFields: false,
-              isExpanded: false,
+            path: ['title'],
+            nestedDepth: 0,
+            childFieldsName: 'fields',
+            canHaveChildFields: false,
+            hasChildFields: false,
+            canHaveMultiFields: true,
+            hasMultiFields: false,
+            isExpanded: false,
+          },
+          'c5d86c82-ea07-4457-b469-3ffd4b96db81': {
+            id: 'c5d86c82-ea07-4457-b469-3ffd4b96db81',
+            isMultiField: false,
+            source: {
+              name: 'semantic',
+              inference_id: 'elser_model_2',
+              type: 'semantic_text',
             },
-          },
-          aliases: {},
-          rootLevelFields: [
-            '88ebcfdb-19b7-4458-9ea2-9488df54453d',
-            'c5d86c82-ea07-4457-b469-3ffd4b96db81',
-          ],
-          maxNestedDepth: 2,
-        } as NormalizedFields,
-        inferenceToModelIdMap: {
-          elser_model_2: {
-            trainedModelId: '.elser_model_2',
-            isDeployed: false,
-            isDeployable: true,
-            isDownloading: false,
-          },
-          e5: {
-            trainedModelId: '.multilingual-e5-small',
-            isDeployed: true,
-            isDeployable: true,
-            isDownloading: false,
+            path: ['semantic'],
+            nestedDepth: 0,
+            childFieldsName: 'fields',
+            canHaveChildFields: false,
+            hasChildFields: false,
+            canHaveMultiFields: true,
+            hasMultiFields: false,
+            isExpanded: false,
           },
         },
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+        aliases: {},
+        rootLevelFields: [
+          '88ebcfdb-19b7-4458-9ea2-9488df54453d',
+          'c5d86c82-ea07-4457-b469-3ffd4b96db81',
+        ],
+        maxNestedDepth: 2,
+      } as NormalizedFields,
+      inferenceToModelIdMap: {
+        elser_model_2: {
+          trainedModelId: '.elser_model_2',
+          isDeployed: false,
+          isDeployable: true,
+          isDownloading: false,
+        },
+        e5: {
+          trainedModelId: '.multilingual-e5-small',
+          isDeployed: true,
+          isDeployable: true,
+          isDownloading: false,
+        },
+      },
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockDispatch = vi.fn();
 

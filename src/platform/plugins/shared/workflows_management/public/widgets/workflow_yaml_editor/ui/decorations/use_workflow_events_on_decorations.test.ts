@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { renderHook } from '@testing-library/react';
 import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
-import { renderHook } from '@testing-library/react';
 import { LineCounter, parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { resolveWorkflowEventsModeFromOn } from '@kbn/workflows-execution-engine/server';
 import { useWorkflowEventsOnDecorations } from './use_workflow_events_on_decorations';
 
 vi.mock('@kbn/monaco', async () => {
-  const actualMonaco = (await vi.importActual('@kbn/monaco'));
+  const actualMonaco = await vi.importActual('@kbn/monaco');
   return {
     ...actualMonaco,
     monaco: {

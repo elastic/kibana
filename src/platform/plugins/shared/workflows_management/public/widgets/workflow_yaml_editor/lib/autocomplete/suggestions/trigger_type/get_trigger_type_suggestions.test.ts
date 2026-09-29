@@ -32,21 +32,21 @@ const mockGetTriggerDefinition = vi.fn(
 );
 
 vi.mock('../../../../../../trigger_schemas', () => {
-      const mocked = {
-      triggerSchemas: {
-        getTriggerDefinitions: () => mockGetTriggerDefinitions(),
-        getTriggerDefinition: (id: string) => mockGetTriggerDefinition(id),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    triggerSchemas: {
+      getTriggerDefinitions: () => mockGetTriggerDefinitions(),
+      getTriggerDefinition: (id: string) => mockGetTriggerDefinition(id),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../snippets/generate_trigger_snippet', () => {
-      const mocked = {
-      generateTriggerSnippet: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    generateTriggerSnippet: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 import { generateTriggerSnippet } from '../../../snippets/generate_trigger_snippet';
 

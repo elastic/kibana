@@ -23,24 +23,24 @@ let mockStoredValue: string | undefined;
 
 // mock localStorage
 vi.mock('@kbn/kibana-utils-plugin/public', () => {
-      const mocked = {
-      Storage: vi.fn().mockImplementation(() => ({
-        get: vi.fn((key) => {
-          if (key !== mockCustomLocalStorageKey) {
-            throw new Error(`Unexpected key: ${key}`);
-          }
-          return mockStoredValue !== undefined ? JSON.parse(mockStoredValue) : undefined;
-        }),
-        set: vi.fn((key, value) => {
-          if (key !== mockCustomLocalStorageKey) {
-            throw new Error(`Unexpected key: ${key}`);
-          }
-          mockStoredValue = JSON.stringify(value);
-        }),
-      })),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    Storage: vi.fn().mockImplementation(() => ({
+      get: vi.fn((key) => {
+        if (key !== mockCustomLocalStorageKey) {
+          throw new Error(`Unexpected key: ${key}`);
+        }
+        return mockStoredValue !== undefined ? JSON.parse(mockStoredValue) : undefined;
+      }),
+      set: vi.fn((key, value) => {
+        if (key !== mockCustomLocalStorageKey) {
+          throw new Error(`Unexpected key: ${key}`);
+        }
+        mockStoredValue = JSON.stringify(value);
+      }),
+    })),
+  };
+  return { ...mocked, default: mocked };
+});
 
 interface RestorableState {
   count?: number;

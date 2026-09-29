@@ -23,9 +23,9 @@ vi.mock('../../../../../common/navigation/hooks');
 vi.mock('../../../use_on_update_field');
 vi.mock('../../../../../containers/use_replace_custom_field');
 vi.mock('../../../../../containers/api', () => {
-      const mocked = { getCase: vi.fn() };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = { getCase: vi.fn() };
+  return { ...mocked, default: mocked };
+});
 
 const onUpdateField = vi.fn();
 const replaceCustomField = vi.fn();

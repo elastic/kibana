@@ -21,12 +21,12 @@ import { withDefaultErrorHandler } from '../../services/security/fleet_router';
 import { rotateKeyPairHandler } from './handlers';
 
 vi.mock('../../services/security', async () => {
-      const mocked = {
-      ...(await vi.importActual('../../services/security')),
-      checkSuperuser: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('../../services/security')),
+    checkSuperuser: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockCheckSuperuser = checkSuperuser as MockedFunction<typeof checkSuperuser>;
 

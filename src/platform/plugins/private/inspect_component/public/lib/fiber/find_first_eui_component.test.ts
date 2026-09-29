@@ -20,9 +20,7 @@ vi.mock('../utils');
 
 const mockGetFiberType = getFiberType as MockedFunction<typeof getFiberType>;
 const mockIsEuiMainComponent = isEuiMainComponent as MockedFunction<typeof isEuiMainComponent>;
-const mockIsExcludedComponent = isExcludedComponent as MockedFunction<
-  typeof isExcludedComponent
->;
+const mockIsExcludedComponent = isExcludedComponent as MockedFunction<typeof isExcludedComponent>;
 
 describe('findFirstEuiComponent', () => {
   beforeEach(() => {

@@ -8,11 +8,11 @@
 import { vi } from 'vitest';
 
 vi.mock('./set_message_helpers', () => {
-      const mocked = {
-      flashErrorToast: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    flashErrorToast: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 import '../../__mocks__/kea_logic/kibana_logic.mock';
 
 import type { NotificationsStart } from '@kbn/core-notifications-browser';

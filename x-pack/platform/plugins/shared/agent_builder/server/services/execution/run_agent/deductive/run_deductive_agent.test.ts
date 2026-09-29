@@ -15,7 +15,7 @@ import { DeductiveSessionUnavailableError, DeductiveError } from './deductive_cl
 import { runDeductiveAgent } from './run_deductive_agent';
 
 vi.mock('./deductive_client', async () => {
-  const actual = (await vi.importActual('./deductive_client'));
+  const actual = await vi.importActual('./deductive_client');
   return {
     ...actual,
     createDeductiveSession: vi.fn(),

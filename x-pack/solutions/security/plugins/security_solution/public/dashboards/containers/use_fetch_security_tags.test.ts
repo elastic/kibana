@@ -18,11 +18,11 @@ import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plug
 
 vi.mock('../../common/lib/kibana');
 vi.mock('../../../common/utils/get_ramdom_color', () => {
-      const mocked = {
-      getRandomColor: vi.fn().mockReturnValue('#FFFFFF'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getRandomColor: vi.fn().mockReturnValue('#FFFFFF'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockGet = vi.fn();
 const mockAbortSignal = {} as unknown as AbortSignal;

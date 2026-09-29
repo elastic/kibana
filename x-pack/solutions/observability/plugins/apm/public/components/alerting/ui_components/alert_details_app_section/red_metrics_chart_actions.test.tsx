@@ -18,17 +18,17 @@ import { SERVICE_NAME, TRANSACTION_TYPE } from '@kbn/apm-types';
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 
 vi.mock('@kbn/kibana-react-plugin/public', async () => {
-      const mocked = {
-      ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
-      useKibana: vi.fn().mockReturnValue({ services: {} }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ...(await vi.importActual('@kbn/kibana-react-plugin/public')),
+    useKibana: vi.fn().mockReturnValue({ services: {} }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../hooks/use_fetcher');
 
-const { useKibana } = (await vi.importMock('@kbn/kibana-react-plugin/public'));
-const { useFetcher } = (await vi.importMock('../../../../hooks/use_fetcher'));
+const { useKibana } = await vi.importMock('@kbn/kibana-react-plugin/public');
+const { useFetcher } = await vi.importMock('../../../../hooks/use_fetcher');
 
 const MOCK_TRACES_INDEX = 'traces-apm-*';
 const MOCK_ERROR_INDEX = 'logs-apm.error-*';

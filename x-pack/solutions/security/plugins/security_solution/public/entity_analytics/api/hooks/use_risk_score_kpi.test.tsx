@@ -18,24 +18,24 @@ import { useAppToastsMock } from '../../../common/hooks/use_app_toasts.mock';
 import { EntityType, EMPTY_SEVERITY_COUNT } from '../../../../common/search_strategy';
 
 vi.mock('../../../common/containers/use_search_strategy', () => {
-      const mocked = {
-      useSearchStrategy: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSearchStrategy: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('./use_risk_engine_status', () => {
-      const mocked = {
-      useRiskEngineStatus: vi.fn(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useRiskEngineStatus: vi.fn(),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../common/hooks/use_app_toasts');
 vi.mock('../../../common/hooks/use_space_id', () => {
-      const mocked = {
-      useSpaceId: vi.fn().mockReturnValue('default'),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useSpaceId: vi.fn().mockReturnValue('default'),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockUseSearchStrategy = useSearchStrategy as Mock;
 const mockUseRiskEngineStatus = useRiskEngineStatus as Mock;

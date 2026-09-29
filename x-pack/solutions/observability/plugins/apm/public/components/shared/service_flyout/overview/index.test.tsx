@@ -24,86 +24,86 @@ let transactionsSectionProps: React.ComponentProps<typeof ServiceFlyoutTransacti
 const mockUseServiceFlyoutContext = vi.fn();
 const mockUseProjectRouting = vi.fn<string | undefined, []>(() => undefined);
 vi.mock('../service_flyout_context', () => {
-      const mocked = {
-      useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceFlyoutContext: () => mockUseServiceFlyoutContext(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../hooks/use_service_has_system_metrics', () => {
-      const mocked = {
-      useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useServiceHasSystemMetrics: () => mockUseServiceHasSystemMetrics(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 // Avoid pulling the real plugin module (heavy import graph) into this test.
 vi.mock('../hooks/use_project_routing', () => {
-      const mocked = {
-      useProjectRouting: () => mockUseProjectRouting(),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useProjectRouting: () => mockUseProjectRouting(),
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('@kbn/apm-ui-shared', () => {
-      const mocked = {
-      ServiceFlyoutTransactionsSection: (
-        props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>
-      ) => {
-        transactionsSectionProps = props;
-        return <div data-test-subj="transactionsSectionMock" />;
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceFlyoutTransactionsSection: (
+      props: React.ComponentProps<typeof ServiceFlyoutTransactionsSection>
+    ) => {
+      transactionsSectionProps = props;
+      return <div data-test-subj="transactionsSectionMock" />;
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./query_controls', () => {
-      const mocked = {
-      ServiceFlyoutQueryControls: () => <div data-test-subj="queryControlsMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceFlyoutQueryControls: () => <div data-test-subj="queryControlsMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('./lens_chart', () => {
-      const mocked = {
-      ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceFlyoutLensChart: () => <div data-test-subj="lensChartMock" />,
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockTransactionDetailFlyoutProps = vi.fn();
 vi.mock('../../transaction_detail_flyout', () => {
-      const mocked = {
-      TransactionDetailFlyout: (props: {
-        filters: { transactionName: string };
-        onClose: () => void;
-        preferDocumentBasedCharts?: boolean;
-        schema?: string;
-        indices?: unknown;
-        deps: { lens?: unknown; dataViews?: unknown };
-      }) => {
-        mockTransactionDetailFlyoutProps(props);
-        return (
-          <div data-test-subj="transactionDetailFlyoutMock">
-            <span>{props.filters.transactionName}</span>
-            <button type="button" onClick={props.onClose}>
-              close
-            </button>
-          </div>
-        );
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    TransactionDetailFlyout: (props: {
+      filters: { transactionName: string };
+      onClose: () => void;
+      preferDocumentBasedCharts?: boolean;
+      schema?: string;
+      indices?: unknown;
+      deps: { lens?: unknown; dataViews?: unknown };
+    }) => {
+      mockTransactionDetailFlyoutProps(props);
+      return (
+        <div data-test-subj="transactionDetailFlyoutMock">
+          <span>{props.filters.transactionName}</span>
+          <button type="button" onClick={props.onClose}>
+            close
+          </button>
+        </div>
+      );
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 const mockServiceFlyoutApmCharts = vi.fn((_props: unknown) => (
   <div data-test-subj="apmChartsMock" />
 ));
 vi.mock('./apm_charts', () => {
-      const mocked = {
-      ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    ServiceFlyoutApmCharts: (props: unknown) => mockServiceFlyoutApmCharts(props as never),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const service: ServiceFlyoutService = {
   name: 'opbeans-java',

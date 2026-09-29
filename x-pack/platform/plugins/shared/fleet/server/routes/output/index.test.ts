@@ -34,60 +34,60 @@ import {
 } from './handler';
 
 vi.mock('../../services', () => {
-      const mocked = {
-      agentPolicyService: {
-        bumpAllAgentPoliciesForOutput: vi.fn().mockResolvedValue({} as any),
-      },
-      appContextService: {
-        getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
-        getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    agentPolicyService: {
+      bumpAllAgentPoliciesForOutput: vi.fn().mockResolvedValue({} as any),
+    },
+    appContextService: {
+      getLogger: vi.fn().mockReturnValue({ error: vi.fn() } as any),
+      getCloud: vi.fn().mockReturnValue({ isServerlessEnabled: false } as any),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/output', () => {
-      const mocked = {
-      outputService: {
-        list: vi.fn().mockResolvedValue({
-          items: [
-            {
-              id: 'output1',
-              type: 'elasticsearch',
-              hosts: ['http://elasticsearch:9200'],
-              is_default: true,
-              is_default_monitoring: true,
-              name: 'Default',
-            },
-          ],
-          total: 1,
-          page: 1,
-          perPage: 20,
-        }),
-        create: vi.fn().mockResolvedValue({ id: 'output1' }),
-        update: vi.fn().mockResolvedValue({}),
-        get: vi.fn().mockResolvedValue({ id: 'output1' }),
-        delete: vi.fn().mockResolvedValue({}),
-        getLatestOutputHealth: vi.fn().mockResolvedValue({
-          state: 'HEALTHY',
-          message: '',
-          timestamp: '2021-01-01T00:00:00Z',
-        }),
-      },
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    outputService: {
+      list: vi.fn().mockResolvedValue({
+        items: [
+          {
+            id: 'output1',
+            type: 'elasticsearch',
+            hosts: ['http://elasticsearch:9200'],
+            is_default: true,
+            is_default_monitoring: true,
+            name: 'Default',
+          },
+        ],
+        total: 1,
+        page: 1,
+        perPage: 20,
+      }),
+      create: vi.fn().mockResolvedValue({ id: 'output1' }),
+      update: vi.fn().mockResolvedValue({}),
+      get: vi.fn().mockResolvedValue({ id: 'output1' }),
+      delete: vi.fn().mockResolvedValue({}),
+      getLatestOutputHealth: vi.fn().mockResolvedValue({
+        state: 'HEALTHY',
+        message: '',
+        timestamp: '2021-01-01T00:00:00Z',
+      }),
+    },
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../services/api_keys', () => {
-      const mocked = {
-      canCreateLogstashApiKey: vi.fn().mockResolvedValue(true),
-      generateLogstashApiKey: vi.fn().mockResolvedValue({
-        id: 'id',
-        api_key: 'apikey',
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    canCreateLogstashApiKey: vi.fn().mockResolvedValue(true),
+    generateLogstashApiKey: vi.fn().mockResolvedValue({
+      id: 'id',
+      api_key: 'apikey',
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const outputServiceMock = outputService as Mocked<typeof outputService>;
 

@@ -200,10 +200,7 @@ describe('Event filter flyout', () => {
       return { isLoading: false, isRefetching: false };
     });
 
-    (useFetchIndex as Mock).mockImplementation(() => [
-      false,
-      { indexPatterns: stubIndexPattern },
-    ]);
+    (useFetchIndex as Mock).mockImplementation(() => [false, { indexPatterns: stubIndexPattern }]);
 
     render = (props) => {
       renderResult = mockedContext.render(

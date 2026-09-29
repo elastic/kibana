@@ -39,45 +39,41 @@ vi.mock('../../../../detections/hooks/attacks/bulk_actions/use_attacks_privilege
 vi.mock('../../../../common/hooks/use_license');
 vi.mock('../../../../common/hooks/use_upselling');
 vi.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles', () => {
-      const mocked = {
-      useBulkGetUserProfiles: ({ uids }: { uids: Set<string> }) => ({
-        data:
-          uids.size > 0
-            ? [
-                {
-                  uid: 'uid-1',
-                  enabled: true,
-                  user: { username: 'user1', full_name: 'User 1' },
-                  data: {},
-                },
-              ]
-            : undefined,
-      }),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useBulkGetUserProfiles: ({ uids }: { uids: Set<string> }) => ({
+      data:
+        uids.size > 0
+          ? [
+              {
+                uid: 'uid-1',
+                enabled: true,
+                user: { username: 'user1', full_name: 'User 1' },
+                data: {},
+              },
+            ]
+          : undefined,
+    }),
+  };
+  return { ...mocked, default: mocked };
+});
 vi.mock('../../../../common/components/empty_value', () => {
-      const mocked = {
-      getEmptyTagValue: () => '—',
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getEmptyTagValue: () => '—',
+  };
+  return { ...mocked, default: mocked };
+});
 
-const mockUseAttackAssigneesContextMenuItems =
-  useAttackAssigneesContextMenuItems as MockedFunction<
-    typeof useAttackAssigneesContextMenuItems
-  >;
-const mockUseInvalidateFindAttackDiscoveries =
-  useInvalidateFindAttackDiscoveries as MockedFunction<
-    typeof useInvalidateFindAttackDiscoveries
-  >;
+const mockUseAttackAssigneesContextMenuItems = useAttackAssigneesContextMenuItems as MockedFunction<
+  typeof useAttackAssigneesContextMenuItems
+>;
+const mockUseInvalidateFindAttackDiscoveries = useInvalidateFindAttackDiscoveries as MockedFunction<
+  typeof useInvalidateFindAttackDiscoveries
+>;
 const mockUseAttacksPrivileges = useAttacksPrivileges as MockedFunction<
   typeof useAttacksPrivileges
 >;
 const mockUseLicense = useLicense as MockedFunction<typeof useLicense>;
-const mockUseUpsellingMessage = useUpsellingMessage as MockedFunction<
-  typeof useUpsellingMessage
->;
+const mockUseUpsellingMessage = useUpsellingMessage as MockedFunction<typeof useUpsellingMessage>;
 
 const mockInvalidateFindAttackDiscoveries = vi.fn();
 

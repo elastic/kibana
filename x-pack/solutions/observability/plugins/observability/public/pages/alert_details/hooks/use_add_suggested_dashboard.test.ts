@@ -36,17 +36,17 @@ vi.mock('@kbn/triggers-actions-ui-plugin/public', () => ({
 const mockUpdateRule = vi.fn();
 
 vi.mock('@kbn/response-ops-rule-form/src/common/hooks', () => {
-      const mocked = {
-      useUpdateRule: vi.fn(
-        (params: { onSuccess: (data: Rule) => Promise<void>; onError: (error: any) => void }) => {
-          capturedOnSuccess = params.onSuccess;
-          capturedOnError = params.onError;
-          return { mutateAsync: mockUpdateRule };
-        }
-      ),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    useUpdateRule: vi.fn(
+      (params: { onSuccess: (data: Rule) => Promise<void>; onError: (error: any) => void }) => {
+        capturedOnSuccess = params.onSuccess;
+        capturedOnError = params.onError;
+        return { mutateAsync: mockUpdateRule };
+      }
+    ),
+  };
+  return { ...mocked, default: mocked };
+});
 
 const mockRule = {
   id: TEST_RULE_ID,

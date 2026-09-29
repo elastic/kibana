@@ -14,13 +14,13 @@ import { WorkflowExecuteMonacoConnectorHandler } from './workflow_execute_handle
 import { setMockStabilityBadgeThemeForTests } from '../stability/set_mock_stability_badge_theme_for_tests';
 
 vi.mock('@kbn/workflows', () => {
-      const mocked = {
-      getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    getBuiltInStepStability: vi.fn().mockReturnValue(undefined),
+  };
+  return { ...mocked, default: mocked };
+});
 
-const { getBuiltInStepStability } = (await vi.importMock('@kbn/workflows'));
+const { getBuiltInStepStability } = await vi.importMock('@kbn/workflows');
 
 describe('WorkflowExecuteMonacoConnectorHandler', () => {
   let handler: WorkflowExecuteMonacoConnectorHandler;

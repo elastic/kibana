@@ -25,14 +25,14 @@ import {
 const mockUseLink = vi.fn();
 
 vi.mock('../../../../../../../../common/services/packages_with_integrations', () => {
-      const mocked = {
-      doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
-    };
-      return { ...mocked, default: mocked };
-    });
+  const mocked = {
+    doesPackageHaveIntegrations: (pkg: any) => (pkg.policy_templates || []).length > 1,
+  };
+  return { ...mocked, default: mocked };
+});
 
 vi.mock('../../../../../../../hooks', async () => {
-  const actual = (await vi.importActual('../../../../../../../hooks'));
+  const actual = await vi.importActual('../../../../../../../hooks');
   return {
     ...actual,
     useLink: () => mockUseLink(),
