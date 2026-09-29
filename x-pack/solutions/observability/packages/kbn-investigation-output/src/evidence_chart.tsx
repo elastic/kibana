@@ -288,15 +288,11 @@ export const EvidenceChart: React.FC<EvidenceChartProps> = ({ chart }) => {
                 >
                   <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                     <EuiFlexItem grow={false}>
-                      <span
+                      <EuiIcon
+                        type="stop"
+                        size="s"
+                        color={euiTheme.colors.accent}
                         aria-hidden={true}
-                        css={css`
-                          display: inline-block;
-                          width: ${euiTheme.size.m};
-                          height: ${euiTheme.size.s};
-                          background: ${euiTheme.colors.accent};
-                          opacity: 0.3;
-                        `}
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
