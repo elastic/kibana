@@ -108,6 +108,10 @@ describe('create_dataset_form_state', () => {
       expect(validateEscapeCharacter('\\r')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
     });
 
+    it.each(['none', 'NONE', 'None'])('accepts %s to turn off escaping', (value) => {
+      expect(validateEscapeCharacter(value)).toBe(true);
+    });
+
     it('rejects two characters when the first is not a backslash', () => {
       expect(validateEscapeCharacter('ab')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);
       expect(validateEscapeCharacter('""')).toBe(createDatasetWizardStrings.settingsEscapeInvalid);

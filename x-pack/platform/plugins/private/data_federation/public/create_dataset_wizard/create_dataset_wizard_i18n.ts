@@ -859,9 +859,9 @@ export const createDatasetWizardStrings = {
   ),
 
   settingsEscapeInvalid: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsEscapeInvalid',
+    'xpack.dataFederation.createDatasetForm.settingsEscapeInvalidCharacterOrNone',
     {
-      defaultMessage: 'Must be a single character, or one of: \\t, \\\\.',
+      defaultMessage: "Must be a single character, \\t, \\\\, or 'none'.",
     }
   ),
 

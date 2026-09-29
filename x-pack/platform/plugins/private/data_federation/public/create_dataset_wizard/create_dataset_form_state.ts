@@ -13,7 +13,7 @@ import type {
 } from '../../common/dataset_types';
 import {
   getConflictingCsvCharacterSettings,
-  isValidQuoteCharacter,
+  isValidQuoteOrEscapeCharacter,
   type CsvCharacterSettingName,
 } from '../../common';
 
@@ -40,15 +40,7 @@ export const DEFAULT_COLUMN_PREFIX = 'col';
 export const DEFAULT_CSV_QUOTE = '"';
 export const DEFAULT_CSV_ESCAPE = '\\';
 
-const VALID_ESCAPE_CHARACTER_SEQUENCES = ['\\t', '\\\\'] as const;
-type ValidEscapeCharacterSequence = (typeof VALID_ESCAPE_CHARACTER_SEQUENCES)[number];
-
-const isValidEscapeCharacterSequence = (value: string): value is ValidEscapeCharacterSequence =>
-  (VALID_ESCAPE_CHARACTER_SEQUENCES as readonly string[]).includes(value);
-
-const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<
-  Record<string, Exclude<ValidEscapeCharacterSequence, '\\\\'> | '\\n' | '\\r'>
-> = {
+const CHARACTER_TO_ESCAPE_SEQUENCE: Partial<Record<string, '\\t' | '\\n' | '\\r'>> = {
   '\t': '\\t',
   '\n': '\\n',
   '\r': '\\r',
@@ -205,7 +197,7 @@ export const validateSkipRows = (value: string): true | string => {
 
 export const validateQuoteCharacter = (value: string): true | string => {
   if (!value) return true;
-  if (!isValidQuoteCharacter(value)) return createDatasetWizardStrings.settingsQuoteInvalid;
+  if (!isValidQuoteOrEscapeCharacter(value)) return createDatasetWizardStrings.settingsQuoteInvalid;
   return true;
 };
 
@@ -222,11 +214,9 @@ export const validateDistinctCsvCharacter =
 
 export const validateEscapeCharacter = (value: string): true | string => {
   if (!value) return true;
-
-  if (value.length === 1) return true;
-  if (isValidEscapeCharacterSequence(value)) return true;
-
-  return createDatasetWizardStrings.settingsEscapeInvalid;
+  if (!isValidQuoteOrEscapeCharacter(value))
+    return createDatasetWizardStrings.settingsEscapeInvalid;
+  return true;
 };
 
 /**

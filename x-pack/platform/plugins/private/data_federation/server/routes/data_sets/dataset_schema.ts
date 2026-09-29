@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { QUOTE_CHARACTER_NONE, isValidQuoteCharacter } from '../../../common';
+import { CSV_CHARACTER_NONE, isValidQuoteOrEscapeCharacter } from '../../../common';
 
 const optionalString = schema.maybe(schema.string({ maxLength: 4096 }));
 const optionalShortString = schema.maybe(schema.string({ maxLength: 256 }));
@@ -108,22 +108,21 @@ export const datasetSchema = schema.object({
       // CSV/TSV advanced
       quote: schema.maybe(
         schema.string({
-          maxLength: QUOTE_CHARACTER_NONE.length,
+          maxLength: CSV_CHARACTER_NONE.length,
           minLength: 1,
           validate: (value) => {
-            if (isValidQuoteCharacter(value)) return;
+            if (isValidQuoteOrEscapeCharacter(value)) return;
             return "Must be a single character, \\t, \\\\ or 'none'.";
           },
         })
       ),
       escape: schema.maybe(
         schema.string({
-          maxLength: 2,
+          maxLength: CSV_CHARACTER_NONE.length,
           minLength: 1,
           validate: (value) => {
-            if (value.length === 1) return;
-            if (value.length === 2 && value.startsWith('\\')) return;
-            return 'Must be a single character, or a backslash followed by a character.';
+            if (isValidQuoteOrEscapeCharacter(value)) return;
+            return "Must be a single character, \\t, \\\\ or 'none'.";
           },
         })
       ),

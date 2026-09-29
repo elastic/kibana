@@ -61,16 +61,16 @@ export function getDataSetByIdApiPath(id: string): string {
   return DATA_SET_BY_ID_ROUTE_PATH.replace('{id}', encodeURIComponent(id));
 }
 
-/** Quote character value Elasticsearch reads (case-insensitively) as "quoting off". */
-export const QUOTE_CHARACTER_NONE = 'none';
+/** Quote/escape character value Elasticsearch reads (case-insensitively) as "turned off". */
+export const CSV_CHARACTER_NONE = 'none';
 
-const VALID_QUOTE_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
+const VALID_QUOTE_OR_ESCAPE_SEQUENCES: readonly string[] = ['\\t', '\\\\'];
 
 /** Whether `value` is a single character, a supported escape sequence, or `none` (any case). */
-export const isValidQuoteCharacter = (value: string): boolean =>
+export const isValidQuoteOrEscapeCharacter = (value: string): boolean =>
   value.length === 1 ||
-  VALID_QUOTE_SEQUENCES.includes(value) ||
-  value.toLowerCase() === QUOTE_CHARACTER_NONE;
+  VALID_QUOTE_OR_ESCAPE_SEQUENCES.includes(value) ||
+  value.toLowerCase() === CSV_CHARACTER_NONE;
 
 const CHARACTER_SEQUENCES: Readonly<Record<string, string>> = {
   '\\t': '\t',
@@ -90,7 +90,7 @@ const CSV_CHARACTER_SETTING_NAMES: readonly CsvCharacterSettingName[] = [
 ];
 
 const resolveCsvCharacter = (value: string | undefined): string | undefined => {
-  if (!value || value.toLowerCase() === QUOTE_CHARACTER_NONE) return undefined;
+  if (!value || value.toLowerCase() === CSV_CHARACTER_NONE) return undefined;
   return CHARACTER_SEQUENCES[value] ?? value;
 };
 

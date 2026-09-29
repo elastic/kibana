@@ -11,7 +11,7 @@ import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController, useWatch } from 'react-hook-form';
 
-import { QUOTE_CHARACTER_NONE } from '../../../../common';
+import { CSV_CHARACTER_NONE } from '../../../../common';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
   DEFAULT_COLUMN_PREFIX,
@@ -59,7 +59,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 id="xpack.dataFederation.createDatasetWizard.additionalSettings.quoteCharacter.descriptionTextWithNone"
                 defaultMessage="Character that surrounds field values. Enter {none} to turn off quoting. Overrides {quoteMode} in {commonSettings}."
                 values={{
-                  none: <EuiCode>{QUOTE_CHARACTER_NONE}</EuiCode>,
+                  none: <EuiCode>{CSV_CHARACTER_NONE}</EuiCode>,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
@@ -92,7 +92,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           data-test-subj="createDatasetSettingsQuote"
           fullWidth
           placeholder={createDatasetWizardStrings.settingsQuotePlaceholder}
-          maxLength={QUOTE_CHARACTER_NONE.length}
+          maxLength={CSV_CHARACTER_NONE.length}
           isInvalid={Boolean(quoteState.error)}
           value={quoteField.value}
           onChange={(e) => quoteField.onChange(e.target.value)}
@@ -106,9 +106,10 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
             label={createDatasetWizardStrings.settingsEscapeLabel}
             infoText={
               <FormattedMessage
-                id="xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.descriptionText"
-                defaultMessage="Character used to escape special characters. Overrides {quoteMode} in {commonSettings}."
+                id="xpack.dataFederation.createDatasetWizard.additionalSettings.escapeCharacter.descriptionTextWithNone"
+                defaultMessage="Character used to escape special characters. Enter {none} to turn off escaping. Overrides {quoteMode} in {commonSettings}."
                 values={{
+                  none: <EuiCode>{CSV_CHARACTER_NONE}</EuiCode>,
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
                     <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
@@ -141,7 +142,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           data-test-subj="createDatasetSettingsEscape"
           fullWidth
           placeholder={createDatasetWizardStrings.settingsEscapePlaceholder}
-          maxLength={2}
+          maxLength={CSV_CHARACTER_NONE.length}
           isInvalid={Boolean(escapeState.error)}
           value={escapeField.value}
           onChange={(e) => escapeField.onChange(e.target.value)}
