@@ -68,8 +68,14 @@ steps:
                     content_fingerprint: "{{ foreach.item._source.content_fingerprint }}"
               must_not:
                 # A different non-pending doc with this fingerprint means already extracted.
+                # Hard-rejected siblings must not count: they never completed extraction and
+                # would strand other Spaces' pending duplicates on skip_already_extracted.
                 - term:
                     lineage.extraction_method: pending
+                - term:
+                    lineage.extraction_method: workflow_v4_rejected
+                - term:
+                    extracted.gate.is_intelligence: false
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"

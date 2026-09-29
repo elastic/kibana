@@ -65,6 +65,32 @@ const HAS_EXTRACTED_IOCS_FILTER: estypes.QueryDslQueryContainer = {
   },
 };
 
+/**
+ * Reports worth promoting (or retracting). Has IOCs, or completed enrichment with
+ * an empty IOC array (must still retract prior live citations).
+ */
+const PROMOTABLE_REPORT_FILTER: estypes.QueryDslQueryContainer = {
+  bool: {
+    should: [
+      HAS_EXTRACTED_IOCS_FILTER,
+      {
+        terms: {
+          'lineage.extraction_method': ['workflow_v4', 'workflow_v4_rejected'],
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+};
+
+/** Thrown when prior-citation lookup fails for a reason other than missing index / abort. */
+class PriorCitationLookupError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'PriorCitationLookupError';
+  }
+}
+
 const stateSchemaV1 = schema.object({
   /**
    * ISO-8601 timestamp of the most recent `lineage.extracted_at` value
@@ -720,52 +746,72 @@ export const buildBulkOpsForTest = buildBulkOps;
 /**
  * Look up live indicator ids that still cite any of these reports. Used to retract
  * citations whose IOC values left `extracted.iocs` on re-extraction.
+ *
+ * Pages through every matching indicator (a report can contribute thousands of
+ * citations). Non-404 failures throw so the task holds the sync checkpoint.
  */
 const loadPriorCitationIdsByReport = async ({
   esClient,
   reportIds,
   signal,
-  logger,
 }: {
   esClient: ElasticsearchClient;
   reportIds: string[];
   signal: AbortSignal;
-  logger: Logger;
 }): Promise<Map<string, string[]>> => {
   const prior = new Map<string, string[]>();
   if (reportIds.length === 0) {
     return prior;
   }
   const reportIdSet = new Set(reportIds);
+  const pageSize = 1000;
+  let searchAfter: Array<string | number | null> | undefined;
+
   try {
-    const response = await esClient.search<{
-      sources?: Array<{ report_id?: string }>;
-    }>(
-      {
-        index: THREAT_INTEL_INDICATORS_INDEX,
-        size: Math.min(Math.max(reportIds.length * 32, 100), 10_000),
-        _source: ['sources.report_id'],
-        query: {
-          nested: {
-            path: 'sources',
-            query: { terms: { 'sources.report_id': reportIds } },
+    while (!signal.aborted) {
+      const response = await esClient.search<{
+        sources?: Array<{ report_id?: string }>;
+      }>(
+        {
+          index: THREAT_INTEL_INDICATORS_INDEX,
+          size: pageSize,
+          _source: ['sources.report_id'],
+          query: {
+            nested: {
+              path: 'sources',
+              query: { terms: { 'sources.report_id': reportIds } },
+            },
           },
+          sort: [{ _id: 'asc' }],
+          ...(searchAfter ? { search_after: searchAfter } : {}),
         },
-      },
-      { signal }
-    );
-    for (const hit of response.hits.hits) {
-      const indicatorIdValue = hit._id;
-      if (indicatorIdValue) {
-        for (const entry of hit._source?.sources ?? []) {
-          const citingReportId = entry?.report_id;
-          if (typeof citingReportId === 'string' && reportIdSet.has(citingReportId)) {
-            const list = prior.get(citingReportId) ?? [];
-            list.push(indicatorIdValue);
-            prior.set(citingReportId, list);
+        { signal }
+      );
+      const hits = response.hits.hits;
+      if (hits.length === 0) {
+        break;
+      }
+      for (const hit of hits) {
+        const indicatorIdValue = hit._id;
+        if (indicatorIdValue) {
+          for (const entry of hit._source?.sources ?? []) {
+            const citingReportId = entry?.report_id;
+            if (typeof citingReportId === 'string' && reportIdSet.has(citingReportId)) {
+              const list = prior.get(citingReportId) ?? [];
+              list.push(indicatorIdValue);
+              prior.set(citingReportId, list);
+            }
           }
         }
       }
+      if (hits.length < pageSize) {
+        break;
+      }
+      const lastId = hits[hits.length - 1]?._id;
+      if (!lastId) {
+        break;
+      }
+      searchAfter = [lastId];
     }
   } catch (err) {
     const status = (err as { statusCode?: number }).statusCode;
@@ -773,11 +819,7 @@ const loadPriorCitationIdsByReport = async ({
       // Indicators index not created yet, or the task timed out mid-lookup.
       return prior;
     }
-    logger.warn(
-      `Failed to load prior indicator citations for orphan retracts: ${
-        (err as Error).message ?? String(err)
-      }`
-    );
+    throw new PriorCitationLookupError((err as Error).message ?? String(err));
   }
   return prior;
 };
@@ -1005,7 +1047,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                       bool: {
                         filter: [
                           { range: { 'lineage.extracted_at': { gte: lower } } },
-                          HAS_EXTRACTED_IOCS_FILTER,
+                          PROMOTABLE_REPORT_FILTER,
                         ],
                       },
                     },
@@ -1034,12 +1076,32 @@ export const registerPromoteThreatIndicatorsTask = ({
                 break;
               }
 
-              const priorCitationIdsByReport = await loadPriorCitationIdsByReport({
-                esClient,
-                reportIds: hits.map((hit) => hit._id),
-                signal,
-                logger,
-              });
+              let priorCitationIdsByReport: Map<string, string[]>;
+              try {
+                priorCitationIdsByReport = await loadPriorCitationIdsByReport({
+                  esClient,
+                  reportIds: hits.map((hit) => hit._id),
+                  signal,
+                });
+              } catch (err) {
+                if (signal.aborted) {
+                  abortedMidRun = true;
+                  break;
+                }
+                if (err instanceof PriorCitationLookupError) {
+                  // Orphan retracts must not be skipped: hold the checkpoint so the
+                  // next run retries the lookup instead of advancing past these reports.
+                  hadRetryableWriteFailures = true;
+                  logger.error(
+                    `Failed to load prior indicator citations for orphan retracts; holding the sync checkpoint: ${err.message}`
+                  );
+                  break;
+                }
+                throwForNextRun(
+                  'Failed to load prior indicator citations for orphan retracts',
+                  err
+                );
+              }
               if (signal.aborted) {
                 abortedMidRun = true;
                 break;

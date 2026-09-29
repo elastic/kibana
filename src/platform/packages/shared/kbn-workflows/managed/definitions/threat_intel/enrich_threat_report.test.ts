@@ -149,6 +149,19 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     );
   });
 
+  it('excludes hard-rejected reports from already-extracted fingerprint dedup', () => {
+    const step = findStepByName(workflow.steps, 'check_already_extracted') as {
+      with?: { query?: { bool?: { must_not?: unknown[] } } };
+    };
+    const mustNot = step.with?.query?.bool?.must_not ?? [];
+    expect(mustNot).toEqual(
+      expect.arrayContaining([
+        { term: { 'lineage.extraction_method': 'workflow_v4_rejected' } },
+        { term: { 'extracted.gate.is_intelligence': false } },
+      ])
+    );
+  });
+
   it('skips a report on gate-rejection persist failure without aborting the foreach', () => {
     const persist = findStepByName(workflow.steps, 'persist_gate_rejection') as {
       'on-failure'?: { continue?: boolean };

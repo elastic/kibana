@@ -641,6 +641,27 @@ describe('promote task runner', () => {
     );
   });
 
+  it('holds the cursor when prior-citation lookup fails mid-page', async () => {
+    const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
+    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: unknown }) => {
+      if (req?.pit) {
+        return { hits: { hits: [reportHit('r-1')] } };
+      }
+      throw Object.assign(new Error('search_phase_execution_exception'), { statusCode: 503 });
+    });
+
+    const result = await definition
+      .createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+        })
+      )
+      .run();
+
+    expect(esClient.bulk).not.toHaveBeenCalled();
+    expect(result.state).toEqual(expect.objectContaining({ lastSyncedAt: 'now-30d' }));
+  });
+
   it('holds the cursor when the run is aborted mid-scan', async () => {
     const controller = new AbortController();
     controller.abort();
@@ -779,7 +800,21 @@ describe('promote task runner', () => {
       expect(searchArg.pit).toEqual(expect.objectContaining({ id: 'pit-1' }));
       expect(searchArg.index).toBeUndefined();
       expect(searchArg.query.bool.filter).toEqual(
-        expect.arrayContaining([{ range: { 'lineage.extracted_at': { gte: 'now-30d' } } }])
+        expect.arrayContaining([
+          { range: { 'lineage.extracted_at': { gte: 'now-30d' } } },
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              minimum_should_match: 1,
+              should: expect.arrayContaining([
+                expect.objectContaining({
+                  terms: {
+                    'lineage.extraction_method': ['workflow_v4', 'workflow_v4_rejected'],
+                  },
+                }),
+              ]),
+            }),
+          }),
+        ])
       );
       // `_shard_doc` is the stable tie-breaker a PIT makes available.
       expect(searchArg.sort).toEqual([
