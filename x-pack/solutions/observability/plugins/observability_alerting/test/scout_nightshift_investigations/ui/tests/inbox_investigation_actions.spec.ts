@@ -211,7 +211,7 @@ test.describe(
 
       await expect(investigateItem).toBeVisible();
       await expect(investigateItem).toHaveAttribute('aria-disabled', 'true');
-      await expect(viewItem).not.toBeVisible();
+      await expect(viewItem).toBeHidden();
 
       await page.keyboard.press('Escape');
 
@@ -228,7 +228,7 @@ test.describe(
       await menuButton.click();
       await completedInvestigationsPromise;
       await expect(viewItem).toBeVisible();
-      await expect(investigateItem).not.toBeVisible();
+      await expect(investigateItem).toBeHidden();
 
       await viewItem.click();
       await pageObjects.observabilityAlerting.gotoInboxFilteredByRule(ruleId);
