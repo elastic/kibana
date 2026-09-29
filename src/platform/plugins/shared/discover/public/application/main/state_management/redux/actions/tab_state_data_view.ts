@@ -245,19 +245,24 @@ export const updateAdHocDataViewId: InternalStateThunkActionCreator<
     return nextDataView;
   };
 
-/**
- * Create and select a temporary/adhoc data view by a given spec
- * Used by the Data View Picker
- */
+/** Creates an isolated Explore draft, infers its time field, and selects the finalized inline view. */
 export const createAndAppendAdHocDataView: InternalStateThunkActionCreator<
   [TabActionPayload<{ dataViewSpec: DataViewSpec }>],
   Promise<DataView>
 > = ({ tabId, dataViewSpec }) =>
   async function createAndAppendAdHocDataViewThunkFn(dispatch, _, { services }) {
-    const newDataView = await services.dataViews.create(dataViewSpec);
-    if (newDataView.fields.getByName('@timestamp')?.type === 'date') {
-      newDataView.timeFieldName = '@timestamp';
+    const { dataViews, inlineDataViews } = services;
+    // A fresh ID prevents inferred defaults from mutating an existing cached view.
+    const draft = await dataViews.create({ ...dataViewSpec, id: undefined });
+    if (draft.fields.getByName('@timestamp')?.type === 'date') {
+      draft.timeFieldName = '@timestamp';
     }
+
+    const newDataView = await inlineDataViews.finalize(draft);
+    if (draft.id && draft.id !== newDataView.id) {
+      dataViews.clearInstanceCache(draft.id);
+    }
+
     dispatch(internalStateActions.appendAdHocDataViews(newDataView));
     await dispatch(
       changeDataView({

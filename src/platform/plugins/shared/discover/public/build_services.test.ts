@@ -10,6 +10,7 @@
 import { Observable, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
+import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 import { buildServices } from './build_services';
 import {
   CASCADE_LAYOUT_ENABLED_FEATURE_FLAG_KEY,
@@ -44,6 +45,8 @@ const build = (getBooleanValue$: CoreStart['featureFlags']['getBooleanValue$']) 
     profilesManager: {} as never,
     profileStateRegistry: {} as never,
     ebtManager: {} as never,
+    inlineDataViews: { resolve: jest.fn(), finalize: jest.fn() },
+    dataViewEditor: indexPatternEditorPluginMock.createStartContract(),
   });
 };
 

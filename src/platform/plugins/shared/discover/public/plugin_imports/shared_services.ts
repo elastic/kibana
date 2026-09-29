@@ -15,4 +15,5 @@ export { DocumentProfileService } from '../context_awareness/profiles/document_p
 export { ProfilesManager } from '../context_awareness/profiles_manager';
 export { buildServices } from '../build_services';
 export { createInlineDataViewService } from '../services/inline_data_view_service';
+export { createDiscoverDataViewEditorAdapter } from '../services/discover_data_view_editor_adapter';
 export { createProfileStateRegistry } from '../../common/context_awareness/create_profile_state_registry';

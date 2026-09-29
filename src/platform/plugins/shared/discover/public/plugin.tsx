@@ -90,6 +90,7 @@ export class DiscoverPlugin
   private singleDocLocator?: DiscoverSingleDocLocator;
   private profileProviderSharedServices?: Promise<ProfileProviderSharedServices>;
   private inlineDataViewService?: InlineDataViewService;
+  private dataViewEditorAdapter?: DiscoverStartPlugins['dataViewEditor'];
 
   constructor(private readonly initializerContext: PluginInitializerContext<ConfigSchema>) {
     const experimental = this.initializerContext.config.get().experimental;
@@ -434,11 +435,19 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const [{ buildServices, createInlineDataViewService }, historyService, profileStateRegistry] =
-      await Promise.all([getSharedServices(), getHistoryService(), getProfileStateRegistry()]);
+    const [
+      { buildServices, createInlineDataViewService, createDiscoverDataViewEditorAdapter },
+      historyService,
+      profileStateRegistry,
+    ] = await Promise.all([getSharedServices(), getHistoryService(), getProfileStateRegistry()]);
 
     const inlineDataViews = (this.inlineDataViewService ??= createInlineDataViewService({
       dataViews: plugins.data.dataViews,
+    }));
+    const dataViewEditor = (this.dataViewEditorAdapter ??= createDiscoverDataViewEditorAdapter({
+      dataViewEditor: plugins.dataViewEditor,
+      dataViews: plugins.data.dataViews,
+      inlineDataViews,
     }));
 
     return buildServices({
@@ -455,6 +464,7 @@ export class DiscoverPlugin
       profileStateRegistry,
       ebtManager,
       inlineDataViews,
+      dataViewEditor,
       setHeaderActionMenu,
     });
   };

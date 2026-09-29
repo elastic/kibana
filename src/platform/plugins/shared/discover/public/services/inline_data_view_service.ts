@@ -20,6 +20,7 @@ export interface InlineDataViewService {
   /**
    * Returns the instance with the derived ID of the final spec of a view, such as after an editor
    * or inferred defaults. Persisted and excluded views are returned unchanged; nothing is evicted.
+   * Expects a valid DataView and reuses its existing fields without fetching them.
    */
   finalize: (dataView: DataView) => Promise<DataView>;
 }

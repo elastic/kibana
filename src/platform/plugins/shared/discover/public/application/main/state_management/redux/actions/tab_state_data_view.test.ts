@@ -8,7 +8,9 @@
  */
 
 import { createDiscoverSessionMock } from '@kbn/saved-search-plugin/common/mocks';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
 import { internalStateActions, selectTabRuntimeState, selectTab } from '..';
 import { createDataViewDataSource } from '../../../../../../common/data_sources';
@@ -26,6 +28,7 @@ import { selectDataSourceProfileId } from '../runtime_state';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { UPDATE_FILTER_REFERENCES_TRIGGER } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { UPDATE_FILTER_REFERENCES_ACTION } from '@kbn/unified-search-plugin/public';
+import { generateInlineDataViewId } from '../../../../../../common/session/inline_data_view';
 
 const setup = async ({ dataView = dataViewMockWithTimeField }: { dataView?: DataView } = {}) => {
   const services = createDiscoverServicesMock();
@@ -336,18 +339,73 @@ describe('tab_state_data_view actions', () => {
   });
 
   describe('createAndAppendAdHocDataView', () => {
-    test('should create a new data view and append to the ad-hoc data view list', async () => {
-      const { internalState, tabId, runtimeStateManager } = await setup();
-      await internalState.dispatch(
+    // Builds an Explore draft with real serialization, without fetching fields.
+    const createExploreView = (spec: DataViewSpec): DataView =>
+      new DataView({
+        spec: { ...spec, id: spec.id ?? 'explore-draft' },
+        fieldFormats: fieldFormatsMock,
+      });
+
+    afterEach(() => jest.restoreAllMocks());
+
+    it.each(['date', 'string', undefined])(
+      'finalizes after inferring the time field when @timestamp has type %s',
+      async (timestampType) => {
+        const { internalState, tabId, runtimeStateManager, services } = await setup();
+        const spec = { id: 'existing-view', title: 'ad-hoc' };
+        jest.spyOn(services.dataViews, 'create').mockImplementation(async (input) =>
+          createExploreView({
+            ...input,
+            fields: timestampType
+              ? {
+                  '@timestamp': {
+                    name: '@timestamp',
+                    type: timestampType,
+                    searchable: true,
+                    aggregatable: true,
+                  },
+                }
+              : {},
+          })
+        );
+        const finalize = jest.spyOn(services.inlineDataViews, 'finalize');
+        const expectedTimeField = timestampType === 'date' ? '@timestamp' : undefined;
+        const expectedId = generateInlineDataViewId({ ...spec, timeFieldName: expectedTimeField });
+
+        const result = await internalState.dispatch(
+          internalStateActions.createAndAppendAdHocDataView({ tabId, dataViewSpec: spec })
+        );
+
+        expect(services.dataViews.create).toHaveBeenCalledWith({ ...spec, id: undefined });
+        expect(finalize).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'explore-draft', timeFieldName: expectedTimeField })
+        );
+        expect(result.id).toBe(expectedId);
+        expect(result.timeFieldName).toBe(expectedTimeField);
+        expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
+          createDataViewDataSource({ dataViewId: expectedId })
+        );
+        expect(runtimeStateManager.adHocDataViews$.getValue()).toEqual([result]);
+        expect(services.dataViews.clearInstanceCache).toHaveBeenCalledTimes(1);
+        expect(services.dataViews.clearInstanceCache).toHaveBeenCalledWith('explore-draft');
+        expect(spec.id).toBe('existing-view');
+      }
+    );
+
+    it('keeps the draft cached when finalization returns it unchanged', async () => {
+      const { internalState, tabId, services } = await setup();
+      const draft = createExploreView({ title: 'ad-hoc', managed: true });
+      jest.spyOn(services.dataViews, 'create').mockResolvedValueOnce(draft);
+
+      const result = await internalState.dispatch(
         internalStateActions.createAndAppendAdHocDataView({
           tabId,
-          dataViewSpec: { title: 'ad-hoc' },
+          dataViewSpec: draft.toSpec(),
         })
       );
-      expect(selectTab(internalState.getState(), tabId).appState.dataSource).toEqual(
-        createDataViewDataSource({ dataViewId: 'ad-hoc-id' })
-      );
-      expect(runtimeStateManager.adHocDataViews$.getValue()[0].id).toBe('ad-hoc-id');
+
+      expect(result).toBe(draft);
+      expect(services.dataViews.clearInstanceCache).not.toHaveBeenCalled();
     });
   });
 

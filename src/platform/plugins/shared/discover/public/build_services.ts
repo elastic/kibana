@@ -199,6 +199,7 @@ export const buildServices = ({
   profileStateRegistry,
   ebtManager,
   inlineDataViews,
+  dataViewEditor,
   setHeaderActionMenu = noop,
 }: {
   core: CoreStart;
@@ -214,6 +215,7 @@ export const buildServices = ({
   profileStateRegistry: ProfileStateRegistry;
   ebtManager: DiscoverEBTManager;
   inlineDataViews: InlineDataViewService;
+  dataViewEditor: DataViewEditorStart;
   setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
 }): DiscoverServices => {
   const { usageCollection } = plugins;
@@ -270,7 +272,7 @@ export const buildServices = ({
     dataViewFieldEditor: plugins.dataViewFieldEditor,
     http: core.http,
     spaces: plugins.spaces,
-    dataViewEditor: plugins.dataViewEditor,
+    dataViewEditor,
     triggersActionsUi: plugins.triggersActionsUi,
     locator,
     contextLocator,
