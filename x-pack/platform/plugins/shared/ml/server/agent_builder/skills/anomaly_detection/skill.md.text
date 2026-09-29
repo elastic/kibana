@@ -89,7 +89,7 @@ Read scores this way:
 - Raw per-type fields (`record_score`, `anomaly_score`, `influencer_score`, `initial_record_score`, …) exist on `.ml-anomalies-*` only; use `score` / `initial_score` in all ES|QL templates.
 - Compare `actual` to `typical`.
 - Map entities via `partition_field_value` / `by_field_value` / `over_field_value` / `influencer_field_value`.
-- Filter time ranges with `` `event.ingested` ``; use `timestamp` for the bucket time and for aggregating scores over time.
+- Filter anomaly time ranges with `timestamp`.
 - **`causes` is not supported** on the materialized view. Do not query `probability`, `multi_bucket_impact`, or `anomaly_score_explanation.*` via ES|QL.
 
 ---

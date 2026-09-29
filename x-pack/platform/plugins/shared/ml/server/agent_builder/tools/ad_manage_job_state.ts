@@ -267,14 +267,20 @@ export const createAdManageJobStateTool = (
 
         case 'await_batch_completion': {
           await hasMlCapabilities(['canGetJobs']);
+          // Require the space-scoped client so datafeed/job stat reads are restricted
+          // to the current Space. The raw current-user client lacks filterJobsForSpace.
+          if (!mlClient) {
+            return {
+              results: [createErrorResult('ML client is unavailable — service not yet started')],
+            };
+          }
           const waitSeconds = clampWaitSeconds(maxWaitSeconds);
           const deadlineMs = Date.now() + waitSeconds * 1000;
-          const statsApi = mlClient ?? ml;
 
           while (true) {
             const [datafeedStats, jobStats] = await Promise.all([
-              statsApi.getDatafeedStats({ datafeed_id: datafeedId }),
-              statsApi.getJobStats({ job_id: jobId }),
+              mlClient.getDatafeedStats({ datafeed_id: datafeedId }),
+              mlClient.getJobStats({ job_id: jobId }),
             ]);
 
             const datafeedState: string | undefined = datafeedStats.datafeeds?.[0]?.state;

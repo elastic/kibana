@@ -56,43 +56,107 @@ const SCORE_EVAL_INJECTION =
   '| EVAL score = COALESCE(record_score, anomaly_score, influencer_score),' +
   ' initial_score = COALESCE(initial_record_score, initial_anomaly_score, initial_influencer_score)\n';
 
-// Kibana-style date math units → milliseconds (approximate; M = 30 d, y = 365 d).
+// Kibana-style date math units → milliseconds for non-calendar units.
 const DATE_MATH_UNIT_MS: Record<string, number> = {
   s: 1_000,
   m: 60_000,
   h: 3_600_000,
   d: 86_400_000,
   w: 604_800_000,
-  M: 2_592_000_000,
-  y: 31_536_000_000,
 };
 
-// Matches: now, now±Nunits, with optional /roundUnit suffix (suffix is dropped — we floor).
-const DATE_MATH_RE = /^now(?:([+-])(\d+)([smhdwMy]))?(?:\/[smhdwMy])?$/;
+// Matches: now, now±Nunits, with optional /roundUnit suffix.
+const DATE_MATH_RE = /^now(?:([+-])(\d+)([smhdwMy]))?(?:\/([smhdwMy]))?$/;
+
+/** Floors a UTC epoch ms value to the start of the given calendar unit. */
+const floorToUtcUnit = (ms: number, unit: string): number => {
+  const d = new Date(ms);
+  switch (unit) {
+    case 's':
+      d.setUTCMilliseconds(0);
+      break;
+    case 'm':
+      d.setUTCSeconds(0, 0);
+      break;
+    case 'h':
+      d.setUTCMinutes(0, 0, 0);
+      break;
+    case 'd':
+      d.setUTCHours(0, 0, 0, 0);
+      break;
+    case 'w': {
+      const day = d.getUTCDay(); // 0 = Sun, 1 = Mon
+      d.setUTCDate(d.getUTCDate() - (day === 0 ? 6 : day - 1));
+      d.setUTCHours(0, 0, 0, 0);
+      break;
+    }
+    case 'M':
+      d.setUTCDate(1);
+      d.setUTCHours(0, 0, 0, 0);
+      break;
+    case 'y':
+      d.setUTCMonth(0, 1);
+      d.setUTCHours(0, 0, 0, 0);
+      break;
+  }
+  return d.getTime();
+};
+
+/** Applies a date-math offset using calendar-aware arithmetic for months and years. */
+const applyDateMathOffset = (
+  baseMs: number,
+  sign: string,
+  amount: number,
+  unit: string
+): number => {
+  if (unit === 'M') {
+    const d = new Date(baseMs);
+    d.setUTCMonth(d.getUTCMonth() + (sign === '+' ? amount : -amount));
+    return d.getTime();
+  }
+  if (unit === 'y') {
+    const d = new Date(baseMs);
+    d.setUTCFullYear(d.getUTCFullYear() + (sign === '+' ? amount : -amount));
+    return d.getTime();
+  }
+  const delta = amount * (DATE_MATH_UNIT_MS[unit] ?? 0);
+  return sign === '+' ? baseMs + delta : baseMs - delta;
+};
 
 const resolveDateMathParam = (value: string): string => {
   const match = DATE_MATH_RE.exec(value);
   if (!match) return value;
   let ms = Date.now();
-  const [, sign, amount, unit] = match;
+  const [, sign, amount, unit, roundUnit] = match;
   if (sign && amount && unit) {
-    const delta = parseInt(amount, 10) * (DATE_MATH_UNIT_MS[unit] ?? 0);
-    ms = sign === '+' ? ms + delta : ms - delta;
+    ms = applyDateMathOffset(ms, sign, parseInt(amount, 10), unit);
+  }
+  if (roundUnit) {
+    ms = floorToUtcUnit(ms, roundUnit);
   }
   return new Date(ms).toISOString();
 };
 
 /**
+ * Keys whose values may contain Kibana-style relative date math (e.g. `now-2y`, `now-6M`).
+ * Only convert parameters whose key names look like time/date parameters to avoid
+ * accidentally converting job IDs, entity values, or other strings that happen to
+ * match the date-math pattern (e.g. `job_id_pattern: "now"`, `entity_value: "now-1d"`).
+ */
+const TIME_PARAM_KEY_RE = /\b(?:time|date|start|end|from|to)\b/i;
+
+/**
  * Converts Kibana-style relative date math (e.g. `now-2y`, `now-6M`, `now`) to
- * absolute ISO 8601 strings. ES|QL parameterized queries require typed datetime values
- * and do not support relative date math in params.
+ * absolute ISO 8601 strings for parameters whose key names indicate a time value.
+ * ES|QL parameterized queries require typed datetime values and do not support
+ * relative date math in params.
  */
 export const resolveParamDates = (
   params: Record<string, string | number | boolean>
 ): Record<string, string | number | boolean> => {
   const result: Record<string, string | number | boolean> = {};
   for (const [k, v] of Object.entries(params)) {
-    result[k] = typeof v === 'string' ? resolveDateMathParam(v) : v;
+    result[k] = typeof v === 'string' && TIME_PARAM_KEY_RE.test(k) ? resolveDateMathParam(v) : v;
   }
   return result;
 };
@@ -316,7 +380,7 @@ Pass the full ES|QL string in \`query\`. Only include \`params\` when the query 
 
 For record / bucket / influencer results copy templates that use \`FROM .ml-anomalies\`. This tool probes whether that materialized view exists on the connected Elasticsearch cluster and automatically rewrites to \`FROM .ml-anomalies-*\` (and \`timestamp\` instead of \`event.ingested\`) when it does not — older ES versions will not have the view.
 
-Prefer \`event.ingested\` for time-range filters in templates. Do not query \`causes\` — it is not supported on the view. Only the fields listed in \`esql-read-queries\` exist on that view.
+Prefer \`timestamp\` for time-range filters in templates — it is the anomaly bucket time and is correct for both real-time and historical batch jobs. Do not query \`causes\` — it is not supported on the view. Only the fields listed in \`esql-read-queries\` exist on that view.
 
 For \`model_plot\`, \`model_forecast\`, \`model_snapshot\`, \`category_definition\`, and \`model_size_stats\` use \`FROM .ml-anomalies-*\`.
 

@@ -174,8 +174,8 @@ Find buckets with zero or suspiciously low event counts. Compare `event_count` a
 FROM .ml-anomalies
 | WHERE result_type == "bucket"
   AND job_id == ?job_id
-  AND `event.ingested` >= ?start_time
-  AND `event.ingested` <= ?end_time
+  AND timestamp >= ?start_time
+  AND timestamp <= ?end_time
 | SORT timestamp ASC
 | KEEP timestamp, event_count, score, bucket_span, is_interim
 | LIMIT 500

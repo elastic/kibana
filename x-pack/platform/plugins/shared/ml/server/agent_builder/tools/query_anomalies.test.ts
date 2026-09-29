@@ -201,26 +201,38 @@ describe('resolveParamDates', () => {
     expect(resolved).toBeLessThanOrEqual(after);
   });
 
-  it('converts "now-2y" to an approximate ISO 8601 string', () => {
+  it('converts "now-2y" using calendar-aware arithmetic', () => {
     const result = resolveParamDates({ start_time: 'now-2y' });
     const resolved = new Date(result.start_time as string).getTime();
-    const twoYearsAgo = Date.now() - 2 * 31_536_000_000;
+    const expected = new Date();
+    expected.setUTCFullYear(expected.getUTCFullYear() - 2);
     // Allow ±5 s for test execution time
-    expect(Math.abs(resolved - twoYearsAgo)).toBeLessThan(5_000);
+    expect(Math.abs(resolved - expected.getTime())).toBeLessThan(5_000);
   });
 
-  it('converts "now-6M" correctly', () => {
+  it('converts "now-6M" using calendar-aware month arithmetic', () => {
     const result = resolveParamDates({ start_time: 'now-6M' });
     const resolved = new Date(result.start_time as string).getTime();
-    const sixMonthsAgo = Date.now() - 6 * 2_592_000_000;
-    expect(Math.abs(resolved - sixMonthsAgo)).toBeLessThan(5_000);
+    const expected = new Date();
+    expected.setUTCMonth(expected.getUTCMonth() - 6);
+    expect(Math.abs(resolved - expected.getTime())).toBeLessThan(5_000);
   });
 
-  it('strips /roundUnit suffix without error', () => {
-    expect(() => resolveParamDates({ t: 'now/d' })).not.toThrow();
-    const result = resolveParamDates({ t: 'now-1d/d' });
-    expect(typeof result.t).toBe('string');
-    expect(result.t).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+  it('honors the /unit rounding suffix and floors to UTC day boundary', () => {
+    expect(() => resolveParamDates({ start_time: 'now/d' })).not.toThrow();
+    const result = resolveParamDates({ start_time: 'now-1d/d' });
+    const resolved = new Date(result.start_time as string).getTime();
+    const expected = new Date();
+    expected.setUTCDate(expected.getUTCDate() - 1);
+    expected.setUTCHours(0, 0, 0, 0);
+    expect(resolved).toBe(expected.getTime());
+  });
+
+  it('does not resolve date math in non-time parameters', () => {
+    expect(resolveParamDates({ job_id_pattern: 'now', entity_value: 'now-1d' })).toEqual({
+      job_id_pattern: 'now',
+      entity_value: 'now-1d',
+    });
   });
 });
 

@@ -145,7 +145,7 @@ describe('adCreateJobTool', () => {
       });
     });
 
-    it('operation=estimate_memory maps detector fields to overall cardinality and extra influencers to max-bucket cardinality', async () => {
+    it('operation=estimate_memory maps detector fields to overall cardinality and all influencers to max-bucket cardinality (including those that also appear as detector split fields)', async () => {
       const ml = createMlMock();
       const search = jest
         .fn()
@@ -189,7 +189,9 @@ describe('adCreateJobTool', () => {
       const maxBucketFields = search.mock.calls
         .filter(([request]) => request.aggs?.max_bucket_card)
         .map(([request]) => request.aggs.buckets.aggs.card.cardinality.field);
-      expect(maxBucketFields).toEqual(['source.ip']);
+      // host.name is both a detector over_field and an influencer — it must appear
+      // in max_bucket_cardinality even though it is also in overall_cardinality.
+      expect(maxBucketFields).toEqual(['host.name', 'source.ip']);
 
       for (const [request] of search.mock.calls) {
         expect(request.query).toEqual(datafeedQuery);
@@ -203,7 +205,7 @@ describe('adCreateJobTool', () => {
             'host.name': 42,
             'event.dataset': 42,
           },
-          max_bucket_cardinality: { 'source.ip': 7 },
+          max_bucket_cardinality: { 'host.name': 7, 'source.ip': 7 },
         },
       });
     });

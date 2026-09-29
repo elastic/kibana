@@ -184,6 +184,38 @@ export const createAdCreateJobTool = (
               : undefined;
           const datafeedQuery = getDatafeedQuery(datafeedConfigObj);
 
+          const dataDescForCardinality = jobConfigObj.data_description as
+            | Record<string, unknown>
+            | undefined;
+          const timeField =
+            typeof dataDescForCardinality?.time_field === 'string'
+              ? dataDescForCardinality.time_field
+              : '@timestamp';
+
+          // Scope cardinality searches to the analysis window when duration is provided.
+          // This keeps the date_histogram bucket count within circuit-breaker limits for
+          // long windows and ensures the max-bucket estimate covers the actual analysis period.
+          const durationRangeFilter: estypes.QueryDslQueryContainer | undefined =
+            duration?.start !== undefined || duration?.end !== undefined
+              ? {
+                  range: {
+                    [timeField]: {
+                      ...(duration?.start !== undefined
+                        ? { gte: duration.start, format: 'epoch_millis' }
+                        : {}),
+                      ...(duration?.end !== undefined
+                        ? { lte: duration.end, format: 'epoch_millis' }
+                        : {}),
+                    },
+                  },
+                }
+              : undefined;
+
+          const cardinalitySearchQuery: estypes.QueryDslQueryContainer | undefined =
+            datafeedQuery && durationRangeFilter
+              ? { bool: { must: [datafeedQuery, durationRangeFilter] } }
+              : datafeedQuery ?? durationRangeFilter;
+
           if (indices && indices.length > 0) {
             if (overallCardinalityFields.size > 0 && !resolvedOverallCardinality) {
               resolvedOverallCardinality = {};
@@ -192,7 +224,7 @@ export const createAdCreateJobTool = (
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
-                    ...(datafeedQuery ? { query: datafeedQuery } : {}),
+                    ...(cardinalitySearchQuery ? { query: cardinalitySearchQuery } : {}),
                     aggs: { card: { cardinality: { field } } },
                   });
                   const cardinality = (result.aggregations?.card as { value?: number } | undefined)
@@ -222,9 +254,6 @@ export const createAdCreateJobTool = (
 
             if (influencerCardinalityFields.size > 0 && !resolvedMaxBucketCardinality) {
               resolvedMaxBucketCardinality = {};
-              const dataDesc = jobConfigObj.data_description as Record<string, unknown> | undefined;
-              const timeField =
-                typeof dataDesc?.time_field === 'string' ? dataDesc.time_field : '@timestamp';
               const bucketSpan =
                 typeof analysisConfigObj.bucket_span === 'string'
                   ? analysisConfigObj.bucket_span
@@ -235,7 +264,7 @@ export const createAdCreateJobTool = (
                   const result = await esClient.asCurrentUser.search({
                     index: indices,
                     size: 0,
-                    ...(datafeedQuery ? { query: datafeedQuery } : {}),
+                    ...(cardinalitySearchQuery ? { query: cardinalitySearchQuery } : {}),
                     aggs: {
                       buckets: {
                         date_histogram: { field: timeField, fixed_interval: bucketSpan },
@@ -574,12 +603,14 @@ const collectOverallCardinalityFields = (
 };
 
 /**
- * Influencer fields that still need `max_bucket_cardinality`. Fields already
- * sent as overall cardinality are omitted, matching the job wizard estimator.
+ * Influencer fields that need `max_bucket_cardinality`. Fields shared between
+ * influencers and detector split fields must appear in BOTH overall_cardinality
+ * and max_bucket_cardinality — the estimator uses the latter specifically for
+ * influencer peak-bucket sizing regardless of overlap.
  */
 const collectInfluencerCardinalityFields = (
   influencers: unknown,
-  overallCardinalityFields: ReadonlySet<string>
+  _overallCardinalityFields: ReadonlySet<string>
 ): Set<string> => {
   const influencerList = Array.isArray(influencers)
     ? influencers
@@ -588,7 +619,7 @@ const collectInfluencerCardinalityFields = (
     : [influencers];
   const fields = new Set<string>();
   for (const influencer of influencerList) {
-    if (isCardinalityField(influencer) && !overallCardinalityFields.has(influencer)) {
+    if (isCardinalityField(influencer)) {
       fields.add(influencer);
     }
   }
