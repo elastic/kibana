@@ -36,6 +36,7 @@ import {
 } from './esql_summary_count_field_select';
 import { EsqlDelayedDataCheckToggle } from './esql_delayed_data_check_toggle';
 import { EsqlDetectorsEditor } from './esql_detectors_editor';
+import { pruneEsqlSelections } from './esql_prune_selections';
 import { NUMERIC_ESQL_TYPES } from './esql_numeric_types';
 import { DEFAULT_DETECTOR_FUNCTION } from './esql_detector_functions';
 import type { EsqlDetectorConfig } from '../../../common/job_creator/esql_job_creator';
@@ -119,22 +120,47 @@ const EsqlQueryStepContent = () => {
     [state.columns, state.emittedTimeField, state.query, state.sourceTimeField]
   );
 
+  // Captured once per query change so the pruning below (LEAD DECISION
+  // 2026-09-29, g2sz.10: "editing query re-resolves columns and prunes
+  // downstream selections that no longer exist") diffs against the
+  // selections that were on screen right before this query edit, not
+  // against a wiped-out intermediate state.
+  const priorSelections = useRef({
+    detectors: state.detectors,
+    influencers: state.influencers,
+    summaryCountFieldName: state.summaryCountFieldName,
+    emittedTimeField: state.emittedTimeField,
+  });
+
+  // Keep the ref in sync with any manual edit to these fields (detectors
+  // editor, influencers combo box, summary count field select) so a
+  // subsequent query edit prunes against what's actually on screen.
+  useEffect(() => {
+    priorSelections.current = {
+      detectors: state.detectors,
+      influencers: state.influencers,
+      summaryCountFieldName: state.summaryCountFieldName,
+      emittedTimeField: state.emittedTimeField,
+    };
+  }, [state.detectors, state.influencers, state.summaryCountFieldName, state.emittedTimeField]);
+
   useEffect(() => {
     const generation = ++requestGeneration.current;
     const trimmedQuery = state.query.trim();
+    const priorForThisRequest = priorSelections.current;
 
-    setQueryState({
-      columns: [],
-      emittedTimeField: '',
-      detectors: [],
-      influencers: [],
-      summaryCountFieldName: '',
-      delayedDataCheckEnabled: false,
-    });
     setQueryProbeState(trimmedQuery === '' ? 'idle' : 'loading');
     setError(undefined);
 
     if (trimmedQuery === '') {
+      setQueryState({
+        columns: [],
+        emittedTimeField: '',
+        detectors: [],
+        influencers: [],
+        summaryCountFieldName: '',
+        delayedDataCheckEnabled: false,
+      });
       setIsLoading(false);
       return;
     }
@@ -145,19 +171,35 @@ const EsqlQueryStepContent = () => {
         ({ columns: nextColumns }) => {
           if (generation !== requestGeneration.current) return;
 
+          const pruned = pruneEsqlSelections(priorForThisRequest, nextColumns);
           const defaultSummaryCountField = findDefaultSummaryCountField(nextColumns);
           const defaultDetectorField = nextColumns.find(
             (column) => NUMERIC_ESQL_TYPES.has(column.type) && !isCountShapedColumn(column)
           )?.name;
+
+          const emittedTimeField = pruned.emittedTimeField || firstTimeField(nextColumns);
+          const detectors =
+            pruned.detectors.length > 0
+              ? pruned.detectors
+              : defaultDetectorField !== undefined
+              ? [{ function: DEFAULT_DETECTOR_FUNCTION, field: defaultDetectorField }]
+              : [];
+          const summaryCountFieldName = pruned.summaryCountFieldName || defaultSummaryCountField;
+
+          priorSelections.current = {
+            detectors,
+            influencers: pruned.influencers,
+            summaryCountFieldName,
+            emittedTimeField,
+          };
+
           setQueryState({
             columns: nextColumns,
-            emittedTimeField: firstTimeField(nextColumns),
-            detectors:
-              defaultDetectorField !== undefined
-                ? [{ function: DEFAULT_DETECTOR_FUNCTION, field: defaultDetectorField }]
-                : [],
-            summaryCountFieldName: defaultSummaryCountField,
-            delayedDataCheckEnabled: defaultSummaryCountField !== '',
+            emittedTimeField,
+            detectors,
+            influencers: pruned.influencers,
+            summaryCountFieldName,
+            delayedDataCheckEnabled: summaryCountFieldName !== '',
           });
           setQueryProbeState('success');
           setIsLoading(false);

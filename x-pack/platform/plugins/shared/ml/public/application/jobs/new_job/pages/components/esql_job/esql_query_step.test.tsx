@@ -438,4 +438,53 @@ describe('EsqlQueryStep', () => {
     expect(consoleError).not.toHaveBeenCalled();
     consoleError.mockRestore();
   });
+
+  it('prunes a by_field and an influencer that disappear on a query edit, keeping the surviving detector field', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('mean(avg_bytes)')
+    );
+
+    // Select 'host' as the by field and as an influencer.
+    const byFieldInput = screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')!;
+    fireEvent.change(byFieldInput, { target: { value: 'host' } });
+    fireEvent.keyDown(byFieldInput, { key: 'Enter', code: 'Enter' });
+
+    const influencersInput = screen.getByTestId('mlEsqlInfluencers').querySelector('input')!;
+    fireEvent.change(influencersInput, { target: { value: 'host' } });
+    fireEvent.keyDown(influencersInput, { key: 'Enter', code: 'Enter' });
+
+    // Editing the query drops 'host' from the resolved output.
+    getEsqlQueryColumns.mockResolvedValue({
+      columns: [
+        { name: 'bucket', type: 'date', hasConflict: false, userDefined: false },
+        { name: 'doc_count', type: 'long', hasConflict: false, userDefined: false },
+        { name: 'avg_bytes', type: 'double', hasConflict: false, userDefined: false },
+      ],
+    });
+    fireEvent.change(screen.getByTestId('mlEsqlQuery'), {
+      target: { value: 'FROM logs-* | STATS avg_bytes = AVG(bytes) BY bucket' },
+    });
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    // The detector survives (its field_name, avg_bytes, still resolves) but
+    // its now-invalid by_field is dropped rather than the whole row.
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlDetectorSummary-0')).toHaveTextContent('mean(avg_bytes)')
+    );
+    expect(screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')).toHaveValue('');
+    expect(
+      within(screen.getByTestId('mlEsqlInfluencers')).queryByText('host')
+    ).not.toBeInTheDocument();
+  });
 });

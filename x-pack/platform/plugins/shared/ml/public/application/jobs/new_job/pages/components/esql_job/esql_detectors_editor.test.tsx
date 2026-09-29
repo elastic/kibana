@@ -57,9 +57,10 @@ describe('EsqlDetectorsEditor', () => {
     expect(screen.getByTestId('mlEsqlDetectorByFieldHint-0')).toHaveTextContent(
       'rare requires a by field.'
     );
-    expect(
-      screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')
-    ).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
   });
 
   it('does not flag freq_rare once a by field is set', () => {
@@ -73,20 +74,23 @@ describe('EsqlDetectorsEditor', () => {
   it('marks a column reused across by/over/partition on the same detector as a duplicate', () => {
     renderEditor([{ function: 'mean', field: 'avg_bytes', byField: 'host', overField: 'host' }]);
 
-    expect(
-      screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')
-    ).toHaveAttribute('aria-invalid', 'true');
-    expect(
-      screen.getByTestId('mlEsqlDetectorOverField-0').querySelector('input')
-    ).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
+    expect(screen.getByTestId('mlEsqlDetectorOverField-0').querySelector('input')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
   });
 
   it('flags a by field that references a column no longer in the query output', () => {
     renderEditor([{ function: 'mean', field: 'avg_bytes', byField: 'removed_column' }]);
 
-    expect(
-      screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')
-    ).toHaveAttribute('aria-invalid', 'true');
+    expect(screen.getByTestId('mlEsqlDetectorByField-0').querySelector('input')).toHaveAttribute(
+      'aria-invalid',
+      'true'
+    );
   });
 
   it('flags the emitted time column when used as a partitioning field', () => {
