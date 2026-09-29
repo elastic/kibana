@@ -23,7 +23,7 @@ import {
 import {
   findDuplicateClassNames,
   findAllScoutFiles,
-  formatAuditText,
+  formatAuditReportForSlack,
   extractPageObjectKeys,
   extractPageObjectKeysOrThrow,
   fileConsumesKey,
@@ -233,9 +233,9 @@ describe('findDuplicateClassNames', () => {
   });
 });
 
-describe('formatAuditText', () => {
+describe('formatAuditReportForSlack', () => {
   it('lists only keys and classes that need a look, with the reason', () => {
-    const text = formatAuditText({
+    const text = formatAuditReportForSlack({
       census: [
         { key: 'overlays', fileCount: 0, modules: [] },
         { key: 'listingTable', fileCount: 1, modules: ['examples-plugin'] },
@@ -247,14 +247,14 @@ describe('formatAuditText', () => {
       ],
       configSets: {
         ...emptyConfigSets,
-        sameAsDefault: ['isolated (stateful)'],
+        sameAsDefault: ['`isolated` (stateful)'],
         failed: [
           {
             file: 'config_sets/broken/stateful/classic.stateful.config.ts',
             error: 'Error: boom\n  at x',
           },
         ],
-        runtimeOnly: ['flags_only (stateful)'],
+        runtimeOnly: ['`flags_only` (stateful)'],
         identical: [['a (stateful/x.config.ts)', 'b (stateful/x.config.ts)']],
         subsets: [
           { set: 'small (stateful/x.config.ts)', of: 'big (stateful/x.config.ts)' },
@@ -269,8 +269,8 @@ describe('formatAuditText', () => {
       '`pageObjects.unifiedTabs` used in 45 files, all in @kbn/discover-plugin'
     );
     expect(text).toContain('`SavedObjectsManagementPage` in spaces, tagging');
-    expect(text).toContain('flags_only (stateful)');
-    expect(text).toContain('isolated (stateful)');
+    expect(text).toContain('`flags_only` (stateful)');
+    expect(text).toContain('`isolated` (stateful)');
     expect(text).toContain('config_sets/broken/stateful/classic.stateful.config.ts: Error: boom');
     expect(text).not.toContain('at x');
     expect(text).toContain('a (stateful/x.config.ts) = b (stateful/x.config.ts)');
@@ -281,7 +281,7 @@ describe('formatAuditText', () => {
   });
 
   it('says so when there is nothing to report', () => {
-    const text = formatAuditText({
+    const text = formatAuditReportForSlack({
       census: [{ key: 'dashboard', fileCount: 128, modules: ['a', 'b'] }],
       duplicateClassNames: [],
       configSets: emptyConfigSets,
@@ -409,17 +409,17 @@ describe('config set audit, pure parts', () => {
       ['feature_flags.overrides']
     );
 
-    expect(report.sameAsDefault).toEqual(['same_as_default (stateful)']);
-    expect(report.runtimeOnly).toEqual(['flags_only (stateful)']);
+    expect(report.sameAsDefault).toEqual(['`same_as_default` (stateful)']);
+    expect(report.runtimeOnly).toEqual(['`flags_only` (stateful)']);
     // zero-diff sets are reported as same as default, not as identical to each other
-    expect(report.identical).toEqual([['twin_a (stateful)', 'twin_b (stateful)']]);
+    expect(report.identical).toEqual([['`twin_a` (stateful)', '`twin_b` (stateful)']]);
     // one line per identical group (twin_b is represented by twin_a), nearest superset only
     // (big, not bigger, since big is itself covered by bigger), sets with non-arg differences never take part
     expect(report.subsets).toEqual([
-      { set: 'flags_only (stateful)', of: 'flags_plus_boot (stateful)' },
-      { set: 'twin_a (stateful)', of: 'flags_plus_boot (stateful)' },
-      { set: 'twin_a (stateful)', of: 'big (stateful)' },
-      { set: 'big (stateful)', of: 'bigger (stateful)' },
+      { set: '`flags_only` (stateful)', of: '`flags_plus_boot` (stateful)' },
+      { set: '`twin_a` (stateful)', of: '`flags_plus_boot` (stateful)' },
+      { set: '`twin_a` (stateful)', of: '`big` (stateful)' },
+      { set: '`big` (stateful)', of: '`bigger` (stateful)' },
     ]);
   });
 });

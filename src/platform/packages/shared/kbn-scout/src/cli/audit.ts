@@ -279,28 +279,28 @@ export async function runAudit(
  * Human readable findings, in Slack mrkdwn. Reports only what needs a look and
  * says why, per the placement policy. Nothing to report prints one line.
  */
-export function formatAuditText(report: AuditReport): string {
+export function formatAuditReportForSlack(report: AuditReport): string {
   const { census, duplicateClassNames, configSets } = report;
   const unused = census.filter((c) => c.fileCount === 0);
   const singleFile = census.filter((c) => c.fileCount === 1);
   const singleModule = census.filter((c) => c.fileCount > 1 && c.modules.length === 1);
 
-  const lines: string[] = [`*Scout quality audit* (${census.length} page object keys)`];
+  const lines: string[] = ['*Scout quality audit*'];
   const section = (title: string, items: string[]) => {
     if (items.length === 0) return;
     lines.push('', `*${title}*`, ...items.map((item) => `• ${item}`));
   };
 
   section(
-    'Unused keys, removal candidates',
+    'Page objects nobody uses, removal candidates',
     unused.map((c) => `\`pageObjects.${c.key}\` has no consumer`)
   );
   section(
-    'Single consumer keys',
+    'Shared page objects with only one consumer',
     singleFile.map((c) => `\`pageObjects.${c.key}\` is used by one file (${c.modules[0]})`)
   );
   section(
-    'Keys used by one module only, check they wrap a shared component or belong in that module',
+    'Shared page objects used by one module only, check they wrap a shared component or belong in that module',
     singleModule.map(
       (c) => `\`pageObjects.${c.key}\` used in ${c.fileCount} files, all in ${c.modules[0]}`
     )
@@ -338,7 +338,7 @@ export function formatAuditText(report: AuditReport): string {
   if (lines.length === 1) lines.push('', 'No findings.');
   lines.push(
     '',
-    `Config sets compared: ${configSets.sets.length}. Placement rules: docs/extend/testing/page-objects.md`
+    `Checked ${census.length} core page objects and ${configSets.sets.length} config sets. Placement rules: docs/extend/testing/page-objects.md#scout-page-objects-placement`
   );
   return lines.join('\n');
 }
@@ -392,6 +392,8 @@ export const auditCmd: Command<void> = {
 
     // `write` rather than `info`: the report is meant to be piped, and `info`
     // prefixes the first line with ' info '.
-    log.write(flags.format === 'text' ? formatAuditText(report) : JSON.stringify(report, null, 2));
+    log.write(
+      flags.format === 'text' ? formatAuditReportForSlack(report) : JSON.stringify(report, null, 2)
+    );
   },
 };

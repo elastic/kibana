@@ -352,7 +352,7 @@ It also reports exported class names that appear in more than one Scout module (
 
 Run it by hand when you add, move, or remove a page object or a config set. Read the output against the placement policy above. The command reports facts only, it does not decide.
 
-The audit is a set of small functions in `src/cli/audit.ts` and `src/cli/audit_config_sets.ts` so the same facts can feed a scheduled run and the `scout-best-practices-reviewer` skill on every PR. To add a check, add a function that returns facts, include it in the report, and give it a section in `formatAuditText`.
+The audit is a set of small functions in `src/cli/audit.ts` and `src/cli/audit_config_sets.ts` so the same facts can feed a scheduled run and the `scout-best-practices-reviewer` skill on every PR. To add a check, add a function that returns facts, include it in the report, and give it a section in `formatAuditReportForSlack`.
 
 #### Setting up Test Directory
 
