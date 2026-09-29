@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { recoveryStrategy } from '@kbn/alerting-v2-schemas';
 import type { FormValues } from '../../../../form/types';
 import type { CustomRecoveryRenderProps } from '../../types';
 import { useBuilderState } from '../builder_state_context';
@@ -74,12 +75,11 @@ export const BuilderRecoveryForm: React.FC<CustomRecoveryRenderProps> = () => {
 
   useEffect(() => {
     if (!recoveryConfig || !generatedRecoveryBlock) return;
-    const current = getValues('query');
-    if (current.format !== 'composed') return;
-    if (current.recovery?.segment === generatedRecoveryBlock) return;
-    setValue('query', {
-      ...current,
-      recovery: { segment: generatedRecoveryBlock },
+    const current = getValues('recovery');
+    if (current?.segment === generatedRecoveryBlock) return;
+    setValue('recovery', {
+      strategy: recoveryStrategy.condition,
+      segment: generatedRecoveryBlock,
     });
   }, [recoveryConfig, generatedRecoveryBlock, getValues, setValue]);
 

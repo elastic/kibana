@@ -218,6 +218,86 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(400);
       });
+
+      it('should create an agent-based deployment with authMethod and no connectorId', async () => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['ec2_otel'],
+            globalRegion: 'eu-west-1',
+            dataFormat: 'otel',
+            authMethod: 'assume_role',
+          })
+          .expect(200);
+
+        expect(body.item).to.have.property('id');
+        expect(body.item.provider).to.equal('aws');
+        expect(body.item.mechanisms).to.eql(['agent_based']);
+        expect(body.item.authMethod).to.equal('assume_role');
+        expect(body.item.globalRegion).to.equal('eu-west-1');
+        expect(body.item.dataFormat).to.equal('otel');
+        expect(body.item.connectorId).to.be(undefined);
+        expect(body.item.status).to.equal('pending');
+
+        createdIds.push(body.item.id);
+      });
+
+      it('should return 400 for an invalid authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['ec2_otel'],
+            authMethod: 'invalid_method',
+          })
+          .expect(400);
+      });
+
+      it('should return 400 when agent_based deployment uses identity_federation authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['ec2_otel'],
+            authMethod: 'identity_federation',
+          })
+          .expect(400);
+      });
+
+      it('should return 400 when managed_integration deployment uses assume_role authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['managed_integration'],
+            services: ['cloudtrail'],
+            authMethod: 'assume_role',
+          })
+          .expect(400);
+      });
+
+      it('should return 400 when mixed agent_based+managed_integration deployment uses assume_role authMethod', async () => {
+        await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            connectorId: primaryConnectorId,
+            mechanisms: ['agent_based', 'managed_integration'],
+            services: ['ec2_otel', 'cloudtrail'],
+            authMethod: 'assume_role',
+          })
+          .expect(400);
+      });
     });
 
     describe('GET /api/fleet/cloud_onboarding_deployments/{id}', () => {
@@ -417,6 +497,115 @@ export default function (providerContext: FtrProviderContext) {
           .send({ status: 'invalid-status' })
           .expect(400);
       });
+
+      it('should return 400 when updating a managed_integration deployment with assume_role authMethod', async () => {
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ authMethod: 'assume_role' })
+          .expect(400);
+      });
+    });
+
+    describe('agent_based deployment — PUT round-trip', () => {
+      let deploymentId: string;
+
+      const createAgentBasedDeployment = async (authMethod: string) => {
+        const { body } = await supertest
+          .post(BASE_URL)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            provider: 'aws',
+            mechanisms: ['agent_based'],
+            services: ['ec2_otel'],
+            globalRegion: 'eu-west-1',
+            dataFormat: 'otel',
+            authMethod,
+          })
+          .expect(200);
+        return body.item.id as string;
+      };
+
+      beforeEach(async () => {
+        deploymentId = await createAgentBasedDeployment('assume_role');
+      });
+
+      afterEach(async () => {
+        try {
+          await supertest.delete(`${BASE_URL}/${deploymentId}`).set('kbn-xsrf', 'xxxx');
+        } catch (_) {
+          // ignore
+        }
+      });
+
+      it('should update agentPolicyIds (array), packagePolicyIds and status:succeeded', async () => {
+        const agentPolicyIds = ['policy-id-1', 'policy-id-2', 'policy-id-3'];
+        const packagePolicyIds = ['pkg-policy-id-1'];
+
+        const { body } = await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyIds, packagePolicyIds, status: 'succeeded' })
+          .expect(200);
+
+        expect(body.item.agentPolicyIds).to.eql(agentPolicyIds);
+        expect(body.item.packagePolicyIds).to.eql(packagePolicyIds);
+        expect(body.item.status).to.equal('succeeded');
+        // authMethod set on create must be preserved through update
+        expect(body.item.authMethod).to.equal('assume_role');
+        expect(body.item.connectorId).to.be(undefined);
+      });
+
+      it('should set status:failed without agentPolicyIds (partial failure before policy creation)', async () => {
+        const { body } = await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ status: 'failed' })
+          .expect(200);
+
+        expect(body.item.status).to.equal('failed');
+        expect(body.item.agentPolicyIds).to.be(undefined);
+      });
+
+      it('should return 400 when agentPolicyIds is passed as a bare string', async () => {
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ agentPolicyIds: 'not-an-array', status: 'succeeded' })
+          .expect(400);
+      });
+
+      it('should return 400 when updating an agent_based deployment with identity_federation authMethod', async () => {
+        await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ authMethod: 'identity_federation' })
+          .expect(400);
+      });
+
+      it('should update authMethod on an agent_based deployment with a valid agent-based method', async () => {
+        const { body } = await supertest
+          .put(`${BASE_URL}/${deploymentId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({ authMethod: 'shared_credentials' })
+          .expect(200);
+        expect(body.item.authMethod).to.equal('shared_credentials');
+      });
+
+      for (const authMethod of [
+        'static_keys',
+        'temporary_keys',
+        'shared_credentials',
+        'assume_role',
+      ] as const) {
+        it(`should create and retrieve an agent_based deployment with authMethod: ${authMethod}`, async () => {
+          const id = await createAgentBasedDeployment(authMethod);
+          const { body } = await supertest.get(`${BASE_URL}/${id}`).expect(200);
+          expect(body.item.authMethod).to.equal(authMethod);
+          expect(body.item.mechanisms).to.eql(['agent_based']);
+          await supertest.delete(`${BASE_URL}/${id}`).set('kbn-xsrf', 'xxxx');
+        });
+      }
     });
 
     describe('Space isolation', () => {
