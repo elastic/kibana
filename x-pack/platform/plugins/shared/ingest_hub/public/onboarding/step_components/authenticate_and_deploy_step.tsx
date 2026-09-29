@@ -208,17 +208,18 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         // against an MI SO would always report drift when a selection is held in session (4124128788).
         const agentPoliciesDirty = (() => {
           if (deploymentMethod !== 'agent_based') return false;
-          const { agentHostsMode, selectedAgentPolicyIds } = agentBasedDeploymentFromFlow;
-          // A mode change from 'existing' to 'new' means the user wants a freshly created policy.
-          // Only dirty when the new policy has not yet been created (agentPolicyId unset) — after
-          // a successful new-policy deploy agentPolicyId is set and the SO matches, so no drift
-          // (4131926221, 4132097877).
-          if (
-            agentHostsMode === 'new' &&
-            (item.agentPolicyIds ?? []).length > 0 &&
-            !agentBasedDeploymentFromFlow.agentPolicyId
-          )
-            return true;
+          const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } =
+            agentBasedDeploymentFromFlow;
+          if (agentHostsMode === 'new') {
+            // Flyout created the new policy but packages not yet deployed to it: dirty until
+            // the next deploy attaches package policies to the new agent policy (4132197351).
+            if (agentPolicyId && !(item.agentPolicyIds ?? []).includes(agentPolicyId)) return true;
+            // Mode switch without flyout: dirty when a prior deployment exists (4131926221,
+            // 4132097877). Guard on !agentPolicyId so a successful new-policy deploy (which
+            // writes agentPolicyId) is not treated as drift on the next mount.
+            if ((item.agentPolicyIds ?? []).length > 0 && !agentPolicyId) return true;
+            return false;
+          }
           const selected = new Set(selectedAgentPolicyIds);
           if (selected.size === 0 && agentHostsMode !== 'existing') return false;
           const deployed = new Set(item.agentPolicyIds ?? []);

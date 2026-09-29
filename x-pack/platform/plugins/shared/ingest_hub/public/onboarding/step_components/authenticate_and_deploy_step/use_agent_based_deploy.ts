@@ -150,9 +150,17 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         detectAndReviewStep.policyIdsByInstance ?? {},
         activeInstanceIds
       );
+      // When switching to 'new' agent-policy mode, deployNewAgentPolicy will create fresh package
+      // policies for every instance. The existing package policies (on old agent policies) become
+      // orphaned — they must be cleaned up before the new deploy runs. Merge them into the pending
+      // cleanup set so the cleanup step below deletes/removes them in this same deploy run, and any
+      // that fail are staged in remainingPending for retry on the next attempt (4132197367).
+      const pendingCleanupBase: Record<string, string> = isNewPolicySwitch
+        ? { ...(detectAndReviewStep.policyIdsByInstance ?? {}), ...(detectAndReviewStep.pendingCleanupPolicyIds ?? {}) }
+        : detectAndReviewStep.pendingCleanupPolicyIds ?? {};
       const effectivePendingCleanup = buildEffectivePendingCleanup(
         liveStalePolicyIds,
-        detectAndReviewStep.pendingCleanupPolicyIds
+        pendingCleanupBase
       );
 
       const hasPendingCleanup = Object.keys(effectivePendingCleanup).length > 0;
@@ -235,10 +243,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // entirely, so no survivingInstanceIds filter is needed here.
           cleanedLiveStale = buildCleanedLiveStale(liveStalePolicyIds, succeededIds);
           removeDeployInstances(cleanedLiveStale);
-          remainingPending = buildRemainingPending(
-            detectAndReviewStep.pendingCleanupPolicyIds,
-            succeededIds
-          );
+          remainingPending = buildRemainingPending(pendingCleanupBase, succeededIds);
           updateDetectAndReviewStep({ pendingCleanupPolicyIds: remainingPending });
         }
 
