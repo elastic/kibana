@@ -8,7 +8,11 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { AgentNotFoundError, FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import {
+  AgentNotFoundError,
+  FleetError,
+  HostedAgentPolicyRestrictionRelatedError,
+} from '../../errors';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 import { agentPolicyService } from '../agent_policy';
