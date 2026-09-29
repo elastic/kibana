@@ -118,6 +118,88 @@ apiTest.describe('Upsert rule API', { tag: '@local-stateful-classic' }, () => {
   );
 
   apiTest(
+    'upsert: should create an enabled rule when the body omits enabled',
+    async ({ apiClient, apiServices }) => {
+      const id = 'rule-created-enabled-by-default';
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: buildCreateRuleData({ metadata: { name: 'created-enabled-by-default' } }),
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(true);
+
+      const persisted = await apiServices.alertingV2.rules.get(id);
+      expect(persisted.enabled).toBe(true);
+    }
+  );
+
+  apiTest(
+    'upsert: should create a disabled rule when the body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const id = 'rule-created-disabled';
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: { ...buildCreateRuleData({ metadata: { name: 'created-disabled' } }), enabled: false },
+      });
+      expect(response).toHaveStatusCode(201);
+      expect(response.body.enabled).toBe(false);
+
+      const persisted = await apiServices.alertingV2.rules.get(id);
+      expect(persisted.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
+    'upsert: should enable a disabled rule when the replace body sets enabled=true',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'to-be-enabled' } })
+      );
+      const id = created.id;
+
+      await apiServices.alertingV2.rules.bulkDisable({ ids: [id] });
+      expect((await apiServices.alertingV2.rules.get(id)).enabled).toBe(false);
+
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'now-enabled' } }),
+          enabled: true,
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(true);
+
+      const reFetched = await apiServices.alertingV2.rules.get(id);
+      expect(reFetched.enabled).toBe(true);
+    }
+  );
+
+  apiTest(
+    'upsert: should disable an enabled rule when the replace body sets enabled=false',
+    async ({ apiClient, apiServices }) => {
+      const created = await apiServices.alertingV2.rules.create(
+        buildCreateRuleData({ metadata: { name: 'to-be-disabled-via-put' } })
+      );
+      const id = created.id;
+      expect(created.enabled).toBe(true);
+
+      const response = await apiClient.put(getRuleUrl(id), {
+        headers: writerHeaders,
+        body: {
+          ...buildCreateRuleData({ metadata: { name: 'now-disabled' } }),
+          enabled: false,
+        },
+      });
+      expect(response).toHaveStatusCode(200);
+      expect(response.body.enabled).toBe(false);
+
+      const reFetched = await apiServices.alertingV2.rules.get(id);
+      expect(reFetched.enabled).toBe(false);
+    }
+  );
+
+  apiTest(
     'upsert: should return 409 when attempting to change an immutable field (kind)',
     async ({ apiClient, apiServices }) => {
       const created = await apiServices.alertingV2.rules.create(
