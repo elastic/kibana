@@ -10,6 +10,7 @@ import type {
   MaterializeArticleOutput,
 } from '../../../common/threat_intel/workflows/step_types/materialize_article/materialize_article_common';
 import { assertSafeUrlResolved, type DnsLookupFn } from '../adapters/http_client';
+import { normalizeProvenanceUrl } from './provenance_url';
 
 const JINA_READER_URL = 'https://r.jina.ai';
 const MAX_ARTICLE_CHARS = 500_000;
@@ -63,7 +64,8 @@ const reason = (value: unknown): string =>
 
 /**
  * Transient failures worth another materialization pass. Permanent validation /
- * 4xx / private-URL failures stay `fallback` so enrichment can finish on RSS.
+ * 4xx / private-URL / NXDOMAIN failures stay `fallback` so enrichment can
+ * finish on RSS instead of crowding the oldest-first pending batch.
  */
 const isRetryableMaterializationError = (error: unknown): boolean => {
   const message = reason(error);
@@ -74,7 +76,9 @@ const isRetryableMaterializationError = (error: unknown): boolean => {
     const code = Number(httpMatch[1]);
     return code === 429 || code >= 500;
   }
-  return /fetch failed|network|ECONNRESET|ECONNREFUSED|ENOTFOUND|EAI_AGAIN/i.test(message);
+  // EAI_AGAIN is a transient resolver failure. ENOTFOUND / NXDOMAIN is not:
+  // a dead hostname would otherwise defer forever.
+  return /fetch failed|network|ECONNRESET|ECONNREFUSED|EAI_AGAIN/i.test(message);
 };
 
 const sliceWithoutSplittingSurrogatePair = (value: string, maxChars: number): string => {
@@ -252,6 +256,11 @@ export const materializeArticle = async (
       fallbackReason: 'source_is_not_rss',
     });
   }
+  // Strip userinfo before any network call or persisted source_url so embedded
+  // credentials cannot reach Jina or land in materialization metadata.
+  const articleUrl = normalizeProvenanceUrl(input.article_url) ?? '';
+  const safeInput = { ...input, article_url: articleUrl };
+
   if (input.existing_status === 'rendered' && input.existing_rendered_body_text.trim()) {
     return {
       body_text: input.existing_rendered_body_text,
@@ -260,24 +269,24 @@ export const materializeArticle = async (
         provider: 'jina',
         status: 'rendered',
         attempted_at: now.toISOString(),
-        source_url: input.article_url,
+        source_url: articleUrl,
         rendered_chars: input.existing_rendered_body_text.length,
         truncated: input.existing_rendered_body_text.length >= MAX_ARTICLE_CHARS,
         reason: 'cached_render',
       },
     };
   }
-  if (!input.article_url) {
+  if (!articleUrl) {
     return fallbackOutput({
-      input,
+      input: safeInput,
       now,
       status: 'skipped',
-      fallbackReason: 'article_url_missing',
+      fallbackReason: input.article_url ? 'article_url_invalid' : 'article_url_missing',
     });
   }
 
   try {
-    await validateArticleUrl(input.article_url, abortSignal, dependencies.lookupFn);
+    await validateArticleUrl(articleUrl, abortSignal, dependencies.lookupFn);
     await (dependencies.pace ?? paceUnauthenticatedRequest)(abortSignal);
 
     const controller = new AbortController();
@@ -302,7 +311,7 @@ export const materializeArticle = async (
           'User-Agent': 'Kibana-ThreatIntel/1.0 (+https://www.elastic.co/security)',
         },
         body: JSON.stringify({
-          url: input.article_url,
+          url: articleUrl,
           respondWith: 'markdown',
         }),
         signal: controller.signal,
@@ -320,7 +329,7 @@ export const materializeArticle = async (
     const validation = validateRender(rendered, input.rss_body_text);
     if (!validation.valid) {
       return fallbackOutput({
-        input,
+        input: safeInput,
         now,
         status: 'fallback',
         fallbackReason: validation.reason,
@@ -337,7 +346,7 @@ export const materializeArticle = async (
         provider: 'jina',
         status: 'rendered',
         attempted_at: now.toISOString(),
-        source_url: input.article_url,
+        source_url: articleUrl,
         rendered_chars: rendered.length,
         truncated,
         reason: truncated ? 'rendered_and_truncated' : 'rendered',
@@ -345,7 +354,7 @@ export const materializeArticle = async (
     };
   } catch (error) {
     return fallbackOutput({
-      input,
+      input: safeInput,
       now,
       status: isRetryableMaterializationError(error) ? 'retryable_fallback' : 'fallback',
       fallbackReason: reason(error),

@@ -30,11 +30,12 @@ const run = (
       }),
       { status: 200, headers: { 'Content-Type': 'application/json' } }
     )
-  )
+  ),
+  deps: { lookupFn?: typeof lookupFn } = {}
 ) =>
   materializeArticle({ ...INPUT, ...overrides }, new AbortController().signal, {
     fetchFn,
-    lookupFn,
+    lookupFn: deps.lookupFn ?? lookupFn,
     pace,
     now: () => NOW,
   });
@@ -168,6 +169,40 @@ describe('materializeArticle', () => {
     expect(result.materialization.status).toBe('fallback');
     expect(result.materialization.reason).toMatch(/restricted IPv4/);
     expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('treats NXDOMAIN as a permanent fallback so dead links cannot stall the batch', async () => {
+    const fetchFn = jest.fn();
+    const lookupFn = jest.fn().mockRejectedValue(
+      Object.assign(new Error('getaddrinfo ENOTFOUND gone.example'), { code: 'ENOTFOUND' })
+    );
+    const result = await run({}, fetchFn as typeof fetch, { lookupFn });
+
+    expect(result.materialization.status).toBe('fallback');
+    expect(result.materialization.reason).toMatch(/ENOTFOUND/);
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
+  it('strips URL userinfo before calling Jina and recording source_url', async () => {
+    const fetchFn = jest.fn().mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          data: { markdown: '# Report\n\n' + 'Technical analysis body. '.repeat(40) },
+        }),
+        { status: 200 }
+      )
+    ) as typeof fetch;
+    const result = await run(
+      { article_url: 'https://user:secret@example.com/threat-report' },
+      fetchFn
+    );
+
+    expect(fetchFn).toHaveBeenCalled();
+    const requestBody = JSON.parse(String(fetchFn.mock.calls[0][1]?.body));
+    expect(requestBody.url).toBe('https://example.com/threat-report');
+    expect(requestBody.url).not.toContain('secret');
+    expect(result.materialization.source_url).toBe('https://example.com/threat-report');
+    expect(JSON.stringify(result)).not.toContain('secret');
   });
 
   it('does not split a UTF-16 surrogate pair at the retained article boundary', async () => {
