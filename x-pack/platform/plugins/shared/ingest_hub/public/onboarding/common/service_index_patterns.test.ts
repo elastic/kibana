@@ -78,20 +78,23 @@ describe('getServiceIndexPatterns', () => {
     expect(getServiceIndexPatterns(entry, '')).toEqual(['logs-aws.ec2_logs-*']);
   });
 
-  it('falls back to the wildcard for a namespace the has_data route would reject', () => {
-    const entry = makeEntry({
-      varDefsByDataStream: {
-        ec2_logs: {
-          type: 'logs',
-          dataset: 'aws.ec2_logs',
-          inputs: [],
-          defaultEnabledInputs: {},
-          varDefsByInput: {},
-        } as any,
-      },
-    });
-    expect(getServiceIndexPatterns(entry, 'Prod')).toEqual(['logs-aws.ec2_logs-*']);
-  });
+  it.each(['Prod', 'é'.repeat(51)])(
+    'falls back to the wildcard for the namespace %s, which the has_data route would reject',
+    (namespace) => {
+      const entry = makeEntry({
+        varDefsByDataStream: {
+          ec2_logs: {
+            type: 'logs',
+            dataset: 'aws.ec2_logs',
+            inputs: [],
+            defaultEnabledInputs: {},
+            varDefsByInput: {},
+          } as any,
+        },
+      });
+      expect(getServiceIndexPatterns(entry, namespace)).toEqual(['logs-aws.ec2_logs-*']);
+    }
+  );
 
   it.each(['prod@eu', 'producción'])('keeps the Fleet-valid namespace %s concrete', (namespace) => {
     const entry = makeEntry({

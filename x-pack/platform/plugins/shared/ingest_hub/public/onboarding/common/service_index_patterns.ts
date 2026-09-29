@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DATA_STREAM_INDEX_PATTERN_REGEX } from '@kbn/fleet-plugin/common';
+import { isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
 
 /**
@@ -25,7 +25,7 @@ export function getServiceIndexPatterns(
       if (dsInfo.dataset && dsInfo.type) {
         const concrete = `${dsInfo.type}-${dsInfo.dataset}-${namespace}`;
         patterns.push(
-          namespace && DATA_STREAM_INDEX_PATTERN_REGEX.test(concrete)
+          namespace && isValidDataStreamIndexPattern(concrete)
             ? concrete
             : `${dsInfo.type}-${dsInfo.dataset}-*`
         );

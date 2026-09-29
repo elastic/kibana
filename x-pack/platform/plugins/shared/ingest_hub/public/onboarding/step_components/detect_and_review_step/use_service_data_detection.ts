@@ -10,7 +10,7 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useQuery } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DATA_STREAM_API_ROUTES, DATA_STREAM_INDEX_PATTERN_REGEX } from '@kbn/fleet-plugin/common';
+import { DATA_STREAM_API_ROUTES, isValidDataStreamIndexPattern } from '@kbn/fleet-plugin/common';
 import type { ServiceChipState } from '../../onboarding_flow_context';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
@@ -103,7 +103,7 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
     const patterns = new Set<string>();
     for (const servicePatterns of patternsByServiceId.values()) {
       for (const p of servicePatterns) {
-        if (DATA_STREAM_INDEX_PATTERN_REGEX.test(p)) patterns.add(p);
+        if (isValidDataStreamIndexPattern(p)) patterns.add(p);
       }
     }
     return [...patterns];

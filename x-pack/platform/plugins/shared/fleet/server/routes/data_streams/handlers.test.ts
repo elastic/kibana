@@ -23,8 +23,7 @@ import { getPackageSavedObjects } from '../../services/epm/packages/get';
 import { appContextService } from '../../services';
 
 import { FleetUnauthorizedError } from '../../errors';
-import { DATA_STREAM_INDEX_PATTERN_REGEX } from '../../constants';
-import { isValidNamespace } from '../../../common/services';
+import { isValidDataStreamIndexPattern, isValidNamespace } from '../../../common/services';
 
 import { getDeprecatedILMCheckHandler, getListHandler, getHasDataHandler } from './handlers';
 import { getDataStreamsQueryMetadata } from './get_data_streams_query_metadata';
@@ -534,7 +533,7 @@ describe('getHasDataHandler', () => {
     expect(mockEsClient.msearch).not.toHaveBeenCalled();
   });
 
-  it.each(['prod@eu', 'producción', 'a+b=c', 'team(1)'])(
+  it.each(['prod@eu', 'producción', 'a+b=c', 'team(1)', 'a'.repeat(100)])(
     'accepts the Fleet-valid namespace %s',
     async (namespace) => {
       mockEsClient.msearch.mockResolvedValue({
@@ -552,21 +551,29 @@ describe('getHasDataHandler', () => {
     }
   );
 
-  it.each(['prodÉ', 'prod eu', 'prod-eu', 'prod*', 'prod?', 'prod:eu', 'prod#eu', 'prod<eu'])(
-    'rejects the namespace %s',
-    async (namespace) => {
-      const pattern = `logs-aws.cloudtrail-${namespace}`;
+  it.each([
+    'prodÉ',
+    'prod eu',
+    'prod-eu',
+    'prod*',
+    'prod?',
+    'prod:eu',
+    'prod#eu',
+    'prod<eu',
+    'a'.repeat(101),
+    'é'.repeat(51),
+  ])('rejects the namespace %s', async (namespace) => {
+    const pattern = `logs-aws.cloudtrail-${namespace}`;
 
-      await getHasDataHandler(
-        context,
-        makeRequest({ dataStreams: pattern, start: '2025-01-01T00:00:00Z' }),
-        response
-      );
+    await getHasDataHandler(
+      context,
+      makeRequest({ dataStreams: pattern, start: '2025-01-01T00:00:00Z' }),
+      response
+    );
 
-      expect(response.badRequest).toHaveBeenCalled();
-      expect(mockEsClient.msearch).not.toHaveBeenCalled();
-    }
-  );
+    expect(response.badRequest).toHaveBeenCalled();
+    expect(mockEsClient.msearch).not.toHaveBeenCalled();
+  });
 
   it('accepts exactly the namespaces Fleet accepts', () => {
     const samples = [
@@ -584,11 +591,15 @@ describe('getHasDataHandler', () => {
       'prod"eu',
       'prod|eu',
       'prod\\eu',
+      'a'.repeat(100),
+      'a'.repeat(101),
+      'é'.repeat(50),
+      'é'.repeat(51),
     ];
     for (const namespace of samples) {
       expect([
         namespace,
-        DATA_STREAM_INDEX_PATTERN_REGEX.test(`logs-aws.cloudtrail-${namespace}`),
+        isValidDataStreamIndexPattern(`logs-aws.cloudtrail-${namespace}`),
       ]).toEqual([namespace, isValidNamespace(namespace).valid]);
     }
   });
