@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useCallback } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { i18n } from '@kbn/i18n';
 import {
   NIGHTSHIFT_INVESTIGATION_LOCATOR_ID,
@@ -17,14 +18,40 @@ import { useQuery, useQueryClient } from '@kbn/react-query';
 import { useKibana } from '../utils/kibana_react';
 import { getInvestigationsClient } from '../services/investigations_client';
 
+export const VIEWED_INVESTIGATIONS_STORAGE_KEY = 'xpack.observability.viewedInvestigationIds';
+export const MAX_VIEWED_INVESTIGATIONS = 200;
+
 const getStatusQuery = (alertId: string) => ({
   concurrency_key: alertId,
-  statuses: ['pending', 'running', 'completed'] satisfies InvestigationStatus[],
+  statuses: [
+    'pending',
+    'running',
+    'completed',
+    'failed',
+    'cancelled',
+  ] satisfies InvestigationStatus[],
   subject_types: ['alert'] satisfies InvestigationSubjectType[],
   sort_field: 'created_at' as const,
   sort_order: 'desc' as const,
-  size: 2,
+  size: 1,
 });
+
+export const useInvestigationAvailability = () => {
+  const kibana = useKibana();
+  const basePath = kibana?.services?.http?.basePath?.get?.() ?? '';
+  const investigationsClient = getInvestigationsClient();
+
+  return useQuery({
+    queryKey: ['investigationAvailability', basePath],
+    queryFn: ({ signal }) =>
+      investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
+        signal: signal ?? null,
+      }),
+    enabled: Boolean(investigationsClient),
+    retry: false,
+    staleTime: 30_000,
+  });
+};
 
 export const useInvestigateAlert = ({
   alertId,
@@ -35,25 +62,18 @@ export const useInvestigateAlert = ({
   enabled?: boolean;
   onInvestigate?: () => void;
 }) => {
-  const { http, notifications, share } = useKibana().services;
+  const kibana = useKibana();
+  const services = kibana?.services;
   const investigationsClient = getInvestigationsClient();
-  const investigationLocator = share.url.locators.get<InvestigationLocatorParams>(
+  const investigationLocator = services?.share?.url?.locators?.get<InvestigationLocatorParams>(
     NIGHTSHIFT_INVESTIGATION_LOCATOR_ID
   );
-  const statusQueryKey = ['alertInvestigations', http.basePath.get?.() ?? '', alertId] as const;
+  const basePath = services?.http?.basePath?.get?.() ?? '';
+  const statusQueryKey = ['alertInvestigations', basePath, alertId] as const;
   const queryClient = useQueryClient();
+  const { data: availability } = useInvestigationAvailability();
   const canInvestigate = Boolean(enabled && alertId && investigationsClient);
-  const { data: availability } = useQuery({
-    queryKey: ['investigationAvailability', http.basePath.get?.() ?? ''],
-    queryFn: ({ signal }) =>
-      investigationsClient!.fetch('GET /internal/nightshift/investigations/availability', {
-        signal: signal ?? null,
-      }),
-    enabled: canInvestigate,
-    retry: false,
-    staleTime: 30_000,
-  });
-  const { data: investigations } = useQuery({
+  const { data: investigations, isSuccess: isStatusLoaded } = useQuery({
     queryKey: statusQueryKey,
     queryFn: ({ signal }) =>
       investigationsClient!.fetch('GET /internal/nightshift/investigations', {
@@ -67,6 +87,10 @@ export const useInvestigateAlert = ({
         ? 5_000
         : false,
   });
+  const [viewedInvestigationIds = [], setViewedInvestigationIds] = useLocalStorage<string[]>(
+    VIEWED_INVESTIGATIONS_STORAGE_KEY,
+    []
+  );
   const [isStarting, setIsStarting] = useState(false);
   const latestInvestigation = investigations?.results[0];
   const latestStatus = latestInvestigation?.status;
@@ -79,29 +103,54 @@ export const useInvestigateAlert = ({
     () => (investigationId ? investigationLocator?.getRedirectUrl({ investigationId }) : undefined),
     [investigationId, investigationLocator]
   );
+
+  const markInvestigationViewed = useCallback(() => {
+    if (!investigationId) return;
+    setViewedInvestigationIds((prev = []) =>
+      [investigationId, ...prev.filter((id) => id !== investigationId)].slice(
+        0,
+        MAX_VIEWED_INVESTIGATIONS
+      )
+    );
+  }, [investigationId, setViewedInvestigationIds]);
+
+  const isFinished = latestStatus === 'failed' || latestStatus === 'cancelled';
+  const isOpened = Boolean(investigationId && viewedInvestigationIds.includes(investigationId));
+
+  const showViewInvestigation =
+    showInvestigateAction &&
+    !isInvestigating &&
+    (latestStatus === 'completed' || isFinished) &&
+    Boolean(viewInvestigationUrl);
+  const showInvestigateButton =
+    showInvestigateAction &&
+    isStatusLoaded &&
+    !isInvestigating &&
+    (!latestInvestigation || (latestStatus === 'completed' && isOpened) || isFinished);
+
   const viewInvestigationActionLabel = i18n.translate(
     'xpack.observability.alerts.viewInvestigationButtonLabel',
     {
       defaultMessage: 'View investigation',
     }
   );
-  const investigateActionLabel = isInvestigating
-    ? i18n.translate('xpack.observability.alerts.investigating', {
-        defaultMessage: 'Investigating',
-      })
-    : latestStatus === 'completed'
-    ? i18n.translate('xpack.observability.alerts.reinvestigate', {
-        defaultMessage: 'Re-investigate',
-      })
-    : i18n.translate('xpack.observability.alerts.investigate', {
-        defaultMessage: 'Investigate',
-      });
+  let investigateActionLabel = i18n.translate('xpack.observability.alerts.investigate', {
+    defaultMessage: 'Investigate',
+  });
+  if (isInvestigating) {
+    investigateActionLabel = i18n.translate('xpack.observability.alerts.investigating', {
+      defaultMessage: 'Investigating…',
+    });
+  } else if (latestInvestigation) {
+    investigateActionLabel = i18n.translate('xpack.observability.alerts.reinvestigate', {
+      defaultMessage: 'Re-investigate',
+    });
+  }
 
   const handleInvestigate = async () => {
     if (!alertId || !investigationsClient || isInvestigating) return;
 
     setIsStarting(true);
-    onInvestigate?.();
     try {
       await investigationsClient.fetch('POST /internal/nightshift/investigations', {
         signal: null,
@@ -109,14 +158,15 @@ export const useInvestigateAlert = ({
           body: { subject: { type: 'alert', id: alertId }, concurrency_key: alertId },
         },
       });
-      notifications.toasts.addSuccess({
+      services?.notifications?.toasts?.addSuccess({
         title: i18n.translate('xpack.observability.alerts.investigationStarted', {
           defaultMessage: 'Investigation started',
         }),
       });
       await queryClient.invalidateQueries(statusQueryKey);
+      onInvestigate?.();
     } catch (error) {
-      notifications.toasts.addDanger({
+      services?.notifications?.toasts?.addDanger({
         title: i18n.translate('xpack.observability.alerts.investigationFailed', {
           defaultMessage: 'Failed to start investigation',
         }),
@@ -129,10 +179,13 @@ export const useInvestigateAlert = ({
 
   return {
     showInvestigateAction,
+    showInvestigateButton,
+    showViewInvestigation,
     handleInvestigate,
     isInvestigating,
     investigateActionLabel,
     viewInvestigationUrl,
     viewInvestigationActionLabel,
+    markInvestigationViewed,
   };
 };

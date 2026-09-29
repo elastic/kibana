@@ -14,6 +14,7 @@ import {
 const experimentalEnabled = jest.fn().mockResolvedValue(true);
 const experimentalDisabled = jest.fn().mockResolvedValue(false);
 const getAgentRegistry = jest.fn().mockResolvedValue({ get: jest.fn() });
+const getExecutionService = jest.fn();
 
 describe('updateConversationMetadataStepDefinition', () => {
   const baseInput = {
@@ -26,6 +27,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
 
@@ -48,6 +50,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
     const result = await definition.handler(
@@ -78,6 +81,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
     const result = await definition.handler(
@@ -103,6 +107,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
     const result = await definition.handler(createStepHandlerContext({ input: baseInput }));
@@ -117,6 +122,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
 
@@ -130,6 +136,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalEnabled,
     });
 
@@ -141,6 +148,7 @@ describe('updateConversationMetadataStepDefinition', () => {
     const definition = updateConversationMetadataStepDefinition({
       getConversationClient,
       getAgentRegistry,
+      getExecutionService,
       isExperimentalEnabled: experimentalDisabled,
     });
 
