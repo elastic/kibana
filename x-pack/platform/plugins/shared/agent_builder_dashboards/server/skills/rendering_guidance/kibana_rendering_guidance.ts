@@ -39,7 +39,7 @@ In Kibana, a dashboard request follows three stages: resolve inputs, generate (w
 - Never invent an \`attachment_id\`, panel \`id\`, or \`sectionId\`. Reuse values returned by prior tool results.
 - Describe the result in the user's terms: what the dashboard shows and which filters it offers. Do not explain how panels or controls are built, such as field mappings or why you picked one field over another.
 - If the generation result includes \`data.failures\`, explain which panel creations failed and report each returned \`type\`, \`identifier\`, and \`error\`.
-- \`data.skipped_controls\` lists controls left out because their field cannot back one. Mention them only if the user asked for those controls. Retry only with a field from \`available_fields\` that clearly matches the same intent.
+- \`data.skipped_controls\` lists controls left out because their field cannot back one. Mention a skipped control only when the user named that specific control (e.g. "add an HTTP method filter"); a general request for controls or filters does not count. Never mention skipped controls in progress updates between tool calls. Retry only with a field from \`available_fields\` that clearly matches the same intent.
 
 ## Rendering Edge Cases
 
