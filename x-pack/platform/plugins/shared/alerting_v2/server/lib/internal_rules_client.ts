@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
 import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type { BulkByIdsParams, BulkResponse } from './rules_client';
 import { toBulkError } from './rules_client/utils';
@@ -15,6 +17,7 @@ import type { InternalRulesClientApi, RulesClientApi } from '../types';
 /**
  * Builds the internal rules client. Rule ids are unique across spaces, so it finds
  * each rule's space and disables every space's rules through that space's client.
+ * Each rule is therefore read twice: once to find its space, once by the space client.
  */
 export const createInternalRulesClient = ({
   rulesSavedObjectService,
@@ -26,12 +29,20 @@ export const createInternalRulesClient = ({
 }): InternalRulesClientApi => ({
   async bulkDisableRules({ ids }: BulkByIdsParams): Promise<BulkResponse> {
     const uniqueIds = [...new Set(ids)];
+    if (uniqueIds.length > BULK_FILTER_MAX_RESOURCES) {
+      throw Boom.badRequest(
+        `Received ${uniqueIds.length} rule ids, exceeding the maximum of ${BULK_FILTER_MAX_RESOURCES} per request. Split the operation into multiple requests.`
+      );
+    }
+
     const found = await rulesSavedObjectService.findByIds(uniqueIds);
 
     const idsBySpace = new Map<SpaceId, string[]>();
     for (const { id, namespaces } of found) {
       const spaceId = asSpaceId(savedObjectNamespacesToSpaceId(namespaces));
-      idsBySpace.set(spaceId, [...(idsBySpace.get(spaceId) ?? []), id]);
+      const spaceRuleIds = idsBySpace.get(spaceId) ?? [];
+      spaceRuleIds.push(id);
+      idsBySpace.set(spaceId, spaceRuleIds);
     }
 
     let affectedCount = 0;

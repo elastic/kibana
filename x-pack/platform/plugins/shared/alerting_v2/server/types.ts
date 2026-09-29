@@ -65,6 +65,10 @@ export interface AlertingServerStart {
    * Returns a rules client that acts as the internal Kibana user across every space,
    * for system-initiated work with no user request. It only disables rules and
    * bypasses user authorization, so callers own the decision of which rules to disable.
+   *
+   * Unlike a user disable, `updatedBy` is `null`, the change history has no author,
+   * and `alerting.ruleDisabled` workflow triggers do not fire. A call accepts at most
+   * `BULK_FILTER_MAX_RESOURCES` rule ids.
    */
   getInternalRulesClient(): Promise<InternalRulesClientApi>;
 

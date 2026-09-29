@@ -63,11 +63,11 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
     // space, so the regular rules client code path runs without a user.
     const savedObjects = get(CoreStart('savedObjects'));
     const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
+    const internalClient = savedObjects.getUnsafeInternalClient({
+      includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
+    });
     const buildInternalScope = (spaceId: SpaceId) => {
       const scope = buildScope(createInternalUserRequest(spaceId), spaceId);
-      const internalClient = savedObjects.getUnsafeInternalClient({
-        includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
-      });
       const namespace = spaceIdToNamespace(spaces, spaceId);
       scope
         .bind(RuleSavedObjectsClientToken)
