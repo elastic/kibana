@@ -30,6 +30,7 @@ import { useAttackRunWorkflowContextMenuItems } from '../../../hooks/attacks/bul
 import { useIsInSecurityApp } from '../../../../common/hooks/is_in_security_app';
 import { AttacksActionMenu } from './attacks_action_menu';
 import { ATTACK_DISCOVERY_ACTION_IDS } from '../../../../common/constants/action_ids';
+import type { AttackToAttach } from '../../../../cases/attachments/attack';
 
 interface AttacksGroupTakeActionItemsProps {
   attack: AttackDiscoveryAlert;
@@ -157,11 +158,51 @@ export function AttacksGroupTakeActionItems({
     [attack, baseAttackProps]
   );
 
+  // Only attachable as a `security.attack` when we know which index the attack document came
+  // from — the attachment metadata requires it for the duplicate check and for status sync — so
+  // without it the menu falls back to the markdown-comment payload.
+  const attackToAttach = useMemo<Omit<AttackToAttach, 'alertsIndex'> | undefined>(
+    () =>
+      attack.index != null
+        ? {
+            id: attack.id,
+            index: attack.index,
+            title: attack.title,
+            // The narrative the activity card renders from. Still anonymised here; the payload
+            // builder de-anonymises and truncates it.
+            summaryMarkdown: attack.summaryMarkdown,
+            detailsMarkdown: attack.detailsMarkdown,
+            entitySummaryMarkdown: attack.entitySummaryMarkdown,
+            mitreAttackTactics: attack.mitreAttackTactics,
+            timestamp: attack.timestamp,
+            riskScore: attack.riskScore,
+            // Raw (possibly anonymised) ids plus the replacements that reverse them; the payload
+            // builder de-anonymises and dedupes.
+            alertIds: attack.alertIds,
+            replacements: attack.replacements,
+          }
+        : undefined,
+    [
+      attack.alertIds,
+      attack.detailsMarkdown,
+      attack.entitySummaryMarkdown,
+      attack.id,
+      attack.index,
+      attack.mitreAttackTactics,
+      attack.replacements,
+      attack.riskScore,
+      attack.summaryMarkdown,
+      attack.timestamp,
+      attack.title,
+    ]
+  );
+
   const { items: casesItems, panels: casePanels } = useAttackCaseContextMenuItems({
     closePopover,
     attacksWithCase,
     telemetrySource,
     title: attack.title,
+    attackToAttach,
   });
   const { items: viewInAiAssistantItems } = useAttackViewInAiAssistantContextMenuItems({
     attack,
