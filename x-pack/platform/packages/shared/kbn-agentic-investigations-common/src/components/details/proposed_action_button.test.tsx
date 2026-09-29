@@ -23,6 +23,7 @@ const wrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
 );
 
 const mockProposal: ApprovalProposal = {
+  title: 'Isolate cfo-mbp-14 — host isolation',
   comment: 'Isolate the host to cut off the replayed session.',
   impact: 'critical',
   status: 'pending',
