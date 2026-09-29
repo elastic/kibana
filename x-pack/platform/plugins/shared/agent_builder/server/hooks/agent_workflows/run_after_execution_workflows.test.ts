@@ -313,7 +313,7 @@ describe('runAfterExecutionWorkflows', () => {
   });
 
   describe('error handling (non-throwing — fire-and-forget)', () => {
-    it('logs and skips the workflow when its lookup throws', async () => {
+    it('runs with original inputs when the workflow lookup throws', async () => {
       const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
       getWorkflowMock.mockRejectedValue(new Error('lookup failed'));
 
@@ -328,7 +328,12 @@ describe('runAfterExecutionWorkflows', () => {
 
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('wf-1'));
       expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('lookup failed'));
-      expect(executeWorkflowMock).not.toHaveBeenCalled();
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowId: 'wf-1' })
+      );
+      expect(executeWorkflowMock.mock.calls[0][0].workflowParams).not.toHaveProperty(
+        'round_connector_id'
+      );
     });
 
     it('logs and skips the workflow when the lookup returns no workflow', async () => {
@@ -348,7 +353,7 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).not.toHaveBeenCalled();
     });
 
-    it('executes a later workflow after an earlier workflow lookup fails', async () => {
+    it('still passes the round model to a later workflow after a lookup fails', async () => {
       const { workflowApi, getWorkflowMock, getInternalServices } = createDeps();
       getWorkflowMock.mockRejectedValueOnce(new Error('lookup failed')).mockResolvedValueOnce(
         makeWorkflow({
@@ -366,8 +371,16 @@ describe('runAfterExecutionWorkflows', () => {
       ).resolves.toBeUndefined();
 
       expect(getWorkflowMock).toHaveBeenCalledTimes(2);
-      expect(executeWorkflowMock).toHaveBeenCalledTimes(1);
-      expect(executeWorkflowMock).toHaveBeenCalledWith(
+      expect(executeWorkflowMock).toHaveBeenCalledTimes(2);
+      expect(executeWorkflowMock).toHaveBeenNthCalledWith(
+        1,
+        expect.objectContaining({ workflowId: 'wf-1' })
+      );
+      expect(executeWorkflowMock.mock.calls[0][0].workflowParams).not.toHaveProperty(
+        'round_connector_id'
+      );
+      expect(executeWorkflowMock).toHaveBeenNthCalledWith(
+        2,
         expect.objectContaining({
           workflowId: 'wf-2',
           workflowParams: expect.objectContaining({ round_connector_id: 'connector-1' }),

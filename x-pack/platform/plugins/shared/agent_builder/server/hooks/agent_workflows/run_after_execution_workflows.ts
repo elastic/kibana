@@ -99,9 +99,8 @@ export const runAfterExecutionWorkflows = async ({
         }
       } catch (error) {
         logger.error(
-          `Post-execution workflow "${workflowId}" could not be read; skipping execution: ${error}`
+          `Post-execution workflow "${workflowId}" could not be inspected; running with original inputs: ${error}`
         );
-        continue;
       }
     }
 
