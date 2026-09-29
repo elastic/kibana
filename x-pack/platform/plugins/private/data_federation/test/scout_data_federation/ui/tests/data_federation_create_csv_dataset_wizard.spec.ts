@@ -122,8 +122,7 @@ test.describe(
       }
     });
 
-    /* eslint-disable jest/no-disabled-tests */
-    test.skip('creates a CSV dataset, validates preview, and saves', async ({
+    test('creates a CSV dataset, validates preview, and saves', async ({
       browserAuth,
       kbnClient,
       page,
@@ -139,7 +138,7 @@ test.describe(
       // Choose values that force settings into the request payload (non-default / non-empty).
       const settings = {
         delimiter: ';',
-        mode: 'Escaped',
+        mode: 'Quoted',
         headerRow: 'No',
         skipRows: '10',
         datetimeFormat: 'yyyy-MM-dd',
@@ -151,7 +150,7 @@ test.describe(
         trimSpaces: 'True',
         fileExclusions: '**/*.tmp',
         partitionDetection: 'Template',
-        partitionPath: 'year={year}/month={month}',
+        partitionPath: '{year}/{month}',
         errorMode: 'Skip row',
         maxErrors: '10',
         maxErrorRatio: '0.1',
@@ -200,11 +199,7 @@ test.describe(
 
       await test.step('navigate to Data Federation > Datasets', async () => {
         await pageObjects.dataFederation.goto();
-        await page.getByRole('tab', { name: 'Datasets' }).click();
-        await expect(page.getByRole('tab', { name: 'Datasets' })).toHaveAttribute(
-          'aria-selected',
-          'true'
-        );
+        await pageObjects.dataFederation.selectTab('Datasets');
         await expect(pageObjects.dataFederation.dataSetsTable).toBeVisible();
       });
 
@@ -322,8 +317,11 @@ test.describe(
 
         await page.getByTestId('createDatasetWizardDefineSchemaCard').click();
 
-        // Timeseries data (@timestamp)
-        await page.getByTestId('createDatasetWizardTimeseriesToggle').click();
+        // Timeseries data (@timestamp) is enabled by default.
+        await expect(page.getByTestId('createDatasetWizardTimeseriesToggle')).toHaveAttribute(
+          'aria-checked',
+          'true'
+        );
         await page.getByTestId('createDatasetWizardTimestampType').selectOption(timestamp.type);
         await page.getByTestId('createDatasetWizardTimestampPath').fill(timestamp.path);
         await createComboBoxCustomOption({

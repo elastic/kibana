@@ -60,11 +60,7 @@ test.describe('ES|QL Data Federation — mapping fields', { tag: tags.stateful.c
 
     await test.step('open the create dataset wizard on the mapping step', async () => {
       await dataFederation.goto();
-      await page.getByRole('tab', { name: 'Datasets' }).click();
-      await expect(page.getByRole('tab', { name: 'Datasets' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      await dataFederation.selectTab('Datasets');
 
       await dataFederation.openCreateDatasetWizardAtMapping({
         dataSourceName: createdDataSourceName,

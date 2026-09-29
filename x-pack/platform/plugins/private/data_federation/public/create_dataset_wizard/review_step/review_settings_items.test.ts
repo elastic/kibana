@@ -10,6 +10,7 @@ import {
   emptyCreateDatasetSettingsFormValues,
   type CreateDatasetSettingsFormValues,
 } from '../create_dataset_form_state';
+import { createDatasetWizardStrings } from '../create_dataset_wizard_i18n';
 import { getSettingsReviewItems } from './review_settings_items';
 import type { DatasetSettings } from '../../../common';
 
@@ -87,6 +88,23 @@ describe('getSettingsReviewItems', () => {
     expect(valueOf('header_row')).toBe('No');
     expect(valueOf('file_exclusions')).toBe('**/skip/*');
     expect(valueOf('max_errors')).toBe('5');
+  });
+
+  it.each([
+    ['auto', createDatasetWizardStrings.settingsPartitionDetectionAuto],
+    ['hive', createDatasetWizardStrings.settingsPartitionDetectionHive],
+    ['template', createDatasetWizardStrings.settingsPartitionDetectionTemplate],
+    ['none', createDatasetWizardStrings.settingsPartitionDetectionNone],
+  ] as const)('translates the %s partition detection value', (partitionDetection, label) => {
+    const { settings, unmanagedSettings } = allSettingsForFormat('csv');
+    const items = getSettingsReviewItems(
+      mergedSettingsFromForm(
+        { ...settings, partition_detection: partitionDetection },
+        unmanagedSettings
+      )
+    );
+
+    expect(items.find((item) => item.key === 'partition_detection')?.value).toBe(label);
   });
 
   it('marks configured settings as custom and leaves format unmarked', () => {

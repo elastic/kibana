@@ -62,6 +62,7 @@ const enumLabels: Partial<Record<SettingKey, Record<string, string>>> = {
   partition_detection: {
     auto: createDatasetWizardStrings.settingsPartitionDetectionAuto,
     hive: createDatasetWizardStrings.settingsPartitionDetectionHive,
+    template: createDatasetWizardStrings.settingsPartitionDetectionTemplate,
     none: createDatasetWizardStrings.settingsPartitionDetectionNone,
   },
   schema_resolution: {

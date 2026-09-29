@@ -69,11 +69,7 @@ test.describe('ES|QL Data Federation — datasets CRUD', { tag: tags.stateful.cl
     await test.step('navigate to the Data Federation management app and ensure the data sets tab is selected', async () => {
       await pageObjects.dataFederation.goto();
 
-      await page.getByRole('tab', { name: 'Datasets' }).click();
-      await expect(page.getByRole('tab', { name: 'Datasets' })).toHaveAttribute(
-        'aria-selected',
-        'true'
-      );
+      await pageObjects.dataFederation.selectTab('Datasets');
       await expect(pageObjects.dataFederation.dataSetsTable).toBeVisible();
     });
 

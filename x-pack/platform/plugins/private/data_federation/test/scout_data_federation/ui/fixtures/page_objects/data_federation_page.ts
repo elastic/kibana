@@ -85,6 +85,16 @@ export class DataFederationPage {
     await this.pageTitle.waitFor({ state: 'visible' });
   }
 
+  /** Selects the given app tab, clicking it only when it is not already the selected tab. */
+  async selectTab(name: 'Datasets' | 'Data sources'): Promise<void> {
+    const tab = this.page.getByRole('tab', { name, exact: true });
+    await tab.waitFor({ state: 'visible' });
+    if ((await tab.getAttribute('aria-selected')) !== 'true') {
+      await tab.click();
+    }
+    await this.page.getByRole('tab', { name, exact: true, selected: true }).waitFor();
+  }
+
   getDataSourceRow(dataSourceName: string) {
     return this.dataSourcesTable.locator('tr').filter({ hasText: dataSourceName });
   }
