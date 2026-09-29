@@ -239,6 +239,7 @@ export {
   MAX_SANDBOX_SECRETS_VERSION_LENGTH,
   validateSandboxSecretKey,
   validateSandboxSecretValue,
+  hasSandboxSecretValueLineBreak,
   type SandboxSecretEntry,
   type GetSandboxSecretsResponse,
   type PutSandboxSecretsRequest,

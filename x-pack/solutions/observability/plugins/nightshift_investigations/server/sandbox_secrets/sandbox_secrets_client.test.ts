@@ -446,6 +446,17 @@ describe('createSandboxSecretsClient', () => {
       });
     });
 
+    it('reports the missing encryption key rather than an unknown key when nothing is stored', async () => {
+      const { client, request } = setup({ canEncrypt: false });
+
+      const result = await client.resolveForCommand(request, ['A_KEY']);
+
+      expect(result).toEqual({
+        errorMessage: expect.stringContaining('Sandbox secrets are unavailable'),
+      });
+      expect(JSON.stringify(result)).not.toContain('Unknown sandbox secret');
+    });
+
     it('refuses users without the Nightshift read privilege without decrypting', async () => {
       const { client, getDecryptedAsInternalUser, checkPrivileges, request } = setup({
         storedValues: { A_KEY: 'value-123' },

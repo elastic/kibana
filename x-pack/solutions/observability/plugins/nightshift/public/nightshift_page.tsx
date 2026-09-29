@@ -14,7 +14,7 @@ import {
   OBSERVABILITY_OVERVIEW_APP_ID,
   SIGNIFICANT_EVENTS_APP_ID,
 } from '@kbn/deeplinks-observability';
-import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
+import { getNightshiftCapabilities, NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import { NightshiftAppHeader } from './app/app_header';
@@ -25,6 +25,7 @@ import { SandboxSecretsFlyout } from './sandbox_secrets/sandbox_secrets_flyout';
 export function NightshiftPage(): React.ReactElement | null {
   const {
     application,
+    featureFlags,
     http: { basePath },
     serverless,
     observabilityShared,
@@ -49,8 +50,11 @@ export function NightshiftPage(): React.ReactElement | null {
     [application, managementHref]
   );
 
+  // The secrets API is disabled (404) unless the nightshift.enabled flag is on.
   const canManageSandboxSecrets =
-    canManage && nightshiftInvestigations?.investigationsClient != null;
+    canManage &&
+    nightshiftInvestigations?.investigationsClient != null &&
+    featureFlags.getBooleanValue(NIGHTSHIFT_ENABLED_FLAG, false);
   const [isSandboxSecretsFlyoutOpen, setIsSandboxSecretsFlyoutOpen] = useState(false);
   const openSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(true), []);
   const closeSandboxSecretsFlyout = useCallback(() => setIsSandboxSecretsFlyoutOpen(false), []);

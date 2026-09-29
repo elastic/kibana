@@ -10,7 +10,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '../hooks/use_kibana';
-import { SandboxSecretsFlyout } from './sandbox_secrets_flyout';
+import { getValueError, SandboxSecretsFlyout } from './sandbox_secrets_flyout';
 
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
@@ -127,6 +127,16 @@ describe('SandboxSecretsFlyout', () => {
 
     expect(screen.getByText('Use between 8 and 16384 characters.')).toBeInTheDocument();
     expect(getPutBody()).toBeUndefined();
+  });
+
+  it('explains that values with line breaks are rejected', () => {
+    // Browsers strip line breaks from <input> values, so the helper is exercised directly.
+    expect(getValueError({ id: 'row', key: 'MULTILINE', value: 'first-line\nsecond-line' })).toBe(
+      'Enter the value on a single line, without line breaks.'
+    );
+    expect(getValueError({ id: 'row', key: 'CRLF', value: 'first-line\r\nsecond' })).toBe(
+      'Enter the value on a single line, without line breaks.'
+    );
   });
 
   it('disables editing when encryption is unavailable', async () => {

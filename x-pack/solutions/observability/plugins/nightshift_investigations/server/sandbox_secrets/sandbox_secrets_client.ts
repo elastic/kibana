@@ -298,6 +298,11 @@ export const createSandboxSecretsClient = ({
           logger.warn(`Refused sandbox secrets: ${deniedReason}`);
           return { errorMessage: deniedReason };
         }
+        // Report the missing encryption key even when no secrets object exists yet, rather than
+        // an unknown key: nothing can be stored until the key is configured.
+        if (!canEncrypt || !getDeps().encryptedSavedObjects) {
+          throw new SandboxSecretsUnavailableError();
+        }
         values = await getDecryptedValuesForRequest(request);
       } catch (err) {
         return { errorMessage: `Failed to load sandbox secrets: ${err.message}` };

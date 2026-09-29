@@ -32,6 +32,7 @@ import {
   MAX_SANDBOX_SECRETS,
   MAX_SANDBOX_SECRET_VALUE_LENGTH,
   MIN_SANDBOX_SECRET_VALUE_LENGTH,
+  hasSandboxSecretValueLineBreak,
   validateSandboxSecretKey,
   validateSandboxSecretValue,
   type SandboxSecretEntry,
@@ -39,7 +40,7 @@ import {
 import { useFetchSandboxSecrets } from './use_fetch_sandbox_secrets';
 import { useSaveSandboxSecrets } from './use_save_sandbox_secrets';
 
-interface SecretRow {
+export interface SecretRow {
   id: string;
   key: string;
   /** Key under which a value is already stored; absent for rows added in this session. */
@@ -65,7 +66,8 @@ const getKeyError = (row: SecretRow, rows: readonly SecretRow[]): string | undef
   return undefined;
 };
 
-const getValueError = (row: SecretRow): string | undefined => {
+/** Returns the localized validation error for a secret row's value, if any. */
+export const getValueError = (row: SecretRow): string | undefined => {
   if (row.value === '') {
     return hasStoredValue(row)
       ? undefined
@@ -73,16 +75,21 @@ const getValueError = (row: SecretRow): string | undefined => {
           defaultMessage: 'Enter a value for this secret.',
         });
   }
-  // Same bounds, checked the same way, as the server client and the route: validateSandboxSecretValue.
-  return validateSandboxSecretValue(row.value) !== undefined
-    ? i18n.translate('xpack.nightshift.sandboxSecrets.valueInvalidLengthError', {
+  // Same rules, checked the same way, as the server client and the route: validateSandboxSecretValue.
+  if (validateSandboxSecretValue(row.value) === undefined) {
+    return undefined;
+  }
+  return hasSandboxSecretValueLineBreak(row.value)
+    ? i18n.translate('xpack.nightshift.sandboxSecrets.valueLineBreakError', {
+        defaultMessage: 'Enter the value on a single line, without line breaks.',
+      })
+    : i18n.translate('xpack.nightshift.sandboxSecrets.valueInvalidLengthError', {
         defaultMessage: 'Use between {minLength} and {maxLength} characters.',
         values: {
           minLength: MIN_SANDBOX_SECRET_VALUE_LENGTH,
           maxLength: MAX_SANDBOX_SECRET_VALUE_LENGTH,
         },
-      })
-    : undefined;
+      });
 };
 
 const toEntries = (rows: readonly SecretRow[]): SandboxSecretEntry[] =>

@@ -102,6 +102,7 @@ apiTest.describe(
       });
       expect(kept).toHaveStatusCode(200);
       expect(kept.body.keys).toStrictEqual(['GITHUB_TOKEN']);
+      expectNoSecretValuesLeaked(kept.body);
 
       const stale = await putSandboxSecrets(apiClient, manageCookie, SPACE_ID, {
         entries: [{ key: 'GITHUB_TOKEN' }],

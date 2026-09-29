@@ -41,6 +41,9 @@ export const validateSandboxSecretKey = (key: string): string | undefined => {
   return undefined;
 };
 
+/** Whether a sandbox secret value contains a line break, which the value rules reject. */
+export const hasSandboxSecretValueLineBreak = (value: string): boolean => /[\r\n]/.test(value);
+
 /**
  * Returns a validation error message for a sandbox secret value, or `undefined` when it is
  * valid. The single source of truth for the value rules, so the API, the server client and the
@@ -49,7 +52,7 @@ export const validateSandboxSecretKey = (key: string): string | undefined => {
 export const validateSandboxSecretValue = (value: string): string | undefined => {
   // Output redaction matches a secret as one contiguous string, and tools like view_file reformat
   // output per line (e.g. prefixing line numbers), which would split a multi-line value past it.
-  if (/[\r\n]/.test(value)) {
+  if (hasSandboxSecretValueLineBreak(value)) {
     return 'must be a single line (no line breaks)';
   }
   if (value.length < MIN_SANDBOX_SECRET_VALUE_LENGTH) {
