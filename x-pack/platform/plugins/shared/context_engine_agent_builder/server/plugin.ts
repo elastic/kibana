@@ -13,6 +13,7 @@ import type {
   ContextEngineAgentBuilderStartDependencies,
 } from './types';
 import { registerContextEngineAgentBuilderIntegration } from './register_agent_builder_integration';
+import { createWorkflowProvider } from './workflow_provider';
 
 export class ContextEngineAgentBuilderPlugin
   implements
@@ -37,6 +38,12 @@ export class ContextEngineAgentBuilderPlugin
       agentBuilder: setupDeps.agentBuilder,
       workflowsManagement: setupDeps.workflowsManagement.management,
     });
+
+    // Closes the dependency inversion in `ContextEnginePluginSetup.registerWorkflowProvider`: this
+    // plugin is the one place that may depend on both Context Engine and workflows.
+    setupDeps.contextEngine.registerWorkflowProvider(
+      createWorkflowProvider(setupDeps.workflowsManagement.management)
+    );
 
     return {};
   }

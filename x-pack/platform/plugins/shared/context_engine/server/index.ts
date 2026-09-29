@@ -14,6 +14,12 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
+export type {
+  WorkflowProvider,
+  WorkflowProviderContext,
+  WorkflowSummary,
+  WorkflowValidationResult,
+} from './workflows/provider';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,

@@ -42,10 +42,10 @@ const proposedImprovementShape = {
     .describe('Classifier tags of the group this was derived from, e.g. `coverage_gap`.'),
   signal_ids: z
     .array(z.string().min(1).max(1024))
-    .min(1)
     .max(MAX_GROUP_SIGNAL_IDS)
+    .optional()
     .describe(
-      'Ids of the signals that evidence this change, taken from the groups you were given.'
+      'Ids of the signals that evidence this change, taken from the groups you were given. Required when a group supports the change, and omitted only when the evidence is the index itself — an indicator its source contradicts, an automation producing nothing — which a run over a window with no signals is reading.'
     ),
   target: z
     .object({
