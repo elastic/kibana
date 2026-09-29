@@ -748,7 +748,7 @@ export interface StaticLaunchUrlParams {
   provider: CloudProviders;
   /** Static quick-create URL from the package manifest (token-substituted). */
   staticUrl: string | undefined;
-  /** Stack parameters set on the URL, replacing any it already carries. */
+  /** Stack parameters set on a quick-create URL, replacing any it already carries. */
   stackParams?: StackParams;
 }
 
@@ -813,7 +813,11 @@ const getAwsStackUpdateUrl = (deploymentId: string, artifactUrl: string): string
   )}&templateURL=${encodeURIComponent(artifactUrl)}`;
 };
 
-/** Console launch URL for the package's static template, with the stack parameters set. AWS only. */
+/**
+ * Console launch URL for the package's static template, with the stack parameters set on a
+ * quick-create link. Any other URL is returned unchanged: extra query params could invalidate a
+ * signed template URL. AWS only.
+ */
 export const getStaticLaunchUrl = ({
   provider,
   staticUrl,
@@ -821,6 +825,9 @@ export const getStaticLaunchUrl = ({
 }: StaticLaunchUrlParams): string | undefined => {
   if (provider !== AWS_PROVIDER || !staticUrl) {
     return undefined;
+  }
+  if (!TEMPLATE_URL_PARAM_REGEX.test(staticUrl)) {
+    return staticUrl;
   }
   return setQuickCreateStackParams(staticUrl, stackParams);
 };

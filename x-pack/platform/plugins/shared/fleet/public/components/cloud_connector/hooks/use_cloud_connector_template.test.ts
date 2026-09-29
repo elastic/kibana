@@ -142,6 +142,22 @@ describe('useCloudConnectorTemplate', () => {
       expect(params.get('param_ElasticResourceId')).toBe('kibana-component-id');
     });
 
+    it('links to a static URL that is not a quick-create link unchanged', () => {
+      const { result } = renderHook(() =>
+        useCloudConnectorTemplate({
+          ...HOOK_PARAMS,
+          cloud: { ...CLOUD, organizationId: '2070044029' },
+          iacTemplateUrl: 'https://static.example/template.yml',
+        })
+      );
+
+      const { launchButtonProps } = result.current;
+      if (!('href' in launchButtonProps)) {
+        throw new Error('expected href launch button props');
+      }
+      expect(launchButtonProps.href).toBe('https://static.example/template.yml');
+    });
+
     it('is disabled when no static template URL can be built', () => {
       const { result } = renderHook(() =>
         useCloudConnectorTemplate({ ...HOOK_PARAMS, iacTemplateUrl: undefined })

@@ -1587,6 +1587,18 @@ describe('IaC launch URL helpers', () => {
     expect(new URLSearchParams(url?.split('?')[1]).get('param_X')).toBe('$&$1');
   });
 
+  it('getStaticLaunchUrl leaves a URL that is not a quick-create link unchanged', () => {
+    const rawTemplateUrl = 'https://static.example/t.yml?X-Amz-Signature=abc';
+
+    expect(
+      getStaticLaunchUrl({
+        provider: 'aws',
+        staticUrl: rawTemplateUrl,
+        stackParams: { ElasticOrganizationId: '2070044029' },
+      })
+    ).toBe(rawTemplateUrl);
+  });
+
   it('getStaticLaunchUrl returns undefined when there is no static URL', () => {
     expect(
       getStaticLaunchUrl({
