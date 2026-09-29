@@ -11,6 +11,7 @@ import type { UiSettingsParams } from '@kbn/core/types';
 import type { UiSettingsServiceSetup } from '@kbn/core-ui-settings-server';
 import {
   ALERTING_V2_ENABLED_SETTING_ID,
+  ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID,
   ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID,
   type AlertingAdvancedSettingId,
   type AlertingAdvancedSettingValueMap,
@@ -43,8 +44,25 @@ export const alertingGlobalAdvancedSettings = {
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<typeof ALERTING_V2_ENABLED_SETTING_ID>;
 
-// Gates experimental Alerting V2 features independently for each Kibana space.
 export const alertingSpaceAdvancedSettings = {
+  [ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID]: {
+    category: [ALERTING_CATEGORY],
+    name: i18n.translate('xpack.alertingVTwo.showStandardObservabilityAlertsPageSettingName', {
+      defaultMessage: 'Show standard Observability alerts page',
+    }),
+    type: 'boolean',
+    value: false,
+    description: i18n.translate(
+      'xpack.alertingVTwo.showStandardObservabilityAlertsPageSettingDescription',
+      {
+        defaultMessage:
+          'Show the standard Observability alerts page in navigation. Only shows alerts from standard alerting rules.',
+      }
+    ),
+    schema: schema.boolean(),
+    requiresPageReload: true,
+    experimental: true,
+  },
   [ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID]: {
     category: [ALERTING_CATEGORY],
     name: i18n.translate('xpack.alertingV2.experimentalFeaturesSettingName', {
@@ -60,7 +78,8 @@ export const alertingSpaceAdvancedSettings = {
     experimental: true,
   },
 } satisfies AlertingV2AdvancedSettingsRegistration<
-  typeof ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
+  | typeof ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID
+  | typeof ALERTING_V2_EXPERIMENTAL_FEATURES_SETTING_ID
 >;
 
 export const registerAlertingAdvancedSettings = (uiSettings: UiSettingsServiceSetup): void => {
