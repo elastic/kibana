@@ -1097,22 +1097,39 @@ agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation',
 
 ### Conversation details menu actions
 
-`openConversationDetails` accepts optional `menuActions`, rendered as icon buttons in the flyout
-menu bar before the close button. Each entry is an `EuiFlyoutMenuAction` (`iconType`,
-`aria-label`, and `onClick` or `href`, plus optional `toolTipContent`, `isDisabled` and
-`isLoading`). They are fixed when the flyout opens:
+Menu actions are icon buttons rendered in the flyout menu bar before the close button. Each entry
+is an `EuiFlyoutMenuAction` (`iconType`, `aria-label`, and `onClick` or `href`, plus optional
+`toolTipContent`, `isDisabled` and `isLoading`). Each flyout takes them from a different place:
+
+- The in-chat flyout (opened from the chat's "Chat info" button) uses the template's
+  `detailsFlyout.menuActions`, re-evaluated when the conversation updates.
+- Flyouts opened with `openConversationDetails` use only its `menuActions` option, fixed when the
+  flyout opens. They don't read the template's `menuActions`, because the template isn't known
+  until the conversation has loaded.
+
+Define the actions once and pass the same function to both:
 
 ```tsx
+const getMenuActions = (conversationId: string): EuiFlyoutMenuAction[] => [
+  {
+    iconType: 'link',
+    'aria-label': copyLinkLabel,
+    toolTipContent: copyLinkLabel,
+    onClick: () => copyToClipboard(getShareUrl(conversationId)),
+  },
+];
+
+agentBuilder.conversationTemplates.registerTemplateUIDefinition('investigation', () => ({
+  name: investigationTemplateName,
+  tabs: ['investigation.details'],
+  detailsFlyout: {
+    menuActions: ({ conversation }) => getMenuActions(conversation.id),
+  },
+}));
+
 agentBuilder.openConversationDetails({
   conversationId,
-  menuActions: [
-    {
-      iconType: 'link',
-      'aria-label': copyLinkLabel,
-      toolTipContent: copyLinkLabel,
-      onClick: () => copyToClipboard(getShareUrl(conversationId)),
-    },
-  ],
+  menuActions: getMenuActions(conversationId),
 });
 ```
 

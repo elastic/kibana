@@ -268,13 +268,23 @@ export const ConversationDetailsFlyout = ({ onClose }: ConversationDetailsFlyout
   const { conversation, isLoading } = useConversation();
   const { conversationTemplatesService } = useAgentBuilderServices();
 
+  const trailingActions = useMemo(() => {
+    if (!conversation?.template_id) {
+      return undefined;
+    }
+    const definition = conversationTemplatesService.getTemplateUIDefinition(
+      conversation.template_id
+    );
+    return definition?.detailsFlyout?.menuActions?.({ conversation });
+  }, [conversation, conversationTemplatesService]);
+
   return (
     <EuiFlyout
       onClose={onClose}
       session="start"
       historyKey={CONVERSATION_DETAILS_FLYOUT_HISTORY_KEY}
       flyoutMenuDisplayMode="always"
-      flyoutMenuProps={{ title: FLYOUT_TITLE }}
+      flyoutMenuProps={{ title: FLYOUT_TITLE, trailingActions }}
       size="s"
       type="push"
       paddingSize="m"
