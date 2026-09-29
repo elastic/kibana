@@ -11,6 +11,10 @@ import { parseDurationToMs } from '../../../infra/time';
 
 const MIN_HISTORY_SNAPSHOT_FREQUENCY_MS = 60 * 60 * 1000; // 1h
 
+const MAX_HISTORY_SNAPSHOT_FREQUENCY_INTERVAL_DAYS = 1000;
+const MAX_HISTORY_SNAPSHOT_FREQUENCY_MS =
+  MAX_HISTORY_SNAPSHOT_FREQUENCY_INTERVAL_DAYS * 24 * 60 * 60 * 1000;
+
 function validateHistorySnapshotParams(
   data: z.infer<typeof HistorySnapshotBodyParams> | undefined,
   ctx: z.RefinementCtx
@@ -20,14 +24,15 @@ function validateHistorySnapshotParams(
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       path: ['frequency'],
-      message: 'must be a valid duration of at least 1 hour (e.g. 1h, 24h)',
+      message: `must be a valid duration between 1 hour and ${MAX_HISTORY_SNAPSHOT_FREQUENCY_INTERVAL_DAYS} days (e.g. 1h, 24h, 30d)`,
     });
   }
 }
 
 function isValidHistorySnapshotFrequency(frequency: string): boolean {
   try {
-    return parseDurationToMs(frequency) >= MIN_HISTORY_SNAPSHOT_FREQUENCY_MS;
+    const ms = parseDurationToMs(frequency);
+    return ms >= MIN_HISTORY_SNAPSHOT_FREQUENCY_MS && ms <= MAX_HISTORY_SNAPSHOT_FREQUENCY_MS;
   } catch {
     return false;
   }

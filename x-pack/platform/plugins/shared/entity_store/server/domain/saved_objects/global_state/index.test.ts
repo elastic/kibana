@@ -264,6 +264,33 @@ describe('EntityStoreGlobalStateClient', () => {
       expect(state.historySnapshot.lastExecutionTimestamp).toBe('2026-01-01T00:00:00.000Z');
     });
 
+    it('clears lastError when it is explicitly set to null', async () => {
+      mockStored({
+        historySnapshot: {
+          status: 'started',
+          frequency: '24h',
+          retentionDays: 30,
+          lastError: { message: 'previous failure', timestamp: '2026-01-01T00:00:00.000Z' },
+        },
+      });
+
+      const state = await client.update({
+        historySnapshot: { lastExecutionTimestamp: '2026-06-01T00:00:00.000Z', lastError: null },
+      });
+
+      expect(state.historySnapshot.lastError).toBeUndefined();
+      expect(state.historySnapshot.lastExecutionTimestamp).toBe('2026-06-01T00:00:00.000Z');
+      expect(state.historySnapshot.status).toBe('started');
+      expect(soClient.update).toHaveBeenCalledWith(
+        EntityStoreGlobalStateTypeName,
+        soId,
+        expect.objectContaining({
+          historySnapshot: expect.not.objectContaining({ lastError: expect.anything() }),
+        }),
+        expect.anything()
+      );
+    });
+
     it('leaves history snapshot fields out of a partial update unchanged', async () => {
       mockStored({
         historySnapshot: {

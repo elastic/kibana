@@ -219,10 +219,7 @@ describe('HistorySnapshotClient', () => {
         })
       );
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        historySnapshot: expect.objectContaining({
-          lastExecutionTimestamp: expect.any(String),
-          lastError: undefined,
-        }),
+        historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
       });
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -258,10 +255,7 @@ describe('HistorySnapshotClient', () => {
       }
       expect(mockUpdateByQueryWithScript).not.toHaveBeenCalled();
       expect(mockGlobalStateClient.update).toHaveBeenCalledWith({
-        historySnapshot: expect.objectContaining({
-          lastExecutionTimestamp: expect.any(String),
-          lastError: undefined,
-        }),
+        historySnapshot: { lastExecutionTimestamp: expect.any(String), lastError: null },
       });
       expect(mockDeleteExpiredHistorySnapshots).toHaveBeenCalledTimes(1);
     });

@@ -337,12 +337,13 @@ export class HistorySnapshotClient {
 
   private async updateGlobalStateOnSuccess(): Promise<void> {
     try {
-      const current = await this.globalStateClient.findOrThrow();
+      // Write only the fields this method changes. Spreading the full current state would
+      // snapshot frequency/retentionDays at read time; a conflict retry would then replay
+      // those stale values over a concurrent config update.
       await this.globalStateClient.update({
         historySnapshot: {
-          ...current.historySnapshot,
           lastExecutionTimestamp: moment.utc().toISOString(),
-          lastError: undefined,
+          lastError: null,
         },
       });
     } catch (updateErr) {
@@ -354,10 +355,9 @@ export class HistorySnapshotClient {
 
   private async updateGlobalStateOnError(error: Error): Promise<void> {
     try {
-      const current = await this.globalStateClient.findOrThrow();
+      // Write only the fields this method changes — same reasoning as updateGlobalStateOnSuccess.
       await this.globalStateClient.update({
         historySnapshot: {
-          ...current.historySnapshot,
           lastError: {
             message: error.message,
             timestamp: moment.utc().toISOString(),
