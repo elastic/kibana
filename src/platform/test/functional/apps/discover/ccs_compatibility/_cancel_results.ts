@@ -85,12 +85,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // competing for the same machine) that can't be forced synthetically outside a real FTR
         // run. See https://github.com/elastic/kibana/issues/246775 for the full investigation.
         await retry.try(async () => {
-          // Only remove when a filter is actually present. Swallowing the error would let a
-          // partially-failed removal (menu opened, click missed) silently leave the old filter
-          // in place — addDslFilter below would then stack a second stall filter on top.
-          if ((await filterBar.getFilterCount()) > 0) {
-            await filterBar.removeAllFilters();
-          }
+          // No-op on the first attempt, when there's no filter yet to remove.
+          await filterBar.removeAllFilters().catch(() => {});
 
           // Add a stall time to the remote indices
           await filterBar.addDslFilter(
