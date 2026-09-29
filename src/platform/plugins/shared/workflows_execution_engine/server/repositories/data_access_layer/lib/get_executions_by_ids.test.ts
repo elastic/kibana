@@ -111,7 +111,11 @@ describe('getExecutionsByIds', () => {
       ],
     } as never);
 
-    const result = await getExecutionsByIds({
+    const result = await getExecutionsByIds<{
+      id: string;
+      spaceId: string;
+      status: string;
+    }>({
       esClient,
       ids: ['step-1'],
       defaultIndex: DEFAULT_INDEX,
