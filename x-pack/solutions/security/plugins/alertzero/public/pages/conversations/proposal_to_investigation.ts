@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { getProposalTitle } from '@kbn/proposals-ui';
 import type { ProposalConfidence, ProposalImpact } from '@kbn/proposals-common';
 import type { Investigation, RecommendedAction } from '@kbn/agentic-investigations-common';
 import type { ProposalItem } from '../../../common/proposals/list';
@@ -110,9 +111,12 @@ export const proposalToInvestigation = (proposal: ProposalItem): Investigation =
     recordId: proposal.id,
     conversationId: proposal.conversationId,
     summary: proposal.comment,
-    // The proposal's own title when it has one: the same precedence the card
-    // and the attachment use, so one proposal reads the same on every surface.
-    primaryActionLabel: proposal.title ?? proposal.action?.name,
+    // The shared helper, so one proposal reads the same on every surface —
+    // except that a proposal naming nothing gets no label at all here, because
+    // this doubles as the row button's name and the helper's "no action"
+    // fallback reads as an instruction rather than something to press.
+    primaryActionLabel:
+      proposal.title ?? proposal.actionWorkflowId ? getProposalTitle(proposal) : undefined,
     // `conversationAssignees` is an array but `Investigation.assignee` is singular,
     // because the flyout header renders one avatar. First entry wins, as in the
     // conversation adapter.

@@ -1397,7 +1397,7 @@ describe('ProposalsService', () => {
       expect(reviseArgs.document).toMatchObject({ title: 'Tune the Okta rule' });
     });
 
-    it('does not inherit a two-attempts-ago failure as if it were the last one', async () => {
+    it('keeps the failure the predecessor was re-offered for', async () => {
       // The predecessor is pending, so it never ran: whatever failure it was
       // itself created to re-offer is not this revision's predecessor error.
       const storage = createStorage(
@@ -1408,7 +1408,9 @@ describe('ProposalsService', () => {
       await service.revise({ id: 'proposal-1' }, SPACE_ID, request);
 
       const [[reviseArgs]] = storage.index.mock.calls;
-      expect(reviseArgs.document.previousExecutionError).toBeUndefined();
+      // A revision corrects a proposal without running anything, so the
+      // retry warning an analyst is about to act on must survive the edit.
+      expect(reviseArgs.document.previousExecutionError).toBe('rule API rejected it');
     });
 
     it('creates a new pending revision and marks the original superseded', async () => {

@@ -16,7 +16,10 @@ import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
  * flyout's proposed-action row), so they title it identically.
  */
 export const getProposalTitle = (proposal: ApprovalProposal): string =>
-  proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
+  proposal.title ??
+  proposal.action?.name ??
+  proposal.actionWorkflowId ??
+  APPROVAL_MODAL_TRANSLATIONS.noAction;
 
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>

@@ -706,11 +706,9 @@ export class ProposalsService {
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
-      // The predecessor's, by the same definition `clone()` uses. A revision an
-      // analyst asked for supersedes a pending proposal, which has no error, so
-      // this clears the one the predecessor itself inherited rather than
-      // carrying a two-attempts-ago failure forward as if it were the last.
-      previousExecutionError: original.executionError,
+      // `previousExecutionError` rides along with the spread untouched: a
+      // revision corrects a proposal, it does not run anything, so the last
+      // attempt to fail is still the one the predecessor was re-offered for.
       // Blanked like `create()` does, so a caller clearing the title gets the
       // action's name back rather than an empty label: every renderer falls
       // back with `??`, which an empty string satisfies.

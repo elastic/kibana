@@ -8,6 +8,7 @@
 import {
   getProposalCaption,
   getProposalDecision,
+  getProposalTitle,
   getProposalTone,
   isProposalExpired,
 } from './proposal_helpers';
@@ -19,6 +20,25 @@ const proposal = (overrides: Partial<ApprovalProposal> = {}): ApprovalProposal =
   status: 'pending',
   expired: false,
   ...overrides,
+});
+
+describe('getProposalTitle', () => {
+  it("prefers the proposal's own title over the action's name", () => {
+    expect(
+      getProposalTitle(
+        proposal({ title: 'Tune the Okta rule', action: { name: 'Edit rule' } as never })
+      )
+    ).toBe('Tune the Okta rule');
+  });
+
+  it('falls back through the action name and then its workflow id', () => {
+    expect(getProposalTitle(proposal({ action: { name: 'Edit rule' } as never }))).toBe(
+      'Edit rule'
+    );
+    expect(getProposalTitle(proposal({ actionWorkflowId: 'system-edit-rule' }))).toBe(
+      'system-edit-rule'
+    );
+  });
 });
 
 describe('getProposalTone', () => {

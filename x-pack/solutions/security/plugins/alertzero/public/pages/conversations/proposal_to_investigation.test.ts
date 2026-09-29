@@ -48,6 +48,25 @@ describe('proposalToInvestigation', () => {
       expect(result.primaryActionLabel).toBe('Isolate host');
     });
 
+    it('labels the row with the proposal title over the action name', () => {
+      const result = proposalToInvestigation({
+        ...baseProposal,
+        title: 'Tune the Okta rule',
+        action: { name: 'Edit rule' } as ProposalWithMetadata['action'],
+        actionWorkflowId: 'system-alertzero-action-edit-rule',
+      });
+
+      expect(result.primaryActionLabel).toBe('Tune the Okta rule');
+    });
+
+    // The label doubles as the row button's name, so a proposal naming nothing
+    // gets none rather than the shared helper's "no action" sentence.
+    it('leaves the row unlabelled when there is neither a title nor an action', () => {
+      const result = proposalToInvestigation({ ...baseProposal });
+
+      expect(result.primaryActionLabel).toBeUndefined();
+    });
+
     it('falls back to a placeholder when the conversation title could not be read', () => {
       const result = proposalToInvestigation({ ...baseProposal });
       expect(result.title).toBe('Untitled investigation');

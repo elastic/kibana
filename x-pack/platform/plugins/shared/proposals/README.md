@@ -86,7 +86,7 @@ AlertZero's Workers do not call `system-create-proposal`. They call `system-crea
 
 Two properties make this safe to copy for another producer:
 
-- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h against the gate's `168h` ceiling. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and a cancelled parent runs no handler, so the proposal strands `pending`.
+- **It must outlive the gate it waits on.** `workflow.execute` parks the caller in `WAITING_FOR_CHILD` for as long as the decision is held, and the engine's default workflow timeout is 6h. Because `expiresIn` is caller-configurable there is no fixed window to size against, so the bridge tracks the gate's `52w` sentinel rather than any particular deadline. A bridge that leaves `settings.timeout` unset is cancelled mid-decision, and a cancelled parent runs no handler, so the proposal strands `pending`.
 - **It must re-declare the gate's `outputs`.** Callers read `steps.<step>.output.decision`, `.status` and `.proposalId`. A bridge that does not forward them leaves every one of those expressions undefined — falsy, so approval branches simply stop firing, with nothing logged.
 
 `create_proposal.test.ts` next to the bridge pins both, plus input parity with the gate, so an input added to `system-create-proposal` fails the build rather than being silently dropped at the hop. `proposal_origin.test.ts` in the AlertZero plugin sweeps every AlertZero definition to keep the bridge the only thing that reaches the gate.

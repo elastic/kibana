@@ -9,6 +9,7 @@
 
 import { parse } from 'yaml';
 import ALERTZERO_CREATE_PROPOSAL_YAML from './create_proposal.yaml';
+import { parseDuration } from '../../../common/utils';
 import { CREATE_PROPOSAL_WORKFLOW_ID } from '../proposals';
 import CREATE_PROPOSAL_YAML from '../proposals/create_proposal.yaml';
 
@@ -34,17 +35,6 @@ interface ParsedWorkflow {
 
 const bridge = parse(ALERTZERO_CREATE_PROPOSAL_YAML) as ParsedWorkflow;
 const gate = parse(CREATE_PROPOSAL_YAML) as ParsedWorkflow;
-
-const durationToMs = (duration: string): number => {
-  const match = /^(\d+)(ms|[smhdw])$/.exec(duration);
-  if (!match) {
-    throw new Error(`Unparseable duration: ${duration}`);
-  }
-  const unit = { ms: 1, s: 1000, m: 60_000, h: 3_600_000, d: 86_400_000, w: 604_800_000 }[
-    match[2]
-  ] as number;
-  return Number(match[1]) * unit;
-};
 
 const inputsOf = (workflow: ParsedWorkflow) => workflow.triggers[0].inputs ?? {};
 const propertiesOf = (workflow: ParsedWorkflow) => inputsOf(workflow).properties ?? {};
@@ -141,7 +131,7 @@ describe('AlertZero create proposal bridge', () => {
   // analyst, and a cancelled parent runs no handler, so the proposal would
   // strand `pending`.
   it('outlives the gate it waits on', () => {
-    const ceiling = durationToMs(bridge.settings?.timeout ?? '');
-    expect(ceiling).toBeGreaterThanOrEqual(durationToMs(gate.settings?.timeout ?? ''));
+    const ceiling = parseDuration(bridge.settings?.timeout ?? '');
+    expect(ceiling).toBeGreaterThanOrEqual(parseDuration(gate.settings?.timeout ?? ''));
   });
 });
