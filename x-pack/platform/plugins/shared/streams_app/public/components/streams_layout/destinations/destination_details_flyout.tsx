@@ -72,6 +72,53 @@ export const DestinationDeleteFooter = ({
   );
 };
 
+export const UnitDestinationFlyout = ({
+  destinationName,
+  onClose,
+  onDelete,
+  isDeleteDisabled = false,
+}: {
+  destinationName: string;
+  onClose: () => void;
+  onDelete: () => void;
+  isDeleteDisabled?: boolean;
+}) => {
+  const flyoutTitleId = useGeneratedHtmlId({ prefix: 'streamsUnitDestinationFlyoutTitle' });
+
+  return (
+    <EuiFlyout
+      ownFocus
+      aria-labelledby={flyoutTitleId}
+      onClose={onClose}
+      size="m"
+      data-test-subj="streamsUnitDestinationFlyout"
+    >
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle size="s">
+          <h2 id={flyoutTitleId}>{destinationName}</h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+      <EuiFlyoutBody>
+        <EuiText data-test-subj="streamsUnitDestinationFlyoutPlaceholder">
+          <p>
+            <FormattedMessage
+              id="xpack.streams.destinations.flyout.provisioningPlaceholderDescription"
+              defaultMessage="Placeholder until destination resources can be provisioned locally"
+            />
+          </p>
+        </EuiText>
+      </EuiFlyoutBody>
+      <EuiFlyoutFooter>
+        <DestinationDeleteFooter
+          destinationName={destinationName}
+          isDisabled={isDeleteDisabled}
+          onDelete={onDelete}
+        />
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+};
+
 export const DestinationDetailsFlyout = ({
   destinations,
   destination,

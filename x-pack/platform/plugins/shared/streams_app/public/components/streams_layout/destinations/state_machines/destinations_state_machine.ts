@@ -8,7 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, not, sendTo, setup, stateIn } from 'xstate';
 import type { ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import { collectUnitComponentIds } from '@kbn/streams-schema';
 import { notifyUnitUpdated } from '../../notify_unit_updated';
@@ -82,6 +82,8 @@ export type DestinationsStateEvent =
   | { type: 'destination.create' }
   | { type: 'destination.delete'; destinationId: string }
   | { type: 'destination.deleteMany'; destinationIds: string[] }
+  | { type: 'unconfiguredNode.remove'; nodeId: string }
+  | { type: 'unconfiguredNodes.set'; nodeIds: string[] }
   | { type: 'destination.view'; destinationId: string }
   | { type: 'storageKind.select'; storageKind: DestinationStorageKind }
   | { type: 'destinationName.change'; destinationName: string }
@@ -193,6 +195,19 @@ export const destinationsStateMachine = setup({
       creationContext: undefined,
       persistenceError: undefined,
     }),
+    removeUnconfiguredNode: assign(({ context, event }) => {
+      if (event.type !== 'unconfiguredNode.remove') {
+        return {};
+      }
+      return {
+        unconfiguredNodeIds: context.unconfiguredNodeIds.filter(
+          (nodeId) => nodeId !== event.nodeId
+        ),
+      };
+    }),
+    setUnconfiguredNodes: assign(({ context, event }) =>
+      event.type === 'unconfiguredNodes.set' ? { unconfiguredNodeIds: event.nodeIds } : {}
+    ),
     selectStorageKind: assign(({ context, event }) => {
       if (event.type !== 'storageKind.select' || !context.creationContext) {
         return {};
@@ -422,6 +437,17 @@ export const destinationsStateMachine = setup({
     },
     hasDestinationsToDelete: ({ event }) =>
       event.type === 'destination.deleteMany' && event.destinationIds.length > 0,
+    removesOpenPlaceholder: ({ context, event }) =>
+      event.type === 'unconfiguredNode.remove' &&
+      event.nodeId === context.creationContext?.associatedUnconfiguredNodeId,
+    setDropsOpenPlaceholder: ({ context, event }) => {
+      const associatedNodeId = context.creationContext?.associatedUnconfiguredNodeId;
+      return (
+        event.type === 'unconfiguredNodes.set' &&
+        associatedNodeId !== undefined &&
+        !event.nodeIds.includes(associatedNodeId)
+      );
+    },
     loadedUnitRemovedViewedDestination: ({ context, event }) =>
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
@@ -459,12 +485,29 @@ export const destinationsStateMachine = setup({
       guard: and(['unitSaveIsIdle', 'hasDestinationsToDelete']),
       actions: ['deleteDestinations', 'notifyParentDeleteMany'],
     },
+    'unconfiguredNode.remove': [
+      {
+        guard: and(['removesOpenPlaceholder', not(stateIn({ configuring: 'persisting' }))]),
+        target: '#configuringIdle',
+        actions: ['removeUnconfiguredNode', 'clearCreate'],
+      },
+      { actions: 'removeUnconfiguredNode' },
+    ],
+    'unconfiguredNodes.set': [
+      {
+        guard: and(['setDropsOpenPlaceholder', not(stateIn({ configuring: 'persisting' }))]),
+        target: '#configuringIdle',
+        actions: ['setUnconfiguredNodes', 'clearCreate'],
+      },
+      { actions: 'setUnconfiguredNodes' },
+    ],
   },
   states: {
     configuring: {
       initial: 'idle',
       states: {
         idle: {
+          id: 'configuringIdle',
           on: {
             'modal.openCreate': {
               guard: 'unitSaveIsIdle',

@@ -8,15 +8,12 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { StreamFlyout } from '../../stream_flyout';
 import { CreateDestinationModal } from './create_destination_modal';
-import { DestinationDeleteFooter } from './destination_details_flyout';
+import { UnitDestinationFlyout } from './destination_details_flyout';
 import { getDestinationSortableValue, DestinationsGrid } from './destinations_grid';
 import { DestinationsToolbar } from './destinations_toolbar';
 import { useDestinationsTable } from './destinations_context';
 import { LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
-
-const DESTINATION_FLYOUT_TABS = ['overview', 'quality'] as const;
 
 export const DestinationsTab = () => {
   const destinationsController = useDestinationsTable();
@@ -122,21 +119,15 @@ export const DestinationsTab = () => {
         <CreateDestinationModal destinations={destinationsController} onClose={closeCreateModal} />
       )}
       {selectedDestination && (
-        <StreamFlyout
+        <UnitDestinationFlyout
           key={selectedDestination.id}
-          name={selectedDestination.index}
+          destinationName={selectedDestination.name}
           onClose={closeDestinationFlyout}
-          visibleTabs={DESTINATION_FLYOUT_TABS}
-          footer={
-            <DestinationDeleteFooter
-              destinationName={selectedDestination.name}
-              isDisabled={isUnitSaving}
-              onDelete={() => {
-                destinationsController.deleteDestination(selectedDestination.id);
-                closeDestinationFlyout();
-              }}
-            />
-          }
+          isDeleteDisabled={isUnitSaving}
+          onDelete={() => {
+            destinationsController.deleteDestination(selectedDestination.id);
+            closeDestinationFlyout();
+          }}
         />
       )}
     </>

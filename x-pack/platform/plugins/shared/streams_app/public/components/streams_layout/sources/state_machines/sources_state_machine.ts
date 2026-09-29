@@ -8,7 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { and, assign, fromPromise, sendTo, setup, stateIn } from 'xstate';
+import { and, assign, fromPromise, not, sendTo, setup, stateIn } from 'xstate';
 import type { ActionArgs, ActorRefFrom, AnyActorRef, MachineImplementationsFrom } from 'xstate';
 import {
   createSourceApiKeyServices,
@@ -134,6 +134,8 @@ export type SourcesStateEvent =
   | { type: 'source.create' }
   | { type: 'source.delete'; sourceId: string }
   | { type: 'source.deleteMany'; sourceIds: string[] }
+  | { type: 'unconfiguredNode.remove'; nodeId: string }
+  | { type: 'unconfiguredNodes.set'; nodeIds: string[] }
   | { type: 'source.view'; sourceId: string }
   | { type: 'apiKey.generate'; sourceId: string }
   | { type: 'apiKey.delete'; sourceId: string; apiKeyId: string }
@@ -472,6 +474,19 @@ export const sourcesStateMachine = setup({
       revealedApiKey: undefined,
       apiKeyError: undefined,
     }),
+    removeUnconfiguredNode: assign(({ context, event }) => {
+      if (event.type !== 'unconfiguredNode.remove') {
+        return {};
+      }
+      return {
+        unconfiguredNodeIds: context.unconfiguredNodeIds.filter(
+          (nodeId) => nodeId !== event.nodeId
+        ),
+      };
+    }),
+    setUnconfiguredNodes: assign(({ context, event }) =>
+      event.type === 'unconfiguredNodes.set' ? { unconfiguredNodeIds: event.nodeIds } : {}
+    ),
     clearFailedCreate: assign(({ context }) => {
       const sourceId = context.creationContext?.createdSource?.id;
       if (!sourceId || context.apiKeyError?.operation !== 'persist') {
@@ -868,6 +883,17 @@ export const sourcesStateMachine = setup({
       event.type === 'source.delete' && event.sourceId === context.selectedSourceId,
     hasSourcesToDelete: ({ event }) =>
       event.type === 'source.deleteMany' && event.sourceIds.length > 0,
+    removesOpenPlaceholder: ({ context, event }) =>
+      event.type === 'unconfiguredNode.remove' &&
+      event.nodeId === context.creationContext?.associatedUnconfiguredNodeId,
+    setDropsOpenPlaceholder: ({ context, event }) => {
+      const associatedNodeId = context.creationContext?.associatedUnconfiguredNodeId;
+      return (
+        event.type === 'unconfiguredNodes.set' &&
+        associatedNodeId !== undefined &&
+        !event.nodeIds.includes(associatedNodeId)
+      );
+    },
     isDeletePersistenceFailure: ({ event }) =>
       event.type === 'unit.persistenceFailed' && event.intent === 'delete',
     unitSaveIsIdle: stateIn('#sourcesUnitSaveIdle'),
@@ -902,6 +928,30 @@ export const sourcesStateMachine = setup({
       guard: and(['unitSaveIsIdle', 'hasSourcesToDelete']),
       actions: ['deleteSources', 'notifyParentDeleteMany'],
     },
+    'unconfiguredNode.remove': [
+      {
+        guard: and([
+          'removesOpenPlaceholder',
+          not(stateIn({ configuring: 'persisting' })),
+          not(stateIn({ configuring: { apiKey: 'generating' } })),
+        ]),
+        target: '#configuringIdle',
+        actions: ['removeUnconfiguredNode', 'clearCreate'],
+      },
+      { actions: 'removeUnconfiguredNode' },
+    ],
+    'unconfiguredNodes.set': [
+      {
+        guard: and([
+          'setDropsOpenPlaceholder',
+          not(stateIn({ configuring: 'persisting' })),
+          not(stateIn({ configuring: { apiKey: 'generating' } })),
+        ]),
+        target: '#configuringIdle',
+        actions: ['setUnconfiguredNodes', 'clearCreate'],
+      },
+      { actions: 'setUnconfiguredNodes' },
+    ],
   },
   states: {
     unitSave: {

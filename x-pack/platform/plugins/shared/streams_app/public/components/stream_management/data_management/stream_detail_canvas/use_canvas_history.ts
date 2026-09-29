@@ -5,23 +5,26 @@
  * 2.0.
  */
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Dispatch, SetStateAction } from 'react';
 import type { Edge, Node } from '@xyflow/react';
 
 /** Cap the stack so long editing sessions don't grow memory unbounded. */
-const HISTORY_LIMIT = 100;
+const HISTORY_LIMIT = 50;
 
-interface Snapshot<NodeType extends Node, EdgeType extends Edge> {
+interface Snapshot<NodeType extends Node, EdgeType extends Edge, Extra> {
   nodes: NodeType[];
   edges: EdgeType[];
+  extra: Extra;
 }
 
-interface UseCanvasHistoryArgs<NodeType extends Node, EdgeType extends Edge> {
+interface UseCanvasHistoryArgs<NodeType extends Node, EdgeType extends Edge, Extra> {
   nodes: NodeType[];
   edges: EdgeType[];
+  extra: Extra;
   setNodes: Dispatch<SetStateAction<NodeType[]>>;
   setEdges: Dispatch<SetStateAction<EdgeType[]>>;
+  onRestore: (extra: Extra) => void;
 }
 
 export interface CanvasHistory {
@@ -35,17 +38,21 @@ export interface CanvasHistory {
   canRedo: boolean;
 }
 
-export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge>({
+export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge, Extra>({
   nodes,
   edges,
+  extra,
   setNodes,
   setEdges,
-}: UseCanvasHistoryArgs<NodeType, EdgeType>): CanvasHistory {
-  const latestRef = useRef<Snapshot<NodeType, EdgeType>>({ nodes, edges });
-  latestRef.current = { nodes, edges };
+  onRestore,
+}: UseCanvasHistoryArgs<NodeType, EdgeType, Extra>): CanvasHistory {
+  const latestRef = useRef<Snapshot<NodeType, EdgeType, Extra>>({ nodes, edges, extra });
+  latestRef.current = { nodes, edges, extra };
+  const onRestoreRef = useRef(onRestore);
+  onRestoreRef.current = onRestore;
 
-  const [past, setPast] = useState<Array<Snapshot<NodeType, EdgeType>>>([]);
-  const [future, setFuture] = useState<Array<Snapshot<NodeType, EdgeType>>>([]);
+  const [past, setPast] = useState<Array<Snapshot<NodeType, EdgeType, Extra>>>([]);
+  const [future, setFuture] = useState<Array<Snapshot<NodeType, EdgeType, Extra>>>([]);
 
   const pastRef = useRef(past);
   pastRef.current = past;
@@ -55,14 +62,36 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge>({
   // The stacks are read from refs but mutated via async setState, so a second
   // undo/redo fired in the same tick (e.g. a key held down) would read the same
   // pre-update stack and pop the same snapshot twice. This lock blocks re-entry
-  // until the state update commits and re-renders (which clears it below).
+  // until the state update commits.
   const isApplyingRef = useRef(false);
-  isApplyingRef.current = false;
+  // Restoring a snapshot updates nodes, then the graph sync writes them again.
+  // Those writes look like a new edit and would clear the redo stack. Ignore
+  // records for this render and the follow-up one.
+  const suppressRecordRef = useRef(0);
+
+  useEffect(() => {
+    isApplyingRef.current = false;
+    if (suppressRecordRef.current > 0) {
+      suppressRecordRef.current -= 1;
+    }
+  });
+
+  const captureSnapshot = useCallback((): Snapshot<NodeType, EdgeType, Extra> => {
+    const current = latestRef.current;
+    return {
+      nodes: current.nodes.map((node) => ({ ...node, position: { ...node.position } })),
+      edges: current.edges.map((edge) => ({ ...edge })),
+      extra: current.extra,
+    };
+  }, []);
 
   const record = useCallback(() => {
-    setPast((stack) => [...stack, latestRef.current].slice(-HISTORY_LIMIT));
+    if (isApplyingRef.current || suppressRecordRef.current > 0) {
+      return;
+    }
+    setPast((stack) => [...stack, captureSnapshot()].slice(-HISTORY_LIMIT));
     setFuture([]);
-  }, []);
+  }, [captureSnapshot]);
 
   const undo = useCallback(() => {
     const stack = pastRef.current;
@@ -70,12 +99,14 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge>({
       return;
     }
     isApplyingRef.current = true;
+    suppressRecordRef.current = 2;
     const previous = stack[stack.length - 1];
-    setFuture([...futureRef.current, latestRef.current]);
+    setFuture([...futureRef.current, captureSnapshot()]);
     setPast(stack.slice(0, -1));
     setNodes(previous.nodes);
     setEdges(previous.edges);
-  }, [setNodes, setEdges]);
+    onRestoreRef.current(previous.extra);
+  }, [captureSnapshot, setNodes, setEdges]);
 
   const redo = useCallback(() => {
     const stack = futureRef.current;
@@ -83,12 +114,14 @@ export function useCanvasHistory<NodeType extends Node, EdgeType extends Edge>({
       return;
     }
     isApplyingRef.current = true;
+    suppressRecordRef.current = 2;
     const next = stack[stack.length - 1];
-    setPast([...pastRef.current, latestRef.current]);
+    setPast([...pastRef.current, captureSnapshot()]);
     setFuture(stack.slice(0, -1));
     setNodes(next.nodes);
     setEdges(next.edges);
-  }, [setNodes, setEdges]);
+    onRestoreRef.current(next.extra);
+  }, [captureSnapshot, setNodes, setEdges]);
 
   const reset = useCallback(() => {
     setPast([]);

@@ -17,8 +17,16 @@ const initialNodes: Node[] = [{ id: 'a', position: { x: 0, y: 0 }, data: {} }];
 function useHistoryHarness() {
   const [nodes, setNodes] = useState<Node[]>(initialNodes);
   const [edges, setEdges] = useState<Edge[]>([]);
-  const history = useCanvasHistory({ nodes, edges, setNodes, setEdges });
-  return { nodes, setNodes, history };
+  const [marker, setMarker] = useState(0);
+  const history = useCanvasHistory({
+    nodes,
+    edges,
+    extra: marker,
+    setNodes,
+    setEdges,
+    onRestore: setMarker,
+  });
+  return { nodes, setNodes, marker, setMarker, history };
 }
 
 const moveFirstNodeTo = (x: number) => (current: Node[]) =>
@@ -35,13 +43,18 @@ describe('useCanvasHistory', () => {
     const { result } = renderHook(() => useHistoryHarness());
 
     act(() => result.current.history.record());
-    act(() => result.current.setNodes(moveFirstNodeTo(100)));
+    act(() => {
+      result.current.setMarker(1);
+      result.current.setNodes(moveFirstNodeTo(100));
+    });
 
     expect(result.current.history.canUndo).toBe(true);
     expect(result.current.nodes[0].position.x).toBe(100);
+    expect(result.current.marker).toBe(1);
 
     act(() => result.current.history.undo());
     expect(result.current.nodes[0].position.x).toBe(0);
+    expect(result.current.marker).toBe(0);
     expect(result.current.history.canUndo).toBe(false);
     expect(result.current.history.canRedo).toBe(true);
 
@@ -58,8 +71,66 @@ describe('useCanvasHistory', () => {
     act(() => result.current.history.undo());
     expect(result.current.history.canRedo).toBe(true);
 
+    // The undo's own follow-up render is ignored. A later edit clears redo.
+    act(() => result.current.setNodes((current) => [...current]));
     act(() => result.current.history.record());
     expect(result.current.history.canRedo).toBe(false);
+  });
+
+  it('keeps every undone step available to redo', () => {
+    const { result } = renderHook(() => useHistoryHarness());
+
+    act(() => result.current.history.record());
+    act(() => {
+      result.current.setMarker(1);
+      result.current.setNodes(moveFirstNodeTo(100));
+    });
+    act(() => result.current.history.record());
+    act(() => {
+      result.current.setMarker(2);
+      result.current.setNodes(moveFirstNodeTo(200));
+    });
+
+    act(() => result.current.history.undo());
+    act(() => result.current.history.undo());
+    expect(result.current.marker).toBe(0);
+    expect(result.current.history.canRedo).toBe(true);
+
+    act(() => result.current.history.redo());
+    expect(result.current.marker).toBe(1);
+    expect(result.current.history.canRedo).toBe(true);
+
+    act(() => result.current.history.redo());
+    expect(result.current.marker).toBe(2);
+    expect(result.current.history.canRedo).toBe(false);
+  });
+
+  it('ignores a history write caused by restoring a snapshot', () => {
+    const { result } = renderHook(() => {
+      const [nodes, setNodes] = useState<Node[]>(initialNodes);
+      const [edges, setEdges] = useState<Edge[]>([]);
+      const [marker, setMarker] = useState(0);
+      const recordRef = { current: () => {} };
+      const history = useCanvasHistory({
+        nodes,
+        edges,
+        extra: marker,
+        setNodes,
+        setEdges,
+        onRestore: (restored: number) => {
+          setMarker(restored);
+          recordRef.current();
+        },
+      });
+      recordRef.current = history.record;
+      return { marker, history };
+    });
+
+    act(() => result.current.history.record());
+    act(() => result.current.history.undo());
+
+    expect(result.current.marker).toBe(0);
+    expect(result.current.history.canRedo).toBe(true);
   });
 
   it('reset empties both stacks', () => {

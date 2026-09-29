@@ -31,6 +31,7 @@ import {
   type OnEdgesChange,
   type OnNodeDrag,
   type OnNodesChange,
+  type OnNodesDelete,
   type OnReconnect,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -163,6 +164,9 @@ interface CanvasShellProps<NodeType extends Node, EdgeType extends Edge> {
   edgeTypes?: EdgeTypes;
   onNodesChange?: OnNodesChange<NodeType>;
   onEdgesChange?: OnEdgesChange<EdgeType>;
+  onNodesDelete?: OnNodesDelete<NodeType>;
+  /** Keys that delete the selection. `null` turns deletion off. */
+  deleteKeyCode?: string | string[] | null;
   onConnect?: OnConnect;
   onConnectStart?: OnConnectStart;
   onConnectEnd?: OnConnectEnd;
@@ -218,6 +222,8 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
   edgeTypes = canvasEdgeTypes,
   onNodesChange,
   onEdgesChange,
+  onNodesDelete,
+  deleteKeyCode,
   onConnect,
   onConnectStart,
   onConnectEnd,
@@ -296,6 +302,8 @@ export function CanvasShell<NodeType extends Node = Node, EdgeType extends Edge 
           edgeTypes={edgeTypes}
           onNodesChange={onNodesChange}
           onEdgesChange={onEdgesChange}
+          onNodesDelete={onNodesDelete}
+          deleteKeyCode={deleteKeyCode}
           onConnect={onConnect}
           onConnectStart={onConnectStart}
           onConnectEnd={onConnectEnd}
