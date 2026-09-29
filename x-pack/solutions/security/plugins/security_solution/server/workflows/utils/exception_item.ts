@@ -82,7 +82,9 @@ export const toCreateExceptionItemBody = (
     entries: toApiEntries(entries),
     ...(osTypes && osTypes.length > 0 ? { os_types: osTypes } : {}),
     ...(tags && tags.length > 0 ? { tags } : {}),
-    ...(expireTime !== undefined ? { expire_time: expireTime } : {}),
+    // Truthiness on purpose: a caller's unset optional renders as "" or null through
+    // the template engine, and both mean "no expiry", not an expiry of "".
+    ...(expireTime ? { expire_time: expireTime } : {}),
     ...(comments && comments.length > 0 ? { comments } : {}),
   };
 };
