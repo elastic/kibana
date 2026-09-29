@@ -43,8 +43,7 @@ export async function getMlInfo({
   }
 
   const isMlCpsEnabled = serverless.cpsEnabled && (await getIsMlCpsEnabled(client));
-  const isMlEsqlDatafeedEnabled =
-    serverless.isServerless && (await getIsMlEsqlDatafeedEnabled(client));
+  const isMlEsqlDatafeedEnabled = await getIsMlEsqlDatafeedEnabled(client);
 
   return {
     ...body,

@@ -59,15 +59,26 @@ describe('EsqlJobTypeCard', () => {
     expect(onClick).toHaveBeenCalledTimes(1);
   });
 
-  it('hides the card outside Serverless', () => {
-    renderCard(false);
+  it('shows the card on Stateful when the capability is enabled', () => {
+    const onClick = renderCard(false);
 
-    expect(screen.queryByTestId('mlJobTypeLinkEsqlJob')).not.toBeInTheDocument();
+    const card = screen.getByTestId('mlJobTypeLinkEsqlJob');
+    expect(card).toHaveTextContent('ES|QL');
+
+    fireEvent.click(card);
+    expect(onClick).toHaveBeenCalledTimes(1);
   });
 
   it('hides the card when ES|QL datafeeds are unavailable', () => {
     mockGetIsMlEsqlDatafeedEnabled.mockReturnValue(false);
     renderCard(true);
+
+    expect(screen.queryByTestId('mlJobTypeLinkEsqlJob')).not.toBeInTheDocument();
+  });
+
+  it('hides the card on Stateful when the capability is disabled', () => {
+    mockGetIsMlEsqlDatafeedEnabled.mockReturnValue(false);
+    renderCard(false);
 
     expect(screen.queryByTestId('mlJobTypeLinkEsqlJob')).not.toBeInTheDocument();
   });

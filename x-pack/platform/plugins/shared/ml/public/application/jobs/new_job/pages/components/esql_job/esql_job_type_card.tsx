@@ -9,14 +9,11 @@ import type { FC } from 'react';
 import React from 'react';
 import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useEnabledFeatures } from '../../../../../contexts/ml/enabled_features_context';
 import { LinkCard } from '../../../../../components/link_card';
 import { getIsMlEsqlDatafeedEnabled } from '../../../../../services/ml_server_info';
 
 export const EsqlJobTypeCard: FC<{ onClick: () => void }> = ({ onClick }) => {
-  const { isServerless } = useEnabledFeatures();
-
-  if (!isServerless || !getIsMlEsqlDatafeedEnabled()) {
+  if (!getIsMlEsqlDatafeedEnabled()) {
     return null;
   }
 
