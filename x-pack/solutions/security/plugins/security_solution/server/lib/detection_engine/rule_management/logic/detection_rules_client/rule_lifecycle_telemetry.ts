@@ -11,6 +11,7 @@ import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection
 import type { RuleAlertType } from '../../../rule_schema';
 import {
   DETECTION_RULE_DUPLICATE_EVENT,
+  DETECTION_RULE_IMPORT_EVENT,
   DETECTION_RULE_INSTALL_EVENT,
 } from '../../../../telemetry/event_based/events';
 import type {
@@ -64,6 +65,16 @@ export function sendRuleInstallTelemetryEvents(
         logger
       );
     }
+  }
+}
+
+export function sendRuleImportTelemetryEvents(
+  analytics: AnalyticsServiceSetup,
+  rules: RuleLifecycleTelemetryData[],
+  logger?: Logger
+): void {
+  for (const rule of rules) {
+    sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_IMPORT_EVENT, rule, logger);
   }
 }
 

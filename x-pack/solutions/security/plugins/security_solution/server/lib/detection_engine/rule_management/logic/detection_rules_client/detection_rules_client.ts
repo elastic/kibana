@@ -56,10 +56,10 @@ import {
 import {
   sendRuleLifecycleTelemetryEvent,
   sendRuleInstallTelemetryEvents,
+  sendRuleImportTelemetryEvents,
 } from './rule_lifecycle_telemetry';
 import {
   DETECTION_RULE_REVERT_EVENT,
-  DETECTION_RULE_IMPORT_EVENT,
   DETECTION_RULE_INSTALL_EVENT,
 } from '../../../../telemetry/event_based/events';
 
@@ -271,14 +271,11 @@ export const createDetectionRulesClient = ({
         });
 
         if (analytics) {
-          for (const { telemetry } of result.successes) {
-            sendRuleLifecycleTelemetryEvent(
-              analytics,
-              DETECTION_RULE_IMPORT_EVENT,
-              telemetry,
-              logger
-            );
-          }
+          sendRuleImportTelemetryEvents(
+            analytics,
+            result.successes.map(({ telemetry }) => telemetry),
+            logger
+          );
         }
 
         return result;
