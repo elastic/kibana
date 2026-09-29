@@ -72,7 +72,6 @@ export class EventLoopWatchdog {
   private restarts = 0;
   private running = false;
   private stopping?: Promise<void>;
-  private profilingEnabled = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {
     this.logger = params.logger;
@@ -101,17 +100,6 @@ export class EventLoopWatchdog {
       `Event loop watchdog started (threshold ${this.params.options.thresholdMs}ms, heartbeat ${this.params.options.heartbeatIntervalMs}ms)`
     );
     this.trySpawnWorker(buffer);
-  }
-
-  /**
-   * Enables or disables profiling of long blocks. Takes effect immediately for a running worker
-   * and is kept for workers started or restarted later.
-   */
-  public setProfiling(enabled: boolean): void {
-    if (this.profilingEnabled === enabled) return;
-    this.profilingEnabled = enabled;
-    this.worker?.postMessage({ type: 'set-profiling', enabled } satisfies MainToWorkerMessage);
-    this.logger.info(`Event loop watchdog profiling ${enabled ? 'enabled' : 'disabled'}`);
   }
 
   /** Stops the heartbeat and terminates the worker. Concurrent callers await the same cleanup. */
@@ -151,7 +139,6 @@ export class EventLoopWatchdog {
       loggerName,
       outputFd: outputFd ?? STDOUT_FD,
       sanitizeRoot,
-      profilingEnabled: this.profilingEnabled,
     };
 
     const worker = new Worker(workerEntry ?? WORKER_ENTRY, {

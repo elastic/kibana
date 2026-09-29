@@ -40,8 +40,6 @@ export interface WatchdogWorkerData {
   outputFd: number;
   /** Absolute path prefix stripped from profile frame URLs. */
   sanitizeRoot: string;
-  /** Whether long blocks are profiled; can be changed at runtime with `set-profiling`. */
-  profilingEnabled: boolean;
 }
 
 /**
@@ -114,15 +112,14 @@ export interface BlockReport {
   suppressedBlocks: number;
   candidates: Candidate[];
   omittedCandidates: number;
-  /** Present only for blocks that lasted at least `profileAfter` while profiling was enabled. */
+  /** Present only for blocks that lasted at least `profileAfter`. */
   profile?: ProfileSummary;
 }
 
 export type MainToWorkerMessage =
   | { type: 'snapshot'; activities: Array<[number, Activity]> }
   | { type: 'activity-start'; key: number; activity: Activity }
-  | { type: 'activity-end'; key: number }
-  | { type: 'set-profiling'; enabled: boolean };
+  | { type: 'activity-end'; key: number };
 
 export type WorkerToMainMessage =
   | { type: 'ready' }

@@ -78,28 +78,6 @@ describe('EventLoopWatchdog', () => {
     });
   });
 
-  it('applies profiling changes to running and future workers', () => {
-    watchdog.start();
-    const first = lastWorker();
-    expect(first.workerOptions).toEqual(
-      expect.objectContaining({ workerData: expect.objectContaining({ profilingEnabled: false }) })
-    );
-
-    watchdog.setProfiling(true);
-    watchdog.setProfiling(true);
-    expect(first.postMessage).toHaveBeenCalledWith({ type: 'set-profiling', enabled: true });
-    expect(
-      first.postMessage.mock.calls.filter(([message]) => message.type === 'set-profiling')
-    ).toHaveLength(1);
-
-    // a restarted worker starts with the current setting
-    first.emit('exit', 1);
-    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS);
-    expect(lastWorker().workerOptions).toEqual(
-      expect.objectContaining({ workerData: expect.objectContaining({ profilingEnabled: true }) })
-    );
-  });
-
   it('terminates the worker on stop and can start again', async () => {
     watchdog.start();
     const first = lastWorker();

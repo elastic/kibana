@@ -40,8 +40,8 @@ export interface EventLoopWatchdogConfigType {
   /** Maximum number of candidate activities listed in a report. */
   maxCandidates: number;
   /**
-   * When profiling is enabled (feature flag `core.eventLoopWatchdog.profiling`), only blocks
-   * lasting at least this long are profiled. Starting the profiler stalls the main thread.
+   * Only blocks lasting at least this long are CPU-profiled, since starting the profiler stalls
+   * the main thread.
    */
   profileAfter: Duration;
   /** Maximum duration of one CPU-profile capture. */

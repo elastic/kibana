@@ -67,7 +67,6 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
   const detector = new BlockDetector(options);
   const reportedErrors = new Set<string>();
 
-  let profilingEnabled = false;
   let session: Session | undefined;
   let profilerReady = false;
   let captureInFlight = false;
@@ -96,10 +95,8 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       );
     });
 
-  /** Connects the inspector lazily, only once profiling is enabled for the first time. */
-  const setProfiling = (enabled: boolean) => {
-    profilingEnabled = enabled;
-    if (!enabled || session) return;
+  /** Connects the inspector to the main thread so that long blocks can be profiled. */
+  const setUpProfiler = () => {
     try {
       session = new Session();
       session.connectToMainThread();
@@ -208,7 +205,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
   };
 
   const onProfileStart = ({ blockId }: Extract<DetectorEvent, { type: 'profile-start' }>) => {
-    if (!block || !profilingEnabled) return;
+    if (!block) return;
     if (captureInFlight) {
       block.captureSkippedReason = 'a previous capture is still in progress';
     } else if (!profilerReady) {
@@ -318,9 +315,6 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       case 'activity-end':
         activities.delete(message.key);
         break;
-      case 'set-profiling':
-        setProfiling(message.enabled);
-        break;
     }
   });
 
@@ -335,7 +329,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     session?.disconnect();
   });
 
-  setProfiling(data.profilingEnabled);
+  setUpProfiler();
   post({ type: 'ready' });
 };
 

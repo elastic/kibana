@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { concatMap, distinctUntilChanged, firstValueFrom, Subscription } from 'rxjs';
+import { concatMap, distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
@@ -20,8 +20,6 @@ import type { LiveNoticeFormat, WatchdogOptions } from './types';
 
 /** Feature flag enabling the event-loop watchdog at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
-/** Feature flag enabling CPU profiling of long blocks (see `ops.eventLoopWatchdog.profileAfter`). */
-export const EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG = 'core.eventLoopWatchdog.profiling';
 const PROFILE_SAMPLING_INTERVAL_US = 1_000;
 const MAX_FRAMES = 5;
 const LOGGER_CONTEXT = ['metrics', 'event_loop_watchdog'] as const;
@@ -148,14 +146,7 @@ export class EventLoopWatchdogService {
     });
     this.watchdog = watchdog;
 
-    this.subscription = new Subscription();
-    this.subscription.add(
-      featureFlags
-        .getBooleanValue$(EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG, false)
-        .pipe(distinctUntilChanged())
-        .subscribe((enabled) => watchdog.setProfiling(enabled))
-    );
-    const enabledSubscription = featureFlags
+    this.subscription = featureFlags
       .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, false)
       .pipe(
         distinctUntilChanged(),
@@ -172,7 +163,6 @@ export class EventLoopWatchdogService {
         })
       )
       .subscribe();
-    this.subscription.add(enabledSubscription);
   }
 
   public async stop(): Promise<void> {

@@ -78,12 +78,6 @@ describe('EventLoopWatchdog (real worker)', () => {
   const debugCount = (text: string) =>
     logger.debug.mock.calls.filter(([message]) => String(message).includes(text)).length;
 
-  const enableProfiling = async () => {
-    const before = debugCount('profiler ready');
-    watchdog?.setProfiling(true);
-    await waitFor(() => (debugCount('profiler ready') > before ? true : undefined));
-  };
-
   const startWatchdog = async (options: Partial<WatchdogOptions> = {}) => {
     watchdog = new EventLoopWatchdog({
       logger,
@@ -94,9 +88,10 @@ describe('EventLoopWatchdog (real worker)', () => {
       sanitizeRoot: REPO_ROOT,
       outputFd,
     });
-    const before = debugCount('worker ready');
+    const before = debugCount('profiler ready');
     watchdog.start();
-    await waitFor(() => (debugCount('worker ready') > before ? true : undefined));
+    // blocks are only profiled once the worker's inspector session is set up
+    await waitFor(() => (debugCount('profiler ready') > before ? true : undefined));
   };
 
   beforeEach(() => {
@@ -146,8 +141,6 @@ describe('EventLoopWatchdog (real worker)', () => {
       expect.objectContaining({ kind: 'task', type: 'test:late', id: 'b' }),
     ]);
     expect(report.omittedCandidates).toBe(1);
-    // profiling is opt-in
-    expect(report.profile).toBeUndefined();
     expect(report.liveNotices).toBe(notices.length);
   });
 
@@ -171,10 +164,9 @@ describe('EventLoopWatchdog (real worker)', () => {
     expect(report.cpuRatio).toBeGreaterThan(0.5);
   });
 
-  describe('with profiling enabled', () => {
+  describe('profiling', () => {
     it('profiles blocks that last at least profileAfter and reports the stack', async () => {
       await startWatchdog();
-      await enableProfiling();
 
       deliberatelyBlockTheEventLoop(1_500);
       const report = await nextReport(1);
@@ -190,7 +182,6 @@ describe('EventLoopWatchdog (real worker)', () => {
 
     it('does not profile blocks shorter than profileAfter', async () => {
       await startWatchdog();
-      await enableProfiling();
 
       deliberatelyBlockTheEventLoop(400);
       const report = await nextReport(1);
@@ -200,23 +191,11 @@ describe('EventLoopWatchdog (real worker)', () => {
 
     it('reports native CPU-bound blocks as inconclusive', async () => {
       await startWatchdog();
-      await enableProfiling();
 
       pbkdf2Sync('password', 'salt', 6_000_000, 64, 'sha512');
       const report = await nextReport(1);
       expect(report.profile?.verdict).toBe('inconclusive');
       expect(report.cpuRatio).toBeGreaterThan(0.5);
-    });
-
-    it('stops profiling when disabled at runtime', async () => {
-      await startWatchdog();
-      await enableProfiling();
-      watchdog?.setProfiling(false);
-      await sleep(50);
-
-      deliberatelyBlockTheEventLoop(1_000);
-      const report = await nextReport(1);
-      expect(report.profile).toBeUndefined();
     });
   });
 

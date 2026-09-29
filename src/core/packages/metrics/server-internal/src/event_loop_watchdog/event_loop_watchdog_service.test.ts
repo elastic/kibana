@@ -15,7 +15,6 @@ import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 import { MockEventLoopWatchdog, mockWatchdog } from './event_loop_watchdog_service.test.mocks';
 import {
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
-  EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG,
   EventLoopWatchdogService,
   resolveLiveNoticeFormat,
   toWatchdogOptions,
@@ -26,7 +25,6 @@ const flush = () => new Promise((resolve) => setImmediate(resolve));
 
 describe('EventLoopWatchdogService', () => {
   let flag$: BehaviorSubject<boolean>;
-  let profilingFlag$: BehaviorSubject<boolean>;
   let featureFlags: ReturnType<typeof coreFeatureFlagsMock.createStart>;
   let service: EventLoopWatchdogService;
 
@@ -38,11 +36,8 @@ describe('EventLoopWatchdogService', () => {
       path === 'ops' ? new BehaviorSubject(ops) : new BehaviorSubject({})
     );
     flag$ = new BehaviorSubject(false);
-    profilingFlag$ = new BehaviorSubject(false);
     featureFlags = coreFeatureFlagsMock.createStart();
-    featureFlags.getBooleanValue$.mockImplementation((name) =>
-      name === EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG ? profilingFlag$ : flag$
-    );
+    featureFlags.getBooleanValue$.mockReturnValue(flag$);
     service = new EventLoopWatchdogService(coreContext);
   });
 
@@ -77,25 +72,10 @@ describe('EventLoopWatchdogService', () => {
     expect(mockWatchdog.start).toHaveBeenCalledTimes(2);
   });
 
-  it('follows the profiling feature flag independently, defaulting to disabled', async () => {
-    await service.start({ featureFlags });
-    expect(featureFlags.getBooleanValue$).toHaveBeenCalledWith(
-      EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG,
-      false
-    );
-    expect(mockWatchdog.setProfiling).toHaveBeenLastCalledWith(false);
-    profilingFlag$.next(true);
-    expect(mockWatchdog.setProfiling).toHaveBeenLastCalledWith(true);
-    expect(mockWatchdog.start).not.toHaveBeenCalled();
-  });
-
   it('stops the watchdog and the subscription on stop', async () => {
     await service.start({ featureFlags });
     await service.stop();
     const stops = mockWatchdog.stop.mock.calls.length;
-    const profilingCalls = mockWatchdog.setProfiling.mock.calls.length;
-    profilingFlag$.next(true);
-    expect(mockWatchdog.setProfiling).toHaveBeenCalledTimes(profilingCalls);
     flag$.next(true);
     await flush();
     expect(mockWatchdog.start).not.toHaveBeenCalled();

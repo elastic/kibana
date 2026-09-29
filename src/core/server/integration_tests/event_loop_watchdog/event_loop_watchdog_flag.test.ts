@@ -20,7 +20,6 @@ import {
 } from '@kbn/core-test-helpers-kbn-server';
 
 const FLAG = 'core.eventLoopWatchdog.enabled';
-const PROFILING_FLAG = 'core.eventLoopWatchdog.profiling';
 const logFilePath = Path.join(Os.tmpdir(), `event_loop_watchdog_flag_${process.pid}.log`);
 
 interface LogRecord {
@@ -69,13 +68,12 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
   let root: Root;
   let coreStart: InternalCoreStart;
 
-  const setFlags = (overrides: Record<string, boolean>) =>
+  const setFlag = (value: boolean) =>
     request
       .put(root, '/internal/core/_settings')
       .set('Elastic-Api-Version', '1')
-      .send({ 'feature_flags.overrides': overrides })
+      .send({ 'feature_flags.overrides': { [FLAG]: value } })
       .expect(200);
-  const setFlag = (value: boolean) => setFlags({ [FLAG]: value });
 
   const runTask = (taskType: string, id: string, blockMs: number) =>
     coreStart.executionContext.withContext(
@@ -129,7 +127,7 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
 
   it('starts when the flag is enabled and attributes blocks to in-flight tasks', async () => {
     await setFlag(true);
-    await waitFor(() => countMessages(/worker ready/) === 1);
+    await waitFor(() => countMessages(/profiler ready/) === 1);
 
     await runTask('test:blocker', 'task-1', 1_000);
     await waitFor(() => reports().length === 1);
@@ -141,6 +139,8 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
         blockedMs: expect.any(Number),
         candidates: [expect.objectContaining({ type: 'test:blocker', id: 'task-1' })],
         cpuRatio: expect.any(Number),
+        // blocks lasting at least `profileAfter` are profiled
+        profile: expect.objectContaining({ verdict: 'profiled' }),
       })
     );
   });
@@ -168,17 +168,5 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
     ]);
     expect(countMessages(/watchdog started/)).toBe(2);
     expect(countMessages(/worker ready/)).toBe(2);
-  });
-
-  it('profiles long blocks once the profiling flag is enabled', async () => {
-    await setFlags({ [FLAG]: true, [PROFILING_FLAG]: true });
-    await waitFor(() => countMessages(/profiler ready/) === 1);
-
-    await runTask('test:blocker', 'task-4', 1_500);
-    await waitFor(() => reports().length === 3);
-
-    const profile = reports()[2].kibana?.event_loop_watchdog?.profile;
-    expect(profile?.verdict).toBe('profiled');
-    expect(profile?.frames[0].location).toMatch(/event_loop_watchdog_flag\.test\.ts:\d+$/);
   });
 });
