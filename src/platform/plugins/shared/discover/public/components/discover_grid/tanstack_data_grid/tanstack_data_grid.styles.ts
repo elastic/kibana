@@ -14,6 +14,8 @@ export const CONTROL_COL_WIDTH = 24;
 export const SELECT_COL_WIDTH = 24;
 export const DEFAULT_COL_WIDTH = 180;
 export const MIN_COL_WIDTH = 60;
+/** Below this width the full action bar is replaced by a single expand icon. */
+export const COMPACT_CELL_ACTIONS_THRESHOLD = 220;
 const RESIZE_HANDLE_WIDTH = 4;
 
 export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
@@ -347,6 +349,10 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   cellWithActions: css({
     position: 'relative',
     overflow: 'hidden',
+    '&:hover .tsg-compactCellExpand, &:focus-within .tsg-compactCellExpand': {
+      opacity: 1,
+      pointerEvents: 'auto',
+    },
   }),
 
   cellActions: css({
@@ -381,6 +387,20 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
   cellActionsExpand: css({
     display: 'flex',
     flexShrink: 0,
+  }),
+
+  // Shown instead of the full action bar when the cell is narrower than COMPACT_CELL_ACTIONS_THRESHOLD.
+  // Hidden by default; revealed by the .tsg-compactCellExpand selector in cellWithActions on hover/focus.
+  compactCellExpand: css({
+    position: 'absolute',
+    top: 0,
+    right: 0,
+    display: 'flex',
+    alignItems: 'flex-start',
+    opacity: 0,
+    pointerEvents: 'none',
+    transition: `opacity ${euiTheme.animation.fast} ease-in`,
+    zIndex: 1,
   }),
 
   cellActionButton: css({
