@@ -84,7 +84,13 @@ export const createUserMessageMarkdownPlugins = ({
 
   rehypeToReactOptions.components = {
     ...rehypeToReactOptions.components,
-    a: ({ href, children, ...rest }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
+    a: ({
+      href,
+      children,
+      type,
+      color,
+      ...rest
+    }: React.AnchorHTMLAttributes<HTMLAnchorElement>) => {
       const parsed = href ? parseSchemeAndPath(href) : undefined;
 
       if (parsed?.scheme === IMAGE_ATTACHMENT_SCHEME) {
