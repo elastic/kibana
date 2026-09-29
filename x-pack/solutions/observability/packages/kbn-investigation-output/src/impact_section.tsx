@@ -62,6 +62,7 @@ const ImpactEntityRow: React.FC<{ entity: InvestigationImpactEntity; isLast: boo
   return (
     <EuiPanel
       color="transparent"
+      hasBorder={false}
       hasShadow={false}
       paddingSize="none"
       borderRadius="none"

@@ -104,7 +104,7 @@ const RecommendationRow: React.FC<{
 
   if (!onClick) {
     return (
-      <EuiPanel hasShadow={false} paddingSize="m" css={rowCss}>
+      <EuiPanel hasBorder={false} hasShadow={false} paddingSize="m" css={rowCss}>
         {content}
       </EuiPanel>
     );
@@ -114,6 +114,7 @@ const RecommendationRow: React.FC<{
     <EuiPanel
       element="button"
       type="button"
+      hasBorder={false}
       hasShadow={false}
       paddingSize="m"
       onClick={onClick}
