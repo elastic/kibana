@@ -64,7 +64,9 @@ describe('RERANK Validation', () => {
     });
 
     test('WITH inference_id with empty string value', () => {
-      rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH { "inference_id": "" }', []);
+      rerankExpectErrors('FROM index | RERANK "q" ON keywordField WITH { "inference_id": "" }', [
+        msg,
+      ]);
     });
   });
 });
