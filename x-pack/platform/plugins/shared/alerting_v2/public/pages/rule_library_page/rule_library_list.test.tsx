@@ -8,6 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, fireEvent, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { MAX_TAG_LENGTH } from '@kbn/alerting-v2-constants';
 import type { CreateRuleData, RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { CONTENT_LIST_TEST_SUBJECTS } from '@kbn/content-list-common';
 import { ListPageTestProviders } from '../../test_utils/test_providers';
@@ -164,6 +165,10 @@ describe('RuleLibraryList', () => {
 
     fireEvent.click(screen.getByTestId('ruleLibraryTagsFilter'));
     const options = await screen.findByTestId('ruleLibraryTagsFilter-list');
+    expect(screen.getByTestId('ruleLibraryTagsFilterSearch')).toHaveAttribute(
+      'maxLength',
+      String(MAX_TAG_LENGTH)
+    );
     fireEvent.click(within(options).getByText('nginx'));
 
     await waitFor(() => {

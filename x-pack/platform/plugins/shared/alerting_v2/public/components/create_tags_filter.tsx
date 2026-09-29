@@ -7,7 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 import { EuiFieldSearch, EuiText, type Query } from '@elastic/eui';
-import { TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
+import { MAX_TAG_LENGTH, TAGS_RESPONSE_LIMIT } from '@kbn/alerting-v2-constants';
 import { SelectableFilterPopover, StandardFilterOption } from '@kbn/content-list';
 import { TAG_FILTER_ID } from '@kbn/content-list-provider';
 import { filter, useFieldQueryFilter } from '@kbn/content-list-toolbar';
@@ -68,6 +68,7 @@ export const createTagsFilter = ({
           <EuiFieldSearch
             compressed
             value={tagSearch}
+            maxLength={MAX_TAG_LENGTH}
             onChange={(event) => setTagSearch(event.target.value)}
             placeholder={i18n.translate('xpack.alertingV2.tagsFilter.searchPlaceholder', {
               defaultMessage: 'Search tags',
