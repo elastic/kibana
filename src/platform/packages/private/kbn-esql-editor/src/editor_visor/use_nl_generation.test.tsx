@@ -62,6 +62,7 @@ describe('useNlGeneration', () => {
 
     expect(onNlResult).toHaveBeenCalledWith('FROM logs | LIMIT 10');
     expect(defaultParams.onUpdateAndSubmitQuery).not.toHaveBeenCalled();
+    expect(result.current.nlValue).toBe('');
   });
 
   it('onNlSubmit falls back to onUpdateAndSubmitQuery when onNlResult is not provided', async () => {
@@ -77,6 +78,7 @@ describe('useNlGeneration', () => {
     });
 
     expect(defaultParams.onUpdateAndSubmitQuery).toHaveBeenCalledWith('FROM logs | LIMIT 10');
+    expect(result.current.nlValue).toBe('');
   });
 
   it('onNlSubmit shows the server error message on failure', async () => {
@@ -96,6 +98,7 @@ describe('useNlGeneration', () => {
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
       title: 'Connector unavailable',
     });
+    expect(result.current.nlValue).toBe('show me logs');
   });
 
   it('onNlSubmit shows the fallback message when the error has no body message', async () => {
@@ -113,6 +116,7 @@ describe('useNlGeneration', () => {
     expect(coreStart.notifications.toasts.addDanger).toHaveBeenCalledWith({
       title: 'Failed to generate ES|QL query',
     });
+    expect(result.current.nlValue).toBe('show me logs');
   });
 
   it('onStopGeneration aborts the request, clears loading state and nlValue', async () => {

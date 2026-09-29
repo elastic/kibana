@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useState, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -72,6 +72,7 @@ export function QuickSearchVisor({
   const [searchValue, setSearchValue] = useState('');
   const [visorMode, setVisorMode] = useState<VisorMode>(VisorMode.KQL);
   const [adHocDataView, setAdHocDataView] = useState<DataView | null>(null);
+  const wasVisibleRef = useRef(isVisible);
   const telemetryService = useMemo(
     () => new ESQLEditorTelemetryService(core.analytics),
     [core.analytics]
@@ -120,6 +121,17 @@ export function QuickSearchVisor({
     },
     [onStopGeneration]
   );
+
+  useEffect(() => {
+    const becameVisible = Boolean(isInline) && isVisible && !wasVisibleRef.current;
+    wasVisibleRef.current = isVisible;
+    if (!becameVisible) return;
+    document
+      .querySelector<HTMLTextAreaElement>(
+        '[data-test-subj="ESQLEditor-quick-search-visor"] textarea'
+      )
+      ?.focus();
+  }, [isInline, isVisible]);
 
   useEffect(() => {
     if (!isVisible || !sourcesKey) {

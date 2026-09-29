@@ -79,6 +79,7 @@ export const useNlGeneration = ({
     abortControllerRef.current = abortController;
     setIsNlLoading(true);
     const startTime = Date.now();
+    let appliedContent = false;
     try {
       const result = await core.http.post<{ content: string }>(NL_TO_ESQL_ROUTE, {
         body: JSON.stringify({ nlInstruction: trimmed, currentQuery: query }),
@@ -86,6 +87,7 @@ export const useNlGeneration = ({
       });
       if (abortController.signal.aborted) return;
       if (result.content) {
+        appliedContent = true;
         trackNlResult(
           trimmed.length,
           query.length,
@@ -112,7 +114,9 @@ export const useNlGeneration = ({
     } finally {
       if (abortControllerRef.current === abortController) {
         abortControllerRef.current = null;
-        setNlValue('');
+        if (appliedContent) {
+          setNlValue('');
+        }
         setIsNlLoading(false);
       }
     }
