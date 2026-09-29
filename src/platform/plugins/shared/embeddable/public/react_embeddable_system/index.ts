@@ -13,8 +13,8 @@ export { registerEmbeddablePublicDefinition } from './react_embeddable_registry'
 
 /**
  * Kicks off the embeddable renderer async chunk (buildEmbeddable, PresentationPanel,
- * PhaseTracker). Call this at dashboard module load time — before loadDashboardApi() starts —
- * so the chunk loads in parallel with the saved object server fetch.
+ * PhaseTracker). Call this at application module load time —
+ * so the chunk loads in parallel with application chunk loading.
  */
 export const prefetchEmbeddableRenderer = (): void => {
   import('../async_module');
