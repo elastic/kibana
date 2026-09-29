@@ -40,11 +40,23 @@ export const formatResourceWithSampledValues = ({
   const samplingCount = resource.fields.length > 1000 ? 0 : resource.fields.length > 200 ? 1 : 2;
   const lines = resource.fields.map((field) => renderFieldLine(field, samplingCount));
   const tsdbAttr = resource.isTsdb ? ` is-tsds="true"` : '';
+  const definition = resource.query ? `definition: ${summarizeQuery(resource.query)}` : undefined;
   return [
     `<target_resource name="${resource.name}" type="${resource.type}"${tsdbAttr}>`,
+    ...(definition ? [definition] : []),
     ...lines,
     `</target_resource>`,
   ].join('\n');
+};
+
+const VIEW_QUERY_PROMPT_LIMIT = 500;
+
+const summarizeQuery = (query: string): string => {
+  const singleLine = query.replace(/\s+/g, ' ').trim();
+  if (singleLine.length <= VIEW_QUERY_PROMPT_LIMIT) {
+    return singleLine;
+  }
+  return `${singleLine.slice(0, VIEW_QUERY_PROMPT_LIMIT)}…`;
 };
 
 const renderFieldLine = (field: MappingFieldWithStats, samplingCount: number): string => {

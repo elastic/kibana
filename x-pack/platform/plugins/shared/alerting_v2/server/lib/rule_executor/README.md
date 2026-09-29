@@ -116,25 +116,19 @@ The persisted shape lives in `saved_objects/schemas/rule_saved_object_attributes
 
 ### Query shape
 
-`query` is a discriminated union on `format`:
+`query` is one ES\|QL query plus an optional breach condition:
 
-- `format: 'composed'` — `base` ES\|QL plus pipe-less segments for each phase.
-- `format: 'standalone'` — independent ES\|QL queries for each phase.
-
-In both formats the `breach` sub-object is required; the `recovery` sub-object is optional. Recovery and no-data behaviour are now controlled by **top-level rule fields** rather than fields nested inside `query`:
-
-| Sub-object | Required? | Behavior |
+| Field | Required? | Behavior |
 | --- | --- | --- |
-| `breach` | Yes | The breach query (composed: `segment`; standalone: `query`). Produces breached events on matching rows. |
-| `recovery` | Optional | The recovery query payload only. Present when `recovery_strategy` is `'query'` and holds the leaf field: `segment` for composed, `query` for standalone. No `strategy` field — that is the top-level `recovery_strategy`. |
-| `no_data` | Optional (standalone only) | Data-presence query. Present when `no_data_strategy` is not `'none'`. Composed queries do not have a `no_data` block. |
+| `base` | Yes | The detection query, and the only place a `FROM` lives. Also the fallback data-presence query. |
+| `breach` | Optional | A pipe-less `segment` appended to `base`. Omit it to treat every row `base` returns as a breach. |
 
-Top-level strategy fields (sit alongside `query` on the rule, not inside it):
+Recovery and no-data live in sibling objects that each own the ES\|QL they run. Both are always stored for `kind: alert` and never for `kind: signal`:
 
-| Top-level field | Values | Meaning |
+| Field | Members | Meaning |
 | --- | --- | --- |
-| `recovery_strategy` | `'no_breach'` \| `'query'` \| `'none'` | How the executor detects recovery. `'none'` disables recovery entirely. |
-| `no_data_strategy` | `'emit'` \| `'last_known_status'` \| `'recover'` \| `'none'` | How the executor reacts when an active group is absent from the breach batch and the `no_data` query reports no data. See [No-data behavior](#no-data-behavior). |
+| `recovery` | `{ strategy: 'no_breach' }`, `{ strategy: 'condition', segment }`, `{ strategy: 'query', query }`, `{ strategy: 'manual' }` | How the executor detects recovery. `condition` appends `segment` to `query.base` and requires `query.breach`; `manual` disables automatic recovery entirely. |
+| `no_data` | `{ strategy: 'ignore' }`, `{ strategy: 'keep_last' \| 'resolve' \| 'alert', query? }` | How the executor reacts when an active group is absent from the breach batch and the presence query reports no data. Without an explicit `query`, `query.base` is the presence query. See [No-data behavior](#no-data-behavior). |
 
 ## Operational parameters
 
@@ -189,7 +183,7 @@ Step order is defined in `setup/bind_rule_executor.ts`.
 | 4 | `FetchActiveGroupsStep` | Fetch the rule's active groups once for every `kind: 'alert'` rule (bounded by `maxGroupsPerExecution`) and thread them onto `state.activeGroups`. |
 | 5 | `ExecuteRuleQueryStep` | Build and run ES\|QL, emitting streamed row batches. |
 | 6 | `CreateAlertEventsStep` | Turn a row batch into breached rule events (per batch). |
-| 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when both `recovery_strategy` and `no_data_strategy` are `'none'`. |
+| 7 | `ClassifyAbsentGroupsStep` | Forward every breach batch unchanged while accumulating the full-run breach set. Once the stream drains, run the data-presence and recovery queries once and emit recovery / `no_data` / continued-`breached` events for the active groups absent from that set, as a single final batch. No-op for `signal` rules and when `recovery.strategy` is `'manual'` and `no_data.strategy` is `'ignore'`. |
 | 8 | `DirectorStep` | Enrich alert-type events with episode state. |
 | 9 | `StoreAlertEventsStep` | Persist the batch into `.rule-events`. |
 
@@ -197,19 +191,19 @@ The rule executor runs whenever the plugin is enabled (`xpack.alerting_v2.enable
 
 ## How recovery and no-data fit together
 
-For an alert rule with recovery and/or no-data enabled, `ClassifyAbsentGroupsStep` sets the correct rule-event `status` for every active group that is absent from the **full-run** breach set (all groups that breached in any batch this run, not just the last batch). It runs the three sub-classifications — data-presence detection, recovery, and no-data — once, after the breach stream drains. The `recovery_strategy` is the rule executor's job (it decides `recovered` vs continued `breached`); the `no_data_strategy` is the director's job (it maps a `no_data` event to an episode status).
+For an alert rule with recovery and/or no-data enabled, `ClassifyAbsentGroupsStep` sets the correct rule-event `status` for every active group that is absent from the **full-run** breach set (all groups that breached in any batch this run, not just the last batch). It runs the three sub-classifications — data-presence detection, recovery, and no-data — once, after the breach stream drains. The `recovery` strategy is the rule executor's job (it decides `recovered` vs continued `breached`); the `no_data` strategy is the director's job (it maps a `no_data` event to an episode status).
 
 Three signals drive the decision per active group:
 
 - **B** — the group breached anywhere this run (present in the accumulated full-run breach set, from any `CreateAlertEventsStep` batch).
-- **R** — the group matched the recovery query (`recovery_strategy: 'query'` only).
-- **N** — the group is reported as still having data by the data-presence (`no_data`) query, run once via the `detectDataPresence` helper.
+- **R** — the group matched the recovery query (`recovery.strategy: 'condition'` or `'query'` only).
+- **N** — the group is reported as still having data by the presence query, run once via the `detectDataPresence` helper.
 
 ### Decision tables (source of truth)
 
 `1` means the query returned the group; `0` means it did not. For `N`, `1` = data present, `0` = no data.
 
-**Table 1 — `recovery_strategy: 'no_breach'`**
+**Table 1 — `recovery.strategy: 'no_breach'`**
 
 | B | N | Rule event | Why |
 | --- | --- | --- | --- |
@@ -218,7 +212,7 @@ Three signals drive the decision per active group:
 | 1 | 0 | `breached` | Breach matched even though the no_data query reported no data. Breach wins. |
 | 1 | 1 | `breached` | Ordinary breach. |
 
-**Table 2 — `recovery_strategy: 'query'`**
+**Table 2 — `recovery.strategy: 'condition'` / `'query'`**
 
 | B | R | N | Rule event | Why |
 | --- | --- | --- | --- | --- |
@@ -236,51 +230,51 @@ The three sub-classifications below all run inside `ClassifyAbsentGroupsStep` on
 
 Runs once at drain, before recovery. For `kind: alert` rules it executes the data-presence query and returns the set of group hashes that still have data:
 
-1. Standalone rules use the configured `query.no_data` block. The API schema requires this block whenever `no_data_strategy` is not `'none'`.
-2. Composed rules use `base` — `breach.segment` is what filters `base` down to breaching rows, so any group that appears in `base` results has data.
+1. A rule with an explicit `no_data.query` runs that query.
+2. Otherwise `query.base` is the presence query — `breach.segment` is what filters `base` down to breaching rows, so any group that appears in `base` results has data.
 
-The helper is not invoked (and the query is skipped for performance) when `no_data_strategy` is `'none'`, or defensively when a stale saved object has no `query.no_data` block. In those cases the data-presence set stays `undefined` and the classifier falls back to its data-presence-agnostic behavior.
+The helper is not invoked (and the query is skipped for performance) when `no_data.strategy` is `'ignore'`, or defensively when a stale saved object carries no `no_data` at all. In those cases the data-presence set stays `undefined` and the classifier falls back to its data-presence-agnostic behavior.
 
 ## Recovery behavior
 
-Recovery runs after data-presence detection, so the data-presence set is available. It only applies to `kind: alert` rules and is optional — a rule with `recovery_strategy: 'none'` (or none) never emits recovery events.
+Recovery runs after data-presence detection, so the data-presence set is available. It only applies to `kind: alert` rules — a rule with `recovery.strategy: 'manual'` never emits recovery events.
 
 ### `no_breach` recovery
 
-Selected when `recovery_strategy === 'no_breach'`. The executor:
+Selected when `recovery.strategy === 'no_breach'`. The executor:
 
 1. queries `.rule-events` for group hashes that still have non-inactive episode state (once, via `fetchActiveAlertGroupHashes`)
 2. emits one `recovered` event for each active group that is absent from the full-run breach set **and still has data** — table 1 row `01`
 
-Absent groups with no data (row `00`) are left for the no-data classification. When no data-presence result is available (`no_data_strategy: 'none'`), it falls back to recovering every absent group. No `query.recovery` block is needed for this mode.
+Absent groups with no data (row `00`) are left for the no-data classification. When no data-presence result is available (`no_data.strategy: 'ignore'`), it falls back to recovering every absent group. This mode runs no recovery query of its own.
 
-### `query` recovery
+### `condition` / `query` recovery
 
-Selected when `recovery_strategy === 'query'`. The executor runs the configured recovery query — composed `base` + `query.recovery.segment`, or standalone `query.recovery.query` — via the `executeRecoveryQuery` helper and emits `recovered` events for rows whose computed `group_hash` matches an active group, **excluding any group that breached anywhere this run** (breach wins — table 2 rows `110` / `111`). It does not consult data presence: a concrete recovery-query match recovers even if the no_data query disagrees (row `010`).
+Selected when `recovery.strategy === 'condition'` or `'query'`. The executor runs the configured recovery query — `query.base` + `recovery.segment` for `condition`, or the standalone `recovery.query` — via the `executeRecoveryQuery` helper and emits `recovered` events for rows whose computed `group_hash` matches an active group, **excluding any group that breached anywhere this run** (breach wins — table 2 rows `110` / `111`). It does not consult data presence: a concrete recovery-query match recovers even if the presence query disagrees (row `010`).
 
 Recovered documents are added to the final classification batch alongside the no-data results, then flow through `DirectorStep` and storage.
 
 ## No-data behavior
 
-No-data classification runs after recovery and classifies the active groups that are still absent from the full-run breach set, using the data-presence set. It only runs for `kind: alert` rules and is skipped entirely when no data-presence result is available (`no_data_strategy: 'none'`, or a stale saved object with no `query.no_data` block).
+No-data classification runs after recovery and classifies the active groups that are still absent from the full-run breach set, using the data-presence set. It only runs for `kind: alert` rules and is skipped entirely when no data-presence result is available (`no_data.strategy: 'ignore'`, or a stale saved object with no `no_data` at all).
 
 ### Recovery takes priority
 
 Groups already resolved this run — present in the full-run breach set or in the `recovered` set produced above — are excluded. Only **unresolved** absent groups are classified:
 
-- **No data** (absent from the data-presence set): emit a `no_data` event (table 1 row `00`, table 2 row `000`). The director's FSM maps it to an episode status based on `no_data_strategy`.
-- **Data present** and `recovery_strategy: 'query'`: emit a continued `breached` event with an empty `data` payload (table 2 row `001`) so the rule keeps breaching until the user's recovery threshold is met. Under `no_breach` these groups already recovered above, so this branch only applies to `query`.
+- **No data** (absent from the data-presence set): emit a `no_data` event (table 1 row `00`, table 2 row `000`). The director's FSM maps it to an episode status based on `no_data.strategy`.
+- **Data present** and a recovery query ran (`condition` / `query`): emit a continued `breached` event with an empty `data` payload (table 2 row `001`) so the rule keeps breaching until the user's recovery threshold is met. Under `no_breach` these groups already recovered above.
 
-### `no_data_strategy` outcomes
+### `no_data.strategy` outcomes
 
 For a `no_data` event, the director's FSM decides the next episode status. There is no `'no_data'` episode status; the branch lives in `BasicTransitionStrategy.getNextState`.
 
-| `no_data_strategy` | Episode status the FSM lands on |
+| `no_data.strategy` | Episode status the FSM lands on |
 | --- | --- |
-| `'emit'` | Sets the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
-| `'last_known_status'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
-| `'recover'` | Mirrors the `'recovered'` FSM transitions, moving the episode toward `inactive` via the normal lifecycle. |
-| `'none'` | The data-presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. |
+| `'alert'` | Sets the episode to `'active'` so downstream consumers (dispatcher, actions) keep treating the group as live during the data gap. |
+| `'keep_last'` | Preserves the prior episode status (e.g. an `active` episode stays `active`). |
+| `'resolve'` | Mirrors the `'recovered'` FSM transitions, moving the episode toward `inactive` via the normal lifecycle. |
+| `'ignore'` | The presence query is skipped and no `no_data` event is produced; the episode drifts out of lookback windows over time. |
 
 ## Severity behavior
 

@@ -43,12 +43,10 @@ const buildBaseSnapshot = ({
   time_field: 'timestamp',
   schedule: { every: '1m', lookback: '5h' },
   query: {
-    format: 'standalone',
-    breach: {
-      query:
-        'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
-    },
+    base: 'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 1',
   },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   created_by: { profile_uid: 'user-admin' },
   created_at: '2026-07-22T14:00:00.000Z',
   updated_by: { profile_uid: 'user-admin' },
@@ -87,11 +85,7 @@ export const createRuleChangeHistoryFixtures = (
   const v3: RuleSnapshot = {
     ...v2,
     query: {
-      format: 'standalone',
-      breach: {
-        query:
-          'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 2',
-      },
+      base: 'FROM kibana_sample_data_flights | WHERE DestWeather LIKE "Thunder & Lightning" | STATS c = COUNT(*) BY Carrier | WHERE c > 2',
     },
     updated_at: '2026-07-30T16:42:00.000Z',
     updated_by: { profile_uid: 'user-admin' },
