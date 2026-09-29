@@ -323,6 +323,11 @@ export function isModelEndOfLifeReached(metadata: EisInferenceEndpointMetadata |
   return dateMath.parse('now')?.isSameOrAfter(eolDate) ?? false;
 }
 
+export function isModelNearingEndOfLife(metadata: EisInferenceEndpointMetadata | undefined) {
+  if (!isModelDeprecated(metadata)) return false;
+  return !isModelEndOfLifeReached(metadata);
+}
+
 export function getModelReleaseDate(metadata: EisInferenceEndpointMetadata | undefined) {
   if (!metadata) return undefined;
   if (!metadata.heuristics?.release_date) return undefined;
