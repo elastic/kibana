@@ -52,7 +52,7 @@ describe('subscribeToLegacySecurityAssetsMigrationFlag', () => {
   beforeEach(() => {
     flag$ = new Subject<boolean>();
     stop$ = new Subject<void>();
-    scheduleMigration = jest.fn().mockResolvedValue();
+    scheduleMigration = jest.fn().mockResolvedValue(undefined);
     logger = loggerMock.create();
   });
 
@@ -104,6 +104,30 @@ describe('subscribeToLegacySecurityAssetsMigrationFlag', () => {
     await flushPromises();
 
     expect(scheduleMigration).not.toHaveBeenCalled();
+  });
+
+  it('discards a queued migration when the plugin stops', async () => {
+    let resolveFirstMigration: (() => void) | undefined;
+    scheduleMigration
+      .mockImplementationOnce(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveFirstMigration = resolve;
+          })
+      )
+      .mockResolvedValueOnce(undefined);
+    subscribe();
+
+    flag$.next(true);
+    flag$.next(false);
+    flag$.next(true);
+    await flushPromises();
+
+    stop$.next();
+    resolveFirstMigration?.();
+    await flushPromises();
+
+    expect(scheduleMigration).toHaveBeenCalledTimes(1);
   });
 });
 

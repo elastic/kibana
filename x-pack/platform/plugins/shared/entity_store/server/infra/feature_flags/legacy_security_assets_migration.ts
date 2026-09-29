@@ -46,7 +46,6 @@ export const subscribeToLegacySecurityAssetsMigrationFlag = ({
     .pipe(
       distinctUntilChanged(),
       filter(Boolean),
-      takeUntil(stop$),
       concatMap(() =>
         from(scheduleMigration()).pipe(
           catchError((error) => {
@@ -56,7 +55,8 @@ export const subscribeToLegacySecurityAssetsMigrationFlag = ({
             return EMPTY;
           })
         )
-      )
+      ),
+      takeUntil(stop$)
     )
     .subscribe();
 };
