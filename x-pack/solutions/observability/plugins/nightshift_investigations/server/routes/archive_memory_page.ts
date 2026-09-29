@@ -7,6 +7,7 @@
 
 import { notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { toMemoryDisplayTelemetry } from '../memory/page_store';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
@@ -14,9 +15,10 @@ import { createNightshiftInvestigationsServerRoute } from './create_server_route
 /**
  * Archives or restores a memory on a person's behalf.
  *
- * Requires a write privilege, not just `agentBuilder:read`: otherwise every
- * reader of the memory tab could retire memories.
+ * Requires the Nightshift manage privilege, not just read, so a reader of the
+ * memory tab cannot retire memories. Mirrors `cortexWritePrivileges`.
  */
+export const memoryWritePrivileges = [NIGHTSHIFT_API_PRIVILEGES.manage, 'agentBuilder:read'];
 export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/memory/pages/{id}/archive',
   options: {
@@ -25,7 +27,7 @@ export const archiveMemoryPageRoute = createNightshiftInvestigationsServerRoute(
     description: 'Sets `archive_reason` to `manual`, or clears it. Reversible, unlike delete.',
   },
   security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
+    authz: { requiredPrivileges: memoryWritePrivileges },
   },
   params: z.object({
     path: z.object({

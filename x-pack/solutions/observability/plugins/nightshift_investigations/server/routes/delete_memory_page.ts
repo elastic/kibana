@@ -7,8 +7,19 @@
 
 import { badRequest, notFound } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
+import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { createNightshiftInvestigationsServerRoute } from './create_server_route';
+
+/**
+ * Deleting is irreversible, so it is held to a higher bar than archiving: it
+ * needs the Nightshift configure privilege, not just manage.
+ */
+export const memoryDeletePrivileges = [
+  NIGHTSHIFT_API_PRIVILEGES.configure,
+  NIGHTSHIFT_API_PRIVILEGES.manage,
+  'agentBuilder:read',
+];
 
 /**
  * Hard-deletes a memory. This is the escape hatch for content that should not
@@ -29,7 +40,7 @@ export const deleteMemoryPageRoute = createNightshiftInvestigationsServerRoute({
       'by echoing the page title, so a mistyped or reflexive click cannot destroy content.',
   },
   security: {
-    authz: { requiredPrivileges: ['agentBuilder:write'] },
+    authz: { requiredPrivileges: memoryDeletePrivileges },
   },
   params: z.object({
     path: z.object({
