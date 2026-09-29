@@ -133,11 +133,11 @@ triggers:
           description: >
             Conversation id of an existing Investigation conversation (created by the
             Worker before calling this sub-workflow). When supplied and calledByWorker
-            is true, progress comments are posted into that conversation so the analyst
-            sees batch-by-batch results without leaving the Investigation. Absent on the
-            standalone path — no comments are posted.
-            Bounded to 1–256 chars to match Agent Builder CONVERSATION_ID_MAX_LENGTH;
-            posted into /api/chat/converse once per batch when present.
+            is true, progress comments are posted into that conversation via
+            `ai.conversation.add_user_message` so the analyst sees batch-by-batch
+            results without leaving the Investigation. Absent on the standalone path —
+            no comments are posted. Bounded to 1–256 chars to match Agent Builder
+            CONVERSATION_ID_MAX_LENGTH.
 
 # Structured output emitted by the `emit_workflow_output` step at the end of each run.
 # Always present, even when analysis is skipped (empty arrays / zero counts).
@@ -1619,29 +1619,17 @@ steps:
                     Alert analysis batch {{ foreach.index }} returned no verdicts for
                     {{ foreach.item | size }} alerts.
 
-              # TODO: replace with ai.conversation.message.add once kibana#291688 merges.
-              # Until then /api/chat/converse + trigger_mode:never appends via appendUserMessage,
-              # so these progress lines are stored as user messages (emoji does not change role).
               - name: post_batch_failure_comment
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ variables.investigation_conversation_id }}"
-                    trigger_mode: "never"
-                    input: |-
-                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
+                  conversation_id: "{{ variables.investigation_conversation_id }}"
+                  message: |-
+                    Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} ({{ foreach.item | size }} alert(s)) failed after retries and returned no verdicts. These alerts will not get verdict tags or notes; an error note will record the miss, and a Worker re-run will retry them.
 
-                      [View execution]({{ execution.url }})
-
+                    [View execution]({{ execution.url }})
             else:
               # The model can echo an id from another batch; select_alert_verdict takes `first`
               # over all_verdicts, so only this batch's ids may enter it (and the progress counts).
@@ -1758,28 +1746,19 @@ steps:
                   batch_fp_count: "${{ variables.batch_verdicts | where: 'classification', 'false_positive' | size }}"
                   batch_inc_count: "${{ variables.batch_verdicts | where: 'classification', 'inconclusive' | size }}"
 
-              # TODO: replace with ai.conversation.message.add once kibana#291688 merges
               - name: post_batch_progress_comment
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 if: "${{ inputs.calledByWorker == true and variables.investigation_conversation_id != '' }}"
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ variables.investigation_conversation_id }}"
-                    trigger_mode: "never"
-                    input: >-
-                      Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
-                      ({{ foreach.item | size }} alert(s)):
-                      {{ variables.batch_tp_count }} true positive,
-                      {{ variables.batch_fp_count }} false positive,
-                      {{ variables.batch_inc_count }} inconclusive.
+                  conversation_id: "{{ variables.investigation_conversation_id }}"
+                  message: >-
+                    Batch {{ foreach.index | plus: 1 }} of {{ foreach.total }} complete
+                    ({{ foreach.item | size }} alert(s)):
+                    {{ variables.batch_tp_count }} true positive,
+                    {{ variables.batch_fp_count }} false positive,
+                    {{ variables.batch_inc_count }} inconclusive.
 
       # -----------------------------------------------------------------------
       # Write the verdicts back to the alerts

@@ -59,8 +59,8 @@ consts:
 #   9. gate_fp_close             — proposal gate and one branch per outcome (if any FP candidates)
 #  10. close_investigation_no_fp — explicit close when there are no FP candidates
 #
-# Investigation narrative: messages are posted with `POST /api/chat/converse` and
-# `trigger_mode: 'never'`, so they are recorded without running the Investigation's agent.
+# Investigation narrative: progress and outcome lines use `ai.conversation.add_user_message`
+# (elastic/kibana#293743) so they are recorded without running the Investigation's agent.
 
 steps:
   # ---------------------------------------------------------------------------
@@ -161,29 +161,20 @@ steps:
           failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
 
   - name: post_comment_triage_started
-    type: kibana.request
+    type: ai.conversation.add_user_message
     on-failure:
       continue: true
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        Content-Type: application/json
-        elastic-api-version: "2023-10-31"
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        trigger_mode: "never"
-        input: |-
-          Triage started for rule **{{ event.rule.name }}** ({{ event.alerts | size }} alert(s)). Model routed via the `alertzero_reasoning` Model Management feature.
-          {% if variables.failed_attach_chunk_count > 0 %}
-          ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
-          {% else %}
-          Alerts attached above.
-          {% endif %}
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        Triage started for rule **{{ event.rule.name }}** ({{ event.alerts | size }} alert(s)). Model routed via the `alertzero_reasoning` Model Management feature.
+        {% if variables.failed_attach_chunk_count > 0 %}
+        ⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach as evidence after retries; some alerts are not visible in this Investigation.
+        {% else %}
+        Alerts attached above.
+        {% endif %}
 
-          [View execution]({{ execution.url }})
-
+        [View execution]({{ execution.url }})
   # ---------------------------------------------------------------------------
   # 4. Run the Security Alert Analysis sub-workflow.
   #
@@ -209,23 +200,15 @@ steps:
     on-failure:
       fallback:
         - name: post_comment_classify_failed
-          type: kibana.request
+          type: ai.conversation.add_user_message
           on-failure:
             continue: true
           with:
-            method: POST
-            path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-            headers:
-              kbn-xsrf: string
-              Content-Type: application/json
-              elastic-api-version: "2023-10-31"
-            body:
-              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-              trigger_mode: "never"
-              input: >-
-                ⚠️ Classification step failed for {{ event.alerts | size }} alert(s).
-                The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
-                Alerts have NOT been tagged or closed.
+            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+            message: >-
+              ⚠️ Classification step failed for {{ event.alerts | size }} alert(s).
+              The Alert Analysis workflow may be disabled, or `workflow.execute` threw.
+              Alerts have NOT been tagged or closed.
 
         # Fallback handles the comment only. Without this fail the parent continues into
         # empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
@@ -300,25 +283,17 @@ steps:
         condition: "${{ variables.verdict_count == 0 }}"
         steps:
           - name: post_comment_classification_empty
-            type: kibana.request
+            type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-                elastic-api-version: "2023-10-31"
-              body:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                trigger_mode: "never"
-                input: >-
-                  ⚠️ Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
-                  Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
-                  Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
-                  or the sub-workflow skipped the batch.
-                  Alerts have NOT been tagged or closed.
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                ⚠️ Alert Analysis returned no verdicts for {{ event.alerts | size }} alert(s).
+                Analysis is on for this space (a disabled setting aborts before an Investigation is opened).
+                Likely causes: the `alertzero_reasoning` Model Management feature has no connector,
+                or the sub-workflow skipped the batch.
+                Alerts have NOT been tagged or closed.
         else:
           # Partial miss: at least one verdict came back (the all-empty case is handled
           # above), but the sub-workflow's missing_alert_ids is nonempty — the model
@@ -331,43 +306,27 @@ steps:
             condition: "${{ variables.missing_alert_count > 0 }}"
             steps:
               - name: post_comment_missing_alert_ids
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                    trigger_mode: "never"
-                    input: >-
-                      ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
-                      {{ variables.alert_count }} alert(s) in this batch (see the sub-workflow's
-                      missing_alert_ids). Those alerts were NOT tagged, noted, or considered for
-                      closure by this Worker; only the {{ variables.verdict_count }} matched
-                      alert(s) will be triaged below. Re-run the Worker or follow up manually on
-                      the missing alert(s).
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: >-
+                    ⚠️ Alert Analysis returned no verdict for {{ variables.missing_alert_count }} of
+                    {{ variables.alert_count }} alert(s) in this batch (see the sub-workflow's
+                    missing_alert_ids). Those alerts were NOT tagged, noted, or considered for
+                    closure by this Worker; only the {{ variables.verdict_count }} matched
+                    alert(s) will be triaged below. Re-run the Worker or follow up manually on
+                    the missing alert(s).
 
   - name: post_comment_classification_results
-    type: kibana.request
+    type: ai.conversation.add_user_message
     on-failure:
       continue: true
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        Content-Type: application/json
-        elastic-api-version: "2023-10-31"
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        trigger_mode: "never"
-        input: |-
-          Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: |-
+        Classification complete: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
 
           {{ steps.classify_alerts.output.grouped_counts_summary }}
 
@@ -473,21 +432,13 @@ steps:
         Content-Type: application/json
 
   - name: post_comment_alert_updates
-    type: kibana.request
+    type: ai.conversation.add_user_message
     on-failure:
       continue: true
     with:
-      method: POST
-      path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-      headers:
-        kbn-xsrf: string
-        Content-Type: application/json
-        elastic-api-version: "2023-10-31"
-      body:
-        conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-        trigger_mode: "never"
-        input: >-
-          Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
+      conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+      message: >-
+        Tags and verdict notes written to {{ steps.classify_alerts.output.verdicts | size }} alert(s).
 
   # ---------------------------------------------------------------------------
   # 9. Autonomy gate — create a proposal to close FP alerts if any qualify.
@@ -509,23 +460,15 @@ steps:
     condition: "${{ variables.fp_candidate_count > 0 }}"
     steps:
       - name: post_comment_proposal
-        type: kibana.request
+        type: ai.conversation.add_user_message
         on-failure:
           continue: true
         with:
-          method: POST
-          path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-          headers:
-            kbn-xsrf: string
-            Content-Type: application/json
-            elastic-api-version: "2023-10-31"
-          body:
-            conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-            trigger_mode: "never"
-            input: >-
-              Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
-              Autonomy level: {{ consts.worker_settings.autonomy }}.
-              {% if consts.worker_settings.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
+          conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+          message: >-
+            Proposing closure of {{ variables.fp_candidate_count }} alert(s) classified as false positive at or above the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor.
+            Autonomy level: {{ consts.worker_settings.autonomy }}.
+            {% if consts.worker_settings.autonomy == 'supervised' %}The closure is approved automatically at this autonomy level; reopen any alert you disagree with.{% else %}A human decision is required.{% endif %}
 
       - name: create_fp_proposal
         type: workflow.execute
@@ -536,22 +479,14 @@ steps:
         on-failure:
           fallback:
             - name: post_comment_proposal_failed
-              type: kibana.request
+              type: ai.conversation.add_user_message
               on-failure:
                 continue: true
               with:
-                method: POST
-                path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                headers:
-                  kbn-xsrf: string
-                  Content-Type: application/json
-                  elastic-api-version: "2023-10-31"
-                body:
-                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                  trigger_mode: "never"
-                  input: >-
-                    ⚠️ The closure proposal could not be completed: {{ error.message }}.
-                    {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
+                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                message: >-
+                  ⚠️ The closure proposal could not be completed: {{ error.message }}.
+                  {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
         with:
           workflow-id: system-create-proposal
           inputs:
@@ -621,21 +556,13 @@ steps:
                 close_reason: false_positive
 
           - name: post_comment_outcome_approved
-            type: kibana.request
+            type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-                elastic-api-version: "2023-10-31"
-              body:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                trigger_mode: "never"
-                input: >-
-                  Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert(s) closed as false positive.
 
       - name: handle_dismissed
         type: if
@@ -728,41 +655,25 @@ steps:
                     close_reason: other
 
               - name: post_comment_outcome_dismissed
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                    trigger_mode: "never"
-                    input: >-
-                      Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and need manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: >-
+                    Proposal {{ steps.get_proposal.output.decision | default: 'dismissed' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} (reason: {{ steps.get_proposal.output.dismissReason | default: 'not specified' }}). {% if variables.failed_retag_count > 0 %}{{ variables.fp_candidate_count | minus: variables.failed_retag_count }} of {{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}; {{ variables.failed_retag_count }} failed after retries and need manual re-tagging.{% else %}{{ variables.fp_candidate_count }} alert(s) re-tagged {{ variables.dismissed_tag }}.{% endif %}{% if steps.get_proposal.output.rationale != blank %} Rationale: "{{ steps.get_proposal.output.rationale | truncate: 500 | escape }}".{% endif %}
             else:
               - name: post_comment_dismissed_read_failed
-                type: kibana.request
+                type: ai.conversation.add_user_message
                 on-failure:
                   continue: true
                 with:
-                  method: POST
-                  path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-                  headers:
-                    kbn-xsrf: string
-                    Content-Type: application/json
-                    elastic-api-version: "2023-10-31"
-                  body:
-                    conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                    trigger_mode: "never"
-                    input: >-
-                      ⚠️ The proposal was dismissed, but its details could not be read after
-                      retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
-                      alert(s) remain tagged az:false_positive and untouched; this Investigation
-                      stays open for manual follow-up.
+                  conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+                  message: >-
+                    ⚠️ The proposal was dismissed, but its details could not be read after
+                    retries ({{ steps.get_proposal.error.message }}). {{ variables.fp_candidate_count }}
+                    alert(s) remain tagged az:false_positive and untouched; this Investigation
+                    stays open for manual follow-up.
 
       # An unanswered deadline is not a dismissal: nobody rejected the verdict, so the alerts
       # keep their az:false_positive tag and stay open for an analyst to pick up.
@@ -789,21 +700,13 @@ steps:
                 close_reason: other
 
           - name: post_comment_outcome_expired
-            type: kibana.request
+            type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-                elastic-api-version: "2023-10-31"
-              body:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                trigger_mode: "never"
-                input: >-
-                  No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                No decision was made before the proposal expired. {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
 
       # Any other terminal status means the gate settled in a way this Worker does not
       # expect. Leave the Investigation open so an analyst looks at it.
@@ -812,27 +715,19 @@ steps:
         condition: "${{ variables.proposal_outcome == 'unknown' }}"
         steps:
           - name: post_comment_outcome_unknown
-            type: kibana.request
+            type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-                elastic-api-version: "2023-10-31"
-              body:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                trigger_mode: "never"
-                # Does not assert every candidate remains open: this outcome can follow
-                # action_close_alerts_false_positive's fail_incomplete_close, which fires after
-                # a partial SetAlertsStatus update (conflicts: proceed lets some alerts close
-                # before the count mismatch throws). Whether that happened is not observable
-                # here — the gate's own output carries no per-alert result — so this reports
-                # the ambiguity instead of a specific (possibly wrong) closed/open count.
-                input: >-
-                  ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert(s) may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              # Does not assert every candidate remains open: this outcome can follow
+              # action_close_alerts_false_positive's fail_incomplete_close, which fires after
+              # a partial SetAlertsStatus update (conflicts: proceed lets some alerts close
+              # before the count mismatch throws). Whether that happened is not observable
+              # here — the gate's own output carries no per-alert result — so this reports
+              # the ambiguity instead of a specific (possibly wrong) closed/open count.
+              message: >-
+                ⚠️ The closure proposal ended in an unexpected state (status: "{{ steps.create_fp_proposal.output.status | default: 'unknown' }}"). Some of the {{ variables.fp_candidate_count }} candidate alert(s) may already be closed if a closure attempt partially succeeded before this outcome — check each alert's workflow_status rather than assuming all remain open and tagged az:false_positive. This Investigation stays open for review.
 
   # ---------------------------------------------------------------------------
   # 10. No-FP branch: close the Investigation immediately.
@@ -879,19 +774,11 @@ steps:
                 status: closed
 
           - name: post_comment_outcome_no_fp
-            type: kibana.request
+            type: ai.conversation.add_user_message
             on-failure:
               continue: true
             with:
-              method: POST
-              path: "/s/{{ workflow.spaceId }}/api/chat/converse"
-              headers:
-                kbn-xsrf: string
-                Content-Type: application/json
-                elastic-api-version: "2023-10-31"
-              body:
-                conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
-                trigger_mode: "never"
-                input: >-
-                  Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
-                  {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.
+              conversation_id: "{{ steps.create_investigation.output.conversation_id }}"
+              message: >-
+                Triage complete. No false positive alerts met the {{ consts.worker_settings.autoCloseConfidenceScoreMinThreshold }} confidence floor; no proposal created.
+                {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.false_positive_count }} false positive (below threshold), {{ steps.classify_alerts.output.inconclusive_count }} inconclusive.

@@ -420,13 +420,13 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
   it('posts batch progress counts reconciled to this batch alert ids, not raw agent verdicts', () => {
     const progress = findStepByName(workflow.steps, 'post_batch_progress_comment') as {
-      with: { body: { input: string } };
+      with: { message: string };
     };
     // Fabricated agent ids must not inflate the Investigation summary.
-    expect(progress.with.body.input).toContain('variables.batch_tp_count');
-    expect(progress.with.body.input).toContain('variables.batch_fp_count');
-    expect(progress.with.body.input).toContain('variables.batch_inc_count');
-    expect(progress.with.body.input).not.toContain(
+    expect(progress.with.message).toContain('variables.batch_tp_count');
+    expect(progress.with.message).toContain('variables.batch_fp_count');
+    expect(progress.with.message).toContain('variables.batch_inc_count');
+    expect(progress.with.message).not.toContain(
       "structured_output.verdicts | where: 'classification'"
     );
 

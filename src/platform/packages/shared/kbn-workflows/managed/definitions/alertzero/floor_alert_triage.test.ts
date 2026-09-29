@@ -199,7 +199,7 @@ describe('floor_alert_triage — guard_get_proposal_readable', () => {
 
   it('reports the read failure without claiming any alert was re-tagged', () => {
     const comment = stepByName('post_comment_dismissed_read_failed');
-    const template = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
     const rendered = renderString(template, {
       steps: { get_proposal: { error: { message: 'timeout after 3 attempts' } } },
       variables: { fp_candidate_count: 4 },
@@ -216,8 +216,8 @@ describe('floor_alert_triage — guard_get_proposal_readable', () => {
 // ---------------------------------------------------------------------------
 
 const dismissedComment = stepByName('post_comment_outcome_dismissed');
-const dismissedInputTemplate = (dismissedComment?.with?.body as Record<string, unknown>)
-  ?.input as string;
+const dismissedInputTemplate = (dismissedComment?.with as Record<string, unknown>)
+  ?.message as string;
 
 const renderDismissedComment = ({
   dismissReason = 'wrong',
@@ -345,8 +345,8 @@ describe('floor_alert_triage — retag_dismissed_alerts failure tracking', () =>
 // ---------------------------------------------------------------------------
 
 const triageStartedComment = stepByName('post_comment_triage_started');
-const triageInputTemplate = (triageStartedComment?.with?.body as Record<string, unknown>)
-  ?.input as string;
+const triageInputTemplate = (triageStartedComment?.with as Record<string, unknown>)
+  ?.message as string;
 
 const makeAlerts = (count: number) =>
   Array.from({ length: count }, (_, i) => ({ _id: `alert-id-${i + 1}` }));
@@ -538,7 +538,7 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
 
   it('does not tell the operator to enable Alert Analysis — that path aborted earlier', () => {
     const comment = stepByName('post_comment_classification_empty');
-    const input = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const input = (comment?.with as { message?: string } | undefined)?.message ?? '';
     expect(input).toContain('`alertzero_reasoning` Model Management feature has no connector');
     // The sub-workflow skips its dedupe on the Worker path, so tags cannot empty the batch.
     expect(input).not.toContain('already carry the analysis tag');
@@ -559,7 +559,7 @@ describe('floor_alert_triage — guard_classification_nonempty', () => {
 
   it('reports the shortfall and warns the missing alert(s) were not tagged, noted, or closed', () => {
     const comment = stepByName('post_comment_missing_alert_ids');
-    const template = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
     const rendered = renderString(template, {
       variables: { missing_alert_count: 2, alert_count: 5, verdict_count: 3 },
     });
@@ -719,7 +719,7 @@ describe('floor_alert_triage — proposal outcomes', () => {
     // already closed (conflicts: proceed), so this outcome must not assert a specific
     // closed/open count it cannot actually observe.
     const comment = stepByName('post_comment_outcome_unknown');
-    const template = (comment?.with?.body as { input?: string } | undefined)?.input ?? '';
+    const template = (comment?.with as { message?: string } | undefined)?.message ?? '';
     const rendered = renderString(template, {
       steps: { create_fp_proposal: { output: { status: 'failed' } } },
       variables: { fp_candidate_count: 2 },
