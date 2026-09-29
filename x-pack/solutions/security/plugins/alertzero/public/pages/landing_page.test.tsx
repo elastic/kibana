@@ -29,6 +29,7 @@ import { LandingPage } from './landing_page';
 jest.mock('../hooks/use_workers_api', () => ({
   useWorkers: jest.fn(),
   useUpdateWorker: jest.fn().mockReturnValue({ mutate: jest.fn(), isLoading: false }),
+  notifyWorkerUpdateError: jest.fn(),
 }));
 jest.mock('../hooks/use_investigations_api');
 
@@ -237,10 +238,14 @@ describe('LandingPage', () => {
     mockUseInvestigationsCount.mockReturnValue(investigationsResult(0));
 
     // Use a custom queryClient and core so we can keep PATCHes in-flight.
-    const resolvers: Array<() => void> = [];
-    const httpPatch = jest
-      .fn()
-      .mockImplementation(() => new Promise((resolve) => resolvers.push(() => resolve({}))));
+    type Settler = { resolve: () => void; reject: (err: Error) => void };
+    const settlers: Settler[] = [];
+    const httpPatch = jest.fn().mockImplementation(
+      () =>
+        new Promise<void>((resolve, reject) => {
+          settlers.push({ resolve: () => resolve(), reject: (err) => reject(err) });
+        })
+    );
     const coreStart = coreMock.createStart();
     (coreStart.application.capabilities as Record<string, unknown>).alertzero = { write: true };
     const core = { ...coreStart, http: { ...coreStart.http, patch: httpPatch } };
@@ -298,6 +303,25 @@ describe('LandingPage', () => {
 
     // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
     // though showQueue would otherwise be true.
+    expect(screen.getByText('Enable your workers')).toBeInTheDocument();
+    expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
+
+    // Settle the fan-out with a mixed outcome: 4 succeed, 1 fails.
+    // This exercises the partial-failure path where onSavingChange(false) is
+    // withheld, keeping savingInProgress=true and onboarding mounted for retry.
+    settlers.slice(0, 4).forEach(({ resolve }) => resolve());
+    settlers[4].reject(new Error('network error'));
+
+    // Wait for the save to settle (isSaving clears, button re-enables).
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: 'Enable and continue' })).not.toHaveAttribute(
+        'disabled'
+      )
+    );
+
+    // Partial failure must keep onboarding mounted: the parent save lock is not
+    // released, so the partially-committed server state (one enabled worker) cannot
+    // transition the page to the queue.
     expect(screen.getByText('Enable your workers')).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
