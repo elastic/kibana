@@ -39,6 +39,7 @@ import {
   SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH,
   SERVERLESS_IDP_METADATA_PATH,
 } from '../paths';
+import { publishLoopbackPort } from './publish_loopback_port';
 
 const COSMOS_DB_EMULATOR_DOCKER_REGISTRY = 'docker.elastic.co';
 const COSMOS_DB_EMULATOR_DOCKER_REPO = `${COSMOS_DB_EMULATOR_DOCKER_REGISTRY}/kibana-ci/uiam-azure-cosmos-emulator`;
@@ -112,10 +113,8 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--volume',
       `${SERVERLESS_UIAM_CERTIFICATE_BUNDLE_PATH}:/scripts/certs/uiam_cosmosdb.pfx:z`,
 
-      '-p',
-      `127.0.0.1:${env.UIAM_COSMOS_DB_PORT}:8081`, // Cosmos DB gateway
-      '-p',
-      `127.0.0.1:${env.UIAM_COSMOS_DB_UI_PORT}:1234`, // Cosmos DB emulator UI
+      ...publishLoopbackPort(env.UIAM_COSMOS_DB_PORT, 8081), // Cosmos DB gateway
+      ...publishLoopbackPort(env.UIAM_COSMOS_DB_UI_PORT, 1234), // Cosmos DB emulator UI
 
       '--env',
       'AZURE_COSMOS_EMULATOR_PARTITION_COUNT=1',
@@ -161,8 +160,7 @@ const UIAM_BASE_CONTAINERS: UiamContainer[] = [
       '--volume',
       `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
-      '-p',
-      `127.0.0.1:${env.UIAM_SERVICE_PORT}:8443`, // UIAM API port
+      ...publishLoopbackPort(env.UIAM_SERVICE_PORT, 8443), // UIAM API port
 
       '--entrypoint',
       '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',
@@ -279,8 +277,7 @@ const UIAM_OAUTH_CONTAINER: UiamContainer = {
     '--volume',
     `${KBN_CERT_PATH}:/tmp/server.crt:z`,
 
-    '-p',
-    `127.0.0.1:${env.UIAM_OAUTH_SERVICE_PORT}:8443`, // UIAM OAuth HTTPS port
+    ...publishLoopbackPort(env.UIAM_OAUTH_SERVICE_PORT, 8443), // UIAM OAuth HTTPS port
 
     '--entrypoint',
     '/opt/jboss/container/java/run/run-java-with-custom-ca.sh',

@@ -958,6 +958,18 @@ describe('AuthenticationService', () => {
         } as ConfigType['public'];
         expect(getServerBaseURL()).toBe('https://elastic.co:4321');
       });
+
+      it('brackets IPv6 literal hostnames so the result is a parseable URL', async () => {
+        mockStartAuthenticationParams.http.getServerInfo.mockReturnValue({
+          name: 'some-name',
+          protocol: 'https',
+          hostname: '::1',
+          port: 5620,
+        });
+
+        expect(getServerBaseURL()).toBe('https://[::1]:5620');
+        expect(new URL(getServerBaseURL()).protocol).toBe('https:');
+      });
     });
 
     describe('getCurrentUser()', () => {
