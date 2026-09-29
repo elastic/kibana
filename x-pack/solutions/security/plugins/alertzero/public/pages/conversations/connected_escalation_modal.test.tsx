@@ -65,8 +65,9 @@ const mockUseCurrentUserProfile = useCurrentUserProfile as jest.MockedFunction<
 const mockUseSuggestUserProfiles = useSuggestUserProfiles as jest.MockedFunction<
   typeof useSuggestUserProfiles
 >;
-const mockUseEscalationsForInvestigation =
-  useEscalationsForInvestigation as jest.MockedFunction<typeof useEscalationsForInvestigation>;
+const mockUseEscalationsForInvestigation = useEscalationsForInvestigation as jest.MockedFunction<
+  typeof useEscalationsForInvestigation
+>;
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const createMutate = jest.fn();
@@ -445,9 +446,7 @@ describe('ConnectedEscalationModal', () => {
       const { useAgenticInvestigationsCapabilities } = jest.requireMock(
         '../../hooks/use_agentic_investigations_capabilities'
       );
-      (
-        useAgenticInvestigationsCapabilities as jest.Mock
-      ).mockReturnValueOnce({
+      (useAgenticInvestigationsCapabilities as jest.Mock).mockReturnValueOnce({
         showEscalations: false,
         manageEscalations: false,
         manageInvestigations: true,

@@ -147,6 +147,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 size="s"
                 color="warning"
                 iconType="warning"

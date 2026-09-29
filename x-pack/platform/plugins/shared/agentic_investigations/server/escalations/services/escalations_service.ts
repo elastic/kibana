@@ -67,7 +67,9 @@ import { filterMetadataToTemplateFields } from './filter_template_metadata';
  * `metadata` is a flattened field, so a KQL keyword term match against
  * `metadata.linked_investigations` tests array membership.
  */
-const buildEscalationsFilter = (query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>): string => {
+const buildEscalationsFilter = (
+  query: Pick<ListEscalationsQuery, 'status' | 'linked_investigation_id'>
+): string => {
   const base = `template_id: "${ESCALATION_TEMPLATE_ID}"`;
 
   let filter: string;
@@ -81,7 +83,9 @@ const buildEscalationsFilter = (query: Pick<ListEscalationsQuery, 'status' | 'li
   }
 
   if (query.linked_investigation_id) {
-    filter = `${filter} and metadata.${ESCALATION_LINKED_INVESTIGATIONS_FIELD}: "${escapeQuotes(query.linked_investigation_id)}"`;
+    filter = `${filter} and metadata.${ESCALATION_LINKED_INVESTIGATIONS_FIELD}: "${escapeQuotes(
+      query.linked_investigation_id
+    )}"`;
   }
 
   return filter;
