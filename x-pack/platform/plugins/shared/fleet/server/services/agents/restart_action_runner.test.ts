@@ -183,7 +183,9 @@ describe('restartBatch', () => {
     it('excludes agents below minimum version and writes error results', async () => {
       const unsupported = makeAgent('old-agent');
       const supported = makeAgent('new-agent');
-      mockIsAgentRestartSupported.mockImplementation((agent: { id: string }) => agent.id === 'new-agent');
+      mockIsAgentRestartSupported.mockImplementation(
+        (agent: { id: string }) => agent.id === 'new-agent'
+      );
 
       await restartBatch(esClient, soClient, [unsupported, supported], { spaceId: 'default' });
 
