@@ -83,6 +83,22 @@ steps:
             terms:
               _id: "${{ inputs.actionInput.alertIds }}"
 
+  # `conflicts: proceed` lets close_alerts finish without throwing even when it
+  # updates fewer alerts than requested (including zero) — e.g. version conflicts
+  # or ids no longer matching. The proposal gate that runs this action only checks
+  # steps.execute_action.error == blank, not closed_count, so an incomplete close
+  # would otherwise be reported as a full success and the Investigation closed
+  # while some alerts remain open. Fail loud instead so that check catches it.
+  - name: fail_incomplete_close
+    type: workflow.fail
+    if: "${{ steps.close_alerts.output.updated != inputs.actionInput.alertIds.size }}"
+    with:
+      message: >-
+        Closed {{ steps.close_alerts.output.updated }} of
+        {{ inputs.actionInput.alertIds.size }} requested alert(s) as false
+        positive; the rest were not updated (conflicts: proceed skips
+        version conflicts and no-ops instead of aborting the batch).
+
   # Emit a structured result so the caller (Worker or gate) can verify the
   # close landed. `workflow.execute` declares its output as unknown, so the
   # parent falls back to a heuristic read of the last step unless the child
