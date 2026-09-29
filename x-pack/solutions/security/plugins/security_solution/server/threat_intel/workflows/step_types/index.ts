@@ -8,8 +8,9 @@
 import type { Logger } from '@kbn/core/server';
 import type { WorkflowsExtensionsServerPluginSetup } from '@kbn/workflows-extensions/server';
 import { buildFetchSourceStepDefinition } from './fetch_source/fetch_source_step';
+import { buildMaterializeArticleStepDefinition } from './materialize_article/materialize_article_step';
 
-/** Registers threat_intel.fetch_source on the workflowsExtensions contract. */
+/** Registers the threat-intel workflow extensions on the workflowsExtensions contract. */
 export const registerThreatIntelWorkflowSteps = ({
   workflowsExtensions,
   logger,
@@ -18,4 +19,5 @@ export const registerThreatIntelWorkflowSteps = ({
   logger: Logger;
 }): void => {
   workflowsExtensions.registerStepDefinition(buildFetchSourceStepDefinition({ logger }));
+  workflowsExtensions.registerStepDefinition(buildMaterializeArticleStepDefinition({ logger }));
 };

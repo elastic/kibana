@@ -103,6 +103,26 @@ const threatReportsTemplate = {
               type: 'keyword' as const,
               ignore_above: FEED_TEXT_IGNORE_ABOVE,
             },
+            // RSS is retained as a bounded fallback while body_text becomes the
+            // validated effective body after article materialization.
+            rss_body_text: { type: 'text' as const, index: false },
+            rss_body_chars: { type: 'integer' as const },
+            rss_truncated: { type: 'boolean' as const },
+            rendered_body_text: { type: 'text' as const, index: false },
+            materialization: {
+              properties: {
+                provider: { type: 'keyword' as const },
+                status: { type: 'keyword' as const },
+                attempted_at: { type: 'date' as const },
+                source_url: {
+                  type: 'keyword' as const,
+                  ignore_above: FEED_TEXT_IGNORE_ABOVE,
+                },
+                rendered_chars: { type: 'integer' as const },
+                truncated: { type: 'boolean' as const },
+                reason: { type: 'keyword' as const, ignore_above: 500 },
+              },
+            },
           },
         },
         severity: {
@@ -925,6 +945,84 @@ const migrateExistingContentScrubbedMapping = async (
  * `*` searches. Settings updates are cheap and idempotent.
  */
 
+
+/** RSS article materialization fields for reports indices created before Jina support. */
+const migrateExistingMaterializationMappings = async (
+  esClient: ElasticsearchClient,
+  reportIndices: readonly string[],
+  logger: Logger
+): Promise<void> => {
+  const log = logger.get('materialization-mapping-migration');
+
+  for (const indexName of reportIndices) {
+    try {
+      const { [indexName]: indexMappings } = await esClient.indices.getMapping({
+        index: indexName,
+      });
+      const contentProps = (
+        (
+          indexMappings?.mappings?.properties as
+            | Record<string, { properties?: Record<string, unknown> }>
+            | undefined
+        )?.content as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
+      const materializationProps = (
+        contentProps?.materialization as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+      const needsMigration = !(
+        contentProps?.article_url &&
+        contentProps?.rss_body_text &&
+        contentProps?.rss_body_chars &&
+        contentProps?.rss_truncated &&
+        contentProps?.rendered_body_text &&
+        materializationProps?.provider &&
+        materializationProps?.status &&
+        materializationProps?.attempted_at &&
+        materializationProps?.source_url &&
+        materializationProps?.rendered_chars &&
+        materializationProps?.truncated &&
+        materializationProps?.reason
+      );
+
+      if (needsMigration) {
+        await esClient.indices.putMapping({
+          index: indexName,
+          properties: {
+            content: {
+              properties: {
+                article_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                rss_body_text: { type: 'text', index: false },
+                rss_body_chars: { type: 'integer' },
+                rss_truncated: { type: 'boolean' },
+                rendered_body_text: { type: 'text', index: false },
+                materialization: {
+                  properties: {
+                    provider: { type: 'keyword' },
+                    status: { type: 'keyword' },
+                    attempted_at: { type: 'date' },
+                    source_url: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    rendered_chars: { type: 'integer' },
+                    truncated: { type: 'boolean' },
+                    reason: { type: 'keyword', ignore_above: 500 },
+                  },
+                },
+              },
+            },
+          },
+        });
+        log.info(`Migrated article materialization mappings on ${indexName}`);
+      }
+    } catch (err) {
+      log.error(
+        `Failed to migrate article materialization mappings on ${indexName}: ${
+          err instanceof Error ? err.message : String(err)
+        }. RSS materialization writes will fail until the mapping is updated.`
+      );
+    }
+  }
+};
+
 /** Consolidated core artifacts and context metadata for enrichment pipeline upgrades. */
 const migrateExistingCoreEnrichmentMappings = async (
   esClient: ElasticsearchClient,
@@ -1575,6 +1673,12 @@ interface RequiredMapping {
 
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
+  { path: 'content.rss_body_text' },
+  { path: 'content.rss_body_chars' },
+  { path: 'content.rss_truncated' },
+  { path: 'content.rendered_body_text' },
+  { path: 'content.materialization.status' },
+  { path: 'content.materialization.rendered_chars' },
   { path: 'extracted.artifacts' },
   { path: 'extracted.core.model_id' },
   { path: 'extracted.core.context_mode' },
@@ -1821,6 +1925,7 @@ export const installIndexTemplates = async ({
   await migrateExistingVulnerabilityMappings(esClient, reportIndices, log);
   await backfillKevRankScore(esClient, reportIndices, log);
   await migrateExistingContentScrubbedMapping(esClient, reportIndices, log);
+  await migrateExistingMaterializationMappings(esClient, reportIndices, log);
   await migrateExistingCoreEnrichmentMappings(esClient, reportIndices, log);
   await migrateExistingIndicesToHidden(esClient, reportIndices, log);
 

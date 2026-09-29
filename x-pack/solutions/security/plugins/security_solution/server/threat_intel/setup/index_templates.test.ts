@@ -57,6 +57,21 @@ const fullyMigratedReportMappings = () => ({
     content: {
       properties: {
         article_url: { ignore_above: 2048 },
+        rss_body_text: {},
+        rss_body_chars: {},
+        rss_truncated: {},
+        rendered_body_text: {},
+        materialization: {
+          properties: {
+            provider: {},
+            status: {},
+            attempted_at: {},
+            source_url: {},
+            rendered_chars: {},
+            truncated: {},
+            reason: {},
+          },
+        },
       },
     },
     lineage: { properties: { content_scrubbed_at: {} } },
@@ -275,6 +290,33 @@ describe('index_templates — migrations', () => {
     const { patchedPaths } = await runMigrations({ reportMappings: mappings });
 
     expect(patchedPaths).toContain('lineage.content_scrubbed_at');
+  });
+
+  it('adds article materialization fields when absent', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (mappings.properties.content.properties as Record<string, unknown>).materialization;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toEqual(
+      expect.arrayContaining([
+        'content.article_url',
+        'content.rss_body_text',
+        'content.rendered_body_text',
+        'content.materialization.status',
+      ])
+    );
+  });
+
+  it('repairs a partial article materialization mapping', async () => {
+    const mappings = fullyMigratedReportMappings();
+    delete (
+      mappings.properties.content.properties.materialization.properties as Record<string, unknown>
+    ).rendered_chars;
+
+    const { patchedPaths } = await runMigrations({ reportMappings: mappings });
+
+    expect(patchedPaths).toContain('content.materialization.rendered_chars');
   });
 
   it('repairs a partial Diamond context mapping missing char leaves', async () => {

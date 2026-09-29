@@ -169,6 +169,45 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     );
   });
 
+  it('defers retryable RSS Jina fallbacks before persist and the relevance gate', () => {
+    expect(findStepByName(workflow.steps, 'defer_rss_retryable_fallback')).toMatchObject({
+      type: 'loop.continue',
+      if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}",
+    });
+    const yaml = THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml;
+    const deferAt = yaml.indexOf('name: defer_rss_retryable_fallback');
+    expect(deferAt).toBeGreaterThan(yaml.indexOf('name: materialize_article'));
+    expect(deferAt).toBeLessThan(yaml.indexOf('name: persist_materialization'));
+    expect(deferAt).toBeLessThan(yaml.indexOf('name: assess_relevance'));
+  });
+
+  it('rewrites semantic body_text only when the materialized body changed', () => {
+    const withBody = findStepByName(workflow.steps, 'persist_materialization') as {
+      if?: string;
+      'on-failure'?: { continue?: boolean };
+      with?: { doc?: { content?: Record<string, unknown> } };
+    };
+    const metadataOnly = findStepByName(workflow.steps, 'persist_materialization_metadata') as {
+      if?: string;
+      'on-failure'?: { continue?: boolean };
+      with?: { doc?: { content?: Record<string, unknown> } };
+    };
+
+    expect(withBody.if).toContain('materialization_body_text != variables.existing_body_text');
+    expect(withBody.with?.doc?.content).toHaveProperty('body_text');
+    expect(withBody['on-failure']?.continue).toBe(true);
+
+    expect(metadataOnly.if).toContain('materialization_body_text == variables.existing_body_text');
+    expect(metadataOnly.with?.doc?.content).not.toHaveProperty('body_text');
+    expect(metadataOnly['on-failure']?.continue).toBe(true);
+
+    // Per-item capture must always run so foreach variables cannot leak across items.
+    expect(findStepByName(workflow.steps, 'capture_materialization_persist')).toMatchObject({
+      type: 'data.set',
+    });
+    expect(findStepByName(workflow.steps, 'capture_materialization_persist')?.if).toBeUndefined();
+  });
+
   it('skips a report on gate-rejection persist failure without aborting the foreach', () => {
     const persist = findStepByName(workflow.steps, 'persist_gate_rejection') as {
       'on-failure'?: { continue?: boolean };
@@ -183,6 +222,17 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
   it('sends complete article text and contains no blind 30K prefix slice', () => {
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('slice: 0, 30000');
     expect(THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml).not.toContain('30000');
+  });
+
+  it('skips a report on materialization persist failure without aborting the foreach', () => {
+    const persist = findStepByName(workflow.steps, 'persist_materialization') as {
+      'on-failure'?: { continue?: boolean };
+    };
+    expect(persist?.['on-failure']?.continue).toBe(true);
+    expect(findStepByName(workflow.steps, 'retry_materialization_persist_failure')).toMatchObject({
+      type: 'loop.continue',
+      if: '${{ steps.persist_materialization.error != null or steps.persist_materialization_metadata.error != null }}',
+    });
   });
 
   // Dropped in this PR: it was a closed-set taxonomy field nothing consumed, and the

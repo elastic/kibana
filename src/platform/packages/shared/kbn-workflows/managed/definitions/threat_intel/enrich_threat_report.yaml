@@ -93,8 +93,75 @@ steps:
               values:
                 - "{{ foreach.item._id }}"
 
-      # Cheap hard gate: a negative Fast-tier verdict stops this report before
-      # deterministic extraction, Reasoning-tier core extraction, or Diamond.
+      # Materialize every linked RSS entry through unauthenticated Jina Reader.
+      # The custom step is fail-safe: rejected URLs, HTTP failures, access
+      # challenges, and suspiciously short renders all return the original RSS body.
+      - name: materialize_article
+        type: threat_intel.materialize_article
+        with:
+          source_type: "{{ steps.load_full_doc.output.hits.hits[0]._source.source.type }}"
+          article_url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url | default: '' }}"
+          title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+          rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+          existing_rendered_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rendered_body_text | default: '' }}"
+          existing_status: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.materialization.status | default: '' }}"
+
+      # Only transient Jina/transport failures use status `retryable_fallback`.
+      # Skip before persist and the gate so an outage cannot re-embed semantic_text
+      # or spend Fast-tier calls on teaser text every four hours.
+      - name: defer_rss_retryable_fallback
+        type: loop.continue
+        if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}"
+
+      # Always set per-item flags. A conditional data.set would leave the previous
+      # foreach item's body comparison variables in place for non-RSS reports.
+      - name: capture_materialization_persist
+        type: data.set
+        with:
+          is_rss_report: "${{ steps.load_full_doc.output.hits.hits[0]._source.source.type == 'rss' }}"
+          # Bounded semantic_text body used for equality checks and writes.
+          materialization_body_text: "{{ steps.materialize_article.output.body_text | slice: 0, 32000 }}"
+          existing_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | default: '' }}"
+
+      # Rewrite semantic body_text only when the effective body changed. Retries
+      # after a gate/core failure otherwise re-embed up to 32K chars every run.
+      - name: persist_materialization
+        type: elasticsearch.update
+        if: "${{ variables.is_rss_report == true and variables.materialization_body_text != variables.existing_body_text }}"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            content:
+              body_text: "{{ variables.materialization_body_text }}"
+              rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+              rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
+              materialization: "${{ steps.materialize_article.output.materialization }}"
+        on-failure:
+          continue: true
+
+      # Body unchanged: still refresh retained RSS/render metadata without
+      # touching semantic_text.
+      - name: persist_materialization_metadata
+        type: elasticsearch.update
+        if: "${{ variables.is_rss_report == true and variables.materialization_body_text == variables.existing_body_text }}"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            content:
+              rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+              rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
+              materialization: "${{ steps.materialize_article.output.materialization }}"
+        on-failure:
+          continue: true
+
+      - name: retry_materialization_persist_failure
+        type: loop.continue
+        if: "${{ steps.persist_materialization.error != null or steps.persist_materialization_metadata.error != null }}"
+
+      # Cheap hard gate: a negative Haiku verdict stops this report before
+      # deterministic extraction, Sonnet core extraction, or Opus Diamond.
       - name: assess_relevance
         type: kibana.request
         with:
@@ -104,7 +171,7 @@ steps:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+            text: "{{ steps.materialize_article.output.body_text }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
             url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}"
         on-failure:
@@ -166,7 +233,7 @@ steps:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+            text: "{{ steps.materialize_article.output.body_text }}"
             defang: true
         on-failure:
           continue: true
@@ -182,7 +249,7 @@ steps:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+            text: "{{ steps.materialize_article.output.body_text }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
             article_url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}"
             report_id: "{{ foreach.item._id }}"
@@ -223,7 +290,7 @@ steps:
             elastic-api-version: "1"
             x-elastic-internal-origin: "kibana"
           body:
-            text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+            text: "{{ steps.materialize_article.output.body_text }}"
             report_id: "{{ foreach.item._id }}"
         on-failure:
           continue: true

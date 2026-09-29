@@ -118,6 +118,9 @@ export const rssAdapter: FetchAdapter = {
             language,
           }),
           ...(articleUrl ? { article_url: articleUrl } : {}),
+          rss_body_text: bodyText,
+          rss_body_chars: fullBodyText.length,
+          rss_truncated: fullBodyText.length > BODY_TEXT_MAX_LENGTH,
         },
         severity: {
           level: DEFAULT_SEVERITY_LEVEL,
