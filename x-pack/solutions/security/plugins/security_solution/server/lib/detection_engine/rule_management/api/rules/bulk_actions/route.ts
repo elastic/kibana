@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { partition } from 'lodash';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -50,9 +51,8 @@ import { RULE_MANAGEMENT_BULK_ACTION_SOCKET_TIMEOUT_MS } from '../../constants';
 import type { BulkActionError } from './bulk_actions_response';
 import { buildBulkResponse } from './bulk_actions_response';
 import { bulkEnableDisableRules } from './bulk_enable_disable_rules';
-import { fetchRulesByQueryOrIds } from './fetch_rules_by_query_or_ids';
+import { fetchRulesByQueryOrIds, RuleNotFoundError } from './fetch_rules_by_query_or_ids';
 import { bulkScheduleBackfill } from './bulk_schedule_rule_run';
-import { extractNotFoundAsSkipped } from './utils';
 import { createPrebuiltRuleAssetsClient } from '../../../../prebuilt_rules/logic/rule_assets/prebuilt_rule_assets_client';
 import { checkAlertSuppressionBulkEditSupport } from '../../../logic/bulk_actions/check_alert_suppression_bulk_edit_support';
 import { bulkScheduleRuleGapFilling } from './bulk_schedule_rule_gap_filling';
@@ -287,7 +287,8 @@ export const performBulkActionRoute = (
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);
-          const errors: BulkActionError[] = [...fetchRulesOutcome.errors];
+          const fetchErrors = fetchRulesOutcome.errors;
+          const errors: BulkActionError[] = [];
           let updated: RuleAlertType[] = [];
           let created: RuleAlertType[] = [];
           let deleted: RuleAlertType[] = [];
@@ -303,7 +304,7 @@ export const performBulkActionRoute = (
                 mlAuthz,
                 rulesAuthz,
               });
-              errors.push(...bulkActionErrors);
+              errors.push(...fetchErrors, ...bulkActionErrors);
               updated = updatedRules;
               break;
             }
@@ -316,13 +317,21 @@ export const performBulkActionRoute = (
                 mlAuthz,
                 rulesAuthz,
               });
-              errors.push(...bulkActionErrors);
+              errors.push(...fetchErrors, ...bulkActionErrors);
               updated = updatedRules;
               break;
             }
             case BulkActionTypeEnum.delete: {
               // Rules not found at fetch time are skipped for delete (idempotent semantics)
-              extractNotFoundAsSkipped(errors, skipped);
+              const [notFoundErrors, otherFetchErrors] = partition(
+                fetchErrors,
+                ({ error }) => error instanceof RuleNotFoundError
+              );
+              errors.push(...otherFetchErrors);
+              skipped = notFoundErrors.map(({ item }) => ({
+                id: item,
+                skip_reason: 'RULE_NOT_FOUND',
+              }));
 
               // during dry run return early for delete, as no validations needed for this action
               if (isDryRun) {
@@ -422,7 +431,7 @@ export const performBulkActionRoute = (
                 },
                 abortSignal: abortController.signal,
               });
-              errors.push(...bulkActionOutcome.errors);
+              errors.push(...fetchErrors, ...bulkActionOutcome.errors);
               created = bulkActionOutcome.results
                 .map(({ result }) => result)
                 .filter((rule): rule is RuleAlertType => rule !== null);
@@ -477,7 +486,7 @@ export const performBulkActionRoute = (
                   },
                   abortSignal: abortController.signal,
                 });
-                errors.push(...bulkActionOutcome.errors);
+                errors.push(...fetchErrors, ...bulkActionOutcome.errors);
                 updated = bulkActionOutcome.results
                   .map(({ result }) => result)
                   .filter((rule): rule is RuleAlertType => rule !== null);
@@ -494,7 +503,7 @@ export const performBulkActionRoute = (
                 });
                 updated = bulkEditResult.rules;
                 skipped = bulkEditResult.skipped;
-                errors.push(...bulkEditResult.errors);
+                errors.push(...fetchErrors, ...bulkEditResult.errors);
               }
               break;
             }
@@ -508,7 +517,7 @@ export const performBulkActionRoute = (
                 rulesAuthz,
                 runPayload: body.run,
               });
-              errors.push(...bulkActionErrors);
+              errors.push(...fetchErrors, ...bulkActionErrors);
               updated = backfilled.filter((rule): rule is RuleAlertType => rule !== null);
               break;
             }
@@ -532,7 +541,7 @@ export const performBulkActionRoute = (
                 fillGapsPayload: body.fill_gaps,
                 excludedReasons,
               });
-              errors.push(...bulkActionErrors);
+              errors.push(...fetchErrors, ...bulkActionErrors);
               updated = backfilled;
               skipped = skippedRules.map((rule) => {
                 return {

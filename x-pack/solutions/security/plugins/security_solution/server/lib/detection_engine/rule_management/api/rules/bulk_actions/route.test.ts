@@ -263,6 +263,39 @@ describe('Perform bulk action route', () => {
       ]);
     });
 
+    it('returns 500 when rules fail to be fetched for a reason other than not found', async () => {
+      const brokenId = 'broken-rule-id';
+      bulkGetRulesMock.mockResolvedValue({
+        rules: [],
+        errors: [{ id: brokenId, error: { statusCode: 500 } }],
+      });
+      clients.detectionRulesClient.bulkDeleteRules.mockResolvedValue({
+        rules: [],
+        errors: [],
+        skipped: [],
+      });
+
+      const response = await server.inject(
+        requestMock.create({
+          method: 'patch',
+          path: DETECTION_ENGINE_RULES_BULK_ACTION,
+          body: { query: undefined, ids: [brokenId], action: BulkActionTypeEnum.delete },
+        }),
+        requestContextMock.convertContext(context)
+      );
+
+      expect(response.status).toEqual(500);
+      expect(response.body.attributes.summary).toEqual({
+        failed: 1,
+        skipped: 0,
+        succeeded: 0,
+        total: 1,
+      });
+      expect(response.body.attributes.errors).toEqual([
+        { message: 'Error resolving the rule', status_code: 500, rules: [{ id: brokenId }] },
+      ]);
+    });
+
     it('returns 200 with skipped rules when rules are not found at fetch time during dry run', async () => {
       const missingId = 'missing-rule-id';
       bulkGetRulesMock.mockResolvedValue({
