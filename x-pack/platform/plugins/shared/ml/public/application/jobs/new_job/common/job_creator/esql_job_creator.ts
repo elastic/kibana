@@ -29,6 +29,8 @@ export interface EsqlJobPayloadInput {
   influencers: string[];
   summaryCountFieldName?: string;
   delayedDataCheckEnabled?: boolean;
+  description?: string;
+  groups?: string[];
 }
 
 export interface EsqlJobPayload {
@@ -73,6 +75,8 @@ export const buildEsqlJobPayload = ({
   influencers,
   summaryCountFieldName,
   delayedDataCheckEnabled,
+  description,
+  groups,
 }: EsqlJobPayloadInput): EsqlJobPayload => {
   const analysisConfig: EsqlJobConfig['analysis_config'] = {
     bucket_span: bucketSpan,
@@ -96,12 +100,22 @@ export const buildEsqlJobPayload = ({
     datafeed.delayed_data_check_config = { enabled: delayedDataCheckEnabled };
   }
 
+  const job: EsqlJobPayload['job'] = {
+    job_id: jobId,
+    analysis_config: analysisConfig,
+    data_description: { time_field: timeField },
+  };
+
+  if (description !== undefined && description !== '') {
+    job.description = description;
+  }
+
+  if (groups !== undefined && groups.length > 0) {
+    job.groups = groups;
+  }
+
   return {
-    job: {
-      job_id: jobId,
-      analysis_config: analysisConfig,
-      data_description: { time_field: timeField },
-    },
+    job,
     datafeed,
   };
 };

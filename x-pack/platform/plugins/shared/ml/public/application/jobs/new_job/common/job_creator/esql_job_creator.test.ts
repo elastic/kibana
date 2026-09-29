@@ -106,6 +106,26 @@ describe('buildEsqlJobPayload', () => {
 
     expect(buildEsqlJobPayload(input).datafeed).not.toHaveProperty('delayed_data_check_config');
   });
+
+  it('includes description only when supplied and non-empty', () => {
+    expect(buildEsqlJobPayload({ ...input, description: 'my job' }).job).toHaveProperty(
+      'description',
+      'my job'
+    );
+    expect(buildEsqlJobPayload({ ...input, description: '' }).job).not.toHaveProperty(
+      'description'
+    );
+    expect(buildEsqlJobPayload(input).job).not.toHaveProperty('description');
+  });
+
+  it('includes groups only when supplied and non-empty', () => {
+    expect(buildEsqlJobPayload({ ...input, groups: ['team-a', 'team-b'] }).job).toHaveProperty(
+      'groups',
+      ['team-a', 'team-b']
+    );
+    expect(buildEsqlJobPayload({ ...input, groups: [] }).job).not.toHaveProperty('groups');
+    expect(buildEsqlJobPayload(input).job).not.toHaveProperty('groups');
+  });
 });
 
 describe('createDetectors', () => {

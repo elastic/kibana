@@ -26,6 +26,8 @@ export type DataDescription = estypes.MlDataDescription;
 
 export interface EsqlJobConfig {
   job_id: JobId;
+  description?: string;
+  groups?: string[];
   analysis_config: {
     bucket_span: BucketSpan;
     detectors: Detector[];
