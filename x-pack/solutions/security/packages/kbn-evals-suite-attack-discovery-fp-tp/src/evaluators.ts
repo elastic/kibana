@@ -38,9 +38,7 @@ interface SourceStatusGroups {
  * successful zero-hit query: both produce `seen = 0`, but only the former may be
  * claimed as `failed` in the line -- a claim of `failed` against a query that actually
  * ran and legitimately found nothing is also a mismatch, and so is a claim of `empty`
- * against a query that errored. `PayloadConformance` previously validated only the
- * line's syntax and could not tell an outage from an empty source -- see the
- * `entity_store: hits` / zero-hits mismatch this closes.
+ * against a query that errored.
  */
 const sourceStatusMismatches = (
   { entityStore, rawEvents }: SourceStatusGroups,
