@@ -27,7 +27,14 @@ const completed: FpTpTaskOutput = {
     rationale_markdown: 'entity_store: hits; raw_events: hits\n- alert_linkage: supports',
   },
   attackDiscoveryIdEcho: 'ad-1',
-  raw: { coverage: { entities: { seen: 1 }, events: { seen: 1 } } },
+  raw: {
+    coverage: { entities: { seen: 1 }, events: { seen: 1 } },
+    checks: [
+      { name: 'entity_role', status: 'completed', result: 'neutral', details: '' },
+      { name: 'process_parent', status: 'completed', result: 'contradicts', details: '' },
+      { name: 'network_destination', status: 'skipped', result: undefined, details: '' },
+    ],
+  },
   seededIds: { attackDiscoveryId: 'ad-1', alertIds: [], entityIds: [], eventIds: [] },
   seededEvidence: { alerts: [], entities: [], events: [] },
   agentConversationIds: [],
@@ -208,9 +215,43 @@ describe('PayloadConformance', () => {
         raw: { coverage: { entities: { seen: 3, failed: false }, events: { seen: 1 } } },
       },
     ],
+    [
+      'a rationale claiming empty for a source the run reported no coverage for at all',
+      {
+        payload: {
+          verdict: 'inconclusive',
+          summary_markdown: 'A summary',
+          rationale_markdown: 'entity_store: empty; raw_events: empty\n- alert_linkage: supports',
+        },
+        raw: {
+          coverage: {},
+          checks: [
+            { name: 'entity_role', status: 'completed', result: 'neutral', details: '' },
+            { name: 'process_parent', status: 'completed', result: 'neutral', details: '' },
+            { name: 'network_destination', status: 'completed', result: 'neutral', details: '' },
+          ],
+        },
+      },
+    ],
     ['a different attack id echo', { attackDiscoveryIdEcho: 'ad-2' }],
     ['a conforming payload from a failed execution', { executionStatus: ExecutionStatus.FAILED }],
     ['no payload', { payload: undefined }],
+    [
+      'checks missing every required world-check entry',
+      { raw: { coverage: { entities: { seen: 1 }, events: { seen: 1 } }, checks: [] } },
+    ],
+    [
+      'checks missing one required world-check entry',
+      {
+        raw: {
+          coverage: { entities: { seen: 1 }, events: { seen: 1 } },
+          checks: [
+            { name: 'entity_role', status: 'completed', result: 'neutral', details: '' },
+            { name: 'process_parent', status: 'completed', result: 'neutral', details: '' },
+          ],
+        },
+      },
+    ],
   ])('returns 0 for %s', async (_, overrides) => {
     expect(await score(payloadConformance, { ...completed, ...overrides }, 'inconclusive')).toBe(0);
   });
@@ -226,7 +267,14 @@ describe('PayloadConformance', () => {
             summary_markdown: 'A summary',
             rationale_markdown: 'entity_store: failed; raw_events: hits\n- alert_linkage: supports',
           },
-          raw: { coverage: { entities: { seen: 0, failed: true }, events: { seen: 1 } } },
+          raw: {
+            coverage: { entities: { seen: 0, failed: true }, events: { seen: 1 } },
+            checks: [
+              { name: 'entity_role', status: 'skipped', details: '' },
+              { name: 'process_parent', status: 'completed', result: 'neutral', details: '' },
+              { name: 'network_destination', status: 'completed', result: 'neutral', details: '' },
+            ],
+          },
         },
         'inconclusive'
       )

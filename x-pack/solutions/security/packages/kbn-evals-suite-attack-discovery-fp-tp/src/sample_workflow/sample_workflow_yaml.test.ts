@@ -289,7 +289,7 @@ describe('sample FP/TP analysis workflow', () => {
       expect(
         validate({
           ...completeOutput,
-          payload: { verdict: 'inconclusive', summary_markdown: 'x'.repeat(8001) },
+          payload: { ...completeOutput.payload, summary_markdown: 'x'.repeat(8001) },
         })
       ).toBe(false);
     });
