@@ -615,6 +615,8 @@ const parseStatsByColumns = (
   return { byFields, orderedColumns };
 };
 
+const CELL_ACTIONS_HOVER_OPEN_DELAY_MS = 350;
+
 // ── Cell Actions: filter in/out, copy (clippable), expand (always visible) ──
 const CellActions = React.memo(
   ({
@@ -623,6 +625,7 @@ const CellActions = React.memo(
     formattedValue,
     onFilter,
     onExpand,
+    onDismiss,
     styles,
   }: {
     fieldName: string;
@@ -630,96 +633,239 @@ const CellActions = React.memo(
     formattedValue: string;
     onFilter?: UnifiedDataTableProps['onFilter'];
     onExpand: (cellElement: HTMLElement) => void;
+    onDismiss: () => void;
     styles: ReturnType<typeof getTanStackDataGridStyles>;
   }) => {
+    const { euiTheme } = useEuiTheme();
+    const bubbleRef = useRef<HTMLDivElement>(null);
+    const openTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const [isOpen, setIsOpen] = useState(false);
+    const collapsedRadius = euiTheme.border.radius.small;
+    const openRadius = euiTheme.size.m;
+
+    const clearOpenTimer = useCallback(() => {
+      if (openTimerRef.current !== null) {
+        clearTimeout(openTimerRef.current);
+        openTimerRef.current = null;
+      }
+    }, []);
+
+    const playMorph = useCallback(
+      (nextOpen: boolean) => {
+        const el = bubbleRef.current;
+        const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        if (!el || reduceMotion) {
+          setIsOpen(nextOpen);
+          return;
+        }
+
+        const firstWidth = el.getBoundingClientRect().width;
+        setIsOpen(nextOpen);
+        requestAnimationFrame(() => {
+          const node = bubbleRef.current;
+          if (!node) return;
+          const lastWidth = node.getBoundingClientRect().width;
+          const scaleX = firstWidth / Math.max(lastWidth, 1);
+          node.getAnimations().forEach((animation) => animation.cancel());
+          node.animate(
+            nextOpen
+              ? [
+                  { transform: `scaleX(${scaleX})`, borderRadius: collapsedRadius },
+                  { transform: 'scaleX(1.06)', borderRadius: '14px', offset: 0.58 },
+                  { transform: 'scaleX(1)', borderRadius: openRadius },
+                ]
+              : [
+                  { transform: `scaleX(${scaleX})`, borderRadius: openRadius },
+                  { transform: 'scaleX(1)', borderRadius: collapsedRadius },
+                ],
+            {
+              duration: nextOpen ? 420 : 240,
+              easing: nextOpen
+                ? 'cubic-bezier(0.22, 0.8, 0.28, 1)'
+                : 'cubic-bezier(0.4, 0, 0.2, 1)',
+            }
+          );
+        });
+      },
+      [collapsedRadius, openRadius]
+    );
+
+    const scheduleOpen = useCallback(() => {
+      if (isOpen) return;
+      clearOpenTimer();
+      openTimerRef.current = setTimeout(() => {
+        openTimerRef.current = null;
+        playMorph(true);
+      }, CELL_ACTIONS_HOVER_OPEN_DELAY_MS);
+    }, [clearOpenTimer, isOpen, playMorph]);
+
+    useEffect(() => () => clearOpenTimer(), [clearOpenTimer]);
+
+    const handleBubbleMouseEnter = useCallback(() => {
+      if (!isOpen) {
+        scheduleOpen();
+      }
+    }, [isOpen, scheduleOpen]);
+
+    const handleBubbleMouseLeave = useCallback(() => {
+      clearOpenTimer();
+      if (isOpen) {
+        playMorph(false);
+      }
+    }, [clearOpenTimer, isOpen, playMorph]);
+
+    useEffect(() => {
+      if (!isOpen) return;
+
+      const onPointerDown = (event: PointerEvent) => {
+        if (!bubbleRef.current?.contains(event.target as Node)) {
+          onDismiss();
+        }
+      };
+      const onKeyDown = (event: KeyboardEvent) => {
+        if (event.key === keys.ESCAPE) {
+          event.stopPropagation();
+          onDismiss();
+        }
+      };
+
+      document.addEventListener('pointerdown', onPointerDown);
+      document.addEventListener('keydown', onKeyDown, true);
+      return () => {
+        document.removeEventListener('pointerdown', onPointerDown);
+        document.removeEventListener('keydown', onKeyDown, true);
+      };
+    }, [isOpen, onDismiss]);
+
     const handleFilterIn = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         onFilter?.(fieldName, value, '+');
+        onDismiss();
       },
-      [onFilter, fieldName, value]
+      [onFilter, fieldName, value, onDismiss]
     );
     const handleFilterOut = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         onFilter?.(fieldName, value, '-');
+        onDismiss();
       },
-      [onFilter, fieldName, value]
+      [onFilter, fieldName, value, onDismiss]
     );
     const handleCopy = useCallback(
       (e: React.MouseEvent) => {
         e.stopPropagation();
         navigator.clipboard.writeText(formattedValue);
+        onDismiss();
       },
-      [formattedValue]
+      [formattedValue, onDismiss]
     );
     const handleExpand = useCallback(
       (e: React.MouseEvent<HTMLElement>) => {
         e.stopPropagation();
         const cellElement = e.currentTarget.closest<HTMLElement>('[role="gridcell"]');
         if (cellElement) onExpand(cellElement);
+        onDismiss();
       },
-      [onExpand]
+      [onExpand, onDismiss]
     );
+    const cellActionsLabel = i18n.translate('discover.grid.tanStack.cellActionsButtonAriaLabel', {
+      defaultMessage: 'Cell actions',
+    });
+
+    const actionButtons = [
+      onFilter ? (
+        <EuiToolTip key="filterIn" content="Filter for value" disableScreenReaderOutput>
+          <EuiButtonIcon
+            css={styles.cellActionButton}
+            iconType="plusCircle"
+            aria-label="Filter for value"
+            size="xs"
+            iconSize="s"
+            color="text"
+            display="empty"
+            onClick={handleFilterIn}
+            data-test-subj="filterForValue"
+          />
+        </EuiToolTip>
+      ) : null,
+      onFilter ? (
+        <EuiToolTip key="filterOut" content="Filter out value" disableScreenReaderOutput>
+          <EuiButtonIcon
+            css={styles.cellActionButton}
+            iconType="minusCircle"
+            aria-label="Filter out value"
+            size="xs"
+            iconSize="s"
+            color="text"
+            display="empty"
+            onClick={handleFilterOut}
+            data-test-subj="filterOutValue"
+          />
+        </EuiToolTip>
+      ) : null,
+      <EuiToolTip key="copy" content="Copy value" disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.cellActionButton}
+          iconType="copy"
+          aria-label="Copy value"
+          size="xs"
+          iconSize="s"
+          color="text"
+          display="empty"
+          onClick={handleCopy}
+          data-test-subj="copyCellValue"
+        />
+      </EuiToolTip>,
+      <EuiToolTip key="expand" content="Expand cell" disableScreenReaderOutput>
+        <EuiButtonIcon
+          css={styles.cellActionButton}
+          iconType="maximize"
+          aria-label="Expand cell"
+          size="xs"
+          iconSize="s"
+          color="text"
+          display="empty"
+          onClick={handleExpand}
+          data-test-subj="expandCellValue"
+        />
+      </EuiToolTip>,
+    ].filter((button): button is React.ReactElement => button != null);
 
     return (
-      <div className="tsg-cellActions" css={styles.cellActions}>
-        <div css={styles.cellActionsClippable}>
-          {onFilter && (
-            <>
-              <EuiToolTip content="Filter for value" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  css={styles.cellActionButton}
-                  iconType="plusCircle"
-                  aria-label="Filter for value"
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  onClick={handleFilterIn}
-                  data-test-subj="filterForValue"
-                />
-              </EuiToolTip>
-              <EuiToolTip content="Filter out value" disableScreenReaderOutput>
-                <EuiButtonIcon
-                  css={styles.cellActionButton}
-                  iconType="minusCircle"
-                  aria-label="Filter out value"
-                  size="xs"
-                  iconSize="s"
-                  color="text"
-                  onClick={handleFilterOut}
-                  data-test-subj="filterOutValue"
-                />
-              </EuiToolTip>
-            </>
-          )}
-          <EuiToolTip content="Copy value" disableScreenReaderOutput>
-            <EuiButtonIcon
-              css={styles.cellActionButton}
-              iconType="copy"
-              aria-label="Copy value"
-              size="xs"
-              iconSize="s"
-              color="text"
-              onClick={handleCopy}
-              data-test-subj="copyCellValue"
-            />
-          </EuiToolTip>
-        </div>
-        <div css={styles.cellActionsExpand}>
-          <EuiToolTip content="Expand cell" disableScreenReaderOutput>
-            <EuiButtonIcon
-              css={styles.cellActionButton}
-              iconType="maximize"
-              aria-label="Expand cell"
-              size="xs"
-              iconSize="s"
-              color="text"
-              onClick={handleExpand}
-              data-test-subj="expandCellValue"
-            />
-          </EuiToolTip>
-        </div>
+      <div
+        ref={bubbleRef}
+        className="tsg-cellActions"
+        css={[styles.cellActions, isOpen && styles.cellActionsOpen]}
+        onMouseEnter={handleBubbleMouseEnter}
+        onMouseLeave={handleBubbleMouseLeave}
+        onClick={(event) => event.stopPropagation()}
+        onKeyDown={(event) => event.stopPropagation()}
+      >
+        {isOpen ? (
+          actionButtons.map((button, index) => (
+            <span
+              key={button.key}
+              css={styles.cellActionPop}
+              style={{ animationDelay: `${index * 45}ms` }}
+            >
+              {button}
+            </span>
+          ))
+        ) : (
+          <EuiButtonIcon
+            color="text"
+            display="base"
+            iconType="ellipsis"
+            size="xs"
+            iconSize="s"
+            aria-label={cellActionsLabel}
+            aria-expanded={isOpen}
+            data-test-subj="tanStackCellActionsButton"
+            onClick={(event) => event.stopPropagation()}
+          />
+        )}
       </div>
     );
   }
@@ -1096,9 +1242,23 @@ const VirtualCell = React.memo(
     /** Only used to re-render the control cell, whose content reads the expanded doc from a ref. */
     isRowExpanded: boolean;
   }) => {
-    // Cell actions are only mounted while the cell is hovered or focused to keep the DOM small.
-    const [isHovered, setIsHovered] = useState(false);
-    const [hasFocusWithin, setHasFocusWithin] = useState(false);
+    // Visibility follows the pointer (`:hover`). `actionsDismissed` keeps the control hidden
+    // after an action until the pointer actually leaves, even if the cell is still hovered.
+    const [actionsDismissed, setActionsDismissed] = useState(false);
+    const [actionsSession, setActionsSession] = useState(0);
+    const dismissActions = useCallback(() => {
+      setActionsDismissed(true);
+      // Collapse any open bubble so a remount/hover cycle cannot flash action chrome.
+      setActionsSession((session) => session + 1);
+      const active = document.activeElement;
+      if (active instanceof HTMLElement && active.closest('.tsg-cellActions')) {
+        active.blur();
+      }
+    }, []);
+    const resetActions = useCallback(() => {
+      setActionsDismissed(false);
+      setActionsSession((session) => session + 1);
+    }, []);
     const { meta } = cell.column.columnDef;
     const isControl = meta?.isControl;
     const isSelect = meta?.isSelect;
@@ -1185,10 +1345,9 @@ const VirtualCell = React.memo(
 
     const fieldName = meta?.fieldName;
     const value = cell.getValue();
-    const showActions = Boolean(fieldName) && (isHovered || hasFocusWithin);
     const getFormattedValue = () => meta?.formatValue?.(value) ?? formatCellValue(value);
     // Text formatting is only needed for highlighting and actions; skip it for idle cells.
-    const formatted = findTerm || showActions ? getFormattedValue() : undefined;
+    const formatted = findTerm || fieldName ? getFormattedValue() : undefined;
 
     const openCellPopover = (cellEl: HTMLElement) => {
       if (fieldName && setPopoverState) {
@@ -1204,7 +1363,14 @@ const VirtualCell = React.memo(
 
     return (
       <div
-        className={isPinned ? 'tsg-pinnedCell' : undefined}
+        className={
+          [
+            isPinned ? 'tsg-pinnedCell' : undefined,
+            actionsDismissed ? 'tsg-actionsDismissed' : undefined,
+          ]
+            .filter(Boolean)
+            .join(' ') || undefined
+        }
         css={[
           styles.cell,
           styles.cellWithActions,
@@ -1216,12 +1382,32 @@ const VirtualCell = React.memo(
         style={columnStyle}
         role="gridcell"
         tabIndex={0}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onFocus={() => setHasFocusWithin(true)}
-        onBlur={(e) => {
-          if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-            setHasFocusWithin(false);
+        onMouseLeave={(event) => {
+          const next = event.relatedTarget;
+          const leftIntoCell =
+            next instanceof Node &&
+            (next === event.currentTarget || event.currentTarget.contains(next));
+          const rect = event.currentTarget.getBoundingClientRect();
+          const pointerStillInside =
+            event.clientX >= rect.left &&
+            event.clientX <= rect.right &&
+            event.clientY >= rect.top &&
+            event.clientY <= rect.bottom;
+          // Removing the action button fires a leave while the pointer is still
+          // over the cell. Ignore that so the control stays hidden after an action.
+          if (leftIntoCell || pointerStillInside) {
+            return;
+          }
+          resetActions();
+          const active = document.activeElement;
+          if (active instanceof HTMLElement && event.currentTarget.contains(active)) {
+            active.blur();
+          }
+        }}
+        onBlur={(event) => {
+          if (event.currentTarget.contains(event.relatedTarget as Node | null)) return;
+          if (!event.currentTarget.matches(':hover')) {
+            resetActions();
           }
         }}
         onClick={(e) => openCellPopover(e.currentTarget)}
@@ -1249,13 +1435,15 @@ const VirtualCell = React.memo(
             flexRender(cell.column.columnDef.cell, cell.getContext())
           )}
         </div>
-        {showActions && fieldName && formatted !== undefined && (
+        {fieldName && formatted !== undefined && (
           <CellActions
+            key={actionsSession}
             fieldName={fieldName}
             value={value}
             formattedValue={formatted}
             onFilter={onFilter}
             onExpand={openCellPopover}
+            onDismiss={dismissActions}
             styles={styles}
           />
         )}

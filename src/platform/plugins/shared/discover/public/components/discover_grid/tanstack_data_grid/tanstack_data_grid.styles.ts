@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import type { UseEuiTheme } from '@elastic/eui';
 
 export const CONTROL_COL_WIDTH = 24;
@@ -15,6 +15,11 @@ export const SELECT_COL_WIDTH = 24;
 export const DEFAULT_COL_WIDTH = 180;
 export const MIN_COL_WIDTH = 60;
 const RESIZE_HANDLE_WIDTH = 4;
+
+const cellActionPopIn = keyframes({
+  from: { opacity: 0, transform: 'scale(0.35)' },
+  to: { opacity: 1, transform: 'scale(1)' },
+});
 
 export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => ({
   wrapper: css({
@@ -343,49 +348,51 @@ export const getTanStackDataGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => 
     cursor: 'pointer',
   }),
 
-  // -- Cell actions (mounted on hover/focus; secondary actions clip, expand always stays) --
+  // -- Cell actions (ellipsis morphs into the filter/copy/expand bubble) --
   cellWithActions: css({
     position: 'relative',
     overflow: 'hidden',
+    '&:hover > .tsg-cellActions, &:focus-within > .tsg-cellActions': {
+      display: 'flex',
+    },
+    '&.tsg-actionsDismissed > .tsg-cellActions, &.tsg-actionsDismissed:hover > .tsg-cellActions, &.tsg-actionsDismissed:focus-within > .tsg-cellActions':
+      {
+        display: 'none',
+        pointerEvents: 'none',
+      },
   }),
 
   cellActions: css({
     position: 'absolute',
-    top: 0,
-    right: 0,
-    display: 'flex',
-    flexDirection: 'row',
-    alignItems: 'stretch',
-    gap: euiTheme.size.xxs,
-    maxWidth: '100%',
-    overflow: 'hidden',
-    color: euiTheme.colors.emptyShade,
-    backgroundColor: euiTheme.colors.primary,
-    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.primary}`,
-    borderRadius: euiTheme.border.radius.small,
-    paddingInline: euiTheme.size.xxs,
+    top: euiTheme.size.xxs,
+    right: euiTheme.size.xxs,
     zIndex: 1,
+    display: 'none',
+    alignItems: 'center',
     boxSizing: 'border-box',
+    transformOrigin: 'right center',
   }),
 
-  // Filter/copy shrink and clip from the leading edge when the cell is narrow.
-  cellActionsClippable: css({
-    display: 'flex',
-    flex: '1 1 auto',
-    justifyContent: 'flex-end',
-    minWidth: 0,
-    overflow: 'hidden',
+  cellActionsOpen: css({
     gap: euiTheme.size.xxs,
+    paddingInline: euiTheme.size.xxs,
+    overflow: 'hidden',
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    border: `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`,
+    borderRadius: euiTheme.size.m,
+    color: euiTheme.colors.text,
   }),
 
-  cellActionsExpand: css({
-    display: 'flex',
-    flexShrink: 0,
+  cellActionPop: css({
+    display: 'inline-flex',
+    transformOrigin: 'center',
+    animation: `${cellActionPopIn} 280ms cubic-bezier(0.2, 0.85, 0.3, 1.25) both`,
+    '@media (prefers-reduced-motion: reduce)': {
+      animation: 'none',
+    },
   }),
 
   cellActionButton: css({
-    color: 'inherit',
-    borderRadius: 0,
     flexShrink: 0,
   }),
 
