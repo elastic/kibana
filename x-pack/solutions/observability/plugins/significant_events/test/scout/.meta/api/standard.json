@@ -1,5 +1,5 @@
 {
-  "sha1": "ba43df1c1bcb1d50f3be63a4806a418778d12f78",
+  "sha1": "aa5219b86f10ff48c14fe56e99f6d1244b96b46f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -18,6 +18,22 @@
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/global.setup.ts",
         "line": 14,
         "column": 27
+      }
+    },
+    {
+      "id": "5de67efbbfc6ad6-e4e9816c415896d",
+      "title": "Pause when Nightshift is turned off pauses when the flag is turned off and stays paused when it is turned back on",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/maintenance/pause_on_flag_off.spec.ts",
+        "line": 36,
+        "column": 31
       }
     },
     {

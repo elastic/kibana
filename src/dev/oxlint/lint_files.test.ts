@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { REPO_ROOT } from '@kbn/repo-info';
+
 import { ToolingLog } from '@kbn/tooling-log';
 import { File } from '../file';
 import { lintFiles } from './lint_files';
@@ -73,6 +75,29 @@ describe('oxlint lintFiles', () => {
       'src/b.ts',
     ]);
     expect(result).toEqual({ failedFiles: [], lintedFileCount: 2, warningCount: 0 });
+  });
+
+  it('passes repository-relative paths when files are created from a subdirectory', async () => {
+    respondWith({ exitCode: 0 });
+
+    const cwd = process.cwd();
+    try {
+      process.chdir(`${REPO_ROOT}/src`);
+      const file = new File('dev/file.ts');
+
+      await lintFiles(log, [file]);
+    } finally {
+      process.chdir(cwd);
+    }
+
+    expect(passedArgs(0)).toEqual([
+      '/bin/oxlint',
+      '--config',
+      '.oxlintrc.json',
+      '--format',
+      'json',
+      'src/dev/file.ts',
+    ]);
   });
 
   it('runs oxlint without paths for a full-repo scope and forwards --fix', async () => {

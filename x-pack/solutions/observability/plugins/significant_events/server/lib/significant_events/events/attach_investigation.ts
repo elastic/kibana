@@ -26,12 +26,11 @@ export const attachInvestigationToEvent = async ({
   investigation: SignificantEventInvestigation;
   alertEventsClient?: AlertEventsClientApi;
   logger?: Logger;
-}): Promise<{ event_uuid: string; updated: number; ignored: number }> => {
-  const { hits } = await eventClient.findByEventId(eventId);
-  const latest = hits[hits.length - 1];
+}): Promise<{ event_uuid?: string; updated: number; ignored: number }> => {
+  const latest = await eventClient.findLatestByEventId(eventId);
 
   if (!latest) {
-    return { event_uuid: eventId, updated: 0, ignored: 1 };
+    return { updated: 0, ignored: 1 };
   }
 
   const existing = latest.investigations ?? [];
