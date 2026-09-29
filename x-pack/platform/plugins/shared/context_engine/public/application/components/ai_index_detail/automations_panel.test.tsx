@@ -157,18 +157,23 @@ describe('AutomationsPanel', () => {
     renderPanel();
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
-    expect(screen.getByText('Create an automation to get started.')).toBeInTheDocument();
+    expect(screen.getByText('No automations yet')).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Create a Workflow to generate and refresh Knowledge Indicators from source data.'
+      )
+    ).toBeInTheDocument();
     expect(screen.queryByTestId('contextAiIndexAutomationRow')).not.toBeInTheDocument();
   });
 
-  it('shows read-only empty body copy for managed AI indexes', () => {
+  it('shows read-only empty copy for managed AI indexes', () => {
     renderPanel({ isManaged: true });
 
     expect(screen.getByTestId('contextAiIndexAutomationsEmpty')).toBeInTheDocument();
     expect(
       screen.getByText('No automations are configured for this AI index.')
     ).toBeInTheDocument();
-    expect(screen.queryByText('Create an automation to get started.')).not.toBeInTheDocument();
+    expect(screen.queryByText('No automations yet')).not.toBeInTheDocument();
   });
 
   it('does not render the edit button while loading', () => {
@@ -293,6 +298,14 @@ describe('AutomationsPanel', () => {
     rerender({ aiIndex });
 
     expect(screen.getByTestId('contextEditAutomationsButton')).toBeEnabled();
+  });
+
+  it('disables the Edit button while busy, even with a defined AI index', () => {
+    mockUseAutomationsEditor.mockReturnValue(editorResult({ isBusy: true }));
+
+    renderPanel();
+
+    expect(screen.getByTestId('contextEditAutomationsButton')).toBeDisabled();
   });
 
   it('hides the Edit button for managed AI indexes', () => {

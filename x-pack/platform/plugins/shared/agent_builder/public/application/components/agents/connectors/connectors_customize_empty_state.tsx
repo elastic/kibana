@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { labels } from '../../../utils/i18n';
+import { EuiBetaBadge, EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { connectorsTechPreviewBadgeProps, labels } from '../../../utils/i18n';
 import { appPaths } from '../../../utils/app_paths';
 import { useNavigation } from '../../../hooks/use_navigation';
 import { useAgentBuilderServices } from '../../../hooks/use_agent_builder_service';
@@ -31,6 +31,7 @@ export const ConnectorsCustomizeEmptyState: React.FC<ConnectorsCustomizeEmptySta
       dataTestSubj="agentConnectorsCustomizeEmptyState"
       illustrationSrc={connectorsIllustration}
       title={labels.agentConnectors.emptyStateTitle}
+      titleBadge={<EuiBetaBadge {...connectorsTechPreviewBadgeProps} />}
       description={labels.agentConnectors.emptyStateDescription}
       learnMoreHref={docLinksService.agentBuilderConnectors}
       learnMoreSuffix={labels.agentConnectors.emptyStateLearnMoreSuffix}
