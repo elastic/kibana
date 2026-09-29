@@ -7,12 +7,7 @@
 
 import { generateLogTemplates } from '../logging/generate_log_templates';
 import { deduplicateTemplates } from './deduplicate_templates';
-import {
-  queryTemplateRt,
-  renderQueryTemplate,
-  type QueryParameter,
-  type QueryTemplate,
-} from '../models/query_codec';
+import { queryTemplateRt } from '../models/query_codec';
 import { generateOtelTemplates } from '../otel/generate_otel_templates';
 
 /** Supplies immutable metadata required by all pure template builders. */
@@ -42,11 +37,7 @@ describe('deterministic template generation', () => {
     });
     expect(templates).toHaveLength(1);
     expect(templates[0].query).toBe(
-      'FROM [[source]]\n| WHERE MATCH_PHRASE(message, "Processed order") AND MATCH_PHRASE(message, "with status")'
-    );
-    expect(Object.keys(templates[0].parameters)).toEqual(['source']);
-    expect(renderQueryTemplate(templates[0]).query).toContain(
-      'MATCH_PHRASE(message, "Processed order") AND MATCH_PHRASE(message, "with status")'
+      'FROM logs*\n| WHERE MATCH_PHRASE(message, "Processed order") AND MATCH_PHRASE(message, "with status")'
     );
   });
 
@@ -75,64 +66,43 @@ describe('deterministic template generation', () => {
     for (const template of [logTemplate, otelTemplate]) {
       expect(queryTemplateRt.decode(template)._tag).toBe('Right');
       expect(template.query).toContain('\\"quoted\\" \\\\ path café 😀');
-      expect(renderQueryTemplate(template).query).toContain('\\"quoted\\" \\\\ path café 😀');
     }
-    expect(Object.keys(logTemplate.parameters)).toEqual(['source']);
-    expect(Object.keys(otelTemplate.parameters).sort()).toEqual(
-      ['source', 'span_name_field', 'status_field'].sort()
-    );
   });
 
-  it('renders trace templates with alternate span, status, and duration fields', () => {
+  it('inlines the conventional trace source and OTel field names', () => {
     /** Generates the span count and latency templates plus an error-status template. */
     const templates = generateOtelTemplates({
       context,
       signals: [
-        { evidence, kind: 'span_name', language: 'TypeScript', value: 'checkout' },
+        { evidence, kind: 'span_name', language: 'TypeScript', value: 'user_session_start' },
         { evidence, kind: 'error_status', language: 'TypeScript' },
       ],
     });
-    /** Rebinds every trace field to prove it remains deployment-configurable. */
-    const rebound = templates.map((template): QueryTemplate => {
-      /** Copies parameter metadata before replacing the deployment-specific field examples. */
-      const parameters: Record<string, QueryParameter> = { ...template.parameters };
-      if (parameters.span_name_field !== undefined) {
-        parameters.span_name_field = {
-          description: 'Field containing the OpenTelemetry span operation name.',
-          example: 'operation',
-          kind: 'identifier',
-          name: 'span_name_field',
-        };
-      }
-      if (parameters.status_field !== undefined) {
-        parameters.status_field = {
-          description: 'Field containing the OpenTelemetry status code.',
-          example: 'outcome.code',
-          kind: 'identifier',
-          name: 'status_field',
-        };
-      }
-      if (parameters.duration_field !== undefined) {
-        parameters.duration_field = {
-          description: 'Field containing the OpenTelemetry span duration.',
-          example: 'transaction.elapsed',
-          kind: 'identifier',
-          name: 'duration_field',
-        };
-      }
-      return { ...template, parameters };
+    const queries = templates.map((template) => template.query);
+    expect(queries).toEqual([
+      'FROM traces*\n| WHERE name == "user_session_start"\n| STATS total = COUNT(*), errors = COUNT(*) WHERE status.code == "Error"',
+      'FROM traces*\n| WHERE name == "user_session_start"\n| STATS p95_latency = PERCENTILE(duration, 95)',
+      'FROM traces*\n| WHERE status.code == "Error"\n| STATS count = COUNT(*) BY name',
+    ]);
+    for (const query of queries.slice(0, 2)) {
+      expect(query.startsWith('FROM traces*\n')).toBe(true);
+      expect(query).toContain('name ==');
+    }
+    expect(queries[0]).toContain('status.code');
+  });
+
+  it('renders attribute keys bare when safe and backtick-quoted otherwise', () => {
+    const templates = generateOtelTemplates({
+      context,
+      signals: [
+        { evidence, kind: 'attr_key', language: 'TypeScript', value: 'http.request.method' },
+        { evidence, kind: 'attr_key', language: 'TypeScript', value: 'my-attr' },
+      ],
     });
-    /** Renders rebased templates to assert their fields remain parameterized at query execution time. */
-    const rendered = rebound.map((template) => renderQueryTemplate(template).query);
-    expect(rendered).toContain(
-      'FROM traces-application-*\n| WHERE `operation` == "checkout"\n| STATS total = COUNT(*), errors = COUNT(*) WHERE `outcome.code` == "Error"'
-    );
-    expect(rendered).toContain(
-      'FROM traces-application-*\n| WHERE `operation` == "checkout"\n| STATS p95_latency = PERCENTILE(`transaction.elapsed`, 95)'
-    );
-    expect(rendered).toContain(
-      'FROM traces-application-*\n| WHERE `outcome.code` == "Error"\n| STATS count = COUNT(*) BY `operation`'
-    );
+    expect(templates.map((template) => template.query)).toEqual([
+      'FROM traces*\n| WHERE attributes.http.request.method IS NOT NULL\n| STATS count = COUNT(*) BY attributes.http.request.method',
+      'FROM traces*\n| WHERE `attributes.my-attr` IS NOT NULL\n| STATS count = COUNT(*) BY `attributes.my-attr`',
+    ]);
   });
 
   it('distinguishes different static literals while merging identical literal templates', () => {
@@ -169,7 +139,7 @@ describe('deterministic template generation', () => {
     expect(deduplicateTemplates(templates)).toHaveLength(4);
   });
 
-  it('keeps astral-Unicode source names distinct in parameterized metric template identities', () => {
+  it('keeps astral-Unicode source names distinct in metric template identities', () => {
     /** Uses astral code points with the same leading UTF-16 surrogate. */
     const templates = generateOtelTemplates({
       context,
@@ -237,29 +207,39 @@ describe('deterministic template generation', () => {
         { evidence, kind: 'span_name', language: 'TypeScript', templated: true },
       ],
     });
-    /** Renders all templates to enforce the declared-parameter and no-raw-placeholder invariant. */
-    const rendered = templates.map((template) => renderQueryTemplate(template).query);
+    const rendered = templates.map((template) => template.query);
     expect(templates).toHaveLength(12);
-    expect(rendered.some((query) => query.includes('TS metrics-application-*'))).toBe(true);
+    for (const template of templates) {
+      expect(queryTemplateRt.decode(template)._tag).toBe('Right');
+    }
     expect(rendered).toContain(
-      'TS metrics-application-*\n| WHERE `metrics.requests` IS NOT NULL\n| STATS rate = SUM(RATE(`metrics.requests`))'
+      'TS metrics*\n| WHERE metrics.requests IS NOT NULL\n| STATS rate = SUM(RATE(metrics.requests))'
     );
     expect(rendered).toContain(
-      'TS metrics-application-*\n| WHERE `metrics.duration` IS NOT NULL\n| STATS p95 = AVG(PERCENTILE_OVER_TIME(`metrics.duration`, 95))'
+      'TS metrics*\n| WHERE metrics.duration IS NOT NULL\n| STATS p95 = AVG(PERCENTILE_OVER_TIME(metrics.duration, 95))'
     );
     expect(rendered).toContain(
-      'TS metrics-application-*\n| WHERE `metrics.queue.depth` IS NOT NULL\n| STATS avg = AVG(AVG_OVER_TIME(`metrics.queue.depth`))'
+      'TS metrics*\n| WHERE metrics.queue.depth IS NOT NULL\n| STATS avg = AVG(AVG_OVER_TIME(metrics.queue.depth))'
+    );
+    expect(rendered).toContain('FROM traces*\n| WHERE attributes.retry.enabled == true');
+    expect(rendered).toContain('FROM traces*\n| WHERE event.name == "payment.failed"');
+    expect(rendered).toContain(
+      'FROM traces*\n| WHERE attributes.exception.type IS NOT NULL\n| STATS count = COUNT(*) BY attributes.exception.type'
     );
     expect(rendered).toContain(
-      'FROM traces-application-*\n| WHERE `attributes.retry.enabled` == false'
+      'FROM traces*\n| WHERE attributes.cart.total IS NOT NULL\n| STATS avg = AVG(attributes.cart.total), max = MAX(attributes.cart.total), p95 = PERCENTILE(attributes.cart.total, 95)'
     );
-    expect(rendered).toContain(
-      'FROM traces-application-*\n| WHERE `event.name` == "payment.failed"'
-    );
-    expect(rendered).toContain(
-      'FROM traces-application-*\n| WHERE `attributes.exception.type` IS NOT NULL\n| STATS count = COUNT(*) BY `attributes.exception.type`'
-    );
-    expect(rendered.every((query) => !query.includes('[['))).toBe(true);
+    expect(
+      templates
+        .filter((template) => template.signalType === 'metric')
+        .every((template) => template.query.startsWith('TS metrics*\n'))
+    ).toBe(true);
+    expect(
+      templates
+        .filter((template) => template.signalType === 'trace')
+        .every((template) => template.query.startsWith('FROM traces*\n'))
+    ).toBe(true);
+    expect(rendered.every((query) => !query.includes('[[') && !query.includes(']]'))).toBe(true);
     expect(new Set(templates.map((template) => template.id)).size).toBe(12);
   });
 

@@ -123,9 +123,9 @@ export const CatalogView = ({
             <EuiText size="s">
               <strong>{item.title ?? '—'}</strong>
             </EuiText>
-            {item.templated_query !== undefined && (
+            {item.query !== undefined && (
               <EuiText size="xs">
-                <p>{item.templated_query}</p>
+                <p>{item.query}</p>
               </EuiText>
             )}
           </>

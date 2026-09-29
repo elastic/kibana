@@ -127,7 +127,7 @@ export const registerRoutes = ({
               should: [
                 { semantic: { field: 'title', query: q } },
                 { semantic: { field: 'description', query: q } },
-                { match: { templated_query: q } },
+                { match: { query: q } },
               ],
               minimum_should_match: 1,
             };

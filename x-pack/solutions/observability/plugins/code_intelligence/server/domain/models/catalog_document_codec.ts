@@ -9,7 +9,7 @@ import * as t from 'io-ts';
 
 import { nonEmptyStringRt, sourceLocationRt } from '../source_location_codec';
 import { severityScoreRt } from './classification_codec';
-import { queryParameterRt, queryTemplateInvariantError, signalTypeRt } from './query_codec';
+import { queryInvariantError, signalTypeRt } from './query_codec';
 import { commitShaRt } from './repository_codec';
 import { operationErrorRt } from './operation_result';
 
@@ -20,7 +20,7 @@ export const sourceHashRt = t.refinement(
   'SourceHash'
 );
 
-/** A parameterized catalog record. Validation is carried separately by the write request. */
+/** A concrete ES|QL catalog record. Validation is carried separately by the write request. */
 const catalogDocumentBaseRt = t.intersection([
   t.type({
     createdAt: nonEmptyStringRt,
@@ -28,39 +28,33 @@ const catalogDocumentBaseRt = t.intersection([
     evidence: t.readonlyArray(sourceLocationRt),
     extractorVersion: nonEmptyStringRt,
     id: nonEmptyStringRt,
-    parameters: t.record(t.string, queryParameterRt),
+    query: nonEmptyStringRt,
     repository: nonEmptyStringRt,
     revision: commitShaRt,
     signalType: signalTypeRt,
     sourceHash: sourceHashRt,
-    templatedQuery: nonEmptyStringRt,
     title: nonEmptyStringRt,
     updatedAt: nonEmptyStringRt,
   }),
   t.partial({ logLevel: nonEmptyStringRt, severityScore: severityScoreRt }),
 ]);
 
-/** Validates catalog records, including their query-template invariants. */
+/** Validates catalog records, including their concrete-query invariant. */
 export const catalogDocumentRt = new t.Type<
   t.TypeOf<typeof catalogDocumentBaseRt>,
   unknown,
   unknown
 >(
   'CatalogDocument',
-  // Shape validation is separate from the template invariant so invalid queries cannot be stored.
+  // Shape validation is separate from the query invariant so invalid queries cannot be stored.
   (value): value is t.TypeOf<typeof catalogDocumentBaseRt> =>
-    catalogDocumentBaseRt.is(value) &&
-    queryTemplateInvariantError({ parameters: value.parameters, query: value.templatedQuery }) ===
-      undefined,
+    catalogDocumentBaseRt.is(value) && queryInvariantError(value.query) === undefined,
   (value, context) => {
     /** Holds validated external data for the following invariant checks. */
     const decoded = catalogDocumentBaseRt.validate(value, context);
     if (decoded._tag === 'Left') return decoded;
     /** Holds the invariant or codec error returned to the caller. */
-    const error = queryTemplateInvariantError({
-      parameters: decoded.right.parameters,
-      query: decoded.right.templatedQuery,
-    });
+    const error = queryInvariantError(decoded.right.query);
     return error === undefined ? decoded : t.failure(value, context, error);
   },
   (value) => value
