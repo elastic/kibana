@@ -108,7 +108,9 @@ describe('runCortexOptimize', () => {
     options.bindTo ? {} : { getConnectorById }
   );
   const getDefaultConnector = jest.fn();
-  const getInference = jest.fn().mockReturnValue({ getClient, getDefaultConnector });
+  const getInference = jest
+    .fn()
+    .mockReturnValue({ getClient, getConnectorById, getDefaultConnector });
   const getSetting = jest.fn().mockResolvedValue(false);
   const getSavedObjects = jest.fn().mockReturnValue({
     getScopedClient: jest.fn().mockReturnValue({}),
@@ -239,8 +241,8 @@ describe('runCortexOptimize', () => {
     });
 
     expect(getConnectorById.mock.calls).toEqual([
-      ['removed-round-model'],
-      [NIGHTSHIFT_DEFAULT_MODELS.investigation],
+      ['removed-round-model', request],
+      [NIGHTSHIFT_DEFAULT_MODELS.investigation, request],
     ]);
     expect(getClient).toHaveBeenCalledWith(
       expect.objectContaining({

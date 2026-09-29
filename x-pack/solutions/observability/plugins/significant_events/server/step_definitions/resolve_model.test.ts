@@ -18,7 +18,7 @@ import { resolveModelStepDefinition } from './resolve_model';
 const request = {} as KibanaRequest;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const inference = {
-  getClient: jest.fn().mockReturnValue({ getConnectorById }),
+  getConnectorById,
   getDefaultConnector: jest.fn(),
 } as unknown as InferenceServerStart;
 const getSetting = jest.fn().mockResolvedValue(false);
@@ -53,6 +53,7 @@ it('resolves the discovery default', async () => {
   await expect(definition.handler(createContext({ step: 'discovery' }))).resolves.toEqual({
     output: { connector_id: NIGHTSHIFT_DEFAULT_MODELS.discovery },
   });
+  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.discovery, request);
 });
 
 it('bounds connector IDs', () => {

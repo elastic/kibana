@@ -70,7 +70,7 @@ const mockAgentAvailability = { cacheMode: 'space' as const, handler: jest.fn() 
 const investigationQuotaCallback = jest.fn().mockResolvedValue({ allowed: true });
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const mockInference = {
-  getClient: jest.fn().mockReturnValue({ getConnectorById }),
+  getConnectorById,
   getDefaultConnector: jest.fn(),
 } as unknown as InferenceServerStart;
 const getSetting = jest.fn().mockResolvedValue(false);
@@ -443,7 +443,10 @@ describe('NightshiftInvestigationsClient.start()', () => {
       'nightshift-investigations'
     );
     expect(result).toEqual({ investigation_id: 'exec-123' });
-    expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation);
+    expect(getConnectorById).toHaveBeenCalledWith(
+      NIGHTSHIFT_DEFAULT_MODELS.investigation,
+      mockRequest
+    );
     expect(investigationQuotaCallback).not.toHaveBeenCalled();
   });
 
@@ -459,7 +462,7 @@ describe('NightshiftInvestigationsClient.start()', () => {
       connector_id: 'legacy-alias',
     });
 
-    expect(getConnectorById).toHaveBeenCalledWith('legacy-alias');
+    expect(getConnectorById).toHaveBeenCalledWith('legacy-alias', mockRequest);
     expect(mockManagement.runWorkflow).toHaveBeenCalledWith(
       expect.anything(),
       SPACE_ID,

@@ -81,12 +81,11 @@ export const isInvestigationRunAvailable = async ({
   }
 
   try {
-    const inferenceClient = inference.getClient({ request });
     await resolveNightshiftModel({
       step: 'investigation',
       requestedId: connectorId,
       validateConnector: async (id) => ({
-        connectorId: (await inferenceClient.getConnectorById(id)).connectorId,
+        connectorId: (await inference.getConnectorById(id, request)).connectorId,
       }),
       // Availability reports whether the model resolves. The restriction is checked on start so
       // a blocked model remains visible and produces the setting-specific error.

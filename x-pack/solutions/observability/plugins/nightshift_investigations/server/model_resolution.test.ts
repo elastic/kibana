@@ -15,14 +15,12 @@ import {
 
 const request = {} as KibanaRequest;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
-const scopedInferenceClient = { getConnectorById };
-const getClient = jest.fn().mockReturnValue(scopedInferenceClient);
+const getClient = jest.fn();
 const getDefaultConnector = jest.fn();
-const startContractGetConnectorById = jest.fn();
 const inference = {
   getClient,
   getDefaultConnector,
-  getConnectorById: startContractGetConnectorById,
+  getConnectorById,
 } as unknown as InferenceServerStart;
 const getSetting = jest.fn().mockResolvedValue(false);
 const asScopedToClient = jest.fn().mockReturnValue({ get: getSetting });
@@ -36,7 +34,7 @@ beforeEach(() => {
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
 });
 
-it('validates with one request-scoped inference client and returns its canonical id', async () => {
+it('validates with the request-aware server lookup and returns its canonical id', async () => {
   getConnectorById.mockResolvedValue({ connectorId: 'canonical-endpoint' });
 
   await expect(
@@ -50,10 +48,8 @@ it('validates with one request-scoped inference client and returns its canonical
     })
   ).resolves.toBe('canonical-endpoint');
 
-  expect(getClient).toHaveBeenCalledTimes(1);
-  expect(getClient).toHaveBeenCalledWith({ request });
-  expect(getConnectorById).toHaveBeenCalledWith('legacy-alias');
-  expect(startContractGetConnectorById).not.toHaveBeenCalled();
+  expect(getConnectorById).toHaveBeenCalledWith('legacy-alias', request);
+  expect(getClient).not.toHaveBeenCalled();
 });
 
 it('does not load the platform default when the default-only setting is off', async () => {
