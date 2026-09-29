@@ -173,9 +173,11 @@ describe('materializeArticle', () => {
 
   it('treats NXDOMAIN as a permanent fallback so dead links cannot stall the batch', async () => {
     const fetchFn = jest.fn();
-    const lookupFn = jest.fn().mockRejectedValue(
-      Object.assign(new Error('getaddrinfo ENOTFOUND gone.example'), { code: 'ENOTFOUND' })
-    );
+    const lookupFn = jest
+      .fn()
+      .mockRejectedValue(
+        Object.assign(new Error('getaddrinfo ENOTFOUND gone.example'), { code: 'ENOTFOUND' })
+      );
     const result = await run({}, fetchFn as typeof fetch, { lookupFn });
 
     expect(result.materialization.status).toBe('fallback');
@@ -205,7 +207,7 @@ describe('materializeArticle', () => {
     const fetchFn = jest.fn().mockResolvedValue(
       new Response(
         JSON.stringify({
-          data: { markdown: '# Report\n\n' + 'Technical analysis body. '.repeat(40) },
+          data: { markdown: `# Report\n\n${'Technical analysis body. '.repeat(40)}` },
         }),
         { status: 200 }
       )
