@@ -8,8 +8,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import { WorkflowEventLoggerService } from './workflow_event_logger_service';
-import { WorkflowEventQueue } from './workflow_event_queue';
+import { WorkflowLogsQueryService } from './workflow_logs_query_service';
 import type { LogsRepository } from '../repositories/logs_repository';
 
 const createLoggerMock = () =>
@@ -17,22 +16,13 @@ const createLoggerMock = () =>
     error: jest.fn(),
   } as unknown as Logger);
 
-const createService = (
-  logsRepository: LogsRepository,
-  logger: Logger = createLoggerMock(),
-  enableConsoleLogging = false
-) =>
-  new WorkflowEventLoggerService(
-    logsRepository,
-    logger,
-    new WorkflowEventQueue(logsRepository, logger),
-    enableConsoleLogging
-  );
-
-describe('WorkflowEventLoggerService', () => {
+describe('WorkflowLogsQueryService', () => {
   it('maps paging fields for repository search helpers', async () => {
     const repository = { searchLogs: jest.fn().mockResolvedValue({ total: 0, logs: [] }) };
-    const service = createService(repository as unknown as LogsRepository);
+    const service = new WorkflowLogsQueryService(
+      repository as unknown as LogsRepository,
+      createLoggerMock()
+    );
 
     await service.getExecutionLogs({
       executionId: 'exec-1',
@@ -52,7 +42,7 @@ describe('WorkflowEventLoggerService', () => {
 
   it('throws validation errors for missing required params', async () => {
     const logger = createLoggerMock();
-    const service = createService({} as LogsRepository, logger);
+    const service = new WorkflowLogsQueryService({} as LogsRepository, logger);
 
     expect(() => service.getExecutionLogs({} as any)).toThrow(
       'Execution logs: Execution ID is required'
@@ -66,46 +56,11 @@ describe('WorkflowEventLoggerService', () => {
     expect(logger.error).toHaveBeenCalledTimes(3);
   });
 
-  it('returns contextual logger instances from convenience factories', () => {
-    const service = createService({} as LogsRepository, createLoggerMock(), true);
-    const createLoggerSpy = jest.spyOn(service, 'createLogger');
-
-    service.createWorkflowLogger('wf-1', 'workflow');
-    service.createExecutionLogger('wf-1', 'exec-1', 'workflow');
-    service.createStepLogger('wf-1', 'exec-1', 'step-1', 'Step', 'wait', 'workflow');
-
-    expect(createLoggerSpy).toHaveBeenNthCalledWith(1, {
-      workflowId: 'wf-1',
-      workflowName: 'workflow',
-    });
-    expect(createLoggerSpy).toHaveBeenNthCalledWith(2, {
-      workflowId: 'wf-1',
-      workflowName: 'workflow',
-      executionId: 'exec-1',
-    });
-    expect(createLoggerSpy).toHaveBeenNthCalledWith(3, {
-      workflowId: 'wf-1',
-      workflowName: 'workflow',
-      executionId: 'exec-1',
-      stepId: 'step-1',
-      stepName: 'Step',
-      stepType: 'wait',
-    });
-  });
-
-  it('does not create loggers when the service has no event queue', () => {
-    const service = new WorkflowEventLoggerService({} as LogsRepository, createLoggerMock());
-
-    expect(() => service.createLogger({})).toThrow(
-      'Workflow event loggers can only be created for an execution that owns an event queue'
-    );
-  });
-
   it('rethrows repository failures from getRecentLogs', async () => {
     const logger = createLoggerMock();
     const repositoryError = new Error('repository down');
     const repository = { getRecentLogs: jest.fn().mockRejectedValue(repositoryError) };
-    const service = createService(repository as unknown as LogsRepository, logger);
+    const service = new WorkflowLogsQueryService(repository as unknown as LogsRepository, logger);
 
     await expect(service.getRecentLogs(10)).rejects.toThrow(repositoryError);
     expect(repository.getRecentLogs).toHaveBeenCalledWith(10);

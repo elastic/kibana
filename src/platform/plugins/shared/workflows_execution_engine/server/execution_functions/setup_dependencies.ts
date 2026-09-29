@@ -36,7 +36,7 @@ import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/wor
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
 import { WorkflowRuntimeGraph } from '../workflow_context_manager/workflow_runtime_graph';
 
-import { WorkflowEventLoggerService, WorkflowEventQueue } from '../workflow_event_logger';
+import { WorkflowEventLoggerFactory, WorkflowEventQueue } from '../workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
 export async function setupDependencies(
@@ -145,14 +145,13 @@ export async function setupDependencies(
 
   const logsRepository = new LogsRepository(dependencies.coreStart.dataStreams, logger);
   const eventQueue = new WorkflowEventQueue(logsRepository, logger);
-  const workflowEventLoggerService = new WorkflowEventLoggerService(
-    logsRepository,
+  const workflowEventLoggerFactory = new WorkflowEventLoggerFactory(
     logger,
     eventQueue,
     config.logging.console
   );
 
-  const workflowLogger = workflowEventLoggerService.createLogger({
+  const workflowLogger = workflowEventLoggerFactory.createLogger({
     workflowId: workflowExecution.workflowId,
     workflowName: workflowExecution.workflowDefinition.name,
     executionId: workflowExecution.id,
