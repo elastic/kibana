@@ -278,7 +278,7 @@ export function useMiDeploy({
           // resolved, instances are absent from session (e.g. ?deploymentId resume that skipped
           // Step 2). Fail closed so the caller does not clear isDirty without any Fleet PUT —
           // the auth change would be written to the SO record but not applied to the integration
-          // (4132745938). An empty policyIdsByInstance is a legitimate no-op (nothing deployed).
+          //. An empty policyIdsByInstance is a legitimate no-op (nothing deployed).
           return Object.keys(policyIdsByInstance).length > 0
             ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
             : { hadFailures: false, allFailedIds: [] };
@@ -494,7 +494,7 @@ export function useMiDeploy({
         // Hoist cleanup result so it can be merged into a single updateDetectAndReviewStep call.
         // React may batch synchronous state updates, meaning two sequential calls in the same
         // tick both capture the same prev state — the second call would clobber the
-        // pendingCleanupPolicyIds written by the first (4121333268).
+        // pendingCleanupPolicyIds written by the first.
         let retryRemainingPending: Record<string, string> | undefined;
         if (Object.keys(plan.retryPending).length > 0) {
           cleanupOps = await cleanupManagedIntegrationsPolicies({
@@ -519,7 +519,7 @@ export function useMiDeploy({
 
         // Dirty-update failures (instance in policyIdsByInstance) whose settings have since been
         // restored to match the SO (isDirty=false) are resolved: the unchanged policy is already
-        // correct and no PUT is needed. Retain only failures that still require action (4130821558).
+        // correct and no PUT is needed. Retain only failures that still require action.
         const cleanedByDriftRestore = isDirty
           ? []
           : instanceIds.filter((id) => id in (policyIdsByInstance ?? {}));
@@ -528,7 +528,7 @@ export function useMiDeploy({
         );
 
         // Combine cleanup result with service-status update into one write so React batching
-        // cannot lose pendingCleanupPolicyIds (4121333268).
+        // cannot lose pendingCleanupPolicyIds.
         updateDetectAndReviewStep({
           ...(retryRemainingPending !== undefined
             ? { pendingCleanupPolicyIds: retryRemainingPending }

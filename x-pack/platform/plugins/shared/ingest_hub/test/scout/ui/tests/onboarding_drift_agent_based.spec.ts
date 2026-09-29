@@ -291,10 +291,10 @@ test.describe(
 
       // isDirty cleared → session reflects the new state. The step may navigate away after
       // a successful deploy (unmounting the callout), so assert on session state rather than
-      // UI element visibility to avoid a vacuously-true assertion (4123330463).
+      // UI element visibility to avoid a vacuously-true assertion.
       // Poll instead of a one-shot read: soPutPromise resolves when the PUT is SENT, but
       // isDirty is only written after the response lands and React state updates — a one-shot
-      // evaluate races and can read stale state (4123900598).
+      // evaluate races and can read stale state.
       await page.waitForFunction(
         ({ key }) => {
           const raw = sessionStorage.getItem(key);

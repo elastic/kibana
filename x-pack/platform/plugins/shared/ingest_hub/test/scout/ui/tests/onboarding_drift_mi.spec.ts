@@ -631,7 +631,7 @@ test.describe(
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
 
       // Exercise successful Retry: override the PUT mock to return 200, then add SO PUT mock
-      // and click Retry — the drift callout must disappear and Next must enable (4123049397).
+      // and click Retry — the drift callout must disappear and Next must enable.
       await page.route(
         (url) => /\/api\/fleet\/managed_integrations\/mock-mi-policy-id$/.test(url.pathname),
         async (route) => {

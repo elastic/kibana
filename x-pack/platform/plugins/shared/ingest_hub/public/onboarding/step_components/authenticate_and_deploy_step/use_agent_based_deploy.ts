@@ -131,14 +131,14 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // this handles incremental service additions (deploy A, add B, Next should only deploy B).
       // Exception: when the user switches to 'new' agent-policy mode without having created the
       // policy yet, include ALL active instances so deployNewAgentPolicy runs for every group and
-      // the dirty update does not re-attach instances to the old policy IDs (4132097890).
+      // the dirty update does not re-attach instances to the old policy IDs.
       const isNewPolicySwitch =
         !isRetry &&
         agentBasedDeployment.agentHostsMode === 'new' &&
         !agentBasedDeployment.agentPolicyId;
       // Broader than isNewPolicySwitch: also true on Retry of a failed switch (isRetry=true,
       // but agentHostsMode still 'new' and agentPolicyId still unset). Used for old-policy
-      // cleanup staging and policyIdsByInstance preservation across retries (4132650240).
+      // cleanup staging and policyIdsByInstance preservation across retries.
       const isNewPolicyDeploy =
         agentBasedDeployment.agentHostsMode === 'new' && !agentBasedDeployment.agentPolicyId;
       const targetsToDeploy = isRetry
@@ -158,10 +158,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // Snapshot the old package policies BEFORE the new-policy deploy runs. They become orphaned
       // once deployNewAgentPolicy succeeds, but must NOT be cleaned up until after that succeeds —
       // if creation fails, Retry must keep the old IDs intact to retry creation rather than
-      // attempting dirty PUTs against already-deleted policies (4132197367).
+      // attempting dirty PUTs against already-deleted policies.
       // isNewPolicyDeploy (not isNewPolicySwitch) so Retry of a failed creation also snapshots:
       // on the first failure policyIdsByInstance is preserved (not cleared), so Retry reads the
-      // same old IDs here and stages them after a successful retry creation (4132650240).
+      // same old IDs here and stages them after a successful retry creation.
       const oldPolicyIdsByInstance: Record<string, string> = isNewPolicyDeploy
         ? { ...(detectAndReviewStep.policyIdsByInstance ?? {}) }
         : {};
@@ -263,10 +263,13 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // alongside the setting change.
         // Skipped when switching to 'new' agent-policy mode (isNewPolicySwitch): in that case all
         // instances are re-deployed to the newly created policy via deployNewAgentPolicy below, so
-        // updating the old policy IDs here would be wrong (4132097890).
+        // updating the old policy IDs here would be wrong.
         let dirtyUpdateApplied = false;
         if ((detectAndReviewStep.isDirty ?? false) && !isNewPolicySwitch) {
           const targetPolicyIds = agentPolicyId ? [agentPolicyId] : selectedAgentPolicyIds ?? [];
+          // Build byPolicy from active instances only — exclude instances removed by cleanup in this
+          // run (cleanedLiveStale) and any not currently in activeInstanceIds, so we don't
+          // re-add inputs that were just removed by the cleanup step above.
           const byPolicy = new Map<string, string[]>();
           for (const [instanceId, policyId] of Object.entries(
             detectAndReviewStep.policyIdsByInstance ?? {}
@@ -301,11 +304,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               }
             });
             if (redeployResults.some((r) => r.status === 'rejected')) {
-              // Surface the failure so the error callout shows and the user can retry (4119321580).
+              // Surface the failure so the error callout shows and the user can retry.
               // Also include undeployed new target IDs so Retry re-queues them alongside the
               // existing-policy updates — without this they are dropped from failedInstances and
               // never deployed when the user clicks Retry after a mixed dirty+new-target failure
-              // (4123478531).
+              //.
               const allActiveIds = [
                 ...Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
                   (id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id)
@@ -334,7 +337,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // Pure dirty-redeploy case: no new targets AND cleanup fully succeeded.
           // When cleanup partially failed (remainingPending non-empty), fall through to
           // the cleanup-only path so isDirty is cleared without writing an incomplete
-          // post-cleanup state to the SO (4123049389).
+          // post-cleanup state to the SO.
           if (targetsToDeploy.length === 0 && Object.keys(remainingPending).length === 0) {
             if (onboardingDeploymentId) {
               const postCleanupIds = Object.fromEntries(
@@ -343,7 +346,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 )
               );
               // Check SO write result — if it fails, keep isDirty so the user can retry
-              // rather than silently losing the updated settings (4123049384).
+              // rather than silently losing the updated settings.
               const soOk = await updateDeployment(onboardingDeploymentId, {
                 services: selectedServiceIds,
                 serviceVars: toSOServiceVars(storedServiceVars, servicesMap ?? new Map()) as Record<
@@ -354,7 +357,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 policyIdsByInstance: postCleanupIds,
                 authMethod: toSOAuthMethod(agentCredentialMethod),
                 // Persist selected agent policies so resume restores the correct selection
-                // (4123900586).
+                //.
                 ...(targetPolicyIds.length > 0 ? { agentPolicyIds: targetPolicyIds } : {}),
               });
               if (!soOk) {
@@ -365,7 +368,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             }
             setIsDeploying(false);
             // Clear stale failure state from prior deploy attempts so agentHasFailed does not
-            // linger after a successful dirty redeploy (4123190760).
+            // linger after a successful dirty redeploy.
             setFailedInstances([]);
             updateDetectAndReviewStep({ isDeploying: false, isDirty: false, failedInstances: [] });
             return { failed: false };
@@ -379,7 +382,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             isDeploying: false,
             // Dirty update policy changes succeeded (dirtyUpdateApplied=true) even though cleanup
             // partially failed — clear isDirty so the user can navigate without re-deploying
-            // policies that are already up to date (4123049389).
+            // policies that are already up to date.
             ...(dirtyUpdateApplied ? { isDirty: false } : {}),
           });
           // Only refresh the SO services list when ALL cleanup succeeded — both explicit
@@ -545,7 +548,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
             // Persist per-instance package-policy mapping on new-policy success so hydration
             // restores the correct (new) IDs — without this the SO's policyIdsByInstance stays
-            // at the old values, and resume attaches subsequent edits to deleted policies (4132650246).
+            // at the old values, and resume attaches subsequent edits to deleted policies.
             ...(isNewPolicyDeploy && mergedFailed.length === 0 ? { policyIdsByInstance } : {}),
             ...(cleanupFullySucceeded || (dirtyUpdateApplied && mergedFailed.length === 0)
               ? {
@@ -581,21 +584,21 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           serviceStatuses: statuses,
           // When a new-policy deploy fails, preserve the old policyIdsByInstance so Retry can
           // capture them in oldPolicyIdsByInstance and stage cleanup after a successful retry.
-          // deployNewAgentPolicy is transactional — Fleet state is unchanged on failure (4132650240).
+          // deployNewAgentPolicy is transactional — Fleet state is unchanged on failure.
           ...(isNewPolicyDeploy && mergedFailed.length > 0 ? {} : { policyIdsByInstance }),
           failedInstances: mergedFailed,
           deployErrors: mergedErrors,
           // Clear drift flag only when the SO write confirmed the new state — if the SO PUT
           // failed, the updated settings were not persisted, so isDirty must stay true to force
-          // a retry rather than silently losing the change (4123190769).
+          // a retry rather than silently losing the change.
           ...(dirtyUpdateApplied && mergedFailed.length === 0 && soOk ? { isDirty: false } : {}),
           // When switching to 'new' agent-policy mode, deployNewAgentPolicy created fresh package
           // policies. The old package policies (on previous agent policies) are now orphaned.
           // Stage them for cleanup on the next deploy ONLY after successful creation — staging
           // before creation would delete old policies before the replacement exists, making
-          // Retry impossible if creation failed (4132197367).
+          // Retry impossible if creation failed.
           // isNewPolicyDeploy (not isNewPolicySwitch) so retries of a failed creation also stage
-          // cleanup when they eventually succeed (4132650240).
+          // cleanup when they eventually succeed.
           ...(isNewPolicyDeploy && mergedFailed.length === 0 && Object.keys(oldPolicyIdsByInstance).length > 0
             ? { pendingCleanupPolicyIds: { ...remainingPending, ...oldPolicyIdsByInstance } }
             : {}),

@@ -134,9 +134,9 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep ?? {};
   // Stable key for selectedAgentPolicyIds so the drift effect re-runs when policy selection
-  // changes in agent-based edit mode (4123478517). Gated to agent_based: MI SOs never store
+  // changes in agent-based edit mode. Gated to agent_based: MI SOs never store
   // agentPolicyIds, so a leftover selection from a prior agent-based session would falsely mark
-  // an unchanged MI deployment dirty on every visit (4124128788).
+  // an unchanged MI deployment dirty on every visit.
   const selectedAgentPoliciesKey =
     deploymentMethod === 'agent_based'
       ? agentBasedDeploymentFromFlow.selectedAgentPolicyIds.slice().sort().join(',')
@@ -193,7 +193,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         );
         // In agent-based mode, authMethod is only written to session in edit mode; use
         // agentCredentialMethod (the canonical UI state) converted to SO format so an unchanged
-        // return to Step 3 does not falsely report auth drift (4131515449).
+        // return to Step 3 does not falsely report auth drift.
         const sessionAuthMethod =
           deploymentMethod === 'agent_based'
             ? toSOAuthMethod(agentBasedDeploymentFromFlow.agentCredentialMethod)
@@ -203,16 +203,16 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
           { authMethod: item.authMethod, connectorId: item.connectorId }
         );
         // Detect agent policy selection drift: if the user has changed which agent policies
-        // are targeted, the existing policies must be re-attached to the new selection (4123478517).
+        // are targeted, the existing policies must be re-attached to the new selection.
         // Only applicable in agent_based mode — MI SOs never write agentPolicyIds, so comparing
-        // against an MI SO would always report drift when a selection is held in session (4124128788).
+        // against an MI SO would always report drift when a selection is held in session.
         const agentPoliciesDirty = (() => {
           if (deploymentMethod !== 'agent_based') return false;
           const { agentHostsMode, agentPolicyId, selectedAgentPolicyIds } =
             agentBasedDeploymentFromFlow;
           if (agentHostsMode === 'new') {
             // Flyout created the new policy but packages not yet deployed to it: dirty until
-            // the next deploy attaches package policies to the new agent policy (4132197351).
+            // the next deploy attaches package policies to the new agent policy.
             if (agentPolicyId && !(item.agentPolicyIds ?? []).includes(agentPolicyId)) return true;
             // Mode switch without flyout: dirty when a prior deployment exists (4131926221,
             // 4132097877). Guard on !agentPolicyId so a successful new-policy deploy (which
@@ -330,7 +330,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
     // The already-deployed arm must check !isDeploying and failedInstances independently:
     // !hasFailed collapses to (isDeploying || failedInstances.length === 0), so when Retry
     // starts isDeploying=true makes !hasFailed true and isMiDone flips true mid-retry, enabling
-    // Next before the Retry PUT has finished (4123900574).
+    // Next before the Retry PUT has finished.
     ((isAlreadyDeployed && !isDirty && !isDeploying && failedInstances.length === 0) ||
       (deployAttempted && !isDeploying && failedInstances.length === 0 && !isDirty));
 

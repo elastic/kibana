@@ -336,7 +336,7 @@ export function ManagedIntegrationsSection({
                         // if the user reverts to access_keys without deploying. Use isEditMode
                         // rather than isStaticKeysEditMode: after switching to identity_federation,
                         // authMethod is 'identity_federation' so isStaticKeysEditMode becomes false,
-                        // which would prevent the revert from clearing isDirty (4121333261).
+                        // which would prevent the revert from clearing isDirty.
                         if (isEditMode) setAuthMethod('static_keys');
                       } else if (isStaticKeysEditMode) {
                         // Switching to identity federation while currently deployed with static keys:

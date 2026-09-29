@@ -189,7 +189,7 @@ export async function updateAgentBasedPolicy(
     inputs,
     // Prefer the user's current policy selection over the GET response: on a dirty redeploy
     // after a policy-selection change, `existingPolicyIds` from the GET would keep the old
-    // agents attached, ignoring the new selection (4123478517).
+    // agents attached, ignoring the new selection.
     policy_ids:
       selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
   } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
