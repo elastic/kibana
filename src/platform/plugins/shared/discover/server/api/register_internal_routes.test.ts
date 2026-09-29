@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { RequestHandlerContext } from '@kbn/core/server';
+import type { CoreSetup, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   coreMock,
@@ -150,10 +150,12 @@ describe('registerInternalRoutes', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let core: ReturnType<typeof coreMock.createRequestHandlerContext>;
   let context: RequestHandlerContext;
+  let userActivity: jest.Mocked<CoreSetup['userActivity']>;
 
   beforeEach(() => {
     router = httpServiceMock.createRouter();
-    registerInternalRoutes(router.versioned, loggingSystemMock.createLogger());
+    userActivity = { trackUserAction: jest.fn() };
+    registerInternalRoutes(router.versioned, userActivity, loggingSystemMock.createLogger());
 
     core = coreMock.createRequestHandlerContext();
     context = {
@@ -217,6 +219,18 @@ describe('registerInternalRoutes', () => {
         { references: storedSession.references }
       );
       expect(response.created).toHaveBeenCalledWith({ body: expectedBody });
+      expect(userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+      expect(userActivity.trackUserAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'discover_session_create', type: ['creation'] },
+          object: {
+            id: 'session-id',
+            name: sessionData.title,
+            type: 'discover_session',
+            tags: ['tag-1'],
+          },
+        })
+      );
     });
 
     it('omits conversion warnings from the write response', async () => {
@@ -235,6 +249,7 @@ describe('registerInternalRoutes', () => {
       await expect(
         callRoute('post', DISCOVER_SESSION_INTERNAL_API_BASE_PATH, { body: sessionData })
       ).rejects.toThrow('Unexpected failure');
+      expect(userActivity.trackUserAction).not.toHaveBeenCalled();
     });
   });
 
@@ -261,6 +276,18 @@ describe('registerInternalRoutes', () => {
         expect(core.savedObjects.client.resolve).not.toHaveBeenCalled();
         expect(core.savedObjects.client.create).not.toHaveBeenCalled();
         expect(response.ok).toHaveBeenCalledWith({ body: { ...expectedBody, id } });
+        expect(userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+        expect(userActivity.trackUserAction).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: { action: 'discover_session_update', type: ['change'] },
+            object: {
+              id,
+              name: sessionData.title,
+              type: 'discover_session',
+              tags: ['tag-1'],
+            },
+          })
+        );
       }
     );
 
@@ -282,6 +309,18 @@ describe('registerInternalRoutes', () => {
       );
       expect(core.savedObjects.client.update).not.toHaveBeenCalled();
       expect(response.created).toHaveBeenCalledWith({ body: expectedBody });
+      expect(userActivity.trackUserAction).toHaveBeenCalledTimes(1);
+      expect(userActivity.trackUserAction).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: { action: 'discover_session_create', type: ['creation'] },
+          object: {
+            id: 'session-id',
+            name: sessionData.title,
+            type: 'discover_session',
+            tags: ['tag-1'],
+          },
+        })
+      );
     });
 
     it('rejects an invalid new ID without writing a session', async () => {
@@ -358,6 +397,7 @@ describe('registerInternalRoutes', () => {
       });
 
       expect(response.conflict).toHaveBeenCalledWith({ body: { message: conflict.message } });
+      expect(userActivity.trackUserAction).not.toHaveBeenCalled();
     });
 
     it('returns 409 when creating at an alias ID conflicts', async () => {
@@ -377,6 +417,7 @@ describe('registerInternalRoutes', () => {
       );
       expect(response.conflict).toHaveBeenCalledWith({ body: { message: conflict.message } });
       expect(core.savedObjects.client.update).not.toHaveBeenCalled();
+      expect(userActivity.trackUserAction).not.toHaveBeenCalled();
     });
   });
 

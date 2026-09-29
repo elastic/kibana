@@ -31,5 +31,5 @@ export const registerRoutes = (
   registerSearchRoute(versioned, logger, usageCounter);
   registerDeleteRoute(versioned, userActivity, logger, usageCounter);
   registerSanitizeRoute(versioned, logger);
-  registerInternalRoutes(versioned, logger);
+  registerInternalRoutes(versioned, userActivity, logger);
 };

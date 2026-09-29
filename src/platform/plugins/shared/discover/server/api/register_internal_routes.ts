@@ -13,6 +13,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import { prettifyError, ZodError } from '@kbn/zod';
 import type {
+  CoreSetup,
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
@@ -41,6 +42,7 @@ import {
   resolveStoredDiscoverSession,
   updateStoredDiscoverSession,
 } from './stored_session';
+import { trackDiscoverSessionAction } from './user_activity';
 
 // These routes stay internal when the as-code API becomes public, so they don't use its access.
 const routeConfig = {
@@ -51,6 +53,7 @@ const routeConfig = {
 /** Registers as-code routes for Discover that also preserve inline Data View IDs. */
 export const registerInternalRoutes = (
   router: VersionedRouter<RequestHandlerContext>,
+  userActivity: CoreSetup['userActivity'],
   logger: Logger
 ) => {
   router
@@ -76,6 +79,7 @@ export const registerInternalRoutes = (
           const storedSession = transformInternalDiscoverSessionIn(request.body);
           const savedObject = await createStoredDiscoverSession(context, storedSession);
           const { body } = toInternalSessionResponse(savedObject);
+          trackDiscoverSessionAction(userActivity, 'create', body);
 
           return response.created({ body });
         } catch (error) {
@@ -123,12 +127,14 @@ export const registerInternalRoutes = (
 
             const savedObject = await createStoredDiscoverSession(context, storedSession, id);
             const { body } = toInternalSessionResponse(savedObject);
+            trackDiscoverSessionAction(userActivity, 'create', body);
 
             return response.created({ body });
           }
 
           const savedObject = await updateStoredDiscoverSession(context, id, storedSession);
           const { body } = toInternalSessionResponse(savedObject);
+          trackDiscoverSessionAction(userActivity, 'update', body);
 
           return response.ok({ body });
         } catch (error) {
