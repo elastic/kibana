@@ -31,10 +31,14 @@ describe('aws-iam host correlation config', () => {
     ).toBe(true);
   });
 
-  it('chains process parent/child pids and entity ids', () => {
+  it('chains process parent/child pids, entity ids, and names', () => {
     const [cmd, powershell, aws] = config.processTree ?? [];
-    expect(powershell.parent).toEqual({ pid: cmd.pid, entityId: cmd.entityId });
-    expect(aws.parent).toEqual({ pid: powershell.pid, entityId: powershell.entityId });
+    expect(powershell.parent).toEqual({ pid: cmd.pid, entityId: cmd.entityId, name: cmd.name });
+    expect(aws.parent).toEqual({
+      pid: powershell.pid,
+      entityId: powershell.entityId,
+      name: powershell.name,
+    });
   });
 });
 
@@ -75,11 +79,15 @@ describe('buildProcessDoc', () => {
     });
   });
 
-  it('includes the parent pid/entity_id for non-root process nodes', () => {
+  it('includes the parent pid/entity_id/name for non-root process nodes', () => {
     const [cmd, powershell] = config.processTree ?? [];
     const doc = buildProcessDoc(config, powershell, anchorMs) as {
       process: Record<string, unknown>;
     };
-    expect(doc.process.parent).toEqual({ pid: cmd.pid, entity_id: cmd.entityId });
+    expect(doc.process.parent).toEqual({
+      pid: cmd.pid,
+      entity_id: cmd.entityId,
+      name: cmd.name,
+    });
   });
 });
