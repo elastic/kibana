@@ -39,13 +39,6 @@ export interface CurrentRunState {
   evidenceLines: string[];
   /** Technique ids from current-run SKIs (`type: technique`). */
   techniques: string[];
-  /**
-   * The validated ES|QL query that found a required-index hit, keyed by technique id.
-   * Detection Watch's own call, made from the coverage KI, is whether a hunted technique
-   * is worth a lasting rule -- Tier 2's job ends at reporting what it hunted and found, so
-   * this carries the query forward rather than deciding anything about it here.
-   */
-  huntedTechniqueQueries: Record<string, string>;
   hosts: CurrentRunHost[];
   /**
    * Process selectors already rehydrated from current-run alerts/events.
@@ -62,8 +55,9 @@ export type CoverageSkipReason = 'disabled' | 'denied' | 'storage_failure' | 'al
 
 export interface CoverageSubject {
   kiId: string;
-  subject: string;
+  reportId: string;
   technique?: string;
+  investigationConversationId: string;
   title: string;
   description: string;
   content: string;

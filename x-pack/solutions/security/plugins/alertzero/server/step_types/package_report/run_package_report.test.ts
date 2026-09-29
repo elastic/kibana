@@ -106,12 +106,10 @@ const sseAttachment = ({
   ],
 });
 
-const deps = (
-  overrides: Partial<RunPackageReportDeps> = {}
-): RunPackageReportDeps => ({
+const deps = (overrides: Partial<RunPackageReportDeps> = {}): RunPackageReportDeps => ({
   listRespondActions: async () => ({ ok: true, actions: [isolateHost] }),
   writeCoverageKis: async (subjects) => ({
-    written: subjects.map((s) => ({ kiId: s.kiId, subject: s.subject })),
+    written: subjects.map((s) => ({ kiId: s.kiId, subject: s.reportId })),
     skipped: [],
   }),
   patchExpectedProposalCount: async () => undefined,
@@ -209,7 +207,8 @@ describe('createCoverageWriter', () => {
     const disabledResult = await disabled([
       {
         kiId: 'ki-1',
-        subject: 'rpt',
+        reportId: 'rpt',
+        investigationConversationId: 'conv-1',
         title: 't',
         description: 'd',
         content: 'c',
@@ -228,7 +227,8 @@ describe('createCoverageWriter', () => {
     const deniedResult = await denied([
       {
         kiId: 'ki-2',
-        subject: 'rpt',
+        reportId: 'rpt',
+        investigationConversationId: 'conv-1',
         title: 't',
         description: 'd',
         content: 'c',
@@ -247,7 +247,8 @@ describe('createCoverageWriter', () => {
     const storageResult = await storage([
       {
         kiId: 'ki-3',
-        subject: 'rpt',
+        reportId: 'rpt',
+        investigationConversationId: 'conv-1',
         title: 't',
         description: 'd',
         content: 'c',

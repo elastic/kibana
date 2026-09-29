@@ -13,6 +13,7 @@ import {
   packageReportStepCommonDefinition,
 } from '../../../common/step_types/package_report';
 import type { ActionsService } from '../../services/actions/actions_service';
+import { buildCoverageSubject } from './coverage_ki_id';
 import {
   PackageReportIdentityError,
   runPackageReport,
@@ -79,9 +80,12 @@ export const createCoverageWriter = ({
     const written: CoverageWriteResult['written'] = [];
     const skipped: CoverageWriteResult['skipped'] = [];
 
+    const subjectLabel = (subject: CoverageSubject) =>
+      buildCoverageSubject({ reportId: subject.reportId, techniqueId: subject.technique });
+
     if (!(await isContextEngineEnabled(spaceId))) {
       for (const subject of subjects) {
-        skipped.push({ kiId: subject.kiId, subject: subject.subject, reason: 'disabled' });
+        skipped.push({ kiId: subject.kiId, subject: subjectLabel(subject), reason: 'disabled' });
       }
       return { written, skipped };
     }
@@ -96,7 +100,7 @@ export const createCoverageWriter = ({
           if (status !== undefined && status !== 'pending') {
             skipped.push({
               kiId: subject.kiId,
-              subject: subject.subject,
+              subject: subjectLabel(subject),
               reason: 'already_processed',
             });
             continue;
@@ -104,13 +108,13 @@ export const createCoverageWriter = ({
         } catch (error) {
           const code = readErrorStatusCode(error);
           if (code === 403) {
-            skipped.push({ kiId: subject.kiId, subject: subject.subject, reason: 'denied' });
+            skipped.push({ kiId: subject.kiId, subject: subjectLabel(subject), reason: 'denied' });
             continue;
           }
           if (code !== undefined && code !== 404) {
             skipped.push({
               kiId: subject.kiId,
-              subject: subject.subject,
+              subject: subjectLabel(subject),
               reason: 'storage_failure',
             });
             continue;
@@ -132,9 +136,9 @@ export const createCoverageWriter = ({
             tags: ['consumer:detection', 'status:pending', 'watch:hunt'],
             attributes: {
               status: 'pending',
-              subject: subject.subject,
               technique: subject.technique,
-              report_id: subject.subject.split('|')[0],
+              report_id: subject.reportId,
+              investigation_id: subject.investigationConversationId,
               watch_id: 'hunt',
               producer: 'hunt.packageReport.v1',
               space_id: spaceId,
@@ -142,12 +146,12 @@ export const createCoverageWriter = ({
           },
           refresh: 'wait_for',
         });
-        written.push({ kiId: subject.kiId, subject: subject.subject });
+        written.push({ kiId: subject.kiId, subject: subjectLabel(subject) });
       } catch (error) {
         const code = readErrorStatusCode(error);
         skipped.push({
           kiId: subject.kiId,
-          subject: subject.subject,
+          subject: subjectLabel(subject),
           reason: code === 403 ? 'denied' : 'storage_failure',
         });
       }

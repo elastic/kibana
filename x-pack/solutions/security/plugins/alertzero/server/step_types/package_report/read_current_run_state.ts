@@ -79,19 +79,6 @@ export const readCurrentRunState = async ({
     ),
   ];
 
-  // The query that actually found a required-index hit, per technique -- for Detection
-  // Watch to read off the coverage KI and decide, on its own, whether it is worth a
-  // lasting rule. Only behaviors that hit qualify: a query that ran and found nothing is
-  // not evidence of anything to turn into a rule.
-  const huntedTechniqueQueries: Record<string, string> = {};
-  for (const sse of currentRun) {
-    for (const behavior of sse.hunt_result?.tier2?.behaviors ?? []) {
-      if (behavior.execution?.hit && behavior.validated_esql) {
-        huntedTechniqueQueries[behavior.technique_id] = behavior.validated_esql;
-      }
-    }
-  }
-
   const hostNames = [
     ...new Set(
       currentRun.flatMap((sse) =>
@@ -129,7 +116,6 @@ export const readCurrentRunState = async ({
     titles,
     evidenceLines,
     techniques,
-    huntedTechniqueQueries,
     hosts,
     processSelectors,
   };
