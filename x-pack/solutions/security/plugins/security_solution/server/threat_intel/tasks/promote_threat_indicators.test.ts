@@ -47,7 +47,10 @@ jest.mock('@kbn/task-manager-plugin/server', () => ({
   },
 }));
 
-import { THREAT_REPORTS_INDEX_PATTERN } from '../../../common/threat_intel';
+import {
+  THREAT_INTEL_INDICATORS_INDEX,
+  THREAT_REPORTS_INDEX_PATTERN,
+} from '../../../common/threat_intel';
 import {
   buildBulkOpsForTest,
   SOURCES_REMOVE_SCRIPT_FOR_TEST,
@@ -566,19 +569,22 @@ describe('promote task runner', () => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
-    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: unknown }) => {
-      // Report scan pages use a PIT. Prior-citation lookups hit the indicators
-      // index without one and default to empty so existing page fixtures stay
-      // focused on the report scan.
-      if (!req?.pit) {
-        return { hits: { hits: [] } };
+    (esClient.openPointInTime as jest.Mock).mockImplementation(async (req: { index?: string }) => {
+      // Prior-citation lookup opens its own PIT over the indicators index.
+      if (req.index === THREAT_INTEL_INDICATORS_INDEX) {
+        return { id: 'indicator-pit-1' };
+      }
+      return { id: 'pit-1' };
+    });
+    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: { id?: string } }) => {
+      if (req?.pit?.id === 'indicator-pit-1') {
+        return { hits: { hits: [] }, pit_id: 'indicator-pit-1' };
       }
       const response = searchResponses[call] ?? { hits: { hits: [] } };
       call += 1;
       return response;
     });
     (esClient.bulk as jest.Mock).mockResolvedValue({ errors: false, items: [] });
-    (esClient.openPointInTime as jest.Mock).mockResolvedValue({ id: 'pit-1' });
     (esClient.closePointInTime as jest.Mock).mockResolvedValue({ succeeded: true, num_freed: 1 });
 
     const coreSetup = coreMock.createSetup();
@@ -643,11 +649,11 @@ describe('promote task runner', () => {
 
   it('holds the cursor when prior-citation lookup fails mid-page', async () => {
     const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }]);
-    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: unknown }) => {
-      if (req?.pit) {
-        return { hits: { hits: [reportHit('r-1')] } };
+    (esClient.openPointInTime as jest.Mock).mockImplementation(async (req: { index?: string }) => {
+      if (req.index === THREAT_INTEL_INDICATORS_INDEX) {
+        throw Object.assign(new Error('search_phase_execution_exception'), { statusCode: 503 });
       }
-      throw Object.assign(new Error('search_phase_execution_exception'), { statusCode: 503 });
+      return { id: 'pit-1' };
     });
 
     const result = await definition
@@ -1211,6 +1217,10 @@ describe('sources[] citation ranks on upsert', () => {
   it('falls back to raise-only when legacy sources lack per-citation ranks', () => {
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (!tiersComplete || !sevsComplete)');
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (incomingTier > currentTier)');
+    // Distinct locals from RECOMPUTE's `tierRank` / `sevRank` so Painless compiles
+    // when both fragments land in the same branch.
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('Map raiseTierRank');
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('Map raiseSevRank');
   });
 
   it('skips absolute recompute while sources_truncated so unrecorded citations cannot demote', () => {

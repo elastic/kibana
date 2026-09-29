@@ -260,10 +260,10 @@ const SEVERITY_RANK_LITERAL = `['low': 1, 'medium': 2, 'high': 3, 'critical': 4]
  */
 const RAISE_RANKS_FROM_PARAMS = `
 if (params.severity != null) {
-  Map rank = ${SEVERITY_RANK_LITERAL};
-  int incoming = rank.containsKey(params.severity) ? rank[params.severity] : 0;
-  int current = ctx._source.severity != null && rank.containsKey(ctx._source.severity)
-    ? rank[ctx._source.severity]
+  Map raiseSevRank = ${SEVERITY_RANK_LITERAL};
+  int incoming = raiseSevRank.containsKey(params.severity) ? raiseSevRank[params.severity] : 0;
+  int current = ctx._source.severity != null && raiseSevRank.containsKey(ctx._source.severity)
+    ? raiseSevRank[ctx._source.severity]
     : 0;
   if (incoming > current) {
     ctx._source.severity = params.severity;
@@ -271,10 +271,10 @@ if (params.severity != null) {
   }
 }
 if (params.ioc_tier != null) {
-  Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
-  int incomingTier = tierRank.containsKey(params.ioc_tier) ? tierRank[params.ioc_tier] : 0;
-  int currentTier = ctx._source.ioc_tier != null && tierRank.containsKey(ctx._source.ioc_tier)
-    ? tierRank[ctx._source.ioc_tier]
+  Map raiseTierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
+  int incomingTier = raiseTierRank.containsKey(params.ioc_tier) ? raiseTierRank[params.ioc_tier] : 0;
+  int currentTier = ctx._source.ioc_tier != null && raiseTierRank.containsKey(ctx._source.ioc_tier)
+    ? raiseTierRank[ctx._source.ioc_tier]
     : 0;
   if (incomingTier > currentTier) {
     ctx._source.ioc_tier = params.ioc_tier;
@@ -765,15 +765,25 @@ const loadPriorCitationIdsByReport = async ({
   }
   const reportIdSet = new Set(reportIds);
   const pageSize = 1000;
+  let pitId: string | undefined;
   let searchAfter: Array<string | number | null> | undefined;
 
   try {
+    const pit = await esClient.openPointInTime(
+      {
+        index: THREAT_INTEL_INDICATORS_INDEX,
+        keep_alive: PIT_KEEP_ALIVE,
+      },
+      { signal }
+    );
+    pitId = pit.id;
+
     while (!signal.aborted) {
       const response = await esClient.search<{
         sources?: Array<{ report_id?: string }>;
       }>(
         {
-          index: THREAT_INTEL_INDICATORS_INDEX,
+          pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
           size: pageSize,
           _source: ['sources.report_id'],
           query: {
@@ -782,11 +792,15 @@ const loadPriorCitationIdsByReport = async ({
               query: { terms: { 'sources.report_id': reportIds } },
             },
           },
-          sort: [{ _id: 'asc' }],
+          // `_shard_doc` is only valid inside a PIT; `_id` is not sortable.
+          sort: [{ _shard_doc: 'asc' }],
           ...(searchAfter ? { search_after: searchAfter } : {}),
         },
         { signal }
       );
+      if (response.pit_id) {
+        pitId = response.pit_id;
+      }
       const hits = response.hits.hits;
       if (hits.length === 0) {
         break;
@@ -807,11 +821,10 @@ const loadPriorCitationIdsByReport = async ({
       if (hits.length < pageSize) {
         break;
       }
-      const lastId = hits[hits.length - 1]?._id;
-      if (!lastId) {
+      searchAfter = hits[hits.length - 1]?.sort as Array<string | number | null> | undefined;
+      if (!searchAfter) {
         break;
       }
-      searchAfter = [lastId];
     }
   } catch (err) {
     const status = (err as { statusCode?: number }).statusCode;
@@ -820,6 +833,10 @@ const loadPriorCitationIdsByReport = async ({
       return prior;
     }
     throw new PriorCitationLookupError((err as Error).message ?? String(err));
+  } finally {
+    if (pitId) {
+      await esClient.closePointInTime({ id: pitId }).catch(() => undefined);
+    }
   }
   return prior;
 };
