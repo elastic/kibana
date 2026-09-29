@@ -25,7 +25,6 @@ import type {
   FetchContext,
   HasParentApi,
   PublishesDataViews,
-  PublishesWritableDataViews,
   PublishesTitle,
   PublishesSavedObjectId,
   PublishesDataLoading,
@@ -53,7 +52,6 @@ type SavedSearchPartialFetchApi = PublishesSavedSearch &
   PublishesSavedObjectId &
   PublishesDataLoading &
   PublishesDataViews &
-  Partial<Pick<PublishesWritableDataViews, 'setDataViews'>> &
   PublishesTitle &
   PublishesWritableTimeRange & {
     fetchContext$: BehaviorSubject<FetchContext | undefined>;
@@ -246,14 +244,26 @@ export function initializeFetch({
               projectRouting: fetchContext.projectRouting,
               timeRange,
             });
-            if (!cachedEsqlSource || cachedEsqlSource.identity !== identity) {
+            const publishedSource = esqlSource$?.getValue();
+            // The panel already resolved this query before fetch. Resolving again and
+            // publishing a new data view emits dataViews$, which aborts this request.
+            if (
+              !cachedEsqlSource &&
+              publishedSource &&
+              publishedSource.query === searchSourceQuery.esql.trim()
+            ) {
+              cachedEsqlSource = {
+                identity,
+                source: publishedSource,
+              };
+            } else if (!cachedEsqlSource || cachedEsqlSource.identity !== identity) {
               const { esqlSource, dataView: resolvedDataView } = await resolveEsqlSource({
                 esql: searchSourceQuery.esql,
                 services: discoverServices,
                 projectRoutingFallback: fetchContext.projectRouting,
                 timeRange,
                 esqlVariables,
-                previousSourceId: cachedEsqlSource?.source.id ?? esqlSource$?.getValue()?.id,
+                previousSourceId: cachedEsqlSource?.source.id ?? publishedSource?.id,
               });
               cachedEsqlSource = {
                 identity,
@@ -261,7 +271,7 @@ export function initializeFetch({
               };
               esqlSource$?.next(esqlSource);
               if (resolvedDataView && resolvedDataView.id !== dataView.id) {
-                api.setDataViews?.([resolvedDataView]);
+                savedSearch.searchSource.setField('index', resolvedDataView);
               }
             }
             const embeddableEsqlSource = cachedEsqlSource.source;
