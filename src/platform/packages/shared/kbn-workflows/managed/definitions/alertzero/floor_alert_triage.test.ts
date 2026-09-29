@@ -54,6 +54,61 @@ const evalExpr = (expr: string, context: Record<string, unknown>): unknown => {
 };
 
 // ---------------------------------------------------------------------------
+// compute_fp_candidates — the Worker's only filter deciding which alert IDs enter
+// a close proposal. Exercises a mixed-verdict batch against the confidence floor.
+// ---------------------------------------------------------------------------
+
+const fpThresholdExprTemplate = stepByName('build_fp_threshold_expr')?.with
+  ?.fp_threshold_expr as string;
+const fpCandidateIdsExpr = stepByName('compute_fp_candidates')?.with?.fp_candidate_ids as string;
+
+const computeFpCandidateIds = (
+  verdicts: Array<{ alert_id: string; classification: string; confidence_score: number }>,
+  autoCloseConfidenceScoreMinThreshold: number
+): unknown => {
+  const fpThresholdExpr = renderString(fpThresholdExprTemplate, {
+    consts: { worker_settings: { autoCloseConfidenceScoreMinThreshold } },
+  }).trim();
+
+  return evalExpr(fpCandidateIdsExpr, {
+    steps: { classify_alerts: { output: { verdicts } } },
+    variables: { fp_threshold_expr: fpThresholdExpr },
+  });
+};
+
+describe('floor_alert_triage — compute_fp_candidates', () => {
+  const mixedVerdictBatch = [
+    { alert_id: 'below-floor', classification: 'false_positive', confidence_score: 0.5 },
+    { alert_id: 'at-floor', classification: 'false_positive', confidence_score: 0.85 },
+    { alert_id: 'above-floor', classification: 'false_positive', confidence_score: 0.95 },
+    { alert_id: 'true-positive', classification: 'true_positive', confidence_score: 0.99 },
+    { alert_id: 'inconclusive', classification: 'inconclusive', confidence_score: 0.9 },
+  ];
+
+  it('includes only false_positive verdicts at or above the confidence floor', () => {
+    expect(computeFpCandidateIds(mixedVerdictBatch, 0.85)).toEqual(['at-floor', 'above-floor']);
+  });
+
+  it('excludes every candidate when the floor is raised above all scores', () => {
+    expect(computeFpCandidateIds(mixedVerdictBatch, 0.96)).toEqual([]);
+  });
+
+  it('includes every false_positive verdict when the floor is 0', () => {
+    expect(computeFpCandidateIds(mixedVerdictBatch, 0)).toEqual([
+      'below-floor',
+      'at-floor',
+      'above-floor',
+    ]);
+  });
+
+  it('never includes a true_positive or inconclusive verdict regardless of score', () => {
+    const ids = computeFpCandidateIds(mixedVerdictBatch, 0) as string[];
+    expect(ids).not.toContain('true-positive');
+    expect(ids).not.toContain('inconclusive');
+  });
+});
+
+// ---------------------------------------------------------------------------
 // Dismiss mapping: map_dismiss_reason_to_tag
 // ---------------------------------------------------------------------------
 
