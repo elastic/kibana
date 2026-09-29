@@ -24,6 +24,8 @@ const mockProposal: ApprovalProposal = {
   status: 'pending',
   expired: false,
   actionWorkflowId: 'system-alertzero-action-edit-rule',
+  // What the server stores when the caller names nothing itself.
+  title: 'Apply monitored exception',
   action: { name: 'Apply monitored exception' },
 };
 
@@ -93,18 +95,6 @@ describe('ApprovalModal', () => {
     renderModal({ proposal: { ...mockProposal, category: undefined, action: undefined } });
     expect(screen.queryByText(/reversible/i)).not.toBeInTheDocument();
     expect(screen.getByText('Low impact')).toBeInTheDocument();
-  });
-
-  it('falls back to the workflow id when the action metadata carries no name', () => {
-    renderModal({ proposal: { ...mockProposal, action: undefined } });
-    expect(screen.getByText('system-alertzero-action-edit-rule')).toBeInTheDocument();
-  });
-
-  it('falls back to the no-action label when the proposal carries no action at all', () => {
-    renderModal({
-      proposal: { ...mockProposal, action: undefined, actionWorkflowId: undefined },
-    });
-    expect(screen.getByText('No automated action')).toBeInTheDocument();
   });
 
   it("renders the proposal's own comment as the body", () => {

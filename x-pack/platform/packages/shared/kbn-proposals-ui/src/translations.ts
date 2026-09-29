@@ -17,9 +17,6 @@ export const APPROVAL_MODAL_TRANSLATIONS = Object.freeze({
   cancelDecline: i18n.translate('xpack.proposals.approvalModal.cancelDecline', {
     defaultMessage: 'Cancel',
   }),
-  noAction: i18n.translate('xpack.proposals.approvalModal.noAction', {
-    defaultMessage: 'No automated action',
-  }),
   modalAriaLabel: i18n.translate('xpack.proposals.approvalModal.ariaLabel', {
     defaultMessage: 'Approval required modal',
   }),

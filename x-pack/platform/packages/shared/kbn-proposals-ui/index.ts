@@ -27,7 +27,6 @@ export {
 export {
   getProposalCaption,
   getProposalDecision,
-  getProposalTitle,
   getProposalTone,
   isProposalExpired,
 } from './src/proposal_helpers';

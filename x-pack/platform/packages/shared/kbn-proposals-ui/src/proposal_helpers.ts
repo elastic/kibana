@@ -12,13 +12,6 @@ import type { ApprovalPhase } from './approval_outcome';
 import { APPROVAL_MODAL_TRANSLATIONS } from './translations';
 import { formatDismissReason } from './dismiss_reason';
 
-/**
- * Shared with anything that opens the approval decision for a proposal (the modal itself, the
- * flyout's proposed-action row), so they title it identically.
- */
-export const getProposalTitle = (proposal: ApprovalProposal): string =>
-  proposal.action?.name ?? proposal.actionWorkflowId ?? APPROVAL_MODAL_TRANSLATIONS.noAction;
-
 /** Stored lowercase (`configure`, `respond`, ...); the caption reads it in sentence case. */
 const toSentenceCase = (value: string): string =>
   value.length > 0 ? `${value[0].toUpperCase()}${value.slice(1)}` : value;
