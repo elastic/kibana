@@ -231,6 +231,7 @@ export class ServiceManager {
       conversationService: conversations,
       attachmentsService: attachments,
       renderersService: renderers,
+      conversationEventsService: conversationEvents,
       skillServiceStart: skillsServiceStart,
       pluginsServiceStart: plugins,
       trackingService,
