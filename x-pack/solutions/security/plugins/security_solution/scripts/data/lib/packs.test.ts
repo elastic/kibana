@@ -215,3 +215,64 @@ describe('aws-iam AssumeRole host pin (DC2 entity join)', () => {
     }
   });
 });
+
+/**
+ * Plan 11's isolate-host pattern for the three non-aws-iam Technology Watch packs: pin an
+ * existing HOSTS catalog entry to the actor whose actions the pack's hunts target, so Hunt
+ * Watch's SSE host-entity extraction has a Fleet-resolvable name to isolate. Lookup-only
+ * (no host.id), same convention as aws-iam's DC2 pin.
+ */
+describe.each([
+  {
+    packId: 'okta',
+    pinnedHost: 'ADMIN-WS02',
+    // it-admin@corp.example also has a legitimate, differently-sourced session (192.0.2.10)
+    // earlier in the story; only the takeover-IP actions get the host pin.
+    matches: (doc: Record<string, unknown>) =>
+      (doc.user as { name?: string } | undefined)?.name === 'it-admin@corp.example' &&
+      (doc.source as { ip?: string } | undefined)?.ip === '192.0.2.50',
+    expectedCount: 7,
+  },
+  {
+    packId: 'kubernetes',
+    pinnedHost: 'ci-runner-03',
+    matches: (doc: Record<string, unknown>) =>
+      (doc.user as { name?: string } | undefined)?.name ===
+      'system:serviceaccount:default:compromised-sa',
+    expectedCount: 14,
+  },
+  {
+    packId: 'github-actions',
+    pinnedHost: 'DEV-BUILD03',
+    matches: (doc: Record<string, unknown>) =>
+      (doc.user as { name?: string } | undefined)?.name === 'dev-contractor-42',
+    expectedCount: 14,
+  },
+])('$packId host pin (isolate-host pattern)', ({ packId, pinnedHost, matches, expectedCount }) => {
+  it('pins an existing HOSTS catalog entry to every event from the targeted actor', async () => {
+    expect(HOSTS[pinnedHost]).toBeDefined();
+
+    const eventsPath = path.join(scriptsDataDir('packs', packId), 'events.ndjson');
+    const events = await readNdjson(eventsPath);
+    const actorEvents = events.filter(matches);
+    expect(actorEvents).toHaveLength(expectedCount);
+    for (const doc of actorEvents) {
+      expect((doc.host as { name?: string } | undefined)?.name).toEqual(pinnedHost);
+      expect((doc.host as { id?: string } | undefined)?.id).toBeUndefined();
+    }
+
+    // No other event in this pack carries a host.
+    const hostBearing = events.filter((doc) => doc.host !== undefined);
+    expect(hostBearing).toHaveLength(expectedCount);
+  });
+
+  it('lets enrichDocForGraph populate related.hosts from the pinned host', async () => {
+    const eventsPath = path.join(scriptsDataDir('packs', packId), 'events.ndjson');
+    const events = await readNdjson(eventsPath);
+    const actorEvents = events.filter(matches);
+    for (const doc of actorEvents) {
+      enrichDocForGraph(doc);
+      expect((doc.related as { hosts?: string[] } | undefined)?.hosts).toEqual([pinnedHost]);
+    }
+  });
+});
