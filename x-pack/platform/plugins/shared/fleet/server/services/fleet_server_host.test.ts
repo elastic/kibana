@@ -443,6 +443,27 @@ describe('delete fleetServerHost', () => {
       expect(mockAtSpaces).not.toHaveBeenCalled();
     });
 
+    it('skips space collection and authz check when RBAC is inactive', async () => {
+      jest.mocked(mockedAppContextService.getSecurity).mockReturnValue({
+        authz: {
+          mode: { useRbacForRequest: jest.fn().mockReturnValue(false) },
+          actions: { api: { get: (name: string) => `api:${name}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+        },
+      } as any);
+      getMockedSoClient();
+      getMockedEncryptedSoClient();
+      const esClientMock = elasticsearchServiceMock.createInternalClient();
+
+      await fleetServerHostService.delete(esClientMock, 'test1', { request: mockRequest });
+
+      expect(
+        jest.mocked(agentPolicyService.getSpacesForPoliciesUsingFleetServerHost)
+      ).not.toHaveBeenCalled();
+      expect(mockAtSpaces).not.toHaveBeenCalled();
+      expect(jest.mocked(agentPolicyService.removeFleetServerHostFromAll)).toHaveBeenCalled();
+    });
+
     it('allows delete when caller holds required privileges', async () => {
       mockSecurity(true);
       getMockedSoClient();

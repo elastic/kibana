@@ -1211,6 +1211,25 @@ describe('Download Service', () => {
         expect(mockAtSpaces).not.toHaveBeenCalled();
       });
 
+      it('skips space collection and authz check when RBAC is inactive', async () => {
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(false) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+        getMockedSoClient();
+
+        await downloadSourceService.delete('download-source-test', { request: mockRequest });
+
+        expect(
+          mockedAgentPolicyService.getSpacesForPoliciesUsingDownloadSource
+        ).not.toHaveBeenCalled();
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeDefaultSourceFromAll).toHaveBeenCalled();
+      });
+
       it('allows delete when caller holds required privileges in all affected spaces', async () => {
         mockSecurity(true);
         getMockedSoClient();
