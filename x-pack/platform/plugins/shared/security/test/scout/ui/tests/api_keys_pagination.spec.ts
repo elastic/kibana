@@ -17,8 +17,7 @@ import {
 } from '../fixtures';
 
 const PAGE_SIZE = 25;
-// Well clear of one page: batch-seeded keys share creation timestamps, and the grid's exclusive
-// `search_after` cursor drops tied rows, so page 2 needs slack to stay non-empty.
+// One full page plus a partial second page.
 const KEY_COUNT = 40;
 const KEY_PREFIX = 'pagination-test-key';
 const SEED_BATCH_SIZE = 10;

@@ -11,13 +11,14 @@ import type { SignificantEventStatus } from '@kbn/significant-events-schema';
 import { useKibana } from './use_kibana';
 
 interface UpdateSignificantEventArgs {
-  eventUuid: string;
+  eventId: string;
   status: SignificantEventStatus;
   assessmentNote?: string;
 }
 
 interface UpdateSignificantEventResult {
-  event_uuid: string;
+  // Absent when the event was not found for the given eventId.
+  event_uuid?: string;
   updated: number;
   ignored: number;
   status: SignificantEventStatus;
@@ -53,12 +54,12 @@ export const useUpdateSignificantEvent = ({
   const queryClient = useQueryClient();
 
   const mutation = useMutation<UpdateSignificantEventResult, Error, UpdateSignificantEventArgs>({
-    mutationFn: ({ eventUuid, status, assessmentNote }: UpdateSignificantEventArgs) =>
+    mutationFn: ({ eventId, status, assessmentNote }: UpdateSignificantEventArgs) =>
       significantEventsRepositoryClient.fetch(
         'POST /internal/significant_events/events/{id}/update',
         {
           params: {
-            path: { id: eventUuid },
+            path: { id: eventId },
             body: {
               status,
               ...(assessmentNote !== undefined ? { assessment_note: assessmentNote } : {}),

@@ -40,6 +40,8 @@ interface AssignToUsersProps {
   onSearchChange: (term: string) => void;
   /** Called with the new full selection when the user makes a change. */
   onChange: (selected: UserProfileWithAvatar[]) => void;
+  /** Size of the `+` button. */
+  buttonIconSize?: 'xs' | 's';
 }
 
 /**
@@ -65,6 +67,7 @@ export const AssignToUsers = memo<AssignToUsersProps>(
     canManage,
     onSearchChange,
     onChange,
+    buttonIconSize = 'xs',
   }) => {
     const [isPopoverOpen, setIsPopoverOpen] = useState(false);
 
@@ -103,6 +106,7 @@ export const AssignToUsers = memo<AssignToUsersProps>(
           onClick={togglePopover}
           isDisabled={isProfilesLoading}
           data-test-subj={`assignToUsersAdd-${conversationId}`}
+          size={buttonIconSize}
         />
       </EuiToolTip>
     );
