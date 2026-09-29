@@ -15,12 +15,30 @@ const mockEuid = {
   },
 } as unknown as EntityStoreEuid;
 
+const pipelineText = (euid: EntityStoreEuid = mockEuid): string =>
+  buildAlertEuidPipeline(euid).join('\n');
+
 describe('buildAlertEuidPipeline', () => {
-  it('picks the first non-null EUID via COALESCE over the stamped field and all three derived EUIDs', () => {
-    const pipeline = buildAlertEuidPipeline(mockEuid);
-    expect(pipeline).toContain(
-      '| EVAL _ea_entity_id = COALESCE(`kibana.alert.entity.id`, user_euid, host_euid, service_euid)'
-    );
+  it('FORKs stamped alerts away from EUID derivation', () => {
+    const query = pipelineText();
+    expect(query).toContain('| FORK (');
+    expect(query).toContain('WHERE `kibana.alert.entity.id` IS NOT NULL');
+    expect(query).toContain('| EVAL _ea_entity_id = `kibana.alert.entity.id`');
+    expect(query).toContain('WHERE `kibana.alert.entity.id` IS NULL');
+    expect(query).not.toContain('COALESCE(`kibana.alert.entity.id`');
+  });
+
+  it('derives typed EUIDs only on the unstamped FORK branch', () => {
+    const query = pipelineText();
+    const stampedEnd = query.indexOf('WHERE `kibana.alert.entity.id` IS NULL');
+    expect(stampedEnd).toBeGreaterThan(-1);
+    const stamped = query.slice(0, stampedEnd);
+    const derived = query.slice(stampedEnd);
+    expect(stamped).not.toContain('user_euid = "mock_euid"');
+    expect(derived).toContain('user_euid = "mock_euid"');
+    expect(derived).toContain('host_euid = "mock_euid"');
+    expect(derived).toContain('service_euid = "mock_euid"');
+    expect(derived).toContain('MV_APPEND(MV_APPEND(user_euid, host_euid), service_euid)');
   });
 
   it('expands _ea_entity_id, filters nulls, deduplicates, then renames to entity.id for the JOIN', () => {
@@ -40,15 +58,10 @@ describe('buildAlertEuidPipeline', () => {
       },
     } as unknown as EntityStoreEuid;
 
-    const pipeline = buildAlertEuidPipeline(euidWithFieldEvals);
-    expect(pipeline).toContain('| EVAL user.namespace = user.domain');
+    expect(pipelineText(euidWithFieldEvals)).toContain('| EVAL user.namespace = user.domain');
   });
 
   it('does not include a field evaluation EVAL when getFieldEvaluations returns undefined', () => {
-    const pipeline = buildAlertEuidPipeline(mockEuid);
-    // Each entity type produces exactly one EVAL (the euid assignment), not two
-    const evalLines = pipeline.filter((l) => l.startsWith('| EVAL'));
-    // 3 euid EVALs + 1 _ea_entity_id = 4
-    expect(evalLines).toHaveLength(4);
+    expect(pipelineText()).not.toContain('user.namespace');
   });
 });
