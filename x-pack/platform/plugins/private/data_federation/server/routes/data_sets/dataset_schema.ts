@@ -112,7 +112,7 @@ export const datasetSchema = schema.object({
           minLength: 1,
           validate: (value) => {
             if (isValidQuoteCharacter(value)) return;
-            return `Must be a single character or ${QUOTE_CHARACTER_NONE}.`;
+            return "Must be a single character, \\t, \\n, \\r, \\\\ or 'none'.";
           },
         })
       ),

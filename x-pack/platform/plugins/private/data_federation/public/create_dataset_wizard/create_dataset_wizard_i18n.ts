@@ -834,7 +834,7 @@ export const createDatasetWizardStrings = {
   settingsQuoteInvalid: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsQuoteInvalidCharacterOrNone',
     {
-      defaultMessage: "Must be a single character or 'none'.",
+      defaultMessage: "Must be a single character, \\t, \\n, \\r, \\\\, or 'none'.",
     }
   ),
 

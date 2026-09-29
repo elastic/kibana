@@ -137,11 +137,15 @@ describe('create_dataset_form_state', () => {
       expect(validateQuoteCharacter(value)).toBe(true);
     });
 
+    it.each(['\\t', '\\n', '\\r', '\\\\'])('accepts the escape sequence %s', (value) => {
+      expect(validateQuoteCharacter(value)).toBe(true);
+    });
+
     it('rejects multi-character values', () => {
       expect(validateQuoteCharacter('non')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter(' none')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
-      expect(validateQuoteCharacter('\\t')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
-      expect(validateQuoteCharacter('\\\\')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter('\\b')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
+      expect(validateQuoteCharacter('\\T')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('ab')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('\\a')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
       expect(validateQuoteCharacter('\\abc')).toBe(createDatasetWizardStrings.settingsQuoteInvalid);
