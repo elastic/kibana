@@ -39,6 +39,10 @@ import { useProposalChartsSummary } from '../../hooks/use_proposal_charts_summar
 import type { ProposalItem } from '../../../common/proposals/list';
 import { ConversationsPage } from './conversations_page';
 
+jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
+  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+}));
+
 // Only the mutations are stubbed: the module also exports DISMISS_REASON_OPTIONS, which
 // the dismiss modal's select needs for real.
 jest.mock('@kbn/proposals-plugin/public', () => ({
@@ -334,6 +338,15 @@ describe('ConversationsPage proposals access', () => {
 
     expect(screen.queryByTestId('alertzeroProposalsPrivilegesGate')).not.toBeInTheDocument();
     expect(mockUseProposalsByCategory).toHaveBeenCalled();
+  });
+});
+
+describe('ConversationsPage scan failures', () => {
+  it('mounts the scan-failure callout', () => {
+    mockProposals({});
+    renderPage('/');
+
+    expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
   });
 });
 

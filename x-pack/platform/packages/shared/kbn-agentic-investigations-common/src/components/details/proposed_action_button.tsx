@@ -124,7 +124,10 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
 
     const pendingCaption = getProposalCaption(proposal);
 
-    const caption = decision ? (
+    // A decision with no `actorName` is a terminal state nobody actually decided (expired,
+    // chiefly) — the badge label alone ("Expired") already says what happened, so this only adds
+    // "by {name}" when there is a real actor to name.
+    const caption = decision?.actorName ? (
       decision.decidedAt ? (
         <FormattedMessage
           id="xpack.alertzero.detailsFlyout.proposedAction.decidedByCaption"
@@ -142,6 +145,8 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           values={{ approvalType: badge.label, name: decision.actorName }}
         />
       )
+    ) : decision ? (
+      badge.label
     ) : Boolean(pendingCaption) ? (
       pendingCaption
     ) : (

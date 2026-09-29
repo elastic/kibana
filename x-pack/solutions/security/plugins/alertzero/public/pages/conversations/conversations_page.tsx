@@ -55,6 +55,7 @@ import { useQueueSections } from './queue/use_queue_sections';
 import { useDropDecidedProposal } from './queue/use_drop_decided_proposal';
 import { QueueSection } from './queue/queue_section';
 import { ConnectedCloseInvestigationModal } from '../../components/connected_status/connected_close_investigation_modal';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 
 // Lazy-loaded so that the escalation modal tree (React Query hooks, form components,
 // translations, and user-profile API) stays out of alertzero's main chunk.
@@ -224,6 +225,7 @@ const ConversationsPageContent: React.FC = () => {
       assignSuccess: QUEUE_PAGE_INFO.assignSuccess,
       assignError: QUEUE_PAGE_INFO.assignError,
     },
+    buttonIconSize: 's',
   });
 
   // Both decisions close on success only, and surface the refusal otherwise: an expired
@@ -417,6 +419,7 @@ const ConversationsPageContent: React.FC = () => {
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
           />
+          <ScanFailureCallout />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />

@@ -292,6 +292,14 @@ export class SyntheticsPrivateLocation {
       return formattedPolicy;
     } catch (e) {
       this.server.logger.error(e);
+      // Preserve actionable package-upgrade guidance; other failures fall through
+      // to the caller's generic "unable to create package policy" path.
+      if (
+        e instanceof Error &&
+        e.message.includes('Synthetics integration version 1.12.0 or later')
+      ) {
+        throw e;
+      }
       return null;
     }
   }
