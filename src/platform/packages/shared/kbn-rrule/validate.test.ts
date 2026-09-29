@@ -191,7 +191,9 @@ describe('validateOptions', () => {
     it('throws an error with invalid values when it contains only string', () => {
       expect(() =>
         validateOptions({ ...options, byweekday: ['+1MO', 'FOO', '+3WE', 'BAR', '-4FR'] })
-      ).toThrowErrorMatchingInlineSnapshot(`[Error: byweekday strings must be valid weekday strings]`);
+      ).toThrowErrorMatchingInlineSnapshot(
+        `[Error: byweekday strings must be valid weekday strings]`
+      );
     });
 
     it('throws an error when is empty', () => {

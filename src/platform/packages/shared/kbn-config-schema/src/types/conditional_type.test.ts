@@ -24,7 +24,9 @@ test('required by default', () => {
       context_value_1: 0,
       context_value_2: 0,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: expected value of type [string] but got [undefined]]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: expected value of type [string] but got [undefined]]`
+  );
 });
 
 test('returns default', () => {
@@ -197,7 +199,9 @@ test('properly handles schemas with incompatible types', () => {
       context_value_1: 0,
       context_value_2: 0,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: expected value of type [string] but got [boolean]]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: expected value of type [string] but got [boolean]]`
+  );
 
   expect(
     type.validate('a', {
@@ -211,7 +215,9 @@ test('properly handles schemas with incompatible types', () => {
       context_value_1: 0,
       context_value_2: 1,
     })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: expected value of type [boolean] but got [string]]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: expected value of type [boolean] but got [string]]`
+  );
 
   expect(
     type.validate(true, {

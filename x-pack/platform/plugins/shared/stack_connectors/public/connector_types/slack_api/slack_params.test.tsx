@@ -15,7 +15,6 @@ import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import userEvent from '@testing-library/user-event';
 
-
 const mockToasts = { addDanger: vi.fn(), addWarning: vi.fn() };
 
 vi.mock('@kbn/triggers-actions-ui-plugin/public', async () => {

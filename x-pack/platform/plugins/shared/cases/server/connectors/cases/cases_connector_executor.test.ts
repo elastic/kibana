@@ -2828,7 +2828,9 @@ fields: []
 
           await expect(() =>
             connectorExecutor.execute(params)
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`[Error: Forbidden: getting cases: bulkGet error]`);
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `[Error: Forbidden: getting cases: bulkGet error]`
+          );
 
           expect(casesClientMock.cases.bulkCreate).not.toHaveBeenCalled();
         });
@@ -2947,7 +2949,9 @@ fields: []
 
           await expect(() =>
             connectorExecutor.execute(params)
-          ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: attaching alerts: bulkCreate error]`);
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `[CaseError: attaching alerts: bulkCreate error]`
+          );
         });
 
         it('throws an error if there is an error when fetching configurations', async () => {
@@ -3503,7 +3507,9 @@ fields: []
 
       await expect(() =>
         connectorExecutor.execute(params)
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: creating non found cases: bulkCreate error]`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[CaseError: creating non found cases: bulkCreate error]`
+      );
 
       resetCounters();
 
@@ -3538,7 +3544,9 @@ fields: []
           ...params,
           reopenClosedCases: true,
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: reopening closed cases: bulkUpdate error]`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[CaseError: reopening closed cases: bulkUpdate error]`
+      );
 
       resetCounters();
 
@@ -3764,7 +3772,9 @@ fields: []
           ...params,
           reopenClosedCases: false,
         })
-      ).rejects.toThrowErrorMatchingInlineSnapshot(`[CaseError: attaching alerts: bulkCreate error]`);
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `[CaseError: attaching alerts: bulkCreate error]`
+      );
 
       resetCounters();
 

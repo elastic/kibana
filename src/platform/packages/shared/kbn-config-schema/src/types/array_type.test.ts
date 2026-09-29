@@ -174,7 +174,9 @@ describe('#minSize', () => {
   test('returns error when fewer items', () => {
     expect(() =>
       schema.arrayOf(schema.string(), { minSize: 2 }).validate(['foo'])
-    ).toThrowErrorMatchingInlineSnapshot(`[Error: array size is [1], but cannot be smaller than [2]]`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: array size is [1], but cannot be smaller than [2]]`
+    );
   });
 });
 
@@ -186,7 +188,9 @@ describe('#maxSize', () => {
   test('returns error when more items', () => {
     expect(() =>
       schema.arrayOf(schema.string(), { maxSize: 1 }).validate(['foo', 'bar'])
-    ).toThrowErrorMatchingInlineSnapshot(`[Error: array size is [2], but cannot be greater than [1]]`);
+    ).toThrowErrorMatchingInlineSnapshot(
+      `[Error: array size is [2], but cannot be greater than [1]]`
+    );
   });
 });
 

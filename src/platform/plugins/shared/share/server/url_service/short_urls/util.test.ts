@@ -55,7 +55,9 @@ describe('validateSlug', () => {
   });
 
   it('throws if slug is shorter than 3 chars', () => {
-    expect(() => validateSlug('ab')).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid [slug = ab].]`);
+    expect(() => validateSlug('ab')).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid [slug = ab].]`
+    );
   });
 
   it('throws if slug is longer than 255 chars', () => {
