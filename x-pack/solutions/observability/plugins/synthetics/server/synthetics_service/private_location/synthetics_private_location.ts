@@ -769,8 +769,8 @@ export class SyntheticsPrivateLocation {
     }
   }
 
-  async getAgentPolicies() {
-    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId: ALL_SPACES_ID });
+  async getAgentPolicies(spaceId: string = ALL_SPACES_ID) {
+    return getAgentPoliciesAsInternalUser({ server: this.server, spaceId });
   }
 
   /**
