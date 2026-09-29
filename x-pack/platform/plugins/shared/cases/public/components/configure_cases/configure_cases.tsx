@@ -74,6 +74,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
     extractObservables,
     isPersistingConfiguration,
     isLoadingCaseConfiguration,
+    isFetchingCaseConfiguration,
     isConfigurationFetchError,
     isLoadingConnectors,
     connectors,
@@ -193,6 +194,7 @@ export const ConfigureCasesRedesign: React.FC = React.memo(() => {
                       disabled={
                         isPersistingConfiguration ||
                         isLoadingCaseConfiguration ||
+                        isFetchingCaseConfiguration ||
                         isConfigurationFetchError ||
                         !permissions.settings
                       }
