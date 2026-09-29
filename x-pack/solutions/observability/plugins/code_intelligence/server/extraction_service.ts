@@ -12,12 +12,14 @@ import { isLockAcquisitionError, type LockManagerService } from '@kbn/lock-manag
 import type { WorkflowsManagementApi } from '@kbn/workflows-management-plugin/server';
 import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/types';
 
+import { extractionLockId } from '../common/extraction_lock_id';
 import type { CatalogWriter } from './domain/ports/catalog_writer';
 import type { QueryValidator } from './domain/ports/query_validator';
 import type { RepositoryResolver } from './domain/ports/repository_resolver';
 import type { SourceReader } from './domain/ports/source_reader';
 import { extractRepository } from './extract_repository';
 import { ExtractionAlreadyRunningError } from './extraction_already_running_error';
+import { ExtractionCapacityExhaustedError } from './extraction_capacity_exhausted_error';
 import { InProcessClassificationWorkflowClient } from './workflows/in_process_classification_client';
 
 export interface ExtractionStatus {
@@ -44,10 +46,6 @@ interface MutableExtractionStatus {
   completedAt?: string;
 }
 
-/** Names the cluster-wide lock held for the whole extraction of one repository. */
-export const extractionLockId = (repository: string): string =>
-  `code_intelligence_extraction:${repository}`;
-
 export class ExtractionService {
   private readonly runs = new Map<string, MutableExtractionStatus>();
   private readonly promises = new Map<string, Promise<void>>();
@@ -73,12 +71,12 @@ export class ExtractionService {
   ): Promise<string> {
     for (const run of this.runs.values()) {
       if (run.repository === repository && run.status === 'running') {
-        throw new ExtractionAlreadyRunningError(repository);
+        throw new ExtractionAlreadyRunningError(repository, run.id);
       }
     }
     this.prune();
     if (this.runs.size >= 100) {
-      throw new Error('Extraction tracking capacity is full.');
+      throw new ExtractionCapacityExhaustedError();
     }
     const id = randomUUID();
     const run: MutableExtractionStatus = {
