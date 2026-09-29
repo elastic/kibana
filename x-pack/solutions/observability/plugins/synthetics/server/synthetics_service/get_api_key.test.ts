@@ -8,7 +8,7 @@
 import {
   generateAPIKey,
   getAPIKeyForSyntheticsService,
-  getApiKeyInvalidTelemetryMessage,
+  getApiKeyInvalidTelemetryPayload,
   getServiceApiKeyPrivileges,
   syntheticsIndex,
 } from './get_api_key';
@@ -174,13 +174,25 @@ describe('getAPIKeyTest', function () {
     );
   });
 
-  it('maps invalid api key reasons to telemetry messages', () => {
-    expect(getApiKeyInvalidTelemetryMessage('missing')).toContain('is missing');
-    expect(getApiKeyInvalidTelemetryMessage('invalid')).toContain('is not valid');
-    expect(getApiKeyInvalidTelemetryMessage('insufficient_privileges')).toContain(
-      'required index privileges'
-    );
-    expect(getApiKeyInvalidTelemetryMessage('error')).toContain('Failed to validate');
+  it('maps invalid api key reasons onto existing telemetry fields', () => {
+    expect(getApiKeyInvalidTelemetryPayload({ reason: 'missing' })).toEqual({
+      code: 'missing',
+      reason: 'Synthetics service API key is missing.',
+      message: 'Failed to push configs. Synthetics service API key is missing.',
+    });
+    expect(getApiKeyInvalidTelemetryPayload({ reason: 'invalid' }).code).toBe('invalid');
+    expect(
+      getApiKeyInvalidTelemetryPayload({
+        reason: 'insufficient_privileges',
+        missingPrivileges: ['read'],
+      })
+    ).toEqual({
+      code: 'insufficient_privileges',
+      reason: 'API key is missing required index privileges.',
+      message:
+        'Failed to push configs. API key is missing required index privileges. Missing privileges: read.',
+    });
+    expect(getApiKeyInvalidTelemetryPayload({ reason: 'error' }).code).toBe('error');
   });
 
   it('marks new service API keys as Kibana-managed', async () => {

@@ -311,12 +311,10 @@ describe('SyntheticsService', () => {
         telemetry,
         expect.objectContaining({
           type: 'invalidApiKey',
-          reason: 'insufficient_privileges',
-          failureReason: 'insufficient_privileges',
-          message: 'Failed to push configs. API key is missing required index privileges.',
-          apiKeyPresent: true,
-          missingPrivileges: ['read'],
-          isServerless: false,
+          code: 'insufficient_privileges',
+          reason: 'API key is missing required index privileges.',
+          message:
+            'Failed to push configs. API key is missing required index privileges. Missing privileges: read.',
           stackVersion: '9.5.0',
         })
       );

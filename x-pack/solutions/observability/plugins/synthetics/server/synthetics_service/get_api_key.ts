@@ -35,17 +35,44 @@ export interface GetSyntheticsApiKeyResult {
   missingPrivileges?: string[];
 }
 
-export const getApiKeyInvalidTelemetryMessage = (reason: ApiKeyInvalidReason): string => {
+export const getApiKeyInvalidTelemetryPayload = ({
+  reason,
+  missingPrivileges,
+}: {
+  reason: ApiKeyInvalidReason;
+  missingPrivileges?: string[];
+}): { code: ApiKeyInvalidReason; reason: string; message: string } => {
   switch (reason) {
     case 'missing':
-      return 'Failed to push configs. Synthetics service API key is missing.';
-    case 'insufficient_privileges':
-      return 'Failed to push configs. API key is missing required index privileges.';
+      return {
+        code: reason,
+        reason: 'Synthetics service API key is missing.',
+        message: 'Failed to push configs. Synthetics service API key is missing.',
+      };
+    case 'insufficient_privileges': {
+      const privilegesSuffix =
+        missingPrivileges && missingPrivileges.length > 0
+          ? ` Missing privileges: ${missingPrivileges.join(', ')}.`
+          : '';
+      return {
+        code: reason,
+        reason: 'API key is missing required index privileges.',
+        message: `Failed to push configs. API key is missing required index privileges.${privilegesSuffix}`,
+      };
+    }
     case 'error':
-      return 'Failed to push configs. Failed to validate API key.';
+      return {
+        code: reason,
+        reason: 'Failed to validate API key.',
+        message: 'Failed to push configs. Failed to validate API key.',
+      };
     case 'invalid':
     default:
-      return 'Failed to push configs. API key is not valid.';
+      return {
+        code: 'invalid',
+        reason: 'API key is not valid.',
+        message: 'Failed to push configs. API key is not valid.',
+      };
   }
 };
 

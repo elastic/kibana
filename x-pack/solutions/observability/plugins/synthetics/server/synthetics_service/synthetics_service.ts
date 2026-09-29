@@ -32,7 +32,7 @@ import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_se
 import { installSyntheticsIndexTemplates } from '../routes/synthetics_service/install_index_templates';
 import {
   getAPIKeyForSyntheticsService,
-  getApiKeyInvalidTelemetryMessage,
+  getApiKeyInvalidTelemetryPayload,
   type ApiKeyInvalidReason,
 } from './get_api_key';
 import { getEsHosts } from './get_es_hosts';
@@ -88,7 +88,6 @@ export class SyntheticsService {
 
   public apiKeyInvalidDetails?: {
     reason: ApiKeyInvalidReason;
-    apiKeyPresent: boolean;
     missingPrivileges?: string[];
   };
 
@@ -375,7 +374,6 @@ export class SyntheticsService {
       this.invalidApiKeyError = true;
       this.apiKeyInvalidDetails = {
         reason: reason ?? 'invalid',
-        apiKeyPresent: Boolean(apiKey),
         missingPrivileges,
       };
       return null;
@@ -515,15 +513,15 @@ export class SyntheticsService {
           if (!output) {
             output = await this.getOutput();
             if (!output) {
-              const failureReason = service.apiKeyInvalidDetails?.reason ?? 'invalid';
-              sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
-                reason: failureReason,
-                message: getApiKeyInvalidTelemetryMessage(failureReason),
-                type: 'invalidApiKey',
-                failureReason,
-                apiKeyPresent: service.apiKeyInvalidDetails?.apiKeyPresent ?? false,
+              const { code, reason, message } = getApiKeyInvalidTelemetryPayload({
+                reason: service.apiKeyInvalidDetails?.reason ?? 'invalid',
                 missingPrivileges: service.apiKeyInvalidDetails?.missingPrivileges,
-                isServerless: service.server.isElasticsearchServerless,
+              });
+              sendErrorTelemetryEvents(service.logger, service.server.telemetry, {
+                type: 'invalidApiKey',
+                code,
+                reason,
+                message,
                 stackVersion: service.server.stackVersion,
               });
               return;
