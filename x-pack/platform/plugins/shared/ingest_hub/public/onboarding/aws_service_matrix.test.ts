@@ -550,6 +550,26 @@ describe('AWS service matrix', () => {
       expect(result.isManifestLoaded).toBe(true);
     });
 
+    it('leaves varDefsByInput undefined when streams declare an input but no vars', () => {
+      // Regression guard for awsfirehose: streams have an input key but vars:[].
+      // An empty varDefsByInput bucket must not cause requiresCredentials=true in Step 3.
+      const pkg = {
+        policy_templates: [],
+        data_streams: [
+          {
+            path: 'log',
+            type: 'logs',
+            streams: [{ input: 'http_endpoint', vars: [] }],
+          },
+        ],
+      };
+      const [result] = buildAwsServiceMatrix({ awsfirehose: pkg as any }, [
+        { id: 'awsfirehose', category: 'analytics', packageName: 'awsfirehose' },
+      ]);
+      expect(result.varDefsByInput).toBeUndefined();
+      expect(result.inputs).toContain('http_endpoint');
+    });
+
     it('does not consume aws-package data streams when the entry has a policyTemplate set', () => {
       // An `aws` entry whose PT is temporarily missing must not fall through to the no-PT
       // fallback and pick up ALL package data streams (regression guard for Libra 4125759535).

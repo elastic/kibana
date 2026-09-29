@@ -651,7 +651,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             fill
             onClick={handleNext}
             isDisabled={isNextDisabled}
-            isLoading={isSavingSO || isAgentDeploying}
+            isLoading={hasUnloadedSelectedManifests || isSavingSO || isAgentDeploying}
             data-test-subj="authenticateAndDeployStep-nextButton"
           >
             <FormattedMessage

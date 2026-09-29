@@ -996,4 +996,48 @@ describe('AuthenticateAndDeployStep', () => {
       expect(getLastMiSectionProps().showIdentityFederation).toBe(false);
     });
   });
+
+  describe('manifest loading/error gating', () => {
+    it('disables and shows loading on Next while a selected service manifest is still loading', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow(),
+        awsServicesMap: new Map([
+          ['guardduty', { ...miService, isManifestLoaded: false, isManifestError: false }],
+        ]),
+      });
+      renderStep();
+      const next = screen.getByTestId('authenticateAndDeployStep-nextButton');
+      expect(next).toBeDisabled();
+      // EuiButton renders a spinner via aria-busy when isLoading=true
+      expect(next).toHaveAttribute('aria-busy', 'true');
+    });
+
+    it('disables Next and shows error callout when a selected service manifest fails to load', () => {
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow(),
+        awsServicesMap: new Map([
+          ['guardduty', { ...miService, isManifestLoaded: false, isManifestError: true }],
+        ]),
+      });
+      renderStep();
+      expect(screen.getByTestId('authenticateAndDeployStep-nextButton')).toBeDisabled();
+      expect(
+        screen.getByTestId('authenticateAndDeployStep-manifestErrorCallout')
+      ).toBeInTheDocument();
+    });
+
+    it('calls refetchAwsServiceMatrix when the manifest retry button is clicked', () => {
+      const mockRefetch = jest.fn();
+      mockUseOnboardingFlow.mockReturnValue({
+        ...mockUseOnboardingFlow(),
+        refetchAwsServiceMatrix: mockRefetch,
+        awsServicesMap: new Map([
+          ['guardduty', { ...miService, isManifestLoaded: false, isManifestError: true }],
+        ]),
+      });
+      renderStep();
+      fireEvent.click(screen.getByTestId('authenticateAndDeployStep-manifestRetryButton'));
+      expect(mockRefetch).toHaveBeenCalledTimes(1);
+    });
+  });
 });

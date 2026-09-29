@@ -652,13 +652,14 @@ function computeDataStreamInfo(
   });
 
   // Build per-DS var defs: input → varName → definition. First-wins within each input bucket.
+  // Only create a bucket when the stream actually declares vars — an empty bucket would make
+  // the service appear to have credential vars (e.g. awsfirehose streams have inputs but no vars).
   const dsVarDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
   for (const s of dsStreams) {
     if (!s.input || !dsEffectiveInputs.includes(s.input)) continue;
-    const bucket = (dsVarDefsByInput[s.input] ??= {});
     for (const v of (s.vars ?? []) as RegistryVarsEntry[]) {
       if (!(v as any).name) continue;
-      bucket[(v as any).name] ??= v;
+      (dsVarDefsByInput[s.input] ??= {})[(v as any).name] ??= v;
     }
   }
 
