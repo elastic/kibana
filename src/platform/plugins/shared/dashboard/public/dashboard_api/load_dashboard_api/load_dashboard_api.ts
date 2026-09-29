@@ -84,8 +84,7 @@ export async function loadDashboardApi({
   }
 
   // Back up view mode passed in explicitly; do not back up preview mode because it should never be restored
-  if (viewMode) {
-    // && viewMode !== 'preview'
+  if (viewMode && viewMode !== 'preview') {
     getDashboardBackupService().storeViewMode(viewMode);
   }
 
@@ -102,6 +101,7 @@ export async function loadDashboardApi({
     savedObjectId,
     user,
     isAccessControlEnabled,
+    viewMode,
   });
   const userActivityService = getDashboardUserActivityService(api);
 

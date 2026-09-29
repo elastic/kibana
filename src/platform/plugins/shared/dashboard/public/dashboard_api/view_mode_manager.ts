@@ -11,32 +11,32 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
-import type { DashboardCreationOptions, DashboardUser } from './types';
+import type { DashboardUser } from './types';
 import { getAccessControlClient } from '../services/access_control_service';
 import { getDashboardBackupService } from '../services/dashboard_api_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import { getDashboardAccessControlState } from '../utils/get_dashboard_access_control_state';
 
 export function initializeViewModeManager({
-  creationOptions,
   incomingEmbeddables,
   isManaged,
   savedObjectId,
   accessControl,
   createdBy,
   user,
+  viewMode: creationOptionsViewMode,
 }: {
-  creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[];
   isManaged: boolean;
   savedObjectId?: string;
   accessControl?: Partial<SavedObjectAccessControl>;
   createdBy?: string;
   user?: DashboardUser;
+  viewMode?: ViewMode;
 }) {
   const dashboardBackupService = getDashboardBackupService();
   const accessControlClient = getAccessControlClient();
-  const { viewMode: creationOptionsViewMode } = creationOptions?.getInitialInput?.() ?? {};
+
   const { canEditDashboard: canUserEditDashboard } = getDashboardAccessControlState({
     accessControlClient,
     accessControl,
@@ -53,8 +53,8 @@ export function initializeViewModeManager({
 
     if (
       incomingEmbeddables?.length ||
-      !Boolean(savedObjectId)
-      // dashboardBackupService.dashboardHasUnsavedEdits(savedObjectId)
+      !Boolean(savedObjectId) ||
+      dashboardBackupService.dashboardHasUnsavedEdits(savedObjectId)
     )
       return 'edit';
 
