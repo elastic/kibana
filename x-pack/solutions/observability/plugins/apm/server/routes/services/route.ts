@@ -122,7 +122,9 @@ const servicesRoute = createApmServerRoute({
         ? getServiceGroup({ savedObjectsClient, serviceGroupId })
         : Promise.resolve(null),
       getRandomSampler({ coreStart, request, probability }),
-      uiSettingsClient.get<number>(apmMaxNumberOfServices).catch(() => MAX_NUMBER_OF_SERVICES),
+      uiSettingsClient
+        .get<number>(apmMaxNumberOfServices)
+        .catch((): number => MAX_NUMBER_OF_SERVICES),
     ]);
 
     return getServicesItems({
