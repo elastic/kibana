@@ -113,15 +113,31 @@ describe('Nightshift investigation agent type', () => {
     ]);
   });
 
-  it('allow-lists the telemetry connector when one is configured', () => {
+  it('allow-lists the request-scoped Elasticsearch connector when the sandbox is available', () => {
+    const base = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+    );
+
+    expect(base.connector_ids).toEqual(['nightshift-elasticsearch']);
+  });
+
+  it('allow-lists no connector when the Elasticsearch connector is disabled', () => {
     const base = staticBase(
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        elasticsearchConnectorEnabled: false,
       })
     );
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+    expect(base.connector_ids).toEqual([]);
+  });
+
+  it('allow-lists no connector without the sandbox', () => {
+    const base = staticBase(
+      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
+    );
+
+    expect(base.connector_ids).toEqual([]);
   });
 });

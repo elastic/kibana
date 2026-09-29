@@ -9,13 +9,19 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
+/**
+ * The request-scoped Elasticsearch connector: the sandbox queries this cluster with the API key of
+ * the current agent run, injected per command only when the agent asks for it.
+ */
+const sandboxElasticsearchConfigSchema = schema.object({
+  // Disable where the sandbox cannot reach this cluster, e.g. network policies or no public URL.
+  enabled: schema.boolean({ defaultValue: true }),
+  // Elasticsearch URL as reachable from inside the sandbox. Defaults to elasticsearch.publicBaseUrl.
+  url: schema.maybe(schema.uri({ scheme: ['http', 'https'] })),
+});
+
 const sandboxConfigSchema = schema.object({
-  /**
-   * Id of the preconfigured connector holding the Elasticsearch URL and API key the sandbox
-   * queries telemetry with. It is added to the investigator's connector allow-list; credentials
-   * are injected per command, only when the agent asks for it.
-   */
-  telemetry_connector_id: schema.maybe(schema.string()),
+  elasticsearch: sandboxElasticsearchConfigSchema,
   // Operator-supplied readable index patterns and remote names for the telemetry manifest.
   telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
 });
@@ -50,4 +56,8 @@ export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<NightshiftInvestigationsConfig> = {
   schema: configSchema,
+  deprecations: ({ unused }) => [
+    // Replaced by the request-scoped Elasticsearch connector.
+    unused('sandbox.telemetry_connector_id', { level: 'warning' }),
+  ],
 };

@@ -12,6 +12,7 @@
     "@kbn/config-schema",
     "@kbn/core",
     "@kbn/core-http-server",
+    "@kbn/core-security-server",
     "@kbn/core-plugins-server",
     "@kbn/core-spaces-common",
     "@kbn/server-route-repository",

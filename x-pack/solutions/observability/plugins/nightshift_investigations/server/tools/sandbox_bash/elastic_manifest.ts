@@ -22,6 +22,8 @@ export const renderElasticManifest = (
     '- `CONNECTOR_CONFIG_URL` — Elasticsearch URL',
     '- `CONNECTOR_SECRET_PASSWORD` — Elasticsearch API key, used as `Authorization: ApiKey <key>`',
     '',
+    'The key acts with the privileges of this investigation run and is revoked after the run ends.',
+    '',
     'Reference those variables directly and never hard-code their values. A command that omits',
     '`connector_id` gets no credentials and cannot reach Elasticsearch.',
     '',

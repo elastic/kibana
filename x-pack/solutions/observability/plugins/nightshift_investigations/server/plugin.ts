@@ -52,6 +52,7 @@ import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_to
 import { createSandboxWriteFileTool } from './tools/sandbox_bash/write_file_tool';
 import { createConnectorCredentialResolver } from './tools/sandbox_bash/connector_credentials';
 import { createSandboxWorkspaceManager } from './tools/sandbox_bash/sandbox_workspace_manager';
+import { REQUEST_SCOPED_CONNECTOR_ID } from './tools/sandbox_bash/request_scoped_connector';
 import {
   nightshiftInvestigationSavedObjectType,
   NIGHTSHIFT_INVESTIGATION_SO_TYPE,
@@ -150,12 +151,11 @@ export class NightshiftInvestigationsPlugin
 
     if (plugins.agentBuilder) {
       const config = this.ctx.config.get();
-      const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
       registerInvestigationAgentType(plugins.agentBuilder, {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         decisionTreesEnabled: this.decisionTreesEnabled,
-        telemetryConnectorId,
+        elasticsearchConnectorEnabled: this.isElasticsearchConnectorEnabled(plugins),
       });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
@@ -172,14 +172,18 @@ export class NightshiftInvestigationsPlugin
 
         // Start deps are read lazily: tools are registered in setup() but only run after start().
         const getSandboxStart = () => this.sandboxStart;
+        // The sandbox runs outside Kibana, so it needs an Elasticsearch URL it can reach.
+        const elasticsearchUrl = this.isElasticsearchConnectorEnabled(plugins)
+          ? config.sandbox?.elasticsearch.url ?? core.elasticsearch.publicBaseUrl
+          : undefined;
+        const getConnectorDeps = () => ({ actions: this.actionsStart, elasticsearchUrl });
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
-          getDeps: () => ({ actions: this.actionsStart }),
-          telemetryConnectorId,
+          getDeps: getConnectorDeps,
           telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
-          getDeps: () => ({ actions: this.actionsStart }),
+          getDeps: getConnectorDeps,
           logger: sandboxLogger.get('connector_credentials'),
         });
 
@@ -219,7 +223,7 @@ export class NightshiftInvestigationsPlugin
             this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           for (const tool of createDecisionTreeTools({
             getSandboxStart,
-            connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+            connectorNames: this.getSandboxConnectorNames(plugins),
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
             logger: decisionTreeLogger,
@@ -269,7 +273,7 @@ export class NightshiftInvestigationsPlugin
           );
           plugins.workflowsExtensions.registerStepDefinition(
             decisionTreePrepareStepDefinition({
-              getTelemetryConnectorId: () => this.ctx.config.get().sandbox?.telemetry_connector_id,
+              connectorNames: this.getSandboxConnectorNames(plugins),
               logger: decisionTreeLogger,
             })
           );
@@ -398,6 +402,14 @@ export class NightshiftInvestigationsPlugin
         }),
     };
   }
+
+  /** Whether the sandbox may query this cluster through the request-scoped connector. */
+  private isElasticsearchConnectorEnabled = (plugins: NightshiftInvestigationsSetupDeps): boolean =>
+    Boolean(plugins.sandbox?.isAvailable) &&
+    (this.ctx.config.get().sandbox?.elasticsearch.enabled ?? true);
+
+  private getSandboxConnectorNames = (plugins: NightshiftInvestigationsSetupDeps): string[] =>
+    this.isElasticsearchConnectorEnabled(plugins) ? [REQUEST_SCOPED_CONNECTOR_ID] : [];
 
   /**
    * Created once and reused so every `agents.ensure` call for the investigation agent registers the

@@ -17,6 +17,7 @@ import {
   createConnectorCredentialResolver,
   redactSecrets,
 } from './connector_credentials';
+import { REQUEST_SCOPED_CONNECTOR_ID } from './request_scoped_connector';
 
 const CONNECTOR_ID = 'github-1';
 const TOKEN = 'ghp_topsecrettokenvalue';
@@ -253,6 +254,50 @@ describe('createConnectorCredentialResolver', () => {
 
     expect(await resolve(CONNECTOR_ID, createCallContext())).toEqual({
       errorMessage: 'Connectors are not available in this deployment',
+    });
+  });
+
+  describe('request-scoped Elasticsearch connector', () => {
+    const secret = 'task-manager-cloned-secret';
+    const encoded = Buffer.from(`key-id:${secret}`).toString('base64');
+    const esUrl = 'https://es.example.com';
+
+    const resolveRequestScoped = (elasticsearchUrl: string | undefined = esUrl) => {
+      const actions = actionsMock.createStart();
+      const resolve = createConnectorCredentialResolver({
+        getDeps: () => ({ actions, elasticsearchUrl }),
+        logger: loggingSystemMock.createLogger(),
+      });
+      const callContext: SandboxCallContext = {
+        request: httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: `ApiKey ${encoded}` },
+        }),
+        allowedConnectorIds: [REQUEST_SCOPED_CONNECTOR_ID],
+      };
+      return { result: resolve(REQUEST_SCOPED_CONNECTOR_ID, callContext), actions };
+    };
+
+    it("injects the run's API key and the sandbox Elasticsearch URL", async () => {
+      const { result, actions } = resolveRequestScoped();
+
+      expect(await result).toEqual({
+        env: {
+          CONNECTOR_ID: REQUEST_SCOPED_CONNECTOR_ID,
+          CONNECTOR_TYPE: '.nightshift-elasticsearch',
+          CONNECTOR_CONFIG_URL: esUrl,
+          CONNECTOR_SECRET_PASSWORD: encoded,
+        },
+        secretValues: [encoded, secret],
+      });
+      expect(actions.getActionsClientWithRequest).not.toHaveBeenCalled();
+    });
+
+    it('fails without a sandbox-reachable Elasticsearch URL', async () => {
+      const { result } = resolveRequestScoped('');
+
+      expect(await result).toEqual({
+        errorMessage: expect.stringContaining('sandbox.elasticsearch.url'),
+      });
     });
   });
 });

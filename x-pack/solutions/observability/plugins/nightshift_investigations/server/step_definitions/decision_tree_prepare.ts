@@ -36,10 +36,11 @@ const toolCallsSchema = z.preprocess((value) => {
 }, z.array(toolCallSchema).max(MAX_TOOL_CALLS).optional());
 
 export const decisionTreePrepareStepDefinition = ({
-  getTelemetryConnectorId,
+  connectorNames,
   logger,
 }: {
-  getTelemetryConnectorId: () => string | undefined;
+  /** Connector ids the investigator could query, named in the reinforcement turn script. */
+  connectorNames: readonly string[];
   logger: Logger;
 }) =>
   createServerStepDefinition({
@@ -78,12 +79,11 @@ export const decisionTreePrepareStepDefinition = ({
         return { output: { message: '', tree_count: 0, skipped: true } };
       }
 
-      const telemetryConnectorId = getTelemetryConnectorId();
       const { spaceId } = context.contextManager.getContext().workflow;
       const { message, treeCount } = await prepareReinforcementTurn({
         prompt,
         response,
-        connectorNames: telemetryConnectorId ? [telemetryConnectorId] : [],
+        connectorNames: [...connectorNames],
         esClient: context.contextManager.getScopedEsClient(),
         logger,
         spaceId,

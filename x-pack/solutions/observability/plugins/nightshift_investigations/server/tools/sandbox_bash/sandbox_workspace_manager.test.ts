@@ -6,14 +6,10 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  actionsMock,
-  actionsClientMock,
-  actionsAuthorizationMock,
-} from '@kbn/actions-plugin/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { SandboxCallContext } from './tool_utils';
 import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
+import { REQUEST_SCOPED_CONNECTOR, REQUEST_SCOPED_CONNECTOR_ID } from './request_scoped_connector';
 
 jest.mock('./connector_manifest', () => ({
   writeConnectorManifest: jest.fn().mockResolvedValue(undefined),
@@ -181,61 +177,85 @@ describe('createSandboxWorkspaceManager', () => {
     expect(mockWriteConnectorManifest).toHaveBeenCalledTimes(1);
   });
 
-  describe('telemetryConnectorId', () => {
+  describe('request-scoped Elasticsearch connector', () => {
+    const ES_URL = 'https://es.example.com';
+    const API_KEY = Buffer.from('key-id:task-manager-secret').toString('base64');
     let managerWithTelemetry: ReturnType<typeof createSandboxWorkspaceManager>;
-    let actions: ReturnType<typeof actionsMock.createStart>;
-    let actionsClient: ReturnType<typeof actionsClientMock.create>;
-    let authorization: ReturnType<typeof actionsAuthorizationMock.create>;
+
+    const createTelemetryCallContext = (
+      allowedConnectorIds: readonly string[] = [REQUEST_SCOPED_CONNECTOR_ID],
+      authorization = `ApiKey ${API_KEY}`
+    ): SandboxCallContext => ({
+      request: httpServerMock.createFakeKibanaRequest({
+        headers: authorization ? { authorization } : {},
+      }),
+      allowedConnectorIds,
+    });
+
+    const CLEARED_HINTS = [
+      {
+        path: '/workspace/elastic.md',
+        content: Buffer.from('No telemetry connector is available.\n'),
+      },
+    ];
 
     beforeEach(() => {
-      actions = actionsMock.createStart();
-      actionsClient = actionsClientMock.create();
-      authorization = actionsAuthorizationMock.create();
-      const connector = {
-        id: 'elasticsearch-telemetry',
-        name: 'Telemetry',
-        actionTypeId: '.webhook',
-        config: {},
-        isPreconfigured: true,
-        isDeprecated: false,
-        isSystemAction: false,
-        isConnectorTypeDeprecated: false,
-      };
-      actionsClient.get.mockResolvedValue(connector);
-      actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
-      actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
-      actions.inMemoryConnectors = [{ ...connector, secrets: {} }];
       managerWithTelemetry = createSandboxWorkspaceManager({
-        getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        getDeps: () => ({ elasticsearchUrl: ES_URL }),
         logger,
       });
     });
 
-    it('writes elastic manifest alongside connector manifest on reset', async () => {
+    it('lists the connector and writes the elastic manifest when the run has an API key', async () => {
       const session = createSessionMock(true);
       await managerWithTelemetry.ensureWorkspaceReady({
         session,
-        callContext: createCallContext(['elasticsearch-telemetry']),
+        callContext: createTelemetryCallContext(),
       });
 
-      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
-        expect.objectContaining({ connectorId: 'elasticsearch-telemetry', session })
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ virtualConnectors: [REQUEST_SCOPED_CONNECTOR] })
       );
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ connectorId: REQUEST_SCOPED_CONNECTOR_ID, session })
+      );
+    });
+
+    it('never writes the API key into the workspace', async () => {
+      const session = createSessionMock(true);
+      mockWriteElasticManifest.mockImplementationOnce(
+        jest.requireActual<typeof import('./elastic_manifest')>('./elastic_manifest')
+          .writeElasticManifest
+      );
+      mockWriteConnectorManifest.mockImplementationOnce(
+        jest.requireActual<typeof import('./connector_manifest')>('./connector_manifest')
+          .writeConnectorManifest
+      );
+
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createTelemetryCallContext(),
+      });
+
+      const written = jest
+        .mocked(session.writeFiles)
+        .mock.calls.flatMap(([files]) => files.map(({ content }) => content.toString('utf8')));
+      expect(written.join('\n')).toContain(REQUEST_SCOPED_CONNECTOR_ID);
+      expect(written.join('\n')).not.toContain(API_KEY);
+      expect(written.join('\n')).not.toContain('task-manager-secret');
     });
 
     it('passes the configured readable indices to the telemetry manifest', async () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
-        getDeps: () => ({ actions }),
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        getDeps: () => ({ elasticsearchUrl: ES_URL }),
         telemetryReadableIndices: 'Read remote-a:logs-service-*',
         logger,
       });
 
       await configuredManager.ensureWorkspaceReady({
         session,
-        callContext: createCallContext(['elasticsearch-telemetry']),
+        callContext: createTelemetryCallContext(),
       });
 
       expect(mockWriteElasticManifest).toHaveBeenCalledWith(
@@ -243,31 +263,57 @@ describe('createSandboxWorkspaceManager', () => {
       );
     });
 
-    it('does not write elastic manifest when telemetryConnectorId is not set', async () => {
+    it('clears hints when no Elasticsearch URL is configured', async () => {
       const session = createSessionMock(true);
-      await manager.ensureWorkspaceReady({
+      await manager.ensureWorkspaceReady({ session, callContext: createTelemetryCallContext() });
+
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+      expect(mockWriteConnectorManifest).toHaveBeenCalledWith(
+        expect.objectContaining({ virtualConnectors: [] })
+      );
+      expect(session.writeFiles).toHaveBeenCalledWith(CLEARED_HINTS);
+    });
+
+    it.each([
+      ['a UIAM key', 'ApiKey essu_internal_key'],
+      ['no API key', ''],
+    ])('does not offer the connector to a run carrying %s', async (_, authorization) => {
+      const session = createSessionMock(false);
+      await managerWithTelemetry.ensureWorkspaceReady({
         session,
-        callContext: createCallContext(['elasticsearch-telemetry']),
+        callContext: createTelemetryCallContext(undefined, authorization),
       });
 
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+      expect(session.writeFiles).toHaveBeenCalledWith(CLEARED_HINTS);
     });
 
-    it('clears retained hints after telemetry configuration is removed on restart', async () => {
+    it('does not seed hints for agents without the connector on their allow-list', async () => {
       const session = createSessionMock(false);
-      const callContext = createCallContext(['elasticsearch-telemetry']);
-      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
-      mockWriteElasticManifest.mockClear();
-
-      await manager.ensureWorkspaceReady({ session, callContext });
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createTelemetryCallContext(['other']),
+      });
 
       expect(mockWriteElasticManifest).not.toHaveBeenCalled();
-      expect(session.writeFiles).toHaveBeenCalledWith([
-        {
-          path: '/workspace/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
-        },
-      ]);
+      expect(session.writeFiles).toHaveBeenCalledWith(CLEARED_HINTS);
+    });
+
+    it('clears previously seeded hints when the agent allow-list changes', async () => {
+      const session = createSessionMock(false);
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createTelemetryCallContext(),
+      });
+      mockWriteElasticManifest.mockClear();
+
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createTelemetryCallContext([]),
+      });
+
+      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
+      expect(session.writeFiles).toHaveBeenCalledWith(CLEARED_HINTS);
     });
 
     it('swallows elastic manifest write failures (best-effort)', async () => {
@@ -277,7 +323,7 @@ describe('createSandboxWorkspaceManager', () => {
       await expect(
         managerWithTelemetry.ensureWorkspaceReady({
           session,
-          callContext: createCallContext(['elasticsearch-telemetry']),
+          callContext: createTelemetryCallContext(),
         })
       ).resolves.toBeUndefined();
 
@@ -286,7 +332,7 @@ describe('createSandboxWorkspaceManager', () => {
 
     it('retries the telemetry manifest after a failed refresh on an initialized session', async () => {
       const { session, setIsReset } = createMutableSessionMock();
-      const callContext = createCallContext(['elasticsearch-telemetry']);
+      const callContext = createTelemetryCallContext();
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
 
       setIsReset(true);
@@ -294,62 +340,17 @@ describe('createSandboxWorkspaceManager', () => {
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
       mockWriteElasticManifest.mockClear();
 
-      // A later command can succeed on the pod even though the telemetry file was never written.
       setIsReset(false);
       await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
 
       expect(mockWriteElasticManifest).toHaveBeenCalledTimes(1);
     });
-    it('does not seed private hints for agents without the telemetry connector', async () => {
-      const session = createSessionMock(false);
-      await managerWithTelemetry.ensureWorkspaceReady({
-        session,
-        callContext: createCallContext(['other']),
-      });
-      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
-      expect(session.writeFiles).toHaveBeenCalledWith([
-        {
-          path: '/workspace/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
-        },
-      ]);
-    });
-
-    it('clears previously seeded hints when the agent allow-list changes', async () => {
-      const session = createSessionMock(false);
-      await managerWithTelemetry.ensureWorkspaceReady({
-        session,
-        callContext: createCallContext(['elasticsearch-telemetry']),
-      });
-      mockWriteElasticManifest.mockClear();
-      await managerWithTelemetry.ensureWorkspaceReady({
-        session,
-        callContext: createCallContext([]),
-      });
-      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
-      expect(session.writeFiles).toHaveBeenCalledWith([
-        {
-          path: '/workspace/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
-        },
-      ]);
-    });
-
-    it('rechecks user access even when the agent allow-list is unchanged', async () => {
-      const session = createSessionMock(false);
-      const callContext = createCallContext(['elasticsearch-telemetry']);
-      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
-      actionsClient.get.mockRejectedValueOnce(new Error('read denied'));
-      mockWriteElasticManifest.mockClear();
-      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
-      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
-      expect(session.writeFiles).toHaveBeenCalledTimes(1);
-    });
 
     it('blocks workspace access and retries if clearing unauthorized hints fails', async () => {
       const session = createSessionMock(false);
-      const callContext = createCallContext([]);
+      const callContext = createTelemetryCallContext([]);
       jest.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
+
       await expect(
         managerWithTelemetry.ensureWorkspaceReady({ session, callContext })
       ).rejects.toThrow('Failed to clear');
@@ -357,34 +358,6 @@ describe('createSandboxWorkspaceManager', () => {
         managerWithTelemetry.ensureWorkspaceReady({ session, callContext })
       ).resolves.toBeUndefined();
       expect(session.writeFiles).toHaveBeenCalledTimes(2);
-    });
-    it('does not seed hints when connector execution is denied despite read access', async () => {
-      const session = createSessionMock(false);
-      authorization.ensureAuthorized.mockRejectedValueOnce(new Error('execute denied'));
-      await managerWithTelemetry.ensureWorkspaceReady({
-        session,
-        callContext: createCallContext(['elasticsearch-telemetry']),
-      });
-      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-        operation: 'execute',
-        actionTypeId: '.webhook',
-      });
-      expect(mockWriteElasticManifest).not.toHaveBeenCalled();
-      expect(session.writeFiles).toHaveBeenCalledTimes(1);
-    });
-
-    it('retries a telemetry manifest after the sandbox reports an unsuccessful write', async () => {
-      const session = createSessionMock(false);
-      const callContext = createCallContext(['elasticsearch-telemetry']);
-      mockWriteElasticManifest.mockImplementation(
-        jest.requireActual<typeof import('./elastic_manifest')>('./elastic_manifest')
-          .writeElasticManifest
-      );
-      jest.mocked(session.writeFiles).mockResolvedValueOnce([{ bytes_written: 0, success: false }]);
-      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
-      await managerWithTelemetry.ensureWorkspaceReady({ session, callContext });
-      expect(session.writeFiles).toHaveBeenCalledTimes(2);
-      expect(loggingSystemMock.collect(logger).warn).toHaveLength(1);
     });
   });
 });
