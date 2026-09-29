@@ -456,6 +456,8 @@ export class SignificantEventsPlugin
         getManagedWorkflowsClient,
       });
 
+      // TODO: remove with the legacy default-space cleanup.
+      // https://github.com/elastic/kibana/issues/294271
       this.removeLegacyWorkflows = () =>
         removeLegacyDefaultSpaceWorkflows({
           getManagedWorkflowsClient,

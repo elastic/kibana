@@ -275,6 +275,9 @@ export const createSignificantEventsMaintenanceService = ({
    * space are dropped: those documents are deleted at startup and would only
    * produce "not found" failures. The legacy sync document is kept, since startup
    * only removes it once its per-space replacement is enabled.
+   *
+   * TODO: drop the legacy filter with the legacy default-space cleanup.
+   * https://github.com/elastic/kibana/issues/294271
    */
   const brandDisabledWorkflows = (
     workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined

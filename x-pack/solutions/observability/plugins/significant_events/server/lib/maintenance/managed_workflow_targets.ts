@@ -71,6 +71,9 @@ export const GLOBAL_MAINTENANCE_WORKFLOW_IDS = [
 /**
  * Pre-per-space continuous onboarding workflows of the default space. Removed at startup and
  * dropped from recorded maintenance state.
+ *
+ * TODO: remove with the legacy default-space cleanup.
+ * https://github.com/elastic/kibana/issues/294271
  */
 export const LEGACY_DEFAULT_SPACE_WORKFLOW_IDS: readonly string[] = [
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
@@ -97,6 +100,9 @@ export interface MaintenanceWorkflowTarget {
  * The pre-per-space KI sync document of the default space. Startup keeps it until
  * `${id}-default` is enabled, since it is the only thing reconciling the default space until
  * then, so Pause and Resume still cover it. Missing documents are a no-op for both.
+ *
+ * TODO: remove with the legacy default-space cleanup.
+ * https://github.com/elastic/kibana/issues/294271
  */
 export const LEGACY_DEFAULT_SPACE_SYNC_TARGET: MaintenanceWorkflowTarget = {
   id: SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,

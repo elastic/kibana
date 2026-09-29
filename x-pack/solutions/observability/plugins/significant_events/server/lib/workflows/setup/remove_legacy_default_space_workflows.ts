@@ -42,6 +42,9 @@ const continuousOnboardingResetWarning = (id: string): string =>
  * Fully best-effort: every failure is logged and swallowed, so it can run on each install without
  * ever blocking startup. It is idempotent, so a document that fails to go is retried on the next
  * startup.
+ *
+ * TODO: delete once no supported upgrade path can skip a version that runs it.
+ * https://github.com/elastic/kibana/issues/294271
  */
 export const removeLegacyDefaultSpaceWorkflows = async ({
   getManagedWorkflowsClient,
