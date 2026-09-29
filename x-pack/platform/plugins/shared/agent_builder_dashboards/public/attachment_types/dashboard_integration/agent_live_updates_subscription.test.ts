@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Subject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
@@ -94,6 +94,34 @@ describe('createAgentLiveUpdatesSubscription', () => {
 
     expect(upsertAttachment).toHaveBeenCalledTimes(1);
     expect(setState).not.toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+
+  it('applies the dashboard state from the first run of a new conversation', () => {
+    const chatEvents$ = new Subject();
+    const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({ id: undefined });
+    const getChatEvents$ = jest.fn().mockReturnValue(chatEvents$);
+    const setState = jest.fn();
+
+    const subscription = createAgentLiveUpdatesSubscription({
+      agentBuilder: {
+        events: { ui: { activeConversation$ }, getChatEvents$ },
+      } as unknown as AgentBuilderPluginStart,
+      api: {
+        savedObjectId$: { getValue: () => undefined },
+        setState,
+      } as unknown as DashboardApi,
+      upsertAttachment: jest.fn(),
+    });
+
+    expect(getChatEvents$).not.toHaveBeenCalled();
+
+    // The chat creates the conversation before sending, so its id is published before the run streams
+    activeConversation$.next({ id: 'new-conversation' });
+    chatEvents$.next(buildToolUiEvent(DASHBOARD_UPDATED_UI_EVENT, buildAttachment(undefined)));
+
+    expect(getChatEvents$).toHaveBeenCalledWith('new-conversation');
+    expect(setState).toHaveBeenCalledTimes(1);
     subscription.unsubscribe();
   });
 

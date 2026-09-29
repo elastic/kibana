@@ -521,6 +521,13 @@ describe('customContentEmbeddableFactory', () => {
       return { chatEvents$, openChat };
     };
 
+    // `useBatchedPublishingSubjects` flushes on the next macrotask
+    const emitAndFlush = async (chatEvents$: Subject<unknown>, event: unknown) =>
+      act(async () => {
+        chatEvents$.next(event);
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
     const startGenerating = async (openChat: jest.Mock) => {
       await act(async () => capturedComponentProps?.onGenerateWithChat?.());
       await act(async () => {
@@ -591,10 +598,34 @@ describe('customContentEmbeddableFactory', () => {
       await startGenerating(openChat);
       expectGenerating(true);
 
-      await act(async () =>
-        chatEvents$.next(buildCustomContentUpdatedEvent('test-uuid', '<p>agent result</p>'))
+      await emitAndFlush(
+        chatEvents$,
+        buildCustomContentUpdatedEvent('test-uuid', '<p>agent result</p>')
       );
 
+      expectGenerating(false);
+    });
+
+    it('applies the update from the first run of a new conversation', async () => {
+      const chatEvents$ = new Subject<unknown>();
+      const activeConversation$ = new BehaviorSubject<{ id?: string } | null>({ id: undefined });
+      const getChatEvents$ = jest.fn(() => chatEvents$);
+      const openChat = jest.fn();
+      mockAgentBuilder = { openChat, events: { ui: { activeConversation$ }, getChatEvents$ } };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await startGenerating(openChat);
+
+      // The chat creates the conversation before sending, so its id is published before the run streams
+      await act(async () => activeConversation$.next({ id: 'new-conv' }));
+      await emitAndFlush(
+        chatEvents$,
+        buildCustomContentUpdatedEvent('test-uuid', '<p>first run</p>')
+      );
+
+      expect(getChatEvents$).toHaveBeenCalledWith('new-conv');
+      expect(embeddable.api.serializeState().template).toBe('<p>first run</p>');
       expectGenerating(false);
     });
 
@@ -610,9 +641,11 @@ describe('customContentEmbeddableFactory', () => {
       await startGenerating(openChat);
       expectGenerating(true);
 
-      await act(async () =>
-        chatEvents$.next({ type: terminalEventType, execution_id: 'exec-1', data: {} })
-      );
+      await emitAndFlush(chatEvents$, {
+        type: terminalEventType,
+        execution_id: 'exec-1',
+        data: {},
+      });
 
       expectGenerating(false);
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
