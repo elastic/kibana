@@ -35,10 +35,13 @@ export interface AfterExecutionWorkflowParams {
   agent_id?: string;
   /**
    * Connector used by the current execution of the triggering round, falling back to
-   * `round.model_usage.connector_id`.
+   * `round.model_usage.connector_id`. Sent only to workflows that declare this input.
    */
   round_connector_id?: string;
-  /** Workflow state persisted by the before-agent workflow for this round. */
+  /**
+   * Workflow state persisted by the before-agent workflow for this round. Sent only to
+   * workflows that declare this input.
+   */
   workflow_context?: WorkflowContext;
   tool_calls: Array<{
     tool_id: string;

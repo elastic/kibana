@@ -30,6 +30,7 @@ import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { BeforeAgentWorkflowOutput } from './types';
+import { withDeclaredInputs } from './with_declared_inputs';
 import type { AgentsServiceStart } from '../../services/agents';
 import {
   mergePreExecutionWorkflowIds,
@@ -205,14 +206,24 @@ export async function runBeforeAgentWorkflows({
   let nextInputChanged = false;
 
   for (const workflowId of workflowIds) {
+    const workflowParams = await withDeclaredInputs({
+      workflowId,
+      inputs: {
+        prompt: currentNextInput.message ?? '',
+        ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
+      },
+      optionalInputs: {
+        round_execution_index: context.roundExecutionIndex ?? 0,
+        agent_id: context.agentId || undefined,
+      },
+      workflowApi,
+      spaceId,
+      request: context.request,
+      logger,
+    });
     const result = await executeWorkflow({
       workflowId,
-      workflowParams: {
-        prompt: currentNextInput.message ?? '',
-        round_execution_index: context.roundExecutionIndex ?? 0,
-        ...(context.conversationId ? { conversation_id: context.conversationId } : {}),
-        ...(context.agentId ? { agent_id: context.agentId } : {}),
-      },
+      workflowParams,
       request: context.request,
       spaceId,
       workflowApi,

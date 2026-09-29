@@ -43,7 +43,26 @@ describe('runBeforeAgentWorkflows', () => {
     ...overrides,
   });
 
-  const createDeps = () => {
+  const strictDefinition = (inputNames: string[]) => ({
+    triggers: [
+      {
+        type: 'manual',
+        inputs: {
+          properties: Object.fromEntries(inputNames.map((name) => [name, { type: 'string' }])),
+          additionalProperties: false,
+        },
+      },
+    ],
+  });
+  const allInputsDefinition = strictDefinition([
+    'prompt',
+    'conversation_id',
+    'agent_id',
+    'round_execution_index',
+  ]);
+
+  const createDeps = ({ definition = allInputsDefinition }: { definition?: unknown } = {}) => {
+    const getWorkflow = jest.fn().mockResolvedValue({ definition });
     const savedObjects = savedObjectsServiceMock.createStartContract();
     const uiSettings = uiSettingsServiceMock.createStartContract();
     const uiSettingsClient = uiSettingsServiceMock.createClient();
@@ -58,7 +77,8 @@ describe('runBeforeAgentWorkflows', () => {
     const resolveAgentConfiguration = jest.fn().mockResolvedValue({ workflow_ids: ['wf-1'] });
 
     return {
-      workflowApi: {} as WorkflowApi,
+      workflowApi: { getWorkflow } as unknown as WorkflowApi,
+      getWorkflow,
       getInternalServices: jest.fn(() => ({
         agents: {
           getRegistry: jest.fn().mockResolvedValue(registry),
@@ -636,5 +656,96 @@ describe('runBeforeAgentWorkflows', () => {
         },
       })
     );
+  });
+
+  describe('inputs added to the hook contract', () => {
+    const completed = {
+      success: true as const,
+      execution: {
+        execution_id: 'exec-inputs',
+        status: ExecutionStatus.COMPLETED,
+        workflow_id: 'wf-1',
+        started_at: '2026-01-01T00:00:00.000Z',
+        output: {},
+      },
+    };
+
+    it('does not send them to a strict workflow that predates them', async () => {
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps({
+        definition: strictDefinition(['prompt', 'conversation_id']),
+      });
+      executeWorkflowMock.mockResolvedValue(completed);
+
+      await runBeforeAgentWorkflows({
+        context: createContext({ conversationId: 'conv-1', roundExecutionIndex: 1 }),
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
+
+      expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default', request);
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowParams: { prompt: 'hello', conversation_id: 'conv-1' },
+        })
+      );
+    });
+
+    it('sends only the declared ones', async () => {
+      const { workflowApi, getInternalServices } = createDeps({
+        definition: strictDefinition(['prompt', 'round_execution_index']),
+      });
+      executeWorkflowMock.mockResolvedValue(completed);
+
+      await runBeforeAgentWorkflows({
+        context: createContext({ roundExecutionIndex: 1 }),
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
+
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({
+          workflowParams: { prompt: 'hello', round_execution_index: 1 },
+        })
+      );
+    });
+
+    it('sends the base inputs when the workflow cannot be read', async () => {
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+      getWorkflow.mockRejectedValue(new Error('boom'));
+      executeWorkflowMock.mockResolvedValue(completed);
+
+      await runBeforeAgentWorkflows({
+        context: createContext(),
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
+
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowParams: { prompt: 'hello' } })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Could not read the inputs of workflow "wf-1"')
+      );
+    });
+
+    it('sends the base inputs when the workflow is not found', async () => {
+      const { workflowApi, getWorkflow, getInternalServices } = createDeps();
+      getWorkflow.mockResolvedValue(null);
+      executeWorkflowMock.mockResolvedValue(completed);
+
+      await runBeforeAgentWorkflows({
+        context: createContext(),
+        workflowApi,
+        getInternalServices,
+        logger,
+      });
+
+      expect(executeWorkflowMock).toHaveBeenCalledWith(
+        expect.objectContaining({ workflowParams: { prompt: 'hello' } })
+      );
+    });
   });
 });
