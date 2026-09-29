@@ -139,10 +139,19 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
         blockedMs: expect.any(Number),
         candidates: [expect.objectContaining({ type: 'test:blocker', id: 'task-1' })],
         cpuRatio: expect.any(Number),
-        // blocks lasting at least `profileAfter` are profiled
-        profile: expect.objectContaining({ verdict: 'profiled' }),
       })
     );
+  });
+
+  it('profiles blocks lasting at least profileAfter', async () => {
+    // The profiler needs time to start and to attribute samples in a Kibana-sized process, so the
+    // block must continue well beyond `profileAfter` (500ms here) to yield frames.
+    await runTask('test:blocker', 'task-profiled', 2_500);
+    await waitFor(() => reports().length === 2);
+
+    const profile = reports()[1].kibana?.event_loop_watchdog?.profile;
+    expect(profile).toEqual(expect.objectContaining({ verdict: 'profiled' }));
+    expect(profile?.frames[0].location).toMatch(/event_loop_watchdog_flag\.test\.ts:\d+$/);
   });
 
   it('stops when the flag is disabled', async () => {
@@ -151,7 +160,7 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
 
     await runTask('test:blocker', 'task-2', 600);
     await sleep(1_000);
-    expect(reports()).toHaveLength(1);
+    expect(reports()).toHaveLength(2);
   });
 
   it('starts again when re-enabled, with a single worker', async () => {
@@ -159,11 +168,11 @@ describe('event loop watchdog feature flag (Kibana root)', () => {
     await waitFor(() => countMessages(/worker ready/) === 2);
 
     await runTask('test:blocker', 'task-3', 600);
-    await waitFor(() => reports().length === 2);
+    await waitFor(() => reports().length === 3);
     await sleep(500);
 
-    expect(reports()).toHaveLength(2);
-    expect(reports()[1].kibana?.event_loop_watchdog?.candidates).toEqual([
+    expect(reports()).toHaveLength(3);
+    expect(reports()[2].kibana?.event_loop_watchdog?.candidates).toEqual([
       expect.objectContaining({ id: 'task-3' }),
     ]);
     expect(countMessages(/watchdog started/)).toBe(2);
