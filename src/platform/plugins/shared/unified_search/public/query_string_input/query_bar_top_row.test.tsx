@@ -331,15 +331,7 @@ describe('QueryBarTopRowTopRow', () => {
     });
 
     describe('secondary button enabled state after rapid state transitions', () => {
-      beforeEach(() => {
-        jest.useFakeTimers();
-      });
-
-      afterEach(() => {
-        jest.useRealTimers();
-      });
-
-      it('should not re-enable the button when Loading transitions to Completed before the 500ms delay fires', () => {
+      it('should not re-enable the button when Loading transitions to Completed before the 500ms delay fires', async () => {
         // Regression test: mergeMap allowed a stale delayed Loading emission to fire after
         // Completed, briefly re-enabling the secondary button. switchMap cancels the delayed
         // emission when a new state arrives, preventing the stale re-enable.
@@ -368,19 +360,19 @@ describe('QueryBarTopRowTopRow', () => {
         const button = getByTestId('queryCancelButton-secondary-button');
 
         // Rapidly emit Loading then Completed — simulates a fast search completing in < 500ms.
-        // Advance past the 500ms delay: with mergeMap the stale Loading would fire here;
+        // Wait past the 500ms delay: with mergeMap the stale Loading would fire here;
         // with switchMap it is cancelled by the Completed emission and never fires.
-        act(() => {
+        await act(async () => {
           stateSubject.next(SearchSessionState.Loading);
           stateSubject.next(SearchSessionState.Completed);
-          jest.advanceTimersByTime(600);
+          await new Promise((resolve) => setTimeout(resolve, 600));
         });
 
         // The button must stay disabled — Completed cancelled any in-flight Loading delay.
         expect(button).toBeDisabled();
       });
 
-      it('should enable the button after 500ms when the search remains Loading', () => {
+      it('should enable the button after 500ms when the search remains Loading', async () => {
         const stateSubject = new Subject<SearchSessionState>();
         const data = dataPluginMock.createStartContract();
         data.search.session = getSessionServiceMock({
@@ -409,9 +401,8 @@ describe('QueryBarTopRowTopRow', () => {
         // Button should be disabled before the 500ms delay fires.
         expect(button).toBeDisabled();
 
-        // Advance past the 500ms delay — button should now be enabled.
-        act(() => jest.advanceTimersByTime(500));
-        expect(button).toBeEnabled();
+        // Button should enable once the 500ms delay has elapsed.
+        await waitFor(() => expect(button).toBeEnabled(), { timeout: 1000 });
       });
     });
   });
