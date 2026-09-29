@@ -37,11 +37,6 @@ const createFromFileLabel = i18n.translate('workflowsManagement.libraryPage.crea
   defaultMessage: 'Import template',
 });
 
-// The Workflow Template Library ships from `elastic/workflows`; the header
-// link takes users to the repo home so they can orient themselves before
-// opening an issue or PR (per Tinsae's feedback on the PR).
-const CONTRIBUTE_TEMPLATE_URL = 'https://github.com/elastic/workflows';
-
 /**
  * Workflow Template Library catalog page (`/app/workflows/library`). The
  * browse UI itself lives in `@kbn/workflows-ui` (`<CatalogBrowser>`) so it can
@@ -76,11 +71,21 @@ export const LibraryCatalogBrowserPage = React.memo(() => {
         order: 1,
         label: contributeLinkLabel,
         iconType: 'logoGithub',
-        href: CONTRIBUTE_TEMPLATE_URL,
+        href: 'https://github.com/elastic/workflows/issues/new?template=template_contribution.yml',
         target: '_blank',
         testId: 'workflowLibraryContributeLink',
       },
       items: [
+        {
+          id: 'requestTemplate',
+          label: i18n.translate('workflowsManagement.libraryPage.requestTemplateButtonLabel', {
+            defaultMessage: 'Request a template',
+          }),
+          iconType: 'logoGithub',
+          href: 'https://github.com/elastic/workflows/issues/new?template=template_request.yml',
+          target: '_blank',
+          testId: 'workflowLibraryRequestLink',
+        },
         {
           id: 'createFromFile',
           label: createFromFileLabel,
