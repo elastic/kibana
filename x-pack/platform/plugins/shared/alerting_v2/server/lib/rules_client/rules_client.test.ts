@@ -57,14 +57,24 @@ const baseCreateData: CreateRuleParams['data'] = {
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  query: { base: 'FROM logs-* | LIMIT 1' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
 };
 
 const baseSoAttrs = createRuleSoAttributes({
   metadata: { name: 'rule-1' },
   time_field: '@timestamp',
   schedule: { every: '1m', lookback: '1m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  query: { base: 'FROM logs-* | LIMIT 1' },
+});
+
+/** Signal rules have no episodes, so storage never holds lifecycle objects for them. */
+const signalSoAttrs = createRuleSoAttributes({
+  ...baseSoAttrs,
+  kind: 'signal',
+  recovery: undefined,
+  no_data: undefined,
 });
 
 /** Wraps attributes in the shape the SO client's `find` returns per hit. */
@@ -140,7 +150,6 @@ describe('RulesClient', () => {
         },
         ...rulesConfigOverrides,
       },
-      esql: { responseFormat: 'json' },
     };
 
     const pluginConfigAccessor =
@@ -175,7 +184,7 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({
             metadata: expect.objectContaining({ name: 'rule-1' }),
             enabled: true,
-            createdBy: 'elastic_profile_uid',
+            createdBy: { profile_uid: 'elastic_profile_uid' },
           }),
           references: [],
         }),
@@ -196,8 +205,8 @@ describe('RulesClient', () => {
           id: 'rule-id-1',
           metadata: expect.objectContaining({ name: 'rule-1' }),
           enabled: true,
-          created_by: 'elastic_profile_uid',
-          updated_by: 'elastic_profile_uid',
+          created_by: { profile_uid: 'elastic_profile_uid' },
+          updated_by: { profile_uid: 'elastic_profile_uid' },
           created_at: '2025-01-01T00:00:00.000Z',
           updated_at: '2025-01-01T00:00:00.000Z',
         })
@@ -404,7 +413,7 @@ describe('RulesClient', () => {
         client.createRule({
           data: {
             ...baseCreateData,
-            query: { format: 'standalone', breach: { query: 'FROM |' } },
+            query: { base: 'FROM |' },
           },
           options: { id: 'rule-id-5' },
         })
@@ -470,9 +479,9 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({ enabled: true }),
         }),
       ]);
-      expect(res.rules).toHaveLength(2);
+      expect(res.items).toHaveLength(2);
       expect(res.errors).toEqual([]);
-      expect(res.rules.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-a', 'rule-b']);
     });
 
     it('maps saved object attributes from the service into the API response', async () => {
@@ -496,8 +505,8 @@ describe('RulesClient', () => {
         rules: [{ ...baseCreateData, id: 'rule-a', metadata: { name: 'from-request' } }],
       });
 
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0]).toEqual(
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0]).toEqual(
         expect.objectContaining({
           id: 'rule-a',
           metadata: expect.objectContaining({ name: 'from-so' }),
@@ -520,8 +529,8 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({ enabled: false }),
         }),
       ]);
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0].enabled).toBe(false);
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].enabled).toBe(false);
       expect(res.errors).toEqual([]);
     });
 
@@ -543,9 +552,9 @@ describe('RulesClient', () => {
         [expect.objectContaining({ params: expect.objectContaining({ ruleId: 'rule-on' }) })],
         expect.anything()
       );
-      expect(res.rules).toHaveLength(2);
-      expect(res.rules.find((rule) => rule.id === 'rule-on')?.enabled).toBe(true);
-      expect(res.rules.find((rule) => rule.id === 'rule-off')?.enabled).toBe(false);
+      expect(res.items).toHaveLength(2);
+      expect(res.items.find((rule) => rule.id === 'rule-on')?.enabled).toBe(true);
+      expect(res.items.find((rule) => rule.id === 'rule-off')?.enabled).toBe(false);
     });
 
     it('does not schedule enabled rules when bulkSchedule throws, and rolls back their saved objects', async () => {
@@ -568,8 +577,8 @@ describe('RulesClient', () => {
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0].id).toBe('rule-off');
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
         expect.objectContaining({
           id: 'rule-on',
@@ -593,7 +602,7 @@ describe('RulesClient', () => {
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(res.rules).toEqual([]);
+      expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
           id: 'rule-dup',
@@ -619,7 +628,7 @@ describe('RulesClient', () => {
       });
 
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(res.rules).toEqual([]);
+      expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
           id: 'rule-dup',
@@ -646,7 +655,7 @@ describe('RulesClient', () => {
 
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(res.rules).toEqual([]);
+      expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
           id: 'rule-fail',
@@ -694,7 +703,7 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-b']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-b']);
-      expect(res.rules.map((rule) => rule.id)).toEqual(['rule-a']);
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-a']);
       expect(res.errors).toEqual([
         expect.objectContaining({
           id: 'rule-b',
@@ -736,7 +745,7 @@ describe('RulesClient', () => {
         rules: [{ ...baseCreateData, id: 'rule-off', enabled: false }],
       });
 
-      expect(res.rules).toHaveLength(1);
+      expect(res.items).toHaveLength(1);
       expect(taskManager.bulkSchedule).not.toHaveBeenCalled();
     });
 
@@ -759,8 +768,8 @@ describe('RulesClient', () => {
         ],
       });
 
-      expect(res.rules).toHaveLength(1);
-      expect(res.rules[0].id).toBe('rule-ok');
+      expect(res.items).toHaveLength(1);
+      expect(res.items[0].id).toBe('rule-ok');
       expect(res.errors).toEqual([
         expect.objectContaining({
           id: 'rule-short',
@@ -1002,10 +1011,7 @@ describe('RulesClient', () => {
     it('throws 400 when setting stateTransition on a signal rule', async () => {
       const client = createClient();
 
-      const existingAttributes: RuleSavedObjectAttributes = {
-        ...baseSoAttrs,
-        kind: 'signal',
-      };
+      const existingAttributes: RuleSavedObjectAttributes = signalSoAttrs;
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-id-signal',
@@ -1016,7 +1022,7 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-signal',
-          data: { state_transition: { pending_count: 3 } },
+          data: { state_transition: { pending: { count: 3 } } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -1044,7 +1050,7 @@ describe('RulesClient', () => {
         client.updateRule({
           id: 'rule-id-alert',
           data: {
-            state_transition: { pending_count: 3, recovering_count: 5 },
+            state_transition: { pending: { count: 3 }, recovering: { count: 5 } },
           },
         })
       ).resolves.not.toThrow();
@@ -1056,8 +1062,8 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
-        recovery_strategy: 'no_breach',
-        state_transition: { recovering_count: 3 },
+        recovery: { strategy: 'no_breach' },
+        state_transition: { recovering: { count: 3 } },
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1069,57 +1075,44 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-inert-recovery-delay',
-          data: { recovery_strategy: 'none' },
+          data: { recovery: { strategy: 'manual' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message:
-          'state_transition.recovering_count and recovering_timeframe have no effect when recovery is disabled (recovery_strategy is "none" or unset).',
+        message: 'state_transition.recovering has no effect when recovery.strategy is "manual".',
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('throws 400 when updating a signal rule query to composed format', async () => {
+    it('throws 400 when setting no_data on a signal rule', async () => {
       const client = createClient();
 
-      const existingAttributes: RuleSavedObjectAttributes = {
-        ...baseSoAttrs,
-        kind: 'signal',
-      };
+      const existingAttributes: RuleSavedObjectAttributes = signalSoAttrs;
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
-        id: 'rule-id-signal-composed',
+        id: 'rule-id-signal-no-data',
         attributes: existingAttributes,
         version: 'WzEsMV0=',
       });
 
       await expect(
         client.updateRule({
-          id: 'rule-id-signal-composed',
-          data: {
-            query: {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: 'WHERE error' },
-            },
-          },
+          id: 'rule-id-signal-no-data',
+          data: { no_data: { strategy: 'keep_last' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: 'kind "signal" requires query.format "standalone".',
+        message: 'Signal rules cannot set recovery or no_data.',
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('throws 400 when setting recovery_strategy or no_data_strategy on a signal rule', async () => {
+    it('throws 400 when setting recovery on a signal rule', async () => {
       const client = createClient();
 
-      const existingAttributes: RuleSavedObjectAttributes = {
-        ...baseSoAttrs,
-        kind: 'signal',
-      };
+      const existingAttributes: RuleSavedObjectAttributes = signalSoAttrs;
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-id-signal-recovery',
@@ -1130,17 +1123,34 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-signal-recovery',
-          data: { recovery_strategy: 'no_breach' },
+          data: { recovery: { strategy: 'no_breach' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: 'Signal rules cannot set recovery_strategy or no_data_strategy.',
+        message: 'Signal rules cannot set recovery or no_data.',
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('allows updating an alert rule query to composed format', async () => {
+    it('allows adding a breach segment to a signal rule query', async () => {
+      const client = createClient();
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-signal-breach',
+        attributes: signalSoAttrs,
+        version: 'WzEsMV0=',
+      });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-signal-breach',
+          data: { query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } } },
+        })
+      ).resolves.not.toThrow();
+    });
+
+    it('allows adding a breach segment to an alert rule query', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
@@ -1157,25 +1167,15 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-alert-composed',
-          data: {
-            query: {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: 'WHERE error' },
-            },
-          },
+          data: { query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } } },
         })
       ).resolves.not.toThrow();
     });
 
-    it('allows a metadata-only update on a signal rule (query omitted stays standalone)', async () => {
+    it('allows a metadata-only update on a signal rule', async () => {
       const client = createClient();
 
-      const existingAttributes: RuleSavedObjectAttributes = {
-        ...baseSoAttrs,
-        kind: 'signal',
-        recovery_strategy: undefined,
-      };
+      const existingAttributes: RuleSavedObjectAttributes = signalSoAttrs;
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-id-signal-metadata',
@@ -1193,18 +1193,14 @@ describe('RulesClient', () => {
       expect(rulesSavedObjectService.update).toHaveBeenCalled();
     });
 
-    it('throws 400 when clearing recovery_strategy leaves a stale query.recovery block', async () => {
+    it('throws 400 when a query update drops the breach a stored condition recovery needs', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
-        recovery_strategy: 'query',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          recovery: { query: 'FROM logs-* | LIMIT 2' },
-        },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'condition', segment: 'WHERE NOT error' },
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1216,17 +1212,17 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-stale-recovery',
-          data: { recovery_strategy: null },
+          data: { query: { base: 'FROM logs-*' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: 'query.recovery is only allowed when recovery_strategy is "query".',
+        message: 'recovery.strategy "condition" requires query.breach.',
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('throws 400 when setting recovery_strategy "query" without a query.recovery block', async () => {
+    it('throws 400 when setting a condition recovery on a rule whose stored query has no breach', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
@@ -1243,28 +1239,24 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-missing-recovery',
-          data: { recovery_strategy: 'query' },
+          data: { recovery: { strategy: 'condition', segment: 'WHERE NOT error' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message: 'query.recovery is required when recovery_strategy is "query".',
+        message: 'recovery.strategy "condition" requires query.breach.',
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('throws 400 when clearing no_data_strategy leaves a stale query.no_data block', async () => {
+    it('throws 400 when a base query update makes a stored recovery segment uncomposable', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
-        no_data_strategy: 'last_known_status',
-        query: {
-          format: 'standalone',
-          breach: { query: 'FROM logs-* | LIMIT 1' },
-          no_data: { query: 'FROM logs-* | STATS c = COUNT(*) | WHERE c == 0' },
-        },
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE error' } },
+        recovery: { strategy: 'condition', segment: 'WHERE (' },
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1276,23 +1268,23 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-stale-no-data',
-          data: { no_data_strategy: null },
+          data: { query: { base: 'FROM metrics-*', breach: { segment: 'WHERE error' } } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
-        message:
-          'query.no_data is only allowed when no_data_strategy is set to a non-"none" value.',
+        message: 'recovery.segment does not compose into a valid ES|QL query with query.base.',
       });
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
 
-    it('throws 400 when setting a no_data_strategy without a query.no_data block (standalone)', async () => {
+    it('allows a no-data strategy without a presence query when the stored query has a breach segment', async () => {
       const client = createClient();
 
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
+        query: { base: 'FROM logs-*', breach: { segment: 'WHERE status == "error"' } },
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1304,13 +1296,31 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-missing-no-data',
-          data: { no_data_strategy: 'last_known_status' },
+          data: { no_data: { strategy: 'keep_last' } },
         })
-      ).rejects.toMatchObject({
-        output: { statusCode: 400 },
-        message:
-          'query.no_data is required when no_data_strategy is not "none" for standalone-format rules.',
+      ).resolves.not.toThrow();
+    });
+
+    it('rejects a no-data strategy the merged query cannot tell apart from a breach', async () => {
+      const client = createClient();
+
+      const existingAttributes: RuleSavedObjectAttributes = {
+        ...baseSoAttrs,
+        kind: 'alert',
+      };
+
+      rulesSavedObjectService.get.mockResolvedValueOnce({
+        id: 'rule-id-indistinguishable-no-data',
+        attributes: existingAttributes,
+        version: 'WzEsMV0=',
       });
+
+      await expect(
+        client.updateRule({
+          id: 'rule-id-indistinguishable-no-data',
+          data: { no_data: { strategy: 'keep_last' } },
+        })
+      ).rejects.toThrow('requires query.breach or no_data.query');
 
       expect(rulesSavedObjectService.update).not.toHaveBeenCalled();
     });
@@ -1318,11 +1328,7 @@ describe('RulesClient', () => {
     it('allows setting state_transition to null on a signal rule (removing it)', async () => {
       const client = createClient();
 
-      const existingAttributes: RuleSavedObjectAttributes = {
-        ...baseSoAttrs,
-        kind: 'signal',
-        recovery_strategy: undefined,
-      };
+      const existingAttributes: RuleSavedObjectAttributes = signalSoAttrs;
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-id-signal-null',
@@ -1342,7 +1348,7 @@ describe('RulesClient', () => {
       const existingAttributes: RuleSavedObjectAttributes = {
         ...baseSoAttrs,
         kind: 'alert',
-        state_transition: { pending_count: 2, recovering_count: 3 },
+        state_transition: { pending: { count: 2 }, recovering: { count: 3 } },
       };
 
       rulesSavedObjectService.get.mockResolvedValueOnce({
@@ -1353,20 +1359,20 @@ describe('RulesClient', () => {
 
       await client.updateRule({
         id: 'rule-partial-st',
-        data: { state_transition: { recovering_count: 3 } },
+        data: { state_transition: { recovering: { count: 3 } } },
       });
 
       expect(rulesSavedObjectService.update).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'rule-partial-st',
           attrs: expect.objectContaining({
-            state_transition: { recovering_count: 3 },
+            state_transition: { recovering: { count: 3 } },
           }),
         })
       );
       const { attrs } = rulesSavedObjectService.update.mock.calls[0][0];
-      expect(attrs.state_transition).toEqual({ recovering_count: 3 });
-      expect(attrs.state_transition?.pending_count).toBeUndefined();
+      expect(attrs.state_transition).toEqual({ recovering: { count: 3 } });
+      expect(attrs.state_transition?.pending).toBeUndefined();
     });
 
     it('clears artifacts when update payload sets artifacts to null', async () => {
@@ -1476,9 +1482,9 @@ describe('RulesClient', () => {
             attrs: expect.objectContaining({
               metadata: expect.objectContaining({ name: 'rule-1' }),
               enabled: true,
-              createdBy: 'elastic_profile_uid',
+              createdBy: { profile_uid: 'elastic_profile_uid' },
               createdAt: '2025-01-01T00:00:00.000Z',
-              updatedBy: 'elastic_profile_uid',
+              updatedBy: { profile_uid: 'elastic_profile_uid' },
               updatedAt: '2025-01-01T00:00:00.000Z',
             }),
             references: [],
@@ -1541,7 +1547,7 @@ describe('RulesClient', () => {
         const existing: RuleSavedObjectAttributes = {
           ...baseSoAttrs,
           enabled: false,
-          createdBy: 'previous-creator',
+          createdBy: { profile_uid: 'previous-creator' },
           createdAt: '2024-06-01T00:00:00.000Z',
           metadata: { name: 'before' },
         };
@@ -1565,9 +1571,9 @@ describe('RulesClient', () => {
           attrs: expect.objectContaining({
             metadata: expect.objectContaining({ name: 'after' }),
             enabled: false,
-            createdBy: 'previous-creator',
+            createdBy: { profile_uid: 'previous-creator' },
             createdAt: '2024-06-01T00:00:00.000Z',
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
           version: 'WzEsMV0=',
@@ -1637,7 +1643,7 @@ describe('RulesClient', () => {
         await expect(
           client.upsertRule({
             id: 'rule-id-1',
-            data: { ...baseCreateData, kind: 'signal' },
+            data: { ...baseCreateData, kind: 'signal', recovery: undefined, no_data: undefined },
           })
         ).rejects.toMatchObject({
           output: { statusCode: 409 },
@@ -2496,7 +2502,7 @@ describe('RulesClient', () => {
           id: 'rule-1',
           attrs: expect.objectContaining({
             enabled: true,
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
         }),
@@ -2732,7 +2738,7 @@ describe('RulesClient', () => {
           id: 'rule-1',
           attrs: expect.objectContaining({
             enabled: false,
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
         }),
@@ -2863,7 +2869,7 @@ describe('RulesClient', () => {
           id: 'rule-1',
           attrs: expect.objectContaining({
             enabled: true,
-            updatedBy: 'elastic_profile_uid',
+            updatedBy: { profile_uid: 'elastic_profile_uid' },
             updatedAt: '2025-01-01T00:00:00.000Z',
           }),
         }),
@@ -3684,14 +3690,14 @@ describe('RulesClient', () => {
       const client = createClient();
       rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-id-y',
-        attributes: { ...baseSoAttrs, kind: 'signal' },
+        attributes: signalSoAttrs,
         version: 'v1',
       });
 
       await expect(
         client.updateRule({
           id: 'rule-id-y',
-          data: { state_transition: { pending_count: 2 } },
+          data: { state_transition: { pending: { count: 2 } } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -3702,24 +3708,18 @@ describe('RulesClient', () => {
       });
     });
 
-    it('attaches INVALID_SIGNAL_RULE code when a signal rule is updated to a composed query', async () => {
+    it('attaches INVALID_SIGNAL_RULE code when a signal rule is given a lifecycle object', async () => {
       const client = createClient();
       rulesSavedObjectService.get.mockResolvedValueOnce({
         id: 'rule-id-signal-z',
-        attributes: { ...baseSoAttrs, kind: 'signal' },
+        attributes: signalSoAttrs,
         version: 'v1',
       });
 
       await expect(
         client.updateRule({
           id: 'rule-id-signal-z',
-          data: {
-            query: {
-              format: 'composed',
-              base: 'FROM logs-*',
-              breach: { segment: 'WHERE error' },
-            },
-          },
+          data: { no_data: { strategy: 'keep_last' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -3741,7 +3741,7 @@ describe('RulesClient', () => {
       await expect(
         client.updateRule({
           id: 'rule-id-query-config',
-          data: { recovery_strategy: 'query' },
+          data: { recovery: { strategy: 'condition', segment: 'WHERE NOT error' } },
         })
       ).rejects.toMatchObject({
         output: { statusCode: 400 },
@@ -3789,10 +3789,7 @@ describe('RulesClient', () => {
       metadata: { name: 'rule-1', tags: workflowRuleTags },
       time_field: '@timestamp',
       schedule: { every: '1m', lookback: '1m' },
-      query: {
-        format: 'standalone',
-        breach: { query: 'FROM logs-* | LIMIT 1' },
-      },
+      query: { base: 'FROM logs-* | LIMIT 1' },
     });
     const workflowCreateData: CreateRuleParams['data'] = {
       ...baseCreateData,

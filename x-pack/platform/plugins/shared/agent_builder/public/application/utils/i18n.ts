@@ -2955,17 +2955,6 @@ export const labels = {
       }),
     },
   },
-  navigationAbort: {
-    title: i18n.translate('xpack.agentBuilder.navigationAbort.title', {
-      defaultMessage: 'Abort chat request?',
-    }),
-    message: i18n.translate('xpack.agentBuilder.navigationAbort.message', {
-      defaultMessage: 'A chat request is in progress. Do you want to navigate away and abort it?',
-    }),
-    confirmButton: i18n.translate('xpack.agentBuilder.navigationAbort.confirmButton', {
-      defaultMessage: 'Yes, abort',
-    }),
-  },
   aiIndices: {
     sectionTitle: i18n.translate('xpack.agentBuilder.aiIndices.sectionTitle', {
       defaultMessage: 'AI Indices',

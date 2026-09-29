@@ -6,7 +6,8 @@
  */
 
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { registerProposalsPublicStepDefinitions } from './proposals/step_types';
+import { registerImpactAttachmentTypes } from './impact/attachments';
+import { registerImpactPublicStepDefinitions } from './impact/step_types';
 import type {
   AgenticInvestigationsPublicPluginSetup,
   AgenticInvestigationsPublicPluginStart,
@@ -14,26 +15,33 @@ import type {
   AgenticInvestigationsPublicStartDependencies,
 } from './types';
 
+/**
+ * Registers Impact workflow steps and the Impact attachment UI. Escalations
+ * and user profiles are consumed directly by a solution's UI.
+ */
 export class AgenticInvestigationsPublicPlugin
-  implements Plugin<AgenticInvestigationsPublicPluginSetup, AgenticInvestigationsPublicPluginStart>
+  implements
+    Plugin<
+      AgenticInvestigationsPublicPluginSetup,
+      AgenticInvestigationsPublicPluginStart,
+      AgenticInvestigationsPublicSetupDependencies,
+      AgenticInvestigationsPublicStartDependencies
+    >
 {
   setup(
     _core: CoreSetup,
     { workflowsExtensions }: AgenticInvestigationsPublicSetupDependencies
   ): AgenticInvestigationsPublicPluginSetup {
-    registerProposalsPublicStepDefinitions(workflowsExtensions);
+    registerImpactPublicStepDefinitions(workflowsExtensions);
     return {};
   }
 
   start(
-    core: CoreStart,
-    startDeps: AgenticInvestigationsPublicStartDependencies
+    _core: CoreStart,
+    { agentBuilder }: AgenticInvestigationsPublicStartDependencies
   ): AgenticInvestigationsPublicPluginStart {
-    if (startDeps.agentBuilder) {
-      const agentBuilder = startDeps.agentBuilder;
-      void import('./proposals/attachments').then(({ registerProposalAttachmentTypes }) => {
-        registerProposalAttachmentTypes(agentBuilder);
-      });
+    if (agentBuilder) {
+      registerImpactAttachmentTypes(agentBuilder);
     }
     return {};
   }

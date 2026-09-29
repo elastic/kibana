@@ -7,7 +7,10 @@
 
 import type { Logger } from '@kbn/core/server';
 import { ToolResultType, SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
+import {
+  DEFAULT_TIME_RANGE,
+  VISUALIZATION_ATTACHMENT_TYPE,
+} from '@kbn/agent-builder-visualizations-common';
 import {
   buildLensConfig,
   buildVegaConfig,
@@ -197,7 +200,7 @@ describe('createVisualizationTool schema', () => {
     ).toBe(false);
   });
 
-  it('accepts an optional time_range and rejects a partial one', () => {
+  it('accepts an optional time_range', () => {
     expect(schema.safeParse({ query: 'errors over time', target: lensTarget() }).success).toBe(
       true
     );
@@ -209,19 +212,41 @@ describe('createVisualizationTool schema', () => {
         time_range: { from: 'now-7d', to: 'now' },
       }).success
     ).toBe(true);
+  });
 
-    expect(
-      schema.safeParse({
-        query: 'errors over time',
-        target: lensTarget(),
-        time_range: { from: 'now-7d' },
-      }).success
-    ).toBe(false);
+  it('fills a blank time_range endpoint with now-24h / now instead of failing', () => {
+    const base = { query: 'errors over time', target: lensTarget() };
+
+    const missingTo = schema.safeParse({ ...base, time_range: { from: 'now-7d' } });
+    expect(missingTo.success).toBe(true);
+    if (missingTo.success) {
+      expect(missingTo.data.time_range).toEqual({ from: 'now-7d', to: DEFAULT_TIME_RANGE.to });
+    }
+
+    const to = new Date().toISOString();
+    const blankFrom = schema.safeParse({
+      ...base,
+      time_range: { from: '', to },
+    });
+    expect(blankFrom.success).toBe(true);
+    if (blankFrom.success) {
+      expect(blankFrom.data.time_range).toEqual({ from: DEFAULT_TIME_RANGE.from, to });
+    }
+
+    const blankTo = schema.safeParse({ ...base, time_range: { from: 'now-7d', to: '' } });
+    expect(blankTo.success).toBe(true);
+    if (blankTo.success) {
+      expect(blankTo.data.time_range).toEqual({ from: 'now-7d', to: DEFAULT_TIME_RANGE.to });
+    }
   });
 
   it('rejects a time_range whose endpoints are not valid Kibana date math', () => {
     const base = { query: 'errors over time', target: lensTarget() };
 
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).success).toBe(true);
+    expect(schema.safeParse({ ...base, time_range: { from: '', to: '' } }).data?.time_range).toBe(
+      undefined
+    );
     expect(schema.safeParse({ ...base, time_range: { from: '', to: 'not-a-date' } }).success).toBe(
       false
     );
@@ -508,6 +533,27 @@ describe('createVisualizationTool handler', () => {
     expect(attachments.add).toHaveBeenCalledWith(
       expect.objectContaining({
         data: expect.objectContaining({ time_range: { from: 'now-7d', to: 'now' } }),
+      })
+    );
+  });
+
+  it('fills a blank time_range.from and persists that range instead of probing', async () => {
+    const to = new Date().toISOString();
+    const schema = createVisualizationTool().schema;
+    const parsed = schema.parse({
+      query: 'count of requests by response.keyword',
+      index: 'kibana_sample_data_logs',
+      target: lensTarget(),
+      time_range: { from: '', to },
+    });
+
+    const { result, attachments } = await runHandler(parsed);
+
+    expect(mockSelectDefaultTimeRange).not.toHaveBeenCalled();
+    expect(result.results[0].data.time_range).toEqual({ from: DEFAULT_TIME_RANGE.from, to });
+    expect(attachments.add).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: expect.objectContaining({ time_range: { from: DEFAULT_TIME_RANGE.from, to } }),
       })
     );
   });
