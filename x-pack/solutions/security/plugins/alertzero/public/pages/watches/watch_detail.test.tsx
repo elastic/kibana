@@ -30,10 +30,14 @@ import {
 } from '@kbn/alertzero-common';
 import { WatchDetailPage } from './watch_detail';
 import * as settingsI18n from './settings_translations';
+import { useCanWriteAlertZero } from '../../hooks/use_can_write_alertzero';
 import { useWatch } from '../../hooks/use_watches_api';
 import { useUpdateWorker, useWorkers } from '../../hooks/use_workers_api';
 
 jest.mock('../../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
+jest.mock('../../hooks/use_can_write_alertzero', () => ({
+  useCanWriteAlertZero: jest.fn(() => true),
+}));
 jest.mock('../../hooks/use_watches_api');
 jest.mock('../../hooks/use_workers_api');
 jest.mock('./components/watches_section_layout', () => ({
@@ -101,6 +105,7 @@ jest.mock('./components/watches_section_layout', () => ({
 const mockUseWatch = jest.mocked(useWatch);
 const mockUseWorkers = jest.mocked(useWorkers);
 const mockUseUpdateWorker = jest.mocked(useUpdateWorker);
+const mockUseCanWriteAlertZero = jest.mocked(useCanWriteAlertZero);
 
 const createWorker = (
   overrides: Partial<Worker> & Pick<Worker, 'id' | 'name' | 'watchIds'>
@@ -201,6 +206,7 @@ const renderWatch = (watchId: string, workers: Worker[]) => {
 describe('WatchDetailPage', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseCanWriteAlertZero.mockReturnValue(true);
   });
 
   it('shows Floor Workers with per-Worker enablement and autonomy, and no Watch switch', () => {
@@ -533,7 +539,7 @@ describe('WatchDetailPage', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('shows Forensics Watch with one Worker that has enablement and fixed autonomy', () => {
+  it('shows Forensics Watch with one Worker that has enablement and two autonomy levels', () => {
     renderWatch(SYSTEM_SECURITY_WATCH_FORENSICS_ID, [
       ...floorWorkers,
       huntWorker,
@@ -555,26 +561,20 @@ describe('WatchDetailPage', () => {
         `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID}`
       )
     ).toBeInTheDocument();
-    // Endpoint analysis allows manual only, so the level renders as one selected card with no
-    // alternatives beside it — the same card a Worker offering three would show it as. Its sweep
-    // cadence is fixed in the definition, not a setting. The level set it declares is what says
-    // there is no choice to present; the card copy below only explains the level.
-    expect(within(section).getByTestId('alertZeroAutonomyFixedLevel')).toHaveTextContent('Manual');
-    expect(within(section).getAllByRole('radio')).toHaveLength(1);
-    expect(within(section).getByRole('radio')).toBeChecked();
-    expect(within(section).queryByRole('radiogroup')).not.toBeInTheDocument();
-    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
-
-    // A fixed level still has to say what it means. Containment is the fact that makes this
-    // Worker manual-only, so it is the one an analyst must be able to read off the page.
-    expect(within(section).getByTestId('alertZeroAutonomyCardWho')).toHaveTextContent(
-      /every containment action waits for you/i
-    );
+    // Same split as Attack Discovery: one level that gates containment and one that does not.
+    // The sweep cadence stays fixed in the definition, not a setting. Manual is the default.
+    expect(within(section).getByTestId('alertZeroAutonomyCard-manual')).toBeInTheDocument();
+    expect(within(section).getByTestId('alertZeroAutonomyCard-supervised')).toBeInTheDocument();
+    expect(within(section).queryByTestId('alertZeroAutonomyCard-assisted')).not.toBeInTheDocument();
+    expect(within(section).getByRole('radiogroup')).toBeInTheDocument();
+    expect(within(section).getAllByRole('radio')).toHaveLength(2);
     expect(
-      within(section)
-        .getAllByTestId('alertZeroAutonomyCardFact')
-        .map((fact) => fact.textContent)
-    ).toEqual([expect.stringContaining('Findings'), expect.stringContaining('Response')]);
+      within(within(section).getByTestId('alertZeroAutonomyCard-manual')).getByRole('radio')
+    ).toBeChecked();
+    expect(within(section).queryByTestId('alertZeroScheduleIntervalField')).not.toBeInTheDocument();
+    expect(within(section).getAllByTestId('alertZeroAutonomyCardWho')[0]).toHaveTextContent(
+      /Runs a forensics pass for an investigation and attaches findings to it/i
+    );
   });
 
   it('shows the analysis window only on Rule Tuning and does not write while editing', () => {
@@ -888,6 +888,28 @@ describe('WatchDetailPage', () => {
         settingsRevision: null,
       },
     });
+  });
+
+  it('locks worker settings and hides save when the user cannot write', () => {
+    mockUseCanWriteAlertZero.mockReturnValue(false);
+    renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+
+    expect(screen.queryByTestId('alertZeroWatchSettingsSave')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('alertZeroWatchSettingsDiscard')).not.toBeInTheDocument();
+    expect(
+      screen.getByTestId(
+        `alertZeroWorkerEnabledSwitch-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+      )
+    ).toBeDisabled();
+    expect(
+      within(
+        within(
+          screen.getByTestId(
+            `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID}`
+          )
+        ).getByTestId('alertZeroAutonomyCard-manual')
+      ).getByRole('radio')
+    ).toBeDisabled();
   });
 
   it('resets collapsed accordion state when navigating to a different Watch, not just on remount', () => {

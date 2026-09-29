@@ -7,14 +7,14 @@
 
 import type {
   CompactionSummary,
+  ConversationEvent,
   ConversationRoundAuthor,
   ConverseInput,
   RoundInput,
   MetadataFieldValue,
   SubagentEntry,
-  TimelineEvent,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType } from '@kbn/agent-builder-common';
+import { TimelineEventType, isTimelineEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -29,8 +29,18 @@ import { mergeAttachmentInputs } from '../../../attachments/merge_attachment_inp
 import { mergeAttachmentRefs } from '../../../conversation/client/migrate_attachments';
 import { authorAndOrigin } from '../../../conversation/client/events_to_rounds';
 import { formatAttachmentsMetadata } from './attachment_presentation';
-import type { ProcessedTimelineEvent, ProcessedUserMessageEvent } from './context_timeline';
-import { groupTimelineRounds, groupTimelineEntries, isTimelineRound } from './context_timeline';
+import type {
+  ContextTimelineEvent,
+  ProcessedCustomEvent,
+  ProcessedTimelineEvent,
+  ProcessedUserMessageEvent,
+} from './context_timeline';
+import {
+  groupTimelineRounds,
+  groupTimelineEntries,
+  isTimelineCustomEvent,
+  isTimelineRound,
+} from './context_timeline';
 
 export interface ProcessedConversation {
   /**
@@ -64,7 +74,7 @@ export const prepareConversation = async ({
   templateId,
 }: {
   /** The conversation's normalized context timeline (see `eventsForContext`). */
-  timeline: TimelineEvent[];
+  timeline: ContextTimelineEvent[];
   nextInput: ConverseInput;
   nextInputAuthor?: ConversationRoundAuthor;
   context: AgentHandlerContext;
@@ -84,12 +94,19 @@ export const prepareConversation = async ({
   const effectiveRounds = groupTimelineRounds(timeline);
   const effectiveNextInput = nextInput;
 
-  // Process complete executions and independent messages in order so attachment versions
-  // resolve consistently. Incomplete execution inputs remain outside the model history.
+  // Process complete executions, independent messages and custom events in order so attachment
+  // versions resolve consistently. Incomplete execution inputs remain outside the model history.
   const processedInputs: ProcessedRoundInput[] = [];
   const processedTimeline: ProcessedTimelineEvent[] = [];
   const includedRounds = new Set(effectiveRounds.map((round) => round.id));
   for (const round of groupTimelineEntries(timeline)) {
+    if (isTimelineCustomEvent(round)) {
+      const processedEvent = await processCustomEvent({ event: round.event, context });
+      if (processedEvent) {
+        processedTimeline.push(processedEvent);
+      }
+      continue;
+    }
     if (isTimelineRound(round) && !includedRounds.has(round.id)) continue;
     attachmentStateManager.clearAccessTracking();
     const input = round.userMessage.data;
@@ -123,7 +140,7 @@ export const prepareConversation = async ({
     for (const event of events) {
       if (event.id === round.userMessage.id) {
         processedTimeline.push(processedUserMessage);
-      } else if (event.type !== TimelineEventType.userMessage) {
+      } else if (isTimelineEvent(event) && event.type !== TimelineEventType.userMessage) {
         processedTimeline.push(event);
       }
     }
@@ -190,6 +207,44 @@ export const prepareConversation = async ({
     ...(metadata !== undefined ? { metadata } : {}),
     ...(templateId !== undefined ? { template_id: templateId } : {}),
   };
+};
+
+/**
+ * Resolves a custom event's LLM representation through its registered type definition. Events
+ * whose type is unknown (logged) or defines no `format` (by design) are left out of the agent
+ * context; a `format` that throws is logged and skipped, so third-party code cannot sink the round.
+ */
+const processCustomEvent = async ({
+  event,
+  context,
+}: {
+  event: ConversationEvent;
+  context: AgentHandlerContext;
+}): Promise<ProcessedCustomEvent | undefined> => {
+  const definition = context.conversationEvents?.getDefinition(event.type);
+  if (!definition) {
+    context.logger.debug(
+      `Skipping conversation event "${event.id}": type "${event.type}" is not registered`
+    );
+    return undefined;
+  }
+  // A type without `format` opts out of the agent context by design: nothing to report.
+  if (!definition.format) {
+    return undefined;
+  }
+  try {
+    // The payload was validated against `definition.payloadSchema` when the event was added.
+    const representation = await definition.format(event, {
+      request: context.request,
+      spaceId: context.spaceId,
+    });
+    return { ...event, representation };
+  } catch (error) {
+    context.logger.warn(
+      `Failed to format conversation event "${event.id}" (type "${event.type}"): ${error}`
+    );
+    return undefined;
+  }
 };
 
 const prepareRoundInput = ({

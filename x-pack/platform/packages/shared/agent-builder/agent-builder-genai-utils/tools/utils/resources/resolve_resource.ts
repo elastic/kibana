@@ -17,6 +17,7 @@ import { flattenMapping, getIndexMappings } from '../mappings';
 import { fetchFieldCaps, processFieldCapsResponse } from '../field_caps';
 import { isCcsTarget, getFieldsFromFieldCaps } from '../ccs';
 import { listDatasets, getDatasetFields } from '../datasets';
+import { listViews, getViewFields } from '../views';
 
 export interface ResolveResourceResponse {
   /** name of the resource */
@@ -27,6 +28,8 @@ export interface ResolveResourceResponse {
   fields: MappingField[];
   /** description from the meta, if available */
   description?: string;
+  /** Stored ES|QL query when the resource is a view. */
+  query?: string;
   /** whether the resource is a TSDB resource (any field has tsDimension or tsMetric) */
   isTsdb: boolean;
 }
@@ -125,6 +128,37 @@ export const resolveResource = async ({
 };
 
 /**
+ * Resolves a single ES|QL view by name, or undefined when none matches. Views are invisible to
+ * `_resolve/index`/`_field_caps`, so they're looked up via `GET _query/view` and their output
+ * columns introspected with `FROM <name> | LIMIT 0`.
+ */
+const tryResolveView = async ({
+  resourceName,
+  esClient,
+}: {
+  resourceName: string;
+  esClient: ElasticsearchClient;
+}): Promise<ResolveResourceResponse | undefined> => {
+  if (resourceName.includes(',') || resourceName.includes('*')) {
+    return undefined;
+  }
+  const views = await listViews({ esClient });
+  const view = views.find((candidate) => candidate.name === resourceName);
+  if (!view) {
+    return undefined;
+  }
+  const fields = await getViewFields({ name: resourceName, esClient });
+  return {
+    name: resourceName,
+    type: EsResourceType.view,
+    fields,
+    ...(view.description ? { description: view.description } : {}),
+    query: view.query,
+    isTsdb: false,
+  };
+};
+
+/**
  * Resolves a single external ES|QL dataset by name, or undefined when none matches. Datasets are
  * invisible to `_resolve/index`/`_field_caps`, so they're looked up via `_query/dataset` and their
  * fields introspected with `FROM <name> | LIMIT 0`.
@@ -162,17 +196,20 @@ const EMPTY_RESOLVE_RESPONSE: IndicesResolveIndexResponse = {
  * Retrieve resource metadata for ES|QL generation.
  * Supports index patterns and comma-separated targets by using field_caps
  * when multiple resources are resolved. Multi-target results use {@link EsResourceType.indexPattern}.
+ * When `includeViews` is true, a name that resolves to no index falls back to an ES|QL view.
  * When `includeDatasets` is true, a name that resolves to no index falls back to an external ES|QL dataset.
  */
 export const resolveResourceForEsql = async ({
   resourceName,
   esClient,
   includeDatasets = false,
+  includeViews = false,
   includeFrozen = false,
 }: {
   resourceName: string;
   esClient: ElasticsearchClient;
   includeDatasets?: boolean;
+  includeViews?: boolean;
   includeFrozen?: boolean;
 }): Promise<ResolveResourceResponse> => {
   if (isCcsTarget(resourceName)) {
@@ -207,6 +244,12 @@ export const resolveResourceForEsql = async ({
     resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
 
   if (resourceCount === 0) {
+    if (includeViews) {
+      const view = await tryResolveView({ resourceName, esClient });
+      if (view) {
+        return view;
+      }
+    }
     if (includeDatasets) {
       const dataset = await tryResolveDataset({ resourceName, esClient });
       if (dataset) {

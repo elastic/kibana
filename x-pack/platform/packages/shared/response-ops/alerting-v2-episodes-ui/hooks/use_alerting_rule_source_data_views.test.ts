@@ -22,8 +22,7 @@ const { dataViews } = dataPluginMock.createStartContract();
 
 type Rule = FindRulesResponse['items'][number];
 
-const buildRule = (query: string): Rule =>
-  ({ query: { format: 'standalone', breach: { query } } } as unknown as Rule);
+const buildRule = (query: string): Rule => ({ query: { base: query } } as unknown as Rule);
 
 describe('useAlertingRuleSourceDataViews', () => {
   beforeEach(() => {

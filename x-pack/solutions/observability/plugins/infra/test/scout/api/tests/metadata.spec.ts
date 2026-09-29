@@ -29,10 +29,9 @@ const timeRange800withAws = {
 };
 
 /**
- * `/api/infra/metadata` (`InfraMetadataRequestRT`) does NOT accept a `schema` field in its
- * request body — schema is resolved server-side from the source configuration. The bodies
- * below intentionally omit `schema`; this is documented behavior, not a missed audit.
- * See issue #264011.
+ * `/api/infra/metadata` accepts an optional `schema`. Bodies that omit it stay on
+ * the Elastic Common Schema path. OpenTelemetry pod coverage lives in
+ * `metadata_semconv_pods.spec.ts`.
  */
 apiTest.describe(
   'API /api/infra/metadata',
