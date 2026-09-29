@@ -67,8 +67,7 @@ export class HttpRateLimiterService
     if (
       request.route.options.excludeFromRateLimiter ||
       !state?.overloaded ||
-      (this.rateLimiterActiveAfterMs !== undefined &&
-        Date.now() < this.rateLimiterActiveAfterMs)
+      (this.rateLimiterActiveAfterMs !== undefined && Date.now() < this.rateLimiterActiveAfterMs)
     ) {
       return toolkit.next();
     }
