@@ -541,7 +541,11 @@ export class NightshiftInvestigationsClient {
    * run's executor, and stamping the transition with the wall clock would date the record to when
    * the persist step happened to run rather than to when the run began.
    */
-  async ensureOrCreate(investigationId: string): Promise<void> {
+  async ensureOrCreate(investigationId: string, executionId = investigationId): Promise<void> {
+    if (executionId !== investigationId) {
+      return this.continueInvestigation(investigationId, executionId);
+    }
+
     const existing = await this.investigationRepository.get(investigationId);
     if (existing && isTerminalStatus(existing.status)) {
       throw InvestigationConflictError.settled(investigationId, existing.status);
@@ -568,7 +572,7 @@ export class NightshiftInvestigationsClient {
     const startedAt = execution.startedAt ?? new Date().toISOString();
 
     if (existing) {
-      await this.transitionPendingToRunning({
+      await this.transitionToRunning({
         investigationId,
         version: existing.version,
         startedAt,
@@ -604,7 +608,47 @@ export class NightshiftInvestigationsClient {
     });
   }
 
-  private async transitionPendingToRunning({
+  /**
+   * Marks an existing investigation running for a run that continues it, such as a reply in its
+   * Slack thread. Unlike a first run, a settled record is reopened. The run must name this
+   * investigation in its own inputs, so a caller cannot reopen one it did not start.
+   */
+  private async continueInvestigation(investigationId: string, executionId: string) {
+    const existing = await this.investigationRepository.get(investigationId);
+    if (!existing) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    if (!this.workflowsManagement) {
+      throw new InvestigationUnavailableError('workflowsManagement is not available');
+    }
+
+    const execution = await this.workflowsManagement.management.getWorkflowExecution(
+      executionId,
+      this.getSpaceId(),
+      { includeOutput: false, request: this.request }
+    );
+    const context = execution?.context;
+    const inputs =
+      isPlainObject(context) && isPlainObject(context.inputs) ? context.inputs : undefined;
+
+    if (
+      !execution ||
+      !isInvestigationWorkflowExecution(execution) ||
+      inputs?.investigation_id !== investigationId
+    ) {
+      throw new InvestigationNotFoundError(investigationId);
+    }
+
+    await this.transitionToRunning({
+      investigationId,
+      version: existing.version,
+      startedAt: execution.startedAt ?? new Date().toISOString(),
+      executedBy: execution.executedBy,
+    });
+  }
+
+  private async transitionToRunning({
     investigationId,
     version,
     startedAt,
