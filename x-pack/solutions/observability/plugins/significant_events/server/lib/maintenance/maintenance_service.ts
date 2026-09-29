@@ -12,7 +12,6 @@ import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { ALERTING_ERROR_CODES, type RulesClientApi } from '@kbn/alerting-v2-plugin/server';
 import type {
-  SignificantEventsMaintenanceDeletedCounts,
   SignificantEventsMaintenanceFailure,
   SignificantEventsMaintenanceStatus,
   SignificantEventsMaintenanceSummary,
@@ -25,10 +24,6 @@ import {
 import { MAINTENANCE_FEATURE_FLAG_ACTOR } from '../../../common/maintenance/actors';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
-import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
-import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
-import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
-import { EVENTS_DATA_STREAM } from '../significant_events/events/data_stream';
 import {
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_ID,
   SIGNIFICANT_EVENTS_MAINTENANCE_STATE_SO_TYPE,
@@ -46,8 +41,10 @@ import {
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
 import { collectResetSnapshot } from './reset_snapshot';
+import { resetDataStreams } from './reset_data_streams';
 import type { MaintenanceAccess } from './maintenance_access';
 import { createMaintenanceSystemRequest } from './system_request';
+import { toMessage } from './to_message';
 
 type ManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -142,9 +139,6 @@ export interface SignificantEventsMaintenanceService {
    */
   reassertPause(): Promise<void>;
 }
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 const workflowKey = ({ id, spaceId }: MaintenanceWorkflowTarget): string => `${id}@${spaceId}`;
 
@@ -246,14 +240,6 @@ const deleteV2Rules = async (
   }
   return { deleted, failures };
 };
-
-const emptyDeletedCounts = (): SignificantEventsMaintenanceDeletedCounts => ({
-  knowledgeIndicators: 0,
-  storedQueries: 0,
-  rules: 0,
-  investigations: 0,
-  dataStreams: 0,
-});
 
 export const createSignificantEventsMaintenanceService = ({
   logger,
@@ -513,6 +499,80 @@ export const createSignificantEventsMaintenanceService = ({
     }
   };
 
+  /**
+   * Disable every managed workflow target and cancel its executions. Returns
+   * the targets this call actually disabled; records a single `workflows`
+   * failure when workflows management is unavailable.
+   */
+  const sweepWorkflows = async ({
+    mgmt,
+    spaceIds,
+    request,
+    failures,
+  }: {
+    mgmt: ManagementApi | undefined;
+    spaceIds: SpaceId[];
+    request: KibanaRequest;
+    failures: SignificantEventsMaintenanceFailure[];
+  }): Promise<MaintenanceWorkflowTarget[]> => {
+    if (!mgmt) {
+      failures.push({
+        target: 'workflows',
+        error: 'Workflows management plugin is not available',
+      });
+      return [];
+    }
+    const newlyDisabled: MaintenanceWorkflowTarget[] = [];
+    for (const target of buildDisableTargets(spaceIds)) {
+      if (await disableWorkflow(mgmt, target, request, failures)) {
+        newlyDisabled.push(target);
+      }
+    }
+    for (const target of buildCancelTargets(spaceIds)) {
+      await cancelTargetExecutions(mgmt, target, request, failures);
+    }
+    return newlyDisabled;
+  };
+
+  /**
+   * Persist `paused` as blocking intent before any side effects so guards fail
+   * closed even if a later write fails. Keeps the existing inventory and
+   * summary; no-op when already paused. Logs and rethrows on failure.
+   */
+  const persistPausedIntent = async ({
+    existing,
+    actor,
+    target,
+  }: {
+    existing: LoadedMaintenanceState | undefined;
+    actor: string | undefined;
+    target: 'pause' | 'reassert' | 'reset';
+  }): Promise<void> => {
+    if (normalizeState(existing?.state) === 'paused') {
+      return;
+    }
+    try {
+      await writeState({
+        state: 'paused',
+        updatedAt: new Date().toISOString(),
+        updatedBy: actor,
+        disabledWorkflows: existing?.disabledWorkflows ?? [],
+        disabledRuleIds: existing?.disabledRuleIds ?? [],
+        pausedSettings: existing?.pausedSettings,
+        lastSummary: normalizeSummary(existing?.lastSummary) ?? emptySummary('paused'),
+      });
+    } catch (writeError) {
+      logFailures(
+        log,
+        `Significant Events ${target} failed before sweep: could not persist paused intent: ${toMessage(
+          writeError
+        )}`,
+        [{ target, error: `Failed to persist pause intent: ${toMessage(writeError)}` }]
+      );
+      throw writeError;
+    }
+  };
+
   const disableBackedRules = async (
     request: KibanaRequest,
     failures: SignificantEventsMaintenanceFailure[]
@@ -654,23 +714,7 @@ export const createSignificantEventsMaintenanceService = ({
     // Enumerate spaces regardless of workflow availability: settings still need
     // to be turned off per space even when workflows management is down.
     const spaceIds = await getAllSpaceIds({ request, access, failures });
-    const newlyDisabled: MaintenanceWorkflowTarget[] = [];
-
-    if (mgmt) {
-      for (const target of buildDisableTargets(spaceIds)) {
-        if (await disableWorkflow(mgmt, target, request, failures)) {
-          newlyDisabled.push(target);
-        }
-      }
-      for (const target of buildCancelTargets(spaceIds)) {
-        await cancelTargetExecutions(mgmt, target, request, failures);
-      }
-    } else {
-      failures.push({
-        target: 'workflows',
-        error: 'Workflows management plugin is not available',
-      });
-    }
+    const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds, request, failures });
 
     // Alerting v2 only offers request-scoped rules clients, so a system sweep
     // leaves rules running.
@@ -727,43 +771,10 @@ export const createSignificantEventsMaintenanceService = ({
   }> => {
     const { mode } = run;
     const access: MaintenanceAccess = run.mode === 'reassert' ? 'system' : run.access;
-    const previousSummary = normalizeSummary(existing?.lastSummary);
     const actor = mode === 'pause' ? updatedBy : existing?.updatedBy ?? 'system:reassert';
 
     // 1. Blocking intent first (skip when already paused — reassert/re-pause).
-    if (normalizeState(existing?.state) !== 'paused') {
-      try {
-        await writeState({
-          state: 'paused',
-          updatedAt: new Date().toISOString(),
-          updatedBy: actor,
-          disabledWorkflows: existing?.disabledWorkflows ?? [],
-          disabledRuleIds: existing?.disabledRuleIds ?? [],
-          pausedSettings: existing?.pausedSettings,
-          lastSummary: previousSummary ?? {
-            state: 'paused',
-            executionsCancelled: 0,
-            workflowsDisabled: 0,
-            rulesDisabled: 0,
-            partialFailures: [],
-          },
-        });
-      } catch (writeError) {
-        logFailures(
-          log,
-          `Significant Events ${mode} failed before sweep: could not persist paused intent: ${toMessage(
-            writeError
-          )}`,
-          [
-            {
-              target: mode === 'reassert' ? 'reassert' : 'pause',
-              error: `Failed to persist pause intent: ${toMessage(writeError)}`,
-            },
-          ]
-        );
-        throw writeError;
-      }
-    }
+    await persistPausedIntent({ existing, actor, target: mode });
 
     // 2. Always re-sweep: a second pause while already paused retries targets that
     // failed (or were re-enabled out-of-band) instead of returning a stale summary.
@@ -846,6 +857,114 @@ export const createSignificantEventsMaintenanceService = ({
     }
 
     return { summary, sweep };
+  };
+
+  /**
+   * Reset step: snapshot every knowledge indicator / stored query, union their
+   * backing rules with the rules pause had disabled and any tag-owned orphans,
+   * and delete them all. Best-effort; every failure is recorded, never thrown.
+   */
+  const deleteOwnedRules = async ({
+    request,
+    previousRuleIds,
+    failures,
+  }: {
+    request: KibanaRequest;
+    previousRuleIds: string[];
+    failures: SignificantEventsMaintenanceFailure[];
+  }): Promise<{ knowledgeIndicators: number; storedQueries: number; rules: number }> => {
+    const counts = { knowledgeIndicators: 0, storedQueries: 0, rules: 0 };
+    const ruleIds = new Set(previousRuleIds);
+
+    let scopedClients: Awaited<ReturnType<GetScopedClients>> | undefined;
+    try {
+      scopedClients = await getScopedClients({ request });
+      const snapshot = await collectResetSnapshot(
+        await scopedClients.getKnowledgeIndicatorClient(),
+        failures
+      );
+      counts.knowledgeIndicators = snapshot.knowledgeIndicators;
+      counts.storedQueries = snapshot.storedQueries;
+      for (const ruleId of snapshot.ruleIds) {
+        ruleIds.add(ruleId);
+      }
+    } catch (error) {
+      failures.push({ target: 'snapshot', error: toMessage(error) });
+    }
+
+    if (ruleIds.size === 0) {
+      return counts;
+    }
+    if (!scopedClients) {
+      failures.push({ target: 'rules', error: 'Scoped clients are not available' });
+      return counts;
+    }
+    try {
+      const { alertingV2RulesClient } = await scopedClients.getSignificantEventsAlertingContext();
+      if (!alertingV2RulesClient) {
+        failures.push({ target: 'rules', error: 'Alerting v2 rules client is not available' });
+        return counts;
+      }
+      const ruleResult = await deleteV2Rules(alertingV2RulesClient, [...ruleIds]);
+      counts.rules = ruleResult.deleted;
+      failures.push(...ruleResult.failures);
+    } catch (error) {
+      failures.push({ target: 'rules', error: toMessage(error) });
+    }
+    return counts;
+  };
+
+  /** Reset step: delete every investigation across spaces; returns how many were deleted. */
+  const deleteInvestigations = async (
+    failures: SignificantEventsMaintenanceFailure[]
+  ): Promise<number> => {
+    if (!server.nightshiftInvestigations) {
+      return 0;
+    }
+    try {
+      const result = await server.nightshiftInvestigations.deleteAllInvestigations();
+      failures.push(
+        ...result.failures.map(({ id, spaceId, error }) => ({
+          target: `investigation:${id}@${spaceId}`,
+          error,
+        }))
+      );
+      return result.deleted;
+    } catch (error) {
+      failures.push({ target: 'investigations', error: toMessage(error) });
+      return 0;
+    }
+  };
+
+  /**
+   * Reset step: re-enable the workflows reset (or an earlier pause) disabled,
+   * except settings-backed ones, which stay off alongside their toggles. Returns
+   * the workflows that failed to re-enable so a later Resume can retry them.
+   */
+  const restoreWorkflowsAfterReset = async ({
+    mgmt,
+    workflows,
+    request,
+    failures,
+  }: {
+    mgmt: ManagementApi | undefined;
+    workflows: MaintenanceWorkflowTarget[];
+    request: KibanaRequest;
+    failures: SignificantEventsMaintenanceFailure[];
+  }): Promise<MaintenanceWorkflowTarget[]> => {
+    const eligible = workflows.filter((workflow) =>
+      shouldRestoreSettingsBackedWorkflow(workflow, undefined)
+    );
+    if (!mgmt) {
+      return eligible;
+    }
+    const remaining: MaintenanceWorkflowTarget[] = [];
+    for (const workflow of eligible) {
+      if ((await reEnableWorkflow(mgmt, workflow, request, failures, false)) === 'failed') {
+        remaining.push(workflow);
+      }
+    }
+    return remaining;
   };
 
   return {
@@ -1019,207 +1138,45 @@ export const createSignificantEventsMaintenanceService = ({
       return withTransitionLock(async () => {
         const existing = await readState();
         const failures: SignificantEventsMaintenanceFailure[] = [];
-        const deleted = emptyDeletedCounts();
+        await persistPausedIntent({ existing, actor: updatedBy, target: 'reset' });
 
-        if (normalizeState(existing?.state) !== 'paused') {
-          try {
-            await writeState({
-              state: 'paused',
-              updatedAt: new Date().toISOString(),
-              updatedBy,
-              disabledWorkflows: existing?.disabledWorkflows ?? [],
-              disabledRuleIds: existing?.disabledRuleIds ?? [],
-              pausedSettings: existing?.pausedSettings,
-              lastSummary: {
-                state: 'paused',
-                executionsCancelled: 0,
-                workflowsDisabled: existing?.disabledWorkflows.length ?? 0,
-                rulesDisabled: existing?.disabledRuleIds.length ?? 0,
-                partialFailures: [],
-              },
-            });
-          } catch (writeError) {
-            log.error(
-              `Significant Events reset failed before cleanup: could not persist paused intent: ${toMessage(
-                writeError
-              )}`
-            );
-            throw writeError;
-          }
-        }
-
+        // Stop activity first, as pause does, then destroy data, then restore.
         const spaceIds = await getAllSpaceIds({ request, access: 'user', failures });
         const mgmt = server.workflowsManagement?.management;
         const recoveryByKey = new Map<string, MaintenanceWorkflowTarget>();
         for (const workflow of existing?.disabledWorkflows ?? []) {
           recoveryByKey.set(workflowKey(workflow), workflow);
         }
-
-        if (mgmt) {
-          for (const target of buildDisableTargets(spaceIds)) {
-            if (await disableWorkflow(mgmt, target, request, failures)) {
-              recoveryByKey.set(workflowKey(target), target);
-            }
-          }
-          for (const target of buildCancelTargets(spaceIds)) {
-            await cancelTargetExecutions(mgmt, target, request, failures);
-          }
-        } else {
-          failures.push({
-            target: 'workflows',
-            error: 'Workflows management plugin is not available',
-          });
+        for (const target of await sweepWorkflows({ mgmt, spaceIds, request, failures })) {
+          recoveryByKey.set(workflowKey(target), target);
         }
-
         await featureSettings.reassertFeatureSettingsOff({ request, spaceIds, failures });
 
-        let scopedClients: Awaited<ReturnType<GetScopedClients>> | undefined;
-        const ruleIds = new Set(existing?.disabledRuleIds ?? []);
-        try {
-          scopedClients = await getScopedClients({ request });
-          const snapshot = await collectResetSnapshot(
-            await scopedClients.getKnowledgeIndicatorClient(),
-            failures
-          );
-          deleted.knowledgeIndicators = snapshot.knowledgeIndicators;
-          deleted.storedQueries = snapshot.storedQueries;
-          for (const ruleId of snapshot.ruleIds) {
-            ruleIds.add(ruleId);
-          }
-        } catch (error) {
-          failures.push({ target: 'snapshot', error: toMessage(error) });
-        }
+        const { knowledgeIndicators, storedQueries, rules } = await deleteOwnedRules({
+          request,
+          previousRuleIds: existing?.disabledRuleIds ?? [],
+          failures,
+        });
+        const investigations = await deleteInvestigations(failures);
+        const dataStreams = await resetDataStreams({
+          esClient: server.core.elasticsearch.client.asScoped(request).asCurrentUser,
+          dataStreams: server.core.dataStreams,
+          failures,
+        });
 
-        if (ruleIds.size > 0) {
-          if (!scopedClients) {
-            failures.push({ target: 'rules', error: 'Scoped clients are not available' });
-          } else {
-            try {
-              const { alertingV2RulesClient } =
-                await scopedClients.getSignificantEventsAlertingContext();
-              if (alertingV2RulesClient) {
-                const ruleResult = await deleteV2Rules(alertingV2RulesClient, [...ruleIds]);
-                deleted.rules = ruleResult.deleted;
-                failures.push(...ruleResult.failures);
-              } else {
-                failures.push({
-                  target: 'rules',
-                  error: 'Alerting v2 rules client is not available',
-                });
-              }
-            } catch (error) {
-              failures.push({ target: 'rules', error: toMessage(error) });
-            }
-          }
-        }
-
-        if (server.nightshiftInvestigations) {
-          try {
-            const investigations = await server.nightshiftInvestigations.deleteAllInvestigations();
-            deleted.investigations = investigations.deleted;
-            failures.push(
-              ...investigations.failures.map(({ id, spaceId, error }) => ({
-                target: `investigation:${id}@${spaceId}`,
-                error,
-              }))
-            );
-          } catch (error) {
-            failures.push({ target: 'investigations', error: toMessage(error) });
-          }
-        }
-
-        // `kibana_system` can initialize these streams but cannot delete them.
-        const esClient = server.core.elasticsearch.client.asScoped(request).asCurrentUser;
-        for (const name of [
-          DETECTIONS_DATA_STREAM,
-          EVENTS_DATA_STREAM,
-          KNOWLEDGE_INDICATORS_DATA_STREAM,
-        ]) {
-          try {
-            await server.core.dataStreams.initializeClient(name);
-          } catch (error) {
-            failures.push({ target: `data-stream:${name}:initialize`, error: toMessage(error) });
-          }
-
-          let exists = false;
-          try {
-            exists = await esClient.indices.exists({ index: name });
-          } catch (error) {
-            failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
-            continue;
-          }
-
-          let documentCount: number | undefined;
-          if (exists) {
-            try {
-              documentCount = (await esClient.count({ index: name })).count;
-            } catch (error) {
-              failures.push({ target: `data-stream:${name}:count`, error: toMessage(error) });
-            }
-          }
-
-          let needsCreate = !exists;
-          if (exists && (documentCount === undefined || documentCount > 0)) {
-            try {
-              await esClient.indices.deleteDataStream({ name }, { ignore: [404] });
-              needsCreate = true;
-              if (documentCount !== undefined && documentCount > 0) {
-                deleted.dataStreams += 1;
-              }
-            } catch (error) {
-              failures.push({ target: `data-stream:${name}:delete`, error: toMessage(error) });
-            }
-          }
-
-          if (needsCreate) {
-            try {
-              await esClient.indices.createDataStream({ name });
-            } catch (error) {
-              failures.push({ target: `data-stream:${name}:create`, error: toMessage(error) });
-            }
-          }
-        }
-
-        try {
-          if (await esClient.indices.exists({ index: DISCOVERIES_DATA_STREAM })) {
-            await esClient.indices.deleteDataStream(
-              { name: DISCOVERIES_DATA_STREAM },
-              { ignore: [404] }
-            );
-            deleted.dataStreams += 1;
-          }
-        } catch (error) {
-          failures.push({
-            target: `data-stream:${DISCOVERIES_DATA_STREAM}:delete`,
-            error: toMessage(error),
-          });
-        }
-
-        const remainingWorkflows: MaintenanceWorkflowTarget[] = [];
-        if (mgmt) {
-          for (const workflow of recoveryByKey.values()) {
-            if (!shouldRestoreSettingsBackedWorkflow(workflow, undefined)) {
-              continue;
-            }
-            const outcome = await reEnableWorkflow(mgmt, workflow, request, failures, false);
-            if (outcome === 'failed') {
-              remainingWorkflows.push(workflow);
-            }
-          }
-        } else {
-          remainingWorkflows.push(
-            ...[...recoveryByKey.values()].filter((workflow) =>
-              shouldRestoreSettingsBackedWorkflow(workflow, undefined)
-            )
-          );
-        }
+        const remainingWorkflows = await restoreWorkflowsAfterReset({
+          mgmt,
+          workflows: [...recoveryByKey.values()],
+          request,
+          failures,
+        });
 
         const summary: SignificantEventsMaintenanceSummary = {
           state: 'enabled',
           executionsCancelled: 0,
           workflowsDisabled: remainingWorkflows.length,
           rulesDisabled: 0,
-          deleted,
+          deleted: { knowledgeIndicators, storedQueries, rules, investigations, dataStreams },
           partialFailures: failures,
         };
 

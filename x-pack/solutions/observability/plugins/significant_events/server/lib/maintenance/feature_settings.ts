@@ -19,6 +19,7 @@ import type { SignificantEventsMaintenanceFailure } from '../../../common/mainte
 import type { GetScopedClients } from '../../routes/types';
 import type { MaintenanceAccess } from './maintenance_access';
 import { SCHEDULED_DISCOVERY_WORKFLOW_IDS } from './managed_workflow_targets';
+import { toMessage } from './to_message';
 
 /**
  * Snapshot of feature toggles that Pause turned off so Resume can restore only
@@ -28,9 +29,6 @@ export interface PausedFeatureSettings {
   continuousOnboardingWasEnabled: boolean;
   scheduledDiscoveryEnabledSpaceIds: SpaceId[];
 }
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 /** Failure targets for the settings step. */
 const CONTINUOUS_SETTING_TARGET = 'settings:continuous-onboarding';

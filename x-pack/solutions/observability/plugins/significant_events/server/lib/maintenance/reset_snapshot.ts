@@ -12,15 +12,13 @@ import {
   KI_TYPE_QUERY,
   type KnowledgeIndicatorClient,
 } from '../knowledge_indicators';
+import { toMessage } from './to_message';
 
 export interface SignificantEventsResetSnapshot {
   knowledgeIndicators: number;
   storedQueries: number;
   ruleIds: string[];
 }
-
-const toMessage = (error: unknown): string =>
-  error instanceof Error ? error.message : String(error);
 
 const OWNED_RULE_LOOKUP_CONCURRENCY = 10;
 
