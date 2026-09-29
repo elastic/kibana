@@ -46,6 +46,7 @@ const context = {
     ensureRuleTypeEnabled: () => {},
   },
   getUserName: async () => {},
+  getProfileUid: async () => null,
   alertsService: {
     muteAllAlerts: muteAllAlertsMock,
   },
@@ -77,6 +78,7 @@ describe('muteAll', () => {
       expect.objectContaining({
         muteAll: true,
         mutedInstanceIds: [],
+        updatedByProfileUid: null,
       }),
       { version: '9.0.0' }
     );
@@ -137,6 +139,7 @@ describe('muteAll', () => {
       expect.objectContaining({
         muteAll: true,
         mutedInstanceIds: [],
+        updatedByProfileUid: null,
       }),
       { version: '9.0.0' }
     );
@@ -168,6 +171,25 @@ describe('muteAll', () => {
       expect.objectContaining({
         muteAll: true,
         mutedInstanceIds: [],
+        updatedByProfileUid: null,
+      }),
+      { version: '9.0.0' }
+    );
+  });
+
+  it('stamps updatedByProfileUid from the current user', async () => {
+    const contextWithProfile = {
+      ...context,
+      getProfileUid: async () => 'u_profile_1',
+    } as unknown as RulesClientContext;
+
+    await muteAll(contextWithProfile, { id: 'rule-123' });
+
+    expect(savedObjectsMock.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-123',
+      expect.objectContaining({
+        updatedByProfileUid: 'u_profile_1',
       }),
       { version: '9.0.0' }
     );
