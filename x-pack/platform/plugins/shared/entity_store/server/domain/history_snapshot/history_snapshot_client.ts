@@ -19,7 +19,10 @@ import {
   getLegacySecurityHistorySnapshotIndexName,
 } from '../asset_manager/history_snapshot_index';
 import { resolveLatestEntitiesIndexName } from '../asset_manager/resolve_entity_store_indices';
-import { getHistorySnapshotTaskId } from '../../tasks/config';
+import { parseDurationToMs } from '../../infra/time';
+import { getHistorySnapshotTaskId, TasksConfig } from '../../tasks/config';
+import { EntityStoreTaskType } from '../../tasks/constants';
+import type { HistorySnapshotState } from '../saved_objects';
 import { HISTORY_SNAPSHOT_RESET_SCRIPT } from './constants';
 import { deleteExpiredHistorySnapshots } from './expire_history_snapshots';
 
@@ -119,6 +122,53 @@ export class HistorySnapshotClient {
     });
 
     this.logger.debug(`Enabled history snapshot task ${taskId}`);
+  }
+
+  public async updateConfig(
+    request: KibanaRequest,
+    params: Partial<Pick<HistorySnapshotState, 'frequency' | 'retentionDays'>>
+  ): Promise<void> {
+    const historySnapshot: Partial<Pick<HistorySnapshotState, 'frequency' | 'retentionDays'>> = {};
+    if (params.frequency != null) {
+      historySnapshot.frequency = params.frequency;
+    }
+    if (params.retentionDays != null) {
+      historySnapshot.retentionDays = params.retentionDays;
+    }
+    if (Object.keys(historySnapshot).length === 0) {
+      return;
+    }
+
+    await this.globalStateClient.update({ historySnapshot });
+
+    if (params.frequency != null) {
+      await this.reschedule(request, params.frequency);
+    }
+  }
+
+  private async reschedule(request: KibanaRequest, frequency: string): Promise<void> {
+    const taskId = getHistorySnapshotTaskId(this.namespace);
+    try {
+      // `runAt` applies only when this call creates the task. An existing task has its
+      // interval replaced, and Task Manager recomputes the next run from that interval.
+      const firstRunAt = new Date(Date.now() + parseDurationToMs(frequency));
+      await this.taskManager.ensureScheduled(
+        {
+          id: taskId,
+          taskType: TasksConfig[EntityStoreTaskType.enum.historySnapshot].type,
+          runAt: firstRunAt,
+          schedule: { interval: frequency },
+          state: { namespace: this.namespace },
+          params: {},
+        },
+        { request }
+      );
+      this.logger.info(`Rescheduled history snapshot task ${taskId} with interval ${frequency}`);
+    } catch (err) {
+      const message = getErrorMessage(err);
+      this.logger.error(`Failed to reschedule history snapshot task: ${message}`);
+      throw err;
+    }
   }
 
   public async disable(

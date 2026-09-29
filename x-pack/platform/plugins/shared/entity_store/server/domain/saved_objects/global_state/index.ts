@@ -41,10 +41,23 @@ const applyLogExtractionOverrides = (
   return next;
 };
 
-/** Write-path input. Like the persisted overrides, but each log extraction field also accepts `null` to delete it. */
-export type GlobalStateOverridesInput = Omit<EntityStoreGlobalStateOverrides, 'logsExtraction'> & {
+/** Write-path input. Like the persisted overrides, but each log extraction field also accepts `null` to delete it. History snapshot fields are partial: omitted keys stay as stored. */
+export type GlobalStateOverridesInput = Omit<
+  EntityStoreGlobalStateOverrides,
+  'logsExtraction' | 'historySnapshot'
+> & {
   logsExtraction?: LogExtractionOverride;
+  historySnapshot?: Partial<HistorySnapshotState>;
 };
+
+/** Copies only defined history snapshot fields so a partial update cannot wipe status or timestamps. */
+const applyHistorySnapshotUpdate = (
+  stored: HistorySnapshotState,
+  incoming: Partial<HistorySnapshotState> = {}
+): HistorySnapshotState => ({
+  ...stored,
+  ...Object.fromEntries(Object.entries(incoming).filter(([, value]) => value !== undefined)),
+});
 
 // takes existing config, strips legacy defaults (if exists) and merges with new overrides
 const mergeOverrides = (
@@ -53,10 +66,10 @@ const mergeOverrides = (
 ): EntityStoreGlobalStateOverrides =>
   EntityStoreGlobalStateOverrides.parse({
     defaultsVersion: 'latest',
-    historySnapshot: {
-      ...HistorySnapshotState.parse(raw.historySnapshot ?? {}),
-      ...overrides.historySnapshot,
-    },
+    historySnapshot: applyHistorySnapshotUpdate(
+      HistorySnapshotState.parse(raw.historySnapshot ?? {}),
+      overrides.historySnapshot
+    ),
     logsExtraction: applyLogExtractionOverrides(
       getLogsExtractionOverrides(raw),
       overrides.logsExtraction
