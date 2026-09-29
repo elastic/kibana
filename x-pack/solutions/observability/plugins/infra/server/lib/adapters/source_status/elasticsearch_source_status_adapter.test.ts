@@ -6,6 +6,7 @@
  */
 
 import { InfraElasticsearchSourceStatusAdapter } from './elasticsearch_source_status_adapter';
+import { NoSuchRemoteClusterError } from '../../sources/errors';
 import type { KibanaFramework } from '../framework/kibana_framework_adapter';
 import type { InfraPluginRequestHandlerContext } from '../../../types';
 
@@ -27,53 +28,170 @@ describe('InfraElasticsearchSourceStatusAdapter', () => {
       callWithRequest,
     } as unknown as KibanaFramework);
 
-  describe('getIndexStatus', () => {
-    it('bounds the underlying search with a requestTimeout so it cannot hang indefinitely', async () => {
+  /** A valid _resolve/cluster response with matching indices on the local cluster. */
+  const makeResolveResponse = (matchingIndices: boolean) => ({
+    '(local)': {
+      connected: true,
+      skip_unavailable: false,
+      matching_indices: matchingIndices,
+    },
+  });
+
+  describe('hasIndices — primary path (_resolve/cluster)', () => {
+    it('returns true when at least one cluster reports matching_indices', async () => {
+      const callWithRequest = jest.fn().mockResolvedValue(makeResolveResponse(true));
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      expect(result).toBe(true);
+    });
+
+    it('returns false when no cluster reports matching_indices', async () => {
+      const callWithRequest = jest.fn().mockResolvedValue(makeResolveResponse(false));
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      expect(result).toBe(false);
+    });
+
+    it('returns true when any cluster in a multi-cluster response has matching_indices', async () => {
       const callWithRequest = jest.fn().mockResolvedValue({
-        _shards: { total: 1 },
-        hits: { total: { value: 1 } },
+        '(local)': { connected: true, skip_unavailable: false, matching_indices: false },
+        remote1: { connected: true, skip_unavailable: true, matching_indices: true },
       });
       const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
 
-      const status = await adapter.getIndexStatus(createRequestContext(), 'metrics-*');
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
 
-      expect(status).toBe('available');
-      expect(callWithRequest).toHaveBeenCalledTimes(1);
+      expect(result).toBe(true);
+    });
+
+    it('calls indices.resolveCluster with both a server-side timeout and a transport requestTimeout', async () => {
+      const callWithRequest = jest.fn().mockResolvedValue(makeResolveResponse(true));
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
       const [, endpoint, params] = callWithRequest.mock.calls[0];
-      expect(endpoint).toBe('search');
-      // A `requestTimeout` must be forwarded to the ES client call so a
-      // slow/unhealthy cluster (or an unreachable remote-cluster pattern in
-      // a customized index alias) can't hang the request indefinitely.
-      // See https://github.com/elastic/kibana/issues/279610
-      expect(params).toEqual(
-        expect.objectContaining({
-          requestTimeout: expect.anything(),
-        })
-      );
+      expect(endpoint).toBe('indices.resolveCluster');
+      // Server-side per-remote timeout so a slow remote is reported as
+      // not-connected rather than failing the whole call.
+      expect(params).toEqual(expect.objectContaining({ timeout: expect.any(String) }));
+      // Transport-level backstop so the Kibana → ES connection cannot hang.
+      expect(params).toEqual(expect.objectContaining({ requestTimeout: expect.any(String) }));
     });
 
-    it('propagates a timeout/error from the search instead of hanging or resolving with stale data', async () => {
-      const timeoutError = Object.assign(new Error('Request timed out'), {
-        name: 'TimeoutError',
-      });
-      const callWithRequest = jest.fn().mockRejectedValue(timeoutError);
+    it('forwards the KibanaRequest for abort-on-disconnect wiring', async () => {
+      const callWithRequest = jest.fn().mockResolvedValue(makeResolveResponse(true));
       const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+      const fakeRequest = { method: 'get' } as any;
 
-      await expect(adapter.getIndexStatus(createRequestContext(), 'metrics-*')).rejects.toBe(
-        timeoutError
-      );
+      await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*', fakeRequest);
+
+      // The 4th argument to callWithRequest is the KibanaRequest, which wires up
+      // subscribeToAborted$ so a client disconnect cancels the ES call.
+      const [, , , requestArg] = callWithRequest.mock.calls[0];
+      expect(requestArg).toBe(fakeRequest);
     });
 
-    it('still maps a 404 response to "missing" rather than throwing', async () => {
-      const notFoundError = Object.assign(new Error('index_not_found_exception'), {
-        status: 404,
-      });
+    it('returns false when _resolve/cluster throws 404', async () => {
+      const notFoundError = Object.assign(new Error('index_not_found_exception'), { status: 404 });
       const callWithRequest = jest.fn().mockRejectedValue(notFoundError);
       const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
 
-      const status = await adapter.getIndexStatus(createRequestContext(), 'metrics-*');
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
 
-      expect(status).toBe('missing');
+      expect(result).toBe(false);
+    });
+
+    it('throws NoSuchRemoteClusterError when _resolve/cluster surfaces no_such_remote_cluster_exception', async () => {
+      const remoteErr = Object.assign(
+        new Error('no_such_remote_cluster_exception: [remote1] is missing'),
+        { status: 500 }
+      );
+      const callWithRequest = jest.fn().mockRejectedValue(remoteErr);
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await expect(
+        adapter.hasIndices(createRequestContext(), 'remote1:metrics-*')
+      ).rejects.toBeInstanceOf(NoSuchRemoteClusterError);
+    });
+
+    it('propagates unexpected errors from _resolve/cluster', async () => {
+      const unexpectedError = new Error('cluster unhealthy');
+      const callWithRequest = jest.fn().mockRejectedValue(unexpectedError);
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await expect(
+        adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*')
+      ).rejects.toThrow('cluster unhealthy');
+    });
+  });
+
+  describe('hasIndices — privilege fallback (403 → search)', () => {
+    it('falls back to _search when _resolve/cluster returns 403 (read-only user)', async () => {
+      const forbidden = Object.assign(new Error('security_exception'), { status: 403 });
+      // First call: resolveCluster → 403. Second call: search → has shards.
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(forbidden)
+        .mockResolvedValueOnce({ _shards: { total: 3 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      expect(result).toBe(true);
+      expect(callWithRequest).toHaveBeenCalledTimes(2);
+      const [, firstEndpoint] = callWithRequest.mock.calls[0];
+      const [, secondEndpoint] = callWithRequest.mock.calls[1];
+      expect(firstEndpoint).toBe('indices.resolveCluster');
+      expect(secondEndpoint).toBe('search');
+    });
+
+    it('returns false via fallback search when no shards match', async () => {
+      const forbidden = Object.assign(new Error('security_exception'), { status: 403 });
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(forbidden)
+        .mockResolvedValueOnce({ _shards: { total: 0 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      const result = await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      expect(result).toBe(false);
+    });
+
+    it('propagates NoSuchRemoteClusterError through the fallback search', async () => {
+      const forbidden = Object.assign(new Error('security_exception'), { status: 403 });
+      const remoteErr = Object.assign(
+        new Error('no_such_remote_cluster_exception: [remote1] is missing'),
+        { status: 500 }
+      );
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(forbidden)
+        .mockRejectedValueOnce(remoteErr);
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await expect(
+        adapter.hasIndices(createRequestContext(), 'remote1:metrics-*')
+      ).rejects.toBeInstanceOf(NoSuchRemoteClusterError);
+    });
+
+    it('fallback search also bounds the call with requestTimeout', async () => {
+      const forbidden = Object.assign(new Error('security_exception'), { status: 403 });
+      const callWithRequest = jest
+        .fn()
+        .mockRejectedValueOnce(forbidden)
+        .mockResolvedValueOnce({ _shards: { total: 1 }, hits: { total: { value: 0 } } });
+      const adapter = new InfraElasticsearchSourceStatusAdapter(createFramework(callWithRequest));
+
+      await adapter.hasIndices(createRequestContext(), 'metrics-*,metricbeat-*');
+
+      const [, , searchParams] = callWithRequest.mock.calls[1];
+      expect(searchParams).toEqual(expect.objectContaining({ requestTimeout: expect.any(String) }));
     });
   });
 });

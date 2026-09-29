@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import Boom from '@hapi/boom';
+import type { KibanaRequest } from '@kbn/core/server';
 import { createRouteValidationFunction } from '@kbn/io-ts-utils';
 import { existsQuery, termQuery } from '@kbn/observability-plugin/server';
 import {
@@ -64,10 +65,15 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
 
   const composeSourceStatus = async (
     requestContext: InfraPluginRequestHandlerContext,
-    sourceId: string
+    metricAlias: string,
+    request: KibanaRequest
   ): Promise<MetricsSourceStatus> => {
     try {
-      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(requestContext, sourceId);
+      const hasMetricIndices = await libs.sourceStatus.hasMetricIndices(
+        requestContext,
+        metricAlias,
+        request
+      );
       return {
         metricIndicesExist: hasMetricIndices,
         remoteClustersExist: true,
@@ -105,21 +111,22 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
       const soClient = (await requestContext.core).savedObjects.client;
 
       try {
-        const [sourceSettled, statusSettled] = await Promise.allSettled([
+        // Resolve the source configuration first so we can pass metricAlias
+        // directly to the status probe — avoiding the second source-config
+        // read the previous implementation performed inside composeSourceStatus.
+        const [sourceSettled] = await Promise.allSettled([
           libs.sources.getSourceConfiguration(soClient, sourceId),
-          includeStatus
-            ? composeSourceStatus(requestContext, sourceId)
-            : Promise.resolve(defaultStatus),
         ]);
 
         const source = isFulfilled<InfraSource>(sourceSettled) ? sourceSettled.value : null;
-        const status = isFulfilled<MetricsSourceStatus>(statusSettled)
-          ? statusSettled.value
-          : defaultStatus;
 
         if (!source) {
           return response.notFound();
         }
+
+        const status = includeStatus
+          ? await composeSourceStatus(requestContext, source.configuration.metricAlias, request)
+          : defaultStatus;
 
         const sourceResponse = {
           source: {
@@ -173,7 +180,11 @@ export const initMetricsSourceConfigurationRoutes = (libs: InfraBackendLibs) => 
           ? sources.updateSourceConfiguration(soClient, sourceId, sourceConfigurationPayload)
           : sources.createSourceConfiguration(soClient, sourceId, sourceConfigurationPayload));
 
-        const status = await composeSourceStatus(requestContext, sourceId);
+        const status = await composeSourceStatus(
+          requestContext,
+          patchedSourceConfiguration.configuration.metricAlias,
+          request
+        );
 
         const sourceResponse = {
           source: { ...patchedSourceConfiguration, status },
