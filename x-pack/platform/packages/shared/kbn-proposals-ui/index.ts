@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { ApprovalModal, type ApprovalModalProps } from './src/approval_modal';
+export { ApprovalModal, type ApprovalModalProps, type DeclineParams } from './src/approval_modal';
 export {
   ApprovalContent,
   type ApprovalContentProps,
@@ -31,3 +31,9 @@ export {
   isProposalExpired,
 } from './src/proposal_helpers';
 export type { ApprovalProposal } from './src/types';
+export {
+  DISMISS_REASON_LABELS,
+  DISMISS_REASON_OPTIONS,
+  formatDismissReason,
+} from './src/dismiss_reason';
+export { DeclineReasonForm, type DeclineReasonFormProps } from './src/decline_reason_form';

@@ -99,7 +99,7 @@ export const ProposalApprovalCard = memo<ProposalApprovalCardProps>(
   ({ proposalId, chainHops = 0 }) => {
     const { euiTheme } = useEuiTheme();
     const [mode, setMode] = useState<CardMode>('view');
-    const [dismissReason, setDismissReason] = useState<DismissReason>('wrong');
+    const [dismissReason, setDismissReason] = useState<DismissReason>('no_reason');
     const [rationale, setRationale] = useState('');
 
     const proposalQuery = useProposal(proposalId);

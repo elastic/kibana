@@ -16,7 +16,7 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const defaultProps: ProposalDismissFormProps = {
-  dismissReason: 'wrong',
+  dismissReason: 'no_reason',
   rationale: '',
   onDismissReasonChange: jest.fn(),
   onRationaleChange: jest.fn(),

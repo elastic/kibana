@@ -10,7 +10,7 @@ import { css } from '@emotion/react';
 import { EuiFormRow, EuiSelect, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { DismissReason } from '@kbn/proposals-common';
-import { DISMISS_REASON_OPTIONS } from '../dismiss_reason_i18n';
+import { DISMISS_REASON_OPTIONS } from '@kbn/proposals-ui';
 
 export interface ProposalDismissFormProps {
   dismissReason: DismissReason;
