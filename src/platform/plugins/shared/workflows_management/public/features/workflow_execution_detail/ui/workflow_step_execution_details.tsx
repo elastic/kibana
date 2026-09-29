@@ -135,10 +135,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
           workflowExecutionUsage={workflowExecutionUsage}
-          showResumeUI={
-            workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT &&
-            Boolean(waitingStepExecutionId)
-          }
+          showResumeUI={false}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}

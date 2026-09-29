@@ -136,12 +136,39 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
 
     const {
       waitingStepExecutionId,
+      waitingStepStartedAt,
       resumeMessage,
       resumeSchema,
       approvalLabels,
       hasResumeError,
       retryResume,
     } = useWaitingStepResume(executionId, workflowExecution);
+
+    const waitingAction = useMemo(
+      () =>
+        waitingStepExecutionId
+          ? {
+              stepExecutionId: waitingStepExecutionId,
+              message: resumeMessage,
+              executionId,
+              workflowId: workflowExecution?.workflowId,
+              stepStartedAt: waitingStepStartedAt,
+              resumeSchema,
+              approvalLabels,
+              autoOpen: shouldAutoResume,
+            }
+          : undefined,
+      [
+        approvalLabels,
+        executionId,
+        resumeMessage,
+        resumeSchema,
+        shouldAutoResume,
+        waitingStepExecutionId,
+        waitingStepStartedAt,
+        workflowExecution?.workflowId,
+      ]
+    );
 
     // For pseudo-steps (overview, trigger), build from execution context directly
     const isPseudoStep =
@@ -244,6 +271,7 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
               childExecutionsMap={childExecutions}
               isLoadingChildExecutions={isLoadingChildExecutions}
               onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+              waitingAction={waitingAction}
             />
           }
           fixedPanelSize={sidebarWidth}

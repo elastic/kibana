@@ -29,6 +29,7 @@ import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
+import type { WaitingStepAction } from './waiting_step_action_panel';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
@@ -62,6 +63,7 @@ export interface WorkflowExecutionPanelProps {
   isLoadingChildExecutions?: boolean;
   /** Close step detail panel before opening Agent Builder diagnose chat. */
   onBeforeDiagnose?: () => void;
+  waitingAction?: WaitingStepAction;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -77,6 +79,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     childExecutionsMap,
     isLoadingChildExecutions,
     onBeforeDiagnose,
+    waitingAction,
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = Boolean(
@@ -139,6 +142,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               childExecutionsMap={childExecutionsMap}
               isLoadingChildExecutions={isLoadingChildExecutions}
               onBeforeDiagnose={onBeforeDiagnose}
+              waitingAction={waitingAction}
             />
           </EuiPanel>
         </EuiFlexItem>

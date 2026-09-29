@@ -36,6 +36,18 @@ jest.mock('../../../shared/ui/step_icons/step_icon', () => ({
   ),
 }));
 
+jest.mock('./waiting_step_action_panel', () => ({
+  WaitingStepActionPanel: ({
+    action,
+  }: {
+    action: { message?: string; stepExecutionId: string };
+  }) => (
+    <div data-test-subj="workflowWaitingStepActionPanel">
+      {action.message ?? 'User action is required'}
+    </div>
+  ),
+}));
+
 jest.mock('../../../shared/ui/token_usage_badge/token_usage_badge', () => ({
   TokenUsageBadge: ({ usage }: { usage: { totalTokens: number } }) => (
     <span data-test-subj="workflowStepTreeTokenUsage">
@@ -363,12 +375,30 @@ describe('StepExecutionTreeRow', () => {
       executionTimeMs: null,
     });
 
-    expect(screen.getByTestId('mock-step-icon')).toHaveAttribute('data-step-type', 'waitForInput');
-    expect(container.querySelectorAll('[data-euiicon-type="hourglass"]')).toHaveLength(0);
-    expect(screen.queryByTestId('workflowStepTreeStatusSlot')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepTreeIterationTag-waitingForInput')).toHaveTextContent(
       '· waiting for input'
     );
+  });
+
+  it('highlights a waiting step in yellow and shows the Provide action panel', () => {
+    const { container } = renderRow({
+      stepId: 'request_approval',
+      stepType: 'waitForInput',
+      status: ExecutionStatus.WAITING_FOR_INPUT,
+      waitingAction: {
+        stepExecutionId: 'step-wait',
+        executionId: 'exec-1',
+        message: 'Approve isolation',
+      },
+    });
+    const row = container.querySelector('[data-warning-fill="true"]');
+    expect(row).toBeTruthy();
+    expect(screen.getByTestId('workflowWaitingStepActionPanel')).toHaveTextContent(
+      'Approve isolation'
+    );
+    expect(
+      screen.queryByTestId('workflowStepTreeIterationTag-waitingForInput')
+    ).not.toBeInTheDocument();
   });
 
   it('shows Not run in the duration slot for skipped steps', () => {

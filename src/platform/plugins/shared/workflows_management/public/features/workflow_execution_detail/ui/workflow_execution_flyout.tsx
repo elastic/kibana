@@ -29,6 +29,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiPopover,
+  EuiResizableContainer,
   EuiTab,
   EuiTabs,
   EuiText,
@@ -54,6 +55,7 @@ import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepDataValueCell } from './step_data_value_cell';
 import { StepDetailAccordionSection } from './step_detail_accordion_section';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
+import type { WaitingStepAction } from './waiting_step_action_panel';
 import {
   buildOverviewStepExecutionFromContext,
   buildTriggerStepExecutionFromContext,
@@ -89,7 +91,7 @@ import { getFailedStepPosition } from '../lib/get_failed_step_position';
 import { getRunMode } from '../lib/get_run_mode';
 import { getStepFieldPathPrefix } from '../lib/get_step_field_path_prefix';
 import { isTokenUsageTableField } from '../lib/is_token_usage_table_field';
-import { normalizeStepAi } from '../lib/normalize_step_ai';
+import { isAiStepType, normalizeStepAi } from '../lib/normalize_step_ai';
 import { resolveSelectedStepExecution } from '../model/resolve_selected_step_execution';
 import { useChildWorkflowExecutions } from '../model/use_child_workflow_executions';
 import { useStepExecution } from '../model/use_step_execution';
@@ -131,6 +133,74 @@ const FLYOUT_CLASSNAME = 'workflowExecutionFlyout';
 /** Keep slim enough that the YAML editor stays readable with both panels open. */
 const EXECUTION_PANEL_WIDTH = 560;
 const STEP_DETAIL_WIDTH = 560;
+const MIN_PANEL_WIDTH = 280;
+
+const FLYOUT_LAYOUT_CSS = {
+  display: 'flex',
+  flexDirection: 'row' as const,
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+};
+
+const PANEL_FILL_CSS = {
+  display: 'flex',
+  flexDirection: 'column' as const,
+  flex: 1,
+  minWidth: 0,
+  minHeight: 0,
+  width: '100%',
+  height: '100%',
+  overflow: 'hidden',
+};
+
+const FlyoutPanelsLayout = ({
+  stepPanel,
+  executionPanel,
+  stepSizePct,
+  onPanelWidthChange,
+}: {
+  stepPanel: React.ReactNode;
+  executionPanel: React.ReactNode;
+  stepSizePct: number;
+  onPanelWidthChange: (sizes: { [key: string]: number }) => void;
+}) => {
+  if (!stepPanel) {
+    return <div css={FLYOUT_LAYOUT_CSS}>{executionPanel}</div>;
+  }
+
+  const panelProps = {
+    minSize: `${MIN_PANEL_WIDTH}px`,
+    paddingSize: 'none' as const,
+    color: 'transparent' as const,
+    hasShadow: false,
+    hasBorder: false,
+    wrapperProps: { css: { height: '100%', width: '100%' } },
+    css: { height: '100%', width: '100%' },
+  };
+
+  return (
+    <EuiResizableContainer css={FLYOUT_LAYOUT_CSS} onPanelWidthChange={onPanelWidthChange}>
+      {(EuiResizablePanel, EuiResizableButton) => (
+        <>
+          <EuiResizablePanel id="stepDetail" initialSize={stepSizePct} {...panelProps}>
+            {stepPanel}
+          </EuiResizablePanel>
+          <EuiResizableButton
+            indicator="border"
+            data-test-subj="workflowExecutionFlyoutPanelResize"
+          />
+          <EuiResizablePanel id="execution" initialSize={100 - stepSizePct} {...panelProps}>
+            {executionPanel}
+          </EuiResizablePanel>
+        </>
+      )}
+    </EuiResizableContainer>
+  );
+};
 /** Field column: content-sized between a header-comfortable min and a path-truncation max. */
 const FIELD_COLUMN_MIN_PX = 100;
 const FIELD_COLUMN_MAX_PX = 160;
@@ -544,6 +614,32 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       }),
       [isResumeSubmitting, isResumeSubmitted]
     );
+    const waitingAction = useMemo<WaitingStepAction | undefined>(() => {
+      if (!waitingStepExecutionId) {
+        return undefined;
+      }
+      return {
+        stepExecutionId: waitingStepExecutionId,
+        message: resumeMessage,
+        executionId,
+        workflowId: workflowExecution?.workflowId,
+        stepStartedAt: waitingStepStartedAt,
+        resumeSchema,
+        approvalLabels,
+        autoOpen: shouldAutoResume,
+        submitState: resumeSubmitState,
+      };
+    }, [
+      approvalLabels,
+      executionId,
+      resumeMessage,
+      resumeSchema,
+      resumeSubmitState,
+      shouldAutoResume,
+      waitingStepExecutionId,
+      waitingStepStartedAt,
+      workflowExecution?.workflowId,
+    ]);
 
     // The selected step is URL state: switching runs already drops `stepExecutionId`, and
     // clearing it here would wipe a deep-linked step on mount.
@@ -607,7 +703,13 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
           `[data-test-subj="workflowStepTreeNode"][data-step-execution-id="${stepExecutionId}"]`
         );
         const errorRegion = node?.querySelector('[data-test-subj="workflowFailedStepErrorPanel"]');
-        (errorRegion ?? node)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        const waitingRegion = node?.querySelector(
+          '[data-test-subj="workflowWaitingStepActionPanel"]'
+        );
+        (errorRegion ?? waitingRegion ?? node)?.scrollIntoView({
+          behavior: 'smooth',
+          block: 'center',
+        });
       }, 0);
     }, []);
 
@@ -631,17 +733,19 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
       return () => window.clearTimeout(timer);
     }, [errorArrivalPulseStepId]);
 
-    // Highlight the failed step in the tree once per execution open (not on tab switches).
+    // Highlight the failed or waiting step in the tree once per execution open (not on tab switches).
     // Do not open the step-detail sub-flyout — that is only for an explicit step click.
     useEffect(() => {
-      if (!workflowExecution || !failedPosition) return;
+      if (!workflowExecution) return;
       if (autoExpandedForExecutionIdRef.current === workflowExecution.id) return;
+      const highlightStepId = failedPosition?.step.id ?? waitingStepExecutionId;
+      if (!highlightStepId) return;
       autoExpandedForExecutionIdRef.current = workflowExecution.id;
       setActiveTab('table');
-      setAutoExpandErrorForStepId(failedPosition.step.id);
-      setErrorArrivalPulseStepId(failedPosition.step.id);
-      scrollToFailedStep(failedPosition.step.id);
-    }, [workflowExecution, failedPosition, scrollToFailedStep]);
+      setAutoExpandErrorForStepId(highlightStepId);
+      setErrorArrivalPulseStepId(highlightStepId);
+      scrollToFailedStep(highlightStepId);
+    }, [workflowExecution, failedPosition, waitingStepExecutionId, scrollToFailedStep]);
 
     const handleShare = useCallback(() => {
       if (!workflowExecution?.workflowId) return;
@@ -801,6 +905,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const stepName = selectedLightStep?.stepId ?? activeStepExecution?.stepId ?? '';
 
     const activeStepType = selectedLightStep?.stepType ?? activeStepExecution?.stepType;
+    const isAiStep = isAiStepType(activeStepType);
     const isForeachOrWhileStep = activeStepType === 'foreach' || activeStepType === 'while';
     const hasStepError = !isPseudoStep && activeStepExecution?.error != null;
     /** Real foreach/while output only — never synthesize child step listings as Output. */
@@ -834,12 +939,14 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
 
     const stepAi = useMemo(
       () =>
-        normalizeStepAi({
-          usage: activeStepExecution?.usage,
-          output: activeStepExecution?.output,
-          connectorId: definitionConnectorId,
-        }),
-      [activeStepExecution?.usage, activeStepExecution?.output, definitionConnectorId]
+        isAiStep
+          ? normalizeStepAi({
+              usage: activeStepExecution?.usage,
+              output: activeStepExecution?.output,
+              connectorId: definitionConnectorId,
+            })
+          : undefined,
+      [isAiStep, activeStepExecution?.usage, activeStepExecution?.output, definitionConnectorId]
     );
 
     const { data: fetchedConnector } = useFetchConnector(stepAi?.connectorId);
@@ -872,13 +979,71 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
     const showTagsRow = showRunModeBadge || workflowTags.length > 0;
     const stepTestTargetName = runModeInfo?.stepTestTargetName ?? '';
 
-    // Widen the flyout when the step detail panel is open (FlyoutPanels pattern).
-    // Width is a hard constant — content must not flex the panels. It must go through the flyout's
-    // own `size` prop: an imperative style write loses to EUI's container-relative `inline-size`,
-    // which lands on the first commit (the EuiFlyout `container` component default).
-    const flyoutWidth = selectedStepExecutionId
-      ? EXECUTION_PANEL_WIDTH + STEP_DETAIL_WIDTH
-      : EXECUTION_PANEL_WIDTH;
+    const [executionWidth, setExecutionWidth] = useState(EXECUTION_PANEL_WIDTH);
+    const [stepWidth, setStepWidth] = useState(STEP_DETAIL_WIDTH);
+    const hasStepPanel = Boolean(selectedStepExecutionId);
+    const flyoutWidth = hasStepPanel ? executionWidth + stepWidth : executionWidth;
+    const stepSizePct = (stepWidth / (executionWidth + stepWidth)) * 100;
+    const panelWidthsRef = useRef({ executionWidth, stepWidth, hasStepPanel });
+    panelWidthsRef.current = { executionWidth, stepWidth, hasStepPanel };
+
+    const onFlyoutResize = useCallback((width: number) => {
+      const {
+        hasStepPanel: isSplit,
+        executionWidth: exec,
+        stepWidth: step,
+      } = panelWidthsRef.current;
+      if (!isSplit) {
+        setExecutionWidth(width);
+        return;
+      }
+      const nextStep = Math.round(width * (step / (exec + step)));
+      setStepWidth(nextStep);
+      setExecutionWidth(width - nextStep);
+    }, []);
+
+    const onPanelWidthChange = useCallback((sizes: { [key: string]: number }) => {
+      if (sizes.stepDetail == null) {
+        return;
+      }
+      const { executionWidth: exec, stepWidth: step } = panelWidthsRef.current;
+      const total = exec + step;
+      const nextStep = Math.round((sizes.stepDetail / 100) * total);
+      setStepWidth(Math.max(MIN_PANEL_WIDTH, nextStep));
+      setExecutionWidth(Math.max(MIN_PANEL_WIDTH, total - nextStep));
+    }, []);
+
+    // EUI's resize handle keeps :focus after a mouse drag, which leaves the
+    // primary "border" indicator visible. Blur only after pointer interaction
+    // so keyboard resizing still shows the handle.
+    useEffect(() => {
+      let onPointerUp: (() => void) | undefined;
+
+      const onPointerDown = (event: PointerEvent) => {
+        if (!(event.target instanceof Element)) {
+          return;
+        }
+        const handle = event.target.closest<HTMLElement>(
+          '[data-test-subj="euiResizableButton"], [data-test-subj="workflowExecutionFlyoutPanelResize"]'
+        );
+        if (!handle?.closest(`.${FLYOUT_CLASSNAME}`)) {
+          return;
+        }
+
+        onPointerUp = () => {
+          requestAnimationFrame(() => handle.blur());
+        };
+        window.addEventListener('pointerup', onPointerUp, { once: true });
+      };
+
+      document.addEventListener('pointerdown', onPointerDown);
+      return () => {
+        document.removeEventListener('pointerdown', onPointerDown);
+        if (onPointerUp) {
+          window.removeEventListener('pointerup', onPointerUp);
+        }
+      };
+    }, []);
 
     return (
       <EuiFlyout
@@ -888,313 +1053,75 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
         })}
         onClose={onClose}
         type="push"
+        // Stay push when the Agent Builder sidebar shrinks the app below EUI's default `l` (992px).
+        pushMinBreakpoint="xs"
         size={flyoutWidth}
+        minWidth={hasStepPanel ? MIN_PANEL_WIDTH * 2 : MIN_PANEL_WIDTH}
+        resizable={true}
+        onResize={onFlyoutResize}
         paddingSize="none"
         hideCloseButton
         className={FLYOUT_CLASSNAME}
         data-test-subj="workflowExecutionFlyout"
+        css={{
+          '.euiFlyout__content': {
+            width: '100%',
+            minWidth: 0,
+            overflow: 'hidden',
+          },
+        }}
       >
-        {/* Outer flex row — each column is a visually independent panel */}
-        <div css={{ display: 'flex', height: '100%', overflow: 'hidden' }}>
-          {/* ── Step detail panel (independent header + scrollable body) ── */}
-          {selectedStepExecutionId && (
-            <div
-              css={{
-                width: `${STEP_DETAIL_WIDTH}px`,
-                minWidth: `${STEP_DETAIL_WIDTH}px`,
-                maxWidth: `${STEP_DETAIL_WIDTH}px`,
-                flex: `0 0 ${STEP_DETAIL_WIDTH}px`,
-                boxSizing: 'border-box',
-                display: 'flex',
-                flexDirection: 'column',
-                borderRight: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-                overflow: 'hidden',
-              }}
-            >
+        <FlyoutPanelsLayout
+          stepSizePct={stepSizePct}
+          onPanelWidthChange={onPanelWidthChange}
+          stepPanel={
+            selectedStepExecutionId ? (
               <div
                 css={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: euiTheme.size.s,
-                  flexShrink: 0,
+                  ...PANEL_FILL_CSS,
                   boxSizing: 'border-box',
-                  // AppHeader compact: 8px padding + 32px control = 48px.
-                  minHeight: 48,
-                  paddingBlock: euiTheme.size.s,
-                  paddingInline: euiTheme.size.s,
-                  borderBottom: euiTheme.border.thin,
                 }}
               >
-                {(selectedLightStep?.stepType ?? activeStepExecution?.stepType) && (
-                  <StepIcon
-                    stepType={selectedLightStep?.stepType ?? activeStepExecution?.stepType ?? ''}
-                    executionStatus={selectedLightStep?.status ?? activeStepExecution?.status}
-                    size="m"
-                    css={{ flexShrink: 0 }}
-                  />
-                )}
-                <EuiTitle
-                  size="xs"
+                <div
                   css={{
-                    flex: 1,
-                    minWidth: 0,
-                    marginBottom: 0,
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: euiTheme.size.s,
+                    flexShrink: 0,
+                    boxSizing: 'border-box',
+                    // AppHeader compact: 8px padding + 32px control = 48px.
+                    minHeight: 48,
+                    paddingBlock: euiTheme.size.s,
+                    paddingInline: euiTheme.size.s,
+                    borderBottom: euiTheme.border.thin,
                   }}
                 >
-                  <h2
+                  {(selectedLightStep?.stepType ?? activeStepExecution?.stepType) && (
+                    <StepIcon
+                      stepType={selectedLightStep?.stepType ?? activeStepExecution?.stepType ?? ''}
+                      executionStatus={selectedLightStep?.status ?? activeStepExecution?.status}
+                      size="m"
+                      css={{ flexShrink: 0 }}
+                    />
+                  )}
+                  <EuiTitle
+                    size="xs"
                     css={{
+                      flex: 1,
                       minWidth: 0,
-                      margin: 0,
-                      color: euiTheme.colors.title,
+                      marginBottom: 0,
                     }}
                   >
-                    <EuiTextTruncate text={stepName} />
-                  </h2>
-                </EuiTitle>
-                <EuiToolTip content={i18nTexts.close} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType="cross"
-                    aria-label={i18nTexts.close}
-                    color="text"
-                    size="s"
-                    iconSize="m"
-                    onClick={() => setSelectedStepExecutionId(null)}
-                    data-test-subj="workflowExecutionFlyoutStepClose"
-                  />
-                </EuiToolTip>
-              </div>
-
-              <div
-                css={{
-                  flex: 1,
-                  overflowY: 'auto',
-                  overflowX: 'hidden',
-                  // No paddingTop — the first accordion already has header padding.
-                  paddingInline: euiTheme.size.base,
-                  paddingBottom: euiTheme.size.base,
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: 0,
-                  minWidth: 0,
-                }}
-              >
-                {!isPseudoStep && (childWorkflowExecution || parentWorkflowExecution) && (
-                  <div
-                    css={{
-                      paddingTop: euiTheme.size.m,
-                      paddingBottom: euiTheme.size.m,
-                    }}
-                  >
-                    <NestedWorkflowExecutionLinks
-                      stepExecution={activeStepExecution ?? selectedLightStep}
-                      childWorkflowExecution={childWorkflowExecution}
-                      parentWorkflowExecution={parentWorkflowExecution}
-                    />
-                  </div>
-                )}
-                {isLoadingStepData && !isPseudoStep ? (
-                  <EuiFlexGroup justifyContent="center">
-                    <EuiFlexItem grow={false}>
-                      <EuiLoadingSpinner size="l" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : activeStepExecution?.stepType === 'enter-case-branch' ? (
-                  <StepDataSection
-                    key={`status-${selectedStepExecutionId}`}
-                    label={i18n.translate('workflows.executionFlyout.caseBranch.statusLabel', {
-                      defaultMessage: 'Status',
-                    })}
-                    data={{
-                      result:
-                        activeStepExecution.status === ExecutionStatus.COMPLETED
-                          ? i18n.translate('workflows.executionFlyout.caseBranch.taken', {
-                              defaultMessage: 'Branch executed',
-                            })
-                          : i18n.translate('workflows.executionFlyout.caseBranch.skipped', {
-                              defaultMessage: 'Branch not taken',
-                            }),
-                    }}
-                  />
-                ) : isIterationPseudoStep ? (
-                  <>
-                    {activeStepExecution?.executionTimeMs != null &&
-                      activeStepExecution.executionTimeMs > 0 && (
-                        <div css={{ flexShrink: 0 }}>
-                          <div
-                            css={{
-                              paddingTop: euiTheme.size.m,
-                              paddingBottom: euiTheme.size.m,
-                            }}
-                          >
-                            <EuiText
-                              size="s"
-                              color="subdued"
-                              data-test-subj="iterationPseudoStepDuration"
-                            >
-                              {i18n.translate('workflows.executionFlyout.iteration.duration', {
-                                defaultMessage: 'Duration: {duration}',
-                                values: {
-                                  duration: formatDuration(activeStepExecution.executionTimeMs),
-                                },
-                              })}
-                            </EuiText>
-                          </div>
-                          <EuiHorizontalRule margin="none" />
-                        </div>
-                      )}
-                    {activeStepExecution?.usage && activeStepExecution.usage.totalTokens > 0 && (
-                      <TokenUsageBreakdown
-                        usage={activeStepExecution.usage}
-                        data-test-subj="iterationPseudoStepTokenUsage"
-                      />
-                    )}
-                    <StepDataSection
-                      key={`input-${selectedStepExecutionId}`}
-                      label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
-                        defaultMessage: 'Input',
-                      })}
-                      data={activeStepExecution?.input}
-                      fieldPathPrefix={stepInputFieldPathPrefix}
-                    />
-                  </>
-                ) : (
-                  <>
-                    {executionMetadata && (
-                      <StepDataSection
-                        key={`metadata-${selectedStepExecutionId}`}
-                        label={i18n.translate('workflows.executionFlyout.stepDetail.metadata', {
-                          defaultMessage: 'Metadata',
-                        })}
-                        data={executionMetadata}
-                        fieldPathPrefix={metadataFieldPathPrefix}
-                        isFieldPathCopyable={isOverviewContextField}
-                      />
-                    )}
-                    {!isPseudoStep && stepAiWithModel && (
-                      <AiStepSection ai={stepAiWithModel} connectorName={aiConnectorName} />
-                    )}
-                    {!isPseudoStep &&
-                      selectedStepExecutionId === waitingStepExecutionId &&
-                      waitingStepExecutionId && (
-                        <div
-                          css={{
-                            paddingTop: euiTheme.size.m,
-                            paddingBottom: euiTheme.size.m,
-                          }}
-                        >
-                          <ResumeExecutionButton
-                            executionId={executionId}
-                            workflowId={workflowExecution?.workflowId}
-                            stepStartedAt={
-                              selectedLightStep?.startedAt ??
-                              activeStepExecution?.startedAt ??
-                              waitingStepStartedAt
-                            }
-                            resumeMessage={resumeMessage}
-                            resumeSchema={resumeSchema}
-                            approvalLabels={approvalLabels}
-                            waitingStepExecutionId={selectedStepExecutionId}
-                            submitState={resumeSubmitState}
-                          />
-                        </div>
-                      )}
-                    <StepDataSection
-                      key={`input-${selectedStepExecutionId}`}
-                      label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
-                        defaultMessage: 'Input',
-                      })}
-                      data={activeStepExecution?.input}
-                      fieldPathPrefix={stepInputFieldPathPrefix}
-                    />
-                    {!isPseudoStep &&
-                      isForeachOrWhileStep &&
-                      activeStepExecution &&
-                      workflowExecution?.stepExecutions && (
-                        <ForeachIterationsSection
-                          foreachStep={activeStepExecution}
-                          allStepExecutions={workflowExecution.stepExecutions}
-                          selectedId={selectedStepExecutionId}
-                          onSelectStep={setSelectedStepExecutionId}
-                          executionStatus={workflowExecution.status}
-                        />
-                      )}
-                    {!isPseudoStep &&
-                      (hasStepError ? (
-                        <StepDataSection
-                          key={`error-${selectedStepExecutionId}`}
-                          label={i18n.translate('workflows.executionFlyout.stepDetail.error', {
-                            defaultMessage: 'Error',
-                          })}
-                          data={activeStepExecution?.error}
-                        />
-                      ) : stepOutputData != null ? (
-                        <StepDataSection
-                          key={`output-${selectedStepExecutionId}`}
-                          label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
-                            defaultMessage: 'Output',
-                          })}
-                          data={stepOutputData}
-                          fieldPathPrefix={stepOutputFieldPathPrefix}
-                        />
-                      ) : null)}
-                  </>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* ── Execution panel (own EuiFlyoutHeader / Body / Footer) ── */}
-          <div
-            css={{
-              flex: 1,
-              minWidth: 0,
-              display: 'flex',
-              flexDirection: 'column',
-              overflow: 'hidden',
-            }}
-          >
-            <EuiFlyoutHeader css={{ padding: 0 }}>
-              <EuiFlexGroup
-                justifyContent="spaceBetween"
-                alignItems="center"
-                gutterSize="xs"
-                responsive={false}
-                css={{
-                  // AppHeader compact: 8px padding + 32px size="s" control = 48px.
-                  boxSizing: 'border-box',
-                  minHeight: 48,
-                  paddingBlock: euiTheme.size.s,
-                  paddingInline: euiTheme.size.s,
-                  borderBottom: euiTheme.border.thin,
-                }}
-              >
-                <EuiButtonEmpty
-                  size="s"
-                  iconType="undo"
-                  color="text"
-                  flush="left"
-                  onClick={onClose}
-                >
-                  {i18nTexts.back}
-                </EuiButtonEmpty>
-                <EuiFlexGroup
-                  gutterSize="xs"
-                  alignItems="center"
-                  justifyContent="flexEnd"
-                  responsive={false}
-                >
-                  <EuiToolTip content={i18nTexts.share} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="share"
-                      aria-label={i18nTexts.share}
-                      color="text"
-                      size="s"
-                      iconSize="m"
-                      onClick={handleShare}
-                      isDisabled={!workflowExecution?.workflowId}
-                      data-test-subj="workflowExecutionFlyoutShare"
-                    />
-                  </EuiToolTip>
+                    <h2
+                      css={{
+                        minWidth: 0,
+                        margin: 0,
+                        color: euiTheme.colors.title,
+                      }}
+                    >
+                      <EuiTextTruncate text={stepName} />
+                    </h2>
+                  </EuiTitle>
                   <EuiToolTip content={i18nTexts.close} disableScreenReaderOutput>
                     <EuiButtonIcon
                       iconType="cross"
@@ -1202,400 +1129,653 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
                       color="text"
                       size="s"
                       iconSize="m"
-                      onClick={onClose}
+                      onClick={() => setSelectedStepExecutionId(null)}
+                      data-test-subj="workflowExecutionFlyoutStepClose"
                     />
                   </EuiToolTip>
-                </EuiFlexGroup>
-              </EuiFlexGroup>
-
-              <div
-                css={{
-                  padding: '16px 16px 8px 16px',
-                  display: 'flex',
-                  flexDirection: 'column',
-                  gap: '16px',
-                }}
-              >
-                <div>
-                  <EuiTitle size="s">
-                    <h2 css={{ wordBreak: 'break-word' }}>{workflowName}</h2>
-                  </EuiTitle>
-                  {formattedDate && startedAt && (
-                    <EuiToolTip content={formattedDateTooltip} position="top">
-                      <span tabIndex={0}>
-                        <EuiText
-                          size="xs"
-                          color="subdued"
-                          css={{ marginTop: '3px' }}
-                          data-test-subj="workflowExecutionFlyoutStartedAt"
-                        >
-                          {formattedDate}
-                          {' ('}
-                          <FormattedRelativeEnhanced value={startedAt} />
-                          {')'}
-                        </EuiText>
-                      </span>
-                    </EuiToolTip>
-                  )}
                 </div>
 
-                {showTagsRow && (
-                  <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-                    {runModeInfo?.runMode === 'test' && (
-                      <EuiFlexItem grow={false}>
-                        <EuiBadge color="warning" iconType="flask">
-                          {i18nTexts.testRun}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                    {runModeInfo?.runMode === 'stepTest' && (
-                      <EuiFlexItem grow={false}>
-                        <EuiToolTip content={stepTestTargetName}>
-                          <EuiBadge tabIndex={0} color="warning" iconType="flask">
-                            {i18n.translate('workflows.executionFlyout.runMode.stepTest', {
-                              defaultMessage: 'Step test: {name}',
-                              values: { name: truncateStepName(stepTestTargetName) },
-                            })}
-                          </EuiBadge>
-                        </EuiToolTip>
-                      </EuiFlexItem>
-                    )}
-                    {workflowTags.map((tag) => (
-                      <EuiFlexItem grow={false} key={tag}>
-                        <EuiBadge color="hollow">{tag}</EuiBadge>
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGroup>
-                )}
-
-                {workflowExecution ? (
-                  <div
-                    css={{
-                      border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
-                      borderRadius: '10px',
-                      padding: '12px',
-                      minWidth: 0,
-                      maxWidth: '100%',
-                      overflow: 'hidden',
-                    }}
-                  >
+                <div
+                  css={{
+                    flex: 1,
+                    overflowY: 'auto',
+                    overflowX: 'hidden',
+                    // No paddingTop — the first accordion already has header padding.
+                    paddingInline: euiTheme.size.base,
+                    paddingBottom: euiTheme.size.base,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: 0,
+                    minWidth: 0,
+                  }}
+                >
+                  {!isPseudoStep && (childWorkflowExecution || parentWorkflowExecution) && (
                     <div
                       css={{
-                        display: 'flex',
-                        flexDirection: 'row',
-                        alignItems: 'center',
-                        gap: '16px',
+                        paddingTop: euiTheme.size.m,
+                        paddingBottom: euiTheme.size.m,
+                      }}
+                    >
+                      <NestedWorkflowExecutionLinks
+                        stepExecution={activeStepExecution ?? selectedLightStep}
+                        childWorkflowExecution={childWorkflowExecution}
+                        parentWorkflowExecution={parentWorkflowExecution}
+                      />
+                    </div>
+                  )}
+                  {isLoadingStepData && !isPseudoStep ? (
+                    <EuiFlexGroup justifyContent="center">
+                      <EuiFlexItem grow={false}>
+                        <EuiLoadingSpinner size="l" />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  ) : activeStepExecution?.stepType === 'enter-case-branch' ? (
+                    <StepDataSection
+                      key={`status-${selectedStepExecutionId}`}
+                      label={i18n.translate('workflows.executionFlyout.caseBranch.statusLabel', {
+                        defaultMessage: 'Status',
+                      })}
+                      data={{
+                        result:
+                          activeStepExecution.status === ExecutionStatus.COMPLETED
+                            ? i18n.translate('workflows.executionFlyout.caseBranch.taken', {
+                                defaultMessage: 'Branch executed',
+                              })
+                            : i18n.translate('workflows.executionFlyout.caseBranch.skipped', {
+                                defaultMessage: 'Branch not taken',
+                              }),
+                      }}
+                    />
+                  ) : isIterationPseudoStep ? (
+                    <>
+                      {activeStepExecution?.executionTimeMs != null &&
+                        activeStepExecution.executionTimeMs > 0 && (
+                          <div css={{ flexShrink: 0 }}>
+                            <div
+                              css={{
+                                paddingTop: euiTheme.size.m,
+                                paddingBottom: euiTheme.size.m,
+                              }}
+                            >
+                              <EuiText
+                                size="s"
+                                color="subdued"
+                                data-test-subj="iterationPseudoStepDuration"
+                              >
+                                {i18n.translate('workflows.executionFlyout.iteration.duration', {
+                                  defaultMessage: 'Duration: {duration}',
+                                  values: {
+                                    duration: formatDuration(activeStepExecution.executionTimeMs),
+                                  },
+                                })}
+                              </EuiText>
+                            </div>
+                            <EuiHorizontalRule margin="none" />
+                          </div>
+                        )}
+                      {activeStepExecution?.usage && activeStepExecution.usage.totalTokens > 0 && (
+                        <TokenUsageBreakdown
+                          usage={activeStepExecution.usage}
+                          data-test-subj="iterationPseudoStepTokenUsage"
+                        />
+                      )}
+                      <StepDataSection
+                        key={`input-${selectedStepExecutionId}`}
+                        label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
+                          defaultMessage: 'Input',
+                        })}
+                        data={activeStepExecution?.input}
+                        fieldPathPrefix={stepInputFieldPathPrefix}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      {executionMetadata && (
+                        <StepDataSection
+                          key={`metadata-${selectedStepExecutionId}`}
+                          label={i18n.translate('workflows.executionFlyout.stepDetail.metadata', {
+                            defaultMessage: 'Metadata',
+                          })}
+                          data={executionMetadata}
+                          fieldPathPrefix={metadataFieldPathPrefix}
+                          isFieldPathCopyable={isOverviewContextField}
+                        />
+                      )}
+                      {!isPseudoStep && stepAiWithModel && (
+                        <AiStepSection ai={stepAiWithModel} connectorName={aiConnectorName} />
+                      )}
+                      {!isPseudoStep &&
+                        selectedStepExecutionId === waitingStepExecutionId &&
+                        waitingStepExecutionId && (
+                          <div
+                            css={{
+                              paddingTop: euiTheme.size.m,
+                              paddingBottom: euiTheme.size.m,
+                            }}
+                          >
+                            <ResumeExecutionButton
+                              executionId={executionId}
+                              workflowId={workflowExecution?.workflowId}
+                              stepStartedAt={
+                                selectedLightStep?.startedAt ??
+                                activeStepExecution?.startedAt ??
+                                waitingStepStartedAt
+                              }
+                              resumeMessage={resumeMessage}
+                              resumeSchema={resumeSchema}
+                              approvalLabels={approvalLabels}
+                              waitingStepExecutionId={selectedStepExecutionId}
+                              submitState={resumeSubmitState}
+                            />
+                          </div>
+                        )}
+                      <StepDataSection
+                        key={`input-${selectedStepExecutionId}`}
+                        label={i18n.translate('workflows.executionFlyout.stepDetail.input', {
+                          defaultMessage: 'Input',
+                        })}
+                        data={activeStepExecution?.input}
+                        fieldPathPrefix={stepInputFieldPathPrefix}
+                      />
+                      {!isPseudoStep &&
+                        isForeachOrWhileStep &&
+                        activeStepExecution &&
+                        workflowExecution?.stepExecutions && (
+                          <ForeachIterationsSection
+                            foreachStep={activeStepExecution}
+                            allStepExecutions={workflowExecution.stepExecutions}
+                            selectedId={selectedStepExecutionId}
+                            onSelectStep={setSelectedStepExecutionId}
+                            executionStatus={workflowExecution.status}
+                          />
+                        )}
+                      {!isPseudoStep &&
+                        (hasStepError ? (
+                          <StepDataSection
+                            key={`error-${selectedStepExecutionId}`}
+                            label={i18n.translate('workflows.executionFlyout.stepDetail.error', {
+                              defaultMessage: 'Error',
+                            })}
+                            data={activeStepExecution?.error}
+                          />
+                        ) : stepOutputData != null ? (
+                          <StepDataSection
+                            key={`output-${selectedStepExecutionId}`}
+                            label={i18n.translate('workflows.executionFlyout.stepDetail.output', {
+                              defaultMessage: 'Output',
+                            })}
+                            data={stepOutputData}
+                            fieldPathPrefix={stepOutputFieldPathPrefix}
+                          />
+                        ) : null)}
+                    </>
+                  )}
+                </div>
+              </div>
+            ) : null
+          }
+          executionPanel={
+            <div css={PANEL_FILL_CSS}>
+              <EuiFlyoutHeader css={{ padding: 0, width: '100%', flexShrink: 0 }}>
+                <EuiFlexGroup
+                  justifyContent="spaceBetween"
+                  alignItems="center"
+                  gutterSize="xs"
+                  responsive={false}
+                  css={{
+                    // AppHeader compact: 8px padding + 32px size="s" control = 48px.
+                    boxSizing: 'border-box',
+                    minHeight: 48,
+                    paddingBlock: euiTheme.size.s,
+                    paddingInline: euiTheme.size.s,
+                    borderBottom: euiTheme.border.thin,
+                  }}
+                >
+                  <EuiButtonEmpty
+                    size="s"
+                    iconType="undo"
+                    color="text"
+                    flush="left"
+                    onClick={onClose}
+                  >
+                    {i18nTexts.back}
+                  </EuiButtonEmpty>
+                  <EuiFlexGroup
+                    gutterSize="xs"
+                    alignItems="center"
+                    justifyContent="flexEnd"
+                    responsive={false}
+                  >
+                    <EuiToolTip content={i18nTexts.share} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="share"
+                        aria-label={i18nTexts.share}
+                        color="text"
+                        size="s"
+                        iconSize="m"
+                        onClick={handleShare}
+                        isDisabled={!workflowExecution?.workflowId}
+                        data-test-subj="workflowExecutionFlyoutShare"
+                      />
+                    </EuiToolTip>
+                    <EuiToolTip content={i18nTexts.close} disableScreenReaderOutput>
+                      <EuiButtonIcon
+                        iconType="cross"
+                        aria-label={i18nTexts.close}
+                        color="text"
+                        size="s"
+                        iconSize="m"
+                        onClick={onClose}
+                      />
+                    </EuiToolTip>
+                  </EuiFlexGroup>
+                </EuiFlexGroup>
+
+                <div
+                  css={{
+                    padding: '16px 16px 8px 16px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px',
+                  }}
+                >
+                  <div>
+                    <EuiTitle size="s">
+                      <h2 css={{ wordBreak: 'break-word' }}>{workflowName}</h2>
+                    </EuiTitle>
+                    {formattedDate && startedAt && (
+                      <EuiToolTip content={formattedDateTooltip} position="top">
+                        <span tabIndex={0}>
+                          <EuiText
+                            size="xs"
+                            color="subdued"
+                            css={{ marginTop: '3px' }}
+                            data-test-subj="workflowExecutionFlyoutStartedAt"
+                          >
+                            {formattedDate}
+                            {' ('}
+                            <FormattedRelativeEnhanced value={startedAt} />
+                            {')'}
+                          </EuiText>
+                        </span>
+                      </EuiToolTip>
+                    )}
+                  </div>
+
+                  {showTagsRow && (
+                    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
+                      {runModeInfo?.runMode === 'test' && (
+                        <EuiFlexItem grow={false}>
+                          <EuiBadge color="warning" iconType="flask">
+                            {i18nTexts.testRun}
+                          </EuiBadge>
+                        </EuiFlexItem>
+                      )}
+                      {runModeInfo?.runMode === 'stepTest' && (
+                        <EuiFlexItem grow={false}>
+                          <EuiToolTip content={stepTestTargetName}>
+                            <EuiBadge tabIndex={0} color="warning" iconType="flask">
+                              {i18n.translate('workflows.executionFlyout.runMode.stepTest', {
+                                defaultMessage: 'Step test: {name}',
+                                values: { name: truncateStepName(stepTestTargetName) },
+                              })}
+                            </EuiBadge>
+                          </EuiToolTip>
+                        </EuiFlexItem>
+                      )}
+                      {workflowTags.map((tag) => (
+                        <EuiFlexItem grow={false} key={tag}>
+                          <EuiBadge color="hollow">{tag}</EuiBadge>
+                        </EuiFlexItem>
+                      ))}
+                    </EuiFlexGroup>
+                  )}
+
+                  {workflowExecution ? (
+                    <div
+                      css={{
+                        border: `1px solid ${euiTheme.colors.borderBaseSubdued}`,
+                        borderRadius: '10px',
+                        padding: '12px',
                         minWidth: 0,
+                        maxWidth: '100%',
+                        overflow: 'hidden',
                       }}
                     >
                       <div
                         css={{
                           display: 'flex',
-                          flexDirection: 'column',
-                          gap: '2px',
-                          flex: 1,
+                          flexDirection: 'row',
+                          alignItems: 'center',
+                          gap: '16px',
                           minWidth: 0,
                         }}
                       >
-                        <EuiText
-                          size="s"
-                          color="subdued"
-                          css={{ fontWeight: 500, fontSize: '12px' }}
+                        <div
+                          css={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px',
+                            flex: 1,
+                            minWidth: 0,
+                          }}
                         >
-                          {i18nTexts.result}
-                        </EuiText>
-                        <EuiFlexGroup
-                          gutterSize="none"
-                          css={{ gap: '4px', minWidth: 0 }}
-                          alignItems="center"
-                          responsive={false}
-                        >
-                          <EuiFlexItem grow={false}>
-                            {getExecutionStatusIcon(euiTheme, workflowExecution.status)}
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                            {failedPosition ? (
-                              <EuiLink
-                                color="danger"
-                                data-test-subj="workflowExecutionFlyoutResultLink"
-                                onClick={() => {
-                                  focusFailedStep(failedPosition.step.id);
-                                }}
-                                css={{
-                                  fontWeight: 600,
-                                  fontSize: '12px',
-                                  textDecoration: 'underline',
-                                }}
-                              >
-                                {failedPosition.index != null
-                                  ? i18n.translate(
-                                      'workflows.executionFlyout.result.failedAtStep',
-                                      {
-                                        defaultMessage: 'Failed at step {n}',
-                                        values: {
-                                          n: failedPosition.index,
-                                        },
-                                      }
-                                    )
-                                  : i18n.translate('workflows.executionFlyout.result.failed', {
-                                      defaultMessage: 'Failed',
-                                    })}
-                              </EuiLink>
-                            ) : (
-                              <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
-                                {getStatusLabel(workflowExecution.status)}
-                              </EuiText>
-                            )}
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </div>
-
-                      <div
-                        aria-hidden="true"
-                        css={{
-                          width: '1px',
-                          alignSelf: 'stretch',
-                          background: euiTheme.colors.borderBaseSubdued,
-                          flexShrink: 0,
-                        }}
-                      />
-
-                      <div
-                        css={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '2px',
-                          flex: 1,
-                          minWidth: 0,
-                        }}
-                      >
-                        <EuiText
-                          size="s"
-                          color="subdued"
-                          css={{ fontWeight: 500, fontSize: '12px' }}
-                        >
-                          {i18nTexts.executionTime}
-                        </EuiText>
-                        <EuiFlexGroup
-                          gutterSize="none"
-                          css={{ gap: '4px', minWidth: 0 }}
-                          alignItems="center"
-                          responsive={false}
-                        >
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon type="clock" color="subdued" size="m" aria-hidden={true} />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                            <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
-                              {formattedDuration ?? '-'}
-                            </EuiText>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      </div>
-
-                      <div
-                        aria-hidden="true"
-                        css={{
-                          width: '1px',
-                          alignSelf: 'stretch',
-                          background: euiTheme.colors.borderBaseSubdued,
-                          flexShrink: 0,
-                        }}
-                      />
-
-                      <div
-                        css={{
-                          display: 'flex',
-                          flexDirection: 'column',
-                          gap: '2px',
-                          flex: 1,
-                          minWidth: 0,
-                        }}
-                        data-test-subj="workflowExecutionFlyoutExecutedBy"
-                      >
-                        <EuiText
-                          size="s"
-                          color="subdued"
-                          css={{ fontWeight: 500, fontSize: '12px' }}
-                        >
-                          {i18nTexts.executedBy}
-                        </EuiText>
-                        <EuiFlexGroup
-                          gutterSize="xs"
-                          alignItems="center"
-                          responsive={false}
-                          wrap={false}
-                          css={{ minWidth: 0, width: '100%' }}
-                        >
-                          <EuiFlexItem grow css={{ minWidth: 0 }}>
-                            <EuiToolTip content={executedByDisplay} display="block">
-                              <EuiText
-                                tabIndex={0}
-                                size="s"
-                                css={{
-                                  fontWeight: 600,
-                                  fontSize: '12px',
-                                  minWidth: 0,
-                                }}
-                              >
-                                <EuiTextTruncate text={executedByDisplay} truncation="middle" />
-                              </EuiText>
-                            </EuiToolTip>
-                          </EuiFlexItem>
-                          {executedByValue ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiCopy textToCopy={executedByValue}>
-                                {(copy) => {
-                                  const copyLabel = i18n.translate(
-                                    'workflows.executionFlyout.executedBy.copy',
-                                    { defaultMessage: 'Copy executed by' }
-                                  );
-                                  return (
-                                    <EuiToolTip content={copyLabel} disableScreenReaderOutput>
-                                      <EuiButtonIcon
-                                        iconType="copy"
-                                        size="xs"
-                                        color="text"
-                                        aria-label={copyLabel}
-                                        onClick={copy}
-                                        data-test-subj="workflowExecutionFlyoutExecutedByCopy"
-                                      />
-                                    </EuiToolTip>
-                                  );
-                                }}
-                              </EuiCopy>
-                            </EuiFlexItem>
-                          ) : null}
-                        </EuiFlexGroup>
-                        {workflowExecution?.effectiveIdentity?.type === 'service_account' && (
-                          <EuiText size="s" data-test-subj="workflowExecutionFlyoutRunAs">
-                            {i18n.translate('workflows.executionFlyout.runAs', {
-                              defaultMessage: 'Run as',
-                            })}
-                            {': '}
-                            <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            css={{ fontWeight: 500, fontSize: '12px' }}
+                          >
+                            {i18nTexts.result}
                           </EuiText>
-                        )}
+                          <EuiFlexGroup
+                            gutterSize="none"
+                            css={{ gap: '4px', minWidth: 0 }}
+                            alignItems="center"
+                            responsive={false}
+                          >
+                            <EuiFlexItem grow={false}>
+                              {getExecutionStatusIcon(euiTheme, workflowExecution.status)}
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                              {failedPosition ? (
+                                <EuiLink
+                                  color="danger"
+                                  data-test-subj="workflowExecutionFlyoutResultLink"
+                                  onClick={() => {
+                                    focusFailedStep(failedPosition.step.id);
+                                  }}
+                                  css={{
+                                    fontWeight: 600,
+                                    fontSize: '12px',
+                                    textDecoration: 'underline',
+                                  }}
+                                >
+                                  {failedPosition.index != null
+                                    ? i18n.translate(
+                                        'workflows.executionFlyout.result.failedAtStep',
+                                        {
+                                          defaultMessage: 'Failed at step {n}',
+                                          values: {
+                                            n: failedPosition.index,
+                                          },
+                                        }
+                                      )
+                                    : i18n.translate('workflows.executionFlyout.result.failed', {
+                                        defaultMessage: 'Failed',
+                                      })}
+                                </EuiLink>
+                              ) : waitingStepExecutionId ? (
+                                <EuiLink
+                                  color="warning"
+                                  data-test-subj="workflowExecutionFlyoutResultLink"
+                                  onClick={() => {
+                                    focusFailedStep(waitingStepExecutionId);
+                                  }}
+                                  css={{
+                                    fontWeight: 600,
+                                    fontSize: '12px',
+                                    textDecoration: 'underline',
+                                  }}
+                                >
+                                  {i18n.translate(
+                                    'workflows.executionFlyout.result.provideActionLinkText',
+                                    { defaultMessage: 'Provide action' }
+                                  )}
+                                </EuiLink>
+                              ) : (
+                                <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
+                                  {getStatusLabel(workflowExecution.status)}
+                                </EuiText>
+                              )}
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </div>
+
+                        <div
+                          aria-hidden="true"
+                          css={{
+                            width: '1px',
+                            alignSelf: 'stretch',
+                            background: euiTheme.colors.borderBaseSubdued,
+                            flexShrink: 0,
+                          }}
+                        />
+
+                        <div
+                          css={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px',
+                            flex: 1,
+                            minWidth: 0,
+                          }}
+                        >
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            css={{ fontWeight: 500, fontSize: '12px' }}
+                          >
+                            {i18nTexts.executionTime}
+                          </EuiText>
+                          <EuiFlexGroup
+                            gutterSize="none"
+                            css={{ gap: '4px', minWidth: 0 }}
+                            alignItems="center"
+                            responsive={false}
+                          >
+                            <EuiFlexItem grow={false}>
+                              <EuiIcon type="clock" color="subdued" size="m" aria-hidden={true} />
+                            </EuiFlexItem>
+                            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+                              <EuiText size="s" css={{ fontWeight: 600, fontSize: '12px' }}>
+                                {formattedDuration ?? '-'}
+                              </EuiText>
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </div>
+
+                        <div
+                          aria-hidden="true"
+                          css={{
+                            width: '1px',
+                            alignSelf: 'stretch',
+                            background: euiTheme.colors.borderBaseSubdued,
+                            flexShrink: 0,
+                          }}
+                        />
+
+                        <div
+                          css={{
+                            display: 'flex',
+                            flexDirection: 'column',
+                            gap: '2px',
+                            flex: 1,
+                            minWidth: 0,
+                          }}
+                          data-test-subj="workflowExecutionFlyoutExecutedBy"
+                        >
+                          <EuiText
+                            size="s"
+                            color="subdued"
+                            css={{ fontWeight: 500, fontSize: '12px' }}
+                          >
+                            {i18nTexts.executedBy}
+                          </EuiText>
+                          <EuiFlexGroup
+                            gutterSize="xs"
+                            alignItems="center"
+                            responsive={false}
+                            wrap={false}
+                            css={{ minWidth: 0, width: '100%' }}
+                          >
+                            <EuiFlexItem grow css={{ minWidth: 0 }}>
+                              <EuiToolTip content={executedByDisplay} display="block">
+                                <EuiText
+                                  tabIndex={0}
+                                  size="s"
+                                  css={{
+                                    fontWeight: 600,
+                                    fontSize: '12px',
+                                    minWidth: 0,
+                                  }}
+                                >
+                                  <EuiTextTruncate text={executedByDisplay} truncation="middle" />
+                                </EuiText>
+                              </EuiToolTip>
+                            </EuiFlexItem>
+                            {executedByValue ? (
+                              <EuiFlexItem grow={false}>
+                                <EuiCopy textToCopy={executedByValue}>
+                                  {(copy) => {
+                                    const copyLabel = i18n.translate(
+                                      'workflows.executionFlyout.executedBy.copy',
+                                      { defaultMessage: 'Copy executed by' }
+                                    );
+                                    return (
+                                      <EuiToolTip content={copyLabel} disableScreenReaderOutput>
+                                        <EuiButtonIcon
+                                          iconType="copy"
+                                          size="xs"
+                                          color="text"
+                                          aria-label={copyLabel}
+                                          onClick={copy}
+                                          data-test-subj="workflowExecutionFlyoutExecutedByCopy"
+                                        />
+                                      </EuiToolTip>
+                                    );
+                                  }}
+                                </EuiCopy>
+                              </EuiFlexItem>
+                            ) : null}
+                          </EuiFlexGroup>
+                          {workflowExecution?.effectiveIdentity?.type === 'service_account' && (
+                            <EuiText size="s" data-test-subj="workflowExecutionFlyoutRunAs">
+                              {i18n.translate('workflows.executionFlyout.runAs', {
+                                defaultMessage: 'Run as',
+                              })}
+                              {': '}
+                              <ServiceAccountName id={workflowExecution.effectiveIdentity.id} />
+                            </EuiText>
+                          )}
+                        </div>
                       </div>
                     </div>
-                  </div>
+                  ) : (
+                    <EuiLoadingSpinner size="m" />
+                  )}
+
+                  {hasResumeError && <ResumeUnavailableCallout onRetry={retryResume} />}
+                </div>
+              </EuiFlyoutHeader>
+
+              <EuiFlyoutBody
+                css={css`
+                  flex: 1;
+                  min-height: 0;
+                  width: 100%;
+                  .euiFlyoutBody__overflow {
+                    width: 100%;
+                  }
+                  .euiFlyoutBody__overflowContent {
+                    padding: 0;
+                    width: 100%;
+                  }
+                `}
+              >
+                {!workflowExecution && !error ? (
+                  <EuiFlexGroup
+                    justifyContent="center"
+                    css={{ padding: `${euiTheme.size.xl} ${euiTheme.size.base} 0` }}
+                  >
+                    <EuiFlexItem grow={false}>
+                      <EuiLoadingSpinner size="l" />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
                 ) : (
-                  <EuiLoadingSpinner size="m" />
-                )}
-
-                {waitingStepExecutionId && workflowExecution && (
-                  <ResumeExecutionButton
-                    executionId={executionId}
-                    workflowId={workflowExecution.workflowId}
-                    stepStartedAt={waitingStepStartedAt}
-                    resumeMessage={resumeMessage}
-                    resumeSchema={resumeSchema}
-                    approvalLabels={approvalLabels}
-                    autoOpen={shouldAutoResume}
-                    waitingStepExecutionId={waitingStepExecutionId}
-                    submitState={resumeSubmitState}
-                  />
-                )}
-                {hasResumeError && <ResumeUnavailableCallout onRetry={retryResume} />}
-              </div>
-            </EuiFlyoutHeader>
-
-            <EuiFlyoutBody
-              css={css`
-                .euiFlyoutBody__overflowContent {
-                  padding: 0;
-                }
-              `}
-            >
-              {!workflowExecution && !error ? (
-                <EuiFlexGroup
-                  justifyContent="center"
-                  css={{ padding: `${euiTheme.size.xl} ${euiTheme.size.base} 0` }}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiLoadingSpinner size="l" />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              ) : (
-                <>
-                  <EuiTabs css={{ paddingInline: euiTheme.size.base }}>
-                    <EuiTab
-                      isSelected={activeTab === 'table'}
-                      onClick={() => setActiveTab('table')}
-                    >
-                      {i18nTexts.tableTab}
-                    </EuiTab>
-                    <EuiTab isSelected={activeTab === 'json'} onClick={() => setActiveTab('json')}>
-                      {i18nTexts.jsonTab}
-                    </EuiTab>
-                  </EuiTabs>
-                  {/*
+                  <>
+                    <EuiTabs css={{ paddingInline: euiTheme.size.base }}>
+                      <EuiTab
+                        isSelected={activeTab === 'table'}
+                        onClick={() => setActiveTab('table')}
+                      >
+                        {i18nTexts.tableTab}
+                      </EuiTab>
+                      <EuiTab
+                        isSelected={activeTab === 'json'}
+                        onClick={() => setActiveTab('json')}
+                      >
+                        {i18nTexts.jsonTab}
+                      </EuiTab>
+                    </EuiTabs>
+                    {/*
                     No Table-tab step search: findability is auto-scroll, the header
                     failure link, and iteration pins. If step search returns, spec
                     expand-on-match and match handling inside collapsed gaps/attempts
                     first — naive filter breaks the pin/gap model. (Subflyout
                     Input/Output field/value search is separate and required.)
                   */}
-                  <div
-                    css={{
-                      padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
-                    }}
-                  >
-                    {/* Both tabs show the same paginated run, so the callout is outside the Table branch. */}
-                    <StepExecutionsTruncatedCallout
-                      executionId={executionId}
-                      loadedCount={workflowExecution?.stepExecutions.length ?? 0}
-                    />
-                    {showStepExecutionTree && (
-                      <WorkflowStepExecutionTree
-                        definition={workflowDefinition}
-                        execution={workflowExecution ?? null}
-                        stepExecutionsTotal={stepExecutionsTotal}
-                        error={error}
-                        onStepExecutionClick={setSelectedStepExecutionId}
-                        selectedId={selectedStepExecutionId}
-                        childExecutionsMap={childExecutions}
-                        isLoadingChildExecutions={isLoadingChildExecutions}
-                        autoExpandErrorForStepId={autoExpandErrorForStepId}
-                        errorArrivalPulseStepId={errorArrivalPulseStepId}
-                        workflowName={workflowName}
-                        onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+                    <div
+                      css={{
+                        padding: `${euiTheme.size.s} ${euiTheme.size.base} ${euiTheme.size.base}`,
+                      }}
+                    >
+                      {/* Both tabs show the same paginated run, so the callout is outside the Table branch. */}
+                      <StepExecutionsTruncatedCallout
+                        executionId={executionId}
+                        loadedCount={workflowExecution?.stepExecutions.length ?? 0}
                       />
-                    )}
-                    {!showStepExecutionTree && (
-                      <div css={{ height: '70vh' }}>
-                        <JSONCodeEditorCommonMemoized
-                          data-test-subj="workflowExecutionJsonEditor"
-                          jsonValue={executionJson}
-                          onEditorDidMount={() => {}}
-                          height="100%"
-                          hasLineNumbers
-                          enableFindAction
+                      {showStepExecutionTree && (
+                        <WorkflowStepExecutionTree
+                          definition={workflowDefinition}
+                          execution={workflowExecution ?? null}
+                          stepExecutionsTotal={stepExecutionsTotal}
+                          error={error}
+                          onStepExecutionClick={setSelectedStepExecutionId}
+                          selectedId={selectedStepExecutionId}
+                          childExecutionsMap={childExecutions}
+                          isLoadingChildExecutions={isLoadingChildExecutions}
+                          autoExpandErrorForStepId={autoExpandErrorForStepId}
+                          errorArrivalPulseStepId={errorArrivalPulseStepId}
+                          workflowName={workflowName}
+                          onBeforeDiagnose={() => setSelectedStepExecutionId(null)}
+                          waitingAction={waitingAction}
                         />
-                      </div>
-                    )}
-                  </div>
-                </>
-              )}
-            </EuiFlyoutBody>
+                      )}
+                      {!showStepExecutionTree && (
+                        <div css={{ height: '70vh' }}>
+                          <JSONCodeEditorCommonMemoized
+                            data-test-subj="workflowExecutionJsonEditor"
+                            jsonValue={executionJson}
+                            onEditorDidMount={() => {}}
+                            height="100%"
+                            hasLineNumbers
+                            enableFindAction
+                          />
+                        </div>
+                      )}
+                    </div>
+                  </>
+                )}
+              </EuiFlyoutBody>
 
-            <EuiFlyoutFooter>
-              <div css={{ padding: `${euiTheme.size.m} ${euiTheme.size.base}` }}>
-                <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
-                  <EuiFlexItem grow={false}>
-                    {workflowExecution && (
-                      <ExecutionTakeActionSplitButton
-                        execution={workflowExecution}
-                        failedStepId={failedPosition?.step.stepId}
-                        onOpenFailedStepInEditor={handleOpenFailedStepInEditor}
-                      />
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </div>
-            </EuiFlyoutFooter>
-          </div>
-        </div>
+              <EuiFlyoutFooter css={{ width: '100%', flexShrink: 0 }}>
+                <div css={{ padding: `${euiTheme.size.m} ${euiTheme.size.base}` }}>
+                  <EuiFlexGroup justifyContent="flexEnd" gutterSize="none">
+                    <EuiFlexItem grow={false}>
+                      {workflowExecution && (
+                        <ExecutionTakeActionSplitButton
+                          execution={workflowExecution}
+                          failedStepId={failedPosition?.step.stepId}
+                          onOpenFailedStepInEditor={handleOpenFailedStepInEditor}
+                        />
+                      )}
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                </div>
+              </EuiFlyoutFooter>
+            </div>
+          }
+        />
       </EuiFlyout>
     );
   }

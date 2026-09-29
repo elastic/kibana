@@ -204,26 +204,14 @@ describe('WorkflowStepExecutionDetails', () => {
     ).toBeInTheDocument();
   });
 
-  it('does not show resume UI on overview until waitingStepExecutionId is ready', () => {
+  it('does not show resume UI on overview — waiting actions live on the step row', () => {
     const overviewStep = createRegularStep({
       id: '__overview',
       stepId: 'Overview',
       stepType: '__overview',
     });
 
-    const { rerender } = render(
-      <TestWrapper>
-        <WorkflowStepExecutionDetails
-          workflowExecutionId="exec-1"
-          stepExecution={overviewStep}
-          workflowExecutionStatus={ExecutionStatus.WAITING_FOR_INPUT}
-        />
-      </TestWrapper>
-    );
-
-    expect(mockOverviewProps.current.showResumeUI).toBe(false);
-
-    rerender(
+    render(
       <TestWrapper>
         <WorkflowStepExecutionDetails
           workflowExecutionId="exec-1"
@@ -234,6 +222,6 @@ describe('WorkflowStepExecutionDetails', () => {
       </TestWrapper>
     );
 
-    expect(mockOverviewProps.current.showResumeUI).toBe(true);
+    expect(mockOverviewProps.current.showResumeUI).toBe(false);
   });
 });
