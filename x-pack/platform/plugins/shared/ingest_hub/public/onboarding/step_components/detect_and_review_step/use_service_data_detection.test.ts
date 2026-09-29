@@ -170,6 +170,33 @@ describe('useServiceDataDetection', () => {
     expect(Object.keys(merged.results)).toHaveLength(35);
   });
 
+  it('polls duplicate namespaces on resume, where only serviceVars are restored', async () => {
+    const { httpGet } = setup({
+      serviceSettings: {
+        globalRegion: 'us-east-1',
+        serviceVars: {
+          cloudtrail: {
+            enabledDataStreams: ['cloudtrail'],
+            varsByDataStream: {},
+            namespace: 'prod',
+          },
+          'cloudtrail__dup-1': {
+            enabledDataStreams: ['cloudtrail'],
+            varsByDataStream: {},
+            namespace: 'staging',
+          },
+        },
+      },
+    });
+    renderHook(() => useServiceDataDetection());
+
+    await mockUseQuery.mock.calls[0][0].queryFn();
+
+    expect(httpGet.mock.calls[0][1].query.dataStreams).toBe(
+      'logs-aws.cloudtrail-prod,logs-aws.cloudtrail-staging'
+    );
+  });
+
   it('keeps the wildcard pattern when no namespace is set', async () => {
     const { httpGet } = setup({
       serviceSettings: { globalRegion: 'us-east-1', serviceVars: {} },

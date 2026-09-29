@@ -61,6 +61,9 @@ export interface ServiceSettingsPersistedState {
 
 export const SERVICE_SETTINGS_SESSION_KEY = getOnboardingSessionKey('aws', 'serviceSettingsStep');
 
+/** Duplicate instance ids are `<serviceId>__dup-<n>`. */
+export const getDuplicateInstanceIdPrefix = (serviceId: string): string => `${serviceId}__dup-`;
+
 export const DEFAULT_SERVICE_SETTINGS: ServiceSettingsPersistedState = {
   globalRegion: '',
   serviceVars: {},
@@ -232,9 +235,9 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
 
       const existingIds = new Set(instances.map((i) => i.instanceId));
       let n = instances.filter((i) => i.serviceId === source.serviceId && i.isDuplicate).length + 1;
-      let newInstanceId = `${source.serviceId}__dup-${n}`;
+      let newInstanceId = `${getDuplicateInstanceIdPrefix(source.serviceId)}${n}`;
       while (existingIds.has(newInstanceId)) {
-        newInstanceId = `${source.serviceId}__dup-${++n}`;
+        newInstanceId = `${getDuplicateInstanceIdPrefix(source.serviceId)}${++n}`;
       }
 
       const sourceVars = getServiceVars(sourceInstanceId);

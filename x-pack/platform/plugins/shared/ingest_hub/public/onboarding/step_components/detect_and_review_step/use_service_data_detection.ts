@@ -19,6 +19,7 @@ import type { HasDataResponse } from '../../../../common/core/detection_api';
 import {
   DEFAULT_SERVICE_SETTINGS,
   SERVICE_SETTINGS_SESSION_KEY,
+  getDuplicateInstanceIdPrefix,
   type ServiceSettingsPersistedState,
 } from '../service_settings_step/use_service_settings';
 
@@ -51,12 +52,16 @@ function getServiceInstancePatterns(
   entry: AwsServiceMatrixEntry,
   serviceSettings: ServiceSettingsPersistedState
 ): string[] {
-  const instanceIds = (serviceSettings.instances ?? [])
-    .filter((inst) => inst.serviceId === serviceId)
-    .map((inst) => inst.instanceId);
+  const { instances, serviceVars = {} } = serviceSettings;
+  // A resumed session restores serviceVars but not instances, so fall back to the serviceVars keys.
+  const instanceIds = instances
+    ? instances.filter((inst) => inst.serviceId === serviceId).map((inst) => inst.instanceId)
+    : Object.keys(serviceVars).filter(
+        (id) => id === serviceId || id.startsWith(getDuplicateInstanceIdPrefix(serviceId))
+      );
   if (instanceIds.length === 0) instanceIds.push(serviceId);
   const patterns = instanceIds.flatMap((instanceId) =>
-    getServiceIndexPatterns(entry, serviceSettings.serviceVars?.[instanceId]?.namespace)
+    getServiceIndexPatterns(entry, serviceVars[instanceId]?.namespace)
   );
   return [...new Set(patterns)];
 }
