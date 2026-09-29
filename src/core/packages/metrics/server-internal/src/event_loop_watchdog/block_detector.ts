@@ -18,7 +18,7 @@ export type DetectorEvent =
   | { type: 'block-start'; startedAt: number; detectedAt: number }
   | { type: 'live-notice'; startedAt: number; elapsedMs: number; count: number }
   /** The block has lasted `profileAfter` and the cooldown allows a capture. */
-  | { type: 'profile-start' }
+  | { type: 'profile-start'; blockId: number }
   | { type: 'profile-deadline' }
   | {
       type: 'block-end';
@@ -43,6 +43,7 @@ type DetectorOptions = Pick<
 >;
 
 interface BlockState {
+  id: number;
   startedAt: number;
   liveNotices: number;
   lastLiveNoticeAt: number;
@@ -59,6 +60,7 @@ interface BlockState {
 export class BlockDetector {
   private block?: BlockState;
   private lastProfileStartedAt = Number.NEGATIVE_INFINITY;
+  private nextBlockId = 0;
   private reportTokens = REPORT_BURST;
   private lastRefillAt?: number;
   private suppressedBlocks = 0;
@@ -76,6 +78,7 @@ export class BlockDetector {
     if (!block) {
       if (now - lastHeartbeat < options.thresholdMs) return [];
       this.block = {
+        id: this.nextBlockId++,
         startedAt: lastHeartbeat,
         liveNotices: 0,
         lastLiveNoticeAt: lastHeartbeat,
@@ -127,7 +130,7 @@ export class BlockDetector {
       now - this.lastProfileStartedAt >= options.profileCooldownMs
     ) {
       block.profileRequested = true;
-      events.push({ type: 'profile-start' });
+      events.push({ type: 'profile-start', blockId: block.id });
     }
     if (
       block.profileStartedAt !== undefined &&
@@ -141,13 +144,13 @@ export class BlockDetector {
   }
 
   /**
-   * Records that the profiler actually started (acknowledged) at `now`. Only then is the cooldown
-   * consumed, so skipped or long-pending captures do not skew it. The profile deadline is armed
-   * only if the block is still ongoing.
+   * Records that the profiler started (acknowledged) at `now` for the capture requested by block
+   * `blockId`. Only then is the cooldown consumed, so skipped or long-pending captures do not skew
+   * it. The profile deadline is armed only if that same block is still ongoing.
    */
-  public onCaptureStarted(now: number): void {
+  public onCaptureStarted(now: number, blockId: number): void {
     this.lastProfileStartedAt = now;
-    if (this.block && this.block.profileStartedAt === undefined) {
+    if (this.block?.id === blockId && this.block.profileStartedAt === undefined) {
       this.block.profileStartedAt = now;
     }
   }

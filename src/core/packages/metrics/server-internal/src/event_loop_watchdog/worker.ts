@@ -39,6 +39,8 @@ const hrUs = (): number => Number(process.hrtime.bigint() / 1000n);
 const MAX_PENDING_REPORTS = 10;
 
 interface Capture {
+  /** Detector id of the block that requested this capture. */
+  blockId: number;
   requestedAtUs: number;
   startAckUs?: number;
   stopAckUs?: number;
@@ -144,12 +146,12 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     };
   };
 
-  const startCapture = (): Capture => {
-    const capture: Capture = { requestedAtUs: hrUs(), done: Promise.resolve() };
+  const startCapture = (blockId: number): Capture => {
+    const capture: Capture = { blockId, requestedAtUs: hrUs(), done: Promise.resolve() };
     capture.done = inspect('Profiler.start')
       .then(() => {
         capture.startAckUs = hrUs();
-        detector.onCaptureStarted(capture.startAckUs / 1000);
+        detector.onCaptureStarted(capture.startAckUs / 1000, capture.blockId);
       })
       .catch((error) => {
         capture.error = `Profiler.start failed: ${error.message}`;
@@ -205,7 +207,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     };
   };
 
-  const onProfileStart = () => {
+  const onProfileStart = ({ blockId }: Extract<DetectorEvent, { type: 'profile-start' }>) => {
     if (!block || !profilingEnabled) return;
     if (captureInFlight) {
       block.captureSkippedReason = 'a previous capture is still in progress';
@@ -213,7 +215,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       block.captureSkippedReason = 'profiler unavailable or not yet enabled';
     } else {
       captureInFlight = true;
-      block.capture = startCapture();
+      block.capture = startCapture(blockId);
     }
   };
 
@@ -293,7 +295,7 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       case 'live-notice':
         return onLiveNotice(event);
       case 'profile-start':
-        return onProfileStart();
+        return onProfileStart(event);
       case 'profile-deadline':
         if (block?.capture) {
           stopCapture(block.capture).catch((error) => reportError('profile stop failed', error));
