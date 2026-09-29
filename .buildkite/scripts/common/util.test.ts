@@ -40,9 +40,12 @@ esac
     `#!/usr/bin/env bash
 set -euo pipefail
 echo "gcloud $*" >> "$CALLS_FILE"
-if [[ "$1 $2" == "auth list" ]]; then
-  echo "kibana-ci-sa-proxy@elastic-kibana-ci.iam.gserviceaccount.com"
+if [[ "$1 $2" == "auth login" ]]; then
+  [[ "\${GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES:-}" == "1" ]]
+elif [[ "$1 $2" == "auth print-access-token" ]]; then
+  echo "mock-token"
 elif [[ "$1 $2" == "storage cp" ]]; then
+  echo "gcloud-auth token=$(cat "\${CLOUDSDK_AUTH_ACCESS_TOKEN_FILE:-/dev/null}") impersonate=[\${CLOUDSDK_AUTH_IMPERSONATE_SERVICE_ACCOUNT-unset}]" >> "$CALLS_FILE"
   src="\${3/gs:\\/\\//$FAKE_GCS/}"
   dest="\${4/gs:\\/\\//$FAKE_GCS/}"
   mkdir -p "$(dirname "$dest")"
@@ -68,6 +71,7 @@ const setupSandbox = () => {
     gcs: Path.join(root, 'gcs'),
     checkout: Path.join(root, 'checkout'),
     gcloudConfig: Path.join(root, 'gcloud-config'),
+    wifCredentials: Path.join(root, 'wif-credentials'),
   };
   Object.values(dirs).forEach((dir) => Fs.mkdirSync(dir, { recursive: true }));
   Fs.writeFileSync(Path.join(dirs.gcloudConfig, 'config'), '');
@@ -92,6 +96,8 @@ const setupSandbox = () => {
           META_FILE: metaFile,
           FAKE_GCS: dirs.gcs,
           CLOUDSDK_CONFIG: dirs.gcloudConfig,
+          KIBANA_WIF_CREDENTIALS_DIR: dirs.wifCredentials,
+          GOOGLE_EXTERNAL_ACCOUNT_ALLOW_EXECUTABLES: '1',
           BUILDKITE_AGENT_GCP_REGION: 'us-central1',
           BUILDKITE_BUILD_ID: BUILD_ID,
           ...env,
@@ -144,6 +150,21 @@ describe('tmp artifact helpers', () => {
       '{"groups":[]}'
     );
     expect(download.calls.some((call) => call.includes('artifact download'))).toBe(false);
+  });
+
+  it('mints one access token per upload and shares it across regional uploads', () => {
+    const { dirs, run } = sandbox;
+    Fs.writeFileSync(Path.join(dirs.root, 'a.json'), '{}');
+
+    const upload = run(`upload_tmp_artifact "${dirs.root}/a.json" a.json "${BUILD_ID}"`);
+
+    expect(upload.status).toBe(0);
+    expect(upload.calls.filter((call) => call === 'gcloud auth print-access-token')).toHaveLength(
+      1
+    );
+    const cpAuth = upload.calls.filter((call) => call.startsWith('gcloud-auth'));
+    expect(cpAuth).toHaveLength(7);
+    expect(new Set(cpAuth)).toEqual(new Set(['gcloud-auth token=mock-token impersonate=[]']));
   });
 
   it('discards a GCS object whose checksum does not match and falls back to buildkite', () => {
