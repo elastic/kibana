@@ -9,15 +9,19 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { PluginStart, Setup, Start } from '@kbn/core-di';
 import { Global } from '@kbn/core-di-internal';
 import { CoreStart, Request } from '@kbn/core-di-server';
-import type { FakeRawRequest, KibanaRequest } from '@kbn/core/server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
+import type { KibanaRequest } from '@kbn/core/server';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { RulesClient } from '../lib/rules_client';
 import { ActionPolicyClient } from '../lib/action_policy_client';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { AlertEventsClient } from '../lib/alert_events_client';
 import { RequestSpaceIdToken } from '../lib/services/spaces_service/tokens';
-import { RuleSavedObjectsClientToken } from '../lib/services/rules_saved_object_service/tokens';
+import {
+  RuleSavedObjectsClientToken,
+  RulesSavedObjectServiceInternalToken,
+} from '../lib/services/rules_saved_object_service/tokens';
+import { createInternalUserRequest } from '../lib/internal_user_request';
+import { createInternalRulesClient } from '../lib/internal_rules_client';
 import { spaceIdToNamespace } from '../lib/space_id_to_namespace';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
@@ -60,8 +64,7 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
     const savedObjects = get(CoreStart('savedObjects'));
     const spaces = get(PluginStart<AlertingServerStartDependencies['spaces']>('spaces'));
     const buildInternalScope = (spaceId: SpaceId) => {
-      const fakeRawRequest: FakeRawRequest = { headers: {}, spaceId };
-      const scope = buildScope(kibanaRequestFactory(fakeRawRequest), spaceId);
+      const scope = buildScope(createInternalUserRequest(spaceId), spaceId);
       const internalClient = savedObjects.getUnsafeInternalClient({
         includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE],
       });
@@ -73,6 +76,7 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
         );
       return scope;
     };
+    const rulesSavedObjectServiceInternal = get(RulesSavedObjectServiceInternalToken);
 
     const contract: AlertingServerStart = {
       async getRulesClientWithRequest(request: KibanaRequest): Promise<RulesClientApi> {
@@ -84,10 +88,11 @@ export function bindContract({ bind }: ContainerModuleLoadOptions) {
       ): Promise<RulesClientApi> {
         return buildScope(request, spaceId).get(RulesClient);
       },
-      async getInternalRulesClientInSpace(spaceId: SpaceId): Promise<InternalRulesClientApi> {
-        const rulesClient = buildInternalScope(spaceId).get(RulesClient);
-        // Expose only disable, so the internal user cannot create, enable or edit rules.
-        return { bulkDisableRules: (params) => rulesClient.bulkDisableRules(params) };
+      async getInternalRulesClient(): Promise<InternalRulesClientApi> {
+        return createInternalRulesClient({
+          rulesSavedObjectService: rulesSavedObjectServiceInternal,
+          getRulesClientInSpace: (spaceId) => buildInternalScope(spaceId).get(RulesClient),
+        });
       },
       async getActionPolicyClientWithRequest(
         request: KibanaRequest

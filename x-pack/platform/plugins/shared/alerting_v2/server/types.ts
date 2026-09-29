@@ -62,11 +62,11 @@ export interface AlertingServerStart {
   ): Promise<RulesClientApi>;
 
   /**
-   * Returns a rules client that acts as the internal Kibana user in a space, for
-   * system-initiated work with no user request. It only disables rules and bypasses
-   * user authorization, so callers own the decision of which rules to disable.
+   * Returns a rules client that acts as the internal Kibana user across every space,
+   * for system-initiated work with no user request. It only disables rules and
+   * bypasses user authorization, so callers own the decision of which rules to disable.
    */
-  getInternalRulesClientInSpace(spaceId: SpaceId): Promise<InternalRulesClientApi>;
+  getInternalRulesClient(): Promise<InternalRulesClientApi>;
 
   getActionPolicyClientWithRequest(request: KibanaRequest): Promise<ActionPolicyClientApi>;
   getActionPolicyClientWithRequestInSpace(
