@@ -514,7 +514,7 @@ describe('resolveHuntScope', () => {
       expect(result.index_patterns).toEqual(result.required);
     });
 
-    it('collapses a match wider than the request path allows onto the bounded broad target, degraded', async () => {
+    it('collapses a match too wide to name onto one wildcard per matched vendor, degraded', async () => {
       const esClient = createMockEsClient(new Set([alertsPattern]));
       const wide: DiscoveredDataset[] = Array.from({ length: MAX_SCOPE_TARGETS + 1 }, (_, i) => ({
         index_pattern: `logs-microsoft.ds${i}-*`,
@@ -535,8 +535,59 @@ describe('resolveHuntScope', () => {
 
       expect(result.resolution).toBe('discovered:deterministic');
       expect(result.status).toBe('degraded');
+      // Still only Microsoft: an unmatched Okta stream, or a `microsoftx` vendor, stays out of the hit bar.
+      expect(result.required).toEqual(['logs-microsoft.*', 'logs-microsoft_*', 'logs-microsoft-*']);
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('3 vendor wildcard(s)'));
+    });
+
+    it('bounds the serialized target list, not just the entry count', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern]));
+      const longName = (i: number) => `microsoft_${'x'.repeat(200)}${i}.log`;
+      const wide: DiscoveredDataset[] = Array.from({ length: 20 }, (_, i) => ({
+        index_pattern: `logs-${longName(i)}-*`,
+        dataset: longName(i),
+        vendor: `microsoft_${'x'.repeat(200)}${i}`,
+        data_streams: [`logs-${longName(i)}-default`],
+        search_patterns: [`logs-${longName(i)}-*`],
+      }));
+      mockDiscover.mockResolvedValue(wide);
+      mockDeterministic.mockReturnValue(wide);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { vendor: 'Microsoft' },
+        logger,
+      });
+
+      // 20 entries is under the count cap, but 20 patterns of ~220 chars is over 4 KB.
+      expect(result.required).toEqual(['logs-microsoft.*', 'logs-microsoft_*', 'logs-microsoft-*']);
+      expect(result.status).toBe('degraded');
+    });
+
+    it('falls back to the broad target only when even one wildcard per vendor does not fit', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern]));
+      const wide: DiscoveredDataset[] = Array.from({ length: MAX_SCOPE_TARGETS + 1 }, (_, i) => ({
+        index_pattern: `logs-vendor${i}.log-*`,
+        dataset: `vendor${i}.log`,
+        vendor: `vendor${i}`,
+        data_streams: [`logs-vendor${i}.log-default`],
+        search_patterns: [`logs-vendor${i}.log-*`],
+      }));
+      mockDiscover.mockResolvedValue(wide);
+      mockDeterministic.mockReturnValue(wide);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { vendor: 'v' },
+        logger,
+      });
+
       expect(result.required).toEqual(broadSearchPatterns());
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('more than the 64'));
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('the bounded logs-* target')
+      );
     });
 
     it('is ok on a deterministic vendor match with the discovered pattern as required', async () => {

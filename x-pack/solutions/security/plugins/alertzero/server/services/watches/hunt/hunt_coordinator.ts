@@ -36,7 +36,7 @@ export type HuntCoordinatorTier2SkipReason =
   | 'no_inference'
   | 'no_environment_hits'
   /**
-   * The scope was every discovered dataset (`discovered:broad`) and Tier 1 confirmed no
+   * The scope was every log source (`discovered:broad`) and Tier 1 left no matched required index (no confirmed hit, or a hit reached only through an alias), so
    * hit, so there is no matched index set for Tier 2 to generate against. Deterministic
    * for this run; not counted as lost coverage.
    */
@@ -346,15 +346,23 @@ const decideTier2Skip = ({
   tier1,
   hasTier2Input,
   resolution,
+  hasMatchedRequiredIndex,
 }: {
   tier2When: 'on_hits' | 'always' | 'never';
   tier1: HuntForThreatResult;
   /** True when the run has report text, or a vendor or product from the report context. */
   hasTier2Input: boolean;
   resolution: HuntScopeResolution;
+  /** Whether any `per_index` bucket is a required index Tier 2 could be pointed at. */
+  hasMatchedRequiredIndex: boolean;
 }): HuntCoordinatorTier2SkipReason | null => {
   if (tier2When === 'never') return 'configured_never';
-  if (resolution === 'discovered:broad' && !tier1.has_confirmed_hit) {
+  // A broad scope is a wildcard, so Tier 2 needs the concrete indices Tier 1 hit. A
+  // hit that arrived through an alias (`logs-archive` over `archive-v1`) confirms
+  // the count but leaves no required-index bucket to generate against, and the
+  // broad wildcard itself is not an allowed Tier 2 source, so there is no safe
+  // target: skip rather than emit a query the source gate would refuse.
+  if (resolution === 'discovered:broad' && (!tier1.has_confirmed_hit || !hasMatchedRequiredIndex)) {
     return 'no_matched_scope';
   }
   if (tier1.status === 'no_searchable_terms') {
@@ -744,6 +752,7 @@ export const huntCoordinator = async (
     tier1: tier1Raw,
     hasTier2Input,
     resolution: scope.resolution,
+    hasMatchedRequiredIndex: tier1Raw.per_index.some((bucket) => bucket.required),
   });
   if (skipReason) {
     return tier1Only({
@@ -751,7 +760,7 @@ export const huntCoordinator = async (
       message: `Tier 1: ${tier1Raw.status}. Tier 2 skipped (${skipReason}).`,
       nextStep:
         skipReason === 'no_matched_scope'
-          ? "The scope was every discovered dataset and Tier 1 matched none of them, so Tier 2 had no index set to generate against. Install an integration for the report's vendor, or pin a technology, to hunt its behaviors."
+          ? "The scope was every log source and Tier 1 left no matched index Tier 2 could be pointed at (no hit, or a hit reached only through an alias), so Tier 2 had no safe target. Install an integration for the report's vendor, or pin a technology, to hunt its behaviors."
           : tier1Raw.status === 'environment_hits_found'
           ? 'Tier 1 matched. Re-run with tier2_when: "always" for behavioral rule proposals.'
           : 'No environment matches. Consider widening time_range.',

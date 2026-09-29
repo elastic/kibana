@@ -278,11 +278,38 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntS
  * so they do not affect the hit bar; they only keep those streams out of the search.
  */
 /**
- * Most targets a matched scope may hand Tier 1. `_search` and `_count` receive the
- * list in the request path, and Elasticsearch's default initial-line limit is 4 KB,
- * so a wider match collapses to the bounded broad target instead of failing the hunt.
+ * Bounds on what a matched scope may hand Tier 1. `_search` and `_count` receive the
+ * target list in the request path, and Elasticsearch's default initial-line limit
+ * is 4 KB, so both the entry count and the serialized length are capped, leaving
+ * room for the path itself and the space-derived alerts pattern. A match that does
+ * not fit collapses first onto one `logs-<vendor>*` wildcard per matched vendor,
+ * which still covers only the matched vendors, and only failing that onto the broad
+ * target.
  */
 export const MAX_SCOPE_TARGETS = 64;
+/** Unencoded length; the client percent-encodes the separating commas, so this stays at half the limit. */
+export const MAX_SCOPE_TARGET_CHARS = 2048;
+
+const fitsRequestPath = (targets: string[]): boolean =>
+  targets.length <= MAX_SCOPE_TARGETS && targets.join(',').length <= MAX_SCOPE_TARGET_CHARS;
+
+/**
+ * Three wildcards per matched vendor prefix (`microsoft` for both `microsoft.dhcp`
+ * and `microsoft_defender_endpoint.log`), one for each character that can follow a
+ * vendor token in a dataset name: `logs-microsoft.*`, `logs-microsoft_*`,
+ * `logs-microsoft-*`. That covers every dataset of the matched vendors without
+ * reaching a vendor that merely shares the prefix (`microsoftx`). Far fewer targets
+ * than the dataset list; sibling isolation within a vendor is given up, which is
+ * why the scope reads as degraded.
+ */
+export const vendorWildcards = (matches: DiscoveredDataset[]): string[] =>
+  uniq(
+    matches.flatMap((match) => {
+      const type = match.index_pattern.split('-')[0];
+      const vendorPrefix = match.vendor.split(/[._-]/)[0];
+      return ['.', '_', '-'].map((separator) => `${type}-${vendorPrefix}${separator}*`);
+    })
+  );
 
 export const broadSearchPatterns = (): string[] => [
   HUNT_DISCOVERY_PATTERN,
@@ -321,22 +348,37 @@ const buildDiscoveredScope = async ({
   // one bounded wildcard with the internal datasets excluded rather than as the list:
   // the client puts the index list in the request path, and a hundred-odd patterns
   // already exceed Elasticsearch's default initial-line limit.
-  // A broad scope never names its datasets, so only a matched scope is measured.
+  // A broad scope never names its datasets; a matched scope has to fit the request path.
   const matchedTargets =
     resolution === 'discovered:broad'
       ? []
       : uniq(matches.flatMap((match) => match.search_patterns));
-  const tooWide = matchedTargets.length > MAX_SCOPE_TARGETS;
-  if (tooWide) {
+  let required: string[];
+  let collapsed = false;
+  if (resolution === 'discovered:broad') {
+    required = broadSearchPatterns();
+  } else if (fitsRequestPath(matchedTargets)) {
+    required = matchedTargets;
+  } else {
+    // Too wide to name one by one. Fall back to one wildcard per matched vendor, which
+    // keeps unrelated vendors out of the hit bar, and only then to the broad target.
+    const byVendor = vendorWildcards(matches);
+    const useVendor = fitsRequestPath(byVendor);
+    required = useVendor ? byVendor : broadSearchPatterns();
+    collapsed = true;
     logger?.warn(
-      `Hunt scope matched ${matchedTargets.length} index patterns, more than the ${MAX_SCOPE_TARGETS} a request may carry; searching the bounded ${HUNT_DISCOVERY_PATTERN} target instead`
+      `Hunt scope matched ${matchedTargets.length} index patterns (${
+        matchedTargets.join(',').length
+      } chars), more than a request may carry; searching ${
+        useVendor
+          ? `${byVendor.length} vendor wildcard(s)`
+          : `the bounded ${HUNT_DISCOVERY_PATTERN} target`
+      } instead`
     );
   }
-  const required =
-    resolution === 'discovered:broad' || tooWide ? broadSearchPatterns() : matchedTargets;
-  // A match too wide to name is searched like a broad scope and reads as degraded,
+  // A match that had to be collapsed is wider than what matched and reads as degraded,
   // whichever matcher produced it.
-  const status = resolution === 'discovered:deterministic' && !tooWide ? 'ok' : 'degraded';
+  const status = resolution === 'discovered:deterministic' && !collapsed ? 'ok' : 'degraded';
 
   return {
     technologies: [],

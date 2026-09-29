@@ -454,6 +454,57 @@ describe('huntCoordinator', () => {
       expect(result.index_patterns).toEqual([]);
     });
 
+    it('skips Tier 2 as no_matched_scope when a broad hit arrived only through an alias', async () => {
+      const { resolveHuntScope: mockScopeAlias } = jest.requireMock('./common/resolve_index_scope');
+      const { huntForThreat: mockT1Alias } = jest.requireMock('./tier1/hunt_for_threat');
+      const { huntBehavior: mockT2Alias } = jest.requireMock('./tier2/hunt_behavior');
+      mockT2Alias.mockClear();
+      mockScopeAlias.mockResolvedValueOnce({
+        technologies: [],
+        index_patterns: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
+        status: 'degraded',
+        required: ['logs-*', '-logs-elastic_agent*', '-logs-fleet_server*'],
+        optional: [],
+        missing: [],
+        resolution: 'discovered:broad',
+        window: { from: 'now-24h', to: 'now' },
+        row_limit: 100,
+      });
+      // `logs-archive` aliases `archive-v1`: the required count is positive, but the only
+      // bucket Tier 1 saw is the backing index, which no required pattern names.
+      mockT1Alias.mockResolvedValueOnce({
+        status: 'environment_hits_found',
+        has_confirmed_hit: true,
+        searched_iocs: 1,
+        searched_techniques: 0,
+        resolved_iocs: [{ type: 'ip', value: '203.0.113.10' }],
+        resolved_techniques: [],
+        time_range: { from: 'now-24h', to: 'now' },
+        counts: { total_hits: 1, returned_hits: 1, affected_hosts: 0, affected_users: 0 },
+        hits: [],
+        affected_assets: { hosts: [], users: [], services: [] },
+        per_index: [{ index: 'archive-v1', hit_count: 1, required: false }],
+      });
+
+      const result = await huntCoordinator(
+        { esClient, reportsEsClient: esClient },
+        {} as import('@kbn/agent-builder-server').ScopedModel,
+        logger,
+        {
+          spaceId: 'default',
+          trigger: 'scheduled',
+          run_id: 'run-alias',
+          tier2_when: 'always',
+          iocs: [{ type: 'ip', value: '203.0.113.10' }],
+          text: 'report text',
+        }
+      );
+
+      expect(result.tier2_skipped_reason).toBe('no_matched_scope');
+      expect(result.has_confirmed_hit).toBe(true);
+      expect(mockT2Alias).not.toHaveBeenCalled();
+    });
+
     it('names the pinned technology when a pinned scope is blocked', async () => {
       const result = await runBlocked(
         'blocked:pinned',
@@ -1864,7 +1915,7 @@ describe('huntCoordinator', () => {
         expect(result.status).toBe('tier1_only');
         expect(result.tier2_skipped_reason).toBe('no_matched_scope');
         expect(result.index_patterns).toEqual(broadPatterns);
-        expect(result.next_step).toContain('Tier 2 had no index set to generate against');
+        expect(result.next_step).toContain('Tier 2 had no safe target');
         // Tier 1 searched every discovered dataset and found nothing, with no gaps of its
         // own; the skip is deterministic and the caller's, so it is not lost coverage.
         expect(result.completeness).toBe('complete');
