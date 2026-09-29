@@ -81,10 +81,12 @@ describe('CommentsButton', () => {
     const button = screen.getByTestId('devCommentsButton');
     fireEvent.mouseOver(button);
     expect(await screen.findByText('Hold Alt to click through to the page')).toBeInTheDocument();
+    expect(button).toHaveAccessibleDescription(/Hold Alt to click through to the page/);
 
     fireEvent.click(button);
     await screen.findByTestId('devCommentsPanel');
     fireEvent.click(query('#open'), { altKey: true });
+    await act(flush);
     expect(query('#details').hidden).toBe(false);
     expect(screen.queryByTestId('devCommentsComposerInput')).toBeNull();
 

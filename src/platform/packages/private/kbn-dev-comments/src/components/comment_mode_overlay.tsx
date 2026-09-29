@@ -11,7 +11,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Global, css } from '@emotion/react';
 import { IGNORE_SELECTOR } from '../constants';
 import { isIgnored, promoteToCommentable } from '../lib/anchor';
-import { holdsPassThrough, isPassedThrough, passThrough } from '../lib/pass_through';
+import { holdsPassThrough, isPassingThrough, passThrough } from '../lib/pass_through';
 import { useComments } from './comments_context';
 
 const POINTER_EVENTS = [
@@ -102,7 +102,7 @@ export const CommentModeOverlay = () => {
 
     const onPointer = (event: Event) => {
       const target = pageTarget(event);
-      if (!target || isPassedThrough(event)) {
+      if (!target || isPassingThrough()) {
         return;
       }
       if (event instanceof MouseEvent && holdsPassThrough(event)) {

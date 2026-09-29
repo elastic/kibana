@@ -45,7 +45,6 @@ export const CommentsToolbarButton = () => {
         defaultMessage: 'Hold {key} to click through to the page',
         values: { key: PASS_THROUGH_KEY },
       })}
-      disableScreenReaderOutput
       anchorProps={ignoreProps}
     >
       <EuiButtonIcon

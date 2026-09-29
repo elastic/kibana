@@ -11,7 +11,7 @@ import React from 'react';
 import { act, render } from '@testing-library/react';
 import { IGNORE_ATTR } from '../constants';
 import { createCommentsController } from '../state/comments_controller';
-import { createHostServices, query, renderPage } from '../test_helpers';
+import { createHostServices, flush, query, renderPage } from '../test_helpers';
 import { CommentsProvider } from './comments_context';
 import { CommentModeOverlay } from './comment_mode_overlay';
 
@@ -26,6 +26,7 @@ describe('CommentModeOverlay', () => {
     renderPage(`
       <button id="target">Target</button>
       <input id="field" value="before" />
+      <input id="check" type="checkbox" /><label id="checkLabel" for="check">Check</label>
       <div id="host"><button id="hostButton">Host</button></div>
       <div ${IGNORE_ATTR}="true"><textarea id="composer"></textarea></div>
     `);
@@ -63,7 +64,7 @@ describe('CommentModeOverlay', () => {
     expect(controller.pick).toHaveBeenCalledWith(target, { x: 5, y: 6 }, target);
   });
 
-  it('hands pointer input made with Alt held to the page, the click without the Alt, instead of starting a comment', () => {
+  it('hands pointer input made with Alt held to the page, the click without the Alt, instead of starting a comment', async () => {
     const controller = renderOverlay();
     const target = query<HTMLButtonElement>('#target');
     const pageHandler = jest.fn();
@@ -83,6 +84,9 @@ describe('CommentModeOverlay', () => {
     expect(mouse('pointerup', { clientX: 5, clientY: 6 }).defaultPrevented).toBe(false);
     // The click is made again for the page: links leave a modified one to the browser.
     expect(mouse('click', { detail: 1, clientX: 5, clientY: 6 }).defaultPrevented).toBe(true);
+    // Once the stopped click is over: a checkbox it toggled is toggled back at its end.
+    expect(pageHandler).not.toHaveBeenCalled();
+    await flush();
 
     expect(controller.pick).not.toHaveBeenCalled();
     expect(pageHandler).toHaveBeenCalledTimes(1);
@@ -93,6 +97,24 @@ describe('CommentModeOverlay', () => {
       clientX: 5,
       clientY: 6,
     });
+  });
+
+  it('lets the click a label fires on its control through with the click made with Alt held', async () => {
+    const controller = renderOverlay();
+    const check = query<HTMLInputElement>('#check');
+    const altClick = (element: Element) =>
+      element.dispatchEvent(
+        new MouseEvent('click', { bubbles: true, cancelable: true, altKey: true })
+      );
+
+    altClick(check);
+    await flush();
+    expect(check.checked).toBe(true);
+
+    altClick(query('#checkLabel'));
+    await flush();
+    expect(check.checked).toBe(false);
+    expect(controller.pick).not.toHaveBeenCalled();
   });
 
   it('leaves the cursor to the page while Alt is held', () => {

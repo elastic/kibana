@@ -107,8 +107,7 @@ export const createTrailRecorder = ({
 }: {
   location: CommentsLocationService;
   ignoreSelectors: readonly string[];
-  /** Whether the click is one that acts on the page, to be recorded. */
-  isRecording: (click: MouseEvent) => boolean;
+  isRecording: () => boolean;
 }): TrailRecorder => {
   let steps: TrailStep[] = [];
   let pageKey = location.getPageKey();
@@ -164,13 +163,12 @@ export const createTrailRecorder = ({
   // change with it) and recorded after: a click that the page swallowed never
   // reaches the bubbling phase, a control that is gone by then was dismissed
   // rather than opened, and a click that disclosed nothing changed data instead.
-  const onClickCapture = (event: MouseEvent) => {
-    const { target } = event;
+  const onClickCapture = ({ target }: MouseEvent) => {
     candidate = undefined;
     // The previous click gets its last look before this one has had any effect
     // on the page, so that what this click discloses is not credited to it.
     settleAwaited({ finalLook: true });
-    if (!isRecording(event) || !(target instanceof Element) || isIgnored(target, ignoreSelectors)) {
+    if (!isRecording() || !(target instanceof Element) || isIgnored(target, ignoreSelectors)) {
       return;
     }
     const control = target.closest(CONTROL_SELECTOR);
