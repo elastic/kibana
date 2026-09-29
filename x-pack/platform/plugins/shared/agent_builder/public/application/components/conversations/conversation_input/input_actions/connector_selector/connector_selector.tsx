@@ -296,11 +296,6 @@ export const ConnectorSelector: React.FC<{}> = () => {
   const selectedConnector = connectors.find((c) => c.id === selectedConnectorId);
   const isRetiring = isNearingEndOfLife(selectedConnector?.metadata);
 
-  // Track the previously-observed default so we can detect admin-initiated changes
-  // (e.g. admin changes the default connector while the panel is open).
-  // The ref starts as undefined; the guard `previousDefault !== undefined` below ensures
-  // the first emission of defaultConnectorId is never treated as a change — only
-  // transitions between two known values trigger a revert.
   const previousDefaultRef = useRef<string | undefined>(undefined);
 
   useEffect(() => {
@@ -329,10 +324,8 @@ export const ConnectorSelector: React.FC<{}> = () => {
       return;
     }
 
-    // Admin-initiated change of the default-model setting to a valid connector.
-    // `previousDefault !== undefined` guards against the initial settings resolution
-    // being mistaken for an admin change (the race condition where connectors load
-    // from cache before defaultConnectorId is first observed).
+    // Admin-initiated change: only fire once we've seen a previous real value so the
+    // initial settings resolution isn't mistaken for a change.
     if (
       defaultConnectorId &&
       previousDefault !== undefined &&
