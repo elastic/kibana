@@ -186,67 +186,70 @@ export const ServiceAccountRoleSelector = ({
         </EuiButtonEmpty>
       }
     >
-      <div
-        css={css({
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          height: 32,
-          paddingInline: euiTheme.size.s,
-          borderBottom: euiTheme.border.thin,
-        })}
-      >
-        <strong>
-          <FormattedMessage
-            id="xpack.security.management.serviceAccounts.create.customRolesLabel"
-            defaultMessage="Custom roles"
-          />
-        </strong>
-        {createRoleUrl && (
-          <EuiLink
-            href={createRoleUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            color="text"
-            css={css({ textDecoration: 'underline' })}
-          >
+      <div css={css({ maxHeight: 288, overflowY: 'auto' })}>
+        <div
+          css={css({
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: 32,
+            paddingInline: euiTheme.size.s,
+            borderBottom: euiTheme.border.thin,
+          })}
+        >
+          <strong>
             <FormattedMessage
-              id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
-              defaultMessage="Create new role"
+              id="xpack.security.management.serviceAccounts.create.customRolesLabel"
+              defaultMessage="Custom roles"
             />
-          </EuiLink>
-        )}
+          </strong>
+          {createRoleUrl && (
+            <EuiLink
+              href={createRoleUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              color="text"
+              css={css({ textDecoration: 'underline' })}
+            >
+              <FormattedMessage
+                id="xpack.security.management.serviceAccounts.create.createRoleLinkText"
+                defaultMessage="Create new role"
+              />
+            </EuiLink>
+          )}
+        </div>
+        <EuiSelectable
+          aria-label={selectRolesLabel}
+          options={options}
+          height="full"
+          onChange={(nextOptions) =>
+            onChange(
+              nextOptions.filter((option) => option.checked === 'on').map(({ label }) => label)
+            )
+          }
+          listProps={{
+            rowHeight: 32,
+            showIcons: false,
+            isVirtualized: false,
+            paddingSize: 'none',
+            onFocusBadge: false,
+            autoFocus: true,
+          }}
+          renderOption={(option) => (
+            <span>
+              {option.label}
+              {option.data?.description && (
+                <>
+                  {' '}
+                  <EuiIconTip type="info" content={option.data.description} />
+                </>
+              )}
+            </span>
+          )}
+        >
+          {(list) => list}
+        </EuiSelectable>
       </div>
-      <EuiSelectable
-        aria-label={selectRolesLabel}
-        options={options}
-        height={256}
-        onChange={(nextOptions) =>
-          onChange(
-            nextOptions.filter((option) => option.checked === 'on').map(({ label }) => label)
-          )
-        }
-        listProps={{
-          rowHeight: 32,
-          isVirtualized: false,
-          paddingSize: 'none',
-          onFocusBadge: false,
-          autoFocus: true,
-        }}
-        renderOption={(option) => (
-          <span>
-            {option.label}
-            {option.data?.description && (
-              <>
-                {' '}
-                <EuiIconTip type="info" content={option.data.description} />
-              </>
-            )}
-          </span>
-        )}
-      >
-        {(list) => list}
-      </EuiSelectable>
     </EuiInputPopover>
   );
 };
