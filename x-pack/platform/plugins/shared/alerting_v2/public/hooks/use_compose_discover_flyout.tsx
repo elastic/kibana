@@ -10,6 +10,7 @@ import type {
   ComposeDiscoverMode,
   RuleFormServices,
 } from '@kbn/alerting-v2-rule-form';
+import { ESQLMenu, EsqlEditorActionsProvider, EsqlEditorActionsRegister } from '@kbn/esql/public';
 import { ComposeDiscoverFlyout, RULE_BUILDER_REGISTRY } from '@kbn/alerting-v2-rule-form';
 import type { RuleTemplateResponse } from '@kbn/alerting-v2-schemas';
 import { PluginStart } from '@kbn/core-di';
@@ -29,6 +30,8 @@ import { useUpdateRule } from './use_update_rule';
 
 const templateToSyntheticRule = (template: RuleTemplateResponse): RuleApiResponse => ({
   ...template.rule,
+  // `null` is the write-side way to say "no delays"; a rule read back never carries it.
+  state_transition: template.rule.state_transition ?? undefined,
   id: '',
   enabled: false,
   created_by: null,
@@ -105,6 +108,9 @@ export const useComposeDiscoverFlyout = ({
       uiActions,
       dashboard,
       cps,
+      esqlMenu: ESQLMenu,
+      esqlEditorActionsProvider: EsqlEditorActionsProvider,
+      esqlEditorActionsRegister: EsqlEditorActionsRegister,
     }),
     [
       http,

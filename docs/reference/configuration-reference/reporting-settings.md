@@ -1,5 +1,5 @@
 ---
-navigation_title: "Reporting settings"
+navigation_title: 'Reporting settings'
 mapped_pages:
   - https://www.elastic.co/guide/en/kibana/current/reporting-settings-kb.html
 applies_to:
@@ -12,12 +12,12 @@ applies_to:
 
 You can configure `xpack.reporting` settings to:
 
-* [Enable or disable the {{report-features}}](#general-reporting-settings)
-* [Configure an encryption key to protect sensitive authentication data](#encryption-keys)
-* [Choose an access control model of how users will be granted privileges to {{report-features}}](#reporting-advanced-settings)
-* [Manage the way reporting tasks run in the {{kib}} server background](#reporting-job-queue-settings)
-* [Control how screenshots are captured for PNG/PDF reports](#reporting-capture-settings)
-* [Control the limits and capabilities of CSV reports](#reporting-csv-settings)
+- [Enable or disable the {{report-features}}](#general-reporting-settings)
+- [Configure an encryption key to protect sensitive authentication data](#encryption-keys)
+- [Choose an access control model of how users will be granted privileges to {{report-features}}](#reporting-advanced-settings)
+- [Manage the way reporting tasks run in the {{kib}} server background](#reporting-job-queue-settings)
+- [Control how screenshots are captured for PNG/PDF reports](#reporting-capture-settings)
+- [Control the limits and capabilities of CSV reports](#reporting-csv-settings)
 
 ## Enable reporting [general-reporting-settings]
 

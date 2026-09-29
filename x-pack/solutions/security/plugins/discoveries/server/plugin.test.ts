@@ -473,8 +473,8 @@ describe('DiscoveriesPlugin', () => {
           expect(
             mockAgentBuilder.attachments.registerType.mock.calls.map(([type]) => type.id)
           ).toEqual([
-            DIAGNOSTIC_REPORT_ATTACHMENT_TYPE,
             ATTACK_DISCOVERY_ATTACHMENT_TYPE,
+            DIAGNOSTIC_REPORT_ATTACHMENT_TYPE,
             ATTACK_DISCOVERY_VERDICT_ATTACHMENT_TYPE,
           ]);
         });
@@ -491,8 +491,12 @@ describe('DiscoveriesPlugin', () => {
           expect(registerSkills).not.toHaveBeenCalled();
         });
 
-        it('does not register attachment types', () => {
-          expect(mockAgentBuilder.attachments.registerType).not.toHaveBeenCalled();
+        // "Add to chat" in Security Solution attaches discoveries as this type, so it must
+        // not depend on the workflows kill switch.
+        it('registers only the attack discovery attachment type', () => {
+          expect(
+            mockAgentBuilder.attachments.registerType.mock.calls.map(([type]) => type.id)
+          ).toEqual([ATTACK_DISCOVERY_ATTACHMENT_TYPE]);
         });
       });
     });

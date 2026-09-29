@@ -50,6 +50,7 @@ export * from './src/playwright/ui_components';
 export {
   AppMenu,
   ContentListWrapper,
+  Controls,
   DataGrid,
   DiscoverApp,
   FilterBar,
