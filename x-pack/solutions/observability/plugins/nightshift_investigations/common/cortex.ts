@@ -59,6 +59,8 @@ export interface CortexPageSummary {
 export interface CortexPage extends CortexPageSummary {
   content: string;
   slug: string;
+  /** Opaque stored-document version; pass it back on a write to reject concurrent changes. */
+  version?: string;
 }
 
 export interface CortexStats {
