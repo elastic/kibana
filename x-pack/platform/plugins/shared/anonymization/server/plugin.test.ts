@@ -45,7 +45,7 @@ vi.mock('./initialization', () => {
   };
   return { ...mocked, default: mocked };
 });
-const initializationMock = (vi.mocked(await import('./initialization'))) as {
+const initializationMock = vi.mocked(await import('./initialization')) as {
   ensureGlobalProfileForNamespace: Mock;
 };
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { vi } from 'vitest';
-
 import { mockHistory, mockLocation } from './state.mock';
+
+import { vi } from 'vitest';
 
 export const mockUseHistory = vi.fn(() => mockHistory);
 export const mockUseLocation = vi.fn(() => mockLocation);

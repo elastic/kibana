@@ -270,9 +270,9 @@ describe('ToolManager', () => {
 
   describe('setEventEmitter', () => {
     it('passes the event emitter to toolToLangchain when set', async () => {
-      const { toolToLangchain } = (vi.mocked(await import(
-        '@kbn/agent-builder-genai-utils/langchain'
-      ))) as {
+      const { toolToLangchain } = vi.mocked(
+        await import('@kbn/agent-builder-genai-utils/langchain')
+      ) as {
         toolToLangchain: Mock;
       };
 
@@ -295,9 +295,9 @@ describe('ToolManager', () => {
     });
 
     it('uses the event emitter for tools added in subsequent addTools calls', async () => {
-      const { toolToLangchain } = (vi.mocked(await import(
-        '@kbn/agent-builder-genai-utils/langchain'
-      ))) as {
+      const { toolToLangchain } = vi.mocked(
+        await import('@kbn/agent-builder-genai-utils/langchain')
+      ) as {
         toolToLangchain: Mock;
       };
       toolToLangchain.mockClear();
@@ -335,9 +335,9 @@ describe('ToolManager', () => {
     });
 
     it('does not pass event emitter when not set', async () => {
-      const { toolToLangchain } = (vi.mocked(await import(
-        '@kbn/agent-builder-genai-utils/langchain'
-      ))) as {
+      const { toolToLangchain } = vi.mocked(
+        await import('@kbn/agent-builder-genai-utils/langchain')
+      ) as {
         toolToLangchain: Mock;
       };
 
@@ -897,9 +897,9 @@ describe('ToolManager', () => {
     ];
 
     const getBuildContent = async () => {
-      const { toolToLangchain } = (vi.mocked(await import(
-        '@kbn/agent-builder-genai-utils/langchain'
-      ))) as {
+      const { toolToLangchain } = vi.mocked(
+        await import('@kbn/agent-builder-genai-utils/langchain')
+      ) as {
         toolToLangchain: Mock;
       };
       const lastCall = toolToLangchain.mock.calls[toolToLangchain.mock.calls.length - 1][0];

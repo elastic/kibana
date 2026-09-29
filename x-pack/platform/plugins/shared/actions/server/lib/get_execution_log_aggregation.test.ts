@@ -47,7 +47,9 @@ describe('getExecutionLogAggregation', () => {
         perPage: 10,
         sort: [{ timestamp: { order: 'asc' } }],
       });
-    }).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid page field "0" - must be greater than 0]`);
+    }).toThrowErrorMatchingInlineSnapshot(
+      `[Error: Invalid page field "0" - must be greater than 0]`
+    );
   });
 
   test('should throw error when given bad perPage field', () => {

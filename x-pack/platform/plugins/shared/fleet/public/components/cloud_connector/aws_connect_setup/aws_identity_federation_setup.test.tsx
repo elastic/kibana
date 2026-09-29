@@ -55,7 +55,7 @@ const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as MockedFunctio
   typeof useCloudConnectorTemplate
 >;
 const mockIacKeyCheck = IacKeyCheck as MockedFunction<typeof IacKeyCheck>;
-const { useIacProvisioner: mockUseIacProvisioner } = (vi.mocked(await import('../../../hooks'))) as {
+const { useIacProvisioner: mockUseIacProvisioner } = vi.mocked(await import('../../../hooks')) as {
   useIacProvisioner: MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
 };
 

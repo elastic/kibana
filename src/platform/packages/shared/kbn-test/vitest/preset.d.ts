@@ -1,5 +1,14 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 declare const _exports: {
-    createKbnVitestConfig: typeof createKbnVitestConfig;
+  createKbnVitestConfig: typeof createKbnVitestConfig;
 };
 export = _exports;
 /**
@@ -23,18 +32,29 @@ export = _exports;
  * }} options
  * @returns {import('vitest/config').UserConfig}
  */
-declare const createKbnVitestConfig: ({ roots, environment, include, exclude, setupFiles, aliases, inlineDeps, testTimeout, clearMocks, restoreMocks, }: {
-    roots: string[];
-    environment?: 'jsdom' | 'node';
-    include?: string[];
-    exclude?: string[];
-    setupFiles?: string[];
-    aliases?: Array<{
-        find: string | RegExp;
-        replacement: string;
-    }>;
-    inlineDeps?: Array<string | RegExp>;
-    testTimeout?: number;
-    clearMocks?: boolean;
-    restoreMocks?: boolean;
+declare const createKbnVitestConfig: ({
+  roots,
+  environment,
+  include,
+  exclude,
+  setupFiles,
+  aliases,
+  inlineDeps,
+  testTimeout,
+  clearMocks,
+  restoreMocks,
+}: {
+  roots: string[];
+  environment?: 'jsdom' | 'node';
+  include?: string[];
+  exclude?: string[];
+  setupFiles?: string[];
+  aliases?: Array<{
+    find: string | RegExp;
+    replacement: string;
+  }>;
+  inlineDeps?: Array<string | RegExp>;
+  testTimeout?: number;
+  clearMocks?: boolean;
+  restoreMocks?: boolean;
 }) => import('vitest/config').UserConfig;

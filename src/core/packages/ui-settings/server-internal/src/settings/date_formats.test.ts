@@ -39,7 +39,9 @@ describe('accessibility settings', () => {
       expect(() => validate('Browser')).not.toThrow();
       expect(() => validate('UTC')).not.toThrow();
 
-      expect(() => validate('EST')).toThrowErrorMatchingInlineSnapshot(`[Error: Invalid timezone: EST]`);
+      expect(() => validate('EST')).toThrowErrorMatchingInlineSnapshot(
+        `[Error: Invalid timezone: EST]`
+      );
       expect(() => validate('random string')).toThrowErrorMatchingInlineSnapshot(
         `[Error: Invalid timezone: random string]`
       );

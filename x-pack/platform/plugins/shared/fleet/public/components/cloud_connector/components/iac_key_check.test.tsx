@@ -49,16 +49,16 @@ const mockUseCloudConnectorTemplate = useCloudConnectorTemplate as MockedFunctio
   typeof useCloudConnectorTemplate
 >;
 
-const { useIacProvisioner, useStartServices } = (vi.mocked(await import('../../../hooks'))) as {
+const { useIacProvisioner, useStartServices } = vi.mocked(await import('../../../hooks')) as {
   useIacProvisioner: MockedFunction<() => { isIacProvisionerEnabled: boolean }>;
   useStartServices: MockedFunction<
     () => { analytics: { reportEvent: Mock }; http: typeof mockHttp; notifications?: unknown }
   >;
 };
 
-const { updateCloudConnector: mockUpdateCloudConnector } = (vi.mocked(await import(
-  '../hooks/use_update_cloud_connector'
-))) as { updateCloudConnector: MockedFunction<(...args: unknown[]) => Promise<unknown>> };
+const { updateCloudConnector: mockUpdateCloudConnector } = vi.mocked(
+  await import('../hooks/use_update_cloud_connector')
+) as { updateCloudConnector: MockedFunction<(...args: unknown[]) => Promise<unknown>> };
 
 const mockHttp = { put: vi.fn() };
 

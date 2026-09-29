@@ -158,15 +158,21 @@ test('should throw with expected error when validators fail', () => {
 
   expect(() =>
     validateConfig(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: error validating connector type config: test error]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: error validating connector type config: test error]`
+  );
 
   expect(() =>
     validateSecrets(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: error validating connector type secrets: test error]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: error validating connector type secrets: test error]`
+  );
 
   expect(() =>
     validateConnector(actionType, { config: testValue, secrets: { user: 'test' } })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: error validating action type connector: test error]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: error validating action type connector: test error]`
+  );
 });
 
 test('should work with @kbn/zod v4', () => {
@@ -472,11 +478,15 @@ test('should throw an error when custom validators fail', () => {
 
   expect(() =>
     validateConfig(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: error validating connector type config: test error]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: error validating connector type config: test error]`
+  );
 
   expect(() =>
     validateSecrets(actionType, testValue, { configurationUtilities })
-  ).toThrowErrorMatchingInlineSnapshot(`[Error: error validating connector type secrets: test error]`);
+  ).toThrowErrorMatchingInlineSnapshot(
+    `[Error: error validating connector type secrets: test error]`
+  );
 });
 
 describe('validateSecrets', () => {

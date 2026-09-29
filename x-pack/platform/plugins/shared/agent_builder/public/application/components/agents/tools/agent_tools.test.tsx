@@ -100,7 +100,9 @@ vi.mock('../../../hooks/agents/use_can_update_agent');
 vi.mock('../../../hooks/tools/use_tools');
 vi.mock('./use_tools_mutation');
 
-const { useAgentBuilderAgentById } = vi.mocked(await import('../../../hooks/agents/use_agent_by_id'));
+const { useAgentBuilderAgentById } = vi.mocked(
+  await import('../../../hooks/agents/use_agent_by_id')
+);
 const { useCanUpdateAgent } = vi.mocked(await import('../../../hooks/agents/use_can_update_agent'));
 const { useToolsService } = vi.mocked(await import('../../../hooks/tools/use_tools'));
 const { useToolsMutation } = vi.mocked(await import('./use_tools_mutation'));
