@@ -445,7 +445,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`count\` | integer | optional | Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match. (min: 0, max: 1000) |
+| \`count\` | integer | optional | Consecutive matches the alert episode spends in \`pending\` before it becomes \`active\` on the next match. For example, \`2\` opens it on the third consecutive match. Set to \`0\` to open it on the first match. (min: 0, max: 1000) |
 | \`timeframe\` | string | optional | Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`. (max length: 32) |
 | \`operator\` | \\"and\\" \\\\| \\"or\\" | optional | When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present. (enum: and \\\\| or) |
 
@@ -453,7 +453,7 @@ Use \`set_state_transition\` to delay alert firing until the threshold is breach
 
 | Field | Type | Required | Description |
 |---|---|---|---|
-| \`count\` | integer | optional | Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery. (min: 0, max: 1000) |
+| \`count\` | integer | optional | Consecutive recoveries the alert episode spends in \`recovering\` before it becomes \`inactive\` on the next recovery. For example, \`2\` closes it on the third consecutive recovery. Set to \`0\` to close it on the first recovery. (min: 0, max: 1000) |
 | \`timeframe\` | string | optional | Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`. (max length: 32) |
 | \`operator\` | \\"and\\" \\\\| \\"or\\" | optional | When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present. (enum: and \\\\| or) |
 
@@ -670,11 +670,11 @@ exports[`schema_to_skill_docs generateStateTransitionDoc matches the reviewed sk
 Use \`set_state_transition\` to delay alert firing until the threshold is breached N times in a row. This reduces noise from transient spikes.
 
 - \`pending\` — Delay before a match opens an alert episode.
-  - \`pending.count\` — Consecutive matches required before the alert episode becomes \`active\`. Set to \`0\` to open it on the first match.
+  - \`pending.count\` — Consecutive matches the alert episode spends in \`pending\` before it becomes \`active\` on the next match. For example, \`2\` opens it on the third consecutive match. Set to \`0\` to open it on the first match.
   - \`pending.timeframe\` — Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.
   - \`pending.operator\` — When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.
 - \`recovering\` — Delay before a recovered match closes the alert episode. Has no effect when \`recovery.strategy\` is \`manual\`.
-  - \`recovering.count\` — Consecutive recoveries required before the alert episode becomes \`inactive\`. Set to \`0\` to close it on the first recovery.
+  - \`recovering.count\` — Consecutive recoveries the alert episode spends in \`recovering\` before it becomes \`inactive\` on the next recovery. For example, \`2\` closes it on the third consecutive recovery. Set to \`0\` to close it on the first recovery.
   - \`recovering.timeframe\` — Duration the condition must hold, for example \`5m\`. Combine with \`count\` using \`operator\`.
   - \`recovering.operator\` — When both \`count\` and \`timeframe\` are set, \`and\` requires both and \`or\` requires either. Allowed only when both fields are present.
 

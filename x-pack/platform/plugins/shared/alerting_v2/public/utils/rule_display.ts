@@ -97,6 +97,20 @@ const recoveryLabel = (n: number) =>
     values: { n },
   });
 
+/**
+ * A count of 0 resolves the phase on the first evaluation, unless a timeframe is ANDed
+ * with it, in which case the timeframe still has to elapse.
+ */
+const isImmediateDelay = ({
+  count,
+  timeframe,
+  operator,
+}: {
+  count?: number;
+  timeframe?: string;
+  operator?: string;
+}): boolean => count === 0 && !(timeframe != null && operator === 'and');
+
 export function formatAlertDelay(stateTransition: RuleAttachmentData['state_transition']): string {
   const pending = stateTransition?.pending;
 
@@ -104,7 +118,7 @@ export function formatAlertDelay(stateTransition: RuleAttachmentData['state_tran
     return EMPTY_VALUE;
   }
 
-  if (pending.count === 0 && pending.timeframe == null) {
+  if (isImmediateDelay(pending)) {
     return IMMEDIATE_LABEL;
   }
 
@@ -125,7 +139,7 @@ export function formatRecoveryDelay(
     return EMPTY_VALUE;
   }
 
-  if (recovering.count === 0 && recovering.timeframe == null) {
+  if (isImmediateDelay(recovering)) {
     return IMMEDIATE_LABEL;
   }
 

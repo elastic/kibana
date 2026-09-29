@@ -99,12 +99,19 @@ const isThresholdMet = (
 };
 
 /**
+ * A count of 0 skips the phase, unless a timeframe is ANDed with it: then the
+ * timeframe must still elapse, so the phase is entered.
+ */
+const isPhaseSkipped = (phase?: StateTransitionPhase): boolean =>
+  phase?.count === 0 && !(phase.timeframe != null && phase.operator === 'and');
+
+/**
  * A transition strategy that extends the basic state machine with
  * configurable count (and future timeframe) thresholds for the
  * `pending → active` and `recovering → inactive` transitions.
  *
- * - pending count of 0 means skip pending entirely (inactive → active).
- * - recovering count of 0 means skip recovering entirely (active → inactive).
+ * - A count of N holds the phase for N evaluations and resolves it on evaluation N+1.
+ * - A count of 0 skips the phase entirely, unless a timeframe is ANDed with it.
  * - When no threshold is configured for a phase, the strategy behaves
  *   identically to the basic strategy for that phase.
  */
@@ -220,14 +227,16 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.pending?.count === 0 && nextStatus === alertEpisodeStatus.pending;
+    return isPhaseSkipped(stateTransition.pending) && nextStatus === alertEpisodeStatus.pending;
   }
 
   private shouldSkipRecovering(
     stateTransition: StateTransition,
     nextStatus: AlertEpisodeStatus
   ): boolean {
-    return stateTransition.recovering?.count === 0 && nextStatus === alertEpisodeStatus.recovering;
+    return (
+      isPhaseSkipped(stateTransition.recovering) && nextStatus === alertEpisodeStatus.recovering
+    );
   }
 
   private isPendingToActiveTransition(
@@ -271,14 +280,15 @@ export class CountTimeframeStrategy extends BasicTransitionStrategy {
     successStatus: AlertEpisodeStatus;
     stayStatus: AlertEpisodeStatus;
   }): StateTransitionResult {
-    const nextCount = currentStatusCount + 1;
     const config: ThresholdConfig = { operator, count, timeframeMs };
 
-    if (isThresholdMet(nextCount, elapsedMs, config)) {
+    // The count is the number of evaluations to spend in the phase, so compare the
+    // evaluations already spent rather than including the current one.
+    if (isThresholdMet(currentStatusCount, elapsedMs, config)) {
       return { status: successStatus };
     }
 
-    return { status: stayStatus, statusCount: nextCount };
+    return { status: stayStatus, statusCount: currentStatusCount + 1 };
   }
 
   /**

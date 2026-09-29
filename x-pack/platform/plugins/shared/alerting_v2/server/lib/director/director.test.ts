@@ -568,7 +568,7 @@ describe('DirectorService', () => {
             last_status: 'breached',
             last_episode_id: 'episode-1',
             last_episode_status: 'pending',
-            last_episode_status_count: 2,
+            last_episode_status_count: 3,
             group_hash: 'hash-1',
           },
         ])
