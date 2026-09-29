@@ -13,6 +13,7 @@ import { useAppUrl, useHttp, useKibana, useToasts } from '../../common/lib/kiban
 import { useRefreshCaseViewPage } from '../case_view/use_on_refresh_case_view_page';
 import {
   useWorkflowRunTriggeredEBT,
+  getWorkflowRunAttachmentType,
   getWorkflowRunOriginType,
 } from '../../analytics/use_workflow_run_ebt';
 import { runCaseWorkflow } from './api';
@@ -61,7 +62,11 @@ export const createCasesWorkflowExecutor =
     });
 
     // Report after the API resolves so only confirmed starts are counted.
-    reportWorkflowRunTriggered({ originType: getWorkflowRunOriginType(origin), caseCount: 1 });
+    reportWorkflowRunTriggered({
+      originType: getWorkflowRunOriginType(origin),
+      caseCount: 1,
+      attachmentType: getWorkflowRunAttachmentType(origin),
+    });
 
     const executionHref = response.workflowExecutionId
       ? getAppUrl({ path: getWorkflowExecutionPath(workflowId, response.workflowExecutionId) })

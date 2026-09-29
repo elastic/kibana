@@ -388,6 +388,16 @@ export interface CasesTelemetry {
       attachments: number;
       unattributed: number;
     };
+    /**
+     * Breakdown of attachment-origin runs (`byOriginType.attachment` + `byOriginType.attachments`)
+     * by attachment type. `other` is the residual for any other registered attachment type that
+     * supports workflow origins.
+     */
+    byAttachmentType: {
+      alert: number;
+      event: number;
+      other: number;
+    };
     /** Number of case configurations that have at least one workflow tag set. */
     configurationsWithWorkflowTags: number;
   };

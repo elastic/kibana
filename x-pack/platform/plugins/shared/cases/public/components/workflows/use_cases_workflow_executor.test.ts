@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import type { HttpStart } from '@kbn/core/public';
 import { notificationServiceMock } from '@kbn/core/public/mocks';
 import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
   CASE_WORKFLOW_ORIGIN_TYPE,
   OBSERVABLE_WORKFLOW_ORIGIN_TYPE,
 } from '../../../common/types/domain/user_action/workflow/constants';
@@ -27,9 +28,8 @@ jest.mock('../case_view/use_on_refresh_case_view_page', () => ({
 // what the executor reports.
 const mockReportWorkflowRunTriggered = jest.fn();
 jest.mock('../../analytics/use_workflow_run_ebt', () => ({
+  ...jest.requireActual('../../analytics/use_workflow_run_ebt'),
   useWorkflowRunTriggeredEBT: () => mockReportWorkflowRunTriggered,
-  getWorkflowRunOriginType: jest.requireActual('../../analytics/use_workflow_run_ebt')
-    .getWorkflowRunOriginType,
 }));
 
 const mockRunCaseWorkflow = jest.spyOn(api, 'runCaseWorkflow');
@@ -165,7 +165,32 @@ describe('useCasesWorkflowExecutor', () => {
       await result.current({ workflowId: 'wf-1', inputs: {} });
 
       expect(mockReportWorkflowRunTriggered).toHaveBeenCalledTimes(1);
-      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({ originType, caseCount: 1 });
+      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({
+        originType,
+        caseCount: 1,
+        attachmentType: undefined,
+      });
+    });
+
+    it('reports the attachment type for an attachment run', async () => {
+      mockRunCaseWorkflow.mockResolvedValueOnce({
+        workflowExecutionId: 'exec-ok',
+        activityStatus: 'succeeded',
+      });
+
+      const { result } = renderExecutorHook({
+        type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'case-1',
+        attachmentType: 'security.event',
+        attachmentId: 'event-1',
+      });
+      await result.current({ workflowId: 'wf-1', inputs: {} });
+
+      expect(mockReportWorkflowRunTriggered).toHaveBeenCalledWith({
+        originType: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+        caseCount: 1,
+        attachmentType: 'security.event',
+      });
     });
 
     it('still reports the run when only the activity write failed', async () => {
