@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { createPlaywrightConfig } from '@kbn/scout-oblt';
 
-export const PROPOSAL_WITHOUT_ACTION_LABEL = i18n.translate(
-  'xpack.proposals.proposals.noAutomatedAction',
-  { defaultMessage: 'No automated action' }
-);
+export default createPlaywrightConfig({
+  testDir: './tests',
+});

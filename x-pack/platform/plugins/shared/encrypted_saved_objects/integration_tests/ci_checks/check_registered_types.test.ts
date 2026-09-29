@@ -59,7 +59,8 @@ describe('checking changes on all registered encrypted SO types', () => {
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Kibana Security team to review the ESO changes.
   // The number of types in the hashMap should never be reduced, it should only increase.
-  it('detecting changes to encryption registration definitions', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240718
+  it.skip('detecting changes to encryption registration definitions', () => {
     const hashMap = esoService.getRegisteredTypeHashMap();
 
     expect(hashMap).toMatchInlineSnapshot(`

@@ -26,5 +26,10 @@ module.exports = eslintCompatPlugin({
     deployment_agnostic_test_context: require('./rules/deployment_agnostic_test_context'),
     no_sync_import_from_plugin: require('./rules/no_sync_import_from_plugin'),
     no_viz_naming: require('./rules/no_viz_naming'),
+    scout_no_describe_configure: require('./rules/scout_no_describe_configure'),
+    scout_no_deprecated_tags: require('./rules/scout_no_deprecated_tags'),
+    scout_no_at_in_test_titles: require('./rules/scout_no_at_in_test_titles'),
+    scout_no_promise_all_with_playwright_apis: require('./rules/scout_no_promise_all_with_playwright_apis'),
+    require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
   },
 });
