@@ -21247,6 +21247,15 @@ paths:
                     version:
                       example: WzIwNzMsMV0=
                       type: string
+                    workflowTags:
+                      description: |
+                        Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                      items:
+                        maxLength: 256
+                        minLength: 1
+                        type: string
+                      maxItems: 100
+                      type: array
                 type: array
           description: Indicates a successful call.
         '401':
@@ -21447,6 +21456,15 @@ paths:
                   version:
                     example: WzIwNzMsMV0=
                     type: string
+                  workflowTags:
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    items:
+                      maxLength: 256
+                      minLength: 1
+                      type: string
+                    maxItems: 100
+                    type: array
           description: Indicates a successful call.
         '401':
           content:
@@ -21648,6 +21666,15 @@ paths:
                   version:
                     example: WzIwNzMsMV0=
                     type: string
+                  workflowTags:
+                    description: |
+                      Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+                    items:
+                      maxLength: 256
+                      minLength: 1
+                      type: string
+                    maxItems: 100
+                    type: array
           description: Indicates a successful call.
         '401':
           content:
@@ -149832,6 +149859,15 @@ components:
           $ref: '#/components/schemas/Cases_owner'
         templates:
           $ref: '#/components/schemas/Cases_templates'
+        workflowTags:
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
       required:
         - closure_type
         - connector
@@ -150222,6 +150258,15 @@ components:
             The version of the connector. To retrieve the version value, use the get configuration API.
           example: WzIwMiwxXQ==
           type: string
+        workflowTags:
+          description: |
+            Workflow tags that limit which workflows appear in Cases workflow selectors. An empty array shows all workflows.
+          items:
+            maxLength: 256
+            minLength: 1
+            type: string
+          maxItems: 100
+          type: array
       required:
         - version
       title: Update case configuration request
