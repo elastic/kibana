@@ -53,15 +53,19 @@ const controlLayoutFields = {
     .describe('Expand to fill available horizontal space. Defaults to true.'),
 };
 
-const dataControlInputFields = {
-  ...dataControlFields,
-  title: z.string().max(256).optional().describe('Human-readable label shown above the control.'),
+const userRequestedFields = {
   user_requested: z
     .boolean()
     .optional()
     .describe(
-      'True only when the user named this specific filter or field. Leave unset when you chose the field, including when the user only asked for controls in general.'
+      'True only when the user named this specific control, filter, or field. Leave unset when you chose it, including when the user only asked for controls in general.'
     ),
+};
+
+const dataControlInputFields = {
+  ...dataControlFields,
+  title: z.string().max(256).optional().describe('Human-readable label shown above the control.'),
+  ...userRequestedFields,
   ...controlLayoutFields,
 };
 
@@ -77,6 +81,7 @@ const rangeSliderControlInputSchema = z.object({
 
 const timeSliderControlInputSchema = z.object({
   type: z.literal(TIME_SLIDER_CONTROL),
+  ...userRequestedFields,
   ...controlLayoutFields,
 });
 
@@ -88,13 +93,19 @@ const controlInputSchema = z.discriminatedUnion('type', [
 
 type ControlInput = z.infer<typeof controlInputSchema>;
 
+/**
+ * Keep at most one time slider. Extra user-requested ones are reported as
+ * failures; extra ones the agent added on its own are left out silently.
+ */
 const filterDuplicateTimeSliders = ({
   existingControls,
   controlsToAdd,
+  logger,
   failures,
 }: {
   existingControls: Array<{ type?: string }>;
   controlsToAdd: ControlInput[];
+  logger: Logger;
   failures: OperationFailure[];
 }): ControlInput[] => {
   const hasTimeSlider = existingControls.some((control) => control.type === TIME_SLIDER_CONTROL);
@@ -108,6 +119,13 @@ const filterDuplicateTimeSliders = ({
     if (canAddTimeSlider) {
       canAddTimeSlider = false;
       return true;
+    }
+
+    if (control.user_requested !== true) {
+      logger.debug(
+        `Left out controls[${controlInputIndex}]: the dashboard already has a time slider.`
+      );
+      return false;
     }
 
     failures.push({
@@ -369,6 +387,7 @@ export const addControlsOperation = defineOperation({
       controls: filterDuplicateTimeSliders({
         existingControls,
         controlsToAdd: operation.controls,
+        logger: context.logger,
         failures: context.failures,
       }),
       loader: context.aggregatableFieldTypesLoader,

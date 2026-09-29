@@ -2819,7 +2819,7 @@ describe('add_controls / remove_controls operations', () => {
           operation: 'add_controls',
           controls: [
             { type: 'time_slider_control' },
-            { type: 'time_slider_control' },
+            { type: 'time_slider_control', user_requested: true },
             { type: 'options_list_control', field_name: 'service.name', index: 'logs-*' },
           ],
         },
@@ -2843,7 +2843,7 @@ describe('add_controls / remove_controls operations', () => {
     ]);
   });
 
-  it('add_controls skips adding a second time_slider_control to an existing dashboard', async () => {
+  it('add_controls silently skips an unrequested second time_slider_control on an existing dashboard', async () => {
     const { dashboardData: withTimeSlider } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
       operations: [{ operation: 'add_controls', controls: [{ type: 'time_slider_control' }] }],
@@ -2857,13 +2857,7 @@ describe('add_controls / remove_controls operations', () => {
     });
 
     expect(dashboardData.pinned_panels).toHaveLength(1);
-    expect(failures).toEqual([
-      {
-        type: 'add_controls',
-        identifier: 'controls[0]',
-        error: 'A dashboard can contain at most one time_slider_control.',
-      },
-    ]);
+    expect(failures).toEqual([]);
   });
 
   it('add_controls appends to existing controls', async () => {
