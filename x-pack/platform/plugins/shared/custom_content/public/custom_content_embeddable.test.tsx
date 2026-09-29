@@ -682,6 +682,190 @@ describe('customContentEmbeddableFactory', () => {
 
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
     });
+
+    const panelContextAttachment = (
+      embeddableId: string,
+      template: string,
+      esqlQuery?: string,
+      version = 2
+    ) => ({
+      id: 'att-1',
+      type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
+      current_version: version,
+      versions: [
+        {
+          version,
+          data: {
+            panel_template: template,
+            embeddable_id: embeddableId,
+            ...(esqlQuery ? { esql_query: esqlQuery } : {}),
+          },
+        },
+      ],
+    });
+
+    it('applies the conversation attachment when round_complete never arrives', async () => {
+      const activeConversation$ = new BehaviorSubject<{
+        id?: string;
+        conversation?: { attachments?: ReturnType<typeof panelContextAttachment>[] };
+      } | null>({ id: 'conv-1' });
+      const openChat = jest.fn();
+
+      mockAgentBuilder = {
+        openChat,
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+      await act(async () => {
+        openChat.mock.calls[0][0].onSubmit();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      await act(async () => {
+        activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [
+              panelContextAttachment(
+                'test-uuid',
+                '<p>from conversation</p>',
+                'FROM logs | STATS count()'
+              ),
+            ],
+          },
+        });
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+
+      expect(embeddable.api.serializeState().template).toBe('<p>from conversation</p>');
+      expect(readEsqlQuery(embeddable.api.serializeState())).toBe('FROM logs | STATS count()');
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-is-generating',
+        'false'
+      );
+      expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
+        hasEsqlQuery: true,
+        templateSizeBytes: '<p>from conversation</p>'.length,
+      });
+
+      await act(async () =>
+        activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [
+              panelContextAttachment('test-uuid', '<p>follow up</p>', 'FROM logs | LIMIT 1', 3),
+            ],
+          },
+        })
+      );
+
+      expect(embeddable.api.serializeState().template).toBe('<p>follow up</p>');
+      expect(readEsqlQuery(embeddable.api.serializeState())).toBe('FROM logs | LIMIT 1');
+    });
+
+    it('does not apply a conversation attachment for a different panel', async () => {
+      const activeConversation$ = new BehaviorSubject<{
+        id?: string;
+        conversation?: { attachments?: ReturnType<typeof panelContextAttachment>[] };
+      } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        openChat: jest.fn(),
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+
+      await act(async () =>
+        activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [panelContextAttachment('different-uuid', '<p>other panel</p>')],
+          },
+        })
+      );
+
+      expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
+      expect(mockTelemetry.trackAgentUpdateApplied).not.toHaveBeenCalled();
+    });
+
+    it('does not copy a conversation attachment onto a panel that did not open chat', async () => {
+      const activeConversation$ = new BehaviorSubject<{
+        id?: string;
+        conversation?: { attachments?: ReturnType<typeof panelContextAttachment>[] };
+      } | null>({ id: 'conv-1' });
+
+      mockAgentBuilder = {
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () =>
+        activeConversation$.next({
+          id: 'conv-1',
+          conversation: {
+            attachments: [panelContextAttachment('test-uuid', '<p>stale chat</p>')],
+          },
+        })
+      );
+
+      expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
+    });
+
+    it('does not let the same attachment version overwrite a later manual edit', async () => {
+      const activeConversation$ = new BehaviorSubject<{
+        id?: string;
+        conversation?: { attachments?: ReturnType<typeof panelContextAttachment>[] };
+      } | null>({ id: 'conv-1' });
+      const attachment = panelContextAttachment('test-uuid', '<p>from conversation</p>');
+
+      mockAgentBuilder = {
+        openChat: jest.fn(),
+        events: {
+          ui: { activeConversation$ },
+          getChatEvents$: jest.fn(() => new Subject()),
+        },
+      };
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+      await act(async () =>
+        activeConversation$.next({
+          id: 'conv-1',
+          conversation: { attachments: [attachment] },
+        })
+      );
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave(undefined, '<p>manual</p>'));
+
+      await act(async () =>
+        activeConversation$.next({
+          id: 'conv-1',
+          conversation: { attachments: [attachment] },
+        })
+      );
+
+      expect(embeddable.api.serializeState().template).toBe('<p>manual</p>');
+    });
   });
 
   describe('handleGenerateWithChat', () => {

@@ -47,9 +47,13 @@ import {
   of,
   skip,
   switchMap,
+  tap,
 } from 'rxjs';
 import { isRoundCompleteEvent } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import {
+  ATTACHMENT_REF_ACTOR,
+  type VersionedAttachment,
+} from '@kbn/agent-builder-common/attachments';
 import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   readEsqlQuery,
@@ -67,6 +71,7 @@ import { getTelemetry } from './telemetry';
 import {
   CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
   MAX_PREVIEW_HEIGHT,
+  type CustomContentContextAttachmentData,
 } from '../common/panel_context_attachment';
 import {
   buildCustomContentContextAttachment,
@@ -82,6 +87,20 @@ const panelMeasureCss = css({
   flex: '1 1 100%',
   minHeight: 0,
 });
+
+const findPanelContextAttachment = (
+  attachments: VersionedAttachment[] | undefined,
+  embeddableId: string
+): { id: string; version: number; data: CustomContentContextAttachmentData } | undefined => {
+  if (!attachments) return undefined;
+  for (const attachment of attachments) {
+    if (attachment.type !== CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE) continue;
+    const data = readPanelContextData(attachment);
+    if (!data || data.embeddable_id !== embeddableId) continue;
+    return { id: attachment.id, version: attachment.current_version, data };
+  }
+  return undefined;
+};
 
 export type CustomContentApi = DefaultEmbeddableApi<CustomContentEmbeddableState> &
   HasTypeDisplayName &
@@ -122,6 +141,10 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const titleManager = initializeTitleManager(initialState);
     const timeRangeManager = initializeTimeRangeManager(initialState);
     let isRetained = false;
+    // Set when this panel opens chat. The refined template arrives on the conversation
+    // attachment. Without this, an already-open conversation would overwrite the panel on mount.
+    let awaitingChatApply = false;
+    const appliedAttachmentVersions = new Map<string, number>();
     const esqlQuery$ = new BehaviorSubject<string | undefined>(readEsqlQuery(initialState));
     const template$ = new BehaviorSubject<string | undefined>(initialState.template);
     const previewHtml$ = new BehaviorSubject<string | null>(null);
@@ -162,6 +185,39 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
       if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
       if ('template' in update) template$.next(update.template);
+    };
+
+    const publishPanelContext = (data: CustomContentContextAttachmentData): boolean => {
+      if (
+        template$.getValue() === data.panel_template &&
+        esqlQuery$.getValue() === data.esql_query
+      ) {
+        return false;
+      }
+      template$.next(data.panel_template);
+      esqlQuery$.next(data.esql_query);
+      getTelemetry().trackAgentUpdateApplied({
+        hasEsqlQuery: Boolean(data.esql_query),
+        templateSizeBytes: data.panel_template.length,
+      });
+      return true;
+    };
+
+    const rememberAttachmentVersion = (attachmentId: string, version: number): boolean => {
+      if ((appliedAttachmentVersions.get(attachmentId) ?? 0) >= version) return false;
+      appliedAttachmentVersions.set(attachmentId, version);
+      return true;
+    };
+
+    const applyConversationAttachment = (attachments: VersionedAttachment[] | undefined) => {
+      if (!awaitingChatApply) return;
+      const match = findPanelContextAttachment(attachments, uuid);
+      if (!match || !rememberAttachmentVersion(match.id, match.version)) return;
+      // Keep listening: a later turn in this same chat publishes a higher attachment version.
+      // The version check above is what stops this snapshot from wiping a manual edit.
+      if (publishPanelContext(match.data) && isGenerating$.getValue()) {
+        isGenerating$.next(false);
+      }
     };
 
     const stateApi = initializeStateApi<CustomContentEmbeddableState>({
@@ -242,6 +298,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             ) => {
               if (!agentBuilder) return;
               hasSaved = true;
+              awaitingChatApply = true;
               closeFlyout();
               agentBuilder.openChat({
                 newConversation: true,
@@ -423,6 +480,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
           const sub = agentBuilder.events.ui.activeConversation$
             .pipe(
+              // Same conversation id still matters: after the stream the notifier republishes it
+              // with the saved attachments, which is what the chat preview renders.
+              tap((active) => {
+                applyConversationAttachment(active?.conversation?.attachments);
+              }),
               distinctUntilChanged((a, b) => a?.id === b?.id),
               switchMap((conversation) =>
                 conversation?.id
@@ -463,13 +525,16 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
 
                 const data = readPanelContextData(updatedAttachment);
                 if (!data || data.embeddable_id !== uuid) continue;
+                if (
+                  !rememberAttachmentVersion(
+                    updatedAttachment.id,
+                    updatedAttachment.current_version
+                  )
+                ) {
+                  break;
+                }
 
-                template$.next(data.panel_template);
-                esqlQuery$.next(data.esql_query);
-                getTelemetry().trackAgentUpdateApplied({
-                  hasEsqlQuery: Boolean(data.esql_query),
-                  templateSizeBytes: data.panel_template.length,
-                });
+                publishPanelContext(data);
                 break;
               }
             });
@@ -494,6 +559,7 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
             hasExistingTemplate: false,
           });
           isRetained = true;
+          awaitingChatApply = true;
           if (tracksOverlays(parentApi)) parentApi.clearOverlays();
           agentBuilder.openChat({
             newConversation: true,
