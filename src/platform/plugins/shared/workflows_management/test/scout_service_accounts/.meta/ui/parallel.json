@@ -1,5 +1,5 @@
 {
-  "sha1": "e05efea8bd2cc31fb45f15e1a214fed03e176660",
+  "sha1": "183f6420bf912ed4435f1874968873a7e59c299a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,7 +70,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
-        "line": 15,
+        "line": 16,
         "column": 8
       }
     },
@@ -84,7 +84,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
-        "line": 34,
+        "line": 35,
         "column": 84
       }
     },
@@ -98,7 +98,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
-        "line": 52,
+        "line": 53,
         "column": 18
       }
     },
@@ -112,8 +112,36 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
-        "line": 59,
+        "line": 62,
         "column": 98
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-b162235dcceb9d6",
+      "title": "Service account picker states creates through the shared flyout and keeps the workflow unsaved",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 71,
+        "column": 24
+      }
+    },
+    {
+      "id": "beb9bedc7d0a68d-0328d22bb5affaa",
+      "title": "Service account picker states shows the actual workflow-only user flow without security privileges",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/ui/parallel_tests/service_account_picker_states.spec.ts",
+        "line": 124,
+        "column": 18
       }
     },
     {

@@ -50,11 +50,17 @@ export const test = spaceTest.extend<
   {
     directoryState: { set: (state: DirectoryState) => void };
     workflowId: string;
+    createdAccountIds: string[];
     boundWorkflowId: string;
     paginatedDirectory: { requestedCursors: Array<string | null> };
   },
   { serviceAccount: WorkflowServiceAccount; replacementServiceAccount: WorkflowServiceAccount }
 >({
+  createdAccountIds: async ({ esClient, config }, use) => {
+    const ids: string[] = [];
+    await use(ids);
+    await cleanupEsServiceAccounts(esClient, config, ids);
+  },
   directoryState: async ({ page, serviceAccount }, use) => {
     await use(await mockServiceAccountDirectory(page, serviceAccount));
   },

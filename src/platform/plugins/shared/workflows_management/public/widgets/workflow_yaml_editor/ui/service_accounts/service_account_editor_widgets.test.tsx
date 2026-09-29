@@ -11,6 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React from 'react';
 import { monaco } from '@kbn/code-editor';
 import { I18nProvider } from '@kbn/i18n-react';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ServiceAccountEditorWidgets } from './service_account_editor_widgets';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { createStartServicesMock, createUseKibanaMockValue } from '../../../../mocks';
@@ -93,7 +94,14 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false
     executeEdits: jest.fn(() => true),
   });
   model.isDisposed = jest.fn(() => false);
-  const result = render(<ServiceAccountEditorWidgets editor={editor} />, { wrapper: I18nProvider });
+  const queryClient = new QueryClient();
+  const result = render(<ServiceAccountEditorWidgets editor={editor} />, {
+    wrapper: ({ children }) => (
+      <I18nProvider>
+        <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
+      </I18nProvider>
+    ),
+  });
   const action = async (id: string) => {
     const descriptor = jest
       .mocked(editor.addAction)
@@ -107,6 +115,54 @@ const setup = (enabled = true, yaml = 'settings:\n  run_as: ', canManage = false
 };
 
 describe('ServiceAccountEditorWidgets', () => {
+  it('shows descriptions and inserts a newly created account into the current draft', async () => {
+    const { action, services, editor, directory } = setup(true, 'settings:\n  run_as: ', true);
+    services.security.serviceAccounts.canCreate.mockReturnValue(true);
+    jest
+      .mocked(services.securityUi.components.getCreateServiceAccount)
+      .mockReturnValue(<div>{'Create flyout'}</div>);
+    directory.list.mockResolvedValue({
+      serviceAccounts: [{ ...account, description: 'Reads investigation events.' }],
+    });
+    await action('suggest');
+    expect(await screen.findByText('Reads investigation events.')).toBeInTheDocument();
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    expect(screen.getByText('Create flyout')).toBeInTheDocument();
+    const props = jest
+      .mocked(services.securityUi.components.getCreateServiceAccount)
+      .mock.calls.at(-1)?.[0];
+    if (!props) throw new Error('Expected create flyout');
+    act(() => props.onCreated(account));
+    expect(editor.executeEdits).toHaveBeenCalledWith('serviceAccount', [
+      expect.objectContaining({ text: JSON.stringify(account.id) }),
+    ]);
+  });
+
+  it('keeps the draft unchanged when creation is cancelled or the model changes', async () => {
+    const { action, services, editor, model } = setup(true, 'settings:\n  run_as: ', true);
+    services.security.serviceAccounts.canCreate.mockReturnValue(true);
+    jest
+      .mocked(services.securityUi.components.getCreateServiceAccount)
+      .mockReturnValue(<div>{'Create flyout'}</div>);
+    await action('suggest');
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    const props = jest
+      .mocked(services.securityUi.components.getCreateServiceAccount)
+      .mock.calls.at(-1)?.[0];
+    if (!props) throw new Error('Expected create flyout');
+    act(() => props.onClose());
+    expect(editor.executeEdits).not.toHaveBeenCalled();
+    await action('suggest');
+    fireEvent.click(screen.getByRole('button', { name: 'Create account' }));
+    const nextProps = jest
+      .mocked(services.securityUi.components.getCreateServiceAccount)
+      .mock.calls.at(-1)?.[0];
+    if (!nextProps) throw new Error('Expected create flyout');
+    jest.mocked(model.getVersionId).mockReturnValue(2);
+    act(() => nextProps.onCreated(account));
+    expect(editor.executeEdits).not.toHaveBeenCalled();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
     HTMLElement.prototype.scrollIntoView = jest.fn();
@@ -114,6 +170,17 @@ describe('ServiceAccountEditorWidgets', () => {
 
   afterEach(() => {
     jest.useRealTimers();
+  });
+
+  it('cancels the queued refresh when opening suggestions explicitly', async () => {
+    jest.useFakeTimers();
+    const { action, directory } = setup();
+    await action('suggest');
+    expect(directory.list).toHaveBeenCalledTimes(1);
+    await act(async () => {
+      jest.advanceTimersByTime(100);
+    });
+    expect(directory.list).toHaveBeenCalledTimes(1);
   });
 
   it('offers unrelated accounts when replacing an existing ID with Ctrl+Space', async () => {

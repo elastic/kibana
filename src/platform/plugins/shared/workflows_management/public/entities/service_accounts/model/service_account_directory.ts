@@ -14,6 +14,7 @@ import type { QueryClient } from '@kbn/react-query';
 export interface WorkflowServiceAccount {
   id: string;
   name: string;
+  description?: string;
   roles: string[];
   enabled: boolean;
   assumable: boolean;
