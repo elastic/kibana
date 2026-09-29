@@ -25,7 +25,8 @@ import {
   type GeneratedSignificantEventQuery,
 } from '@kbn/significant-events-schema';
 import { EMPTY_TOKENS } from '@kbn/nightshift-ai';
-import type { AnalysisTarget, ExistingQuerySummary } from '@kbn/nightshift-ai';
+import type { ExistingQuerySummary } from '@kbn/nightshift-ai';
+import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { KI_QUERY_GENERATION_AGENT_ID } from '../../agent_builder/agents/ki_query_generation';
 import {
   SIGNIFICANT_EVENTS_VALIDATE_QUERIES_TOOL_ID,
@@ -38,7 +39,7 @@ export const MAX_EXISTING_QUERIES_FOR_CONTEXT = 50;
 const MAX_EXISTING_QUERY_DESCRIPTION_LENGTH = 200;
 
 interface FinalizedValidationData {
-  target_id: string;
+  slug: string;
   finalized: true;
   finalized_queries: AcceptedQuery[];
 }
@@ -46,8 +47,8 @@ interface FinalizedValidationData {
 const isFinalizedValidationData = (data: unknown): data is FinalizedValidationData =>
   typeof data === 'object' &&
   data !== null &&
-  'target_id' in data &&
-  typeof data.target_id === 'string' &&
+  'slug' in data &&
+  typeof data.slug === 'string' &&
   'finalized' in data &&
   data.finalized === true &&
   'finalized_queries' in data &&
@@ -58,7 +59,7 @@ export interface ExecuteKIQueryGenerationAgentOptions {
   request: KibanaRequest;
   connectorId: string;
   interactionId: string;
-  target: AnalysisTarget;
+  source: NightshiftSource;
   existingQueries: ExistingQuerySummary[];
   signal?: AbortSignal;
   logger: Logger;
@@ -69,7 +70,7 @@ export async function executeKIQueryGenerationAgent({
   request,
   connectorId,
   interactionId,
-  target,
+  source,
   existingQueries,
   signal,
   logger,
@@ -77,12 +78,15 @@ export async function executeKIQueryGenerationAgent({
   queries: GeneratedSignificantEventQuery[];
   tokensUsed: ChatCompletionTokenCount;
 }> {
-  const userMessage = buildKIQueryGenerationUserMessage(target, existingQueries);
+  const userMessage = buildKIQueryGenerationUserMessage(
+    { slug: source.slug, description: source.description },
+    existingQueries
+  );
 
   const conversationClient = await agentBuilder.conversations.getScopedClient({ request });
   const conversation = await conversationClient.create({
     agentId: KI_QUERY_GENERATION_AGENT_ID,
-    title: `KI query generation: ${target.name}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
+    title: `KI query generation: ${source.slug}`.slice(0, CONVERSATION_TITLE_MAX_LENGTH),
     accessControl: { access_mode: ConversationAccessControlMode.Public },
   });
 
@@ -122,9 +126,9 @@ export async function executeKIQueryGenerationAgent({
   if (!finalizedData) {
     throw new Error('KI query generation agent did not finalize validate_queries');
   }
-  if (finalizedData.target_id !== target.id) {
+  if (finalizedData.slug !== source.slug) {
     throw new Error(
-      `KI query generation agent finalized for unexpected target "${finalizedData.target_id}"`
+      `KI query generation agent finalized for unexpected source "${finalizedData.slug}"`
     );
   }
 
@@ -146,17 +150,17 @@ export async function executeKIQueryGenerationAgent({
     roundEvent?.data.round.model_usage
   ) ?? { ...EMPTY_TOKENS };
 
-  logger.debug(`KI query generation agent returned ${queries.length} queries for "${target.id}"`);
+  logger.debug(`KI query generation agent returned ${queries.length} queries for "${source.slug}"`);
 
   return { queries, tokensUsed };
 }
 
 export function buildKIQueryGenerationUserMessage(
-  target: AnalysisTarget,
+  target: { slug: string; description?: string },
   existingQueries: ExistingQuerySummary[] = []
 ): string {
   const parts: string[] = [];
-  parts.push(`\`target_id\`: ${target.id}`);
+  parts.push(`\`slug\`: ${target.slug}`);
   if (target.description) {
     parts.push(`\`target_description\`: ${target.description}`);
   }

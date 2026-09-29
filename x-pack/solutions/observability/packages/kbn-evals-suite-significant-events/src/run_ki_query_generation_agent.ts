@@ -54,7 +54,10 @@ export const buildKIQueryGenerationEvalUserMessage = ({
   groundingContext?: string;
 }): string =>
   [
-    buildKIQueryGenerationUserMessage(target, existingQueries),
+    buildKIQueryGenerationUserMessage(
+      { slug: target.id, description: target.description },
+      existingQueries
+    ),
     QUERY_INTENT_EVAL_INSTRUCTIONS,
     groundingContext,
   ]
@@ -197,15 +200,15 @@ export const collectQueryAttempts = (steps: ConverseStep[]): QueryAttempt[] =>
 const isFinalizedValidationResult = (
   result: unknown
 ): result is {
-  data: { target_id: string; finalized: true; finalized_queries: AcceptedQuery[] };
+  data: { slug: string; finalized: true; finalized_queries: AcceptedQuery[] };
 } =>
   typeof result === 'object' &&
   result !== null &&
   'data' in result &&
   typeof result.data === 'object' &&
   result.data !== null &&
-  'target_id' in result.data &&
-  typeof result.data.target_id === 'string' &&
+  'slug' in result.data &&
+  typeof result.data.slug === 'string' &&
   'finalized' in result.data &&
   result.data.finalized === true &&
   'finalized_queries' in result.data &&
@@ -213,7 +216,7 @@ const isFinalizedValidationResult = (
 
 export const getFinalizedQueries = (
   steps: ConverseStep[],
-  expectedTargetId: string
+  expectedSlug: string
 ): AcceptedQuery[] => {
   const validationStep = steps
     .filter(
@@ -228,9 +231,9 @@ export const getFinalizedQueries = (
   if (!validationResult) {
     throw new Error('KI query generation agent did not finalize validate_queries');
   }
-  if (validationResult.data.target_id !== expectedTargetId) {
+  if (validationResult.data.slug !== expectedSlug) {
     throw new Error(
-      `KI query generation agent finalized for unexpected target "${validationResult.data.target_id}"`
+      `KI query generation agent finalized for unexpected source "${validationResult.data.slug}"`
     );
   }
   return validationResult.data.finalized_queries;

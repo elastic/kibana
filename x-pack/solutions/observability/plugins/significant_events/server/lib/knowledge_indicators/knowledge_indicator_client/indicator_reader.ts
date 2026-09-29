@@ -187,6 +187,9 @@ export class IndicatorReader {
       includeExpired?: boolean;
     }
   ): Promise<QueryLink[]> {
+    if (sourceIds.length === 0) {
+      return [];
+    }
     const minSeverityFilter =
       typeof filters?.minSeverityScore === 'number'
         ? esql.exp`\`query.severity_score\` >= ${filters.minSeverityScore}`

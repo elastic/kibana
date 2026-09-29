@@ -11,7 +11,7 @@ import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onb
 import { getKiIdentificationStatusToolHandler } from './handler';
 
 describe('getKiIdentificationStatusToolHandler', () => {
-  it('returns stream_name alongside the onboarding status', async () => {
+  it('returns the onboarding status', async () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: {
         getClient: () => ({
@@ -29,7 +29,6 @@ describe('getKiIdentificationStatusToolHandler', () => {
     });
 
     expect(result).toEqual({
-      stream_name: 'logs.nginx',
       execution_id: null,
       status: SignificantEventsWorkflowStatus.NotStarted,
     });

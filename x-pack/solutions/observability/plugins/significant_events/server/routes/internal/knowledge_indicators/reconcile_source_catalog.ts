@@ -17,7 +17,9 @@ import { listAllSources } from '../../utils/list_all_sources';
 
 interface OnboardingClient {
   cancel: (args: { streamName: string; request: KibanaRequest }) => Promise<unknown>;
-  getNonTerminalExecutions?: (args: { request: KibanaRequest }) => Promise<WorkflowExecutionListItemDto[]>;
+  getNonTerminalExecutions?: (args: {
+    request: KibanaRequest;
+  }) => Promise<WorkflowExecutionListItemDto[]>;
 }
 
 type CatalogKiClient = Pick<

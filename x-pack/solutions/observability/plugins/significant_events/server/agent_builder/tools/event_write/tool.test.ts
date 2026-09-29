@@ -10,7 +10,7 @@ import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
 import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
-import { createMockToolContext, invokeHandler } from '../../utils/test_helpers';
+import { createMockToolContext, invokeHandler, mockSourcesClient } from '../../utils/test_helpers';
 import { BulkWriteError, MAX_BULK_WRITE_ITEMS } from '../bulk_write';
 import { eventsWriteBulkHandler } from './handler';
 import { createEventsWriteTool, eventsWriteSchema } from './tool';
@@ -30,7 +30,7 @@ jest.mock('./handler', () => ({
 const input = {
   event_id: 'event-1',
   status: 'open' as const,
-  stream_names: ['logs.test'],
+  slugs: ['logs.test'],
   title: 'Test event',
   summary: 'Test summary',
   severity: '60-high' as const,
@@ -45,6 +45,7 @@ const createTool = (telemetry: { trackAgentToolEventsWrite: jest.Mock }) => {
     getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ getFeatures }),
     getAlertEventsClient: jest.fn().mockResolvedValue(undefined),
     licensing: {},
+    sourcesClient: mockSourcesClient(['logs.test', 'logs.batch', 'logs.web']),
   });
   return createEventsWriteTool({
     getScopedClients: getScopedClients as unknown as GetScopedClients,
@@ -369,7 +370,7 @@ describe('events_write tool', () => {
         items: [
           {
             ...input,
-            stream_names: ['logs.batch'],
+            slugs: ['logs.batch'],
             causal_features: [{ feature_id: 'uuid-web', name: 'Ambiguous' }],
           },
         ],

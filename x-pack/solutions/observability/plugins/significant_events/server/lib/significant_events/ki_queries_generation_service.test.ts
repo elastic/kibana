@@ -25,9 +25,10 @@ const executeKIQueryGenerationAgentMock = executeKIQueryGenerationAgent as jest.
 >;
 
 const source = {
-  id: 'logs.test',
-  title: 'Test logs',
-  view_name: '$.nightshift.sources.default.logs',
+  id: 'source-1',
+  slug: 'checkout',
+  title: 'Checkout',
+  view_name: '$.nightshift.sources.default.checkout',
 } as NightshiftSource;
 
 const makeDeps = (
@@ -35,7 +36,7 @@ const makeDeps = (
 ): GenerateKIQueriesDependencies => ({
   kiClient: {
     getStreamToQueryLinksMap: jest.fn().mockResolvedValue({
-      'logs.test': [
+      'source-1': [
         {
           query: {
             id: 'query-1',
@@ -45,7 +46,7 @@ const makeDeps = (
             description: 'Tracks error rate',
             esql: {
               query:
-                'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+                'FROM $.nightshift.sources.default.checkout | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
             },
           },
         },
@@ -113,10 +114,7 @@ describe('generateKIQueries', () => {
     expect(executeKIQueryGenerationAgentMock).toHaveBeenCalledWith(
       expect.objectContaining({
         interactionId: 'run-1',
-        target: expect.objectContaining({
-          id: 'logs.test',
-          samplingSource: '$.nightshift.sources.default.logs',
-        }),
+        source,
         existingQueries: [
           {
             id: 'query-1',
@@ -124,7 +122,7 @@ describe('generateKIQueries', () => {
             type: 'stats',
             severity_score: 65,
             description: 'Tracks error rate',
-            esql: 'FROM logs.test | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
+            esql: 'FROM $.nightshift.sources.default.checkout | STATS errors = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)',
           },
         ],
       })
@@ -133,6 +131,7 @@ describe('generateKIQueries', () => {
       expect.objectContaining({
         count: 1,
         connector_id: 'test-connector',
+        source_id: 'source-1',
         input_tokens_used: 10,
         output_tokens_used: 20,
       })

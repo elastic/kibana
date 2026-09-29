@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { STREAMS_INSPECT_STREAMS_TOOL_ID } from '@kbn/streams-plugin/server';
 import { SignificantEventsPausedError } from '../../lib/errors/significant_events_paused_error';
+import { SourceDisabledError, UnknownSourceSlugError } from './resolve_source_slugs';
 
 const getStatusCode = (err: unknown): number | undefined => {
   if (typeof err === 'object' && err !== null) {
@@ -30,13 +30,14 @@ const getErrorType = (err: unknown): string | undefined => {
 };
 
 export const classifyError = (err: unknown): string => {
+  if (err instanceof UnknownSourceSlugError || err instanceof SourceDisabledError) {
+    return err.message;
+  }
+
   const message = err instanceof Error ? err.message : String(err);
   const statusCode = getStatusCode(err);
   const errorType = getErrorType(err);
 
-  if (statusCode === 404 || message.includes('Cannot find stream')) {
-    return `Stream not found. Use ${STREAMS_INSPECT_STREAMS_TOOL_ID} to discover available streams.`;
-  }
   if (
     statusCode === 403 ||
     errorType === 'security_exception' ||

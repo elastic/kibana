@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RoleScopedSupertestProvider } from '../../../services/role_scoped_supertest';
+import type { RoleScopedSupertestProvider } from '@kbn/test-suites-xpack-platform/api_integration_deployment_agnostic/services/role_scoped_supertest';
 
 export interface TestSource {
   id: string;

@@ -9,7 +9,7 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import { ExecutionStatus } from '@kbn/workflows';
 import { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 import { createKiIdentificationCancelTool } from './tool';
-import { createMockToolContext } from '../../utils/test_helpers';
+import { createMockToolContext, mockSourcesClient } from '../../utils/test_helpers';
 
 describe('createKiIdentificationCancelTool', () => {
   const setup = () => {
@@ -26,6 +26,9 @@ describe('createKiIdentificationCancelTool', () => {
 
     const tool = createKiIdentificationCancelTool({
       streamsKIsOnboardingClient,
+      getScopedClients: jest.fn().mockResolvedValue({
+        sourcesClient: mockSourcesClient(['logs.nginx']),
+      }) as never,
     });
     const context = createMockToolContext();
     return { tool, context, managementApi };
@@ -34,7 +37,7 @@ describe('createKiIdentificationCancelTool', () => {
   it('cancels workflow execution and returns canceled status', async () => {
     const { tool, context, managementApi } = setup();
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
@@ -45,7 +48,9 @@ describe('createKiIdentificationCancelTool', () => {
     if ('results' in result) {
       expect(result.results[0].type).toBe('other');
       expect(result.results[0].data).toEqual({
-        stream_name: 'logs.nginx',
+        slug: 'logs.nginx',
+        title: 'logs.nginx',
+        view_name: '$.nightshift.sources.default.logs.nginx',
         execution_id: 'exec-1',
         status: SignificantEventsWorkflowStatus.Canceled,
       });
@@ -56,7 +61,7 @@ describe('createKiIdentificationCancelTool', () => {
     const { tool, context, managementApi } = setup();
     managementApi.cancelWorkflowExecution.mockRejectedValueOnce(new Error('boom'));
 
-    const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
+    const result = await tool.handler({ slug: 'logs.nginx' }, context);
 
     if ('results' in result) {
       expect(result.results[0].type).toBe('error');
