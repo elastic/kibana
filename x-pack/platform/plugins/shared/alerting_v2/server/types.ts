@@ -43,7 +43,9 @@ export interface InternalRulesClientApi {
   /**
    * Disables rules by id in whichever space each one lives in. Unlike a user disable,
    * `updatedBy` is `null`, the change history has no author, and `alerting.ruleDisabled`
-   * workflow triggers do not fire. Accepts at most `BULK_FILTER_MAX_RESOURCES` ids.
+   * workflow triggers do not fire. Accepts at most `BULK_FILTER_MAX_RESOURCES` ids; ids not
+   * valid per `entityIdSchema` are reported as `RULE_NOT_FOUND`, as the HTTP API cannot
+   * address them either.
    */
   bulkDisableRules: RulesClientApi['bulkDisableRules'];
 }

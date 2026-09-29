@@ -105,12 +105,48 @@ describe('createInternalRulesClient', () => {
     expect(findByIds).not.toHaveBeenCalled();
   });
 
+  it('reports ids the HTTP API would reject as RULE_NOT_FOUND without looking them up', async () => {
+    const invalidId = 'x" OR alerting_rule.id: * OR alerting_rule.id: "x';
+    const { client, findByIds, bulkDisableRulesBySpace } = setup([
+      foundRule('rule-1', ['default']),
+    ]);
+
+    const result = await client.bulkDisableRules({ ids: ['rule-1', invalidId] });
+
+    expect(findByIds).toHaveBeenCalledWith(['rule-1']);
+    expect(bulkDisableRulesBySpace.get(asSpaceId('default'))).toHaveBeenCalledWith({
+      ids: ['rule-1'],
+    });
+    expect(result).toEqual({
+      affected_count: 1,
+      errors: [
+        {
+          id: invalidId,
+          error: expect.objectContaining({ code: ALERTING_ERROR_CODES.RULE_NOT_FOUND }),
+        },
+      ],
+    });
+  });
+
+  it('looks the ids up in batches of 1000', async () => {
+    const { client, findByIds } = setup([]);
+    const ids = Array.from({ length: 2500 }, (_, i) => `rule-${i}`);
+
+    await client.bulkDisableRules({ ids });
+
+    expect(findByIds.mock.calls.map(([batch]) => batch)).toEqual([
+      ids.slice(0, 1000),
+      ids.slice(1000, 2000),
+      ids.slice(2000),
+    ]);
+  });
+
   it('does not count duplicate ids towards BULK_FILTER_MAX_RESOURCES', async () => {
     const { client, findByIds } = setup([]);
     const uniqueIds = Array.from({ length: BULK_FILTER_MAX_RESOURCES }, (_, i) => `rule-${i}`);
 
     await client.bulkDisableRules({ ids: [...uniqueIds, 'rule-0'] });
 
-    expect(findByIds).toHaveBeenCalledWith(uniqueIds);
+    expect(findByIds.mock.calls.flatMap(([batch]) => batch)).toEqual(uniqueIds);
   });
 });

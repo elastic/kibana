@@ -6,13 +6,20 @@
  */
 
 import Boom from '@hapi/boom';
-import { BULK_FILTER_MAX_RESOURCES } from '@kbn/alerting-v2-schemas';
+import { chunk, partition } from 'lodash';
+import { BULK_FILTER_MAX_RESOURCES, entityIdSchema } from '@kbn/alerting-v2-schemas';
 import { asSpaceId, type SpaceId } from '@kbn/core-spaces-common';
 import type { BulkByIdsParams, BulkResponse } from './rules_client';
 import { toBulkError } from './rules_client/utils';
-import type { RulesSavedObjectServiceContract } from './services/rules_saved_object_service/rules_saved_object_service';
+import type {
+  RulesFindAllResultItem,
+  RulesSavedObjectServiceContract,
+} from './services/rules_saved_object_service/rules_saved_object_service';
 import { savedObjectNamespacesToSpaceId } from './space_id_to_namespace';
 import type { InternalRulesClientApi, RulesClientApi } from '../types';
+
+// Each id is one clause of the lookup query, so batches stay under Elasticsearch's clause limit.
+const FIND_BY_IDS_BATCH_SIZE = 1000;
 
 /**
  * Builds the internal rules client. Rule ids are unique across spaces, so it finds
@@ -35,7 +42,16 @@ export const createInternalRulesClient = ({
       );
     }
 
-    const found = await rulesSavedObjectService.findByIds(uniqueIds);
+    // The ids are interpolated into the lookup query, so only look up ids the HTTP API accepts.
+    const [validIds, invalidIds] = partition(
+      uniqueIds,
+      (id) => entityIdSchema.safeParse(id).success
+    );
+
+    const found: RulesFindAllResultItem[] = [];
+    for (const batch of chunk(validIds, FIND_BY_IDS_BATCH_SIZE)) {
+      found.push(...(await rulesSavedObjectService.findByIds(batch)));
+    }
 
     const idsBySpace = new Map<SpaceId, string[]>();
     for (const { id, namespaces } of found) {
@@ -56,8 +72,13 @@ export const createInternalRulesClient = ({
     }
 
     const foundIds = new Set(found.map(({ id }) => id));
-    for (const id of uniqueIds.filter((ruleId) => !foundIds.has(ruleId))) {
+    for (const id of validIds.filter((ruleId) => !foundIds.has(ruleId))) {
       errors.push(toBulkError(id, { statusCode: 404, message: `Rule ${id} not found` }));
+    }
+    for (const id of invalidIds) {
+      errors.push(
+        toBulkError(id, { statusCode: 404, message: `Rule id "${id}" is not a valid rule id` })
+      );
     }
 
     return { affected_count: affectedCount, errors };
