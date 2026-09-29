@@ -13,6 +13,7 @@ import Path from 'node:path';
 import { execSync } from 'node:child_process';
 import { pbkdf2Sync } from 'node:crypto';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { REPO_ROOT } from '@kbn/repo-info';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { EventLoopWatchdog } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/event_loop_watchdog';
 import { ActivityRegistry } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/activity_registry';
@@ -28,6 +29,11 @@ const baseOptions: WatchdogOptions = {
   liveNoticeIntervalMs: 300,
   maxLiveNoticesPerBlock: 3,
   maxCandidates: 2,
+  profileAfterMs: 600,
+  maxProfileDurationMs: 10_000,
+  profileCooldownMs: 0,
+  profileSamplingIntervalUs: 1_000,
+  maxFrames: 5,
 };
 
 function deliberatelyBlockTheEventLoop(ms: number) {
@@ -69,6 +75,15 @@ describe('EventLoopWatchdog (real worker)', () => {
       .split('\n')
       .filter((line) => line.includes('Event loop still blocked'));
 
+  const debugCount = (text: string) =>
+    logger.debug.mock.calls.filter(([message]) => String(message).includes(text)).length;
+
+  const enableProfiling = async () => {
+    const before = debugCount('profiler ready');
+    watchdog?.setProfiling(true);
+    await waitFor(() => (debugCount('profiler ready') > before ? true : undefined));
+  };
+
   const startWatchdog = async (options: Partial<WatchdogOptions> = {}) => {
     watchdog = new EventLoopWatchdog({
       logger,
@@ -76,14 +91,12 @@ describe('EventLoopWatchdog (real worker)', () => {
       options: { ...baseOptions, ...options },
       registry,
       liveNoticeFormat: 'json',
+      sanitizeRoot: REPO_ROOT,
       outputFd,
     });
-    const readyCalls = () =>
-      logger.debug.mock.calls.filter(([message]) => String(message).includes('worker ready'))
-        .length;
-    const before = readyCalls();
+    const before = debugCount('worker ready');
     watchdog.start();
-    await waitFor(() => (readyCalls() > before ? true : undefined));
+    await waitFor(() => (debugCount('worker ready') > before ? true : undefined));
   };
 
   beforeEach(() => {
@@ -133,6 +146,8 @@ describe('EventLoopWatchdog (real worker)', () => {
       expect.objectContaining({ kind: 'task', type: 'test:late', id: 'b' }),
     ]);
     expect(report.omittedCandidates).toBe(1);
+    // profiling is opt-in
+    expect(report.profile).toBeUndefined();
     expect(report.liveNotices).toBe(notices.length);
   });
 
@@ -154,6 +169,55 @@ describe('EventLoopWatchdog (real worker)', () => {
     const report = await nextReport(1);
     expect(blockedMs).toBeGreaterThan(baseOptions.thresholdMs * 2);
     expect(report.cpuRatio).toBeGreaterThan(0.5);
+  });
+
+  describe('with profiling enabled', () => {
+    it('profiles blocks that last at least profileAfter and reports the stack', async () => {
+      await startWatchdog();
+      await enableProfiling();
+
+      deliberatelyBlockTheEventLoop(1_500);
+      const report = await nextReport(1);
+      expect(report.profile?.verdict).toBe('profiled');
+      expect(report.profile?.startAckLatencyMs).toEqual(expect.any(Number));
+      // V8 may inline the named function into its (transpiled) caller, so assert on location
+      const [top] = report.profile?.frames ?? [];
+      expect(top.location).toMatch(
+        /^src\/core\/server\/integration_tests\/event_loop_watchdog\/event_loop_watchdog\.test\.ts:\d+$/
+      );
+      expect(top.selfPercent).toBeGreaterThan(80);
+    });
+
+    it('does not profile blocks shorter than profileAfter', async () => {
+      await startWatchdog();
+      await enableProfiling();
+
+      deliberatelyBlockTheEventLoop(400);
+      const report = await nextReport(1);
+      expect(report.blockedMs).toBeGreaterThanOrEqual(300);
+      expect(report.profile).toBeUndefined();
+    });
+
+    it('reports native CPU-bound blocks as inconclusive', async () => {
+      await startWatchdog();
+      await enableProfiling();
+
+      pbkdf2Sync('password', 'salt', 6_000_000, 64, 'sha512');
+      const report = await nextReport(1);
+      expect(report.profile?.verdict).toBe('inconclusive');
+      expect(report.cpuRatio).toBeGreaterThan(0.5);
+    });
+
+    it('stops profiling when disabled at runtime', async () => {
+      await startWatchdog();
+      await enableProfiling();
+      watchdog?.setProfiling(false);
+      await sleep(50);
+
+      deliberatelyBlockTheEventLoop(1_000);
+      const report = await nextReport(1);
+      expect(report.profile).toBeUndefined();
+    });
   });
 
   it('keeps candidates of back-to-back blocks separate', async () => {

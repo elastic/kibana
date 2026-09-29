@@ -20,6 +20,11 @@ const options: WatchdogOptions = {
   liveNoticeIntervalMs: 1_000,
   maxLiveNoticesPerBlock: 3,
   maxCandidates: 5,
+  profileAfterMs: 2_000,
+  maxProfileDurationMs: 10_000,
+  profileCooldownMs: 600_000,
+  profileSamplingIntervalUs: 1_000,
+  maxFrames: 5,
 };
 
 describe('EventLoopWatchdog', () => {
@@ -41,6 +46,7 @@ describe('EventLoopWatchdog', () => {
       options,
       registry,
       liveNoticeFormat: 'text',
+      sanitizeRoot: '/root',
     });
   });
 
@@ -70,6 +76,28 @@ describe('EventLoopWatchdog', () => {
       key: 1,
       activity: expect.objectContaining({ type: 'b' }),
     });
+  });
+
+  it('applies profiling changes to running and future workers', () => {
+    watchdog.start();
+    const first = lastWorker();
+    expect(first.workerOptions).toEqual(
+      expect.objectContaining({ workerData: expect.objectContaining({ profilingEnabled: false }) })
+    );
+
+    watchdog.setProfiling(true);
+    watchdog.setProfiling(true);
+    expect(first.postMessage).toHaveBeenCalledWith({ type: 'set-profiling', enabled: true });
+    expect(
+      first.postMessage.mock.calls.filter(([message]) => message.type === 'set-profiling')
+    ).toHaveLength(1);
+
+    // a restarted worker starts with the current setting
+    first.emit('exit', 1);
+    jest.advanceTimersByTime(RESTART_BASE_DELAY_MS);
+    expect(lastWorker().workerOptions).toEqual(
+      expect.objectContaining({ workerData: expect.objectContaining({ profilingEnabled: true }) })
+    );
   });
 
   it('terminates the worker on stop and can start again', async () => {

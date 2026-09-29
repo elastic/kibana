@@ -9,40 +9,114 @@
 
 /*
  * Runs in the dedicated watchdog worker thread. Watches the main thread's heartbeat, writes
- * live notices directly to stdout while the main thread is blocked and posts a report to the
- * main thread once the block ends.
+ * live notices directly to stdout while the main thread is blocked, optionally profiles long
+ * blocks through the inspector and posts a report to the main thread once the block ends.
  */
 
 import { writeSync } from 'node:fs';
+import { Session } from 'node:inspector';
 import type { MessagePort } from 'node:worker_threads';
 import { isMainThread, parentPort, workerData } from 'node:worker_threads';
 import { BlockDetector, type DetectorEvent } from './block_detector';
 import { formatLiveNoticeMessage, formatLogLine } from './format';
+import { summarizeProfile, type CpuProfile } from './profile_summary';
 import type {
   Activity,
+  BlockReport,
   Candidate,
   MainToWorkerMessage,
+  ProfileSummary,
   WatchdogWorkerData,
   WorkerToMainMessage,
 } from './types';
 
 const hrUs = (): number => Number(process.hrtime.bigint() / 1000n);
 
+/**
+ * Maximum reports waiting on inspector responses. Bounds retained block state should the
+ * inspector stop responding; further reports are dropped (and counted) instead of queued.
+ */
+const MAX_PENDING_REPORTS = 10;
+
+interface Capture {
+  requestedAtUs: number;
+  startAckUs?: number;
+  stopAckUs?: number;
+  profile?: CpuProfile;
+  error?: string;
+  done: Promise<void>;
+}
+
 interface Block {
+  startedAtUs: number;
   detectedAtUs: number;
   cpuAtDetection: NodeJS.CpuUsage;
   candidates: Candidate[];
   omittedCandidates: number;
+  capture?: Capture;
+  /** Set when the block qualified for profiling but no capture was started. */
+  captureSkippedReason?: string;
 }
 
 const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void => {
-  const { options, liveNoticeFormat, loggerName, outputFd } = data;
+  const { options, liveNoticeFormat, loggerName, outputFd, sanitizeRoot } = data;
   const heartbeat = new BigInt64Array(data.heartbeat);
   const activities = new Map<number, Activity>();
   const detector = new BlockDetector(options);
+  const reportedErrors = new Set<string>();
+
+  let profilingEnabled = false;
+  let session: Session | undefined;
+  let profilerReady = false;
+  let captureInFlight = false;
   let block: Block | undefined;
 
   const post = (message: WorkerToMainMessage) => port.postMessage(message);
+
+  const reportError = (context: string, error: unknown) => {
+    // report each distinct failure once to bound log volume
+    if (reportedErrors.has(context)) return;
+    reportedErrors.add(context);
+    post({
+      type: 'worker-error',
+      message: `${context}: ${error instanceof Error ? error.message : String(error)}`,
+    });
+  };
+
+  const inspect = <T>(method: string, params: object = {}): Promise<T> =>
+    new Promise((resolve, reject) => {
+      if (!session) {
+        reject(new Error('inspector session is not connected'));
+        return;
+      }
+      session.post(method, params, (error, result) =>
+        error ? reject(error) : resolve(result as T)
+      );
+    });
+
+  /** Connects the inspector lazily, only once profiling is enabled for the first time. */
+  const setProfiling = (enabled: boolean) => {
+    profilingEnabled = enabled;
+    if (!enabled || session) return;
+    try {
+      session = new Session();
+      session.connectToMainThread();
+    } catch (error) {
+      session = undefined;
+      reportError('connectToMainThread failed', error);
+      return;
+    }
+    // `Profiler.enable` is cheap; the expensive part is `Profiler.start` on a long block
+    inspect('Profiler.enable')
+      .then(() =>
+        inspect('Profiler.setSamplingInterval', { interval: options.profileSamplingIntervalUs })
+      )
+      .then(() => {
+        profilerReady = true;
+        post({ type: 'profiler-ready' });
+      })
+      .catch((error) => reportError('profiler setup failed', error));
+  };
 
   const writeLine = (message: string, meta: Record<string, object>) => {
     if (!liveNoticeFormat) return;
@@ -70,13 +144,77 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     };
   };
 
+  const startCapture = (): Capture => {
+    const capture: Capture = { requestedAtUs: hrUs(), done: Promise.resolve() };
+    capture.done = inspect('Profiler.start')
+      .then(() => {
+        capture.startAckUs = hrUs();
+        detector.onCaptureStarted(capture.startAckUs / 1000);
+      })
+      .catch((error) => {
+        capture.error = `Profiler.start failed: ${error.message}`;
+      });
+    return capture;
+  };
+
+  const stopCapture = (capture: Capture): Promise<void> => {
+    if (capture.stopAckUs !== undefined || capture.error) return capture.done;
+    capture.done = capture.done.then(async () => {
+      if (capture.error || capture.stopAckUs !== undefined) return;
+      try {
+        const { profile } = await inspect<{ profile: CpuProfile }>('Profiler.stop');
+        capture.profile = profile;
+      } catch (error) {
+        capture.error = `Profiler.stop failed: ${error.message}`;
+      } finally {
+        capture.stopAckUs = hrUs();
+      }
+    });
+    return capture.done;
+  };
+
+  const summarize = (current: Block, endedAtUs: number): ProfileSummary | undefined => {
+    const { capture, captureSkippedReason } = current;
+    if (!capture) {
+      return captureSkippedReason
+        ? { verdict: 'unavailable', reason: captureSkippedReason, frames: [] }
+        : undefined;
+    }
+    if (capture.error || !capture.profile || capture.startAckUs === undefined) {
+      return { verdict: 'unavailable', reason: capture.error ?? 'no profile returned', frames: [] };
+    }
+    return {
+      ...summarizeProfile(capture.profile, {
+        windowStartUs: current.startedAtUs,
+        windowEndUs: Math.min(endedAtUs, capture.stopAckUs ?? endedAtUs),
+        startAckUs: capture.startAckUs,
+        sanitizeRoot,
+        maxFrames: options.maxFrames,
+      }),
+      startAckLatencyMs: Math.round((capture.startAckUs - capture.requestedAtUs) / 1000),
+    };
+  };
+
   const onBlockStart = (event: Extract<DetectorEvent, { type: 'block-start' }>) => {
     const blockStartedAt = Date.now() - (event.detectedAt - event.startedAt);
     block = {
+      startedAtUs: event.startedAt * 1000,
       detectedAtUs: event.detectedAt * 1000,
       cpuAtDetection: process.cpuUsage(),
       ...snapshotCandidates(blockStartedAt),
     };
+  };
+
+  const onProfileStart = () => {
+    if (!block || !profilingEnabled) return;
+    if (captureInFlight) {
+      block.captureSkippedReason = 'a previous capture is still in progress';
+    } else if (!profilerReady) {
+      block.captureSkippedReason = 'profiler unavailable or not yet enabled';
+    } else {
+      captureInFlight = true;
+      block.capture = startCapture();
+    }
   };
 
   const onLiveNotice = (event: Extract<DetectorEvent, { type: 'live-notice' }>) => {
@@ -93,39 +231,74 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     });
   };
 
+  // Only block-end reporting awaits the inspector. The ending block's state is detached
+  // synchronously so that a subsequent block cannot be confused with it while reports are queued.
+  let reports: Promise<void> = Promise.resolve();
+  let pendingReports = 0;
+  let droppedReports = 0;
   const onBlockEnd = (event: Extract<DetectorEvent, { type: 'block-end' }>) => {
     const current = block;
     block = undefined;
-    if (!current || !event.report) return;
+    if (!current || (!current.capture && !event.report)) return;
+    if (pendingReports >= MAX_PENDING_REPORTS) {
+      // keep the detector's bundled suppression count; non-reported blocks are already counted
+      if (event.report) droppedReports += 1 + event.suppressedBlocks;
+      reportError('reports dropped', new Error('inspector responses are pending for too long'));
+      return;
+    }
 
     const endedAtUs = hrUs();
     const endedAtMs = Date.now();
     const cpu = process.cpuUsage(current.cpuAtDetection);
     const wallUs = endedAtUs - current.detectedAtUs;
+    const cpuRatio = wallUs > 0 ? Math.round(((cpu.user + cpu.system) / wallUs) * 100) / 100 : 0;
     const toEpochMs = (ms: number) => Math.round(endedAtMs - (endedAtUs / 1000 - ms));
 
-    post({
-      type: 'report',
-      report: {
-        blockedMs: Math.round(event.blockedMs),
-        startedAt: toEpochMs(event.startedAt),
-        endedAt: toEpochMs(event.endedAt),
-        // sampled from detection onwards, which excludes the undetected first `threshold` ms
-        cpuRatio: wallUs > 0 ? Math.round(((cpu.user + cpu.system) / wallUs) * 100) / 100 : 0,
-        liveNotices: event.liveNotices,
-        suppressedBlocks: event.suppressedBlocks,
-        candidates: current.candidates,
-        omittedCandidates: current.omittedCandidates,
-      },
-    });
+    pendingReports++;
+    reports = reports
+      .then(async () => {
+        if (current.capture) {
+          await stopCapture(current.capture);
+          captureInFlight = false;
+        }
+        if (!event.report) return;
+        const report: BlockReport = {
+          blockedMs: Math.round(event.blockedMs),
+          startedAt: toEpochMs(event.startedAt),
+          endedAt: toEpochMs(event.endedAt),
+          // sampled from detection onwards, which excludes the undetected first `threshold` ms
+          cpuRatio,
+          liveNotices: event.liveNotices,
+          suppressedBlocks: event.suppressedBlocks + droppedReports,
+          candidates: current.candidates,
+          omittedCandidates: current.omittedCandidates,
+        };
+        droppedReports = 0;
+        const profile = summarize(current, event.endedAt * 1000);
+        if (profile) report.profile = profile;
+        post({ type: 'report', report });
+      })
+      .catch((error) => reportError('reporting failed', error))
+      .finally(() => {
+        pendingReports--;
+      });
   };
 
+  // Event handling is synchronous so that live notices are never queued behind inspector calls
+  // the blocked main thread cannot service.
   const handle = (event: DetectorEvent) => {
     switch (event.type) {
       case 'block-start':
         return onBlockStart(event);
       case 'live-notice':
         return onLiveNotice(event);
+      case 'profile-start':
+        return onProfileStart();
+      case 'profile-deadline':
+        if (block?.capture) {
+          stopCapture(block.capture).catch((error) => reportError('profile stop failed', error));
+        }
+        return;
       case 'block-end':
         return onBlockEnd(event);
     }
@@ -143,6 +316,9 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
       case 'activity-end':
         activities.delete(message.key);
         break;
+      case 'set-profiling':
+        setProfiling(message.enabled);
+        break;
     }
   });
 
@@ -152,7 +328,12 @@ const runWatchdogWorker = (port: MessagePort, data: WatchdogWorkerData): void =>
     for (const event of events) handle(event);
   }, options.pollIntervalMs);
 
-  port.on('close', () => clearInterval(timer));
+  port.on('close', () => {
+    clearInterval(timer);
+    session?.disconnect();
+  });
+
+  setProfiling(data.profilingEnabled);
   post({ type: 'ready' });
 };
 

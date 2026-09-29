@@ -9,6 +9,7 @@
 
 export const mockWatchdog = {
   start: jest.fn(),
+  setProfiling: jest.fn(),
   stop: jest.fn().mockResolvedValue(undefined),
 };
 export const MockEventLoopWatchdog = jest.fn(() => mockWatchdog);

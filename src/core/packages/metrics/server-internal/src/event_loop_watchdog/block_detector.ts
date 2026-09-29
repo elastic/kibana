@@ -17,6 +17,9 @@ export const REPORT_REFILL_MS = 60_000;
 export type DetectorEvent =
   | { type: 'block-start'; startedAt: number; detectedAt: number }
   | { type: 'live-notice'; startedAt: number; elapsedMs: number; count: number }
+  /** The block has lasted `profileAfter` and the cooldown allows a capture. */
+  | { type: 'profile-start' }
+  | { type: 'profile-deadline' }
   | {
       type: 'block-end';
       startedAt: number;
@@ -31,22 +34,31 @@ export type DetectorEvent =
 
 type DetectorOptions = Pick<
   WatchdogOptions,
-  'thresholdMs' | 'liveNoticeIntervalMs' | 'maxLiveNoticesPerBlock'
+  | 'thresholdMs'
+  | 'liveNoticeIntervalMs'
+  | 'maxLiveNoticesPerBlock'
+  | 'profileAfterMs'
+  | 'maxProfileDurationMs'
+  | 'profileCooldownMs'
 >;
 
 interface BlockState {
   startedAt: number;
   liveNotices: number;
   lastLiveNoticeAt: number;
+  profileRequested: boolean;
+  profileStartedAt?: number;
+  profileDeadlineEmitted: boolean;
 }
 
 /**
  * Pure, clock-injected state machine deciding when a block starts/ends, when to emit live
- * notices and when to report. All limits are enforced here, in the worker, so they hold while
- * the main thread is blocked.
+ * notices, when to profile and when to report. All limits are enforced here, in the worker, so
+ * they hold while the main thread is blocked.
  */
 export class BlockDetector {
   private block?: BlockState;
+  private lastProfileStartedAt = Number.NEGATIVE_INFINITY;
   private reportTokens = REPORT_BURST;
   private lastRefillAt?: number;
   private suppressedBlocks = 0;
@@ -63,7 +75,13 @@ export class BlockDetector {
 
     if (!block) {
       if (now - lastHeartbeat < options.thresholdMs) return [];
-      this.block = { startedAt: lastHeartbeat, liveNotices: 0, lastLiveNoticeAt: lastHeartbeat };
+      this.block = {
+        startedAt: lastHeartbeat,
+        liveNotices: 0,
+        lastLiveNoticeAt: lastHeartbeat,
+        profileRequested: false,
+        profileDeadlineEmitted: false,
+      };
       return [{ type: 'block-start', startedAt: lastHeartbeat, detectedAt: now }];
     }
 
@@ -89,22 +107,49 @@ export class BlockDetector {
       ];
     }
 
+    const events: DetectorEvent[] = [];
     if (
       block.liveNotices < options.maxLiveNoticesPerBlock &&
       now - block.lastLiveNoticeAt >= options.liveNoticeIntervalMs
     ) {
       block.liveNotices++;
       block.lastLiveNoticeAt = now;
-      return [
-        {
-          type: 'live-notice',
-          startedAt: block.startedAt,
-          elapsedMs: now - block.startedAt,
-          count: block.liveNotices,
-        },
-      ];
+      events.push({
+        type: 'live-notice',
+        startedAt: block.startedAt,
+        elapsedMs: now - block.startedAt,
+        count: block.liveNotices,
+      });
     }
-    return [];
+    if (
+      !block.profileRequested &&
+      now - block.startedAt >= options.profileAfterMs &&
+      now - this.lastProfileStartedAt >= options.profileCooldownMs
+    ) {
+      block.profileRequested = true;
+      events.push({ type: 'profile-start' });
+    }
+    if (
+      block.profileStartedAt !== undefined &&
+      !block.profileDeadlineEmitted &&
+      now - block.profileStartedAt >= options.maxProfileDurationMs
+    ) {
+      block.profileDeadlineEmitted = true;
+      events.push({ type: 'profile-deadline' });
+    }
+    return events;
+  }
+
+  /**
+   * Records that the profiler actually started (acknowledged) at `now`. Only then is the cooldown
+   * consumed, so skipped or long-pending captures do not skew it. The profile deadline is armed
+   * only if the block is still ongoing.
+   */
+  public onCaptureStarted(now: number): void {
+    this.lastProfileStartedAt = now;
+    if (this.block && this.block.profileStartedAt === undefined) {
+      this.block.profileStartedAt = now;
+    }
   }
 
   private takeReportToken(now: number): boolean {

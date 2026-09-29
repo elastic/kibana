@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { concatMap, distinctUntilChanged, firstValueFrom, type Subscription } from 'rxjs';
+import { concatMap, distinctUntilChanged, firstValueFrom, Subscription } from 'rxjs';
+import { REPO_ROOT } from '@kbn/repo-info';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
@@ -19,6 +20,10 @@ import type { LiveNoticeFormat, WatchdogOptions } from './types';
 
 /** Feature flag enabling the event-loop watchdog at runtime. */
 export const EVENT_LOOP_WATCHDOG_FEATURE_FLAG = 'core.eventLoopWatchdog.enabled';
+/** Feature flag enabling CPU profiling of long blocks (see `ops.eventLoopWatchdog.profileAfter`). */
+export const EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG = 'core.eventLoopWatchdog.profiling';
+const PROFILE_SAMPLING_INTERVAL_US = 1_000;
+const MAX_FRAMES = 5;
 const LOGGER_CONTEXT = ['metrics', 'event_loop_watchdog'] as const;
 
 export interface EventLoopWatchdogSetupDeps {
@@ -86,13 +91,24 @@ export const toWatchdogOptions = ({
   eventLoopWatchdog: config,
 }: Pick<OpsConfigType, 'eventLoopWatchdog'>): WatchdogOptions => {
   const heartbeatIntervalMs = config.heartbeatInterval.asMilliseconds();
+  const thresholdMs = Math.max(config.threshold.asMilliseconds(), heartbeatIntervalMs * 2);
+  const maxProfileDurationMs = config.maxProfileDuration.asMilliseconds();
   return {
-    thresholdMs: Math.max(config.threshold.asMilliseconds(), heartbeatIntervalMs * 2),
+    thresholdMs,
     heartbeatIntervalMs,
-    pollIntervalMs: Math.max(5, Math.floor(heartbeatIntervalMs / 2)),
+    // the poll loop also enforces the profile deadline, so it must not be coarser than it
+    pollIntervalMs: Math.max(
+      5,
+      Math.floor(Math.min(heartbeatIntervalMs, maxProfileDurationMs) / 2)
+    ),
     liveNoticeIntervalMs: config.liveNoticeInterval.asMilliseconds(),
     maxLiveNoticesPerBlock: config.maxLiveNoticesPerBlock,
     maxCandidates: config.maxCandidates,
+    profileAfterMs: Math.max(config.profileAfter.asMilliseconds(), thresholdMs),
+    maxProfileDurationMs,
+    profileCooldownMs: config.profileCooldown.asMilliseconds(),
+    profileSamplingIntervalUs: PROFILE_SAMPLING_INTERVAL_US,
+    maxFrames: MAX_FRAMES,
   };
 };
 
@@ -128,10 +144,18 @@ export class EventLoopWatchdogService {
       options: toWatchdogOptions(opsConfig),
       registry: this.registry,
       liveNoticeFormat: resolveLiveNoticeFormat(loggingConfig, LOGGER_CONTEXT.join('.')),
+      sanitizeRoot: REPO_ROOT,
     });
     this.watchdog = watchdog;
 
-    this.subscription = featureFlags
+    this.subscription = new Subscription();
+    this.subscription.add(
+      featureFlags
+        .getBooleanValue$(EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG, false)
+        .pipe(distinctUntilChanged())
+        .subscribe((enabled) => watchdog.setProfiling(enabled))
+    );
+    const enabledSubscription = featureFlags
       .getBooleanValue$(EVENT_LOOP_WATCHDOG_FEATURE_FLAG, false)
       .pipe(
         distinctUntilChanged(),
@@ -148,6 +172,7 @@ export class EventLoopWatchdogService {
         })
       )
       .subscribe();
+    this.subscription.add(enabledSubscription);
   }
 
   public async stop(): Promise<void> {

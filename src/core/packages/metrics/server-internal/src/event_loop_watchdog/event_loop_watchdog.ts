@@ -39,6 +39,8 @@ export interface EventLoopWatchdogParams {
   registry: ActivityRegistry;
   /** Format of worker-written live notices; `undefined` disables them. */
   liveNoticeFormat: LiveNoticeFormat | undefined;
+  /** Absolute path prefix stripped from profile frame locations. */
+  sanitizeRoot: string;
   /** Worker entry module; overridable for tests. */
   workerEntry?: string;
   /** File descriptor for worker-written live notices; defaults to stdout. */
@@ -70,6 +72,7 @@ export class EventLoopWatchdog {
   private restarts = 0;
   private running = false;
   private stopping?: Promise<void>;
+  private profilingEnabled = false;
 
   constructor(private readonly params: EventLoopWatchdogParams) {
     this.logger = params.logger;
@@ -100,6 +103,17 @@ export class EventLoopWatchdog {
     this.trySpawnWorker(buffer);
   }
 
+  /**
+   * Enables or disables profiling of long blocks. Takes effect immediately for a running worker
+   * and is kept for workers started or restarted later.
+   */
+  public setProfiling(enabled: boolean): void {
+    if (this.profilingEnabled === enabled) return;
+    this.profilingEnabled = enabled;
+    this.worker?.postMessage({ type: 'set-profiling', enabled } satisfies MainToWorkerMessage);
+    this.logger.info(`Event loop watchdog profiling ${enabled ? 'enabled' : 'disabled'}`);
+  }
+
   /** Stops the heartbeat and terminates the worker. Concurrent callers await the same cleanup. */
   public stop(): Promise<void> {
     if (this.stopping) return this.stopping;
@@ -128,13 +142,16 @@ export class EventLoopWatchdog {
   }
 
   private spawnWorker(buffer: SharedArrayBuffer): void {
-    const { options, liveNoticeFormat, registry, workerEntry, loggerName, outputFd } = this.params;
+    const { options, liveNoticeFormat, registry, workerEntry, loggerName, outputFd, sanitizeRoot } =
+      this.params;
     const workerData: WatchdogWorkerData = {
       heartbeat: buffer,
       options,
       liveNoticeFormat,
       loggerName,
       outputFd: outputFd ?? STDOUT_FD,
+      sanitizeRoot,
+      profilingEnabled: this.profilingEnabled,
     };
 
     const worker = new Worker(workerEntry ?? WORKER_ENTRY, {
@@ -216,6 +233,10 @@ export class EventLoopWatchdog {
   private onWorkerMessage(message: WorkerToMainMessage): void {
     if (message.type === 'ready') {
       this.logger.debug('Event loop watchdog worker ready');
+    } else if (message.type === 'profiler-ready') {
+      this.logger.debug('Event loop watchdog profiler ready');
+    } else if (message.type === 'worker-error') {
+      this.logger.warn(`Event loop watchdog: ${message.message}`);
     } else if (message.type === 'report') {
       const { report } = message;
       this.logger.warn<WatchdogLogMeta>(formatReportMessage(report), {

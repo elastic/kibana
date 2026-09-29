@@ -15,6 +15,15 @@ export interface WatchdogOptions {
   liveNoticeIntervalMs: number;
   maxLiveNoticesPerBlock: number;
   maxCandidates: number;
+  /** Blocks are only profiled once they have lasted this long. */
+  profileAfterMs: number;
+  maxProfileDurationMs: number;
+  /** Minimum interval between two profiler starts (acknowledgements). */
+  profileCooldownMs: number;
+  /** Profiler sampling interval in microseconds. */
+  profileSamplingIntervalUs: number;
+  /** Maximum number of frames listed in a profile summary. */
+  maxFrames: number;
 }
 
 /** Output format of worker-written live notices, matching the process' console appender. */
@@ -29,6 +38,10 @@ export interface WatchdogWorkerData {
   loggerName: string;
   /** File descriptor live notices are written to (stdout by default). */
   outputFd: number;
+  /** Absolute path prefix stripped from profile frame URLs. */
+  sanitizeRoot: string;
+  /** Whether long blocks are profiled; can be changed at runtime with `set-profiling`. */
+  profilingEnabled: boolean;
 }
 
 /**
@@ -52,6 +65,40 @@ export interface Candidate {
   startedBeforeBlockMs: number;
 }
 
+export interface ProfileFrame {
+  functionName: string;
+  /** Sanitised location: repo-relative path, or basename for paths outside the repo root. */
+  location: string;
+  selfTimeMs: number;
+  selfPercent: number;
+  /** Nearest callers (sanitised `functionName (location)`), innermost first. */
+  callers: string[];
+}
+
+/**
+ * - `profiled`: the profile covers the block with JS samples.
+ * - `inconclusive`: a profile was captured but does not reliably cover the block
+ *   (e.g. profiler started only after the block ended, as with native or syscall blocks).
+ * - `unavailable`: no profile (profiling failed or was rate-limited).
+ */
+export type ProfileVerdict = 'profiled' | 'inconclusive' | 'unavailable';
+
+export interface ProfileSummary {
+  verdict: ProfileVerdict;
+  /** Human-readable reason for the verdict. */
+  reason: string;
+  frames: ProfileFrame[];
+  /** Share of sampled time attributed to GC. */
+  gcPercent?: number;
+  /**
+   * Time between requesting `Profiler.start` and its acknowledgement. It includes waiting for the
+   * main thread to service the request (the rest of a native/syscall block) and the profiler's own
+   * start-up stall, which grows with the amount of compiled code. Only for `profiled` verdicts is
+   * it a reasonable upper bound of the time the watchdog itself added to the block.
+   */
+  startAckLatencyMs?: number;
+}
+
 export interface BlockReport {
   blockedMs: number;
   /** Estimated start of the block (last heartbeat), epoch ms. */
@@ -67,11 +114,18 @@ export interface BlockReport {
   suppressedBlocks: number;
   candidates: Candidate[];
   omittedCandidates: number;
+  /** Present only for blocks that lasted at least `profileAfter` while profiling was enabled. */
+  profile?: ProfileSummary;
 }
 
 export type MainToWorkerMessage =
   | { type: 'snapshot'; activities: Array<[number, Activity]> }
   | { type: 'activity-start'; key: number; activity: Activity }
-  | { type: 'activity-end'; key: number };
+  | { type: 'activity-end'; key: number }
+  | { type: 'set-profiling'; enabled: boolean };
 
-export type WorkerToMainMessage = { type: 'ready' } | { type: 'report'; report: BlockReport };
+export type WorkerToMainMessage =
+  | { type: 'ready' }
+  | { type: 'profiler-ready' }
+  | { type: 'report'; report: BlockReport }
+  | { type: 'worker-error'; message: string };

@@ -39,6 +39,15 @@ export interface EventLoopWatchdogConfigType {
   maxLiveNoticesPerBlock: number;
   /** Maximum number of candidate activities listed in a report. */
   maxCandidates: number;
+  /**
+   * When profiling is enabled (feature flag `core.eventLoopWatchdog.profiling`), only blocks
+   * lasting at least this long are profiled. Starting the profiler stalls the main thread.
+   */
+  profileAfter: Duration;
+  /** Maximum duration of one CPU-profile capture. */
+  maxProfileDuration: Duration;
+  /** Minimum interval between two CPU-profile captures. */
+  profileCooldown: Duration;
 }
 
 /** @internal */
@@ -82,6 +91,9 @@ const configSchema = schema.object({
     liveNoticeInterval: boundedDuration('5s', 100, 5 * MINUTE),
     maxLiveNoticesPerBlock: boundedInteger(12, 1, 100),
     maxCandidates: boundedInteger(10, 1, 100),
+    profileAfter: boundedDuration('2s', 100, 5 * MINUTE),
+    maxProfileDuration: boundedDuration('10s', 100, MINUTE),
+    profileCooldown: boundedDuration('10m', 0, 60 * MINUTE),
   }),
 });
 

@@ -18,6 +18,7 @@ export { opsConfig, type OpsConfigType } from './src/ops_config';
 export {
   EventLoopWatchdogService,
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
+  EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG,
   type EventLoopWatchdogSetupDeps,
   type EventLoopWatchdogStartDeps,
 } from './src/event_loop_watchdog';

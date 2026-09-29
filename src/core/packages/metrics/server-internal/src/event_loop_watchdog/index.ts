@@ -10,6 +10,7 @@
 export {
   EventLoopWatchdogService,
   EVENT_LOOP_WATCHDOG_FEATURE_FLAG,
+  EVENT_LOOP_WATCHDOG_PROFILING_FEATURE_FLAG,
   type EventLoopWatchdogSetupDeps,
   type EventLoopWatchdogStartDeps,
 } from './event_loop_watchdog_service';

@@ -8,7 +8,7 @@
  */
 
 import { EcsVersion } from '@elastic/ecs';
-import type { BlockReport, Candidate, LiveNoticeFormat } from './types';
+import type { BlockReport, Candidate, LiveNoticeFormat, ProfileSummary } from './types';
 
 export interface LiveNotice {
   elapsedMs: number;
@@ -48,19 +48,43 @@ export const describeCpuRatio = (cpuRatio: number): string => {
   return 'mixed CPU work and waiting';
 };
 
+const formatProfile = (profile: ProfileSummary): string => {
+  const { verdict, reason, frames, startAckLatencyMs } = profile;
+  let startLatency = '';
+  if (startAckLatencyMs !== undefined) {
+    startLatency =
+      verdict === 'profiled'
+        ? ` (starting the profiler added up to ~${startAckLatencyMs}ms to the block)`
+        : ` (profiler start acknowledged after ~${startAckLatencyMs}ms)`;
+  }
+  const topFrames =
+    frames.length > 0
+      ? ` Top frames: ${frames
+          .map(
+            ({ functionName, location, selfTimeMs, selfPercent, callers }) =>
+              `${functionName}${location ? ` (${location})` : ''} ${selfTimeMs}ms ${selfPercent}%${
+                callers.length > 0 ? ` via ${callers.join(' < ')}` : ''
+              }`
+          )
+          .join('; ')}.`
+      : '';
+  return ` Profile ${verdict}${startLatency}: ${reason}.${topFrames}`;
+};
+
 export const formatReportMessage = ({
   blockedMs,
   cpuRatio,
   candidates,
   omittedCandidates,
   suppressedBlocks,
+  profile,
 }: BlockReport): string => {
   const suppressed =
     suppressedBlocks > 0 ? ` ${suppressedBlocks} earlier block(s) were not reported.` : '';
   return (
     `Event loop was blocked for ~${blockedMs}ms (process CPU ratio ${cpuRatio}: ${describeCpuRatio(
       cpuRatio
-    )}).` +
+    )}).${profile ? formatProfile(profile) : ''}` +
     ` Candidates (in flight, not necessarily the cause): ${formatCandidates(
       candidates,
       omittedCandidates
