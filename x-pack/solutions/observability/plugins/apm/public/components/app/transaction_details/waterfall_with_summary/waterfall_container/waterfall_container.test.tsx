@@ -25,20 +25,16 @@ describe('WaterfallContainer', () => {
     consoleMock.mockRestore();
   });
 
-  it(
-    'expands and contracts the accordion',
-    async () => {
-      const user = userEvent.setup({ delay: null });
-      const { getAllByRole } = render(<Example />);
-      const buttons = getAllByRole('button');
-      const parentItem = buttons[1];
-      const childItem = buttons[3];
+  it('expands and contracts the accordion', async () => {
+    const user = userEvent.setup({ delay: null });
+    const { getAllByRole } = render(<Example />);
+    const buttons = getAllByRole('button');
+    const parentItem = buttons[1];
+    const childItem = buttons[3];
 
-      await user.click(parentItem);
+    await user.click(parentItem);
 
-      expect(parentItem).toHaveAttribute('aria-expanded', 'false');
-      expect(childItem).toHaveAttribute('aria-expanded', 'true');
-    },
-    30_000
-  );
+    expect(parentItem).toHaveAttribute('aria-expanded', 'false');
+    expect(childItem).toHaveAttribute('aria-expanded', 'true');
+  }, 30_000);
 });
