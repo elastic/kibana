@@ -116,7 +116,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({ value, onChange, reserve
     name: string;
   } | null>(null);
   const emptyDraftInitialValue = useMemo(
-    () => ({ type: 'keyword' as const, name: '', path: '', format: '' }),
+    () => ({ type: 'keyword', name: '', path: '', format: '' }),
     []
   );
 
