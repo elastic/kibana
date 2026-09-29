@@ -479,6 +479,9 @@ export const aiIndexHttpItemResponseSchema = () =>
         description: 'Whether the AI Index is managed by a plugin and therefore immutable.',
       },
     }),
+    memory_enabled: schema.boolean({
+      meta: { description: 'Whether this AI Index accepts memory writes.' },
+    }),
     date_created: schema.string({
       meta: { description: 'ISO 8601 timestamp of when the AI Index was created.' },
     }),
