@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import { EuiPageSection, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
+import { KbnDangerCallout } from '@kbn/ui-callout';
 import { Forms } from '@kbn/es-ui-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useHistory } from 'react-router-dom';
@@ -75,7 +76,6 @@ export function CreateDatasetWizardPage({
   );
   const methods = useForm<CreateDatasetFormValues>({
     defaultValues: formDefaultValues,
-    mode: 'onTouched',
   });
 
   const goToDatasets = useCallback(() => {
@@ -127,9 +127,16 @@ export function CreateDatasetWizardPage({
   const apiError = useMemo(
     () =>
       saveError ? (
-        <EuiText color="danger" size="s" data-test-subj="createDatasetWizardSaveError">
-          {saveError}
-        </EuiText>
+        <>
+          <KbnDangerCallout
+            title={createDatasetWizardStrings.saveErrorTitle}
+            text={saveError}
+            size="s"
+            announceOnMount
+            data-test-subj="createDatasetWizardSaveError"
+          />
+          <EuiSpacer size="m" />
+        </>
       ) : null,
     [saveError]
   );

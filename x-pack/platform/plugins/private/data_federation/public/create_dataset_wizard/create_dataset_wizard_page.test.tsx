@@ -463,6 +463,64 @@ describe('CreateDatasetWizardPage', () => {
     });
   });
 
+  it('shows the save error in a danger callout and stays on the page', async () => {
+    const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
+    const add = jest.fn().mockRejectedValue(new Error('validation_exception: bad resource'));
+    const initialDataSet: DataSetWithName = {
+      name: 'logs-dataset',
+      data_source: 'source-1',
+      resource: 's3://bucket/*',
+      description: '',
+      settings: { format: 'csv' },
+    };
+
+    const { getByTestId, queryByTestId, findByTestId } = render(
+      <EuiProvider>
+        <I18nProvider>
+          <MockAppHeaderProvider>
+            <Router history={history}>
+              <KibanaContextProvider
+                services={{
+                  docLinks: docLinksMock,
+                  datasetsClient: { add, delete: jest.fn() },
+                  dataSourcesClient: { add: jest.fn() },
+                }}
+              >
+                <CreateDatasetWizardPage
+                  dataSources={dataSources}
+                  existingDataSetNames={['logs-dataset']}
+                  loadDataSets={jest.fn().mockResolvedValue(undefined)}
+                  loadDataSources={jest.fn().mockResolvedValue(undefined)}
+                  initialDataSet={initialDataSet}
+                />
+              </KibanaContextProvider>
+            </Router>
+          </MockAppHeaderProvider>
+        </I18nProvider>
+      </EuiProvider>
+    );
+
+    await clickNext(getByTestId);
+    expect(
+      await waitFor(() => getByTestId('createDatasetWizardAdditionalStep'))
+    ).toBeInTheDocument();
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardMappingStep'))).toBeInTheDocument();
+    const timestampPathInput = queryByTestId('createDatasetWizardTimestampPath');
+    if (timestampPathInput) {
+      fireEvent.change(timestampPathInput, { target: { value: 'event_time' } });
+    }
+    await clickNext(getByTestId);
+    expect(await waitFor(() => getByTestId('createDatasetWizardReviewStep'))).toBeInTheDocument();
+    await clickNext(getByTestId);
+
+    const callout = await findByTestId('createDatasetWizardSaveError');
+    expect(callout).toHaveClass('euiCallOut--danger');
+    expect(callout).toHaveTextContent(createDatasetWizardStrings.saveErrorTitle);
+    expect(callout).toHaveTextContent('validation_exception: bad resource');
+    expect(history.location.pathname).toBe('/datasets/edit/logs-dataset');
+  });
+
   it('preserves API-only settings not managed by the UI when saving edits', async () => {
     const history = createMemoryHistory({ initialEntries: ['/datasets/edit/logs-dataset'] });
     const add = jest.fn().mockResolvedValue(undefined);

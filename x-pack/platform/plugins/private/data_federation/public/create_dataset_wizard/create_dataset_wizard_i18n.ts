@@ -188,6 +188,9 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Save dataset',
     }
   ),
+  saveErrorTitle: i18n.translate('xpack.dataFederation.createDatasetWizard.saveErrorTitle', {
+    defaultMessage: 'Could not save the dataset',
+  }),
 
   // Form strings
   nameRequired: i18n.translate('xpack.dataFederation.createDatasetForm.nameRequired', {
