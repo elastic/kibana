@@ -9,6 +9,8 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   CASE_USER_ACTION_SAVED_OBJECT,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../../common/constants';
 import {
   CASE_WORKFLOW_ORIGIN_TYPE,
@@ -34,6 +36,9 @@ type WorkflowRunAggs = ReferencesAggregation & {
   counts: Buckets;
   uniqueUsers: { value: number };
   byOriginType: Buckets;
+  byAttachmentType: {
+    buckets: { alert: { doc_count: number }; event: { doc_count: number } };
+  };
 };
 
 interface WorkflowConfigAggs {
@@ -44,7 +49,8 @@ interface WorkflowConfigAggs {
  * Collects workflow-run telemetry from two saved object types:
  *
  * 1. `cases-user-actions` (filtered to `type: workflow`) — total/bucketed run counts,
- *    distinct cases, distinct triggering users, and origin-type breakdown.
+ *    distinct cases, distinct triggering users, origin-type breakdown, and attachment-type
+ *    breakdown for attachment-origin runs.
  * 2. `cases-configure` — number of configurations that have at least one workflow tag set.
  *
  * All fields default to 0 so a cluster that has never run a workflow reports zero
@@ -85,6 +91,26 @@ export const getWorkflowsTelemetryData = async ({
             size: 5,
           },
         },
+        // Only attachment-origin runs carry `attachmentType`. Types other than alert and event
+        // are derived as the residual rather than aggregated.
+        byAttachmentType: {
+          filters: {
+            filters: {
+              alert: {
+                term: {
+                  [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.origin.attachmentType`]:
+                    SECURITY_ALERT_ATTACHMENT_TYPE,
+                },
+              },
+              event: {
+                term: {
+                  [`${CASE_USER_ACTION_SAVED_OBJECT}.attributes.payload.origin.attachmentType`]:
+                    SECURITY_EVENT_ATTACHMENT_TYPE,
+                },
+              },
+            },
+          },
+        },
       },
     }),
     savedObjectsClient.find<unknown, WorkflowConfigAggs>({
@@ -120,6 +146,10 @@ export const getWorkflowsTelemetryData = async ({
 
   const originSum = Object.values(originCounts).reduce((s, n) => s + n, 0);
 
+  const alertRuns = runAggs?.byAttachmentType?.buckets?.alert?.doc_count ?? 0;
+  const eventRuns = runAggs?.byAttachmentType?.buckets?.event?.doc_count ?? 0;
+  const attachmentOriginRuns = originCounts.attachment + originCounts.attachments;
+
   return {
     runs: {
       total: totalRuns,
@@ -132,6 +162,12 @@ export const getWorkflowsTelemetryData = async ({
       // Unattributed: runs with no origin (list-level bulk runs) or an unrecognised origin type.
       // Derived rather than stored because origin is optional on the run request.
       unattributed: Math.max(0, totalRuns - originSum),
+    },
+    byAttachmentType: {
+      alert: alertRuns,
+      event: eventRuns,
+      // Any other registered attachment type that supports workflow origins.
+      other: Math.max(0, attachmentOriginRuns - alertRuns - eventRuns),
     },
     configurationsWithWorkflowTags: configRes.aggregations?.configurationsWithTags?.doc_count ?? 0,
   };

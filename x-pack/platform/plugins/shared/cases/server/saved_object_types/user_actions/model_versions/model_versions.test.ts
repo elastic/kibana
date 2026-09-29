@@ -70,7 +70,7 @@ describe('cases-user-actions model versions', () => {
   });
 
   describe('version 3', () => {
-    it('adds the payload.origin.type mapping', () => {
+    it('adds the payload.origin.type and payload.origin.attachmentType mappings', () => {
       expect(modelVersion3.changes).toEqual([
         {
           type: 'mappings_addition',
@@ -80,6 +80,7 @@ describe('cases-user-actions model versions', () => {
                 origin: {
                   properties: {
                     type: { type: 'keyword' },
+                    attachmentType: { type: 'keyword' },
                   },
                 },
               },

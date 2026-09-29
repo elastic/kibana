@@ -78,6 +78,8 @@ export const createCaseUserActionSavedObjectType = (): SavedObjectsType => ({
             properties: {
               // origin.type — one of the CaseWorkflowRunOrigin discriminant values
               type: { type: 'keyword' },
+              // origin.attachmentType — set only for cases.attachment / cases.attachments origins
+              attachmentType: { type: 'keyword' },
             },
           },
         },

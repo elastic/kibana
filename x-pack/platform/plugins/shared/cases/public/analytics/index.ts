@@ -19,9 +19,15 @@ import {
   CASES_LIST_PAGE_VIEW_EVENT_TYPE,
   CASES_LIST_VIEW_MODE_CHANGED_EVENT_TYPE,
   CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE,
+  SECURITY_ALERT_ATTACHMENT_TYPE,
+  SECURITY_EVENT_ATTACHMENT_TYPE,
 } from '../../common/constants';
 import { registerFieldLibraryAnalytics } from './field_library';
-import { CASE_WORKFLOW_RUN_ORIGIN_TYPES } from '../../common/constants/workflow';
+import {
+  ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+  ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+  CASE_WORKFLOW_RUN_ORIGIN_TYPES,
+} from '../../common/constants/workflow';
 import { UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE } from './use_workflow_run_ebt';
 import { registerTemplateAnalytics } from './templates';
 
@@ -316,6 +322,15 @@ export const registerAnalytics = ({
             'Whether the owner has configured available workflow tags in Case Settings, ' +
             'causing the workflow picker to be pre-filtered. Tag values are never reported.',
           optional: false,
+        },
+      },
+      attachment_type: {
+        type: 'keyword',
+        _meta: {
+          description:
+            `The registered attachment type the workflow was triggered from (for example "${SECURITY_ALERT_ATTACHMENT_TYPE}" or "${SECURITY_EVENT_ATTACHMENT_TYPE}"). ` +
+            `Only set when origin_type is ${ATTACHMENT_WORKFLOW_ORIGIN_TYPE} or ${ATTACHMENTS_WORKFLOW_ORIGIN_TYPE}.`,
+          optional: true,
         },
       },
     },

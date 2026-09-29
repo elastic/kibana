@@ -22,6 +22,7 @@ import { useCasesContext } from '../components/cases_context/use_cases_context';
 import { useGetCaseConfiguration } from '../containers/configure/use_get_case_configuration';
 import {
   useWorkflowRunTriggeredEBT,
+  getWorkflowRunAttachmentType,
   getWorkflowRunOriginType,
   UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE,
 } from './use_workflow_run_ebt';
@@ -66,6 +67,26 @@ describe('useWorkflowRunTriggeredEBT', () => {
       origin_type: CASE_WORKFLOW_ORIGIN_TYPE,
       case_count: 1,
       tag_filter_active: false,
+    });
+  });
+
+  it('reports attachment_type when an attachment type is provided', () => {
+    const { result } = renderHook(() => useWorkflowRunTriggeredEBT());
+
+    act(() => {
+      result.current({
+        originType: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+        caseCount: 1,
+        attachmentType: 'security.alert',
+      });
+    });
+
+    expect(reportEvent).toHaveBeenCalledWith(CASES_WORKFLOW_RUN_TRIGGERED_EVENT_TYPE, {
+      owner: OBSERVABILITY_OWNER,
+      origin_type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+      case_count: 1,
+      tag_filter_active: false,
+      attachment_type: 'security.alert',
     });
   });
 
@@ -135,5 +156,39 @@ describe('getWorkflowRunOriginType', () => {
 
   it('returns "unattributed" when origin is undefined', () => {
     expect(getWorkflowRunOriginType(undefined)).toBe(UNATTRIBUTED_WORKFLOW_RUN_ORIGIN_TYPE);
+  });
+});
+
+describe('getWorkflowRunAttachmentType', () => {
+  it('returns the attachment type for a single-attachment origin', () => {
+    expect(
+      getWorkflowRunAttachmentType({
+        type: ATTACHMENT_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'c1',
+        attachmentType: 'security.alert',
+        attachmentId: 'a1',
+      })
+    ).toBe('security.alert');
+  });
+
+  it('returns the attachment type for a multi-attachment origin', () => {
+    expect(
+      getWorkflowRunAttachmentType({
+        type: ATTACHMENTS_WORKFLOW_ORIGIN_TYPE,
+        caseId: 'c1',
+        attachmentType: 'security.event',
+        attachmentIds: ['a1', 'a2'],
+      })
+    ).toBe('security.event');
+  });
+
+  it('returns undefined for non-attachment origins', () => {
+    expect(
+      getWorkflowRunAttachmentType({ type: CASE_WORKFLOW_ORIGIN_TYPE, caseId: 'c1' })
+    ).toBeUndefined();
+  });
+
+  it('returns undefined when origin is undefined', () => {
+    expect(getWorkflowRunAttachmentType(undefined)).toBeUndefined();
   });
 });
