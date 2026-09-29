@@ -296,7 +296,7 @@ The flag is a request, not a guarantee. The gate skips the human decision only w
 
 An action declaring `always-gate` therefore overrides any autonomy the caller resolved: a Worker cannot auto-approve it by mistake, and the action's own declaration is what enforces that rather than the caller's good behaviour. When the gate is skipped the proposal is still recorded, and the action still runs.
 
-**The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate.
+**The calling workflow must itself be managed.** An unmanaged parent can neither execute a managed child nor see globally-installed definitions, so a Worker registered outside `@kbn/workflows/managed` cannot reach the gate. A definition can waive this with `callableByUnmanaged`. The gate does not, and should not: that is what stops a workflow the user can edit from proposing its own actions.
 
 Omitting an optional input is safe. A Liquid template for an absent input still renders — as `''` — so every optional step input is declared with `optionalStepInput`, which treats `''` and `null` as absent. Without it, `actionInput: '${{ inputs.actionInput }}'` on a non-action proposal would fail schema validation before the handler ran.
 

@@ -14,7 +14,6 @@ import {
 } from '@kbn/human-readable-id';
 import type { DotKeysOf, DotObject, JsonValue, RecursivePartial } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
-import type { WorkflowAccessSubject, WorkflowPermissions } from '../common/access_control';
 import type { StepDeprecationInfo } from '../spec/deprecated_step_metadata';
 import type {
   SerializedError,
@@ -146,8 +145,6 @@ export interface EsWorkflowExecution {
   originManagedWorkflowId?: string | null;
   managedVersion?: number | null;
   isTestRun: boolean;
-  /** Whether the test uses a submitted definition instead of the saved workflow. */
-  isEphemeral?: boolean;
   status: ExecutionStatus;
   context: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
   workflowDefinition: WorkflowYaml;
@@ -159,8 +156,7 @@ export interface EsWorkflowExecution {
   createdAt: string;
   error: SerializedError | null;
   createdBy?: string; // Keep for backwards compatibility with existing documents
-  effectiveIdentity?: { type: 'service_account'; id: string };
-  executedBy?: string; // User who triggered the workflow
+  executedBy?: string; // User who executed the workflow
   startedAt: string;
   finishedAt: string;
   cancelRequested: boolean;
@@ -314,8 +310,7 @@ export interface WorkflowExecutionDto {
   /** Ordered step IDs returned by modern runs, which support pagination beyond the search window. */
   stepExecutionIds?: string[];
   duration: number | null;
-  effectiveIdentity?: { type: 'service_account'; id: string };
-  executedBy?: string; // User who triggered the workflow
+  executedBy?: string; // User who executed the workflow
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
   context?: Record<string, unknown>;
@@ -382,7 +377,7 @@ export const EsWorkflowSchema = z.object({
   version: z.number().optional(),
 });
 
-export type EsWorkflow = z.infer<typeof EsWorkflowSchema> & WorkflowAccessSubject;
+export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
 
 export type EsWorkflowCreate = Omit<
   EsWorkflow,
@@ -476,8 +471,7 @@ export interface UpdatedWorkflowResponseDto {
   validationErrors: string[];
 }
 
-export interface WorkflowDetailDto extends WorkflowAccessSubject {
-  permissions?: WorkflowPermissions;
+export interface WorkflowDetailDto {
   id: string;
   name: string;
   description?: string;
@@ -499,24 +493,23 @@ export interface WorkflowDetailDto extends WorkflowAccessSubject {
   version?: number;
 }
 
-export type WorkflowAccessControlUpdateResponseDto = Pick<
-  WorkflowDetailDto,
-  'owner_id' | 'access_control' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'version'
->;
-
 export interface WorkflowPartialDetailDto extends Partial<WorkflowDetailDto> {
   id: string;
 }
 export type WorkflowMgetResponseDto = WorkflowPartialDetailDto[];
 
-export interface WorkflowListItemDto extends WorkflowAccessSubject {
-  permissions?: WorkflowPermissions;
+export interface WorkflowListItemDto {
   id: string;
   name: string;
   description: string;
   enabled: boolean;
   managed?: boolean;
   managedBy?: string | null;
+  /**
+   * Whether a `workflow.execute` step in an unmanaged workflow may call this one. Derived from the
+   * managed definition registry rather than stored, so it tracks the shipped code.
+   */
+  callableByUnmanaged?: boolean;
   definition: WorkflowYaml | null;
   createdAt: string;
   history?: WorkflowExecutionHistoryModel[];

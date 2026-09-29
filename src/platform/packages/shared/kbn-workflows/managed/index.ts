@@ -93,3 +93,11 @@ export const getManagedWorkflowDefinition = (id: string): ManagedWorkflowDefinit
 export const getManagedWorkflowDefinitions = (): ManagedWorkflowDefinition[] => {
   return [...managedWorkflowDefinitions];
 };
+
+/**
+ * Whether a `workflow.execute` step in an unmanaged workflow may call `id`. False for an
+ * unknown id, so the engine keeps refusing anything that is not a definition that opted in.
+ */
+export const isManagedWorkflowCallableByUnmanaged = (id: string): boolean => {
+  return getManagedWorkflowDefinition(id)?.callableByUnmanaged === true;
+};

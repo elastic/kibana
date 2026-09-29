@@ -190,4 +190,34 @@ describe('getWorkflowSuggestions', () => {
     );
     expect(managedWorkflowResult).toHaveLength(2);
   });
+
+  it('offers a managed workflow that opted in to unmanaged callers', async () => {
+    const mixedWorkflows: WorkflowsResponse = {
+      workflows: {
+        'wf-user': {
+          id: 'wf-user',
+          name: 'User Workflow',
+        },
+        'wf-callable': {
+          id: 'wf-callable',
+          name: 'Callable Managed Workflow',
+          managed: true,
+          callableByUnmanaged: true,
+        },
+        'wf-closed': {
+          id: 'wf-closed',
+          name: 'Closed Managed Workflow',
+          managed: true,
+        },
+      },
+      totalWorkflows: 3,
+    };
+
+    const result = await getWorkflowSuggestions(makeContext({ workflows: mixedWorkflows }));
+
+    expect(result.map((suggestion) => suggestion.label)).toEqual([
+      'User Workflow (id: wf-user)',
+      'Callable Managed Workflow (id: wf-callable)',
+    ]);
+  });
 });

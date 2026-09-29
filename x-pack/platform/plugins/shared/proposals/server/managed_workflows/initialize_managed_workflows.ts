@@ -15,7 +15,8 @@ import { PROPOSALS_MANAGED_WORKFLOW_OWNER_ID } from '../constants';
 /**
  * Installs the generic proposal gate globally. It has to be a managed workflow
  * because an unmanaged parent can neither execute a managed child nor see
- * globally-installed definitions.
+ * globally-installed definitions, and the gate does not declare
+ * `callableByUnmanaged` that would waive it.
  */
 export const initializeManagedWorkflows = async ({
   workflowsExtensions,

@@ -9,7 +9,11 @@
 
 import { parse } from 'yaml';
 import { z } from '@kbn/zod/v4';
-import { managedWorkflowDefinitions } from '.';
+import {
+  getManagedWorkflowDefinitions,
+  isManagedWorkflowCallableByUnmanaged,
+  managedWorkflowDefinitions,
+} from '.';
 import type { ManagedWorkflowTemplateValuesById } from '.';
 import {
   ALERTZERO_ACTION_ISOLATE_HOST_WORKFLOW_ID,
@@ -27,9 +31,12 @@ import {
   ALERTZERO_WORKER_FLOOR_ATTACK_DISCOVERY_WORKFLOW_ID,
   ALERTZERO_WORKER_FORENSICS_ENDPOINT_ANALYSIS_WORKFLOW_ID,
   ALERTZERO_WORKER_HUNT_CONTINUOUS_THREAT_HUNT_WORKFLOW_ID,
+  CONTEXT_ENGINE_DOCUMENT_ORCHESTRATION_TEMPLATE,
+  CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW_ID,
   CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID,
+  CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE,
+  CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE,
   EXAMPLE_MANAGED_WORKFLOW_ID,
-  EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID,
   SECURITY_ALERT_ANALYSIS_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW_ID,
@@ -64,7 +71,6 @@ type YamlTemplateManagedWorkflowDefinition = ManagedWorkflowDefinition & {
 };
 
 const templateRepresentativeValuesById: ManagedWorkflowTemplateValuesById = {
-  [EXAMPLE_SERVICE_ACCOUNT_WORKFLOW_ID]: { serviceAccountId: 'example-account' },
   [EXAMPLE_MANAGED_WORKFLOW_ID]: {
     recipient: 'World',
   },
@@ -314,6 +320,45 @@ describe('managedWorkflowDefinitions', () => {
   it('contains the Security alert analysis workflow', () => {
     const ids = managedWorkflowDefinitions.map(({ id }) => id);
     expect(ids).toContain(SECURITY_ALERT_ANALYSIS_WORKFLOW_ID);
+  });
+
+  it('opens only reviewed definitions to unmanaged callers', () => {
+    const callable = getManagedWorkflowDefinitions()
+      .filter(({ callableByUnmanaged }) => callableByUnmanaged === true)
+      .map(({ id }) => id);
+
+    // An unmanaged parent is a workflow its owner can edit, so anything on this list can be
+    // reached by naming its id from user-authored YAML. Widening it is a privilege decision.
+    expect(callable).toEqual([CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW_ID]);
+  });
+
+  it('treats an unknown id as not callable by an unmanaged parent', () => {
+    expect(isManagedWorkflowCallableByUnmanaged(CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW_ID)).toBe(
+      true
+    );
+    expect(isManagedWorkflowCallableByUnmanaged(CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW_ID)).toBe(
+      false
+    );
+    expect(isManagedWorkflowCallableByUnmanaged('system-does-not-exist')).toBe(false);
+  });
+
+  it('excludes the install-tool templates, whose rendered copy the user owns and may edit', () => {
+    const registeredYaml = new Set(
+      getManagedWorkflowDefinitions()
+        .filter(hasYaml)
+        .map(({ yaml }) => yaml)
+    );
+
+    // Without this the assertions below pass for free if `yaml` is ever renamed.
+    expect(registeredYaml.size).toBeGreaterThan(0);
+
+    for (const template of [
+      CONTEXT_ENGINE_DOCUMENT_ORCHESTRATION_TEMPLATE,
+      CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE,
+      CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE,
+    ]) {
+      expect(registeredYaml.has(template)).toBe(false);
+    }
   });
 
   it.each(managedDefinitionsById)('%s uses the reserved system- id prefix', (id) => {

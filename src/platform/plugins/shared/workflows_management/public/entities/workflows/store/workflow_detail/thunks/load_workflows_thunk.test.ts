@@ -61,10 +61,12 @@ describe('loadWorkflowsThunk', () => {
 
     const result = await store.dispatch(loadWorkflowsThunk());
 
+    // 'all' whatever the parent is: the opted-in managed workflows have to reach the lookup, and
+    // the rest are what lets validation say "not callable" rather than "not found".
     expect(mockGetWorkflows).toHaveBeenCalledWith({
       size: 1000,
       page: 1,
-      managed: 'unmanaged',
+      managed: 'all',
     });
     expect(result.type).toBe('detail/loadWorkflowsThunk/fulfilled');
     expect(result.payload).toEqual({

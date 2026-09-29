@@ -37,6 +37,11 @@ export interface WorkflowYamlValidationContext {
   connectorsManagementUrl: string;
   modelSettingsUrl?: string;
   workflows: WorkflowsResponse | null;
+  /**
+   * Managed parents may call any managed workflow; unmanaged ones only the opted-in set. Optional
+   * because omitting it can only tighten validation, never loosen it.
+   */
+  isCurrentWorkflowManaged?: boolean;
   getPropertyHandler: GetStepPropertyHandler;
   esqlCallbacks: ESQLCallbacks;
   signal?: AbortSignal;
@@ -74,6 +79,7 @@ export async function collectFullWorkflowYamlValidationResults({
     connectorsManagementUrl,
     modelSettingsUrl,
     workflows,
+    isCurrentWorkflowManaged = false,
     getPropertyHandler,
     esqlCallbacks,
     signal,
@@ -113,7 +119,9 @@ export async function collectFullWorkflowYamlValidationResults({
   }
 
   if (workflowLookup && lineCounter) {
-    results.push(...validateWorkflowInputs(workflowLookup, workflows, lineCounter));
+    results.push(
+      ...validateWorkflowInputs(workflowLookup, workflows, lineCounter, isCurrentWorkflowManaged)
+    );
 
     const esqlSignal = signal ?? new AbortController().signal;
     results.push(
