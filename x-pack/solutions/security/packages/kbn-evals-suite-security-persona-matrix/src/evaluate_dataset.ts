@@ -18,7 +18,6 @@ import {
   type EvaluationDataset,
   type Evaluator,
   type TaskOutput,
-  TRACE_INDEX_PATTERN,
 } from '@kbn/evals';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type {
@@ -27,6 +26,7 @@ import type {
 } from './datasets/persona_matrix_prompts';
 import { selectShard } from './datasets/select_shard';
 import { createConnectorInvokedEvaluator } from './evaluators/connector_invoked_evaluator';
+import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
 import type { PersonaMatrixChatClient } from './chat_client';
 
 /**

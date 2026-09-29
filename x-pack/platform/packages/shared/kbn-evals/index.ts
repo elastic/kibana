@@ -162,7 +162,6 @@ export {
   createSkillInvocationEvaluator,
   createChatCallsEvaluator,
   createToolCallsEvaluator,
-  TRACE_INDEX_PATTERN,
 } from './src/evaluators/trace_based';
 export { getGitMetadata, type GitMetadata } from './src/utils/git_metadata';
 

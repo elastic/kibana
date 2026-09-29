@@ -8,7 +8,7 @@
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Evaluator } from '../../types';
-import { TRACE_INDEX_PATTERN, createTraceBasedEvaluator } from './factory';
+import { createTraceBasedEvaluator } from './factory';
 
 /**
  * Counts the LLM round-trips in a trace. Agentic flows re-send the whole
@@ -29,7 +29,7 @@ export function createChatCallsEvaluator({
     config: {
       name: 'Chat Calls',
       direction: 'neutral',
-      buildQuery: (traceId) => `FROM ${TRACE_INDEX_PATTERN}
+      buildQuery: (traceId) => `FROM traces-*
 | WHERE trace.id == "${traceId}" AND attributes.gen_ai.operation.name == "chat"
 | STATS 
   chat_calls = COUNT(*)`,
