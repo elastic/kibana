@@ -6,11 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import {
-  actionsMock,
-  actionsClientMock,
-  actionsAuthorizationMock,
-} from '@kbn/actions-plugin/server/mocks';
+import { actionsMock, actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { SandboxCallContext } from './tool_utils';
 import {
   buildConnectorEnv,
@@ -19,7 +15,8 @@ import {
 } from './connector_credentials';
 
 const CONNECTOR_ID = 'github-1';
-const TOKEN = 'ghp_topsecrettokenvalue';
+const BASIC_AUTHORIZATION = 'Basic dXNlcjpwYXNz';
+const BEARER_AUTHORIZATION = 'Bearer ghp_topsecrettokenvalue';
 
 const createCallContext = (
   allowedConnectorIds: readonly string[] = [CONNECTOR_ID]
@@ -28,52 +25,51 @@ const createCallContext = (
   allowedConnectorIds,
 });
 
-const createConnector = (overrides: Record<string, unknown> = {}) => ({
-  id: CONNECTOR_ID,
-  name: 'My GitHub',
-  actionTypeId: '.github',
-  config: { apiUrl: 'https://api.github.com', owner: 'elastic' },
-  isPreconfigured: true,
-  isDeprecated: false,
-  isSystemAction: false,
-  isConnectorTypeDeprecated: false,
-  ...overrides,
-});
-
 const setup = ({
-  connector = createConnector(),
-  secrets = { token: TOKEN },
-  inMemory = true,
+  credentials = {
+    connectorId: CONNECTOR_ID,
+    actionTypeId: '.github',
+    config: { apiUrl: 'https://api.github.com', owner: 'elastic' },
+    headers: { Authorization: BEARER_AUTHORIZATION },
+  },
   withActions = true,
+  credentialsError,
 }: {
-  connector?: ReturnType<typeof createConnector>;
-  secrets?: Record<string, unknown>;
-  inMemory?: boolean;
+  credentials?: {
+    connectorId: string;
+    actionTypeId: string;
+    config: Record<string, unknown>;
+    headers: Record<string, string>;
+    expiresAt?: string;
+    expiresInSeconds?: number;
+  };
   withActions?: boolean;
+  credentialsError?: Error;
 } = {}) => {
   const actionsClient = actionsClientMock.create();
-  actionsClient.get.mockResolvedValue(connector as any);
-  const authorization = actionsAuthorizationMock.create();
+  if (credentialsError) {
+    actionsClient.getConnectorCredentials.mockRejectedValue(credentialsError);
+  } else {
+    actionsClient.getConnectorCredentials.mockResolvedValue(credentials);
+  }
   const actions = actionsMock.createStart();
   actions.getActionsClientWithRequest.mockResolvedValue(actionsClient);
-  actions.getActionsAuthorizationWithRequest.mockReturnValue(authorization);
-  actions.inMemoryConnectors = inMemory ? [{ ...connector, secrets } as any] : [];
 
   const resolve = createConnectorCredentialResolver({
     getDeps: () => ({ actions: withActions ? actions : undefined }),
     logger: loggingSystemMock.createLogger(),
   });
 
-  return { resolve, actions, actionsClient, authorization };
+  return { resolve, actions, actionsClient };
 };
 
 describe('buildConnectorEnv', () => {
-  it('maps config and secrets to prefixed, upper-cased env vars', () => {
+  it('maps config and auth headers to prefixed, upper-cased env vars', () => {
     const { env, secretValues } = buildConnectorEnv({
       connectorId: CONNECTOR_ID,
       actionTypeId: '.github',
       config: { apiUrl: 'https://api.github.com', 'nested-opt': { a: 1 }, port: 443, tls: true },
-      secrets: { token: TOKEN, password: null, short: 'abc' },
+      headers: { Authorization: BEARER_AUTHORIZATION, 'X-Api-Key': 'abc' },
     });
 
     expect(env).toEqual({
@@ -83,76 +79,57 @@ describe('buildConnectorEnv', () => {
       CONNECTOR_CONFIG_NESTED_OPT: '{"a":1}',
       CONNECTOR_CONFIG_PORT: '443',
       CONNECTOR_CONFIG_TLS: 'true',
-      CONNECTOR_SECRET_TOKEN: TOKEN,
-      CONNECTOR_SECRET_SHORT: 'abc',
+      CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
+      CONNECTOR_HEADER_X_API_KEY: 'abc',
     });
-    // Very short values are not redacted: they would produce false positives in output.
-    expect(secretValues).toEqual([TOKEN]);
+    expect(secretValues).toEqual([BEARER_AUTHORIZATION]);
   });
 
-  it('copies an ApiKey Authorization header into CONNECTOR_SECRET_PASSWORD', () => {
-    const apiKey = 'IYMYxKABgjRzD6vCgZ3Ktestkey';
+  it('maps OAuth access-token headers and TTL metadata without client or refresh secrets', () => {
+    const accessToken = 'Bearer oauth-access-token';
     const { env, secretValues } = buildConnectorEnv({
-      connectorId: 'elasticsearch-telemetry',
-      actionTypeId: '.http',
-      config: { url: 'https://es.example.com' },
-      secrets: { secretHeaders: { Authorization: `ApiKey ${apiKey}` } },
+      connectorId: CONNECTOR_ID,
+      actionTypeId: '.slack',
+      config: { apiUrl: 'https://slack.com/api' },
+      headers: { Authorization: accessToken },
+      expiresAt: '2026-01-01T00:10:00.000Z',
+      expiresInSeconds: 600,
     });
 
-    expect(env.CONNECTOR_SECRET_PASSWORD).toBe(apiKey);
-    expect(secretValues).toContain(apiKey);
+    expect(env).toEqual({
+      CONNECTOR_ID,
+      CONNECTOR_TYPE: '.slack',
+      CONNECTOR_CONFIG_APIURL: 'https://slack.com/api',
+      CONNECTOR_HEADER_AUTHORIZATION: accessToken,
+      CONNECTOR_EXPIRES_AT: '2026-01-01T00:10:00.000Z',
+      CONNECTOR_EXPIRES_IN_SECONDS: '600',
+    });
+    expect(secretValues).toEqual([accessToken]);
+    expect(JSON.stringify(env)).not.toContain('client-secret');
+    expect(JSON.stringify(env)).not.toContain('refresh_token');
   });
 
-  it('copies an ApiKey header when secretHeaders is a JSON string', () => {
-    const apiKey = 'IYMYxKABgjRzD6vCgZ3Ktestkey';
+  it('does not expose raw secret field names', () => {
     const { env, secretValues } = buildConnectorEnv({
-      connectorId: 'elasticsearch-telemetry',
+      connectorId: CONNECTOR_ID,
       actionTypeId: '.http',
       config: { url: 'https://es.example.com' },
-      secrets: { secretHeaders: JSON.stringify({ Authorization: `ApiKey ${apiKey}` }) },
+      headers: { Authorization: BASIC_AUTHORIZATION },
     });
 
-    expect(env.CONNECTOR_SECRET_SECRETHEADERS).toBe(
-      JSON.stringify({ Authorization: `ApiKey ${apiKey}` })
-    );
-    expect(env.CONNECTOR_SECRET_PASSWORD).toBe(apiKey);
-    expect(secretValues).toContain(apiKey);
-  });
-
-  it('leaves CONNECTOR_SECRET_PASSWORD unset when secretHeaders is not an ApiKey header', () => {
-    const { env } = buildConnectorEnv({
-      connectorId: 'elasticsearch-telemetry',
-      actionTypeId: '.http',
-      config: { url: 'https://es.example.com' },
-      secrets: { secretHeaders: 'not-json' },
-    });
-
+    expect(env.CONNECTOR_HEADER_AUTHORIZATION).toBe(BASIC_AUTHORIZATION);
     expect(env.CONNECTOR_SECRET_PASSWORD).toBeUndefined();
-  });
-
-  it('does not overwrite an existing CONNECTOR_SECRET_PASSWORD', () => {
-    const password = 'existing-password-value';
-    const { env, secretValues } = buildConnectorEnv({
-      connectorId: 'elasticsearch-telemetry',
-      actionTypeId: '.webhook',
-      config: { url: 'https://es.example.com' },
-      secrets: {
-        password,
-        secretHeaders: { Authorization: 'ApiKey unused-api-key-value' },
-      },
-    });
-
-    expect(env.CONNECTOR_SECRET_PASSWORD).toBe(password);
-    expect(secretValues).toContain(password);
-    expect(secretValues).toContain('unused-api-key-value');
+    expect(secretValues).toEqual([BASIC_AUTHORIZATION]);
   });
 });
 
 describe('redactSecrets', () => {
   it('replaces every occurrence of each secret value', () => {
-    expect(redactSecrets(`token=${TOKEN} again ${TOKEN}`, [TOKEN])).toBe(
-      'token=[REDACTED] again [REDACTED]'
-    );
+    expect(
+      redactSecrets(`token=${BEARER_AUTHORIZATION} again ${BEARER_AUTHORIZATION}`, [
+        BEARER_AUTHORIZATION,
+      ])
+    ).toBe('token=[REDACTED] again [REDACTED]');
   });
 
   it('leaves text untouched when there is nothing to redact', () => {
@@ -161,8 +138,8 @@ describe('redactSecrets', () => {
 });
 
 describe('createConnectorCredentialResolver', () => {
-  it('injects in-memory secrets and config for an allow-listed preconfigured connector', async () => {
-    const { resolve, authorization } = setup();
+  it('injects framework-resolved config and auth headers for an allow-listed connector', async () => {
+    const { resolve, actionsClient } = setup();
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
@@ -172,29 +149,84 @@ describe('createConnectorCredentialResolver', () => {
         CONNECTOR_TYPE: '.github',
         CONNECTOR_CONFIG_APIURL: 'https://api.github.com',
         CONNECTOR_CONFIG_OWNER: 'elastic',
-        CONNECTOR_SECRET_TOKEN: TOKEN,
+        CONNECTOR_HEADER_AUTHORIZATION: BEARER_AUTHORIZATION,
       },
-      secretValues: [TOKEN],
+      secretValues: [BEARER_AUTHORIZATION],
     });
-    expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
-      operation: 'execute',
-      actionTypeId: '.github',
+    expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({
+      id: CONNECTOR_ID,
+      minimumValiditySeconds: undefined,
+      forceRefresh: undefined,
     });
+    expect(actionsClient.get).not.toHaveBeenCalled();
   });
 
-  it('rejects connectors that are not preconfigured', async () => {
+  it('injects OAuth access-token headers and TTL from the framework response', async () => {
+    const accessToken = 'Bearer oauth-access-token';
     const { resolve } = setup({
-      connector: createConnector({ isPreconfigured: false }),
-      inMemory: false,
+      credentials: {
+        connectorId: CONNECTOR_ID,
+        actionTypeId: '.slack',
+        config: { apiUrl: 'https://slack.com/api' },
+        headers: { Authorization: accessToken },
+        expiresAt: '2026-01-01T00:10:00.000Z',
+        expiresInSeconds: 600,
+      },
     });
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
     expect(result).toEqual({
-      errorMessage: expect.stringContaining(
-        `Connector '${CONNECTOR_ID}' is not a preconfigured connector`
-      ),
+      env: {
+        CONNECTOR_ID,
+        CONNECTOR_TYPE: '.slack',
+        CONNECTOR_CONFIG_APIURL: 'https://slack.com/api',
+        CONNECTOR_HEADER_AUTHORIZATION: accessToken,
+        CONNECTOR_EXPIRES_AT: '2026-01-01T00:10:00.000Z',
+        CONNECTOR_EXPIRES_IN_SECONDS: '600',
+      },
+      secretValues: [accessToken],
     });
+    expect(JSON.stringify(result)).not.toContain('client-secret');
+    expect(JSON.stringify(result)).not.toContain('refresh_token');
+  });
+
+  it('forwards minimum validity and force-refresh options to Actions', async () => {
+    const { resolve, actionsClient } = setup();
+
+    await resolve(CONNECTOR_ID, createCallContext(), {
+      minimumValiditySeconds: 600,
+      forceRefresh: true,
+    });
+
+    expect(actionsClient.getConnectorCredentials).toHaveBeenCalledWith({
+      id: CONNECTOR_ID,
+      minimumValiditySeconds: 600,
+      forceRefresh: true,
+    });
+  });
+
+  it('does not read in-memory connector storage', async () => {
+    const { resolve, actions } = setup();
+    actions.inMemoryConnectors = [
+      {
+        id: CONNECTOR_ID,
+        secrets: { token: 'should-not-leak', clientSecret: 'oauth-client-secret' },
+      } as any,
+    ];
+
+    const result = await resolve(CONNECTOR_ID, createCallContext());
+
+    expect(result).toEqual(
+      expect.objectContaining({
+        env: expect.not.objectContaining({
+          CONNECTOR_SECRET_TOKEN: 'should-not-leak',
+          CONNECTOR_SECRET_CLIENTSECRET: 'oauth-client-secret',
+        }),
+      })
+    );
+    expect(JSON.stringify(result)).not.toContain('should-not-leak');
+    expect(JSON.stringify(result)).not.toContain('oauth-client-secret');
   });
 
   it('denies connectors outside the agent allow-list before any lookup', async () => {
@@ -207,7 +239,7 @@ describe('createConnectorCredentialResolver', () => {
         "Connector 'other-connector' is not assigned to this agent"
       ),
     });
-    expect(actionsClient.get).not.toHaveBeenCalled();
+    expect(actionsClient.getConnectorCredentials).not.toHaveBeenCalled();
   });
 
   it('denies by default when the agent has no connectors', async () => {
@@ -218,34 +250,32 @@ describe('createConnectorCredentialResolver', () => {
     expect(result).toEqual({ errorMessage: expect.stringContaining('Assigned connectors: none') });
   });
 
-  it('fails when the user cannot read the connector', async () => {
-    const { resolve, actionsClient } = setup();
-    actionsClient.get.mockRejectedValue(new Error('Unauthorized to get actions'));
+  it('fails when Actions denies execute access', async () => {
+    const { resolve } = setup({
+      credentialsError: new Error('Unauthorized to execute a ".github" action'),
+    });
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
     expect(result).toEqual({
-      errorMessage: expect.stringContaining(`Failed to resolve connector '${CONNECTOR_ID}'`),
+      errorMessage: expect.stringMatching(
+        /Failed to resolve connector 'github-1': Error: Unauthorized to execute/
+      ),
     });
   });
 
-  it('fails when the user is not allowed to execute the connector type', async () => {
-    const { resolve, authorization } = setup();
-    authorization.ensureAuthorized.mockRejectedValue(new Error('Unauthorized to execute'));
+  it('fails when the connector is a system connector', async () => {
+    const { resolve } = setup({
+      credentialsError: new Error(
+        'Unable to get connector credentials for .cases: system connectors are not supported'
+      ),
+    });
 
     const result = await resolve(CONNECTOR_ID, createCallContext());
 
     expect(result).toEqual({
-      errorMessage: expect.stringContaining(`Not authorized to use connector '${CONNECTOR_ID}'`),
+      errorMessage: expect.stringContaining('system connectors are not supported'),
     });
-  });
-
-  it('rejects system connectors', async () => {
-    const { resolve } = setup({ connector: createConnector({ isSystemAction: true }) });
-
-    const result = await resolve(CONNECTOR_ID, createCallContext());
-
-    expect(result).toEqual({ errorMessage: expect.stringContaining('system connector') });
   });
 
   it('fails when actions is unavailable', async () => {

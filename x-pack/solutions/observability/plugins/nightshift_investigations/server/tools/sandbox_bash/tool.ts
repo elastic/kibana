@@ -18,6 +18,8 @@ import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
+export const DEFAULT_SANDBOX_COMMAND_TIMEOUT_SECONDS = 600;
+
 const sandboxBashSchema = z.object({
   command: z
     .string()
@@ -124,7 +126,12 @@ export const createSandboxBashTool = ({
           ],
         };
       }
-      const resolved = await resolveConnectorCredentials(connector_id, callContext);
+      const resolved = await resolveConnectorCredentials(connector_id, callContext, {
+        minimumValiditySeconds:
+          timeout_seconds && timeout_seconds > 0
+            ? timeout_seconds
+            : DEFAULT_SANDBOX_COMMAND_TIMEOUT_SECONDS,
+      });
       if ('errorMessage' in resolved) {
         return {
           results: [{ type: ToolResultType.error, data: { message: resolved.errorMessage } }],

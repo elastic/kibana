@@ -27,7 +27,7 @@ import type { CustomHostSettings, ProxySettings, SSLSettings } from '@kbn/action
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosHeaderValue, AxiosInstance } from 'axios';
 import type { ConnectorSpecEvents } from './connector_spec_events';
-import type { ClientRegistry, ClientTypeId } from './lib/clients';
+import type { ClientRegistry, ClientTypeId, GetAuthHeadersOptions } from './lib/clients';
 
 export { UISchemas } from './connector_spec_ui';
 
@@ -99,6 +99,8 @@ export interface OAuthGetTokenOpts {
   accessTokenPath?: string;
   tokenTypePath?: string;
   tokenType?: string;
+  minimumValiditySeconds?: number;
+  forceRefresh?: boolean;
 }
 
 export interface OAuthClientCredsPrivateKeyJWTGetTokenOpts {
@@ -151,7 +153,11 @@ export interface AuthTypeDefinition {
 
 export interface AuthTypeSpec<T extends Record<string, unknown>> extends AuthTypeDefinition {
   configure: (ctx: AuthContext, axiosInstance: AxiosInstance, secret: T) => Promise<AxiosInstance>;
-  getAuthHeaders?(ctx: AuthContext, secret: T): Promise<Record<string, string>>;
+  getAuthHeaders?(
+    ctx: AuthContext,
+    secret: T,
+    options?: GetAuthHeadersOptions
+  ): Promise<Record<string, string>>;
   /**
    * Specs using this auth type reach the third party through the Elastic-hosted Relay rather than
    * authenticating the axios client. Defaults to false.

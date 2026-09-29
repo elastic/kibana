@@ -27,6 +27,7 @@ export const TestSingleFileConnector: ConnectorSpec = {
           headerField: 'Key',
         },
       },
+      'oauth_authorization_code',
     ],
     headers: {
       'x-test-header': 'i-am-a-test-header-value',

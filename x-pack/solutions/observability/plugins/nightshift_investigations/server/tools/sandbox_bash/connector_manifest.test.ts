@@ -108,8 +108,16 @@ describe('writeConnectorManifest', () => {
       expect(content).toContain('# Sandbox Connectors');
       expect(content).toContain('`connector_id` parameter of the bash tool');
       expect(content).toContain('CONNECTOR_CONFIG_<KEY>');
-      expect(content).toContain('CONNECTOR_SECRET_<KEY>');
+      expect(content).toContain('CONNECTOR_HEADER_<NAME>');
+      expect(content).toContain('CONNECTOR_HEADER_AUTHORIZATION');
+      expect(content).toContain('CONNECTOR_EXPIRES_AT');
+      expect(content).toContain('CONNECTOR_EXPIRES_IN_SECONDS');
+      expect(content).toContain('refreshes OAuth credentials before injection');
+      expect(content).not.toContain('CONNECTOR_SECRET_<KEY>');
+      expect(content).toContain('Do not retry or refresh on 401 or 403');
+      expect(content).not.toMatch(/refresh (the )?(access )?token (on|when|after) (a )?(401|403)/i);
       expect(content).toContain('env | grep ^CONNECTOR_ | cut -d= -f1');
+      expect(content).toContain('Authorization: $CONNECTOR_HEADER_AUTHORIZATION');
     });
 
     it('does not advertise an in-sandbox connector callback CLI', async () => {

@@ -19,6 +19,7 @@ export type {
   ConnectorNetworkSettings,
   ConnectorResponseSettings,
   CredentialAccessor,
+  GetAuthHeadersOptions,
   HostTarget,
   PlatformServices,
 } from './client_type_spec';
