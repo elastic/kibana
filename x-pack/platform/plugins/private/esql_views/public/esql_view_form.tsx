@@ -41,11 +41,14 @@ import {
   validateEsqlViewName,
   type EsqlViewNameValidationError,
 } from './esql_view_validation';
+import { EsqlViewPreviewResults } from './esql_view_preview_results';
 import { translations } from './translations';
+import { useEsqlViewPreview, type EsqlViewPreviewDependencies } from './use_esql_view_preview';
 
 interface EsqlViewFormProps {
   client: EsqlViewsClient;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  previewDependencies: EsqlViewPreviewDependencies;
   view?: EsqlView;
   onClose: () => void;
   onSave: () => Promise<void>;
@@ -73,6 +76,7 @@ const getNameValidationMessage = (
 export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   client,
   EsqlEditor,
+  previewDependencies,
   view,
   onClose,
   onSave,
@@ -88,6 +92,8 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
   const [nameConflict, setNameConflict] = useState<NameConflict>();
   const [saveError, setSaveError] = useState<string>();
   const [isSaving, setIsSaving] = useState(false);
+  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const preview = useEsqlViewPreview(previewDependencies);
 
   const handleClose = () => {
     if (!isSaving) {
@@ -295,25 +301,44 @@ export const EsqlViewForm: FunctionComponent<EsqlViewFormProps> = ({
               }
             >
               <EsqlEditor
+                allowQueryCancellation
                 dataTestSubj="esqlViewQueryEditor"
                 disableAutoFocus
                 editorIsInline
-                errors={queryError ? [new Error(queryError)] : []}
+                errors={[
+                  ...(queryError ? [new Error(queryError)] : []),
+                  ...(preview.error ? [preview.error] : []),
+                ]}
                 hasOutline
-                hideQueryHistory
-                hideRunQueryButton
                 isDisabled={isSaving}
+                isLoading={preview.isLoading}
                 mergeExternalMessages
                 onTextLangQueryChange={(nextQuery) => {
                   setQuery(nextQuery.esql);
                   setQueryError(undefined);
                   setSaveError(undefined);
+                  preview.clearError();
                 }}
-                onTextLangQuerySubmit={async () => {}}
+                onTextLangQuerySubmit={async (submittedQuery, abortController) => {
+                  setIsPreviewOpen(true);
+                  await preview.runPreview(submittedQuery, abortController);
+                }}
                 query={{ esql: query }}
+                queryStats={preview.result?.queryStats}
               />
             </Suspense>
           </EuiFormRow>
+
+          <EuiSpacer size="m" />
+
+          <EsqlViewPreviewResults
+            error={preview.error}
+            hasRun={preview.hasRun}
+            isLoading={preview.isLoading}
+            isOpen={isPreviewOpen}
+            onToggle={setIsPreviewOpen}
+            result={preview.result}
+          />
 
           {saveError && (
             <>

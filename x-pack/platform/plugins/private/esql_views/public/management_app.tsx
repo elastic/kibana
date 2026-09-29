@@ -16,6 +16,7 @@ import { PLUGIN_NAME } from '../common';
 import { EsqlViewForm } from './esql_view_form';
 import { EsqlViewsTable } from './esql_views_table';
 import { translations } from './translations';
+import type { EsqlViewPreviewDependencies } from './use_esql_view_preview';
 import { useEsqlViews } from './use_esql_views';
 
 interface ManagementAppProps {
@@ -24,6 +25,7 @@ interface ManagementAppProps {
   client: EsqlViewsClient;
   documentationUrl: string;
   EsqlEditor: ComponentType<Omit<ESQLEditorProps, 'ref'>>;
+  previewDependencies: EsqlViewPreviewDependencies;
 }
 
 type FormState = { type: 'create' } | { type: 'edit'; view: EsqlView };
@@ -34,6 +36,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
   client,
   documentationUrl,
   EsqlEditor,
+  previewDependencies,
 }) => {
   const { error, isLoading, reload, status, views } = useEsqlViews(client);
   const [formState, setFormState] = useState<FormState>();
@@ -122,6 +125,7 @@ export const ManagementApp: FunctionComponent<ManagementAppProps> = ({
         <EsqlViewForm
           client={client}
           EsqlEditor={EsqlEditor}
+          previewDependencies={previewDependencies}
           onClose={() => setFormState(undefined)}
           onSave={async () => {
             await reload();

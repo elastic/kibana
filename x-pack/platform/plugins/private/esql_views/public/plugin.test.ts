@@ -7,6 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { managementPluginMock } from '@kbn/management-plugin/public/mocks';
 import { MANAGEMENT_APP_ID, PLUGIN_NAME } from '../common';
 import { EsqlViewsPlugin } from './plugin';
@@ -44,8 +45,9 @@ describe('EsqlViewsPlugin', () => {
   it('registers and mounts the management application when the UI is enabled', async () => {
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
+    const data = dataPluginMock.createStartContract();
     const management = managementPluginMock.createSetupContract();
-    core.getStartServices.mockResolvedValue([coreStart, {}, {}]);
+    core.getStartServices.mockResolvedValue([coreStart, { data }, {}]);
 
     createPlugin(true).setup(core, { management });
 

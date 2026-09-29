@@ -16,9 +16,13 @@
       "esqlViews"
     ],
     "requiredPlugins": [
+      "data",
       "esql",
       "features",
       "management"
+    ],
+    "requiredBundles": [
+      "esqlDataGrid"
     ]
   }
 }

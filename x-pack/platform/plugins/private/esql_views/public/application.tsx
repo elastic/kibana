@@ -8,6 +8,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import type { CoreStart } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { createEsqlViewsManagementClient } from '@kbn/esql-utils';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { ESQL_VIEWS_CAPABILITIES, PLUGIN_ID, PLUGIN_NAME } from '../common';
@@ -20,6 +21,7 @@ const LazyEsqlEditor = React.lazy(async () => {
 
 export const mountManagementSection = (
   coreStart: CoreStart,
+  data: DataPublicPluginStart,
   { element, setBreadcrumbs }: ManagementAppMountParams
 ) => {
   const { docTitle } = coreStart.chrome;
@@ -37,6 +39,11 @@ export const mountManagementSection = (
         client={client}
         documentationUrl={coreStart.docLinks.links.query.queryESQLViews}
         EsqlEditor={LazyEsqlEditor}
+        previewDependencies={{
+          dataViews: data.dataViews,
+          http: coreStart.http,
+          search: data.search.search,
+        }}
       />
     )
   );
