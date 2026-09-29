@@ -340,10 +340,10 @@ export class DetectionRulesClient {
    * contract) while the framework's default is enabled.
    *
    * Three framework fields are the API's decision, not the caller's:
-   *   - `recovery_strategy: 'none'` and `no_data_strategy: 'none'` — sent
+   *   - `recovery: { strategy: 'manual' }` and `no_data: { strategy: 'ignore' }` — sent
    *     explicitly so stored detection rules are uniform even if the framework
    *     default ever changes.
-   *   - `state_transition: { pending_count: 0 }` — zero consecutive breaches
+   *   - `state_transition: { pending: { count: 0 } }` — zero consecutive breaches
    *     required, so the alert activates immediately on the first match.
    *   - No `grouping` — detection rules do not use the framework's grouping
    *     feature.

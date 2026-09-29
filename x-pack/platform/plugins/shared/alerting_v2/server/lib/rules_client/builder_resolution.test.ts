@@ -128,7 +128,7 @@ const baseCreateData = {
   metadata: { name: 'test-rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+  query: { base: 'FROM logs-* | LIMIT 10' },
 } as CreateRuleData;
 
 // CreateRuleData that carries builder fields instead of a query.
@@ -186,36 +186,25 @@ function createRegistryWithManagedTypes(): BuilderTypeRegistry {
 // Existing SO attributes for a plain (non-builder) rule.
 const plainExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
   metadata: { name: 'test-rule' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+  query: { base: 'FROM logs-* | LIMIT 10' },
 });
 
 // Existing SO attributes for a rule that carries a builder type.
 const builderExisting: RuleSavedObjectAttributes = createRuleSoAttributes({
   metadata: { name: 'test-rule', builder_type: BUILDER_TYPE },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+  query: { base: 'FROM logs-* | LIMIT 10' },
 });
 
 // A simple standalone GeneratedQuery — no overrides for time_field or grouping.
 const standaloneGenerated: GeneratedQuery = {
-  query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
+  query: { base: 'FROM metrics-* | LIMIT 10' },
 };
 
 // A composed GeneratedQuery without a recovery segment.
 const composedGenerated: GeneratedQuery = {
   query: {
-    format: 'composed',
     base: 'FROM metrics-*',
     breach: { segment: '| WHERE cpu > 0.9' },
-  },
-};
-
-// A composed GeneratedQuery that includes a recovery segment.
-const composedWithRecoveryGenerated: GeneratedQuery = {
-  query: {
-    format: 'composed',
-    base: 'FROM metrics-*',
-    breach: { segment: '| WHERE cpu > 0.9' },
-    recovery: { segment: '| WHERE cpu <= 0.9' },
   },
 };
 
@@ -365,113 +354,21 @@ describe('resolveCreateRuleBuilder', () => {
     // Signal kind adaptation (adaptToKind)
     // -----------------------------------------------------------------------
 
-    describe('signal kind adaptation', () => {
-      it('converts a composed query to standalone format for a signal rule', () => {
-        const registry = createMockRegistry(jest.fn().mockReturnValue(composedGenerated));
-
-        const result = resolveCreateRuleBuilder(registry, signalBuilderCreateData);
-
-        // Write-time path always produces a query; non-null assertion is safe.
-        expect(result.query!.format).toBe('standalone');
-      });
-
-      it('produces the full composed query (base + breach) as the standalone breach query for a signal rule', () => {
-        // getBreachEsqlQuery assembles "base | breach_segment", not just the segment.
-        const registry = createMockRegistry(jest.fn().mockReturnValue(composedGenerated));
-
-        const result = resolveCreateRuleBuilder(registry, signalBuilderCreateData);
-
-        const q = result.query as { breach: { query: string } };
-        expect(q.breach.query).toBe('FROM metrics-* | WHERE cpu > 0.9');
-      });
-
-      it('throws BUILDER_QUERY_GENERATION_FAILED when a composed query carries a recovery segment for a signal rule', () => {
-        const registry = createMockRegistry(
-          jest.fn().mockReturnValue(composedWithRecoveryGenerated)
-        );
-
-        expect(() => resolveCreateRuleBuilder(registry, signalBuilderCreateData)).toThrow(
-          expect.objectContaining({
-            output: expect.objectContaining({ statusCode: 400 }),
-            data: expect.objectContaining({
-              code: ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED,
-            }),
-          })
-        );
-      });
-
-      it('passes a standalone query through unchanged for a signal rule', () => {
+    describe('the generated query is stored as sent', () => {
+      it('stores the generated query unchanged for a signal rule', () => {
         const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneGenerated));
 
         const result = resolveCreateRuleBuilder(registry, signalBuilderCreateData);
 
         expect(result.query).toEqual(standaloneGenerated.query);
       });
-    });
 
-    // -----------------------------------------------------------------------
-    // Recovery strategy auto-resolution
-    // -----------------------------------------------------------------------
-
-    describe('recovery strategy auto-resolution', () => {
-      it('auto-sets recovery_strategy to "query" when the builder generates a recovery segment and recovery_strategy is undefined', () => {
-        const registry = createMockRegistry(
-          jest.fn().mockReturnValue(composedWithRecoveryGenerated)
-        );
-        const data = {
-          ...builderCreateData,
-          recovery_strategy: undefined,
-        } as unknown as CreateRuleData;
-
-        const result = resolveCreateRuleBuilder(registry, data);
-
-        expect(result.recovery_strategy).toBe('query');
-        const q = result.query as { recovery?: unknown };
-        expect(q.recovery).toBeDefined();
-      });
-
-      it('keeps recovery_strategy "query" and preserves the recovery segment when the strategy already matches', () => {
-        const registry = createMockRegistry(
-          jest.fn().mockReturnValue(composedWithRecoveryGenerated)
-        );
-        const data = {
-          ...builderCreateData,
-          recovery_strategy: 'query',
-        } as unknown as CreateRuleData;
-
-        const result = resolveCreateRuleBuilder(registry, data);
-
-        expect(result.recovery_strategy).toBe('query');
-        const q = result.query as { recovery?: unknown };
-        expect(q.recovery).toBeDefined();
-      });
-
-      it('strips the recovery segment from the generated query when recovery_strategy is "no_breach"', () => {
-        const registry = createMockRegistry(
-          jest.fn().mockReturnValue(composedWithRecoveryGenerated)
-        );
-        const data = {
-          ...builderCreateData,
-          recovery_strategy: 'no_breach',
-        } as unknown as CreateRuleData;
-
-        const result = resolveCreateRuleBuilder(registry, data);
-
-        expect(result.recovery_strategy).toBe('no_breach');
-        const q = result.query as { recovery?: unknown };
-        expect(q.recovery).toBeUndefined();
-      });
-
-      it('does not alter recovery_strategy when the builder generates no recovery segment', () => {
+      it('stores a generated base-plus-breach query unchanged for an alert rule', () => {
         const registry = createMockRegistry(jest.fn().mockReturnValue(composedGenerated));
-        const data = {
-          ...builderCreateData,
-          recovery_strategy: 'no_breach',
-        } as unknown as CreateRuleData;
 
-        const result = resolveCreateRuleBuilder(registry, data);
+        const result = resolveCreateRuleBuilder(registry, builderCreateData);
 
-        expect(result.recovery_strategy).toBe('no_breach');
+        expect(result.query).toEqual(composedGenerated.query);
       });
     });
 
@@ -480,13 +377,14 @@ describe('resolveCreateRuleBuilder', () => {
     // -----------------------------------------------------------------------
 
     describe('GENERATED_QUERY_INVARIANTS', () => {
-      it('throws BUILDER_QUERY_GENERATION_FAILED when recovery_strategy is "query" but the builder generates no recovery', () => {
-        // isRecoveryQueryProvidedForStrategy fails: strategy is 'query' but the
-        // generated composed query has no recovery segment.
-        const registry = createMockRegistry(jest.fn().mockReturnValue(composedGenerated));
+      it('throws BUILDER_QUERY_GENERATION_FAILED when a condition recovery has no breach to recover against', () => {
+        // isRecoveryConditionUsableWithBreach fails: the generated query is a
+        // bare base, so `base + segment` can only return breaching groups.
+        const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneGenerated));
         const data = {
           ...builderCreateData,
-          recovery_strategy: 'query',
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
+          no_data: { strategy: 'ignore' },
         } as unknown as CreateRuleData;
 
         expect(() => resolveCreateRuleBuilder(registry, data)).toThrow(
@@ -499,16 +397,14 @@ describe('resolveCreateRuleBuilder', () => {
         );
       });
 
-      it('throws BUILDER_QUERY_GENERATION_FAILED when no_data_strategy requires a no_data block but none is generated', () => {
-        // isNoDataQueryProvidedForStrategy fails: standalone format + non-none
-        // no_data_strategy, but the generated query has no no_data block.
-        const standaloneWithoutNoData: GeneratedQuery = {
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 10' } },
-        };
-        const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneWithoutNoData));
+      it('throws BUILDER_QUERY_GENERATION_FAILED when a no-data strategy cannot tell absence from breach', () => {
+        // isAbsenceDistinguishableFromBreach fails: the generated query carries
+        // no breach and `no_data` names no presence query of its own.
+        const registry = createMockRegistry(jest.fn().mockReturnValue(standaloneGenerated));
         const data = {
           ...builderCreateData,
-          no_data_strategy: 'last_known_status',
+          recovery: { strategy: 'no_breach' },
+          no_data: { strategy: 'keep_last' },
         } as unknown as CreateRuleData;
 
         expect(() => resolveCreateRuleBuilder(registry, data)).toThrow(
@@ -624,7 +520,7 @@ describe('resolveUpdateRuleBuilder', () => {
         builder_type: MANAGED_BUILDER_TYPE,
         ownership: { managed: true, solution: 'security', domain: 'detection' },
       },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     });
 
     // Existing SO attributes for an unmanaged-explicit builder rule.
@@ -634,7 +530,7 @@ describe('resolveUpdateRuleBuilder', () => {
         builder_type: UNMANAGED_EXPLICIT_BUILDER_TYPE,
         ownership: { managed: false },
       },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     });
 
     // Existing SO attributes for a rule whose stored ownership is managed but
@@ -645,7 +541,7 @@ describe('resolveUpdateRuleBuilder', () => {
         builder_type: 'test.plugin-disabled-type',
         ownership: { managed: true, solution: 'security', domain: 'detection' },
       },
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     });
 
     it('rejects a plain rule adopting a managed type with builder_fields (without onBehalfOf identity)', () => {
@@ -999,46 +895,6 @@ describe('resolveUpdateRuleBuilder', () => {
     });
 
     // -----------------------------------------------------------------------
-    // Recovery strategy on the update path
-    // -----------------------------------------------------------------------
-
-    describe('recovery strategy resolution', () => {
-      it('auto-sets recovery_strategy to "query" when the builder generates a recovery segment and no strategy is in effect', () => {
-        const generate = jest.fn().mockReturnValue(composedWithRecoveryGenerated);
-        const registry = createMockRegistry(generate);
-        const existingNoStrategy = createRuleSoAttributes({
-          metadata: { name: 'test-rule', builder_type: BUILDER_TYPE },
-          recovery_strategy: undefined,
-        });
-        const data: UpdateRuleData = { metadata: { builder_fields: RAW_FIELDS } };
-
-        const result = resolveUpdateRuleBuilder(
-          registry,
-          RULE_ID,
-          data,
-          existingNoStrategy as unknown as RuleSavedObjectAttributes
-        );
-
-        expect(result.recovery_strategy).toBe('query');
-      });
-
-      it('strips the recovery segment when the effective strategy is not "query"', () => {
-        const generate = jest.fn().mockReturnValue(composedWithRecoveryGenerated);
-        const registry = createMockRegistry(generate);
-        const existingNoBreach = createRuleSoAttributes({
-          metadata: { name: 'test-rule', builder_type: BUILDER_TYPE },
-          recovery_strategy: 'no_breach',
-        });
-        const data: UpdateRuleData = { metadata: { builder_fields: RAW_FIELDS } };
-
-        const result = resolveUpdateRuleBuilder(registry, RULE_ID, data, existingNoBreach);
-
-        const q = result.query as { recovery?: unknown } | undefined;
-        expect(q?.recovery).toBeUndefined();
-      });
-    });
-
-    // -----------------------------------------------------------------------
     // GENERATED_QUERY_INVARIANTS are checked on the update path (step 6.4 fix)
     // -----------------------------------------------------------------------
 
@@ -1050,13 +906,13 @@ describe('resolveUpdateRuleBuilder', () => {
        * being rejected. These tests confirm the fix: the same scenarios that
        * throw on create now also throw on update.
        */
-      it('throws BUILDER_QUERY_GENERATION_FAILED when recovery_strategy is "query" but the builder generates no recovery', () => {
+      it('throws BUILDER_QUERY_GENERATION_FAILED when a condition recovery has no breach to recover against', () => {
         // The same scenario no longer passes silently on the update path.
         const generate = jest.fn().mockReturnValue(standaloneGenerated);
         const registry = createMockRegistry(generate);
         const data: UpdateRuleData = {
           metadata: { builder_fields: RAW_FIELDS },
-          recovery_strategy: 'query',
+          recovery: { strategy: 'condition', segment: 'WHERE cpu < 0.5' },
         };
 
         expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
@@ -1080,7 +936,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const registry = createMockRegistry();
       // Different from the stored query in builderExisting.
       const data: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+        query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
@@ -1097,7 +953,7 @@ describe('resolveUpdateRuleBuilder', () => {
     it('includes the builder_type in the BUILDER_TYPE_NOT_CLEARED error details', () => {
       const registry = createMockRegistry();
       const data: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+        query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
       let caught: unknown;
@@ -1121,7 +977,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const registry = createMockRegistry();
       const data: UpdateRuleData = {
         metadata: { builder_type: BUILDER_TYPE },
-        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+        query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
       expect(() =>
@@ -1133,7 +989,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const registry = createRegistryWithBuilderType();
       const data: UpdateRuleData = {
         metadata: { builder_type: BUILDER_TYPE },
-        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+        query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
@@ -1149,7 +1005,7 @@ describe('resolveUpdateRuleBuilder', () => {
       const registry = createMockRegistry();
       // Exact same query as in builderExisting.
       const data: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       };
 
       expect(() =>
@@ -1169,7 +1025,7 @@ describe('resolveUpdateRuleBuilder', () => {
     it('allows a query change on a plain (non-builder) rule', () => {
       const registry = createMockRegistry();
       const data: UpdateRuleData = {
-        query: { format: 'standalone', breach: { query: 'FROM new-index-* | LIMIT 5' } },
+        query: { base: 'FROM new-index-* | LIMIT 5' },
       };
 
       expect(() => resolveUpdateRuleBuilder(registry, RULE_ID, data, plainExisting)).not.toThrow();
@@ -1417,7 +1273,7 @@ describe('resolveReplaceRuleBuilder', () => {
         // Same query as in builderExisting.
         const data: CreateRuleData = {
           ...baseCreateData,
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+          query: { base: 'FROM logs-* | LIMIT 10' },
         };
 
         expect(() => resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
@@ -1441,7 +1297,7 @@ describe('resolveReplaceRuleBuilder', () => {
         const data = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE, name: 'renamed' },
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+          query: { base: 'FROM logs-* | LIMIT 10' },
         } as ReplaceRuleData;
 
         let result: ReturnType<typeof resolveReplaceRuleBuilder>;
@@ -1457,7 +1313,7 @@ describe('resolveReplaceRuleBuilder', () => {
         const data = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 1' } }, // different
+          query: { base: 'FROM metrics-* | LIMIT 1' }, // different
         } as ReplaceRuleData;
 
         expect(() => resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting)).toThrow(
@@ -1494,7 +1350,7 @@ describe('resolveReplaceRuleBuilder', () => {
         // Same query as in builderExisting; metadata carries no builder_type.
         const data: CreateRuleData = {
           ...baseCreateData,
-          query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+          query: { base: 'FROM logs-* | LIMIT 10' },
         };
 
         const result = resolveReplaceRuleBuilder(registry, RULE_ID, data, builderExisting);
@@ -1507,7 +1363,7 @@ describe('resolveReplaceRuleBuilder', () => {
         const data = {
           ...baseCreateData,
           metadata: { ...baseCreateData.metadata, builder_type: BUILDER_TYPE },
-          query: { format: 'standalone', breach: { query: 'FROM metrics-* | LIMIT 1' } },
+          query: { base: 'FROM metrics-* | LIMIT 1' },
         } as ReplaceRuleData;
 
         let result: ReturnType<typeof resolveReplaceRuleBuilder>;
@@ -1539,7 +1395,7 @@ describe('resolveReplaceRuleBuilder', () => {
       // A plain (non-managed) stored rule to test adoption of a managed type.
       const plainExistingForReplace: RuleSavedObjectAttributes = createRuleSoAttributes({
         metadata: { name: 'test-rule', ownership: { managed: false } },
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       });
 
       // A managed stored rule to test same-type restatement.
@@ -1549,7 +1405,7 @@ describe('resolveReplaceRuleBuilder', () => {
           builder_type: MANAGED_BUILDER_TYPE,
           ownership: { managed: true, solution: 'security', domain: 'detection' },
         },
-        query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+        query: { base: 'FROM logs-* | LIMIT 10' },
       });
 
       it('rejects a plain rule adopting a managed type via PUT with builder_fields', () => {
@@ -1894,7 +1750,7 @@ describe('execution-time builder types', () => {
           builder_fields: { q: 'old-fields' },
           ownership: { managed: false },
         },
-        query: { format: 'standalone', breach: { query: 'FROM old-index | LIMIT 10' } },
+        query: { base: 'FROM old-index | LIMIT 10' },
       });
 
       const data: UpdateRuleData = {

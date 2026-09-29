@@ -40,6 +40,7 @@ import { CreateAlertEventsStep } from './steps/create_alert_events_step';
 import { StoreAlertEventsStep } from './steps/store_alert_events';
 import type { PluginConfig } from '../../config';
 import { createQueryService } from '../services/query_service/query_service.mock';
+import { createEsqlResponseFormatService } from '../services/esql_response_format_service/esql_response_format_service.mock';
 import { createLoggerService } from '../services/logger_service/logger_service.mock';
 import { createMockStorageServiceContract } from '../services/storage_service/storage_service.mock';
 import {
@@ -91,8 +92,7 @@ function makeFixtureDefinition(
       const f = fields as unknown as FixtureFields;
       return {
         query: {
-          format: 'standalone',
-          breach: { query: `FROM fixture-index-* | WHERE KQL("${f.q}") | LIMIT 100` },
+          base: `FROM fixture-index-* | WHERE KQL("${f.q}") | LIMIT 100`,
         },
       };
     },
@@ -139,7 +139,6 @@ function createPluginConfigAccessor() {
         query: { maxResponseSize: ByteSizeValue.parse('50mb') },
       },
     },
-    esql: { responseFormat: 'json' },
   };
   return coreMock.createPluginInitializerContext<PluginConfig>(config).config;
 }
@@ -160,7 +159,11 @@ function createPipeline(registry: BuilderTypeRegistry): PipelineSetup {
   const mockStorage = createMockStorageServiceContract();
 
   const compileStep = new CompileRuleQueryStep(registry);
-  const executeQueryStep = new ExecuteRuleQueryStep(queryService, pluginConfigAccessor);
+  const executeQueryStep = new ExecuteRuleQueryStep(
+    queryService,
+    createEsqlResponseFormatService(),
+    pluginConfigAccessor
+  );
   const createEventsStep = new CreateAlertEventsStep(loggerService, pluginConfigAccessor, registry);
   const storeEventsStep = new StoreAlertEventsStep(mockStorage);
 
@@ -290,10 +293,8 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
       // effectiveQuery is derived from builder_fields by generateQuery — not rule.query.
       expect(effectiveQuery).toBeDefined();
-      expect(effectiveQuery!.format).toBe('standalone');
-      if (effectiveQuery!.format !== 'standalone') throw new Error('wrong format');
-      expect(effectiveQuery!.breach.query).toContain('FROM fixture-index-* | WHERE KQL("');
-      expect(effectiveQuery!.breach.query).toContain(FIXTURE_FIELDS.q);
+      expect(effectiveQuery!.base).toContain('FROM fixture-index-* | WHERE KQL("');
+      expect(effectiveQuery!.base).toContain(FIXTURE_FIELDS.q);
 
       // Execution window is anchored at the fake now with the rule's 10-minute lookback.
       expect(executionWindow).toBeDefined();
@@ -386,9 +387,9 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
       alertRule = createRuleResponse({
         kind: 'alert',
-        recovery_strategy: 'none',
-        no_data_strategy: 'none',
-        state_transition: { pending_count: 0 },
+        recovery: { strategy: 'manual' },
+        no_data: { strategy: 'ignore' },
+        state_transition: { pending: { count: 0 } },
         // Detection rules have no persisted query; effectiveQuery comes from generateQuery.
         query: undefined,
         grouping: undefined,
@@ -427,9 +428,7 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
       const { effectiveQuery } = results[0].state;
       expect(effectiveQuery).toBeDefined();
-      expect(effectiveQuery!.format).toBe('standalone');
-      if (effectiveQuery!.format !== 'standalone') throw new Error('wrong format');
-      expect(effectiveQuery!.breach.query).toContain(ALERT_FIELDS.q);
+      expect(effectiveQuery!.base).toContain(ALERT_FIELDS.q);
     });
 
     it('full chain: produces alert-kind events and completes without error', async () => {
@@ -544,9 +543,9 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
       const overridingRegistry = makeRegistry(
         makeFixtureDefinition({
           // grouping overrides on execution-time results are explicitly rejected
-          // by CompileRuleQueryStep before adaptToKind or the invariant checks run.
+          // by CompileRuleQueryStep before the invariant checks run.
           generateQuery: () => ({
-            query: { format: 'standalone', breach: { query: 'FROM fixture-* | LIMIT 10' } },
+            query: { base: 'FROM fixture-* | LIMIT 10' },
             grouping: { fields: ['host.name'] },
           }),
         })
@@ -570,27 +569,23 @@ describe('Execution integration — fixture execution-time builder type (Step 6.
 
     /**
      * Failure 4 (second variant): generator returns a result that fails the
-     * invariants — a signal-kind rule cannot run a recovery block.
-     * Ref: GENERATED_QUERY_INVARIANTS + adaptToKind in generated_query_validation.ts
+     * invariants — a condition recovery needs a breach to recover against.
+     * Ref: GENERATED_QUERY_INVARIANTS in generated_query_validation.ts
      */
-    it('generator returns invalid query (recovery on signal rule): fails the run with BUILDER_QUERY_GENERATION_FAILED (user-source)', async () => {
+    it('generator returns invalid query (condition recovery with no breach): fails the run with BUILDER_QUERY_GENERATION_FAILED (user-source)', async () => {
       const invalidRegistry = makeRegistry(
         makeFixtureDefinition({
           generateQuery: () => ({
-            // adaptToKind rejects a recovery block on a signal-kind rule.
-            query: {
-              format: 'composed' as const,
-              base: 'FROM fixture-* | STATS count = COUNT(*) BY host.name',
-              breach: { segment: 'WHERE count > 10' },
-              recovery: { segment: 'WHERE count <= 10' },
-            },
+            query: { base: 'FROM fixture-* | STATS count = COUNT(*) BY host.name' },
           }),
         })
       );
       const invalidPipeline = createPipeline(invalidRegistry);
 
       const rule = createRuleResponse({
-        kind: 'signal',
+        kind: 'alert',
+        recovery: { strategy: 'condition', segment: 'WHERE count <= 10' },
+        no_data: { strategy: 'ignore' },
         metadata: {
           builder_type: FIXTURE_TYPE_ID,
           builder_fields: { q: 'host.name: test', severity: 'high', risk_score: 10 },

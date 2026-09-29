@@ -44,7 +44,7 @@ function makeEnrichmentDefinition(
     compilation: 'execution_time',
     builderFieldsSchema: simpleSchema as unknown as RegisteredBuilderType['builderFieldsSchema'],
     generateQuery: jest.fn(() => ({
-      query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 10' } },
+      query: { base: 'FROM logs-* | LIMIT 10' },
     })),
     ...overrides,
   };

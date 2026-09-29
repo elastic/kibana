@@ -53,10 +53,7 @@ const writeTimeDef: BuilderTypeDefinition<WriteTimeFields> = {
   },
   manifest: writeTimeManifest,
   generateQuery: (_input: QueryGenerationInput<WriteTimeFields>): GeneratedQuery => ({
-    query: {
-      format: 'standalone',
-      breach: { query: 'FROM logs-* | LIMIT 10' },
-    },
+    query: { base: 'FROM logs-* | LIMIT 10' },
   }),
 };
 
@@ -107,13 +104,10 @@ const execTimeDef: BuilderTypeDefinition<ExecTimeFields> = {
   deriveRuleFields: (_fields: ExecTimeFields): DerivedRuleFields => ({}),
   generateQuery: (input: QueryGenerationInput<ExecTimeFields>): GeneratedQuery => ({
     query: {
-      format: 'standalone',
       // The run context is accessible; the fixture ignores it but the type must accept it.
-      breach: {
-        query: input.run
-          ? `FROM logs-* | WHERE @timestamp >= "${input.run.window.start}" | LIMIT 10`
-          : 'FROM logs-* | LIMIT 10',
-      },
+      base: input.run
+        ? `FROM logs-* | WHERE @timestamp >= "${input.run.window.start}" | LIMIT 10`
+        : 'FROM logs-* | LIMIT 10',
     },
   }),
   enrichRuleEvent: (input: RuleEventEnrichmentInput<ExecTimeFields>): RuleEventEnrichment => ({
@@ -157,7 +151,7 @@ describe('BuilderTypeDefinition — write_time fixture', () => {
     const result = writeTimeDef.generateQuery(input);
     // Write-time types return synchronously; the result must not be a Promise.
     expect(result).not.toBeInstanceOf(Promise);
-    expect((result as GeneratedQuery).query.format).toBe('standalone');
+    expect((result as GeneratedQuery).query.base).toContain('FROM logs-*');
   });
 
   it('validateFields returns an error for a blank query', () => {
@@ -218,7 +212,7 @@ describe('BuilderTypeDefinition — execution_time fixture', () => {
     };
     const result = execTimeDef.generateQuery(input);
     expect(result).not.toBeInstanceOf(Promise);
-    expect((result as GeneratedQuery).query.format).toBe('standalone');
+    expect((result as GeneratedQuery).query.base).toContain('FROM logs-*');
   });
 
   it('generateQuery accepts a QueryGenerationInput with a run context', () => {
@@ -237,11 +231,9 @@ describe('BuilderTypeDefinition — execution_time fixture', () => {
     };
     const result = execTimeDef.generateQuery(input);
     expect(result).not.toBeInstanceOf(Promise);
-    // The fixture uses window.start in the breach query when run is present.
+    // The fixture uses window.start in the compiled query when run is present.
     const query = result as GeneratedQuery;
-    expect((query.query as { breach: { query: string } }).breach.query).toContain(
-      '2023-12-31T23:54:00.000Z'
-    );
+    expect(query.query.base).toContain('2023-12-31T23:54:00.000Z');
   });
 
   it('deriveRuleFields returns an empty DerivedRuleFields for the fixture', () => {

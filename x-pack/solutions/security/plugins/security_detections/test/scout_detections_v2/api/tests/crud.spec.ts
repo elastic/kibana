@@ -312,14 +312,12 @@ apiTest.describe('Detection Engine v2 — CRUD routes', { tag: '@local-stateful-
           kind: 'alert',
           metadata: { name: 'generic-v2-rule' },
           schedule: { every: '5m' },
-          recovery_strategy: 'no_breach',
-          query: {
-            format: 'standalone',
-            breach: { query: 'FROM logs-* | LIMIT 10' },
-          },
+          recovery: { strategy: 'no_breach' },
+          no_data: { strategy: 'ignore' },
+          query: { base: 'FROM logs-* | LIMIT 10' },
           time_field: '@timestamp',
           grouping: { fields: ['host.name'] },
-          state_transition: { pending_count: 0, recovering_count: 0 },
+          state_transition: { pending: { count: 0 }, recovering: { count: 0 } },
         },
       });
       expect(genericResponse).toHaveStatusCode(201);

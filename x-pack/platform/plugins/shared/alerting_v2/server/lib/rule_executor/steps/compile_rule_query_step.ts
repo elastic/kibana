@@ -18,10 +18,7 @@ import { guardedMapStep } from '../stream_utils';
 import { BuilderTypeRegistry } from '../../builder_types';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { parseDurationToMs } from '../../duration';
-import {
-  adaptToKind,
-  assertGeneratedQueryIsValid,
-} from '../../builder_types/generated_query_validation';
+import { assertGeneratedQueryIsValid } from '../../builder_types/generated_query_validation';
 
 /**
  * Resolves the run's effective query and time window, placing them on pipeline
@@ -199,19 +196,17 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
         );
       }
 
-      // Validate the compile result. Four checks, all in the design:
+      // Validate the compile result. Three checks, all in the design:
       //   1. Structural parse: run the result's `query` field through `querySchema`
       //      so that a compile function returning a structurally invalid Query (e.g.
-      //      `{ format: 'standalone', breach: { query: 42 } }` from an unchecked
-      //      cast or a JS-side type error) fails here as BUILDER_QUERY_GENERATION_FAILED
-      //      rather than reaching ExecuteRuleQueryStep and throwing a raw TypeError
-      //      that is classified as a framework-source (retryable) failure.
+      //      `{ base: 42 }` from an unchecked cast or a JS-side type error) fails
+      //      here as BUILDER_QUERY_GENERATION_FAILED rather than reaching
+      //      ExecuteRuleQueryStep and throwing a raw TypeError that is classified
+      //      as a framework-source (retryable) failure.
       //   2. No-overrides rule (execution-time types only): the result must not
       //      carry time_field or grouping — those must be derived at write time
       //      via deriveRuleFields, not set per-run.
-      //   3. adaptToKind: flatten composed queries for signal rules; reject a
-      //      recovery block on a signal rule.
-      //   4. GENERATED_QUERY_INVARIANTS: the same invariants the write path enforces.
+      //   3. GENERATED_QUERY_INVARIANTS: the same invariants the write path enforces.
       //
       // Ref: rule-execution-logic.md "The compilation contract"
       try {
@@ -243,15 +238,13 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
           );
         }
 
-        // Checks 3 + 4.
-        const adapted = adaptToKind(generated, rule.kind, builderType);
-
+        // Check 3.
         assertGeneratedQueryIsValid(
           {
             kind: rule.kind,
-            query: adapted.query,
-            recovery_strategy: rule.recovery_strategy,
-            no_data_strategy: rule.no_data_strategy,
+            query: generated.query,
+            recovery: rule.recovery,
+            no_data: rule.no_data,
           },
           builderType
         );
@@ -260,7 +253,7 @@ export class CompileRuleQueryStep implements RuleExecutionStep {
           type: 'continue',
           state: {
             ...state,
-            effectiveQuery: adapted.query,
+            effectiveQuery: generated.query,
             executionWindow,
             parsedBuilderFields: parsedFields,
           },

@@ -236,14 +236,12 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
 
   it("matches the design's worked example (character-by-character comparison)", () => {
     const result = generateThresholdQuery(makeInput(DESIGN_EXAMPLE_FIELDS));
-    expect(result.query.format).toBe('standalone');
-    if (result.query.format !== 'standalone') return;
 
     // The design example from rule-execution-logic.md "security.detection.threshold".
     // Note: the design shows triple-quoted KQL string ("""...""") but the Builder
     // emits double-quoted ("...").  The implementation pins the Builder's output;
     // the discrepancy is reported to the team.
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"auditbeat-*\\"
       | WHERE KQL(\\"event.category:authentication and event.outcome:failure\\")
       | WHERE \`user.name\` IS NOT NULL AND \`source.ip\` IS NOT NULL
@@ -269,8 +267,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       max_signals: 200,
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"auditbeat-*\\"
       | WHERE \`host.name\` IS NOT NULL
       | STATS threshold_count = COUNT(*) BY \`host.name\`
@@ -292,8 +289,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       max_signals: 100,
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | WHERE \`user.name\` IS NOT NULL
@@ -316,8 +312,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       max_signals: 100,
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | STATS threshold_count = COUNT(*)
@@ -339,8 +334,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       max_signals: 100,
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | STATS threshold_count = COUNT(*), cardinality_count = COUNT_DISTINCT(\`source.ip\`)
@@ -362,8 +356,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       // max_signals absent
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\"
       | WHERE KQL(\\"error\\")
       | WHERE \`user.name\` IS NOT NULL
@@ -385,8 +378,7 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       max_signals: 100,
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\"
       | WHERE QSTR(\\"error message:*timeout*\\", {\\"allow_wildcard\\": TRUE})
       | WHERE \`host.name\` IS NOT NULL
@@ -409,9 +401,8 @@ describe('generateThresholdQuery — compiled query snapshots', () => {
       max_signals: 100,
     };
     const result = generateThresholdQuery(makeInput(fields));
-    if (result.query.format !== 'standalone') throw new Error('expected standalone');
     // Index names are quoted (buildQuotedIndexSource) so the AST builder controls escaping.
-    expect(result.query.breach.query.startsWith('FROM "logs-*", "auditbeat-*"')).toBe(true);
+    expect(result.query.base.startsWith('FROM "logs-*", "auditbeat-*"')).toBe(true);
   });
 });
 

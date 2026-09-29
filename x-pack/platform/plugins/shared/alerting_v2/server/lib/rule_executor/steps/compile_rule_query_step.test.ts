@@ -32,7 +32,7 @@ const FIXED_NOW_ISO = new Date(FIXED_NOW_MS).toISOString();
 const simpleSchema = z.object({ q: z.string().max(100) }).strict();
 
 const standaloneBreach = (esql: string): GeneratedQuery => ({
-  query: { format: 'standalone', breach: { query: esql } },
+  query: { base: esql },
 });
 
 const COMPILED_QUERY_TEXT = 'FROM logs-* | WHERE KQL("host.name: test") | LIMIT 10';
@@ -525,22 +525,22 @@ describe('CompileRuleQueryStep', () => {
       expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
-    it('fails the run when a signal rule returns a composed query with recovery', async () => {
-      // Composed format: base is a full ES|QL string; breach/recovery are appended segments.
+    it('fails the run when the compile result cannot satisfy the rule lifecycle', async () => {
+      // `recovery.strategy: 'condition'` recovers on `base` plus a segment, which
+      // can only mean something when the breach is a narrower condition on the
+      // same base. A generated query with no breach makes it unsatisfiable.
       const definition = makeExecutionTypeDefinition({
         generateQuery: jest.fn(() => ({
-          query: {
-            format: 'composed' as const,
-            base: 'FROM logs-* | LIMIT 10',
-            recovery: { segment: '| WHERE false' }, // invalid for signal: signals cannot have recovery
-          },
+          query: { base: 'FROM logs-* | LIMIT 10' },
         })),
       });
       registry = makeRegistry(definition);
       step = new CompileRuleQueryStep(registry);
 
       const rule = createRuleResponse({
-        kind: 'signal',
+        kind: 'alert',
+        recovery: { strategy: 'condition', segment: 'WHERE false' },
+        no_data: { strategy: 'ignore' },
         metadata: { builder_type: 'test.exec', builder_fields: { q: 'x' } },
       });
       const state = createRulePipelineState({ rule });
@@ -552,9 +552,9 @@ describe('CompileRuleQueryStep', () => {
       expect((error as any).data?.code).toBe(ALERTING_ERROR_CODES.BUILDER_QUERY_GENERATION_FAILED);
     });
 
-    it('fails the run when the compile result has a structurally invalid query (e.g. breach.query is not a string)', async () => {
+    it('fails the run when the compile result has a structurally invalid query (e.g. base is not a string)', async () => {
       // A JS-side type error or unchecked cast can produce a GeneratedQuery whose
-      // `query` field fails the schema (e.g. breach.query: 42 instead of a string).
+      // `query` field fails the schema (e.g. base: 42 instead of a string).
       // Without a structural parse this reaches ExecuteRuleQueryStep and throws a
       // raw TypeError classified as a framework-source (retryable) failure.
       // The compile step must catch it first as a user-source BUILDER_QUERY_GENERATION_FAILED.
@@ -564,10 +564,7 @@ describe('CompileRuleQueryStep', () => {
       const definition = makeExecutionTypeDefinition({
         generateQuery: jest.fn(() => ({
           // TypeScript would reject this but JavaScript-side a rogue generator could return it.
-          query: {
-            format: 'standalone',
-            breach: { query: 42 }, // not a string
-          } as unknown as import('@kbn/alerting-v2-schemas').Query,
+          query: { base: 42 } as unknown as import('@kbn/alerting-v2-schemas').Query,
         })),
       });
       registry = makeRegistry(definition);
