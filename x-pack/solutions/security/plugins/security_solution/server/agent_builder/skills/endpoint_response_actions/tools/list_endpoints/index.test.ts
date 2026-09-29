@@ -246,6 +246,78 @@ describe('listEndpointsTool', () => {
       );
     });
 
+    it('lowercases hostNameFilter before building the kuery so a capitalized filter still matches lowercase hostnames', async () => {
+      // `united.endpoint.host.hostname` is analyzed text: an unmodified
+      // wildcard is case-sensitive and 'Prod' would silently miss the real
+      // hostname 'web-prod-01'.
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'web-prod-01', os: { name: 'Ubuntu', version: '22.04' } },
+                agent: { id: 'agent-1' },
+                Endpoint: { state: { isolation: false } },
+              },
+              last_checkin: '2024-06-01T12:00:00Z',
+              host_status: 'healthy',
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
+
+      await tool.handler({ hostNameFilter: 'Prod' }, mockContext);
+
+      expect(mockMetadataService.getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: expect.stringContaining('prod'),
+        }),
+        expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
+      const [[calledArgs]] = mockMetadataService.getHostMetadataList.mock.calls;
+      expect((calledArgs as { kuery: string }).kuery).not.toContain('Prod');
+    });
+
+    it('reports status "unknown", not a fabricated "offline", when an entry has no host_status', async () => {
+      const mockMetadataService = {
+        getHostMetadataList: jest.fn().mockResolvedValue({
+          data: [
+            {
+              metadata: {
+                host: { hostname: 'no-status-host', os: { name: 'Ubuntu', version: '22.04' } },
+                agent: { id: 'agent-1' },
+                Endpoint: { state: { isolation: false } },
+              },
+              last_checkin: '2024-06-01T12:00:00Z',
+              // host_status intentionally absent
+            },
+          ],
+          total: 1,
+        }),
+      };
+
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation(
+          (() =>
+            mockMetadataService) as unknown as EndpointAppContextService['getEndpointMetadataService']
+        );
+
+      const result = await tool.handler({}, mockContext);
+      const data = assertStandardReturn(result)[0].data as {
+        endpoints: Array<Record<string, unknown>>;
+      };
+      expect(data.endpoints[0].status).toBe('unknown');
+    });
+
     it('returns an error result when the metadata service throws', async () => {
       const mockMetadataService = {
         getHostMetadataList: jest.fn().mockRejectedValue(new Error('metadata service unavailable')),

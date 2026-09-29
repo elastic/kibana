@@ -84,8 +84,14 @@ export const listEndpointsTool = (
           );
         }
 
+        // Lowercase before building the wildcard: `united.endpoint.host.hostname`
+        // is analyzed text, so the wildcard match is case-sensitive and a
+        // capitalized filter (e.g. `Prod`) would silently miss real hostnames
+        // like `web-prod-01`. This matches `get_endpoint_status`'s
+        // case-insensitive behavior, which resolves hostnames via a phrase
+        // match against the same analyzed field.
         const kuery = hostNameFilter
-          ? `united.endpoint.host.hostname: *${escapeKuery(hostNameFilter)}*`
+          ? `united.endpoint.host.hostname: *${escapeKuery(hostNameFilter.toLowerCase())}*`
           : undefined;
 
         const page = params.page ?? 0;
@@ -137,7 +143,10 @@ export const listEndpointsTool = (
           return {
             hostName: host?.hostname || 'unknown',
             agentId: fleetAgentId || agent?.id || 'unknown',
-            status: entry.host_status || 'offline',
+            // Missing `host_status` means unknown, not offline — reporting
+            // 'offline' here would fabricate a down state the metadata never
+            // confirmed.
+            status: entry.host_status || 'unknown',
             isolated: Boolean(endpointState?.isolation),
             os: osLabel,
             lastSeen: entry.last_checkin || null,
