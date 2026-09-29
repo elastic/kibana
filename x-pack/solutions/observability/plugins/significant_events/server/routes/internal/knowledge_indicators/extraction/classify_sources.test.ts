@@ -9,6 +9,8 @@ import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { classifySources } from './classify_sources';
 
+const slugFor = (sourceId: string): string => `${sourceId}-slug`;
+
 const makeExecution = (
   sourceId: string,
   overrides: Partial<WorkflowExecutionListItemDto> = {}
@@ -23,17 +25,18 @@ const makeExecution = (
     error: null,
     workflowId: 'streams_ki/onboarding',
     duration: 300000,
-    concurrencyGroupKey: `streams-ki-onboarding-${sourceId}`,
+    concurrencyGroupKey: `nightshift-source-onboarding-${slugFor(sourceId)}`,
     ...overrides,
   } as WorkflowExecutionListItemDto);
 
 const makeSource = (id: string, esqlUpdatedAt = '2020-01-01T00:00:00.000Z') => ({
   id,
+  slug: slugFor(id),
   esql_updated_at: esqlUpdatedAt,
 });
 
 const candidateNames = (result: ReturnType<typeof classifySources>) =>
-  result.candidates.map((candidate) => candidate.streamName);
+  result.candidates.map((candidate) => candidate.sourceId);
 
 describe('classifySources', () => {
   const defaultArgs = {
@@ -49,7 +52,38 @@ describe('classifySources', () => {
     });
 
     expect(candidateNames(result)).toEqual(['source-a', 'source-b']);
+    expect(result.candidates).toEqual([
+      { sourceId: 'source-a', sourceSlug: 'source-a-slug', lastCompletedAt: null },
+      { sourceId: 'source-b', sourceSlug: 'source-b-slug', lastCompletedAt: null },
+    ]);
     expect(result.unsupported).toEqual([]);
+  });
+
+  it('matches executions to sources by slug, not by id', () => {
+    const result = classifySources({
+      ...defaultArgs,
+      sources: [makeSource('source-a')],
+      executions: [
+        makeExecution('source-a', {
+          concurrencyGroupKey: 'nightshift-source-onboarding-source-a',
+          status: ExecutionStatus.RUNNING,
+        }),
+      ],
+    });
+
+    expect(result.alreadyRunning).toEqual([]);
+    expect(candidateNames(result)).toEqual(['source-a']);
+  });
+
+  it('ignores executions whose slug belongs to no source', () => {
+    const result = classifySources({
+      ...defaultArgs,
+      sources: [makeSource('source-a')],
+      executions: [makeExecution('gone-source', { status: ExecutionStatus.RUNNING })],
+    });
+
+    expect(result.alreadyRunning).toEqual([]);
+    expect(candidateNames(result)).toEqual(['source-a']);
   });
 
   it('identifies already running executions, even when the query changed mid-run', () => {
@@ -66,7 +100,11 @@ describe('classifySources', () => {
     });
 
     expect(result.alreadyRunning).toEqual([
-      { streamName: 'running-source', scheduledAt: '2026-01-01T00:00:00.000Z' },
+      {
+        sourceId: 'running-source',
+        sourceSlug: 'running-source-slug',
+        scheduledAt: '2026-01-01T00:00:00.000Z',
+      },
     ]);
     expect(result.candidates).toEqual([]);
   });
@@ -101,7 +139,11 @@ describe('classifySources', () => {
     });
 
     expect(result.upToDate).toEqual([
-      { streamName: 'fresh-source', lastCompletedAt: recentCompletion },
+      {
+        sourceId: 'fresh-source',
+        sourceSlug: 'fresh-source-slug',
+        lastCompletedAt: recentCompletion,
+      },
     ]);
     expect(result.candidates).toEqual([]);
   });
@@ -115,7 +157,7 @@ describe('classifySources', () => {
     });
 
     expect(result.candidates).toEqual([
-      { streamName: 'old-source', lastCompletedAt: oldCompletion },
+      { sourceId: 'old-source', sourceSlug: 'old-source-slug', lastCompletedAt: oldCompletion },
     ]);
   });
 
@@ -133,7 +175,11 @@ describe('classifySources', () => {
     });
 
     expect(result.candidates).toEqual([
-      { streamName: 'edited-source', lastCompletedAt: recentCompletion },
+      {
+        sourceId: 'edited-source',
+        sourceSlug: 'edited-source-slug',
+        lastCompletedAt: recentCompletion,
+      },
     ]);
     expect(result.upToDate).toEqual([]);
   });
@@ -152,7 +198,11 @@ describe('classifySources', () => {
     });
 
     expect(result.upToDate).toEqual([
-      { streamName: 'failed-source', lastCompletedAt: recentFailure },
+      {
+        sourceId: 'failed-source',
+        sourceSlug: 'failed-source-slug',
+        lastCompletedAt: recentFailure,
+      },
     ]);
     expect(result.candidates).toEqual([]);
   });
@@ -169,7 +219,9 @@ describe('classifySources', () => {
       ],
     });
 
-    expect(result.candidates).toEqual([{ streamName: 'cancelled-source', lastCompletedAt: null }]);
+    expect(result.candidates).toEqual([
+      { sourceId: 'cancelled-source', sourceSlug: 'cancelled-source-slug', lastCompletedAt: null },
+    ]);
     expect(result.upToDate).toEqual([]);
   });
 

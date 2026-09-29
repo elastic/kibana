@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { parse } from 'yaml';
+import { collectAllSteps } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   getManagedWorkflowDefinition,
@@ -33,6 +35,22 @@ describe('sync.yaml managed workflow definition', () => {
     expect(definition?.management.enablement).toBe('restorable');
   });
 
+  it('is a dynamic workflow that upgrades automatically', () => {
+    expect(definition?.management.lifecycle).toBe('dynamic');
+    expect(definition?.management.versionStrategy).toBe('auto');
+  });
+
+  it('prefixes every kibana.request path with the workflow space', () => {
+    const paths = collectAllSteps(parse(WORKFLOW_YAML).steps).flatMap((step) =>
+      step.type === 'kibana.request' ? [(step.with as { path: string }).path] : []
+    );
+
+    expect(paths.length).toBeGreaterThan(0);
+    for (const path of paths) {
+      expect(path.startsWith('/s/{{ workflow.spaceId }}/internal/')).toBe(true);
+    }
+  });
+
   it('is disabled by default so SyncWorkflowService controls enablement', () => {
     assertYamlContains('enabled: false');
   });
@@ -48,9 +66,9 @@ describe('sync.yaml managed workflow definition', () => {
   });
 
   it('fans out over streams and reconciles each one', () => {
-    assertYamlContains("foreach: '${{ steps.get_streams.output.streams }}'");
+    assertYamlContains("foreach: '${{ steps.get_sources.output.sources }}'");
     assertYamlContains(
-      '/internal/streams/{{ foreach.item.streamName }}/knowledge_indicators/_reconcile'
+      '/internal/streams/{{ foreach.item.sourceId }}/knowledge_indicators/_reconcile'
     );
   });
 

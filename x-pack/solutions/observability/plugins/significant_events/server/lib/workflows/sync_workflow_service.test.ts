@@ -6,7 +6,6 @@
  */
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { createSyncWorkflowService } from './sync_workflow';
@@ -34,51 +33,83 @@ const createManagementApi = () => {
   } as unknown as jest.Mocked<WorkflowsServerPluginSetup['management']>;
 };
 
+const createManagedWorkflowsClient = () => ({
+  install: jest.fn().mockResolvedValue(undefined),
+});
+
 const request = {} as KibanaRequest;
+const spaceId = 'space-a';
+const workflowDocumentId = `${SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID}-${spaceId}`;
 
 describe('SyncWorkflowService', () => {
   let logger: Logger;
   let managementApi: ReturnType<typeof createManagementApi>;
+  let managedWorkflowsClient: ReturnType<typeof createManagedWorkflowsClient>;
 
   beforeEach(() => {
     logger = createLogger();
     managementApi = createManagementApi();
+    managedWorkflowsClient = createManagedWorkflowsClient();
+  });
+
+  const createService = () =>
+    createSyncWorkflowService({
+      logger,
+      managementApi,
+      getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
+    });
+
+  it('installs and enables the workflow for the requested space', async () => {
+    (managementApi.getWorkflow as jest.Mock)
+      .mockResolvedValueOnce(undefined)
+      .mockResolvedValueOnce({ enabled: false });
+
+    await createService().ensureEnabled({ request, spaceId });
+
+    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
+      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      { spaceId, workflowIdSuffix: spaceId }
+    );
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      workflowDocumentId,
+      { enabled: true },
+      spaceId,
+      request
+    );
   });
 
   it('enables the workflow when it is installed but disabled', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
 
-    const service = createSyncWorkflowService({ logger, managementApi });
-    await service.ensureEnabled({ request });
+    await createService().ensureEnabled({ request, spaceId });
 
-    expect(managementApi.getWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      DEFAULT_SPACE_ID
-    );
+    expect(managementApi.getWorkflow).toHaveBeenCalledWith(workflowDocumentId, spaceId);
+    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      workflowDocumentId,
       { enabled: true },
-      DEFAULT_SPACE_ID,
+      spaceId,
       request
     );
   });
 
-  it('is a no-op when the workflow is already enabled', async () => {
+  it('is a no-op when the per-space workflow is already enabled', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
 
-    const service = createSyncWorkflowService({ logger, managementApi });
-    await service.ensureEnabled({ request });
+    await createService().ensureEnabled({ request, spaceId });
 
+    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
-  it('does not update when the workflow is not installed yet', async () => {
+  it('does not enable when installation did not persist the workflow', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue(undefined);
 
-    const service = createSyncWorkflowService({ logger, managementApi });
-    await service.ensureEnabled({ request });
+    await createService().ensureEnabled({ request, spaceId });
 
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Managed KI sync workflow ${workflowDocumentId} was not installed; skipping enablement`
+    );
   });
 });

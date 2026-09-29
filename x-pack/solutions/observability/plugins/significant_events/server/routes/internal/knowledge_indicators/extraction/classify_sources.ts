@@ -8,25 +8,26 @@
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import type { WorkflowExecutionListItemDto } from '@kbn/workflows';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
-import { parseStreamNameFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
+import { parseSourceSlugFromConcurrencyKey } from '../../../../lib/workflows/onboarding_workflow_client';
 
 const MILLISECONDS_PER_HOUR = 3_600_000;
 
 export interface SourceCandidate {
-  /** Workflow YAML reads `streamName`. The value is the source id. */
-  streamName: string;
+  /** The continuous onboarding workflow YAML reads `sourceId` and `sourceSlug`. */
+  sourceId: string;
+  sourceSlug: string;
   lastCompletedAt: string | null;
 }
 
 export interface SourceClassificationResult {
-  alreadyRunning: Array<{ streamName: string; scheduledAt: string | null }>;
+  alreadyRunning: Array<{ sourceId: string; sourceSlug: string; scheduledAt: string | null }>;
   candidates: SourceCandidate[];
   upToDate: SourceCandidate[];
   unsupported: string[];
 }
 
 interface ClassifySourcesArgs {
-  sources: Array<Pick<NightshiftSource, 'id' | 'esql_updated_at'>>;
+  sources: Array<Pick<NightshiftSource, 'id' | 'slug' | 'esql_updated_at'>>;
   executions: WorkflowExecutionListItemDto[];
   intervalHours: number;
 }
@@ -44,7 +45,6 @@ export const classifySources = ({
   intervalHours,
 }: ClassifySourcesArgs): SourceClassificationResult => {
   const latestBySource = latestExecutionBySource(sources, executions);
-  const esqlUpdatedAtById = new Map(sources.map((source) => [source.id, source.esql_updated_at]));
   const nowMs = Date.now();
   const intervalMs = intervalHours * MILLISECONDS_PER_HOUR;
 
@@ -52,23 +52,24 @@ export const classifySources = ({
   const ranCandidates: SourceCandidate[] = [];
   const upToDate: SourceCandidate[] = [];
 
-  for (const [sourceId, execution] of latestBySource) {
+  for (const [source, execution] of latestBySource) {
+    const { id: sourceId, slug: sourceSlug } = source;
     const bucket = classifyExecution({
       execution,
-      esqlUpdatedAt: esqlUpdatedAtById.get(sourceId) ?? 0,
+      esqlUpdatedAt: source.esql_updated_at ?? 0,
       nowMs,
       intervalMs,
     });
 
     if (bucket.kind === 'running') {
-      alreadyRunning.push({ streamName: sourceId, scheduledAt: execution.startedAt ?? null });
+      alreadyRunning.push({ sourceId, sourceSlug, scheduledAt: execution.startedAt ?? null });
       continue;
     }
     if (bucket.kind === 'candidate') {
-      ranCandidates.push({ streamName: sourceId, lastCompletedAt: bucket.lastCompletedAt });
+      ranCandidates.push({ sourceId, sourceSlug, lastCompletedAt: bucket.lastCompletedAt });
       continue;
     }
-    upToDate.push({ streamName: sourceId, lastCompletedAt: bucket.lastCompletedAt });
+    upToDate.push({ sourceId, sourceSlug, lastCompletedAt: bucket.lastCompletedAt });
   }
 
   // Oldest completion first, so a source that has waited longer is scheduled sooner.
@@ -78,8 +79,8 @@ export const classifySources = ({
 
   // Never-run sources have no completion time, so they go ahead of anything that has run.
   const neverRun = sources
-    .filter((source) => !latestBySource.has(source.id))
-    .map((source) => ({ streamName: source.id, lastCompletedAt: null }));
+    .filter((source) => !latestBySource.has(source))
+    .map((source) => ({ sourceId: source.id, sourceSlug: source.slug, lastCompletedAt: null }));
 
   return {
     alreadyRunning,
@@ -90,25 +91,29 @@ export const classifySources = ({
 };
 
 /**
- * Executions arrive newest-first. The first row whose concurrency key belongs
- * to a known source is that source's latest run.
+ * Executions arrive newest-first. The first row whose concurrency key carries
+ * the slug of a known source is that source's latest run.
  */
 const latestExecutionBySource = (
   sources: ClassifySourcesArgs['sources'],
   executions: WorkflowExecutionListItemDto[]
-): Map<string, WorkflowExecutionListItemDto> => {
-  const sourceIds = new Set(sources.map((source) => source.id));
-  const latestBySource = new Map<string, WorkflowExecutionListItemDto>();
+): Map<ClassifySourcesArgs['sources'][number], WorkflowExecutionListItemDto> => {
+  const sourcesBySlug = new Map(sources.map((source) => [source.slug, source]));
+  const latestBySource = new Map<
+    ClassifySourcesArgs['sources'][number],
+    WorkflowExecutionListItemDto
+  >();
 
   for (const execution of executions) {
     if (!execution.concurrencyGroupKey) {
       continue;
     }
-    const sourceId = parseStreamNameFromConcurrencyKey(execution.concurrencyGroupKey);
-    if (!sourceId || !sourceIds.has(sourceId) || latestBySource.has(sourceId)) {
+    const slug = parseSourceSlugFromConcurrencyKey(execution.concurrencyGroupKey);
+    const source = slug === null ? undefined : sourcesBySlug.get(slug);
+    if (source === undefined || latestBySource.has(source)) {
       continue;
     }
-    latestBySource.set(sourceId, execution);
+    latestBySource.set(source, execution);
   }
 
   return latestBySource;

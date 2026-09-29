@@ -1,5 +1,5 @@
 {
-  "sha1": "aa5219b86f10ff48c14fe56e99f6d1244b96b46f",
+  "sha1": "d8b51cff47943b84ade4ed9d9d20198cb1432e1a",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -133,8 +133,8 @@
       }
     },
     {
-      "id": "670d85d4e7806a5-1d8b985de6fcd2d",
-      "title": "Onboarding bulk status API returns not_started for every requested stream that has never been onboarded",
+      "id": "670d85d4e7806a5-3f5db4d3dfa9dd0",
+      "title": "Onboarding bulk status API returns not_started for every requested source id that has never been onboarded",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -160,7 +160,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 47,
+        "line": 46,
         "column": 6
       }
     },
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/onboarding_bulk_status.spec.ts",
-        "line": 54,
+        "line": 53,
         "column": 30
       }
     },
@@ -208,6 +208,48 @@
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/significant_events/plugin_loaded.spec.ts",
         "line": 22,
         "column": 35
+      }
+    },
+    {
+      "id": "922b402067ac2c7-5a67f47b0f7f4f0",
+      "title": "Continuous KI onboarding per space installs the workflow document in the enabled space only",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/continuous_onboarding_per_space.spec.ts",
+        "line": 59,
+        "column": 37
+      }
+    },
+    {
+      "id": "922b402067ac2c7-7ad1f3574c34973",
+      "title": "Continuous KI onboarding per space keeps the workflow of another space when one space is disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/continuous_onboarding_per_space.spec.ts",
+        "line": 85,
+        "column": 5
+      }
+    },
+    {
+      "id": "922b402067ac2c7-ae938589ad3721e",
+      "title": "Continuous KI onboarding per space rejects the eligible sources request in a space where the setting is off",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/workflows/continuous_onboarding_per_space.spec.ts",
+        "line": 112,
+        "column": 45
       }
     },
     {

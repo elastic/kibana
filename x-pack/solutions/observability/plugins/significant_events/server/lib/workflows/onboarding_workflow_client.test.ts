@@ -16,7 +16,7 @@ import {
 import {
   SignificantEventsKIsOnboardingClient,
   buildConcurrencyKey,
-  parseStreamNameFromConcurrencyKey,
+  parseSourceSlugFromConcurrencyKey,
 } from './onboarding_workflow_client';
 const statusRequest = httpServerMock.createKibanaRequest();
 
@@ -38,37 +38,44 @@ const createMockManagementApi = (overrides: Record<string, jest.Mock> = {}) => {
   return { ...api, getClient: jest.fn(() => api) };
 };
 
+const slugOf = (sourceId: string): string => `${sourceId}-slug`;
+
 const createClient = (overrides: Record<string, jest.Mock> = {}) => {
   const managementApi = createMockManagementApi(overrides);
   const telemetry = { trackOnboardingScheduled: jest.fn() } as never;
+  const sourcesClientGet = jest.fn(async (sourceId: string) => ({
+    source: { id: sourceId, slug: slugOf(sourceId) },
+  }));
+  const getSourcesClient = jest.fn().mockResolvedValue({ get: sourcesClientGet });
   const client = new SignificantEventsKIsOnboardingClient({
     managementApi: managementApi as never,
     telemetry,
+    getSourcesClient,
   });
-  return { client, managementApi, telemetry };
+  return { client, managementApi, telemetry, getSourcesClient, sourcesClientGet };
 };
 
 describe('StreamsKIsOnboardingClient', () => {
   describe('buildConcurrencyKey', () => {
-    it('prepends the prefix to the stream name', () => {
-      expect(buildConcurrencyKey('my-stream')).toBe('streams-ki-onboarding-my-stream');
+    it('prepends the prefix to the source slug', () => {
+      expect(buildConcurrencyKey('my-source')).toBe('nightshift-source-onboarding-my-source');
     });
   });
 
-  describe('parseStreamNameFromConcurrencyKey', () => {
-    it('extracts the stream name from a valid key', () => {
-      expect(parseStreamNameFromConcurrencyKey('streams-ki-onboarding-my-stream')).toBe(
-        'my-stream'
+  describe('parseSourceSlugFromConcurrencyKey', () => {
+    it('extracts the source slug from a valid key', () => {
+      expect(parseSourceSlugFromConcurrencyKey('nightshift-source-onboarding-my-source')).toBe(
+        'my-source'
       );
     });
 
     it('returns null for keys with a different prefix', () => {
-      expect(parseStreamNameFromConcurrencyKey('other-prefix-my-stream')).toBeNull();
+      expect(parseSourceSlugFromConcurrencyKey('other-prefix-my-source')).toBeNull();
     });
 
     it('round-trips with buildConcurrencyKey', () => {
-      const streamName = 'logs.nginx';
-      expect(parseStreamNameFromConcurrencyKey(buildConcurrencyKey(streamName))).toBe(streamName);
+      const sourceSlug = 'logs.nginx';
+      expect(parseSourceSlugFromConcurrencyKey(buildConcurrencyKey(sourceSlug))).toBe(sourceSlug);
     });
   });
 
@@ -83,21 +90,22 @@ describe('StreamsKIsOnboardingClient', () => {
       };
       const yamlTemplate = parsed.settings.concurrency.key;
 
-      const streamName = 'test-stream';
-      const expectedKey = yamlTemplate.replace('{{ inputs.streamName }}', streamName);
+      const sourceSlug = 'test-source';
+      const expectedKey = yamlTemplate.replace('{{ inputs.sourceSlug }}', sourceSlug);
 
-      expect(buildConcurrencyKey(streamName)).toBe(expectedKey);
+      expect(buildConcurrencyKey(sourceSlug)).toBe(expectedKey);
     });
   });
 
   describe('run', () => {
     it('fetches the workflow definition and runs it and returns executionId', async () => {
-      const { client, managementApi } = createClient();
-      const request = httpServerMock.createKibanaRequest();
+      const { client, managementApi, getSourcesClient } = createClient();
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
 
       const result = await client.run({
         inputs: {
           streamName: 'logs.nginx',
+          sourceSlug: 'nginx',
           features: { skip: false, start: 1000, end: 2000 },
           queries: { skip: false },
         },
@@ -111,8 +119,31 @@ describe('StreamsKIsOnboardingClient', () => {
       );
       expect(managementApi.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: SIGNIFICANT_EVENTS_KI_ONBOARDING_WORKFLOW_ID }),
+        'space-a',
+        expect.objectContaining({ sourceId: 'logs.nginx', sourceSlug: 'nginx' }),
+        request
+      );
+      expect(getSourcesClient).not.toHaveBeenCalled();
+    });
+
+    it('resolves the slug from the source when it is not provided', async () => {
+      const { client, managementApi, sourcesClientGet } = createClient();
+      const request = httpServerMock.createKibanaRequest();
+
+      await client.run({
+        inputs: {
+          streamName: 'logs.nginx',
+          features: { skip: false, start: 1000, end: 2000 },
+          queries: { skip: false },
+        },
+        request,
+      });
+
+      expect(sourcesClientGet).toHaveBeenCalledWith('logs.nginx');
+      expect(managementApi.runWorkflow).toHaveBeenCalledWith(
+        expect.anything(),
         'default',
-        expect.objectContaining({ streamName: 'logs.nginx' }),
+        expect.objectContaining({ sourceId: 'logs.nginx', sourceSlug: slugOf('logs.nginx') }),
         request
       );
     });
@@ -305,15 +336,29 @@ describe('StreamsKIsOnboardingClient', () => {
       });
     });
 
-    it('queries with the correct concurrency group key', async () => {
+    it('queries the request space with the slug based concurrency group key', async () => {
+      const { client, managementApi } = createClient();
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
+
+      await client.getStatus({ request, streamName: 'logs.nginx', sourceSlug: 'nginx' });
+
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          concurrencyGroupKey: 'nightshift-source-onboarding-nginx',
+          size: 1,
+        }),
+        'space-a'
+      );
+    });
+
+    it('resolves the slug from the source when it is not provided', async () => {
       const { client, managementApi } = createClient();
 
       await client.getStatus({ request: statusRequest, streamName: 'logs.nginx' });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
         expect.objectContaining({
-          concurrencyGroupKey: 'streams-ki-onboarding-logs.nginx',
-          size: 1,
+          concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
         }),
         'default'
       );
@@ -321,21 +366,24 @@ describe('StreamsKIsOnboardingClient', () => {
   });
 
   describe('getStatuses', () => {
-    it('returns an empty map and skips the query for no stream names', async () => {
+    const source = (id: string) => ({ id, slug: slugOf(id) });
+
+    it('returns an empty map and skips the query for no sources', async () => {
       const { client, managementApi } = createClient();
 
-      const result = await client.getStatuses({ request: statusRequest, streamNames: [] });
+      const result = await client.getStatuses({ request: statusRequest, sources: [] });
 
       expect(result).toEqual({});
       expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
     });
 
-    it('fetches executions collapsed by concurrencyGroupKey in a single query', async () => {
+    it('fetches executions of the request space collapsed by concurrencyGroupKey in a single query', async () => {
       const { client, managementApi } = createClient();
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
 
       await client.getStatuses({
-        request: statusRequest,
-        streamNames: ['logs.nginx', 'logs.apache'],
+        request,
+        sources: [source('logs.nginx'), source('logs.apache')],
       });
 
       expect(managementApi.getWorkflowExecutions).toHaveBeenCalledTimes(1);
@@ -347,29 +395,29 @@ describe('StreamsKIsOnboardingClient', () => {
           sortOrder: 'desc',
           collapse: 'concurrencyGroupKey',
         }),
-        'default'
+        'space-a'
       );
     });
 
-    it('maps each execution to a status summary and fills missing streams with NotStarted', async () => {
+    it('maps each execution to a status keyed by source id and fills missing sources with NotStarted', async () => {
       const { client } = createClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
             {
               id: 'exec-1',
               status: ExecutionStatus.RUNNING,
-              concurrencyGroupKey: 'streams-ki-onboarding-logs.nginx',
+              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
             },
             {
               id: 'exec-2',
               status: ExecutionStatus.COMPLETED,
-              concurrencyGroupKey: 'streams-ki-onboarding-logs.apache',
+              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.apache')}`,
             },
             {
               id: 'exec-3',
               status: ExecutionStatus.FAILED,
               error: { message: 'boom' },
-              concurrencyGroupKey: 'streams-ki-onboarding-logs.haproxy',
+              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.haproxy')}`,
             },
           ],
         }),
@@ -377,7 +425,12 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatuses({
         request: statusRequest,
-        streamNames: ['logs.nginx', 'logs.apache', 'logs.haproxy', 'logs.envoy'],
+        sources: [
+          source('logs.nginx'),
+          source('logs.apache'),
+          source('logs.haproxy'),
+          source('logs.envoy'),
+        ],
       });
 
       expect(result).toEqual({
@@ -400,7 +453,7 @@ describe('StreamsKIsOnboardingClient', () => {
             {
               id: 'exec-1',
               status: ExecutionStatus.COMPLETED,
-              concurrencyGroupKey: 'streams-ki-onboarding-logs.nginx',
+              concurrencyGroupKey: `nightshift-source-onboarding-${slugOf('logs.nginx')}`,
             },
           ],
         }),
@@ -409,7 +462,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatuses({
         request: statusRequest,
-        streamNames: ['logs.nginx'],
+        sources: [source('logs.nginx')],
       });
 
       expect(result).toEqual({
@@ -426,7 +479,12 @@ describe('StreamsKIsOnboardingClient', () => {
             {
               id: 'exec-2',
               status: ExecutionStatus.RUNNING,
-              concurrencyGroupKey: 'streams-ki-onboarding-not-requested',
+              concurrencyGroupKey: 'nightshift-source-onboarding-not-requested',
+            },
+            {
+              id: 'exec-3',
+              status: ExecutionStatus.RUNNING,
+              concurrencyGroupKey: 'streams-ki-onboarding-logs.nginx',
             },
           ],
         }),
@@ -434,7 +492,7 @@ describe('StreamsKIsOnboardingClient', () => {
 
       const result = await client.getStatuses({
         request: statusRequest,
-        streamNames: ['logs.nginx'],
+        sources: [source('logs.nginx')],
       });
 
       expect(result).toEqual({
@@ -444,19 +502,23 @@ describe('StreamsKIsOnboardingClient', () => {
   });
 
   describe('cancel', () => {
-    it('cancels the latest execution for the stream', async () => {
+    it('cancels the latest execution for the source in the request space', async () => {
       const { client, managementApi } = createClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
         }),
       });
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
 
-      await client.cancel({ streamName: 'logs.nginx', request });
+      await client.cancel({ streamName: 'logs.nginx', sourceSlug: 'nginx', request });
 
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({ concurrencyGroupKey: 'nightshift-source-onboarding-nginx' }),
+        'space-a'
+      );
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
         'exec-1',
-        'default',
+        'space-a',
         request
       );
     });
@@ -471,8 +533,34 @@ describe('StreamsKIsOnboardingClient', () => {
     });
   });
 
+  describe('cancelBySourceSlug', () => {
+    it('cancels by slug without reading the source', async () => {
+      const { client, managementApi, getSourcesClient } = createClient({
+        getWorkflowExecutions: jest.fn().mockResolvedValue({
+          results: [{ id: 'exec-1', status: ExecutionStatus.RUNNING }],
+        }),
+      });
+      const request = httpServerMock.createKibanaRequest();
+
+      await client.cancelBySourceSlug({ sourceSlug: 'deleted-source', request });
+
+      expect(getSourcesClient).not.toHaveBeenCalled();
+      expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+        expect.objectContaining({
+          concurrencyGroupKey: 'nightshift-source-onboarding-deleted-source',
+        }),
+        'default'
+      );
+      expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
+        'exec-1',
+        'default',
+        request
+      );
+    });
+  });
+
   describe('cancelAllRunning', () => {
-    it('cancels all non-terminal onboarding executions', async () => {
+    it('cancels all non-terminal onboarding executions of the request space', async () => {
       const { client, managementApi } = createClient({
         getWorkflowExecutions: jest.fn().mockResolvedValue({
           results: [
@@ -481,19 +569,19 @@ describe('StreamsKIsOnboardingClient', () => {
           ],
         }),
       });
-      const request = httpServerMock.createKibanaRequest();
+      const request = httpServerMock.createKibanaRequest({ spaceId: 'space-a' });
 
       await expect(client.cancelAllRunning({ request })).resolves.toBe(2);
 
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledTimes(2);
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
         'exec-1',
-        'default',
+        'space-a',
         request
       );
       expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
         'exec-2',
-        'default',
+        'space-a',
         request
       );
     });
@@ -507,7 +595,7 @@ describe('StreamsKIsOnboardingClient', () => {
   });
 
   describe('getRecentExecutions', () => {
-    it('returns one execution per stream collapsed by concurrencyGroupKey', async () => {
+    it('returns one execution per source collapsed by concurrencyGroupKey', async () => {
       const executions = [
         { id: 'exec-1', status: ExecutionStatus.COMPLETED },
         { id: 'exec-2', status: ExecutionStatus.RUNNING },

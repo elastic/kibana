@@ -32,12 +32,14 @@ import {
 import {
   createFeatureSettingsController,
   hasPausedSettings,
+  isContinuousOnboardingWorkflowId,
   shouldRestoreSettingsBackedWorkflow,
   type PausedFeatureSettings,
 } from './feature_settings';
 import {
   buildCancelTargets,
   buildDisableTargets,
+  LEGACY_DEFAULT_SPACE_WORKFLOW_IDS,
   type MaintenanceWorkflowTarget,
 } from './managed_workflow_targets';
 import type { MaintenanceAccess } from './maintenance_access';
@@ -260,11 +262,20 @@ export const createSignificantEventsMaintenanceService = ({
         }
       : undefined;
 
-  /** Brand SO-loaded workflow targets once at the SO → domain boundary. */
+  /**
+   * Brand SO-loaded workflow targets once at the SO → domain boundary. Targets
+   * recorded for the pre-per-space default space documents are dropped: those
+   * documents are deleted at startup and would only produce "not found" failures.
+   */
   const brandDisabledWorkflows = (
     workflows: SignificantEventsMaintenanceStateAttributes['disabledWorkflows'] | undefined
   ): MaintenanceWorkflowTarget[] =>
-    (workflows ?? []).map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
+    (workflows ?? [])
+      .filter(
+        ({ id, spaceId }) =>
+          !(spaceId === DEFAULT_SPACE_ID && LEGACY_DEFAULT_SPACE_WORKFLOW_IDS.includes(id))
+      )
+      .map(({ id, spaceId }) => ({ id, spaceId: brandSpaceId(spaceId) }));
 
   const readVersionedState = async (): Promise<VersionedMaintenanceState | undefined> => {
     try {
@@ -894,6 +905,19 @@ export const createSignificantEventsMaintenanceService = ({
             if (outcome === 'toggled') {
               workflowsToggled += 1;
             } else if (outcome === 'failed') {
+              remainingWorkflows.push(workflow);
+            }
+            // A recorded continuous document is the restore record for its space
+            // setting. It stays recorded until the setting write succeeds.
+            if (
+              (outcome === 'toggled' || outcome === 'already') &&
+              isContinuousOnboardingWorkflowId(workflow.id) &&
+              !(await featureSettings.restoreContinuousOnboarding({
+                request,
+                spaceId: workflow.spaceId,
+                failures,
+              }))
+            ) {
               remainingWorkflows.push(workflow);
             }
           }

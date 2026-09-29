@@ -29,6 +29,9 @@ describe('createKiIdentificationStartTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+      }),
     });
     const maintenanceService = {
       getState: jest.fn().mockResolvedValue('enabled'),
@@ -59,7 +62,8 @@ describe('createKiIdentificationStartTool', () => {
       expect.objectContaining({ id: 'system-streams-ki-onboarding' }),
       'default',
       expect.objectContaining({
-        streamName: 'logs.nginx',
+        sourceId: 'logs.nginx',
+        sourceSlug: 'logs-nginx',
         skipFeatures: false,
         skipQueries: false,
       }),

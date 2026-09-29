@@ -62,8 +62,8 @@ const inferenceDocumentsSchema = z
     message: `Documents cannot exceed ${MAX_INFERENCE_DOCUMENTS_BYTES} serialized bytes in aggregate`,
   });
 
-// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow,
-// which runs under a request whose API key can schedule the workflow trigger.
+// Best-effort bootstrap of the standalone KI sync (groundedness) sweep workflow of the
+// request space, which runs under a request whose API key can schedule the workflow trigger.
 // Only the inferred route bootstraps: it runs at least once per identification
 // pass and always precedes computed identification, so hooking it covers every
 // path. Idempotent and non-blocking — a failure here must never fail extraction.
@@ -86,7 +86,7 @@ const bootstrapSyncWorkflow = async ({
     if (stateBlocksNewActivity(state)) {
       return;
     }
-    await syncWorkflowService.ensureEnabled({ request });
+    await syncWorkflowService.ensureEnabled({ request, spaceId: request.spaceId });
   } catch (error) {
     logger.warn(
       `Failed to ensure KI sync workflow is enabled: ${

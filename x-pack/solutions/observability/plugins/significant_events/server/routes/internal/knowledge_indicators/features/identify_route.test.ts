@@ -90,6 +90,7 @@ const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enab
 });
 
 const makeRequest = () => ({
+  spaceId: 'space-a',
   events: {
     aborted$: {
       subscribe: jest.fn(),
@@ -395,7 +396,7 @@ describe('inferred feature identification route', () => {
       })
     );
     expect(telemetry.trackFeaturesIdentified).not.toHaveBeenCalled();
-    expect(ensureEnabled).toHaveBeenCalledWith({ request });
+    expect(ensureEnabled).toHaveBeenCalledWith({ request, spaceId: 'space-a' });
   });
 
   it('normalizes a blank run id before identifying inferred features', async () => {

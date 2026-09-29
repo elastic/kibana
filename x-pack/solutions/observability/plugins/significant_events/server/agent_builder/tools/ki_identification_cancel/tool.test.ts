@@ -22,6 +22,9 @@ describe('createKiIdentificationCancelTool', () => {
     const streamsKIsOnboardingClient = new SignificantEventsKIsOnboardingClient({
       managementApi: { ...managementApi, getClient: jest.fn(() => managementApi) } as never,
       telemetry: { trackOnboardingScheduled: jest.fn() } as never,
+      getSourcesClient: jest.fn().mockResolvedValue({
+        get: jest.fn().mockResolvedValue({ source: { id: 'logs.nginx', slug: 'logs-nginx' } }),
+      }),
     });
 
     const tool = createKiIdentificationCancelTool({
@@ -36,6 +39,10 @@ describe('createKiIdentificationCancelTool', () => {
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 
+    expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({ concurrencyGroupKey: 'nightshift-source-onboarding-logs-nginx' }),
+      'default'
+    );
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',

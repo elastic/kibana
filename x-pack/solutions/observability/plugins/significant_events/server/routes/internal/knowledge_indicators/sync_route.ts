@@ -12,15 +12,14 @@ import { assertSignificantEventsAccess } from '../../utils/assert_significant_ev
 import { reconcileSourceCatalog } from './reconcile_source_catalog';
 
 export interface StreamsWithIndicatorsResponse {
-  streams: Array<{ streamName: string }>;
+  sources: Array<{ sourceId: string }>;
 }
 
 /**
- * Lists every enabled source the sync sweep must reconcile. Independent of
- * `_eligible`: the sweep runs regardless of extraction interval, exclusions,
- * or the continuous-extraction toggle. The response key stays `streamName`
- * so the managed sync workflow YAML can keep reading it. The value is the
- * source id.
+ * Lists every enabled source of the request space the sync sweep must reconcile.
+ * Independent of `_eligible`: the sweep runs regardless of extraction interval,
+ * exclusions, or the continuous onboarding toggle. The managed sync workflow
+ * YAML reads `sources[].sourceId`.
  */
 export const streamsWithIndicatorsRoute = createServerRoute({
   endpoint: 'GET /internal/streams/_knowledge_indicators/_streams_with_indicators',
@@ -62,7 +61,7 @@ export const streamsWithIndicatorsRoute = createServerRoute({
     );
     const sourceIds = reconcileIds.filter((sourceId) => enabledSourceIds.has(sourceId));
 
-    return { streams: sourceIds.map((sourceId) => ({ streamName: sourceId })) };
+    return { sources: sourceIds.map((sourceId) => ({ sourceId })) };
   },
 });
 

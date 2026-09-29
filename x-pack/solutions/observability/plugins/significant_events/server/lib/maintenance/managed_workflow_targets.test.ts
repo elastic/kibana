@@ -9,12 +9,13 @@ import { asSpaceId } from '@kbn/core-spaces-common';
 import {
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+  SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
   SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
+  buildCancelTargets,
   buildDisableTargets,
-  DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
   SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
@@ -24,7 +25,6 @@ describe('managed_workflow_targets registry', () => {
   it('includes every installable workflow id in the maintenance sweep lists', () => {
     const maintenanceIds = new Set<string>([
       ...GLOBAL_MAINTENANCE_WORKFLOW_IDS,
-      ...DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS,
       ...SCHEDULED_MAINTENANCE_WORKFLOW_IDS,
     ]);
 
@@ -40,10 +40,37 @@ describe('managed_workflow_targets registry', () => {
     ]);
   });
 
-  it('keeps continuous onboarding in the default-space set', () => {
-    expect(DEFAULT_SPACE_MAINTENANCE_WORKFLOW_IDS).toEqual(
-      expect.arrayContaining([SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID])
+  it('tracks continuous onboarding and sync as per-space scheduled workflows', () => {
+    expect(SCHEDULED_MAINTENANCE_WORKFLOW_IDS).toEqual(
+      expect.arrayContaining([
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      ])
     );
+
+    const spaceIds = [asSpaceId('default'), asSpaceId('space-a')];
+    const disableTargets = buildDisableTargets(spaceIds);
+    const cancelTargets = buildCancelTargets(spaceIds);
+    for (const spaceId of spaceIds) {
+      for (const baseId of [
+        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
+        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
+      ]) {
+        const target = { id: `${baseId}-${spaceId}`, spaceId };
+        expect(disableTargets).toContainEqual(target);
+        expect(cancelTargets).toContainEqual(target);
+      }
+    }
+  });
+
+  it('does not sweep the unsuffixed pre-per-space documents', () => {
+    const spaceIds = [asSpaceId('default')];
+    const ids = [...buildDisableTargets(spaceIds), ...buildCancelTargets(spaceIds)].map(
+      ({ id }) => id
+    );
+
+    expect(ids).not.toContain(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
+    expect(ids).not.toContain(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID);
   });
 
   it('tracks cleanup as a per-space scheduled workflow', () => {
