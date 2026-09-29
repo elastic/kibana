@@ -571,13 +571,23 @@ describe('FlyoutTemplate body data attributes', () => {
             title="Overview"
             data-test-subj="section"
             data-flyout-section="other"
+            data-open="true"
           >
-            content
+            <FlyoutTemplate.Body.Section.Subsection
+              title="Host"
+              data-test-subj="subsection"
+              data-bordered="true"
+            >
+              host content
+            </FlyoutTemplate.Body.Section.Subsection>
           </FlyoutTemplate.Body.Section>
         </FlyoutTemplate.Body>
       </FlyoutTemplate>
     );
 
-    expect(screen.getByTestId('section')).toHaveAttribute('data-flyout-section', 'section');
+    const section = screen.getByTestId('section');
+    expect(section).toHaveAttribute('data-flyout-section', 'section');
+    expect(section).not.toHaveAttribute('data-open');
+    expect(screen.getByTestId('subsection')).not.toHaveAttribute('data-bordered');
   });
 });

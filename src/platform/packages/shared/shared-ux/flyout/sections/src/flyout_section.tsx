@@ -83,6 +83,8 @@ export const FlyoutSection = ({
       // Read by the divider rule above on the *following* sibling, so it must stay set even when
       // the panel itself lives on the children.
       data-bordered={hasBorder || undefined}
+      // Only accordions are ever open. Clearing it keeps a forwarded `data-open` out of the rule.
+      data-open={undefined}
     >
       {header}
       <EuiSpacer size="s" />

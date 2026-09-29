@@ -52,7 +52,8 @@ export const FlyoutSubsection = ({
   }
 
   return (
-    <div {...subsectionProps} id={id} css={styles.subsection}>
+    // Cleared so a forwarded `data-bordered` cannot suppress the next subsection's divider.
+    <div {...subsectionProps} id={id} css={styles.subsection} data-bordered={undefined}>
       <EuiTitle size="xxs">
         <h5>{title}</h5>
       </EuiTitle>
