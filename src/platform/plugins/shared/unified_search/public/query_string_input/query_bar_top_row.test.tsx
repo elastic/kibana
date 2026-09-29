@@ -23,7 +23,7 @@ jest.mock('@kbn/date-range-picker-presets', () => ({
 }));
 
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Subject } from 'rxjs';
 import { render, screen, waitFor, within, act } from '@testing-library/react';
 import { EMPTY, of } from 'rxjs';
 
