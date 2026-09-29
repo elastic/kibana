@@ -6,7 +6,8 @@
  */
 
 import { mapSavedObjectToMonitor, mergeSourceMonitor } from './saved_object_to_monitor';
-import type { EncryptedSyntheticsMonitor } from '../../../../common/runtime_types';
+import type { EncryptedSyntheticsMonitor, MonitorFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 describe('mergeSourceMonitor', () => {
   it('should merge keys', function () {
@@ -64,6 +65,85 @@ describe('mergeSourceMonitor', () => {
         label: 'North America - US Central',
       },
     ]);
+  });
+
+  it('should deep-merge partial NTLM updates without wiping sibling fields', () => {
+    const previous = {
+      ...testMonitor,
+      [ConfigKey.NTLM]: {
+        enabled: true,
+        username: 'svc-monitor',
+        password: 'old-password',
+        domain: 'EXAMPLE',
+        workstation: 'MONITOR',
+      },
+    } as EncryptedSyntheticsMonitor;
+
+    const result = mergeSourceMonitor(previous, {
+      [ConfigKey.NTLM]: { password: 'new-password' },
+    } as unknown as EncryptedSyntheticsMonitor) as MonitorFields;
+
+    expect(result[ConfigKey.NTLM]).toEqual({
+      enabled: true,
+      username: 'svc-monitor',
+      password: 'new-password',
+      domain: 'EXAMPLE',
+      workstation: 'MONITOR',
+    });
+  });
+
+  it('should deep-merge partial Kerberos updates without wiping sibling fields', () => {
+    const previous = {
+      ...testMonitor,
+      [ConfigKey.KERBEROS]: {
+        enabled: true,
+        auth_type: 'password',
+        username: 'svc',
+        password: 'old-secret',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        realm: 'CORP.LOCAL',
+        service_name: '',
+        enable_krb5_fast: false,
+      },
+    } as EncryptedSyntheticsMonitor;
+
+    const result = mergeSourceMonitor(previous, {
+      [ConfigKey.KERBEROS]: { password: 'new-secret' },
+    } as unknown as EncryptedSyntheticsMonitor) as MonitorFields;
+
+    expect(result[ConfigKey.KERBEROS]).toEqual({
+      enabled: true,
+      auth_type: 'password',
+      username: 'svc',
+      password: 'new-secret',
+      keytab: '',
+      config_path: '/etc/krb5.conf',
+      krb5_conf: '',
+      realm: 'CORP.LOCAL',
+      service_name: '',
+      enable_krb5_fast: false,
+    });
+  });
+
+  it('clears Kerberos/NTLM when the patch sets the block to null', () => {
+    const previous = {
+      ...testMonitor,
+      [ConfigKey.NTLM]: {
+        enabled: true,
+        username: 'svc-monitor',
+        password: 'old-password',
+        domain: 'EXAMPLE',
+        workstation: 'MONITOR',
+      },
+    } as EncryptedSyntheticsMonitor;
+
+    const result = mergeSourceMonitor(previous, {
+      [ConfigKey.NTLM]: null,
+    } as unknown as EncryptedSyntheticsMonitor) as MonitorFields;
+
+    expect(result[ConfigKey.NTLM]).toBeNull();
   });
 
   it('should not omit null or undefined values', () => {
