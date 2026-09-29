@@ -12,6 +12,20 @@ import { expect } from '../..';
 import { DEFAULT_SAVE_MODAL_TIMEOUT, type TimeoutOptions } from './base';
 import { NavigationMixin } from './navigation';
 
+interface JobStatusResult {
+  source: 'api';
+  terminal: true;
+  status: 'completed' | 'failed';
+  errorText?: string;
+}
+
+interface UiStatusResult {
+  source: 'ui';
+  terminal: true;
+  failed: boolean;
+  errorText?: string | null;
+}
+
 /**
  * Save, load, revert and share/export actions for Discover.
  */
@@ -209,33 +223,103 @@ export abstract class SaveMixin extends NavigationMixin {
     }
   }
 
-  async exportAsCsv(options?: TimeoutOptions): Promise<import('playwright-core').Download> {
+  async exportAsCsv(
+    options?: TimeoutOptions & { _retried?: boolean }
+  ): Promise<import('playwright-core').Download> {
+    const timeout = options?.timeout ?? 30_000;
+
+    // Arm the response interceptor before clicking so we never miss it.
+    const generateResponsePromise = this.page.waitForResponse(
+      (r) => r.url().includes('/internal/reporting/generate/') && r.request().method() === 'POST'
+    );
+
     // Export may live in the top nav or the overflow menu depending on viewport / Discover layout.
     await this.clickAppMenuItem('exportTopNavButton');
     await this.page.testSubj.click('exportMenuItem-CSV');
-
-    // 2. Trigger the report generation
     await this.page.testSubj.click('generateReportButton');
 
-    // 3. Explicitly wait for the report to finish generating
+    const generateResponse = await generateResponsePromise;
+    if (!generateResponse.ok()) {
+      throw new Error(
+        `CSV report generate request failed with status ${generateResponse.status()}`
+      );
+    }
+    const { job } = (await generateResponse.json()) as { job: { id: string } };
+
     const downloadBtn = this.page.testSubj.locator('downloadCompletedReportButton');
     const reportFailure = this.page.locator('[data-test-errorText]');
-    await downloadBtn.or(reportFailure).waitFor({
-      state: 'visible',
-      timeout: options?.timeout ?? 30_000,
-    });
 
-    if (await reportFailure.isVisible()) {
-      const errorText = await reportFailure.getAttribute('data-test-errorText');
+    // Race the UI notification (fast when no load) against a direct API poll on the specific job
+    // (immune to stale toast notifications from previous runs and browser tab state).
+    const uiResult: Promise<UiStatusResult> = downloadBtn
+      .or(reportFailure)
+      .waitFor({ state: 'visible', timeout })
+      .then(async () => ({
+        source: 'ui' as const,
+        terminal: true as const,
+        failed: await reportFailure.isVisible(),
+        errorText: (await reportFailure.isVisible())
+          ? await reportFailure.getAttribute('data-test-errorText')
+          : undefined,
+      }));
+
+    const apiResult: Promise<JobStatusResult> = this.pollJobStatus(job.id, timeout);
+
+    const result = await Promise.race([uiResult, apiResult]);
+
+    const failed = result.source === 'api' ? result.status === 'failed' : result.failed;
+    const errorText = result.source === 'api' ? result.errorText : result.errorText ?? undefined;
+
+    if (failed) {
+      // version_conflict_engine_exception is a transient error caused by the ES client retrying
+      // a non-idempotent write after a connection hiccup. The job doc already exists from the
+      // first (successful) attempt. Retry once with a fresh generate request — the new job gets
+      // a new UUID so there is no possibility of a conflict.
+      if (errorText?.includes('version_conflict_engine_exception') && !options?._retried) {
+        return this.exportAsCsv({ ...options, _retried: true });
+      }
       throw new Error(`CSV report generation failed: ${errorText ?? 'Unknown error'}`);
     }
 
-    // 4. Coordinate the click and the event listener
-    const [download] = await Promise.all([
-      this.page.waitForEvent('download'), // Set listener
-      downloadBtn.click(), // Perform action
-    ]);
+    // If the API resolved first, the UI download button may not be visible yet.
+    await downloadBtn.waitFor({ state: 'visible', timeout: 10_000 });
 
+    const [download] = await Promise.all([this.page.waitForEvent('download'), downloadBtn.click()]);
     return download;
+  }
+
+  private async pollJobStatus(jobId: string, timeout: number): Promise<JobStatusResult> {
+    const deadline = Date.now() + timeout;
+    const pollInterval = 2_000;
+
+    while (Date.now() < deadline) {
+      await this.page.waitForTimeout(pollInterval);
+
+      let response;
+      try {
+        response = await this.page.request.get(`/internal/reporting/jobs/info/${jobId}`);
+      } catch {
+        continue;
+      }
+
+      if (!response.ok()) continue;
+
+      const job = (await response.json()) as { status: string; error?: unknown };
+
+      if (job.status === 'completed' || job.status === 'warnings') {
+        return { source: 'api', terminal: true, status: 'completed' };
+      }
+
+      if (job.status === 'failed') {
+        return {
+          source: 'api',
+          terminal: true,
+          status: 'failed',
+          errorText: job.error ? JSON.stringify(job.error) : undefined,
+        };
+      }
+    }
+
+    throw new Error(`CSV report generation timed out after ${timeout}ms`);
   }
 }
