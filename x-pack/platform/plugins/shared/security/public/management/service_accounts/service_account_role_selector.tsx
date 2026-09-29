@@ -52,6 +52,7 @@ export const ServiceAccountRoleSelector = ({
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
+  const menuRef = useRef<HTMLDivElement>(null);
   const selectRolesLabel = i18n.translate(
     'xpack.security.management.serviceAccounts.create.selectRolesLabel',
     {
@@ -186,7 +187,7 @@ export const ServiceAccountRoleSelector = ({
         </EuiButtonEmpty>
       }
     >
-      <div css={css({ maxHeight: 288, overflowY: 'auto' })}>
+      <div ref={menuRef} css={css({ maxHeight: 288, overflowY: 'auto' })}>
         <div
           css={css({
             display: 'flex',
@@ -234,6 +235,14 @@ export const ServiceAccountRoleSelector = ({
             paddingSize: 'none',
             onFocusBadge: false,
             autoFocus: true,
+            onFocus: (event) => {
+              if (!selectedRoleNames.length && event.target.getAttribute('role') === 'listbox') {
+                // Focusing the list must not scroll its custom-role heading out of view.
+                requestAnimationFrame(() => {
+                  if (menuRef.current) menuRef.current.scrollTop = 0;
+                });
+              }
+            },
           }}
           renderOption={(option) => (
             <span>
