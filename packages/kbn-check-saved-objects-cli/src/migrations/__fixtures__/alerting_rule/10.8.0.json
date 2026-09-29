@@ -1,0 +1,77 @@
+{
+  "10.7.0": [
+    {
+      "TODO": "Please create one or more sample objects with properties that reflect real '[object Object]' objects",
+      "NOTE": "That each modelVersion has a corresponding fixture file, which defines the previous and current versions.",
+      "NOTE2": "These fixtures define the before and after state, and are used for both upgrade and rollback testing.",
+      "HINT": "You can use the template below and create sample objects for 10.7.0 and 10.8.0 versions.",
+      "HINT2": "Alternatively, you can copy the contents from older fixture files (if they exist) and adapt them accordingly.",
+      "IMPORTANT": "The current version fixtures (below) are defining how objects from the previous version fixtures (this array) would look like AFTER upgrading.",
+      "IMPORTANT2": "They are NOT defining random sample objects with properties that are valid for the current model version."
+    }
+  ],
+  "10.8.0": [
+    {
+      "kind": "alert|signal",
+      "time_field": "string",
+      "recovery_strategy": "no_breach?|query?|none?",
+      "no_data_strategy": "last_known_status?|emit?|recover?|none?",
+      "artifacts": "array?",
+      "enabled": "boolean",
+      "createdBy": "object?|null",
+      "updatedBy": "object?|null",
+      "updatedAt": "string",
+      "createdAt": "string",
+      "recovery": "object?",
+      "no_data": "object?",
+      "version": "number?",
+      "metadata": {
+        "name": "string",
+        "description": "string?",
+        "owner": "string?",
+        "tags": "array?",
+        "builder_type": "string?"
+      },
+      "schedule": {
+        "every": "string",
+        "lookback": "string?"
+      },
+      "query": {
+        "base": "string",
+        "format": "composed?|standalone?",
+        "breach": {
+          "segment": "string?",
+          "query": "string?"
+        },
+        "recovery": {
+          "segment": "string?",
+          "query": "string?"
+        },
+        "no_data": {
+          "query": "string"
+        }
+      },
+      "state_transition": {
+        "pending_operator": "AND?|OR?",
+        "pending_count": "number?",
+        "pending_timeframe": "string?",
+        "recovering_operator": "AND?|OR?",
+        "recovering_count": "number?",
+        "recovering_timeframe": "string?",
+        "pending": {
+          "count": "number?",
+          "timeframe": "string?",
+          "operator": "and?|or?"
+        },
+        "recovering": {
+          "count": "number?",
+          "timeframe": "string?",
+          "operator": "and?|or?"
+        }
+      },
+      "grouping": {
+        "fields": "array"
+      }
+    }
+  ]
+}
