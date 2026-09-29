@@ -677,11 +677,11 @@ test.describe(
       browserAuth,
       page,
     }) => {
-      // SO has identity_federation auth and no prior policyIdsByInstance so the MI section starts
-      // in "fresh" state with the radio group accessible (not collapsed to "done" state).
-      // Clicking "Access Keys" changes authMethod from 'identity_federation' to 'static_keys',
-      // which is a drift-effect dep — the effect re-fires, fetches SO again, and detects the
-      // mismatch (session static_keys vs SO identity_federation) without any session injection.
+      // SO has identity_federation auth. Clicking "Access Keys" changes authMethod in React state,
+      // re-triggering the drift effect which compares the new session value ('static_keys') against
+      // the SO's stored value ('identity_federation') and sets isDirty=true.
+      // An ELB instance is seeded after hydration so deployGroups is non-empty and the callout
+      // (gated on deployGroups.length > 0 || agentTargets.length > 0) can render.
       const DEP_ID = 'dep-auth-drift-001';
       await page.route(
         (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
@@ -699,21 +699,42 @@ test.describe(
       );
 
       await browserAuth.loginAsAdmin();
-      // Register the SO GET promise before navigating so we catch the initial hydration fetch.
-      const initialSoGetPromise = page.waitForResponse(
-        (resp) =>
-          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
-            new URL(resp.url()).pathname
-          ) && resp.status() === 200
-      );
       await page.gotoApp('onboarding/aws', {
         params: { deploymentId: DEP_ID },
         hash: 'authenticate-and-deploy',
       });
       await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-      // Wait for the initial drift check to settle before interacting — avoids a race where the
-      // radio click fires while the first SO GET is still in flight.
-      await initialSoGetPromise;
+
+      // Seed instances after hydration so deployGroups is non-empty on the subsequent reload.
+      // hydrateOnboardingSession does not write instances, so they survive the reload
+      // (hydration is skipped because hydratedDeploymentId is already set).
+      await page.evaluate(
+        ({ key }) => {
+          sessionStorage.setItem(
+            key,
+            JSON.stringify({
+              globalRegion: 'us-east-1',
+              instances: [
+                { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+              ],
+              serviceVars: {},
+            })
+          );
+        },
+        { key: SERVICE_SETTINGS_SESSION_KEY }
+      );
+
+      // Reload so the component reads the seeded instances. Wait for the drift effect's SO fetch
+      // to settle (no drift yet — session auth matches SO after hydration).
+      const postReloadSoGetPromise = page.waitForResponse(
+        (resp) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+            new URL(resp.url()).pathname
+          ) && resp.status() === 200
+      );
+      await page.reload();
+      await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+      await postReloadSoGetPromise;
 
       // Click "Access Keys" radio via the live UI. This changes authMethod in React state, which
       // is a drift-effect dep, causing the effect to re-run and compare the new session value
