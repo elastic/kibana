@@ -32,7 +32,7 @@ export interface VegaConfig {
  * expects for a Vega/Vega-Lite spec. Kept minimal (no persisted saved object) so
  * the same spec can be rendered inline in chat and embedded in a dashboard panel.
  */
-export interface VegaSavedVis {
+interface VegaSavedVis {
   title: string;
   description: string;
   type: typeof VEGA_VIS_TYPE;

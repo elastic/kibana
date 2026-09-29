@@ -12,10 +12,18 @@ settings:
   # This worker is installed per space, so the key needs no space component.
   #
   # `cancel-in-progress` with max 1: the newest discoveries are the ones worth
-  # having, and a backlog must never delay a new scheduled run. `drop` and `queue`
-  # cannot deliver that — a run that is merely waiting still occupies the single
-  # slot, so a newer run would either wait behind superseded work or be turned away.
-  # The global runner this worker dispatches to sets the same policy.
+  # having, and a backlog must never delay a new scheduled run. Neither alternative
+  # delivers that — `drop` turns the newer run away, and `queue` makes it wait behind
+  # superseded work (a QUEUED run does not hold the slot, but it does not pass the run
+  # ahead of it either, and `queue-ttl` expires it after 24h). The global runner this
+  # worker dispatches to sets the same policy.
+  #
+  # Cancelling is only safe because a run of this worker is bounded by generation. It
+  # holds its slot for as long as the runner it waits on, and the runner dispatches
+  # the per-attack reviews detached rather than waiting on their escalation gates. If
+  # that ever changed, this schedule would cancel a previous run's parked gates —
+  # every 24h by default, and as often as every minute if an operator sets the
+  # interval that low.
   #
   # Must be an object — unlike a `parallel` step's `concurrency`, workflow-level
   # `settings.concurrency` does not accept a bare number.
@@ -38,7 +46,9 @@ steps:
   # `workflow.execute` propagates the child's failure, which `workflow.executeAsync`
   # would not — the run would report success while generation had failed. The cost
   # is that this worker waits for the child to finish before it continues, and keeps
-  # its single concurrency slot for that whole time.
+  # its single concurrency slot for that whole time. That cost stays bounded because
+  # the child returns once generation has run and the reviews are dispatched, not
+  # once they are decided.
   #
   # The child carries no schedule of its own; this worker is the single scheduler
   # authority for the space.

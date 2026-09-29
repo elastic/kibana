@@ -9,11 +9,17 @@ import { EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
-import React, { useEffect, useMemo, useState } from 'react';
-import { ConversationInputShell } from '@kbn/agent-builder-browser';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { ConversationInputShell, formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { useConversationStream } from '../../../hooks/use_conversation_stream';
+import { useCurrentUser } from '../../../hooks/use_current_user';
+import { useInputDraft } from '../../../hooks/use_input_draft';
+import { useActiveSpaceId } from '../../../context/active_space_context';
 import { useSubmitMessage } from '../../../hooks/use_submit_message';
+import { useSendUserMessage } from '../../../hooks/use_send_user_message';
+import { useExperimentalFeatures } from '../../../hooks/use_experimental_features';
+import { ChatTriggerMode } from '../../../../../common/http_api/chat';
 import { useAgentBuilderAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import {
@@ -21,8 +27,8 @@ import {
   useConversationReadOnly,
   useConversationTitle,
   useHasActiveConversation,
-  useIsAwaitingPrompt,
 } from '../../../hooks/use_conversation';
+import { useIsAwaitingPrompt } from '../../../hooks/use_is_awaiting_prompt';
 import { MessageEditor, useMessageEditor, CommandBadgeSerializationError } from './message_editor';
 import { useToasts } from '../../../hooks/use_toasts';
 import { InputActions } from './input_actions';
@@ -98,14 +104,58 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
 }) => {
   const [hoveredImageName, setHoveredImageName] = useState<string | null>(null);
 
-  const { pendingMessage, error, isResuming, isResponseLoading } = useConversationStream();
+  const { isResponseLoading } = useConversationStream();
   const { isFetched } = useAgentBuilderAgents();
   const agentId = useAgentId();
   const conversationId = useConversationId();
 
+  const { currentUser } = useCurrentUser();
+  const username = currentUser?.user.username;
+  const spaceId = useActiveSpaceId();
+  const { sessionTag } = useConversationContext();
+
+  const { draft, saveDraft, clearDraft } = useInputDraft({
+    spaceId,
+    sessionTag,
+    username,
+    agentId,
+    conversationId,
+  });
+
+  const messageEditorControllerRef = useRef<
+    ReturnType<typeof useMessageEditor>['controller'] | null
+  >(null);
+  const saveDraftDebounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastEditorContentRef = useRef('');
+  const handleContentChange = useCallback(() => {
+    try {
+      const content = messageEditorControllerRef.current?.getContent() ?? '';
+      lastEditorContentRef.current = content;
+      if (saveDraftDebounceRef.current) clearTimeout(saveDraftDebounceRef.current);
+      saveDraftDebounceRef.current = setTimeout(() => {
+        saveDraft(lastEditorContentRef.current);
+      }, 300);
+    } catch (err) {
+      if (!(err instanceof CommandBadgeSerializationError)) throw err;
+    }
+  }, [saveDraft]);
+
   const { messageEditor, controller: messageEditorController } = useMessageEditor({
     onEditorFocus,
+    onContentChange: handleContentChange,
   });
+  messageEditorControllerRef.current = messageEditorController;
+
+  useEffect(() => {
+    return () => {
+      if (saveDraftDebounceRef.current) {
+        clearTimeout(saveDraftDebounceRef.current);
+        saveDraftDebounceRef.current = null;
+        saveDraft(lastEditorContentRef.current);
+      }
+    };
+  }, [agentId, conversationId, saveDraft]);
+
   const { addErrorToast } = useToasts();
   const hasActiveConversation = useHasActiveConversation();
   const isAwaitingPrompt = useIsAwaitingPrompt();
@@ -118,7 +168,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     autoSendInitialMessage,
     resetInitialMessage,
   } = useConversationContext();
-  const submitMessage = useSubmitMessage();
+  const { submitMessage, isCreatingConversation } = useSubmitMessage();
+  const [triggerMode, setTriggerMode] = useState<ChatTriggerMode>(ChatTriggerMode.Always);
+  const isExperimentalEnabled = useExperimentalFeatures();
+  const { mutateAsync: sendUserMessage, isLoading: isSendingUserMessage } = useSendUserMessage();
 
   const { uploadingNames, handlePasteFile, handleAfterInput, handleRemoveAttachment } =
     useImageUpload({
@@ -130,10 +183,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
   const isAgentIdValid = validateAgentId(agentId);
 
   const isAgentDeleted = !isAgentIdValid && isFetched && Boolean(agentId);
-  const isInputDisabled = isAgentDeleted || isAwaitingPrompt || isResuming;
+  const isInputDisabled =
+    isAgentDeleted || isAwaitingPrompt || isCreatingConversation || isSendingUserMessage;
   const isSubmitDisabled =
     messageEditorController.isEmpty ||
     isResponseLoading ||
+    isSendingUserMessage ||
+    isCreatingConversation ||
     !isAgentIdValid ||
     isAwaitingPrompt ||
     uploadingNames.size > 0;
@@ -145,8 +201,8 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     flex-direction: column;
     height: 100%;
   `;
-  // Hide attachments if there's an error from current round or if message has been just sent
-  const shouldHideAttachments = Boolean(error) || isResponseLoading;
+  // Hide attachments while the message that carries them is being sent
+  const shouldHideAttachments = isResponseLoading;
 
   const shouldCollapseInput = isResponseLoading || hasActiveConversation;
 
@@ -166,6 +222,17 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     conversationTitle,
   });
 
+  const draftHydratedRef = useRef(false);
+  const isConvSwitchRef = useRef(false);
+  useEffect(() => {
+    if (isConvSwitchRef.current) {
+      messageEditorControllerRef.current?.clear();
+      lastEditorContentRef.current = '';
+    }
+    isConvSwitchRef.current = true;
+    draftHydratedRef.current = false;
+  }, [agentId, conversationId, spaceId, sessionTag]);
+
   // Set initial message in input when {autoSendInitialMessage} is false and {initialMessage} is provided
   useEffect(() => {
     if (isConversationReadOnly) return;
@@ -183,6 +250,30 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
     isConversationReadOnly,
     messageEditorController,
     resetInitialMessage,
+  ]);
+  useEffect(() => {
+    if (draftHydratedRef.current) return;
+    if (!username) return;
+    if (isConversationReadOnly || isConversationReadOnlyLoading) return;
+    if (initialMessage) {
+      draftHydratedRef.current = true;
+      return;
+    }
+    draftHydratedRef.current = true;
+    if (draft && !lastEditorContentRef.current) {
+      messageEditorController.setContent(draft);
+    }
+  }, [
+    draft,
+    username,
+    spaceId,
+    sessionTag,
+    agentId,
+    conversationId,
+    initialMessage,
+    isConversationReadOnly,
+    isConversationReadOnlyLoading,
+    messageEditorController,
   ]);
 
   // Skip auto-focus while a HITL prompt is open, it should own focus instead
@@ -215,11 +306,32 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
       }
       return;
     }
+    if (saveDraftDebounceRef.current) {
+      clearTimeout(saveDraftDebounceRef.current);
+      saveDraftDebounceRef.current = null;
+    }
+
+    if (triggerMode === ChatTriggerMode.Never) {
+      sendUserMessage(content)
+        .then(() => {
+          lastEditorContentRef.current = '';
+          clearDraft();
+          messageEditorController.clear();
+          onSubmit?.();
+        })
+        .catch((sendError: unknown) => {
+          lastEditorContentRef.current = content;
+          addErrorToast({ title: formatAgentBuilderErrorMessage(sendError) });
+        });
+      return;
+    }
+    lastEditorContentRef.current = '';
     if (onSubmitOverride) {
       onSubmitOverride(content);
     } else {
       submitMessage(content);
     }
+    clearDraft();
     messageEditorController.clear();
     onSubmit?.();
   };
@@ -259,12 +371,10 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({
         <InputActions
           onSubmit={handleSubmit}
           isSubmitDisabled={isSubmitDisabled}
-          resetToPendingMessage={() => {
-            if (pendingMessage) {
-              messageEditorController.setContent(pendingMessage);
-            }
-          }}
-          agentId={agentId}
+          isSubmitting={isCreatingConversation || isSendingUserMessage}
+          showTriggerModeToggle={!isNewConversation && isExperimentalEnabled}
+          triggerMode={triggerMode}
+          onTriggerModeChange={setTriggerMode}
         />
       )}
     </InputContainer>

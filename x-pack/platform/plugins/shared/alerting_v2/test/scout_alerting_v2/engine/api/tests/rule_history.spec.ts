@@ -38,8 +38,8 @@ const expectSnapshotShape = (doc: ChangeHistoryDocument, expectedRule: RuleRespo
         metadata: expectedSnapshot.metadata,
         schedule: expectedSnapshot.schedule,
         query: expectedSnapshot.query,
-        recovery_strategy: expectedSnapshot.recovery_strategy,
-        no_data_strategy: expectedSnapshot.no_data_strategy,
+        recovery: expectedSnapshot.recovery,
+        no_data: expectedSnapshot.no_data,
         state_transition: expectedSnapshot.state_transition,
         grouping: expectedSnapshot.grouping,
         artifacts: expectedSnapshot.artifacts,
@@ -500,8 +500,8 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
       expect(list.items.length).toBeGreaterThanOrEqual(2);
       expect(list.items[0]).toMatchObject({
         action: RuleChangesHistoryAction.ruleUpdate,
-        isCurrent: true,
-        metadata: { version: updated.metadata.version },
+        is_current: true,
+        version: updated.metadata.version,
       });
       expect('snapshot' in list.items[0]).toBe(false);
       expect(list.items[0].changes?.count).toBeGreaterThan(0);
@@ -521,7 +521,7 @@ apiTest.describe('Rule change history', { tag: tags.stateful.classic }, () => {
         id: created.id,
         metadata: expect.objectContaining({ name: 'change-history-http-updated' }),
       });
-      expect(detail.isCurrent).toBe(true);
+      expect(detail.is_current).toBe(true);
     }
   );
 });

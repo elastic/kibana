@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { ConvertibleLayer } from './esql_conversion_types';
 import { ConvertToEsqlModal } from './convert_to_esql_modal';
 import userEvent from '@testing-library/user-event';
@@ -105,10 +105,10 @@ describe('ConvertToEsqlModal', () => {
       expect(screen.getByText(/FROM datacommerce/)).toBeInTheDocument();
     });
 
-    it('calls onConfirm callback', async () => {
+    it('calls onConfirm callback', () => {
       renderComponent({ layers: [mockLayers[0]] });
 
-      await userEvent.click(screen.getByRole('button', { name: /convert to es\|ql/i }));
+      fireEvent.click(screen.getByRole('button', { name: /convert to es\|ql/i }));
 
       expect(mockOnConfirm).toHaveBeenCalled();
     });
@@ -141,23 +141,23 @@ describe('ConvertToEsqlModal', () => {
       expect(screen.getAllByText('Will remain unchanged')).toHaveLength(2);
     });
 
-    it('expands row to show query when expand button is clicked', async () => {
+    it('expands row to show query when expand button is clicked', () => {
       renderComponent();
 
       const expandButtons = screen.getAllByRole('button', { name: /expand/i });
-      await userEvent.click(expandButtons[0]);
+      fireEvent.click(expandButtons[0]);
 
       expect(screen.getAllByText(/FROM datacommerce/)[0]).toBeInTheDocument();
     });
 
-    it('collapses row when collapse button is clicked', async () => {
+    it('collapses row when collapse button is clicked', () => {
       renderComponent();
 
       const expandButtons = screen.getAllByRole('button', { name: /expand/i });
-      await userEvent.click(expandButtons[0]);
+      fireEvent.click(expandButtons[0]);
 
       const collapseButton = screen.getByRole('button', { name: /collapse/i });
-      await userEvent.click(collapseButton);
+      fireEvent.click(collapseButton);
 
       const codeBlocks = screen.queryAllByText(/FROM datacommerce/, { selector: 'code' });
       expect(codeBlocks).toHaveLength(0);
@@ -187,10 +187,10 @@ describe('ConvertToEsqlModal', () => {
     });
   });
 
-  it('calls onCancel when cancel button is clicked', async () => {
+  it('calls onCancel when cancel button is clicked', () => {
     renderComponent();
 
-    await userEvent.click(screen.getByText('Cancel'));
+    fireEvent.click(screen.getByText('Cancel'));
     expect(mockOnCancel).toHaveBeenCalledTimes(1);
   });
 });
