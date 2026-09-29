@@ -116,6 +116,28 @@ describe('PerOsProtectionMasterToggle', () => {
     expect(updatedPolicy.mac.popup.ransomware.enabled).toBe(false);
   });
 
+  it('sets linux.ransomware.mode but never writes linux.popup.ransomware when toggled, even though it shares the osList', async () => {
+    props.protection = 'ransomware';
+    props.osList = ['windows', 'mac', 'linux'];
+    render();
+
+    await userEvent.click(renderResult.getByTestId('test'));
+
+    const offPolicy = getUpdatedPolicy();
+    expect(offPolicy.linux.ransomware?.mode).toBe(ProtectionModes.off);
+    expect(offPolicy.linux.popup).not.toHaveProperty('ransomware');
+
+    props.policy = offPolicy;
+    (props.onChange as jest.Mock).mockClear();
+    renderResult.unmount();
+    render();
+    await userEvent.click(renderResult.getByTestId('test'));
+
+    const onPolicy = getUpdatedPolicy();
+    expect(onPolicy.linux.ransomware?.mode).toBe(ProtectionModes.prevent);
+    expect(onPolicy.linux.popup).not.toHaveProperty('ransomware');
+  });
+
   it('writes popup.memory_protection.enabled on every OS when toggled off', async () => {
     props.protection = 'memory_protection';
     render();

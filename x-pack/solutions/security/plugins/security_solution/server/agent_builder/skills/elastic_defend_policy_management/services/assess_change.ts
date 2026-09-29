@@ -6,6 +6,7 @@
  */
 
 import { ProductFeatureSecurityKey } from '@kbn/security-solution-features/keys';
+import { isLinuxRansomwareProtectionEnabled } from '../../../../../common/endpoint/models/policy_config_helpers';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { buildPolicyChangeAssessment } from '../domain/impact';
 import type { PolicyChangeAssessment, PolicyChangeCapabilities } from '../domain/impact';
@@ -42,6 +43,7 @@ const toPolicyChangeCapabilities = (
       ProductFeatureSecurityKey.endpointCustomYaraSignatures
     ),
     customYaraSignaturesExperimental: experimentalFeatures.customYaraSignaturesEnabled,
+    linuxRansomwareProtection: isLinuxRansomwareProtectionEnabled(experimentalFeatures),
     endpointProtectionUpdates: productFeatures.isEnabled(
       ProductFeatureSecurityKey.endpointProtectionUpdates
     ),

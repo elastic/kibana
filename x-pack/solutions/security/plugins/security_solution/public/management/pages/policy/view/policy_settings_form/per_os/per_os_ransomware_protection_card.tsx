@@ -9,7 +9,9 @@ import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Immutable } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
+import { hasProtectionPopup } from '../../../../../../../common/endpoint/models/policy_config_helpers';
 import { useLicense } from '../../../../../../common/hooks/use_license';
+import { useIsExperimentalFeatureEnabled } from '../../../../../../common/hooks/use_experimental_features';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import type { RansomwareProtectionOSes } from '../../../types';
 import { PerOsSettingCard } from './per_os_setting_card';
@@ -25,9 +27,14 @@ import { createRansomwarePolicyAccessor } from './policy_accessor';
 import { PerOsProtectionMasterToggle } from './per_os_protection_master_toggle';
 import { useProtectionModeChangeHandler } from './use_protection_mode_change_handler';
 
-const RANSOMWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
+const BASE_RANSOMWARE_OS_VALUES: Immutable<RansomwareProtectionOSes[]> = [
   PolicyOperatingSystem.windows,
   PolicyOperatingSystem.mac,
+];
+
+const RANSOMWARE_OS_VALUES_WITH_LINUX: Immutable<RansomwareProtectionOSes[]> = [
+  ...BASE_RANSOMWARE_OS_VALUES,
+  PolicyOperatingSystem.linux,
 ];
 
 /**
@@ -57,11 +64,17 @@ export const PerOsRansomwareProtectionCard = memo(
   }: PerOsRansomwareProtectionCardProps) => {
     const isPlatinumPlus = useLicense().isPlatinumPlus();
     const isProtectionsAllowed = !useGetProtectionsUnavailableComponent();
+    const isLinuxRansomwareEnabled = useIsExperimentalFeatureEnabled('linuxRansomwareProtection');
     const getTestId = useTestIdGenerator(dataTestSubj);
+    const ransomwareOsValues = isLinuxRansomwareEnabled
+      ? RANSOMWARE_OS_VALUES_WITH_LINUX
+      : BASE_RANSOMWARE_OS_VALUES;
     // A policy stored before macOS ransomware existed has no `ransomware` branch at all, and one
     // written by the 9.4 advanced field can have the branch without a `mode`. Read both as `off`
-    // so the row renders a real option instead of throwing.
-    const selected = RANSOMWARE_OS_VALUES.some(
+    // so the row renders a real option instead of throwing. Linux ransomware is absent on every
+    // policy that predates it (and on any policy while the feature flag is off), which the same
+    // fallback reads as off.
+    const selected = ransomwareOsValues.some(
       (os) => readRansomwareMode(policy[os]) !== ProtectionModes.off
     );
     const protectionLabel = i18n.translate(
@@ -98,12 +111,12 @@ export const PerOsRansomwareProtectionCard = memo(
             mode={mode}
             protection="ransomware"
             protectionLabel={protectionLabel}
-            osList={RANSOMWARE_OS_VALUES}
+            osList={ransomwareOsValues}
             data-test-subj={getTestId('enableDisableSwitch')}
           />
         }
       >
-        {RANSOMWARE_OS_VALUES.map((os, index) => {
+        {ransomwareOsValues.map((os, index) => {
           const accessor = createRansomwarePolicyAccessor(policy, os);
           return (
             <PerOsRansomwareProtectionRow
@@ -112,7 +125,7 @@ export const PerOsRansomwareProtectionCard = memo(
               accessor={accessor}
               onChange={onChange}
               mode={mode}
-              isLast={index === RANSOMWARE_OS_VALUES.length - 1}
+              isLast={index === ransomwareOsValues.length - 1}
               data-test-subj={getTestId(os)}
             />
           );
@@ -138,7 +151,11 @@ const PerOsRansomwareProtectionRow = memo<PerOsRansomwareProtectionRowProps>(
     const osPolicy = accessor.read();
     const ransomwareMode = readRansomwareMode(osPolicy);
     const subfeaturesVisible = ransomwareMode !== ProtectionModes.off;
-    const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', onChange);
+    const handleModeChange = useProtectionModeChangeHandler(accessor, 'ransomware', os, onChange);
+    // Linux ransomware has no user notification: the endpoint's notification code only reads
+    // `popup.ransomware` on Windows/macOS. `hasProtectionPopup` is the single source of truth for
+    // that, so the row's shape follows it instead of a hard-coded OS check.
+    const showNotifyUser = subfeaturesVisible && hasProtectionPopup(os, 'ransomware');
 
     return (
       <OsRow
@@ -154,7 +171,7 @@ const PerOsRansomwareProtectionRow = memo<PerOsRansomwareProtectionRowProps>(
         isLast={isLast}
         data-test-subj={getTestId()}
       >
-        {subfeaturesVisible && (
+        {showNotifyUser && (
           <PerOsNotifyUserOption
             accessor={accessor}
             onChange={onChange}

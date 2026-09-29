@@ -20,7 +20,11 @@ import {
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
+  isLinuxRansomwareProtectionEnabled,
+  hasProtectionPopup,
   setCustomYaraSignatures,
+  setProtectionModeAndPopup,
 } from './policy_config_helpers';
 import { get, merge } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
@@ -42,6 +46,13 @@ describe('Policy Config helpers', () => {
       for (const os of ['windows', 'mac', 'linux'] as const) {
         expect(result[os].memory_protection).not.toHaveProperty('custom_yara_signatures');
       }
+    });
+
+    it('leaves an absent Linux ransomware absent', () => {
+      const policy = policyFactory();
+      delete policy.linux.ransomware;
+
+      expect(disableProtections(policy).linux).not.toHaveProperty('ransomware');
     });
 
     it('does not enable supported fields', () => {
@@ -76,6 +87,7 @@ describe('Policy Config helpers', () => {
           ...defaultPolicy.linux,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
+          ransomware: notSupported,
         },
       };
 
@@ -96,6 +108,7 @@ describe('Policy Config helpers', () => {
           ...eventsOnlyPolicy().linux,
           memory_protection: notSupported,
           behavior_protection: notSupportedBehaviorProtection,
+          ransomware: notSupported,
         },
       };
 
@@ -188,6 +201,11 @@ describe('Policy Config helpers', () => {
         expectedResult: false,
       },
       {
+        keyPath: `${PolicyOperatingSystem.linux}.ransomware.mode`,
+        keyValue: ProtectionModes.prevent,
+        expectedResult: false,
+      },
+      {
         keyPath: `${PolicyOperatingSystem.linux}.memory_protection.mode`,
         keyValue: ProtectionModes.off,
         expectedResult: true,
@@ -218,6 +236,29 @@ describe('Policy Config helpers', () => {
         });
       }
     );
+
+    it('treats an absent Linux ransomware as off', () => {
+      delete policy.linux.ransomware;
+
+      expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+        isOnlyCollectingEvents: true,
+        message: undefined,
+      });
+    });
+
+    it.each([
+      `${PolicyOperatingSystem.windows}.ransomware.mode`,
+      `${PolicyOperatingSystem.mac}.ransomware.mode`,
+      `${PolicyOperatingSystem.linux}.malware.mode`,
+      `${PolicyOperatingSystem.windows}.antivirus_registration.enabled`,
+    ])('does not treat an absent `%s` as off', (keyPath) => {
+      set(policy, keyPath, undefined);
+
+      expect(isPolicySetToEventCollectionOnly(policy)).toEqual({
+        isOnlyCollectingEvents: false,
+        message: `property [${keyPath}] is set to [undefined]`,
+      });
+    });
   });
 
   describe('isBillablePolicy', () => {
@@ -528,6 +569,69 @@ describe('Policy Config helpers', () => {
     });
   });
 
+  describe('removeLinuxRansomware', () => {
+    it('removes Linux ransomware and leaves every other field untouched', () => {
+      const policy = policyFactory();
+      const originalPolicy = JSON.parse(JSON.stringify(policy));
+
+      const result = removeLinuxRansomware(policy);
+
+      expect(result.linux).not.toHaveProperty('ransomware');
+      const { ransomware: removed, ...linuxRest } = originalPolicy.linux;
+      expect(result).toEqual({ ...originalPolicy, linux: linuxRest });
+      expect(policy).toEqual(originalPolicy);
+    });
+  });
+
+  describe('isLinuxRansomwareProtectionEnabled', () => {
+    it.each([
+      [true, true, true],
+      [true, false, false],
+      [false, true, false],
+      [false, false, false],
+    ])(
+      'linuxRansomwareProtection: %s, perOsPolicySettings: %s returns %s',
+      (linuxRansomwareProtection, perOsPolicySettings, expected) => {
+        expect(
+          isLinuxRansomwareProtectionEnabled({ linuxRansomwareProtection, perOsPolicySettings })
+        ).toBe(expected);
+      }
+    );
+  });
+
+  describe('hasProtectionPopup', () => {
+    it.each([
+      [PolicyOperatingSystem.windows, 'ransomware', true],
+      [PolicyOperatingSystem.mac, 'ransomware', true],
+      [PolicyOperatingSystem.linux, 'ransomware', false],
+      [PolicyOperatingSystem.linux, 'malware', true],
+      [PolicyOperatingSystem.linux, 'memory_protection', true],
+      [PolicyOperatingSystem.linux, 'behavior_protection', true],
+    ] as const)('on %s, %s has a popup: %s', (os, protection, expected) => {
+      expect(hasProtectionPopup(os, protection)).toBe(expected);
+    });
+  });
+
+  describe('setProtectionModeAndPopup', () => {
+    it('does not write a Linux ransomware popup the endpoint never reads', () => {
+      const policy = policyFactory();
+
+      setProtectionModeAndPopup({
+        policy,
+        protection: 'ransomware',
+        osList: ['windows', 'mac', 'linux'],
+        mode: ProtectionModes.detect,
+        syncPopupEnabled: true,
+        popupEnabled: false,
+      });
+
+      expect(policy.linux.ransomware?.mode).toBe(ProtectionModes.detect);
+      expect(policy.linux.popup).not.toHaveProperty('ransomware');
+      expect(policy.windows.popup.ransomware.enabled).toBe(false);
+      expect(policy.mac.popup.ransomware.enabled).toBe(false);
+    });
+  });
+
   describe('custom_yara_signatures', () => {
     it('writes custom_yara_signatures only for OSes in osList', () => {
       const policy = policyFactory();
@@ -721,6 +825,7 @@ const eventsOnlyPolicy = (): PolicyConfig => ({
       tty_io: false,
     },
     malware: { mode: ProtectionModes.off, blocklist: false, on_write_scan: false },
+    ransomware: { mode: ProtectionModes.off, supported: true },
     behavior_protection: { mode: ProtectionModes.off, supported: true, reputation_service: false },
     memory_protection: {
       mode: ProtectionModes.off,

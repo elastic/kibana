@@ -373,6 +373,16 @@ export const allowedExperimentalValues = Object.freeze({
   perOsPolicySettings: false,
 
   /**
+   * Enables ransomware protection for Linux in Elastic Defend policies.
+   * When disabled, `linux.ransomware` is not added to new policies, is stripped from updated
+   * ones, and is not shown in the UI.
+   * Requires `perOsPolicySettings`: the Linux toggle exists only in the per-OS policy form, so the
+   * feature is treated as disabled unless both flags are on (`isLinuxRansomwareProtectionEnabled`).
+   * Release: 9.6
+   */
+  linuxRansomwareProtection: true,
+
+  /**
    * Risk score maintainer create-if-missing path: when an alert's EUID passes the entity type's
    * creation policy but has no entity store record, create the entity (with its risk score)
    * instead of silently dropping the score.

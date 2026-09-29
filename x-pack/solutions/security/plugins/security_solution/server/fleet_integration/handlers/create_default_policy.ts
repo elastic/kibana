@@ -28,9 +28,11 @@ import {
   disableProtections,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isLinuxRansomwareProtectionEnabled,
   removeCustomYaraSignatures,
   removeDeviceControl,
   removeLinuxDnsEvents,
+  removeLinuxRansomware,
 } from '../../../common/endpoint/models/policy_config_helpers';
 import type { ProductFeaturesService } from '../../lib/product_features_service/product_features_service';
 
@@ -91,6 +93,10 @@ export const createDefaultPolicy = (
 
   if (!experimentalFeatures.linuxDnsEvents) {
     defaultPolicyPerType = removeLinuxDnsEvents(defaultPolicyPerType);
+  }
+
+  if (!isLinuxRansomwareProtectionEnabled(experimentalFeatures)) {
+    defaultPolicyPerType = removeLinuxRansomware(defaultPolicyPerType);
   }
 
   defaultPolicyPerType.meta.billable = isBillablePolicy(defaultPolicyPerType);

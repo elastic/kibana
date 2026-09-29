@@ -126,6 +126,10 @@ export const getPolicySettingsFormTestSubjects = (
         notifyUserCheckbox: perOsRansomwareTestSubj('mac-notifyUser-checkbox'),
         notifyCustomMessage: perOsRansomwareTestSubj('mac-notifyUser-customMessage'),
       },
+      linux: {
+        row: perOsRansomwareTestSubj('linux'),
+        modeSelect: perOsRansomwareTestSubj('linux-mode'),
+      },
     },
     memory: {
       card: memoryTestSubj(),

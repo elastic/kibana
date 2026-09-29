@@ -129,6 +129,7 @@ const PerOsMemoryProtectionRow = memo<PerOsMemoryProtectionRowProps>(
     const handleModeChange = useProtectionModeChangeHandler(
       accessor,
       'memory_protection',
+      os,
       onChange
     );
 

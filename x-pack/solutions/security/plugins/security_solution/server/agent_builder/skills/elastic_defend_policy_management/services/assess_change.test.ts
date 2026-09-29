@@ -235,4 +235,39 @@ describe('assessChange', () => {
         ?.eligibility
     ).toEqual({ eligible: true });
   });
+
+  it.each([
+    [
+      { linuxRansomwareProtection: false, perOsPolicySettings: true },
+      { eligible: false, reason: 'linux_ransomware_protection_experimental_disabled' },
+    ],
+    [
+      { linuxRansomwareProtection: true, perOsPolicySettings: false },
+      { eligible: false, reason: 'linux_ransomware_protection_experimental_disabled' },
+    ],
+    [{ linuxRansomwareProtection: true, perOsPolicySettings: true }, { eligible: true }],
+  ])('threads experimental flags %o into Linux ransomware eligibility', async (flags, expected) => {
+    const { access, endpointAppContextService, getById, getAgentStatusForAgentPolicy } =
+      await createCountAccess();
+    jest.replaceProperty(endpointAppContextService, 'experimentalFeatures', {
+      ...endpointAppContextService.experimentalFeatures,
+      ...flags,
+    });
+    const policy = createEndpointPolicy({
+      id: 'policy-id-1',
+      policy_ids: ['agent-policy-a'],
+    });
+    getById.mockResolvedValue(policy);
+    getAgentStatusForAgentPolicy.mockResolvedValue(asFleetAgentStatus(MIXED_STATUS_ABOVE_PAGE));
+
+    const result = await assessChange(access, endpointAppContextService, {
+      idOrName: 'policy-id-1',
+      changes: [{ op: 'set_field', path: 'linux.ransomware.mode', value: ProtectionModes.off }],
+    });
+
+    expect(
+      result.assessment.changes.find((change) => change.path === 'linux.ransomware.mode')
+        ?.eligibility
+    ).toEqual(expected);
+  });
 });

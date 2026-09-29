@@ -78,7 +78,11 @@ export const buildPolicyChangeAssessment = (
       idOrName: policy.snapshot.identity.id,
       changes: [...operations],
     },
-    policy.storedConfig
+    policy.storedConfig,
+    {
+      linuxRansomwareProtection: capabilities.linuxRansomwareProtection,
+      licenseInformation: capabilities.licenseInformation,
+    }
   );
   const { endpointCustomNotification, ...eligibilityCapabilities } = capabilities;
   const eligibilityContext = buildEligibilityContext({

@@ -6,6 +6,7 @@
  */
 
 import type { PolicyConfig } from '../../../../../common/endpoint/types';
+import { ProtectionModes } from '../../../../../common/endpoint/types';
 import { hashPolicyConfig } from './hash_policy_config';
 import type { EndpointPolicySnapshot } from './endpoint_policy_snapshot';
 import type { NormalizedPolicyConfig } from './normalized_policy_config';
@@ -24,6 +25,7 @@ export type EndpointPolicySummary = Readonly<{
   }>;
   linuxProtectionModes: Readonly<{
     malware: string;
+    ransomware: string;
     behavior: string;
   }>;
   globalTelemetryEnabled: boolean;
@@ -62,6 +64,8 @@ const summarizeEndpointPolicy = (config: NormalizedPolicyConfig): EndpointPolicy
   },
   linuxProtectionModes: {
     malware: config.linux.malware.mode,
+    // Absent on legacy policies and wherever `linuxRansomwareProtection` is off; absent means off.
+    ransomware: config.linux.ransomware?.mode ?? ProtectionModes.off,
     behavior: config.linux.behavior_protection.mode,
   },
   globalTelemetryEnabled: config.global_telemetry_enabled,

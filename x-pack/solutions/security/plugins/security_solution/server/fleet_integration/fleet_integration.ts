@@ -43,8 +43,10 @@ import {
   isPolicySetToEventCollectionOnly,
   ensureOnlyEventCollectionIsAllowed,
   isBillablePolicy,
+  isLinuxRansomwareProtectionEnabled,
   removeCustomYaraSignatures,
   removeDeviceControl,
+  removeLinuxRansomware,
 } from '../../common/endpoint/models/policy_config_helpers';
 import {
   ProtectionModes,
@@ -301,6 +303,17 @@ export const getPackagePolicyUpdateCallback = (
       endpointIntegrationData.inputs?.[0]?.config?.policy?.value
     ) {
       endpointIntegrationData.inputs[0].config.policy.value = removeCustomYaraSignatures(
+        endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
+      );
+    }
+
+    // Stripped before license validation so deployments with the feature gated off never get a
+    // license error about a field they cannot set.
+    if (
+      !isLinuxRansomwareProtectionEnabled(experimentalFeatures) &&
+      endpointIntegrationData.inputs?.[0]?.config?.policy?.value
+    ) {
+      endpointIntegrationData.inputs[0].config.policy.value = removeLinuxRansomware(
         endpointIntegrationData.inputs[0].config.policy.value as PolicyConfig
       );
     }

@@ -7,8 +7,10 @@
 
 import { get } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
+import type { ILicense } from '@kbn/licensing-types';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { ProtectionModes } from '../../../../../../common/endpoint/types';
+import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../common/endpoint/types';
+import { isAtLeast } from '../../../../../../common/license/license';
 import {
   getPolicyProtectionsReference,
   POLICY_COUPLING_MALWARE_BOOLEAN_FIELDS,
@@ -47,8 +49,44 @@ interface Evidence {
   readonly semantic: string | undefined;
 }
 
+export interface RansomwareLinuxContext {
+  readonly linuxRansomwareProtection: boolean;
+  readonly licenseInformation: ILicense | null;
+}
+
 const protectionReference = (protection: PolicyCouplingProtection) =>
   getPolicyProtectionsReference().find(({ keyPath }) => keyPath === `${protection}.mode`);
+
+/**
+ * `set_protection_level`/`set_protection_enabled` are card-level operations that otherwise apply
+ * to every OS a protection supports. Linux ransomware must stay untouched while
+ * `linuxRansomwareProtection` is off, so those broad operations are the one place that needs to
+ * drop Linux from the protection's OS list before dispatch runs.
+ */
+const restrictBroadOsList = (
+  protection: PolicyCouplingProtection,
+  osList: readonly PolicyOperatingSystem[],
+  linuxRansomwareProtection: boolean
+): readonly PolicyOperatingSystem[] =>
+  protection === 'ransomware' && !linuxRansomwareProtection
+    ? osList.filter((os) => os !== PolicyOperatingSystem.linux)
+    : osList;
+
+/**
+ * `setProtectionModeAndPopup` writes `linux.ransomware.mode` with a plain `set()`, which creates
+ * `{ mode }` with no `supported` key when `linux.ransomware` was previously absent. A missing
+ * `supported` fails license validation, so any dispatch that could have materialized the field
+ * must be followed by this backfill.
+ */
+const backfillLinuxRansomwareSupported = (
+  policy: PolicyConfig,
+  licenseInformation: ILicense | null
+): void => {
+  const { ransomware } = policy.linux;
+  if (ransomware !== undefined && ransomware.supported === undefined) {
+    ransomware.supported = isAtLeast(licenseInformation, 'platinum');
+  }
+};
 
 const pathProtection = (path: string): string | undefined => {
   const reference = getPolicyProtectionsReference().find(({ keyPath, osList }) =>
@@ -129,8 +167,10 @@ const involvesDeviceControl = (evidence: Evidence): boolean =>
 const dispatch = (
   policy: PolicyConfig,
   operation: PolicyChangeOperation,
-  classified?: ClassifiedSetFieldValue
+  classified: ClassifiedSetFieldValue | undefined,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): void => {
+  const { linuxRansomwareProtection, licenseInformation } = ransomwareLinuxContext;
   if (operation.op === 'set_protection_enabled' || operation.op === 'set_protection_level') {
     const protection = operation.protection;
     const reference = protectionReference(protection);
@@ -148,7 +188,7 @@ const dispatch = (
     helpers.setProtectionModeAndPopup({
       policy,
       protection,
-      osList: reference.osList,
+      osList: restrictBroadOsList(protection, reference.osList, linuxRansomwareProtection),
       mode,
       syncPopupEnabled: true,
       popupEnabled: mode === ProtectionModes.prevent,
@@ -159,6 +199,7 @@ const dispatch = (
     }
     if (operation.op === 'set_protection_enabled' && protection === 'behavior_protection')
       helpers.setBehaviorReputationService(policy, mode !== ProtectionModes.off);
+    backfillLinuxRansomwareSupported(policy, licenseInformation);
     return;
   }
   const target = classified ?? classifySetFieldValue(operation.path, operation.value);
@@ -217,6 +258,7 @@ const dispatch = (
     default:
       set(policy, operation.path, operation.value);
   }
+  backfillLinuxRansomwareSupported(policy, licenseInformation);
 };
 
 const validateOperation = (
@@ -295,7 +337,8 @@ const assertFinalState = (proposal: PolicyConfig): void => {
 
 export const expandChangeSet = (
   operations: readonly PolicyChangeOperation[],
-  currentConfig: PolicyConfig
+  currentConfig: PolicyConfig,
+  ransomwareLinuxContext: RansomwareLinuxContext
 ): PreparedPolicyChangeSet => {
   const classified = operations.map((operation) => ({
     operation,
@@ -321,7 +364,7 @@ export const expandChangeSet = (
 
   const evidence: Evidence[] = classified.map(({ operation, target }, index) => {
     const before = structuredClone(proposal);
-    dispatch(proposal, operation, target);
+    dispatch(proposal, operation, target, ransomwareLinuxContext);
     const patch = leaves(before, proposal);
     const primary = primaryTargets(operation);
     recordOrigins(operation, index, primary, patch);
@@ -362,7 +405,7 @@ export const expandChangeSet = (
       if (!satisfied) {
         converged = false;
         const before = structuredClone(proposal);
-        dispatch(proposal, intent.operation, intent.target);
+        dispatch(proposal, intent.operation, intent.target, ransomwareLinuxContext);
         recordOrigins(
           intent.operation,
           intent.index,

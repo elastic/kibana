@@ -28,7 +28,7 @@ import type { PolicyFormComponentCommonProps } from '../types';
 import type { ImmutableArray, UIPolicyConfig } from '../../../../../../../common/endpoint/types';
 import { PolicyOperatingSystem, ProtectionModes } from '../../../../../../../common/endpoint/types';
 import { setPopupEnabled } from '../../../../../../../common/endpoint/models/policy_config_helpers';
-import type { PolicyProtection, MacPolicyProtection, LinuxPolicyProtection } from '../../../types';
+import type { PolicyProtection, MacPolicyProtection } from '../../../types';
 import { useGetCustomNotificationUnavailableComponent } from '../hooks/use_get_custom_notification_unavailable_component';
 import {
   NOTIFY_USER_SECTION_TITLE,
@@ -79,7 +79,8 @@ export const NotifyUserOption = React.memo(
           } else if (os === PolicyOperatingSystem.mac) {
             newPayload[os].popup[protection as MacPolicyProtection].message = event.target.value;
           } else if (os === PolicyOperatingSystem.linux) {
-            newPayload[os].popup[protection as LinuxPolicyProtection].message = event.target.value;
+            newPayload[os].popup[protection as keyof UIPolicyConfig['linux']['popup']].message =
+              event.target.value;
           }
         }
 

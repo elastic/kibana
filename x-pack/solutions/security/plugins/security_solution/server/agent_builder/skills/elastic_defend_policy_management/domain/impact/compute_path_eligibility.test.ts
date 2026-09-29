@@ -10,7 +10,7 @@ import type { ILicense } from '@kbn/licensing-types';
 import moment from 'moment';
 import { policyFactory } from '../../../../../../common/endpoint/models/policy_config';
 import type { PolicyConfig } from '../../../../../../common/endpoint/types';
-import { DeviceControlAccessLevel } from '../../../../../../common/endpoint/types';
+import { DeviceControlAccessLevel, ProtectionModes } from '../../../../../../common/endpoint/types';
 import { buildEligibilityContext } from './build_eligibility_context';
 import { computePathEligibility } from './compute_path_eligibility';
 import type { EligibilityContext } from './policy_change_operation';
@@ -28,6 +28,7 @@ const eligibilityContext = (
     trustedDevicesExperimental?: boolean;
     endpointCustomYaraSignatures?: boolean;
     customYaraSignaturesExperimental?: boolean;
+    linuxRansomwareProtection?: boolean;
     endpointProtectionUpdates?: boolean;
     serverless?: boolean;
   } = {}
@@ -40,6 +41,7 @@ const eligibilityContext = (
     trustedDevicesExperimental: options.trustedDevicesExperimental ?? true,
     endpointCustomYaraSignatures: options.endpointCustomYaraSignatures ?? true,
     customYaraSignaturesExperimental: options.customYaraSignaturesExperimental ?? true,
+    linuxRansomwareProtection: options.linuxRansomwareProtection ?? true,
     endpointProtectionUpdates: options.endpointProtectionUpdates ?? true,
     serverless: options.serverless ?? false,
   });
@@ -247,6 +249,29 @@ describe('computePathEligibility', () => {
       });
     }
     expect(computePathEligibility('windows.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('marks linux.ransomware.mode ineligible when the linuxRansomwareProtection flag is off', () => {
+    const proposed = policyFactory();
+    proposed.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+    const context = eligibilityContext(proposed, { linuxRansomwareProtection: false });
+
+    expect(computePathEligibility('linux.ransomware.mode', context)).toEqual({
+      eligible: false,
+      reason: 'linux_ransomware_protection_experimental_disabled',
+    });
+    expect(computePathEligibility('windows.ransomware.mode', context)).toEqual({
+      eligible: true,
+    });
+    expect(computePathEligibility('linux.malware.mode', context)).toEqual({ eligible: true });
+  });
+
+  it('keeps linux.ransomware.mode eligible when the linuxRansomwareProtection flag is on', () => {
+    const proposed = policyFactory();
+    proposed.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+    const context = eligibilityContext(proposed, { linuxRansomwareProtection: true });
+
+    expect(computePathEligibility('linux.ransomware.mode', context)).toEqual({ eligible: true });
   });
 
   it('marks the Enterprise-gated rescan interval ineligible when custom YARA signatures are gated off', () => {

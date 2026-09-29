@@ -109,6 +109,7 @@ describe('policy_config and licenses', () => {
       policy.windows.ransomware.supported = true;
       policy.mac.ransomware.mode = ProtectionModes.prevent;
       policy.mac.ransomware.supported = true;
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
       // memory protection
       policy.windows.memory_protection.mode = ProtectionModes.prevent;
       policy.windows.memory_protection.supported = true;
@@ -135,6 +136,7 @@ describe('policy_config and licenses', () => {
       policy.windows.ransomware.supported = true;
       policy.mac.popup.ransomware.enabled = true;
       policy.mac.ransomware.supported = true;
+      policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
       // memory protection
       policy.windows.popup.memory_protection.enabled = true;
       policy.windows.memory_protection.supported = true;
@@ -1097,6 +1099,76 @@ describe('policy_config and licenses', () => {
           expect(stripped[os].advanced).not.toHaveProperty('memory_protection');
         }
       });
+    });
+  });
+
+  describe('Linux ransomware', () => {
+    const omitLinuxRansomware = (policy: PolicyConfig) => {
+      delete policy.linux.ransomware;
+    };
+
+    it('blocks Linux ransomware turned on below Platinum', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: false };
+
+      expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+      expect(isEndpointPolicyValidForLicense(policy, Basic)).toBe(false);
+    });
+
+    it('blocks Linux ransomware marked supported below Platinum', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.off, supported: true };
+
+      expect(isEndpointPolicyValidForLicense(policy, Gold)).toBe(false);
+    });
+
+    it('blocks Linux ransomware marked unsupported with a Platinum license', () => {
+      const policy = policyFactory();
+      disableEnterpriseFeatures(policy);
+      policy.linux.ransomware = { mode: ProtectionModes.prevent, supported: false };
+
+      expect(isEndpointPolicyValidForLicense(policy, Platinum)).toBe(false);
+    });
+
+    it('allows a policy without Linux ransomware at every license tier', () => {
+      const platinumPolicy = policyFactory();
+      disableEnterpriseFeatures(platinumPolicy);
+      omitLinuxRansomware(platinumPolicy);
+      const goldPolicy = policyFactoryWithoutPaidFeatures();
+      omitLinuxRansomware(goldPolicy);
+
+      expect(isEndpointPolicyValidForLicense(platinumPolicy, Platinum)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(goldPolicy, Gold)).toBe(true);
+      expect(isEndpointPolicyValidForLicense(goldPolicy, Basic)).toBe(true);
+    });
+
+    it('turns Linux ransomware off and unsupported on downgrade so license_watch converges', () => {
+      for (const license of [Gold, Basic]) {
+        const stripped = unsetPolicyFeaturesAccordingToLicenseLevel(policyFactory(), license);
+
+        expect(stripped.linux.ransomware).toEqual({ mode: ProtectionModes.off, supported: false });
+        expect(isEndpointPolicyValidForLicense(stripped, license)).toBe(true);
+      }
+    });
+
+    it('marks Linux ransomware supported on upgrade to Platinum and keeps its mode', () => {
+      const policy = policyFactoryWithoutPaidFeatures();
+      policy.linux.ransomware = { mode: ProtectionModes.detect, supported: false };
+
+      const upgraded = unsetPolicyFeaturesAccordingToLicenseLevel(policy, Platinum);
+
+      expect(upgraded.linux.ransomware).toEqual({ mode: ProtectionModes.detect, supported: true });
+    });
+
+    it('leaves an absent Linux ransomware absent on every license change', () => {
+      for (const license of [Enterprise, Platinum, Gold, Basic]) {
+        const policy = policyFactory();
+        omitLinuxRansomware(policy);
+
+        const result = unsetPolicyFeaturesAccordingToLicenseLevel(policy, license);
+
+        expect(result.linux).not.toHaveProperty('ransomware');
+      }
     });
   });
 });

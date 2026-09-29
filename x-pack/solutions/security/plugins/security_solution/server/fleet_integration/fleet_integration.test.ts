@@ -166,6 +166,8 @@ describe('Fleet integrations', () => {
       trustedDevices: true,
       linuxDnsEvents: true,
       customYaraSignaturesEnabled: true,
+      linuxRansomwareProtection: true,
+      perOsPolicySettings: true,
     } as ExperimentalFeatures;
     productFeaturesService = endpointAppContextStartContract.productFeaturesService;
 
@@ -1422,6 +1424,97 @@ describe('Fleet integrations', () => {
 
           expectCustomYaraSignaturesAbsent(policyConfig.inputs[0]!.config!.policy.value);
         });
+      });
+    });
+
+    describe('Linux ransomware protection', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each([
+        ['linuxRansomwareProtection', { linuxRansomwareProtection: false }],
+        ['perOsPolicySettings', { perOsPolicySettings: false }],
+      ])('should strip linux.ransomware from the policy when %s is off', async (_flag, flags) => {
+        experimentalFeatures = {
+          ...experimentalFeatures,
+          ...flags,
+        };
+
+        const mockPolicy = policyFactory();
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.linux).not.toHaveProperty(
+          'ransomware'
+        );
+      });
+
+      it('should keep linux.ransomware on the policy when both experimental flags are on', async () => {
+        const mockPolicy = policyFactory();
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        const updatedPolicyConfig = await callback(
+          policyConfig,
+          soClient,
+          esClient,
+          requestContextMock.convertContext(ctx),
+          req
+        );
+
+        expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.linux.ransomware).toEqual(
+          mockPolicy.linux.ransomware
+        );
+      });
+
+      it('should reject an update with linux.ransomware prevent under a Gold license when the flag is on', async () => {
+        licenseEmitter.next(Gold);
+
+        // Otherwise Gold-compliant policy, so the rejection below is attributable to
+        // `linux.ransomware` alone rather than to windows/mac ransomware support.
+        const mockPolicy = policyFactoryWithoutPaidFeatures();
+        mockPolicy.linux.ransomware = { mode: ProtectionModes.prevent, supported: true };
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value = mockPolicy;
+
+        await expect(() =>
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).rejects.toThrow(
+          'Gold license does not support this action. Please upgrade your license.'
+        );
       });
     });
 

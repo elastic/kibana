@@ -239,6 +239,7 @@ describe('listEndpointPolicies', () => {
         },
         linuxProtectionModes: {
           malware: ProtectionModes.prevent,
+          ransomware: ProtectionModes.prevent,
           behavior: ProtectionModes.prevent,
         },
         globalTelemetryEnabled: false,
@@ -258,6 +259,18 @@ describe('listEndpointPolicies', () => {
     expect(item).not.toHaveProperty('normalizedConfig');
     expect(item).not.toHaveProperty('policy_ids');
     expect(item).not.toHaveProperty('agents');
+  });
+
+  it('reports linux ransomware as off when the policy predates it or the flag is off', async () => {
+    const { access, listPolicies } = await createReadAccess();
+    const policy = createEndpointPolicy({ id: 'no-linux-ransomware', name: 'Legacy Policy' });
+    delete policy.inputs[0]?.config?.policy?.value.linux.ransomware;
+    listPolicies.mockResolvedValue(createPage([policy], 1, 1, 20));
+
+    const result = await listEndpointPolicies(access, { page: 1, perPage: 20 });
+    const [item] = result.dto.items;
+
+    expect(item?.posture.linuxProtectionModes.ransomware).toBe(ProtectionModes.off);
   });
 
   it('caps long name and description at 512 and flags only the cut fields', async () => {
