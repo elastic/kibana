@@ -18,7 +18,6 @@ import {
 } from '@kbn/mcp-client';
 import type { BuildContext, ClientTypeSpec } from '../../clients/client_type_spec';
 import { createFetchResource, type McpFetchResource } from './fetch_resource';
-import { createSseGatedFetch } from './sse_fetch';
 import { McpConnectionTransportError } from './mcp_connection_transport_error';
 
 export { McpConnectionTransportError };
@@ -149,13 +148,12 @@ const connectOnce = async (
     getAuthHeaders: () => ctx.credential.getAuthHeaders(),
     ...(deps.userAgent ? { userAgent: deps.userAgent } : {}),
   });
-  const gatedFetch = createSseGatedFetch(resource);
   let userErrorHttpStatus: number | undefined;
   let transientHttpStatus: number | undefined;
   let transportErrorCode: string | undefined;
   const customFetch: FetchLike = async (url, init) => {
     try {
-      const response = await gatedFetch(url, init);
+      const response = await resource.fetch(url, init);
       if (USER_ERROR_HTTP_STATUS_CODES.has(response.status)) {
         userErrorHttpStatus = response.status;
       } else if (response.status >= 500) {

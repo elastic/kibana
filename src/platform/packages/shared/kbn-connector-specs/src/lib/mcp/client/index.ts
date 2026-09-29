@@ -14,6 +14,5 @@ export {
   MCP_CONNECT_RETRY_DELAY_MS,
 } from './client_type';
 export type { McpClientTypeDeps, McpConnectRetryOptions } from './client_type';
-export { createSseGatedFetch } from './sse_fetch';
 export { createFetchResource } from './fetch_resource';
 export type { CreateFetchResourceOpts, McpFetchResource } from './fetch_resource';

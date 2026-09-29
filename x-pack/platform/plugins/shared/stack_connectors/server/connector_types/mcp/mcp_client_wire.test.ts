@@ -49,27 +49,51 @@ type FailNextInitializeWith = 503 | 'destroy' | undefined;
 
 /**
  * Minimal Streamable HTTP MCP endpoint. Auth is checked before JSON-RPC handling. A successful
- * tool call follows initialize, the initialized 202 (which arms the SSE gate), and the GET SSE channel.
+ * tool call follows initialize, the initialized 202, and the GET SSE channel. With `holdGetStream`
+ * the GET request is parked without a response until `releaseGetStreams()` is called.
  */
 const startMcpServer = async (): Promise<{
   url: string;
   authorizations: string[];
   initializeCount: number;
+  getCount: number;
+  heldGetCount: number;
   failNextInitializeWith: FailNextInitializeWith;
+  holdGetStream: boolean;
+  waitForHeldGet: () => Promise<void>;
+  releaseGetStreams: () => void;
   reset: () => void;
   close: () => Promise<void>;
 }> => {
   const state: {
     authorizations: string[];
     initializeCount: number;
+    getCount: number;
     failNextInitializeWith: FailNextInitializeWith;
+    holdGetStream: boolean;
   } = {
     authorizations: [],
     initializeCount: 0,
+    getCount: 0,
     failNextInitializeWith: undefined,
+    holdGetStream: false,
   };
   const sessionId = randomUUID();
   const openStreams = new Set<ServerResponse>();
+  const heldStreams = new Set<ServerResponse>();
+  let heldGetWaiters: Array<() => void> = [];
+
+  const openSseStream = (res: ServerResponse) => {
+    res.writeHead(200, {
+      'content-type': 'text/event-stream',
+      'cache-control': 'no-cache',
+      'mcp-session-id': sessionId,
+    });
+    res.write(': open\n\n');
+    res.socket?.unref();
+    openStreams.add(res);
+    res.on('close', () => openStreams.delete(res));
+  };
 
   const httpServer: Server = createServer(async (req, res) => {
     const authorization = req.headers.authorization;
@@ -83,15 +107,16 @@ const startMcpServer = async (): Promise<{
     state.authorizations.push(authorization);
 
     if (req.method === 'GET') {
-      res.writeHead(200, {
-        'content-type': 'text/event-stream',
-        'cache-control': 'no-cache',
-        'mcp-session-id': sessionId,
-      });
-      res.write(': open\n\n');
-      res.socket?.unref();
-      openStreams.add(res);
-      res.on('close', () => openStreams.delete(res));
+      state.getCount += 1;
+      if (state.holdGetStream) {
+        heldStreams.add(res);
+        res.on('close', () => heldStreams.delete(res));
+        const waiters = heldGetWaiters;
+        heldGetWaiters = [];
+        waiters.forEach((resolve) => resolve());
+        return;
+      }
+      openSseStream(res);
       return;
     }
 
@@ -181,6 +206,30 @@ const startMcpServer = async (): Promise<{
     get initializeCount() {
       return state.initializeCount;
     },
+    get getCount() {
+      return state.getCount;
+    },
+    get heldGetCount() {
+      return heldStreams.size;
+    },
+    get holdGetStream() {
+      return state.holdGetStream;
+    },
+    set holdGetStream(value: boolean) {
+      state.holdGetStream = value;
+    },
+    waitForHeldGet: () =>
+      heldStreams.size > 0
+        ? Promise.resolve()
+        : new Promise<void>((resolve) => {
+            heldGetWaiters.push(resolve);
+          }),
+    releaseGetStreams: () => {
+      for (const res of heldStreams) {
+        heldStreams.delete(res);
+        openSseStream(res);
+      }
+    },
     get failNextInitializeWith() {
       return state.failNextInitializeWith;
     },
@@ -189,8 +238,15 @@ const startMcpServer = async (): Promise<{
     },
     reset: () => {
       state.initializeCount = 0;
+      state.getCount = 0;
       state.failNextInitializeWith = undefined;
+      state.holdGetStream = false;
       state.authorizations.length = 0;
+      heldGetWaiters = [];
+      for (const res of heldStreams) {
+        heldStreams.delete(res);
+        res.destroy();
+      }
     },
     close: async () => {
       for (const stream of openStreams) {
@@ -244,7 +300,7 @@ describe('MCP client wire', () => {
     server.reset();
   });
 
-  it('connects and calls a tool through the real fetch and SSE gate', async () => {
+  it('connects and calls a tool through the real fetch', async () => {
     const client = await clientTypes.mcp.build(makeBuildContext(server.url, AUTH_HEADER));
 
     try {
@@ -253,6 +309,23 @@ describe('MCP client wire', () => {
       expect(server.authorizations.length).toBeGreaterThan(0);
       expect(server.authorizations.every((value) => value === AUTH_HEADER)).toBe(true);
     } finally {
+      await clientTypes.mcp.terminate(client);
+    }
+  });
+
+  it('calls a tool while the GET SSE stream has not answered yet', async () => {
+    server.holdGetStream = true;
+    const client = await clientTypes.mcp.build(makeBuildContext(server.url, AUTH_HEADER));
+
+    try {
+      await server.waitForHeldGet();
+      expect(server.heldGetCount).toBe(1);
+
+      const result = await client.callTool({ name: 'ping', arguments: {} });
+      expect(result.content).toEqual([{ type: 'text', text: 'pong' }]);
+      expect(server.heldGetCount).toBe(1);
+    } finally {
+      server.releaseGetStreams();
       await clientTypes.mcp.terminate(client);
     }
   });

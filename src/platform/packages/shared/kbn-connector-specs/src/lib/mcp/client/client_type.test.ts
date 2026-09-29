@@ -36,10 +36,6 @@ jest.mock('@kbn/mcp-client', () => {
   };
 });
 
-jest.mock('./sse_fetch', () => ({
-  createSseGatedFetch: jest.fn().mockReturnValue(jest.fn()),
-}));
-
 jest.mock('./fetch_resource', () => ({
   createFetchResource: jest.fn().mockReturnValue({
     fetch: jest.fn(),
@@ -52,7 +48,9 @@ const createRetryingClientType = () => createMcpClientType({ connectRetry: { del
 const fetchFailed = (code: string): TypeError =>
   new TypeError('fetch failed', { cause: Object.assign(new Error(code), { code }) });
 
-const installResourceMocks = (): {
+const installResourceMocks = (
+  fetch: jest.Mock = jest.fn()
+): {
   createFetchResource: jest.Mock;
   close: jest.Mock;
 } => {
@@ -61,7 +59,7 @@ const installResourceMocks = (): {
   };
   const close = jest.fn().mockResolvedValue(undefined);
   createFetchResource.mockImplementation(() => ({
-    fetch: jest.fn(),
+    fetch,
     close,
   }));
   return { createFetchResource, close };
@@ -205,11 +203,6 @@ describe('createMcpClientType', () => {
       const { createFetchResource } = jest.requireMock('./fetch_resource') as {
         createFetchResource: jest.Mock;
       };
-      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-        createSseGatedFetch: jest.Mock;
-      };
-      const mockResource = { fetch: jest.fn(), close: jest.fn() };
-      createFetchResource.mockReturnValue(mockResource);
 
       const ctx = makeBuildContext();
       await createMcpClientType().build(ctx);
@@ -221,7 +214,6 @@ describe('createMcpClientType', () => {
           targetUrl: 'https://mcp.example.com',
         })
       );
-      expect(createSseGatedFetch).toHaveBeenCalledWith(mockResource);
     });
 
     it('passes defaultHeaders to the fetch resource only', async () => {
@@ -304,10 +296,7 @@ describe('createMcpClientType', () => {
     it.each([401, 403])(
       'classifies a wrapped connect error from an HTTP %i response as a user error',
       async (httpStatus) => {
-        const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-          createSseGatedFetch: jest.Mock;
-        };
-        createSseGatedFetch.mockReturnValue(
+        installResourceMocks(
           jest.fn().mockResolvedValue(new Response(null, { status: httpStatus }))
         );
 
@@ -349,12 +338,10 @@ describe('createMcpClientType', () => {
 
   describe('build retries', () => {
     it('retries a transport failure and succeeds on attempt 2', async () => {
-      const { createFetchResource, close } = installResourceMocks();
-      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-        createSseGatedFetch: jest.Mock;
-      };
       const transportError = fetchFailed('ECONNRESET');
-      createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(transportError));
+      const { createFetchResource, close } = installResourceMocks(
+        jest.fn().mockRejectedValue(transportError)
+      );
       mockConnectSequence([
         async (customFetch) => {
           await customFetch('https://mcp.example.com', { method: 'POST' });
@@ -377,11 +364,9 @@ describe('createMcpClientType', () => {
     });
 
     it('succeeds on attempt 3 after two transient failures', async () => {
-      const { createFetchResource, close } = installResourceMocks();
-      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-        createSseGatedFetch: jest.Mock;
-      };
-      createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(fetchFailed('ECONNREFUSED')));
+      const { createFetchResource, close } = installResourceMocks(
+        jest.fn().mockRejectedValue(fetchFailed('ECONNREFUSED'))
+      );
       mockConnectSequence([
         async (customFetch) => {
           await customFetch('https://mcp.example.com', { method: 'POST' });
@@ -402,11 +387,9 @@ describe('createMcpClientType', () => {
     });
 
     it('rejects with McpConnectionTransportError after 3 transient failures', async () => {
-      const { close } = installResourceMocks();
-      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-        createSseGatedFetch: jest.Mock;
-      };
-      createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(fetchFailed('ECONNRESET')));
+      const { close } = installResourceMocks(
+        jest.fn().mockRejectedValue(fetchFailed('ECONNRESET'))
+      );
       mockConnectSequence([
         async (customFetch) => {
           await customFetch('https://mcp.example.com', { method: 'POST' });
@@ -434,11 +417,7 @@ describe('createMcpClientType', () => {
     });
 
     it('retries when customFetch sees HTTP 503', async () => {
-      const { createFetchResource, close } = installResourceMocks();
-      const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-        createSseGatedFetch: jest.Mock;
-      };
-      createSseGatedFetch.mockReturnValue(
+      const { createFetchResource, close } = installResourceMocks(
         jest.fn().mockResolvedValue(new Response(null, { status: 503 }))
       );
       mockConnectSequence([
@@ -459,11 +438,7 @@ describe('createMcpClientType', () => {
     it.each([401, 403])(
       'does not retry HTTP %i and closes the failed attempt',
       async (httpStatus) => {
-        const { close } = installResourceMocks();
-        const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-          createSseGatedFetch: jest.Mock;
-        };
-        createSseGatedFetch.mockReturnValue(
+        const { close } = installResourceMocks(
           jest.fn().mockResolvedValue(new Response(null, { status: httpStatus }))
         );
         const connectError = new Error('wrapped connection error');
@@ -504,10 +479,7 @@ describe('createMcpClientType', () => {
     it('waits the default delay before starting attempt 2', async () => {
       jest.useFakeTimers();
       try {
-        const { createSseGatedFetch } = jest.requireMock('./sse_fetch') as {
-          createSseGatedFetch: jest.Mock;
-        };
-        createSseGatedFetch.mockReturnValue(jest.fn().mockRejectedValue(fetchFailed('ECONNRESET')));
+        installResourceMocks(jest.fn().mockRejectedValue(fetchFailed('ECONNRESET')));
         mockConnectSequence([
           async (customFetch) => {
             await customFetch('https://mcp.example.com', { method: 'POST' });
