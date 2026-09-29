@@ -9,7 +9,7 @@ import type { BrowserAuthFixture, ScoutPage } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import type { ServiceVars } from '../../../../public/onboarding/step_components/service_settings_step/use_service_settings';
 import type { PersistedEcfLaunchStep } from '../../../../public/onboarding/step_components/ecf_deployment_section';
-import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../../../common/constants';
+import { INGEST_HUB_ONBOARDING_ENABLED_FLAG } from '../../../../common/core/constants';
 import { test } from '../fixtures';
 
 export const SERVICES_STEP_SESSION_KEY = 'onboarding.aws.servicesStep';

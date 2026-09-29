@@ -29,6 +29,11 @@ describe('AzureFunctions', () => {
     patch: jest.fn(),
     delete: jest.fn(),
     request: jest.fn(),
+    // `getAllPages` resolves a continuation link against the URL axios would
+    // request. Every handler here passes an absolute ARM URL, which is the
+    // branch where axios returns `url` untouched rather than combining it with
+    // a `baseURL`.
+    getUri: jest.fn(({ url }: { url: string }) => url),
   };
 
   const mockContext = {
@@ -147,8 +152,9 @@ describe('AzureFunctions', () => {
       );
     });
 
-    // ARM paginates list routes with an absolute nextLink URL that already
-    // carries api-version and a skip token, so it must be requested as-is.
+    // ARM paginates list routes with a nextLink that already carries
+    // api-version and a skip token, so its query string is preserved and no
+    // params of our own are re-applied.
     it('follows nextLink and concatenates every page', async () => {
       const nextUrl = `${ARM_BASE}/next-page?skipToken=abc`;
       mockClient.get
@@ -158,6 +164,51 @@ describe('AzureFunctions', () => {
       const result = await AzureFunctions.actions.listFunctionApps.handler(mockContext, {});
 
       expect(mockClient.get).toHaveBeenNthCalledWith(2, nextUrl);
+      expect(result).toEqual({ value: [{ name: 'app-1' }, { name: 'app-2' }] });
+    });
+
+    // `ctx.client` carries the ARM bearer token, and an explicit request to
+    // another host is not covered by axios's cross-host header stripping, so a
+    // link naming one would hand the token over.
+    it('stops instead of sending the ARM token to another host', async () => {
+      mockClient.get.mockResolvedValueOnce({
+        data: { value: [{ name: 'app-1' }], nextLink: 'https://evil.example/pages?skipToken=abc' },
+      });
+
+      const result = await AzureFunctions.actions.listFunctionApps.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ value: [{ name: 'app-1' }], truncated: true });
+    });
+
+    // A protocol-relative link inherits the scheme but not the host, so it
+    // resolves to a different origin and must stop too.
+    it('stops on a protocol-relative link to another host', async () => {
+      mockClient.get.mockResolvedValueOnce({
+        data: { value: [{ name: 'app-1' }], nextLink: '//evil.example/pages' },
+      });
+
+      const result = await AzureFunctions.actions.listFunctionApps.handler(mockContext, {});
+
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ value: [{ name: 'app-1' }], truncated: true });
+    });
+
+    // A bare `new URL(nextLink)` would throw on a relative link. ARM sends an
+    // absolute one, but the helper is shared and must not depend on that.
+    it('resolves a relative nextLink against the requested URL', async () => {
+      mockClient.get
+        .mockResolvedValueOnce({
+          data: { value: [{ name: 'app-1' }], nextLink: '?skipToken=abc' },
+        })
+        .mockResolvedValueOnce({ data: { value: [{ name: 'app-2' }] } });
+
+      const result = await AzureFunctions.actions.listFunctionApps.handler(mockContext, {});
+
+      const [, secondCallUrl] = mockClient.get.mock.calls.map(([callUrl]) => callUrl);
+      expect(secondCallUrl).toBe(
+        `${ARM_BASE}/subscriptions/${SUB_ID}/providers/Microsoft.Web/sites?skipToken=abc`
+      );
       expect(result).toEqual({ value: [{ name: 'app-1' }, { name: 'app-2' }] });
     });
 
@@ -425,9 +476,10 @@ describe('AzureFunctions', () => {
       });
     });
 
-    // 401/403 mean the key was wrong — a connector configuration problem, not
-    // something the function chose to report.
-    it('treats only auth failures as exceptions', async () => {
+    // A status cannot say whether a 401 came from a wrong function key or from
+    // a function enforcing its own user authorization, so none of them are
+    // raised: only a transport failure, which carries no status, throws.
+    it('returns every HTTP status as a result', async () => {
       mockClient.get.mockResolvedValue(siteResponse);
       mockClient.request.mockResolvedValue({ status: 200, headers: {}, data: '' });
 
@@ -438,11 +490,30 @@ describe('AzureFunctions', () => {
       });
 
       const [{ validateStatus }] = mockClient.request.mock.calls[0];
-      expect(validateStatus(200)).toBe(true);
-      expect(validateStatus(409)).toBe(true);
-      expect(validateStatus(500)).toBe(true);
-      expect(validateStatus(401)).toBe(false);
-      expect(validateStatus(403)).toBe(false);
+      for (const status of [200, 302, 401, 403, 409, 500]) {
+        expect(validateStatus(status)).toBe(true);
+      }
+    });
+
+    it("returns a function's own authorization response instead of raising it", async () => {
+      mockClient.get.mockResolvedValue(siteResponse);
+      mockClient.request.mockResolvedValue({
+        status: 403,
+        headers: {},
+        data: { error: 'caller not entitled to quarantine this host' },
+      });
+
+      const result = await AzureFunctions.actions.invoke.handler(mockContext, {
+        ...APP_REF,
+        functionName: 'QuarantineHost',
+        functionKey: 'k',
+      });
+
+      expect(result).toEqual({
+        status: 403,
+        headers: {},
+        body: { error: 'caller not entitled to quarantine this host' },
+      });
     });
 
     // axios follows redirects by default and does not strip custom headers
@@ -470,6 +541,36 @@ describe('AzureFunctions', () => {
         headers: { location: 'https://login.example.com/authorize' },
         body: '',
       });
+    });
+
+    // invoke has two phases, and they classify a 401 differently: a rejected
+    // connector credential on the ARM hostname lookup is a configuration error
+    // and throws, while a 401 from the function itself is returned as a result.
+    it('throws when the ARM hostname lookup is rejected, before the function is reached', async () => {
+      mockClient.get.mockRejectedValue({
+        response: {
+          status: 401,
+          data: {
+            error: {
+              code: 'InvalidAuthenticationToken',
+              message: 'The access token is invalid.',
+            },
+          },
+        },
+      });
+
+      await expect(
+        AzureFunctions.actions.invoke.handler(mockContext, {
+          ...APP_REF,
+          functionName: 'Ping',
+          functionKey: 'k',
+        })
+      ).rejects.toThrow(
+        'Azure API error [InvalidAuthenticationToken]: The access token is invalid.'
+      );
+      // The function was never called, so a 401 here cannot be confused with one
+      // the function itself returned.
+      expect(mockClient.request).not.toHaveBeenCalled();
     });
 
     it('fails with an actionable error when the app has no hostname', async () => {
@@ -508,6 +609,23 @@ describe('AzureFunctions', () => {
         body: { blob: 'x'.repeat(1024 * 1024 + 1) },
       });
       expect(result.success).toBe(false);
+    });
+
+    // The ASCII case above passes whether the bound counts UTF-16 code units or
+    // encoded bytes. This one does not: 400k CJK characters are 400k code units
+    // but 1.2 MB of UTF-8, so it only fails when the bound is measured in bytes.
+    it('rejects a non-ASCII body that is under the cap by length but over it in bytes', () => {
+      const body = { blob: '\u4e2d'.repeat(400_000) };
+
+      expect(JSON.stringify(body).length).toBeLessThan(1024 * 1024);
+      expect(Buffer.byteLength(JSON.stringify(body), 'utf8')).toBeGreaterThan(1024 * 1024);
+      expect(InvokeInputSchema.safeParse({ ...validBase, body }).success).toBe(false);
+    });
+
+    it('accepts a non-ASCII body that fits within the byte cap', () => {
+      const body = { blob: '\u4e2d'.repeat(1000) };
+
+      expect(InvokeInputSchema.safeParse({ ...validBase, body }).success).toBe(true);
     });
 
     it('rejects a body that cannot be serialized', () => {
