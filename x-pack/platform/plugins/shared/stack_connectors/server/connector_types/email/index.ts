@@ -70,11 +70,11 @@ export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 // these values for `service` require users to fill in host/port/secure
 export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];
 
-export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
+export const ELASTIC_CLOUD_SERVICE = {
   host: 'dockerhost',
   port: 10025,
   secure: false,
-};
+} satisfies SMTPConnection.Options;
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
 

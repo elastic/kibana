@@ -12,8 +12,14 @@ export { prepareConversation } from './prepare_conversation';
 export {
   groupTimelineRounds,
   dropTimelineRounds,
+  sliceTimelineRounds,
+  isTimelineCustomEvent,
+  customEvents,
+  type ContextTimelineEvent,
   type ProcessedTimelineEvent,
+  type ProcessedCustomEvent,
   type TimelineRound,
+  type TimelineCustomEvent,
 } from './context_timeline';
 export { selectSkills } from './select_skills';
 export { selectTools } from './select_tools';

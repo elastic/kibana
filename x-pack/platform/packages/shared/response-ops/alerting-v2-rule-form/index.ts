@@ -53,9 +53,11 @@ export type {
   RuleFormLayout,
   RuleRequestCommon,
   RuleQuery,
-  ComposedQuery,
-  StandaloneQuery,
+  RuleRecovery,
+  RuleNoData,
   RuleKind,
+  RecoveryStrategy,
+  NoDataStrategy,
 } from './form';
 
 export {
