@@ -125,12 +125,19 @@ actual documented behavior — flag them even without live access to the API, ba
   proxies a call to caller-controlled code or a caller-named route takes the `catch` path when the service
   deliberately answers `400`, `409`, or `500`. The caller then gets a connector error instead of the
   status, headers, and error body it needs. Flag any such action with no `validateStatus` predicate.
-- **A status code used as the sole evidence for a classification**: Flag a `validateStatus` predicate (or
+- **A status code used as the sole evidence for a classification**: Applies **only to an action that
+  already proxies meaningful non-2xx answers** — the action in the row above, whose contract is to hand
+  the caller whatever the service said. Within such an action, flag a `validateStatus` predicate (or
   `catch` branch) that excludes specific statuses on the grounds of what they "mean" — typically 401/403
   treated as a bad credential. A service whose own code enforces user authorization returns those
   statuses too, and the status alone cannot distinguish the two, so the service's intended authorization
-  response becomes unreadable. Every HTTP status should be returned as a result; only transport failures,
-  which carry no status, are exceptions.
+  response becomes unreadable. Inside that action every HTTP status should be returned as a result; only
+  transport failures, which carry no status, are exceptions.
+
+  Do not apply this rule to any other action. An ordinary `GET` that 401s has failed, and a connectivity
+  `test` handler whose authentication fails **must** fail — its whole purpose is to report whether the
+  credential works, so returning a 401 as a successful result reports a broken connector as healthy.
+  Flag the reverse there: a `test` handler or plain read with a `validateStatus` that accepts 401/403.
 - **Unfollowed pagination continuation links**: Flag any list action that returns
   `response.data.value`/`.items`/`.results` without following the vendor's continuation field
   (`nextLink`, `next`, `next_cursor`, a `Link` header). A partial inventory presented as complete is worse
@@ -138,6 +145,13 @@ actual documented behavior — flag them even without live access to the API, ba
   a count. Where a helper exists, confirm it caps the page count and reports the cap in the result (e.g.
   `truncated: true`), and that it preserves the continuation URL's own query string rather than
   re-applying `params` — that corrupts a URL already carrying an api-version and a skip token.
+
+  Check first which kind of continuation the vendor returns, because the two are handled oppositely. A
+  URL continuation (`nextLink`, `next`, a `Link` header) is resolved and requested, with the caller's
+  `params` dropped. An opaque cursor token (`next_cursor`, `nextPageToken`) is re-sent as the parameter
+  the vendor names, *with* the original `params`, since the filters are not encoded in the token. Flag a
+  helper that passes a cursor token to `new URL()` — a token has no path, so it resolves to a sibling
+  endpoint the connector never called, and the list stops after the first page.
 - **A cross-host continuation link followed with the authenticated client**: Treat this as high severity.
   A vendor-supplied `nextLink` is caller-untrusted data, and `ctx.client` carries the connector's
   credentials. Axios strips a standard authorization header on a cross-host *redirect*, but an explicit
@@ -342,6 +356,7 @@ Report documentation issues alongside code issues.
   | an action that proxies a call whose non-2xx answers are meaningful | that non-2xx returned as a result, with its error body |
   | a request sending a credential in a custom header | a 3xx, asserting `maxRedirects: 0` and the returned `Location` |
   | a list action following a continuation link | a multi-page response, and the page cap reporting `truncated` |
+  | a list action following a continuation link | an off-origin link — absolute *and* protocol-relative (`//evil.example/items`) — asserting pagination stops with no authenticated follow-up request |
   | an input with a size or byte bound | an over-sized input rejected at the schema boundary, **including a non-ASCII case** for a byte bound |
   | a regex constraining a URL path | both the accept and the reject cases, table-driven |
 

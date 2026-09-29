@@ -176,6 +176,11 @@ them with unit tests up front — each one only if your connector has the thing 
   `maxRedirects: 0` and the returned `Location`
 - **if a list action follows a continuation link** — a multi-page response, asserting every page is
   followed and that the page cap reports `truncated`
+- **if a list action follows a continuation link** — an off-origin link, asserting pagination stops and
+  no authenticated follow-up request is made. Cover a protocol-relative link (`//evil.example/items`)
+  as well as an absolute one, because it reads as relative and resolves to a different origin. Without
+  this case a regression that drops the origin guard still passes every test above, and the connector's
+  credentials go to the host the link names
 - **if an input carries a size or byte bound** — an over-sized input rejected at the schema boundary,
   including a **non-ASCII** case for a byte bound
 - **if a regex constrains a URL path** — every accept *and* reject case, table-driven
@@ -197,8 +202,10 @@ Before treating the connector as done, re-read the whole diff once, end to end, 
   header across a cross-host redirect, and rejects the 3xx by default
 - An action that proxies a call to caller-controlled code or a caller-named route, with no
   `validateStatus` — a deliberate non-2xx answer becomes a connector error the agent cannot inspect
-- A status code used as the sole evidence for a classification (e.g. treating every 401/403 as a bad
-  credential) — the service's own authorization responses are indistinguishable by status
+- A status code used as the sole evidence for a classification, *inside a proxying action* (e.g. treating
+  every 401/403 as a bad credential) — the service's own authorization responses are indistinguishable
+  by status. Conversely, a `test` handler or plain read that accepts 401/403 as a result — a failed
+  credential check must fail
 - A list action that reads `response.data.value` (or equivalent) without following the vendor's
   continuation link, or that follows a continuation URL with `ctx.client` without resolving it against
   `ctx.client.getUri()` and checking its origin first — that sends the connector's credentials to

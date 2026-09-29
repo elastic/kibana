@@ -274,12 +274,18 @@ predicate and return `{ status, headers, body }`:
 validateStatus: () => true,
 ```
 
-**Classify on evidence, not on the status code alone.** It is tempting to keep `401`/`403` exceptional on
-the grounds that they mean a bad credential — but a service whose own code enforces user authorization
-returns those statuses too, and the status cannot tell the two apart. Excluding them by number makes the
-service's intended authorization response unreadable. Prefer returning every HTTP status as a result and
-saying so in the action `description` and the `skill` text ("check the `status` field"); reserve
-exceptions for transport failures, which have no status at all.
+**Within such an action, classify on evidence, not on the status code alone.** It is tempting to keep
+`401`/`403` exceptional on the grounds that they mean a bad credential — but a service whose own code
+enforces user authorization returns those statuses too, and the status cannot tell the two apart.
+Excluding them by number makes the service's intended authorization response unreadable. Return every
+HTTP status as a result and say so in the action `description` and the `skill` text ("check the `status`
+field"); reserve exceptions for transport failures, which have no status at all.
+
+This applies only inside an action whose contract is to proxy the service's answer. Everywhere else a
+non-2xx is still an error: an ordinary `GET` that 404s or 401s has failed, and a connectivity `test`
+handler **must** fail when its authentication fails — it exists to report whether the credential works,
+so returning a 401 as a successful result reports a broken connector as healthy. Do not add
+`validateStatus: () => true` to a `test` handler or a plain read.
 
 ### Follow the vendor's pagination continuation links
 
@@ -289,7 +295,19 @@ response envelope for a continuation field (`nextLink`, `next`, `next_cursor`, a
 follow it in a helper shared by every list action, including the connectivity `test` handler if it counts
 anything.
 
-Three details that are easy to get wrong:
+**First decide which of the two kinds of continuation the vendor gives you**, because they are submitted
+differently and the wrong treatment silently stops the list after page one:
+
+- **A URL continuation** (`nextLink`, `next`, a `Link` header) is a link. Resolve it and request the
+  resolved URL, as the rest of this section describes.
+- **A cursor token** (`next_cursor`, `nextPageToken`, `continuationToken`) is an opaque string, not a
+  link. Send it back as the parameter the vendor names (`?cursor=...`), together with the original
+  `params` — the filters are not encoded in the token, so dropping them re-queries the whole
+  collection. Never pass a cursor to `new URL()`: a bare token has no path, so resolving it against the
+  request URL produces a sibling path the connector never meant to call, and an origin check on that
+  result passes while the request is wrong.
+
+The remaining three details apply to a **URL** continuation:
 
 - **Check the origin of a continuation URL before requesting it.** A vendor-supplied link is
   caller-untrusted data, and `ctx.client` carries the connector's credentials. Axios strips a standard
@@ -321,7 +339,8 @@ Three details that are easy to get wrong:
 
 - A continuation URL already carries the api-version and any skip token, whether the vendor gives it
   absolute or relative, so do not re-apply your own `params` — that corrupts it. Request the resolved
-  URL as the vendor composed it, once the origin check above passes.
+  URL as the vendor composed it, once the origin check above passes. This is the opposite of the cursor
+  case above, where the original `params` must be re-sent alongside the token.
 - Cap the number of pages followed, and report the cap in the result (e.g. `truncated: true`) so an agent
   narrows its query rather than treating a capped list as complete.
 
