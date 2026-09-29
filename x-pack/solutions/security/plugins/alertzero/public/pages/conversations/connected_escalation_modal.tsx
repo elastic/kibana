@@ -23,7 +23,7 @@ import { type EscalationModalRenderProps } from '@kbn/agentic-investigations-com
 import {
   useListEscalations,
   useCreateEscalation,
-  useAddToEscalation,
+  useAttachToEscalation,
   useCurrentUserProfile,
   useSuggestUserProfiles,
 } from '@kbn/agentic-investigations-plugin/public';
@@ -87,7 +87,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
       refetch: refetchEscalations,
     } = useListEscalations({ searchQuery: incidentSearch });
     const createEscalation = useCreateEscalation();
-    const addToEscalation = useAddToEscalation();
+    const attachToEscalation = useAttachToEscalation();
 
     if (!conversationId) return null;
 
@@ -220,7 +220,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
             searchQuery={incidentSearch}
             onSearchChange={setIncidentSearch}
             onSubmit={(escalationId) =>
-              addToEscalation.mutate(
+              attachToEscalation.mutate(
                 { escalationId, linkedInvestigationId: conversationId },
                 {
                   onSuccess: () => {
@@ -238,7 +238,7 @@ export const ConnectedEscalationModal = memo<EscalationModalRenderProps>(
                 }
               )
             }
-            isSubmitting={addToEscalation.isLoading}
+            isSubmitting={attachToEscalation.isLoading}
             onCancel={onClose}
           />
         )}
