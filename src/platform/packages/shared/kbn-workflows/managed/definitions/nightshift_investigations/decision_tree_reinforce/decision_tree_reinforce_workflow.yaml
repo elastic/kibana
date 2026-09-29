@@ -60,16 +60,16 @@ steps:
     type: nightshift.ensureInvestigationAgent
     if: '${{ steps.prepare_turn.output.skipped == false }}'
     with:
-      agent_id: significant-events.decision-tree-reinforcement
+      agent_id: nightshift.decision-tree-reinforcement
 
   # The agent runs in its own conversation, so its own beforeAgent hook hydrates the
   # trees into that conversation's sandbox rather than the investigator's.
   - name: reinforce_decision_trees
     type: ai.agent
-    agent-id: significant-events.decision-tree-reinforcement
+    agent-id: nightshift.decision-tree-reinforcement
     connector-id-by-feature: 'nightshift_investigation'
-    plugin-id: 'significant_events_decision_tree_reinforce'
-    aggregate-by: 'significant_events'
+    plugin-id: 'nightshift_decision_tree_reinforce'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

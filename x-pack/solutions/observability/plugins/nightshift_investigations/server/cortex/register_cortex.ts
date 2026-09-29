@@ -15,8 +15,8 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
 import {
+  NIGHTSHIFT_INFERENCE_PARENT_FEATURE_ID,
   NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
@@ -171,7 +171,7 @@ export const runCortexOptimize = async ({
       metadata: {
         connectorTelemetry: {
           pluginId: NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
-          aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+          aggregateBy: NIGHTSHIFT_INFERENCE_PARENT_FEATURE_ID,
           productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
           productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
           interactionId,

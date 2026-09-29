@@ -84,12 +84,9 @@ steps:
   - name: investigate
     type: ai.agent
     agent-id: nightshift.investigation
-    # Keep these inference identifiers in sync with @kbn/significant-events-schema
-    # inference_feature_ids.ts (NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID /
-    # SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID).
     connector-id-by-feature: 'nightshift_investigation'
     plugin-id: 'nightshift_investigation'
-    aggregate-by: 'significant_events'
+    aggregate-by: 'nightshift'
     product-solution: 'observability'
     product-feature: 'nightshift'
     create-conversation: true

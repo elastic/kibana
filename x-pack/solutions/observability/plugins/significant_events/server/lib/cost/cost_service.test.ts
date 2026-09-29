@@ -8,10 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
-  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
-  NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 } from '@kbn/significant-events-schema';
@@ -41,9 +39,8 @@ const PRICES: PriceMap = new Map([
 
 const KNOWN_FEATURE_IDS = [
   SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID,
-  NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
   'significant_events_investigation',
-  SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID,
+  'significant_events_decision_tree_reinforce',
   SIGNIFICANT_EVENTS_KI_EXTRACTION_INFERENCE_FEATURE_ID,
   SIGNIFICANT_EVENTS_KI_QUERY_GENERATION_INFERENCE_FEATURE_ID,
 ] as const;
@@ -273,7 +270,7 @@ describe('calculateSignificantEventsCost', () => {
           },
         },
       });
-      return { aggregations: aggregations({ total: 60, features }) };
+      return { aggregations: aggregations({ total: 50, features }) };
     });
 
     const result = await calculate({ esClient });
@@ -287,7 +284,7 @@ describe('calculateSignificantEventsCost', () => {
     ]);
     expect(result.today.groups.find((group) => group.group === 'discovery')?.totalTokens).toBe(10);
     expect(result.today.groups.find((group) => group.group === 'investigation')?.totalTokens).toBe(
-      30
+      20
     );
     expect(result.today.groups.find((group) => group.group === 'ki_extraction')?.totalTokens).toBe(
       20
@@ -299,7 +296,7 @@ describe('calculateSignificantEventsCost', () => {
       aggregations: aggregations({
         total: 25,
         features: {
-          [SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID]: featureBucket({
+          significant_events_decision_tree_reinforce: featureBucket({
             featureTotal: 25,
             models: [modelBucket({ key: SONNET, total: 25, prompt: 25 })],
           }),

@@ -126,29 +126,6 @@ describe('attachInvestigationToEvent', () => {
     expect(written.investigations![0].completed_at).toBe('2026-01-01T02:00:00.000Z');
   });
 
-  it('keeps existing entry when existing has completed_at and incoming does not', async () => {
-    const completed = createInvestigation({
-      workflow_execution_id: 'exec-1',
-      completed_at: '2026-01-01T02:00:00.000Z',
-    });
-    const existing = createEvent({ event_uuid: 'event-1', investigations: [completed] });
-    const { client, dataStreamClient } = createEventClient([existing]);
-
-    const lateStarted = createInvestigation({
-      workflow_execution_id: 'exec-1',
-      completed_at: undefined,
-    });
-    const result = await attachInvestigationToEvent({
-      eventClient: client,
-      eventId: 'agent-event-1',
-      investigation: lateStarted,
-    });
-
-    expect(result.updated).toBe(0);
-    expect(result.ignored).toBe(1);
-    expect(dataStreamClient.create).not.toHaveBeenCalled();
-  });
-
   it('replaces by workflow_execution_id: different executions produce two entries', async () => {
     const first = createInvestigation({
       workflow_execution_id: 'exec-1',

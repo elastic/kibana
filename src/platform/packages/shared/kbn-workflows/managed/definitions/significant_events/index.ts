@@ -9,8 +9,6 @@
 
 import CLEANUP_YAML from './cleanup.yaml';
 import INVESTIGATION_COMPLETED_YAML from './investigation_completed.yaml';
-import INVESTIGATION_FAILED_YAML from './investigation_failed.yaml';
-import INVESTIGATION_STARTED_YAML from './investigation_started.yaml';
 import DETECTION_YAML from './significant_events/detection.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
@@ -28,10 +26,6 @@ export const SIGNIFICANT_EVENTS_ORCHESTRATOR_WORKFLOW_ID = 'system-significant-e
 export const SIGNIFICANT_EVENTS_CLEANUP_WORKFLOW_ID = 'system-significant-events-cleanup';
 export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW_ID =
   'system-significant-events-investigation-completed';
-export const SIGNIFICANT_EVENTS_INVESTIGATION_FAILED_WORKFLOW_ID =
-  'system-significant-events-investigation-failed';
-export const SIGNIFICANT_EVENTS_INVESTIGATION_STARTED_WORKFLOW_ID =
-  'system-significant-events-investigation-started';
 
 // lifecycle: 'static' — instances are declared at startup; orphans are cleaned up on restart.
 // versionStrategy: 'auto' — version bumps are handled automatically on install.
@@ -90,23 +84,5 @@ export const SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW = {
   version: 1,
   billable: false,
   yaml: INVESTIGATION_COMPLETED_YAML,
-  management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-export const SIGNIFICANT_EVENTS_INVESTIGATION_FAILED_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_FAILED_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 1,
-  billable: false,
-  yaml: INVESTIGATION_FAILED_YAML,
-  management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
-} as const satisfies ManagedWorkflowDefinition;
-
-export const SIGNIFICANT_EVENTS_INVESTIGATION_STARTED_WORKFLOW = {
-  id: SIGNIFICANT_EVENTS_INVESTIGATION_STARTED_WORKFLOW_ID,
-  pluginId: 'significantEvents',
-  version: 1,
-  billable: false,
-  yaml: INVESTIGATION_STARTED_YAML,
   management: SIGNIFICANT_EVENTS_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition;

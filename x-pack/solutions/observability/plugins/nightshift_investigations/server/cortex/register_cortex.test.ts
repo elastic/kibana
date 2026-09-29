@@ -8,8 +8,8 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import {
+  NIGHTSHIFT_INFERENCE_PARENT_FEATURE_ID,
   NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
-  SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
   SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
 } from '@kbn/significant-events-schema';
@@ -133,7 +133,7 @@ describe('runCortexOptimize', () => {
     expect(optimizeCortex).toHaveBeenCalled();
   });
 
-  it('attributes the optimize LLM call to significant events investigation spend', async () => {
+  it('attributes the optimize LLM call to Nightshift investigation spend', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
     expect(getClient).toHaveBeenCalledWith({
       request,
@@ -142,7 +142,7 @@ describe('runCortexOptimize', () => {
         metadata: {
           connectorTelemetry: {
             pluginId: NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID,
-            aggregateBy: SIGNIFICANT_EVENTS_INFERENCE_PARENT_FEATURE_ID,
+            aggregateBy: NIGHTSHIFT_INFERENCE_PARENT_FEATURE_ID,
             productSolution: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_SOLUTION,
             productFeature: SIGNIFICANT_EVENTS_INFERENCE_PRODUCT_FEATURE,
             interactionId: 'execution-1',

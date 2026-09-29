@@ -15,7 +15,7 @@ import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_
 import { DECISION_TREE_PROMPT_TOOLS, DECISION_TREE_TOOL_IDS } from '../../tools/decision_tree';
 
 export const NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_ID =
-  'significant-events.decision-tree-reinforcement';
+  'nightshift.decision-tree-reinforcement';
 export const NIGHTSHIFT_DECISION_TREE_REINFORCEMENT_AGENT_TYPE_ID =
   'platform.sig_events.decision-tree-reinforcement-type';
 

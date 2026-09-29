@@ -43,12 +43,7 @@ export const attachInvestigationToEvent = async ({
 
   let investigations: SignificantEventInvestigation[];
   if (existingIdx !== -1) {
-    const existingEntry = existing[existingIdx];
-    if (existingEntry.completed_at && !investigation.completed_at) {
-      investigations = existing;
-    } else {
-      investigations = existing.map((entry, idx) => (idx === existingIdx ? investigation : entry));
-    }
+    investigations = existing.map((entry, idx) => (idx === existingIdx ? investigation : entry));
   } else if (existing.length < 100) {
     investigations = [...existing, investigation];
   } else {

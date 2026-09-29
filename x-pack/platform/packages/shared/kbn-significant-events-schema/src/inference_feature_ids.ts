@@ -30,5 +30,8 @@ export const SIGNIFICANT_EVENTS_DISCOVERY_INFERENCE_FEATURE_ID =
 export const NIGHTSHIFT_INVESTIGATION_INFERENCE_FEATURE_ID = 'nightshift_investigation' as const;
 
 /** Decision tree reinforcement. */
-export const SIGNIFICANT_EVENTS_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID =
-  'significant_events_decision_tree_reinforce' as const;
+export const NIGHTSHIFT_DECISION_TREE_REINFORCE_INFERENCE_FEATURE_ID =
+  'nightshift_decision_tree_reinforce' as const;
+
+/** Parent id Nightshift investigation LLM usage is aggregated under. */
+export const NIGHTSHIFT_INFERENCE_PARENT_FEATURE_ID = 'nightshift' as const;

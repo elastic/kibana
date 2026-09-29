@@ -222,13 +222,13 @@ const eventsLifecycleRoute = createServerRoute({
   },
 });
 
-/** Used by the managed investigation lifecycle subscriber workflows. */
+/** Used by the managed investigation-completed subscriber workflow. */
 const eventsAttachInvestigationRoute = createServerRoute({
   endpoint: 'POST /internal/significant_events/events/{id}/investigations',
   options: {
     access: 'internal',
     summary: 'Attach investigation to event',
-    description: 'Record an investigation lifecycle event against a significant event.',
+    description: 'Record a completed investigation against a significant event.',
   },
   security: {
     authz: {
@@ -239,7 +239,7 @@ const eventsAttachInvestigationRoute = createServerRoute({
     path: z.object({
       id: z.string().max(255),
     }),
-    body: significantEventInvestigationSchema,
+    body: significantEventInvestigationSchema.required({ completed_at: true }),
   }),
   handler: async ({ params, request, getScopedClients, server, logger }) => {
     const { getEventClient, getAlertEventsClient, licensing } = await getScopedClients({ request });

@@ -11,8 +11,6 @@ import { parse } from 'yaml';
 import {
   SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW,
   SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_FAILED_WORKFLOW,
-  SIGNIFICANT_EVENTS_INVESTIGATION_STARTED_WORKFLOW,
 } from '.';
 import { SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW } from './knowledge_indicators';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
@@ -60,21 +58,10 @@ const discovery = parse(SIGNIFICANT_EVENTS_DISCOVERY_WORKFLOW.yaml) as ParsedWor
 const queriesGeneration = parse(
   SIGNIFICANT_EVENTS_KI_QUERIES_GENERATION_WORKFLOW.yaml
 ) as ParsedWorkflow;
-const investigationCompleted = parse(
-  SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml
-) as ParsedWorkflow & {
-  triggers: Array<{ type: string; on?: { condition?: string } }>;
-};
-const investigationStarted = parse(
-  SIGNIFICANT_EVENTS_INVESTIGATION_STARTED_WORKFLOW.yaml
-) as ParsedWorkflow & {
-  triggers: Array<{ type: string; on?: { condition?: string } }>;
-};
-const investigationFailed = parse(
-  SIGNIFICANT_EVENTS_INVESTIGATION_FAILED_WORKFLOW.yaml
-) as ParsedWorkflow & {
-  triggers: Array<{ type: string; on?: { condition?: string } }>;
-};
+const investigationCompleted = parse(SIGNIFICANT_EVENTS_INVESTIGATION_COMPLETED_WORKFLOW.yaml) as
+  | ParsedWorkflow & {
+      triggers: Array<{ type: string; on?: { condition?: string } }>;
+    };
 
 describe('significant events persistence workflow contracts', () => {
   it('bumps managed workflow versions for the bulk persistence contract', () => {
@@ -175,37 +162,6 @@ describe('significant events persistence workflow contracts', () => {
       },
     ]);
     const attach = requireStep(investigationCompleted, 'attach_completed_investigation');
-    expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body).toEqual({
-      workflow_execution_id: '{{ event.investigation_id }}',
-      started_at: '{{ event.started_at }}',
-      completed_at: '{{ event.completed_at }}',
-    });
-  });
-
-  it('attaches started investigations only to Significant Events', () => {
-    expect(investigationStarted.triggers).toEqual([
-      {
-        type: 'nightshift-investigations.started',
-        on: { condition: 'event.subject.type: "significant_event"' },
-      },
-    ]);
-    const attach = requireStep(investigationStarted, 'attach_started_investigation');
-    expect(attach.with?.path).toContain('/internal/significant_events/events/');
-    expect(attach.with?.body).toEqual({
-      workflow_execution_id: '{{ event.investigation_id }}',
-      started_at: '{{ event.started_at }}',
-    });
-  });
-
-  it('attaches failed investigations only to Significant Events', () => {
-    expect(investigationFailed.triggers).toEqual([
-      {
-        type: 'nightshift-investigations.failed',
-        on: { condition: 'event.subject.type: "significant_event"' },
-      },
-    ]);
-    const attach = requireStep(investigationFailed, 'attach_failed_investigation');
     expect(attach.with?.path).toContain('/internal/significant_events/events/');
     expect(attach.with?.body).toEqual({
       workflow_execution_id: '{{ event.investigation_id }}',
