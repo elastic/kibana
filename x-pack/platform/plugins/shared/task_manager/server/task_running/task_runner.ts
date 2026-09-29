@@ -928,6 +928,7 @@ export class TaskManagerRunner implements TaskRunner {
             );
 
             if (shouldYieldTask) {
+              this.logTaskYieldEvent(task, runAt ?? new Date());
               this.logger.debug(
                 `Task ${this} yielded and will resume at ${(runAt ?? new Date()).toISOString()}.`,
                 { tags: [this.taskType, this.id, 'task:yield'] }
@@ -1099,6 +1100,26 @@ export class TaskManagerRunner implements TaskRunner {
         },
       },
       message: `Task ${this.taskType} "${this.id}" started.`,
+    });
+  }
+
+  // The next task-run-start for this task id is the resume; a start before the deadline
+  // means it was woken by `runSoon`.
+  private logTaskYieldEvent(task: ConcreteTaskInstance, deadline: Date): void {
+    this.eventLogger.logEvent({
+      event: {
+        action: EVENT_LOG_ACTIONS.taskYield,
+      },
+      kibana: {
+        task: {
+          id: this.id,
+          type: this.taskType,
+          scheduled: task.scheduledAt.toISOString(),
+          execution: { uuid: this.uuid },
+          yield: { deadline: deadline.toISOString() },
+        },
+      },
+      message: `Task ${this.taskType} "${this.id}" yielded until ${deadline.toISOString()}.`,
     });
   }
 

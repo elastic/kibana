@@ -820,6 +820,71 @@ describe('TaskManagerRunner', () => {
       expect(getNextRunAtSpy).not.toHaveBeenCalled();
     });
 
+    test('logs a task-yield event with the deadline when an ad-hoc task yields', async () => {
+      const yielded = getYieldTaskRunResult({ state: {}, delay: '5m' });
+      const { instance, runner } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return yielded;
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      const events = (eventLoggerMock.logEvent as jest.Mock).mock.calls.map((call) => call[0]);
+      expect(events.map((event) => event.event.action)).toEqual([
+        'task-run-start',
+        'task-run',
+        'task-yield',
+      ]);
+      expect(events[1].message).toBe(`Task bar "${instance.id}" yielded.`);
+      expect(events[2]).toEqual({
+        event: { action: 'task-yield' },
+        kibana: {
+          task: {
+            id: instance.id,
+            type: 'bar',
+            scheduled: instance.scheduledAt.toISOString(),
+            execution: { uuid: TASK_EXECUTION_UUID },
+            yield: { deadline: (yielded.runAt as Date).toISOString() },
+          },
+        },
+        message: `Task bar "${instance.id}" yielded until ${(
+          yielded.runAt as Date
+        ).toISOString()}.`,
+      });
+    });
+
+    test('does not log a task-yield event when an ad-hoc task completes', async () => {
+      const { runner } = await readyToRunStageSetup({
+        instance: { status: TaskStatus.Running, startedAt: new Date() },
+        definitions: {
+          bar: {
+            title: 'Bar!',
+            createTaskRunner: () => ({
+              async run() {
+                return { state: {} };
+              },
+            }),
+          },
+        },
+      });
+
+      await runner.run();
+
+      const actions = (eventLoggerMock.logEvent as jest.Mock).mock.calls.map(
+        (call) => call[0].event.action
+      );
+      expect(actions).not.toContain('task-yield');
+    });
+
     test('keeps an ad-hoc task that yields, resets attempts, and stores the handed-off params', async () => {
       const onTaskEvent = jest.fn();
       const yielded = getYieldTaskRunResult({

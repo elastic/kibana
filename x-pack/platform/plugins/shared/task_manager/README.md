@@ -321,6 +321,8 @@ taskManager.registerTaskDefinitions({
 
 The task id, stored API key, and user scope are unchanged across yields, and `attempts` resets to 0 because a yield is a successful run.
 
+A yield is recorded in the event log (provider `taskManager`): the yielding run writes its normal `task-run` event plus a `task-yield` event carrying `kibana.task.yield.deadline`. The task's next `task-run-start` event is the resume; if it starts before the deadline, the task was resumed by `runSoon`.
+
 ### Force failing a task
 
 If you wish to purposely fail a task, you can throw an error of any kind and the retry logic will apply.
