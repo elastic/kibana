@@ -70,6 +70,26 @@ describe('exclusion entries', () => {
     expect(isIndexPatternAllowed('logs-fleet_server*', broad)).toBe(false);
   });
 
+  it('refuses a wildcard whose expansion could reach an excluded stream, not just the exact name', () => {
+    // Elasticsearch expands `logs-e*` to `logs-elastic_agent-default` too; probing one
+    // instance (`logs-ex`) would have let it through.
+    expect(isIndexPatternAllowed('logs-e*', broad)).toBe(false);
+    expect(isIndexPatternAllowed('logs-elastic*', broad)).toBe(false);
+    expect(isIndexPatternAllowed('logs-f*', broad)).toBe(false);
+    // Disjoint prefixes stay allowed.
+    expect(isIndexPatternAllowed('logs-okta*', broad)).toBe(true);
+    expect(isIndexPatternAllowed('logs-o*', broad)).toBe(true);
+  });
+
+  it('treats the broad positive itself as a source that overlaps its exclusions, so it is refused', () => {
+    expect(isIndexPatternAllowed('logs-*', broad)).toBe(false);
+  });
+
+  it('judges a concrete candidate exactly, so a name that merely shares a prefix with an exclusion is allowed', () => {
+    expect(isIndexPatternAllowed('logs-elastic', broad)).toBe(true);
+    expect(isIndexPatternAllowed('logs-elastic_agent.filebeat-default', broad)).toBe(false);
+  });
+
   it('never accepts an exclusion entry itself as a source', () => {
     expect(isIndexPatternAllowed('-logs-elastic_agent*', broad)).toBe(false);
   });

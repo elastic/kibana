@@ -13,6 +13,7 @@ import {
   resolveHuntScope,
   parseTechnologyInput,
   broadSearchPatterns,
+  MAX_SCOPE_TARGETS,
 } from './resolve_index_scope';
 import { HUNT_ALERTS_INDEX_PATTERN_PREFIX } from '../../../../../common/constants';
 import type { HuntIoc, HuntTechnology } from '@kbn/alertzero-common';
@@ -511,6 +512,31 @@ describe('resolveHuntScope', () => {
       expect(result.resolution).toBe('discovered:deterministic');
       expect(result.required).toEqual(['logs-windows-default*', 'logs-windows-prod*']);
       expect(result.index_patterns).toEqual(result.required);
+    });
+
+    it('collapses a match wider than the request path allows onto the bounded broad target, degraded', async () => {
+      const esClient = createMockEsClient(new Set([alertsPattern]));
+      const wide: DiscoveredDataset[] = Array.from({ length: MAX_SCOPE_TARGETS + 1 }, (_, i) => ({
+        index_pattern: `logs-microsoft.ds${i}-*`,
+        dataset: `microsoft.ds${i}`,
+        vendor: 'microsoft',
+        data_streams: [`logs-microsoft.ds${i}-default`],
+        search_patterns: [`logs-microsoft.ds${i}-*`],
+      }));
+      mockDiscover.mockResolvedValue(wide);
+      mockDeterministic.mockReturnValue(wide);
+
+      const result = await resolveHuntScope({
+        esClient,
+        spaceId: SPACE_ID,
+        report: { vendor: 'Microsoft' },
+        logger,
+      });
+
+      expect(result.resolution).toBe('discovered:deterministic');
+      expect(result.status).toBe('degraded');
+      expect(result.required).toEqual(broadSearchPatterns());
+      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('more than the 64'));
     });
 
     it('is ok on a deterministic vendor match with the discovered pattern as required', async () => {

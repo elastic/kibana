@@ -45,19 +45,46 @@ export const buildMatchesRequired = (requiredPatterns: string[]): ((index: strin
   };
 };
 
+/** The literal text before a pattern's first `*`; the whole pattern when it has none. */
+const literalPrefix = (pattern: string): string => pattern.split('*')[0];
+
+/**
+ * Whether a candidate source could resolve to anything an exclusion covers.
+ * A concrete candidate is checked exactly. A wildcard candidate is judged by
+ * its literal prefix: if that prefix and the exclusion's prefix are compatible
+ * (either starts with the other) the two can share a match once Elasticsearch
+ * expands the wildcard (`logs-e*` reaches `logs-elastic_agent-default`), so the
+ * candidate is treated as overlapping. That is deliberately conservative: a
+ * refusal falls back to the matched indices, an acceptance would read excluded
+ * streams.
+ */
+const overlapsExclusion = (candidate: string, exclusion: string): boolean => {
+  if (!candidate.includes('*')) return compileGlobs([exclusion])[0].test(candidate);
+  const a = literalPrefix(candidate);
+  const b = literalPrefix(exclusion);
+  return a.startsWith(b) || b.startsWith(a);
+};
+
 /**
  * True when `candidate` (a concrete `_index` or a pattern like
  * `logs-aws.cloudtrail-*`) cannot resolve outside `allowedPatterns`.
  *
  * A trailing `*` on the candidate is probed as `x` so `logs-aws.*` covers
  * `logs-aws.cloudtrail-*` but not the broader `logs-*` or an unrelated
- * `.kibana*`. Cross-cluster sources (`cluster:index`) are never allowed.
+ * `.kibana*`. Exclusion entries (`-logs-elastic_agent*`) then veto any
+ * candidate whose expansion could touch them, including the positive
+ * pattern itself: under a broad scope `logs-*` is not a source, only the
+ * narrower patterns Tier 1 actually hit are. Cross-cluster sources
+ * (`cluster:index`) are never allowed.
  */
 export const isIndexPatternAllowed = (candidate: string, allowedPatterns: string[]): boolean => {
   if (!candidate || candidate === '*' || allowedPatterns.length === 0) return false;
   if (candidate.includes(':')) return false;
   // A generated exclusion is not a source; only positive entries can be named outright.
   if (isExclusion(candidate)) return false;
-  if (allowedPatterns.filter((pattern) => !isExclusion(pattern)).includes(candidate)) return true;
-  return buildMatchesRequired(allowedPatterns)(candidate.replace(/\*/g, 'x'));
+  const positives = allowedPatterns.filter((pattern) => !isExclusion(pattern));
+  const exclusions = allowedPatterns.filter(isExclusion).map((pattern) => pattern.slice(1));
+  const contained =
+    positives.includes(candidate) || buildMatchesRequired(positives)(candidate.replace(/\*/g, 'x'));
+  return contained && !exclusions.some((exclusion) => overlapsExclusion(candidate, exclusion));
 };

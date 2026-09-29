@@ -9,6 +9,7 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   HUNT_DISCOVERY_PATTERN,
+  MAX_NAMESPACE_PATTERNS_PER_DATASET,
   discoverHuntDatasets,
   parseDataStreamName,
 } from './discover_hunt_datasets';
@@ -205,6 +206,28 @@ describe('discoverHuntDatasets', () => {
     mockDataStreams([]);
 
     await expect(discoverHuntDatasets({ esClient })).resolves.toEqual([]);
+  });
+
+  it('falls back to the plain pattern when a dataset has too many namespaces to isolate stream by stream', async () => {
+    const logger = loggerMock.create();
+    const namespaces = Array.from(
+      { length: MAX_NAMESPACE_PATTERNS_PER_DATASET + 1 },
+      (_, i) => `ns${i}`
+    );
+    mockDataStreams([
+      ...namespaces.map((ns) => `logs-windows-${ns}`),
+      'logs-windows-defender-default',
+    ]);
+
+    const datasets = await discoverHuntDatasets({ esClient, logger });
+    const windows = datasets.find((d) => d.dataset === 'windows');
+
+    // The scope's targets travel in the request path; hundreds of per-namespace patterns
+    // would not fit, so the plain pattern wins and the over-match is logged instead.
+    expect(windows?.search_patterns).toEqual(['logs-windows-*']);
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('namespaces exceed the 16 per-namespace patterns')
+    );
   });
 
   it('warns when a sibling dataset extends a full stream name, since no wildcard can isolate it', async () => {

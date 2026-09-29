@@ -39,6 +39,14 @@ export const HUNT_DISCOVERY_PATTERN = 'logs-*';
 export const INTERNAL_DATASET_PREFIXES = ['elastic_agent', 'fleet_server'];
 
 /**
+ * Most per-namespace patterns one dataset may contribute to a scope. The scope's
+ * targets travel in the request path, so a dataset with hundreds of namespaces
+ * cannot be isolated stream by stream; past this it searches its plain
+ * `logs-<dataset>-*` pattern and accepts the sibling over-match, logged.
+ */
+export const MAX_NAMESPACE_PATTERNS_PER_DATASET = 16;
+
+/**
  * Splits a data stream name into its `{type}-{dataset}-{namespace}` parts: type
  * is the segment before the first '-', namespace the segment after the last '-',
  * dataset everything between. Returns undefined for names with fewer than two
@@ -156,6 +164,17 @@ export const discoverHuntDatasets = async ({
     }
     if (siblings.length === 0) {
       entry.search_patterns = [entry.index_pattern];
+      continue;
+    }
+    if (entry.data_streams.length > MAX_NAMESPACE_PATTERNS_PER_DATASET) {
+      entry.search_patterns = [entry.index_pattern];
+      logger?.warn(
+        `Hunt dataset discovery keeps ${entry.index_pattern} for ${
+          entry.dataset
+        } despite sibling dataset(s) ${siblings.map((other) => other.dataset).join(', ')}: ${
+          entry.data_streams.length
+        } namespaces exceed the ${MAX_NAMESPACE_PATTERNS_PER_DATASET} per-namespace patterns a scope may carry`
+      );
       continue;
     }
     entry.search_patterns = entry.data_streams.map((stream) => `${stream}*`);

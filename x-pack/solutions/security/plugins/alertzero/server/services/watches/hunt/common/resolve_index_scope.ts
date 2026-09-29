@@ -277,6 +277,13 @@ const mergeStaticScopes = (scopes: ResolvedIndexScope[], pinned: boolean): HuntS
  * that hit, not against the wildcard. Exclusion entries never match a backing index in `buildMatchesRequired`,
  * so they do not affect the hit bar; they only keep those streams out of the search.
  */
+/**
+ * Most targets a matched scope may hand Tier 1. `_search` and `_count` receive the
+ * list in the request path, and Elasticsearch's default initial-line limit is 4 KB,
+ * so a wider match collapses to the bounded broad target instead of failing the hunt.
+ */
+export const MAX_SCOPE_TARGETS = 64;
+
 export const broadSearchPatterns = (): string[] => [
   HUNT_DISCOVERY_PATTERN,
   ...INTERNAL_DATASET_PREFIXES.map((prefix) => `-logs-${prefix}*`),
@@ -297,12 +304,14 @@ const buildDiscoveredScope = async ({
   matches,
   blocked,
   resolution,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   spaceId: string;
   matches: DiscoveredDataset[];
   blocked: HuntScope;
   resolution: DiscoveredResolution;
+  logger?: Logger;
 }): Promise<HuntScope> => {
   const alertsPattern = alertsIndexPattern(spaceId);
   const [, alertsPresent] = await checkPattern(esClient, alertsPattern);
@@ -312,11 +321,22 @@ const buildDiscoveredScope = async ({
   // one bounded wildcard with the internal datasets excluded rather than as the list:
   // the client puts the index list in the request path, and a hundred-odd patterns
   // already exceed Elasticsearch's default initial-line limit.
-  const required =
+  // A broad scope never names its datasets, so only a matched scope is measured.
+  const matchedTargets =
     resolution === 'discovered:broad'
-      ? broadSearchPatterns()
+      ? []
       : uniq(matches.flatMap((match) => match.search_patterns));
-  const status = resolution === 'discovered:deterministic' ? 'ok' : 'degraded';
+  const tooWide = matchedTargets.length > MAX_SCOPE_TARGETS;
+  if (tooWide) {
+    logger?.warn(
+      `Hunt scope matched ${matchedTargets.length} index patterns, more than the ${MAX_SCOPE_TARGETS} a request may carry; searching the bounded ${HUNT_DISCOVERY_PATTERN} target instead`
+    );
+  }
+  const required =
+    resolution === 'discovered:broad' || tooWide ? broadSearchPatterns() : matchedTargets;
+  // A match too wide to name is searched like a broad scope and reads as degraded,
+  // whichever matcher produced it.
+  const status = resolution === 'discovered:deterministic' && !tooWide ? 'ok' : 'degraded';
 
   return {
     technologies: [],
@@ -426,6 +446,7 @@ export const resolveHuntScope = async ({
         spaceId,
         matches: datasets,
         blocked: staticScope,
+        logger,
         resolution: 'discovered:broad',
       })
     );
@@ -436,7 +457,10 @@ export const resolveHuntScope = async ({
     // Discovery lists data streams only, but the broad target is the whole `logs-*`
     // space: a plain index or alias under it (an imported archive) is still a place
     // an IOC can be searched. Only when nothing at all answers to the discovery
-    // pattern is there truly nothing to hunt.
+    // pattern is there truly nothing to hunt. An estate whose only `logs-*` sources
+    // are the excluded agent-internal streams passes this check and goes broad, and
+    // Tier 1 then reports `index_unavailable` (retryable) because the exclusions leave
+    // the required target backed by no index; it never reads as searched-and-clean.
     const [, anyLogSource] = await checkPattern(esClient, HUNT_DISCOVERY_PATTERN);
     return anyLogSource ? blockedOrBroad('blocked:no_datasets') : blocked('blocked:no_datasets');
   }
@@ -453,6 +477,7 @@ export const resolveHuntScope = async ({
         spaceId,
         matches: deterministic,
         blocked: staticScope,
+        logger,
         resolution: 'discovered:deterministic',
       })
     );
@@ -471,6 +496,7 @@ export const resolveHuntScope = async ({
       spaceId,
       matches: modelMatch.matches,
       blocked: staticScope,
+      logger,
       resolution: 'discovered:model',
     }),
     modelMatch.scored

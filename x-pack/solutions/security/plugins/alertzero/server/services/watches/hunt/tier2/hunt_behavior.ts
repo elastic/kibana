@@ -389,7 +389,9 @@ const resolveGenerationIndex = (
     isIndexPatternAllowed(pattern, allowlist)
   );
   if (matched.length > 0) return matched.join(',');
-  if (requiredIndices.length > 0) return requiredIndices.join(',');
+  // Exclusion entries (`-logs-elastic_agent*`) belong to the search, not to a FROM.
+  const positives = requiredIndices.filter((pattern) => !pattern.startsWith('-'));
+  if (positives.length > 0) return positives.join(',');
   return DEFAULT_GENERATION_INDEX;
 };
 
