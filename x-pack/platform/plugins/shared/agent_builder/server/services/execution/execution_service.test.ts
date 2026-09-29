@@ -862,6 +862,7 @@ describe('AgentExecutionService', () => {
       expect(mockValidateReasoningLevel).toHaveBeenCalledWith(
         expect.objectContaining({ reasoningLevel: 'high', connectorId: 'connector-1', request })
       );
+      expect(mockExecutionClient.peek).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).toHaveBeenCalled();
     });
 
@@ -898,6 +899,41 @@ describe('AgentExecutionService', () => {
       });
 
       expect(mockValidateReasoningLevel).not.toHaveBeenCalled();
+    });
+
+    describe('with an idempotency key', () => {
+      const executeWithKey = () =>
+        service.executeAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          executionId: 'exec-1',
+          metadata: { execution_idempotency_key: 'Ev123' },
+          params: { agentId: 'agent-1', reasoningLevel: 'xhigh', nextInput: { message: 'hello' } },
+          useTaskManager: true,
+        });
+
+      it('validates the first delivery', async () => {
+        await executeWithKey();
+
+        expect(mockExecutionClient.peek).toHaveBeenCalledWith('exec-1');
+        expect(mockValidateReasoningLevel).toHaveBeenCalled();
+        expect(mockExecutionClient.create).toHaveBeenCalled();
+      });
+
+      it('returns and reschedules the existing execution on replay without validating', async () => {
+        const existing = { status: ExecutionStatus.scheduled, eventCount: 0 };
+        mockExecutionClient.peek.mockResolvedValueOnce(existing).mockResolvedValueOnce(existing);
+        mockExecutionClient.create.mockRejectedValueOnce(conflictError());
+
+        const result = await executeWithKey();
+
+        expect(mockValidateReasoningLevel).not.toHaveBeenCalled();
+        expect(result.executionId).toBe('exec-1');
+        expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
+          expect.objectContaining({ id: 'agent-exec-1' }),
+          expect.anything()
+        );
+      });
     });
   });
 

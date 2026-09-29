@@ -118,8 +118,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
     const agentId = params.agentId ?? agentBuilderDefaultAgentId;
     const spaceId = getCurrentSpaceId({ request, spaces: this.deps.spaces });
     const interactivity = normalizeInteractive(interactive, mode);
+    const executionClient = this.createExecutionClient();
 
-    if (params.reasoningLevel !== undefined) {
+    if (
+      params.reasoningLevel !== undefined &&
+      !(await this.isIdempotentReplay({ executionClient, executionId, metadata }))
+    ) {
       const { inference, uiSettings, savedObjects, searchInferenceEndpoints } = this.deps;
       await validateReasoningLevel({
         reasoningLevel: params.reasoningLevel,
@@ -131,8 +135,6 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         searchInferenceEndpoints,
       });
     }
-
-    const executionClient = this.createExecutionClient();
 
     const conversationClient = await this.getConversationClient({
       request,
@@ -688,6 +690,21 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       request,
       user: { ...requestClient.getUser(), ...parentOwner },
     });
+  }
+
+  private async isIdempotentReplay({
+    executionClient,
+    executionId,
+    metadata,
+  }: {
+    executionClient: AgentExecutionClient;
+    executionId: string;
+    metadata?: Record<string, string>;
+  }): Promise<boolean> {
+    if (!metadata?.execution_idempotency_key) {
+      return false;
+    }
+    return (await executionClient.peek(executionId)) !== undefined;
   }
 
   private async resolveConversationRequest({
