@@ -16,22 +16,14 @@ import {
   savedObjectsClientMock,
 } from '@kbn/core/server/mocks';
 
-import { getAgentById } from '../../services/agents';
 import * as AgentService from '../../services/agents';
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
-import * as commonServices from '../../../common/services';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { restartAgentHandler, bulkRestartAgentsHandler } from './restart_handler';
 
 jest.mock('../../services/agents', () => ({
-  getAgentById: jest.fn(),
   restartAgent: jest.fn(),
   bulkRestartAgents: jest.fn(),
-}));
-
-jest.mock('../../../common/services', () => ({
-  ...jest.requireActual('../../../common/services'),
-  isAgentRestartSupported: jest.fn(),
 }));
 
 describe('restart handlers', () => {
@@ -39,10 +31,6 @@ describe('restart handlers', () => {
   let soClientMock: jest.Mocked<SavedObjectsClientContract>;
   let mockContext: any;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
-
-  const mockIsAgentRestartSupported = commonServices.isAgentRestartSupported as jest.MockedFunction<
-    typeof commonServices.isAgentRestartSupported
-  >;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,12 +43,10 @@ describe('restart handlers', () => {
       }),
     };
     mockResponse = httpServerMock.createResponseFactory();
-    mockIsAgentRestartSupported.mockReturnValue(true);
   });
 
   describe('restartAgentHandler', () => {
     it('returns actionId on success', async () => {
-      (getAgentById as jest.Mock).mockResolvedValue({ id: 'agent-1' });
       (AgentService.restartAgent as jest.Mock).mockResolvedValue({ actionId: 'action-abc' });
 
       await restartAgentHandler(
@@ -73,8 +59,19 @@ describe('restart handlers', () => {
       expect(mockResponse.ok).toHaveBeenCalledWith({ body: { actionId: 'action-abc' } });
     });
 
-    it('propagates service errors to the fleet router error handler', async () => {
-      (getAgentById as jest.Mock).mockResolvedValue({ id: 'agent-1' });
+    it('propagates FleetError (version unsupported) to the fleet router error handler', async () => {
+      (AgentService.restartAgent as jest.Mock).mockRejectedValue(
+        new FleetError('Agent does not support the restart action')
+      );
+
+      await expect(
+        restartAgentHandler(mockContext, { params: { agentId: 'agent-1' } } as any, mockResponse)
+      ).rejects.toThrow(FleetError);
+
+      expect(mockResponse.ok).not.toHaveBeenCalled();
+    });
+
+    it('propagates HostedAgentPolicyRestrictionRelatedError to the fleet router error handler', async () => {
       (AgentService.restartAgent as jest.Mock).mockRejectedValue(
         new HostedAgentPolicyRestrictionRelatedError('hosted')
       );
@@ -84,22 +81,6 @@ describe('restart handlers', () => {
       ).rejects.toThrow(HostedAgentPolicyRestrictionRelatedError);
 
       expect(mockResponse.ok).not.toHaveBeenCalled();
-    });
-
-    it('returns 400 when agent version does not support restart', async () => {
-      (getAgentById as jest.Mock).mockResolvedValue({ id: 'agent-1' });
-      mockIsAgentRestartSupported.mockReturnValue(false);
-
-      await restartAgentHandler(
-        mockContext,
-        { params: { agentId: 'agent-1' } } as any,
-        mockResponse
-      );
-
-      expect(mockResponse.customError).toHaveBeenCalledWith(
-        expect.objectContaining({ statusCode: 400 })
-      );
-      expect(AgentService.restartAgent).not.toHaveBeenCalled();
     });
   });
 

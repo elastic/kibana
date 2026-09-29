@@ -78,7 +78,7 @@ export async function restartBatch(
     namespaces,
   });
 
-  await createErrorActionResults(esClient, actionId, errors, 'hosted agent policy restriction');
+  await createErrorActionResults(esClient, actionId, errors, 'restart not supported');
 
   return { actionId };
 }

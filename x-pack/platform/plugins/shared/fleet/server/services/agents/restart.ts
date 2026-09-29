@@ -8,13 +8,15 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
-import { AgentNotFoundError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { AgentNotFoundError, FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
+import { agentPolicyService } from '../agent_policy';
+import { isAgentRestartSupported, MINIMUM_RESTART_AGENT_VERSION } from '../../../common/services';
 
 import type { Agent } from '../../types';
 import type { GetAgentsOptions } from '.';
-import { getAgentsById, getAgentsByKuery, getAgentPolicyForAgent } from './crud';
+import { getAgentById, getAgentsById, getAgentsByKuery } from './crud';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { openPointInTime } from './crud';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
@@ -24,11 +26,21 @@ export async function restartAgent(
   soClient: SavedObjectsClientContract,
   agentId: string
 ): Promise<{ actionId: string }> {
-  const agentPolicy = await getAgentPolicyForAgent(soClient, esClient, agentId);
-  if (agentPolicy?.is_managed) {
-    throw new HostedAgentPolicyRestrictionRelatedError(
-      `Cannot restart agent ${agentId} in hosted agent policy ${agentPolicy.id}`
+  const agent = await getAgentById(esClient, soClient, agentId);
+
+  if (!isAgentRestartSupported(agent)) {
+    throw new FleetError(
+      `Agent ${agentId} does not support the restart action (requires >= ${MINIMUM_RESTART_AGENT_VERSION}).`
     );
+  }
+
+  if (agent.policy_id) {
+    const agentPolicy = await agentPolicyService.get(soClient, agent.policy_id, false);
+    if (agentPolicy?.is_managed) {
+      throw new HostedAgentPolicyRestrictionRelatedError(
+        `Cannot restart agent ${agentId} in hosted agent policy ${agentPolicy.id}`
+      );
+    }
   }
 
   const currentSpaceId = getCurrentNamespace(soClient);

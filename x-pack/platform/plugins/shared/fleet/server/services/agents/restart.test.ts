@@ -8,18 +8,18 @@
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 
-import { HostedAgentPolicyRestrictionRelatedError } from '../../errors';
+import { FleetError, HostedAgentPolicyRestrictionRelatedError } from '../../errors';
 import { getCurrentNamespace } from '../spaces/get_current_namespace';
 
 import { restartAgent, bulkRestartAgents } from './restart';
-import { getAgentsById, getAgentsByKuery, getAgentPolicyForAgent, openPointInTime } from './crud';
+import { getAgentById, getAgentsById, getAgentsByKuery, openPointInTime } from './crud';
 import { createAgentAction, createErrorActionResults } from './actions';
 import { RestartActionRunner, restartBatch } from './restart_action_runner';
 
 jest.mock('./crud', () => ({
+  getAgentById: jest.fn(),
   getAgentsById: jest.fn(),
   getAgentsByKuery: jest.fn(),
-  getAgentPolicyForAgent: jest.fn(),
   openPointInTime: jest.fn(),
 }));
 
@@ -37,9 +37,21 @@ jest.mock('../spaces/get_current_namespace', () => ({
   getCurrentNamespace: jest.fn(),
 }));
 
-const mockGetAgentPolicyForAgent = getAgentPolicyForAgent as jest.MockedFunction<
-  typeof getAgentPolicyForAgent
->;
+jest.mock('../agent_policy', () => ({
+  agentPolicyService: {
+    get: jest.fn(),
+  },
+}));
+
+jest.mock('../../../common/services', () => ({
+  ...jest.requireActual('../../../common/services'),
+  isAgentRestartSupported: jest.fn(),
+}));
+
+import { agentPolicyService } from '../agent_policy';
+import * as commonServices from '../../../common/services';
+
+const mockGetAgentById = getAgentById as jest.MockedFunction<typeof getAgentById>;
 const mockGetAgentsById = getAgentsById as jest.MockedFunction<typeof getAgentsById>;
 const mockGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
@@ -64,9 +76,21 @@ describe('restart', () => {
     mockGetCurrentNamespace.mockReturnValue('default');
   });
 
+  const mockIsAgentRestartSupported = commonServices.isAgentRestartSupported as jest.MockedFunction<
+    typeof commonServices.isAgentRestartSupported
+  >;
+  const mockAgentPolicyGet = agentPolicyService.get as jest.MockedFunction<
+    typeof agentPolicyService.get
+  >;
+
   describe('restartAgent', () => {
+    beforeEach(() => {
+      mockIsAgentRestartSupported.mockReturnValue(true);
+    });
+
     it('should create RESTART action for a non-managed agent', async () => {
-      mockGetAgentPolicyForAgent.mockResolvedValue({ id: 'policy-1', is_managed: false } as any);
+      mockGetAgentById.mockResolvedValue({ id: 'agent-1', policy_id: 'policy-1' } as any);
+      mockAgentPolicyGet.mockResolvedValue({ id: 'policy-1', is_managed: false } as any);
       mockCreateAgentAction.mockResolvedValue({ id: 'action-123' } as any);
 
       const result = await restartAgent(esClient, soClient, 'agent-1');
@@ -80,11 +104,17 @@ describe('restart', () => {
       });
     });
 
+    it('should throw FleetError for agent below minimum version', async () => {
+      mockGetAgentById.mockResolvedValue({ id: 'agent-1', policy_id: 'policy-1' } as any);
+      mockIsAgentRestartSupported.mockReturnValue(false);
+
+      await expect(restartAgent(esClient, soClient, 'agent-1')).rejects.toThrow(FleetError);
+      expect(mockCreateAgentAction).not.toHaveBeenCalled();
+    });
+
     it('should throw HostedAgentPolicyRestrictionRelatedError for managed agent', async () => {
-      mockGetAgentPolicyForAgent.mockResolvedValue({
-        id: 'hosted-policy',
-        is_managed: true,
-      } as any);
+      mockGetAgentById.mockResolvedValue({ id: 'agent-1', policy_id: 'hosted-policy' } as any);
+      mockAgentPolicyGet.mockResolvedValue({ id: 'hosted-policy', is_managed: true } as any);
 
       await expect(restartAgent(esClient, soClient, 'agent-1')).rejects.toThrow(
         HostedAgentPolicyRestrictionRelatedError
@@ -93,7 +123,7 @@ describe('restart', () => {
     });
 
     it('should proceed when agent has no policy', async () => {
-      mockGetAgentPolicyForAgent.mockResolvedValue(undefined);
+      mockGetAgentById.mockResolvedValue({ id: 'agent-1', policy_id: undefined } as any);
       mockCreateAgentAction.mockResolvedValue({ id: 'action-456' } as any);
 
       const result = await restartAgent(esClient, soClient, 'agent-1');
