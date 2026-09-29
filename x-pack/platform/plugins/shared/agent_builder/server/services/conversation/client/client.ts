@@ -62,7 +62,6 @@ import {
   hasConversationConverseAccess,
   hasConversationDeleteAccess,
   hasConversationOwnerAccess,
-  hasConversationPatchMetadataAccess,
   hasConversationRenameAccess,
   hasConversationUpdateAccessControlAccess,
   type ConversationAccess,
@@ -1200,10 +1199,6 @@ class ConversationClientImpl implements ConversationClient {
 
       case 'owner':
         allowed = hasConversationOwnerAccess({ conversation, user: this.getUser() });
-        break;
-
-      case 'patchMetadata':
-        allowed = hasConversationPatchMetadataAccess({ conversation, user: this.getUser() });
         break;
 
       case 'rename':
