@@ -571,6 +571,8 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
+      'platform.context_engine.save_automation',
+      'platform.context_engine.run_automation',
     ]);
   });
 
@@ -1056,6 +1058,19 @@ describe('aiIndexAutomationsSkill', () => {
         /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
       );
     });
+
+    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
+      expect(content).toMatch(
+        /run_automation` reports that the run did not start, that is the answer/
+      );
+      expect(content).toMatch(/that is the answer, not a task/);
+      expect(content).toMatch(/a second attempt doubles it/);
+    });
+
+    it('gives save and run each their own confirmation dialog', () => {
+      expect(content).toMatch(/two separate operations, each with its own confirmation\s+dialog/);
+    });
+
 
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
       expect(content).toContain('The rest of the syntax these automations use');

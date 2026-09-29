@@ -30,6 +30,7 @@
     "@kbn/agent-builder-plugin",
     "@kbn/spaces-plugin",
     "@kbn/search-inference-endpoints",
-    "@kbn/scout"
+    "@kbn/scout",
+    "@kbn/core-logging-server-mocks"
   ]
 }
