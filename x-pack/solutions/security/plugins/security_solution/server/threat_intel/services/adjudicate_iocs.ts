@@ -124,11 +124,27 @@ const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\
 const isUrlBoundary = (char: string | undefined): boolean =>
   char === undefined || /[\s"'<>)\]},.;]/.test(char);
 
+/** After a bare host match, reject hostname continuations like `.other` or `-cdn`. */
+const isBareHostBoundary = (char: string | undefined): boolean =>
+  char === undefined || !/[A-Za-z0-9._-]/.test(char);
+
+/**
+ * `new URL('https://evil.example').toString()` normalizes to a trailing `/`.
+ * Prose often omits that root slash; treat an empty path as an equivalent match.
+ */
+const urlPathCandidates = (parsed: URL): string[] => {
+  const pathPart = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+  if (parsed.pathname === '/' && parsed.search === '' && parsed.hash === '') {
+    return ['/', ''];
+  }
+  return [pathPart];
+};
+
 const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence[] => {
   const scored: ScoredOccurrence[] = [];
   try {
     const parsed = new URL(urlValue);
-    const pathPart = `${parsed.pathname}${parsed.search}${parsed.hash}`;
+    const pathCandidates = urlPathCandidates(parsed);
     // Match protocol+host case-insensitively, then require an exact path/query/hash
     // so `/PAYLOAD` and `/payload` never share review context.
     const hostPattern = new RegExp(
@@ -141,8 +157,18 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
       (hostMatch = hostPattern.exec(source)) !== null
     ) {
       const hostEnd = hostMatch.index + hostMatch[0].length;
-      const after = hostEnd + pathPart.length;
-      if (source.slice(hostEnd, after) === pathPart && isUrlBoundary(source[after])) {
+      let matchedPath: string | undefined;
+      for (const pathPart of pathCandidates) {
+        const after = hostEnd + pathPart.length;
+        const boundaryOk =
+          pathPart === '' ? isBareHostBoundary(source[after]) : isUrlBoundary(source[after]);
+        if (source.slice(hostEnd, after) === pathPart && boundaryOk) {
+          matchedPath = pathPart;
+          break;
+        }
+      }
+      if (matchedPath !== undefined) {
+        const after = hostEnd + matchedPath.length;
         const index = hostMatch.index;
         const window = source.slice(
           Math.max(0, index - CONTEXT_CHARS),
@@ -159,20 +185,48 @@ const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence
     // Fall through to exact search below when URL parsing fails.
   }
   if (scored.length === 0) {
-    let from = 0;
-    while (from < source.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
-      const index = source.indexOf(urlValue, from);
-      if (index < 0) break;
-      const window = source.slice(
-        Math.max(0, index - CONTEXT_CHARS),
-        Math.min(source.length, index + urlValue.length + CONTEXT_CHARS)
-      );
-      scored.push({
-        source,
-        index,
-        score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-      });
-      from = index + Math.max(urlValue.length, 1);
+    const exactValues = (() => {
+      try {
+        const parsed = new URL(urlValue);
+        if (
+          parsed.pathname === '/' &&
+          parsed.search === '' &&
+          parsed.hash === '' &&
+          urlValue.endsWith('/')
+        ) {
+          return [
+            { value: urlValue, bareHost: false },
+            { value: urlValue.slice(0, -1), bareHost: true },
+          ];
+        }
+      } catch {
+        // Keep the original value when parsing fails.
+      }
+      return [{ value: urlValue, bareHost: false }];
+    })();
+    for (const { value: exactValue, bareHost } of exactValues) {
+      let from = 0;
+      while (from < source.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
+        const index = source.indexOf(exactValue, from);
+        if (index < 0) break;
+        const after = index + exactValue.length;
+        const boundaryOk = bareHost
+          ? isBareHostBoundary(source[after])
+          : isUrlBoundary(source[after]);
+        from = index + Math.max(exactValue.length, 1);
+        if (boundaryOk) {
+          const window = source.slice(
+            Math.max(0, index - CONTEXT_CHARS),
+            Math.min(source.length, after + CONTEXT_CHARS)
+          );
+          scored.push({
+            source,
+            index,
+            score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
+          });
+        }
+      }
+      if (scored.length > 0) break;
     }
   }
   return scored;

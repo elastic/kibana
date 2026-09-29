@@ -123,6 +123,12 @@ interface ReportHit {
     severity?: { level?: string };
     extracted?: {
       iocs?: Array<{ type?: string; value?: string; reference?: string; tier?: string }>;
+      /**
+       * Adjudicated promotion set. When present (including empty), deferred
+       * URL/domain candidates are already excluded. Older reports omit this
+       * field and fall back to `iocs`.
+       */
+      anchor_iocs?: Array<{ type?: string; value?: string; reference?: string; tier?: string }>;
     };
     lineage?: { extracted_at?: string };
   };
@@ -381,7 +387,13 @@ const buildBulkOps = (reports: ReportHit[], now: string): IocIndicatorOp[] => {
     // the indicator _id below so a value cited in two spaces never collapses into
     // one cross-space doc.
     const spaceId = report._source?.space_id ?? GLOBAL_SPACE_ID;
-    const iocs = report._source?.extracted?.iocs ?? [];
+    // Prefer anchor_iocs when the enrichment pass wrote them: deferred URL/domain
+    // candidates keep heuristic tiers in `iocs` for debugging, but must not reach
+    // the live Indicator Match index until a model reviews them.
+    const iocs =
+      report._source?.extracted?.anchor_iocs !== undefined
+        ? report._source.extracted.anchor_iocs
+        : report._source?.extracted?.iocs ?? [];
     const provider = report._source?.source?.name ?? 'unknown';
     const reportUrl = normalizeProvenanceUrl(report._source?.source?.url);
     const severity = report._source?.severity?.level;
@@ -664,6 +676,7 @@ export const registerPromoteThreatIndicatorsTask = ({
                       'content.title',
                       'severity.level',
                       'extracted.iocs',
+                      'extracted.anchor_iocs',
                       'lineage.extracted_at',
                     ],
                     query: {

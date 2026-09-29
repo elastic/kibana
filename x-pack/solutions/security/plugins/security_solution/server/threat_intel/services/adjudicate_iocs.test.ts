@@ -283,6 +283,27 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).toContain('/PAYLOAD');
   });
 
+  it('matches bare host URLs when the source omits the normalized trailing slash', () => {
+    const url = 'https://evil.example/';
+    const prepared = prepareIocAdjudication({
+      text: 'The attacker beaconed to https://evil.example during exfiltration.',
+      iocs: [candidate(url)],
+    });
+
+    expect(prepared.reviewable[0].context).toContain('attacker beaconed');
+    expect(prepared.reviewable[0].context).toContain('https://evil.example');
+  });
+
+  it('does not treat a longer hostname as a bare-host match', () => {
+    const prepared = prepareIocAdjudication({
+      text: 'Docs mention https://evil.example.other as a CDN hostname.',
+      iocs: [candidate('https://evil.example/')],
+    });
+
+    expect(prepared.reviewable[0].context).not.toContain('CDN hostname');
+    expect(prepared.reviewable[0].context).toBe('');
+  });
+
   it('does not treat a different port as the same origin citation', () => {
     const prepared = prepareIocAdjudication({
       text: 'Payload mirrored at https://blog.example:8443/payload',

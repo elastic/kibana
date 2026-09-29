@@ -62,6 +62,7 @@ const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
 const makeReport = ({
   id,
   iocs,
+  anchorIocs,
   sourceName = 'maltrail',
   sourceUrl = 'https://example.com/trail.txt',
   trailLabel,
@@ -69,7 +70,9 @@ const makeReport = ({
   spaceId = 'default',
 }: {
   id: string;
-  iocs: Array<{ type: string; value: string; reference?: string }>;
+  iocs: Array<{ type: string; value: string; reference?: string; tier?: string }>;
+  /** When set (including []), promote uses this set instead of `iocs`. */
+  anchorIocs?: Array<{ type: string; value: string; reference?: string; tier?: string }>;
   sourceName?: string;
   sourceUrl?: string;
   trailLabel?: string;
@@ -86,7 +89,12 @@ const makeReport = ({
     severity: { level: 'low' },
     // Only promotable tiers reach the index, so an IOC in a fixture that is not
     // about tiering needs one. Tier-specific cases pass it explicitly.
-    extracted: { iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })) },
+    extracted: {
+      iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })),
+      ...(anchorIocs !== undefined
+        ? { anchor_iocs: anchorIocs.map((ioc) => ({ tier: 'discriminating', ...ioc })) }
+        : {}),
+    },
     lineage: { extracted_at: extractedAt },
   },
 });
@@ -395,6 +403,64 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       );
       expect(ops).toHaveLength(1);
       expect(ops[0]._id).toBe('default:ip:1.2.3.4');
+    });
+  });
+
+  describe('anchor_iocs promotion gate', () => {
+    it('prefers anchor_iocs over iocs when the enrichment pass wrote them', () => {
+      const deferredUrl = 'https://evil.example/deferred';
+      const reviewedHash = 'a'.repeat(64);
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-deferred',
+            iocs: [
+              { type: 'url', value: deferredUrl, tier: 'discriminating' },
+              { type: 'hash', value: reviewedHash, tier: 'discriminating' },
+            ],
+            anchorIocs: [{ type: 'hash', value: reviewedHash, tier: 'discriminating' }],
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(1);
+      expect(
+        (
+          ops[0].upsert as {
+            threat: { indicator: { file?: { hash?: { sha256?: string } } } };
+          }
+        ).threat.indicator.file?.hash?.sha256
+      ).toBe(reviewedHash);
+    });
+
+    it('promotes nothing when anchor_iocs is an empty array', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-empty-anchors',
+            iocs: [{ type: 'url', value: 'https://evil.example/deferred', tier: 'discriminating' }],
+            anchorIocs: [],
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
+    });
+
+    it('falls back to iocs when anchor_iocs is absent on older reports', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-legacy',
+            iocs: [{ type: 'url', value: 'https://evil.example/payload', tier: 'discriminating' }],
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(1);
     });
   });
 

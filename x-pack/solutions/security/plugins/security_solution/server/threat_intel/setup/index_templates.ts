@@ -141,6 +141,23 @@ const threatReportsTemplate = {
                 block_index: { type: 'integer' as const },
               },
             },
+            // Post-adjudication promotion set. Deferred URL/domain candidates keep
+            // heuristic tiers in `iocs` but are excluded here until model-reviewed.
+            anchor_iocs: {
+              type: 'nested' as const,
+              properties: {
+                type: { type: 'keyword' as const },
+                value: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                defanged: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                severity: { type: 'keyword' as const },
+                tier: { type: 'keyword' as const },
+                tier_heuristic: { type: 'keyword' as const },
+                tier_basis: { type: 'keyword' as const },
+                port: { type: 'integer' as const },
+                reference: { type: 'keyword' as const, ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                block_index: { type: 'integer' as const },
+              },
+            },
             ioc_set_hash: { type: 'keyword' as const },
             // LLM-emitted "how useful is this report for writing a
             // detection rule?" score in `[0, 1]`. Populated by the
@@ -963,6 +980,7 @@ const migrateExistingCoreEnrichmentMappings = async (
       const needsMigration = !(
         contentProps?.article_url &&
         extractedProps?.artifacts &&
+        extractedProps?.anchor_iocs &&
         coreProps?.context_mode &&
         coreProps?.context_coverage &&
         coreProps?.context_chars &&
@@ -993,6 +1011,21 @@ const migrateExistingCoreEnrichmentMappings = async (
                     type: { type: 'keyword' },
                     value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
                     context: { type: 'text', index: false },
+                  },
+                },
+                anchor_iocs: {
+                  type: 'nested',
+                  properties: {
+                    type: { type: 'keyword' },
+                    value: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    defanged: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    severity: { type: 'keyword' },
+                    tier: { type: 'keyword' },
+                    tier_heuristic: { type: 'keyword' },
+                    tier_basis: { type: 'keyword' },
+                    port: { type: 'integer' },
+                    reference: { type: 'keyword', ignore_above: FEED_TEXT_IGNORE_ABOVE },
+                    block_index: { type: 'integer' },
                   },
                 },
                 core: {
@@ -1488,6 +1521,7 @@ interface RequiredMapping {
 const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'content.article_url', ignoreAbove: FEED_TEXT_IGNORE_ABOVE },
   { path: 'extracted.artifacts' },
+  { path: 'extracted.anchor_iocs' },
   { path: 'extracted.core.context_mode' },
   { path: 'extracted.core.context_coverage' },
   { path: 'extracted.core.context_chars' },

@@ -109,6 +109,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
         doc?: {
           extracted?: {
             iocs?: string;
+            anchor_iocs?: string;
             ioc_set_hash?: string;
             core?: { adjudication?: { deferred_unreviewed?: string } };
           };
@@ -118,6 +119,10 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
 
     expect(step.if).toContain('steps.enrich_report_core.error == null');
     expect(step.with?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    // Promote reads anchor_iocs so deferred URL/domain heuristic tiers never go live.
+    expect(step.with?.doc?.extracted?.anchor_iocs).toContain(
+      'steps.enrich_report_core.output.anchor_iocs'
+    );
     // Correlation hash stays on extract_iocs so boost:5 matches pre-adjudication docs.
     expect(step.with?.doc?.extracted?.ioc_set_hash).toContain(
       'steps.extract_iocs.output.ioc_set_hash'
