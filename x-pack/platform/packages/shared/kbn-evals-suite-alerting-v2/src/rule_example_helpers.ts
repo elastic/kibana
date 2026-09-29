@@ -23,7 +23,12 @@ import {
   getLatestAttachmentData,
 } from './evaluators/expected_attachment';
 
-export type QueryFormat = NonNullable<Query>['format'];
+/**
+ * How the create turn asks for the detection query to be shaped: `segmented`
+ * puts the condition in `query.breach.segment` on top of a shared `query.base`,
+ * `single` asks for one complete `query.base` with no breach segment.
+ */
+export type QueryStyle = 'segmented' | 'single';
 
 export const MANAGE_RULE_SKILL_OUTPUT = {
   expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
@@ -35,13 +40,7 @@ export const MANAGE_RULE_SKILL_OUTPUT = {
 export const PERSIST_VIA_ATTACHMENT_CRITERION =
   'The assistant directs the user to the Create rule button / attachment actions instead of claiming the rule was persisted via API.';
 
-export const isComposedQuery = (
-  query: Query | undefined
-): query is Extract<Query, { format: 'composed' }> => query?.format === 'composed';
-
-export const isStandaloneQuery = (
-  query: Query | undefined
-): query is Extract<Query, { format: 'standalone' }> => query?.format === 'standalone';
+export const hasBreachSegment = (query: Query | undefined): boolean => query?.breach != null;
 
 export const requireRuleVersions = (attachments: VersionedAttachment[]) => {
   const versions = getAttachmentVersionData<RuleAttachmentData>(attachments, RULE_ATTACHMENT_TYPE);
@@ -51,27 +50,27 @@ export const requireRuleVersions = (attachments: VersionedAttachment[]) => {
 
 export const hostCpuCreateTurn = ({
   index,
-  format,
+  style,
 }: {
   index: string;
-  format: QueryFormat;
+  style: QueryStyle;
 }): string => {
-  const formatClause =
-    format === 'composed'
+  const styleClause =
+    style === 'segmented'
       ? 'with a shared base ES|QL query and a breach segment appended to it'
-      : 'with a complete standalone ES|QL breach query (not a shared base plus segment)';
+      : 'with one complete ES|QL query and no separate breach segment';
   return (
-    `Create an alert rule on ${index} ${formatClause}. Fire when average ` +
+    `Create an alert rule on ${index} ${styleClause}. Fire when average ` +
     `system.cpu.total.norm.pct stays above 0.9 for 5 minutes, grouped by host.name. ` +
     'Check every 1 minute.'
   );
 };
 
-export const assertQueriedFormat = (versions: RuleAttachmentData[], format: QueryFormat) => {
+export const assertQueriedStyle = (versions: RuleAttachmentData[], style: QueryStyle) => {
   const queried = versions.filter((version) => version.query);
   expect(queried.length).toBeGreaterThan(0);
   for (const version of queried) {
-    expect(version.query?.format).toEqual(format);
+    expect(hasBreachSegment(version.query)).toEqual(style === 'segmented');
   }
 };
 

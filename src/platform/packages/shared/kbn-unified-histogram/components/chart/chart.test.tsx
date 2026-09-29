@@ -55,6 +55,7 @@ interface MountComponentProps {
   overlaySeries?: UnifiedHistogramOverlaySeries;
   onOverlaySeriesResult?: jest.Mock;
   rerenderParent?: boolean;
+  withLensActions?: boolean;
 }
 
 const toggleActionsTestId = 'default-chart-toggle-actions';
@@ -74,6 +75,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     overlaySeries,
     onOverlaySeriesResult,
     rerenderParent,
+    withLensActions,
   } = mountProps;
 
   // Handle mockEditVisualization separately to distinguish between "not passed" and "passed as undefined"
@@ -150,6 +152,7 @@ const mountComponent = async (mountProps: MountComponentProps = {}) => {
     onChartHiddenChange: jest.fn(),
     onTimeIntervalChange: jest.fn(),
     withDefaultActions: undefined,
+    withLensActions,
     isChartAvailable: checkChartAvailability({ chart, dataView, isPlainRecord }),
     renderToggleActions: () => <span data-test-subj={toggleActionsTestId}>Toggle actions</span>,
     fetch$: getFetch$Mock(),
@@ -400,6 +403,28 @@ describe('Chart', () => {
     expect(
       screen.queryByRole('button', { name: 'Save visualization to dashboard' })
     ).not.toBeInTheDocument();
+  });
+
+  it('hides Lens edit and save actions when withLensActions is false', async () => {
+    await mountComponent({
+      isPlainRecord: true,
+      dataView: dataViewMock,
+      isTransformationalESQL: true,
+      withLensActions: false,
+    });
+
+    expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
+    expect(screen.queryByTestId('unifiedHistogramEditFlyoutVisualization')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unifiedHistogramEditVisualization')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unifiedHistogramSaveVisualization')).not.toBeInTheDocument();
+  });
+
+  it('hides the Lens app edit action when withLensActions is false', async () => {
+    await mountComponent({ withLensActions: false });
+
+    expect(screen.getByTestId('unifiedHistogramChart')).toBeVisible();
+    expect(screen.queryByTestId('unifiedHistogramEditVisualization')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('unifiedHistogramSaveVisualization')).not.toBeInTheDocument();
   });
 
   it('opens save modal with an empty title', async () => {
