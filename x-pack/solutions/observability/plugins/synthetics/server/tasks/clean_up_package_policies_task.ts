@@ -11,7 +11,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import { schema } from '@kbn/config-schema';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
-import { BROWSER_TEST_NOW_RUN } from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import type { SyntheticsServerSetup } from '../types';
 import { getFilterForTestNowRun } from './test_now_run_filter';
@@ -26,8 +25,12 @@ export const SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE = 'Synthetics:Clean-Up-Packag
 export const SYNTHETICS_SERVICE_CLEAN_UP_TASK_ID =
   'SyntheticsService:clean-up-package-policies-task-id';
 const DAILY_INTERVAL = '24h';
-const BROWSER_TEST_NOW_TTL_MINUTES = 15;
-const LIGHTWEIGHT_TEST_NOW_TTL_MINUTES = 2;
+/**
+ * How long a Test Now run's policies stay deployed. Generous on purpose: deleting
+ * a policy before the agent has deployed and run it loses the result, and on a
+ * large private location the deploy alone can take minutes.
+ */
+const TEST_NOW_CLEAN_UP_DELAY_MINUTES = 20;
 const MINUTE = 60 * 1000;
 
 const paramsSchema = schema.object({
@@ -104,7 +107,7 @@ const findExpiredTestNowPolicyIds = async (
     SyntheticsServerSetup['coreStart']['savedObjects']['createInternalRepository']
   >
 ) => {
-  const cutoff = new Date(Date.now() - BROWSER_TEST_NOW_TTL_MINUTES * MINUTE).toISOString();
+  const cutoff = new Date(Date.now() - TEST_NOW_CLEAN_UP_DELAY_MINUTES * MINUTE).toISOString();
   const pages = await server.pluginsStart.fleet.packagePolicyService.fetchAllItemIds(soClient, {
     kuery: `${getFilterForTestNowRun()} and ingest-package-policies.created_at < "${cutoff}"`,
     spaceIds: ['*'],
@@ -138,20 +141,17 @@ const recreateAtLocations = async (
 /** Schedules the removal of the run-once package policies a Test Now run just created. */
 export const scheduleTestNowCleanUp = async (
   server: SyntheticsServerSetup,
-  createdPolicies: Array<{ id: string; name?: string }>
+  createdPolicies: Array<{ id: string }>
 ): Promise<void> => {
   if (createdPolicies.length === 0) {
     return;
   }
-  const ttlMinutes = createdPolicies.some(({ name }) => name === BROWSER_TEST_NOW_RUN)
-    ? BROWSER_TEST_NOW_TTL_MINUTES
-    : LIGHTWEIGHT_TEST_NOW_TTL_MINUTES;
   try {
     await server.pluginsStart.taskManager.schedule({
       taskType: SYNTHETICS_SERVICE_CLEAN_UP_TASK_TYPE,
       params: { packagePolicyIds: createdPolicies.map(({ id }) => id) },
       state: {},
-      runAt: new Date(Date.now() + ttlMinutes * MINUTE),
+      runAt: new Date(Date.now() + TEST_NOW_CLEAN_UP_DELAY_MINUTES * MINUTE),
       scope: ['uptime'],
     });
   } catch (e) {

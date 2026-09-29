@@ -249,8 +249,8 @@ export class SyntheticsPrivateLocation {
         newPolicy.condition = null;
       }
       if (testRunId) {
-        // Cleanup TTL is keyed off this name: browser = 15m, lightweight = 2m.
-        // API journeys share synthexec with browser and can exceed 2m.
+        // These names mark a policy as a Test Now run: the leftover scan skips
+        // them, and the daily clean up sweeps any whose own clean up never ran.
         newPolicy.name =
           config.type === MonitorTypeEnum.BROWSER || config.type === MonitorTypeEnum.API
             ? BROWSER_TEST_NOW_RUN

@@ -9,10 +9,6 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { createFleetStartContractMock } from '@kbn/fleet-plugin/server/mocks';
-import {
-  BROWSER_TEST_NOW_RUN,
-  LIGHTWEIGHT_TEST_NOW_RUN,
-} from '../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import type { SyntheticsServerSetup } from '../types';
 import { getPrivateLocations } from '../synthetics_service/get_private_locations';
 import { deletePackagePolicies, findLeftoverPackagePolicies } from './clean_up_duplicate_policies';
@@ -28,8 +24,10 @@ import {
   scheduleTestNowCleanUp,
 } from './clean_up_package_policies_task';
 
+// No requireActual: the real module imports back into the task through
+// synthetics_private_location, which would bind the task to the unmocked functions.
 jest.mock('./clean_up_duplicate_policies', () => ({
-  ...jest.requireActual('./clean_up_duplicate_policies'),
+  DUPLICATE_PACKAGE_POLICY_DELETE_BATCH_SIZE: 500,
   findLeftoverPackagePolicies: jest.fn(),
   deletePackagePolicies: jest.fn(),
 }));
@@ -188,7 +186,7 @@ describe('clean up package policies task', () => {
       );
     });
 
-    it('sweeps Test Now policies older than the browser TTL in every space', async () => {
+    it('sweeps Test Now policies older than their clean up delay in every space', async () => {
       const before = Date.now();
 
       await runCleanUpTask(server, taskInstance() as any, signal);
@@ -197,8 +195,9 @@ describe('clean up package policies task', () => {
       expect(options?.spaceIds).toEqual(['*']);
       expect(options?.kuery).toContain(getFilterForTestNowRun());
       const cutoff = Date.parse(options?.kuery?.match(/created_at < "([^"]+)"/)?.[1] ?? '');
-      expect(cutoff).toBeLessThanOrEqual(before - 15 * MINUTE + 1000);
-      expect(cutoff).toBeGreaterThan(before - 16 * MINUTE);
+      // never sooner than the one-shot, which may still be waiting on the run
+      expect(cutoff).toBeLessThanOrEqual(before - 20 * MINUTE + 1000);
+      expect(cutoff).toBeGreaterThan(before - 21 * MINUTE);
     });
 
     it('recreates only at existing locations that have a missing policy', async () => {
@@ -247,13 +246,12 @@ describe('clean up package policies task', () => {
   });
 
   describe('scheduleTestNowCleanUp', () => {
-    it('schedules a one-shot run with the created policy ids after the browser TTL', async () => {
+    it('schedules a one-shot run with the created policy ids after 20 minutes', async () => {
       const before = Date.now();
 
-      await scheduleTestNowCleanUp(server, [
-        { id: 'tn-1', name: BROWSER_TEST_NOW_RUN },
-        { id: 'tn-2', name: BROWSER_TEST_NOW_RUN },
-      ]);
+      // the same delay for every monitor type, so a slow deploy never cuts a
+      // lightweight run short
+      await scheduleTestNowCleanUp(server, [{ id: 'tn-1' }, { id: 'tn-2' }]);
 
       expect(taskManager.schedule).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -264,17 +262,7 @@ describe('clean up package policies task', () => {
       );
       const [scheduled] = taskManager.schedule.mock.calls[0];
       expect(scheduled).not.toHaveProperty('id');
-      expect(scheduled.runAt!.getTime()).toBeGreaterThanOrEqual(before + 15 * MINUTE);
-    });
-
-    it('uses the shorter TTL for lightweight runs', async () => {
-      const before = Date.now();
-
-      await scheduleTestNowCleanUp(server, [{ id: 'tn-1', name: LIGHTWEIGHT_TEST_NOW_RUN }]);
-
-      const [scheduled] = taskManager.schedule.mock.calls[0];
-      expect(scheduled.runAt!.getTime()).toBeGreaterThanOrEqual(before + 2 * MINUTE);
-      expect(scheduled.runAt!.getTime()).toBeLessThan(before + 15 * MINUTE);
+      expect(scheduled.runAt!.getTime()).toBeGreaterThanOrEqual(before + 20 * MINUTE);
     });
 
     it('schedules nothing when no policies were created', async () => {
@@ -286,9 +274,7 @@ describe('clean up package policies task', () => {
     it('logs instead of throwing when scheduling fails', async () => {
       taskManager.schedule.mockRejectedValue(new Error('task manager unavailable'));
 
-      await expect(
-        scheduleTestNowCleanUp(server, [{ id: 'tn-1', name: BROWSER_TEST_NOW_RUN }])
-      ).resolves.toBeUndefined();
+      await expect(scheduleTestNowCleanUp(server, [{ id: 'tn-1' }])).resolves.toBeUndefined();
       expect(logger.error).toHaveBeenCalled();
     });
   });
