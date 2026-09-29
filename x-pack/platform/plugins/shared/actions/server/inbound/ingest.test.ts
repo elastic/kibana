@@ -60,6 +60,7 @@ describe('ingestInboundEvent', () => {
   const getDecryptedConnectorAttributes = jest.fn<Promise<RawAction>, [string, string]>();
   const elasticsearchClient = elasticsearchClientMock.createClusterClient();
   const getElasticsearchClient = jest.fn().mockResolvedValue(elasticsearchClient);
+  const getKibanaRequestAccess = jest.fn().mockResolvedValue(true);
 
   const connectorId = 'connector-1';
   const credentialId = 'cred-1';
@@ -181,6 +182,7 @@ describe('ingestInboundEvent', () => {
       getUnsecuredSavedObjectsClient,
       getDecryptedConnectorAttributes,
       getElasticsearchClient,
+      getKibanaRequestAccess,
       inMemoryConnectors: overrides?.inMemoryConnectors ?? [],
     });
     mapIngestResultToResponse(result, response);
@@ -342,6 +344,25 @@ describe('ingestInboundEvent', () => {
     });
     expect(res.notFound).toHaveBeenCalled();
     expect(handleEvents).not.toHaveBeenCalled();
+    expectOutcome('debug', 'auth_fail');
+  });
+
+  it('returns 404 when the ApiKey cannot access the request space', async () => {
+    (connectorTypeIsDual as jest.Mock).mockReturnValue(true);
+    const apiKey = Buffer.from('es-id:es-secret').toString('base64');
+    getKibanaRequestAccess.mockResolvedValueOnce(false);
+    const handleEvents = jest.fn();
+    getConnectorSpecMock.mockReturnValue(
+      createFakeSpec(handleEvents) as ReturnType<typeof getConnectorSpec>
+    );
+    const { response: res } = await run({
+      query: {},
+      headers: { authorization: `ApiKey ${apiKey}` },
+      inMemoryConnectors: [memoryConnector(true)],
+    });
+    expect(res.notFound).toHaveBeenCalled();
+    expect(handleEvents).not.toHaveBeenCalled();
+    expect(emitConnectorEvents).not.toHaveBeenCalled();
     expectOutcome('debug', 'auth_fail');
   });
 

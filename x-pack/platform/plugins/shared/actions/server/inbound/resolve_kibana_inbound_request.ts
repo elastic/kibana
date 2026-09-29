@@ -62,16 +62,19 @@ const elasticsearchAccepts = async (
 };
 
 /**
- * Builds a Kibana request when Elasticsearch accepts the caller's ApiKey. A 401 returns undefined.
+ * Builds a Kibana request when Elasticsearch accepts the caller's ApiKey and the key can access the space.
+ * A 401 or a failed space check returns undefined.
  */
 export const resolveKibanaInboundRequest = async ({
   headers,
   spaceId,
   elasticsearchClient,
+  getKibanaRequestAccess,
 }: {
   headers: Record<string, string | string[] | undefined>;
   spaceId: string;
   elasticsearchClient: IClusterClient;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
 }): Promise<KibanaRequest | undefined> => {
   const credential = readApiKey(headers);
   if (!credential) {
@@ -79,21 +82,17 @@ export const resolveKibanaInboundRequest = async ({
   }
 
   // A user-created Cloud key is rejected when Kibana's shared secret is attached, so try that first.
-  const request = kibanaApiKeyRequest(credential, spaceId);
-  if (isUiamCredential(credential)) {
-    markExternalUiamCredential(request);
-  }
-  if (await elasticsearchAccepts(elasticsearchClient, request)) {
-    return request;
-  }
-
-  // Kibana-granted UIAM keys need the shared secret. A normal API key has no second attempt.
-  if (!isUiamCredential(credential)) {
-    return undefined;
-  }
-  const grantedRequest = kibanaApiKeyRequest(credential, spaceId);
-  if (await elasticsearchAccepts(elasticsearchClient, grantedRequest)) {
-    return grantedRequest;
+  // A 401 retries once without the mark, because a Kibana-granted UIAM key needs the secret.
+  const attempts = isUiamCredential(credential) ? [true, false] : [false];
+  for (const external of attempts) {
+    const request = kibanaApiKeyRequest(credential, spaceId);
+    if (external) {
+      markExternalUiamCredential(request);
+    }
+    if (await elasticsearchAccepts(elasticsearchClient, request)) {
+      const allowed = await getKibanaRequestAccess(request);
+      return allowed ? request : undefined;
+    }
   }
   return undefined;
 };

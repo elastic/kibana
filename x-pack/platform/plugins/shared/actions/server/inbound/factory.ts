@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { InMemoryConnector } from '../types';
 import type { InboundEventsClient } from './client';
 import { buildInboundEventsClient } from './client';
+import { authorizeKibanaInboundRequest } from './authorize_kibana_inbound_request';
 import { createUnsecuredInboundSavedObjectsClient } from './create_unsecured_inbound_saved_objects_client';
 import { getDecryptedInboundConnector } from './get_decrypted_inbound_connector';
 import type { ConnectorEventEmitParams, DispatchConnectorEventsResult } from './types';
@@ -46,5 +47,6 @@ export function createInboundEventsClient(args: InboundEventsClientArgs): Inboun
       const [coreStart] = await getStartServices();
       return coreStart.elasticsearch.client;
     },
+    getKibanaRequestAccess: (request) => authorizeKibanaInboundRequest(request, getStartServices),
   });
 }

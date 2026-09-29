@@ -30,11 +30,16 @@ const createClient = () => {
 const authenticate = (client: ReturnType<typeof createClient>) =>
   client.asScoped().asCurrentUser.security.authenticate;
 
-const resolve = (authorization: string | undefined, client: ReturnType<typeof createClient>) =>
+const resolve = (
+  authorization: string | undefined,
+  client: ReturnType<typeof createClient>,
+  getKibanaRequestAccess: () => Promise<boolean> = async () => true
+) =>
   resolveKibanaInboundRequest({
     headers: authorization === undefined ? {} : { authorization },
     spaceId: 'default',
     elasticsearchClient: client,
+    getKibanaRequestAccess,
   });
 
 describe('resolveKibanaInboundRequest', () => {
@@ -84,6 +89,26 @@ describe('resolveKibanaInboundRequest', () => {
 
     await expect(resolve('ApiKey essu_install_key', client)).resolves.toBeUndefined();
     expect(authenticate(client)).toHaveBeenCalledTimes(2);
+  });
+
+  it('returns undefined when the ApiKey cannot access the space', async () => {
+    const client = createClient();
+    const getKibanaRequestAccess = jest.fn().mockResolvedValue(false);
+
+    await expect(
+      resolve(`ApiKey ${apiKey}`, client, getKibanaRequestAccess)
+    ).resolves.toBeUndefined();
+    expect(authenticate(client)).toHaveBeenCalledTimes(1);
+    expect(getKibanaRequestAccess).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not retry a UIAM key Elasticsearch accepts when the space check fails', async () => {
+    const client = createClient();
+
+    await expect(
+      resolve('ApiKey essu_install_key', client, async () => false)
+    ).resolves.toBeUndefined();
+    expect(authenticate(client)).toHaveBeenCalledTimes(1);
   });
 
   it('returns undefined when Elasticsearch rejects a normal ApiKey', async () => {

@@ -67,6 +67,7 @@ export interface IngestInboundEventParams extends IngestInboundEventInput {
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
   getElasticsearchClient: () => Promise<IClusterClient>;
+  getKibanaRequestAccess: (request: KibanaRequest) => Promise<boolean>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -95,6 +96,7 @@ export async function ingestInboundEvent({
   getUnsecuredSavedObjectsClient,
   getDecryptedConnectorAttributes,
   getElasticsearchClient,
+  getKibanaRequestAccess,
   inMemoryConnectors,
 }: IngestInboundEventParams): Promise<IngestInboundEventResult> {
   const connectorTypeId = normalizeConnectorTypeId(connectorTypeIdParam);
@@ -169,6 +171,7 @@ export async function ingestInboundEvent({
         headers,
         spaceId,
         elasticsearchClient: await getElasticsearchClient(),
+        getKibanaRequestAccess,
       });
     } catch (error) {
       logInboundIngressOutcome(logger, {
