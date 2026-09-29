@@ -8,18 +8,14 @@
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { ActionPolicyResponse, CreateActionPolicyData } from '@kbn/alerting-v2-schemas';
 import { EuiEmptyPrompt } from '@elastic/eui';
-import { useService } from '@kbn/core-di-browser';
+import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ContentList, ContentListProvider } from '@kbn/content-list';
 import type { FieldDefinition } from '@kbn/content-list-provider';
-import {
-  ActionPolicyCreateOptionsPanel,
-  getCreateActionPolicyWithAgentTooltipText,
-  type ActionPolicyCreateOption,
-} from '../../../components/action_policy/create_options/action_policy_create_options_panel';
+import { getCreateActionPolicyWithAgentTooltipText } from '../../../components/action_policy/create_options/action_policy_create_options_panel';
+import { ActionPoliciesEmptyState } from './action_policies_empty_state';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
-import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../../components/action_policy/labels';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { useAlertingLocators } from '../../../application/locator_context';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
@@ -60,23 +56,6 @@ const enabledFieldDefinition: FieldDefinition = {
 
 const FEATURES_FIELDS: FieldDefinition[] = [enabledFieldDefinition];
 
-const CREATE_POLICY_OPTION_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyTitle',
-  { defaultMessage: 'Create policy' }
-);
-const CREATE_POLICY_OPTION_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyDescription',
-  { defaultMessage: 'Match alerts and send them to destinations.' }
-);
-const CREATE_WITH_AGENT_OPTION_TITLE = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentTitle',
-  { defaultMessage: 'Create with AI Agent' }
-);
-const CREATE_WITH_AGENT_OPTION_DESCRIPTION = i18n.translate(
-  'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentDescription',
-  { defaultMessage: 'Set up an action policy with the help of the AI Agent.' }
-);
-
 export const ActionPoliciesTable = () => {
   const refetchRef = useRef<() => void>(() => {});
   const onRefetchReady = useCallback((refetchFn: () => void) => {
@@ -87,6 +66,7 @@ export const ActionPoliciesTable = () => {
   const [policyToUpdateApiKey, setPolicyToUpdateApiKey] = useState<string | null>(null);
 
   const { actionPolicyLocators } = useAlertingLocators();
+  const documentationHref = useService(CoreStart('docLinks')).links.alerting.actionPolicies;
   const canWrite = useService(UserCapabilities).canWrite('actionPolicies');
   const navigateToAgentBuilder = useNavigateToAgentBuilder(
     CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT
@@ -152,13 +132,22 @@ export const ActionPoliciesTable = () => {
 
   const clonePolicy = useCallback(
     (policy: ActionPolicyResponse) => {
-      const { name, description, destinations, matcher, grouping, throttle } = policy;
+      const {
+        name,
+        description,
+        destinations,
+        matcher,
+        group_by: groupBy,
+        throttle,
+        grouping_mode: groupingMode,
+      } = policy;
       const data: CreateActionPolicyData = {
         name: `${name} [clone]`,
         description,
         destinations,
-        grouping: grouping ?? { mode: 'per_alert' },
+        grouping_mode: groupingMode ?? 'per_alert',
         ...(matcher != null && { matcher }),
+        ...(groupBy != null && { group_by: groupBy }),
         ...(throttle != null && { throttle }),
       };
       createActionPolicy(data, { onSuccess: () => refetchRef.current() });
@@ -170,45 +159,17 @@ export const ActionPoliciesTable = () => {
 
   const itemConfig = useMemo(() => ({}), []);
 
-  const createOptions = useMemo<ActionPolicyCreateOption[]>(
-    () => [
-      {
-        id: 'create-policy',
-        iconType: 'workflow',
-        title: CREATE_POLICY_OPTION_TITLE,
-        description: CREATE_POLICY_OPTION_DESCRIPTION,
-        onClick: navigateToCreate,
-        disabled: !isLicenseValid,
-        tooltipText: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
-        'data-test-subj': 'createActionPolicyCard',
-      },
-      {
-        id: 'create-with-agent',
-        iconType: 'productAgent' as const,
-        title: CREATE_WITH_AGENT_OPTION_TITLE,
-        description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
-        onClick: navigateToAgentBuilder,
-        disabled: !isLicenseValid || !areAgentBuilderSkillsAvailable,
-        tooltipText: isLicenseValid
-          ? createWithAgentTooltipText
-          : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
-        'data-test-subj': 'createActionPolicyWithAgentCard',
-      },
-    ],
-    [
-      navigateToCreate,
-      navigateToAgentBuilder,
-      isLicenseValid,
-      areAgentBuilderSkillsAvailable,
-      createWithAgentTooltipText,
-    ]
-  );
-
   const emptyState = canWrite ? (
-    <ActionPolicyCreateOptionsPanel options={createOptions} />
+    <ActionPoliciesEmptyState
+      onCreatePolicy={navigateToCreate}
+      onCreateWithAgent={navigateToAgentBuilder}
+      createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
+      createWithAgentTooltipText={createWithAgentTooltipText}
+      documentationHref={documentationHref}
+    />
   ) : (
     <EuiEmptyPrompt
-      iconType="document"
+      iconType="documents"
       data-test-subj="actionPoliciesListReadOnlyEmpty"
       title={
         <h2>

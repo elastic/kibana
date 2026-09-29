@@ -82,6 +82,15 @@ jest.mock('@kbn/core-di-browser', () => {
       if (token === 'userProfile') {
         return { bulkGet: mockBulkGet };
       }
+      if (token === 'docLinks') {
+        return {
+          links: {
+            alerting: {
+              actionPolicies: 'https://docs.test/action-policies',
+            },
+          },
+        };
+      }
       return {};
     },
     CoreStart: (key: string) => key,
@@ -566,59 +575,56 @@ describe('ActionPoliciesTable', () => {
       mockFindItems.mockResolvedValue({ items: [], total: 0 });
     });
 
-    it('shows create-policy and create-with-agent cards when there are no policies', async () => {
+    it('shows create-policy and create-with-agent buttons when there are no policies', async () => {
       renderTable();
 
       await waitFor(() => {
         expect(
           screen.getByRole('heading', {
             level: 2,
-            name: /no action policies yet\. let's get started!/i,
+            name: /get started with action policies/i,
           })
         ).toBeInTheDocument();
       });
-      expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument();
-      expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument();
-      expect(screen.getByTestId('createActionPolicyWithAgentExperimentalBadge')).toHaveTextContent(
-        'Experimental'
-      );
+      expect(screen.getByTestId('actionPoliciesEmptyStateCreateButton')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('actionPoliciesEmptyStateCreateWithAgentButton')
+      ).toBeInTheDocument();
     });
 
     it('hides the header create button in the empty state', async () => {
       renderTable();
 
-      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesEmptyStateCreateButton')).toBeInTheDocument()
+      );
       expect(screen.queryByTestId('createActionPolicyButton')).toBeNull();
     });
 
-    it('hides the empty-state create-with-agent card when Alerting V2 experimental features are disabled', async () => {
-      mockAlertingV2ExperimentalFeaturesEnabled = false;
-      renderTable();
-
-      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
-      expect(screen.queryByTestId('createActionPolicyWithAgentCard')).not.toBeInTheDocument();
-    });
-
-    it('navigates to the create form from the empty state create-policy card', async () => {
+    it('navigates to the create form from the empty state create button', async () => {
       const user = userEvent.setup();
       renderTable();
 
-      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
-      await user.click(screen.getByTestId('createActionPolicyCard'));
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesEmptyStateCreateButton')).toBeInTheDocument()
+      );
+      await user.click(screen.getByTestId('actionPoliciesEmptyStateCreateButton'));
 
       expect(mockLocators.actionPolicyLocators.navigateSync).toHaveBeenCalledWith({
         page: 'create',
       });
     });
 
-    it('opens agent chat from the empty state create-with-agent card', async () => {
+    it('opens agent chat from the empty state create-with-agent button', async () => {
       const user = userEvent.setup();
       renderTable();
 
       await waitFor(() =>
-        expect(screen.getByTestId('createActionPolicyWithAgentCard')).toBeInTheDocument()
+        expect(
+          screen.getByTestId('actionPoliciesEmptyStateCreateWithAgentButton')
+        ).toBeInTheDocument()
       );
-      await user.click(screen.getByTestId('createActionPolicyWithAgentCard'));
+      await user.click(screen.getByTestId('actionPoliciesEmptyStateCreateWithAgentButton'));
 
       expect(mockNavigateToApp).toHaveBeenCalledWith('agent_builder', {
         path: '/agents/elastic-ai-agent/conversations/new',
@@ -626,36 +632,30 @@ describe('ActionPoliciesTable', () => {
       });
     });
 
-    it('disables the empty state agent card when agent builder is not available', async () => {
+    it('disables the empty state create-with-agent button when agent builder is not available', async () => {
       mockAgentBuilderShow = false;
       mockExperimentalFeaturesEnabled = false;
       renderTable();
 
-      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
-      const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
-      expect(agentCard).toBeInTheDocument();
-      expect(agentCard).toHaveAttribute('aria-disabled', 'true');
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesEmptyStateCreateButton')).toBeInTheDocument()
+      );
+      const agentButton = screen.getByTestId('actionPoliciesEmptyStateCreateWithAgentButton');
+      expect(agentButton).toBeInTheDocument();
+      expect(agentButton).toBeDisabled();
 
-      fireEvent.click(agentCard);
+      fireEvent.click(agentButton);
       expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
 
-    it('disables both create cards and shows the license callout when the license is not valid', async () => {
+    it('shows the license callout when the license is not valid', async () => {
       mockIsLicenseValid = false;
       renderTable();
 
-      await waitFor(() => expect(screen.getByTestId('createActionPolicyCard')).toBeInTheDocument());
+      await waitFor(() =>
+        expect(screen.getByTestId('actionPoliciesEmptyStateCreateButton')).toBeInTheDocument()
+      );
       expect(screen.getByTestId('actionPoliciesLicenseCallout')).toBeInTheDocument();
-
-      const createCard = screen.getByTestId('createActionPolicyCard');
-      const agentCard = screen.getByTestId('createActionPolicyWithAgentCard');
-      expect(createCard).toHaveAttribute('aria-disabled', 'true');
-      expect(agentCard).toHaveAttribute('aria-disabled', 'true');
-
-      fireEvent.click(createCard);
-      fireEvent.click(agentCard);
-      expect(mockLocators.actionPolicyLocators.navigateSync).not.toHaveBeenCalled();
-      expect(mockNavigateToApp).not.toHaveBeenCalled();
     });
   });
 
@@ -678,8 +678,8 @@ describe('ActionPoliciesTable', () => {
       await waitFor(() =>
         expect(screen.getByTestId('actionPoliciesListReadOnlyEmpty')).toBeInTheDocument()
       );
-      expect(screen.queryByTestId('createActionPolicyCard')).toBeNull();
-      expect(screen.queryByTestId('createActionPolicyWithAgentCard')).toBeNull();
+      expect(screen.queryByTestId('actionPoliciesEmptyStateCreateButton')).toBeNull();
+      expect(screen.queryByTestId('actionPoliciesEmptyStateCreateWithAgentButton')).toBeNull();
     });
 
     it('hides the snooze button in the notify column', async () => {
