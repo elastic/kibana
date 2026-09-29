@@ -71,6 +71,8 @@ const BASIC_SHAPES: ReadonlySet<string> = new Set([
   'polyline',
   'polygon',
 ]);
+// DOMPurify drops <use> and strips the href <image> needs, so only these still draw after sanitization.
+const DRAWING_ELEMENTS: ReadonlySet<string> = new Set([...BASIC_SHAPES, 'text']);
 // `overflow` has no effect on a basic shape, so Illustrator's `style="overflow:visible;"` on <use> can be dropped.
 const OVERFLOW_DECLARATION = /^overflow\s*:\s*[a-z]+$/i;
 // `@namespace` is deliberately absent: a default namespace changes which elements class selectors match.
@@ -437,12 +439,21 @@ const countAddedBytes = (
 
 const kindOf = (element: Element): string => toAsciiLowerCase(element.localName);
 
-const indexById = (elements: readonly Element[]): ReadonlyMap<string, Element> => {
+// A url(#id) or href that finds a non-SVG element first references nothing, as in the XML file.
+const indexById = (
+  elements: readonly Element[],
+  foreignElements: ReadonlySet<Element>
+): ReadonlyMap<string, Element> => {
   const elementsById = new Map<string, Element>();
   for (const element of elements) {
     const id = element.getAttribute('id');
     if (id && !elementsById.has(id)) {
       elementsById.set(id, element);
+    }
+  }
+  for (const [id, element] of elementsById) {
+    if (foreignElements.has(element)) {
+      elementsById.delete(id);
     }
   }
   return elementsById;
@@ -456,9 +467,6 @@ const getHrefTarget = (
   const id = LOCAL_HREF.exec(href)?.[1];
   return id === undefined ? undefined : elementsById.get(id);
 };
-
-const hasStops = (gradient: Element): boolean =>
-  Array.from(gradient.children).some((child) => kindOf(child) === 'stop');
 
 interface Copy {
   readonly elements: readonly Element[];
@@ -480,6 +488,23 @@ const isCopyableStop = (stop: Element): boolean =>
   isFlat(stop) &&
   Array.from(stop.attributes).every(({ value }) => !PARENT_DEPENDENT_VALUE.test(value));
 
+interface Stops {
+  readonly elements: readonly Element[];
+  readonly isCopyable: boolean;
+  readonly bytes: number;
+}
+
+const readStops = (gradient: Element): Stops => {
+  const elements = Array.from(gradient.children).filter((child) => kindOf(child) === 'stop');
+  const isCopyable = elements.every(isCopyableStop);
+  return {
+    elements,
+    isCopyable,
+    // Serializing a stop that contains elements would serialize its whole subtree.
+    bytes: isCopyable ? elements.reduce((total, stop) => total + stop.outerHTML.length, 0) : 0,
+  };
+};
+
 // DOMPurify strips href and drops <use>, so gradients inheriting through href would paint nothing and clip
 // paths built from <use> would hide their shape.
 const planReferences = (
@@ -494,6 +519,18 @@ const planReferences = (
     copiedBytes += bytes;
     return copiedBytes <= MAX_COPIED_MARKUP_BYTES;
   };
+  // Any number of gradients can inherit from one, so each gradient's stops are read once.
+  const stopsByGradient = new Map<Element, Stops>();
+  const getStops = (gradient: Element): Stops => {
+    const cached = stopsByGradient.get(gradient);
+    if (cached) {
+      return cached;
+    }
+    const stops = readStops(gradient);
+    stopsByGradient.set(gradient, stops);
+    return stops;
+  };
+  const hasStops = (gradient: Element): boolean => getStops(gradient).elements.length > 0;
 
   for (const element of elements) {
     const kind = kindOf(element);
@@ -515,12 +552,12 @@ const planReferences = (
 
       const stopSource = hasStops(element) ? undefined : chain.find(hasStops);
       if (stopSource) {
-        const stops = Array.from(stopSource.children).filter((child) => kindOf(child) === 'stop');
-        if (stops.every(isCopyableStop)) {
-          if (!withinBudget(stops.reduce((total, stop) => total + stop.outerHTML.length, 0))) {
+        const stops = getStops(stopSource);
+        if (stops.isCopyable) {
+          if (!withinBudget(stops.bytes)) {
             return undefined;
           }
-          copies.push({ elements: stops, target: element, mode: 'append' });
+          copies.push({ elements: stops.elements, target: element, mode: 'append' });
         } else {
           isResolved = false;
         }
@@ -624,17 +661,16 @@ const collectDependencies = (
   elements: readonly Element[],
   resolvedGradients: ReadonlySet<Element>
 ): Map<string, number> | undefined => {
-  const elementsById = indexById(elements);
+  const elementsById = indexById(elements, collectForeignElements(elements));
   const descendants = countDescendants(elements);
   const positions = new Map(elements.map((element, index) => [element, index]));
   const dependencies = new Map<string, number>();
-  const pending = [...ids];
+  // Iterating a Set also visits the ids added to it during the loop.
+  const pending = new Set(ids);
+  // Subtrees of nested ids overlap, so each element's attributes are read only the first time.
+  const scanned = new Set<Element>();
   let steps = 0;
-  for (let next = 0; next < pending.length; next++) {
-    const id = pending[next];
-    if (dependencies.has(id)) {
-      continue;
-    }
+  for (const id of pending) {
     const target = elementsById.get(id);
     const count = (target && descendants.get(target)) ?? 0;
     dependencies.set(id, count);
@@ -645,7 +681,14 @@ const collectDependencies = (
     // A subtree is contiguous in document order.
     for (const element of elements.slice(start, start + count + 1)) {
       steps += 1;
-      if (steps > MAX_RESOLUTION_STEPS || (hasHref(element) && !resolvedGradients.has(element))) {
+      if (steps > MAX_RESOLUTION_STEPS) {
+        return undefined;
+      }
+      if (scanned.has(element)) {
+        continue;
+      }
+      scanned.add(element);
+      if (hasHref(element) && !resolvedGradients.has(element)) {
         return undefined;
       }
       for (const { value } of Array.from(element.attributes)) {
@@ -654,7 +697,7 @@ const collectDependencies = (
           return undefined;
         }
         for (const [, referencedId] of value.matchAll(LOCAL_URL)) {
-          pending.push(referencedId);
+          pending.add(referencedId);
         }
       }
     }
@@ -704,7 +747,7 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): InlinedSv
       element.setAttribute(property, value);
     }
   }
-  const plan = planReferences(elements, indexById(elements));
+  const plan = planReferences(elements, indexById(elements, foreignElements));
   if (!plan) {
     return undefined;
   }
@@ -729,21 +772,45 @@ const inlineSupportedStyles = (svgContent: string, window: DOMWindow): InlinedSv
     : undefined;
 };
 
-const isRenderableTarget = (target: Element): boolean => {
+interface SanitizedTree {
+  readonly foreignElements: ReadonlySet<Element>;
+  readonly subtree: (element: Element) => readonly Element[];
+}
+
+// Descriptive children such as <title> leave a clip path, mask, pattern or filter hiding whatever uses it.
+const isRenderableTarget = (
+  target: Element,
+  { foreignElements, subtree }: SanitizedTree
+): boolean => {
+  const isSvg = (element: Element): boolean => !foreignElements.has(element);
+  const draws = (element: Element): boolean =>
+    isSvg(element) && DRAWING_ELEMENTS.has(kindOf(element));
   const kind = kindOf(target);
+  const children = Array.from(target.children).filter(isSvg);
   if (GRADIENT_ELEMENTS.has(kind)) {
-    return hasStops(target);
+    return children.some((child) => kindOf(child) === 'stop');
   }
-  return !CONTAINER_REFERENCES.has(kind) || target.children.length > 0;
+  switch (kind) {
+    // Browsers ignore <g> inside a clip path, so only its own shapes and text clip.
+    case 'clippath':
+      return children.some(draws);
+    case 'filter':
+      return children.some((child) => kindOf(child).startsWith('fe'));
+    case 'mask':
+    case 'pattern':
+      return subtree(target).some(draws);
+    default:
+      return true;
+  }
 };
 
-const isRenderableReference = (property: string, target: Element): boolean => {
+const isRenderableReference = (property: string, target: Element, tree: SanitizedTree): boolean => {
   const kind = kindOf(target);
   const fitsProperty =
     property === 'clip-path'
       ? kind === 'clippath'
       : GRADIENT_ELEMENTS.has(kind) || kind === 'pattern';
-  return fitsProperty && isRenderableTarget(target);
+  return fitsProperty && isRenderableTarget(target, tree);
 };
 
 // A clip path or pattern that loses only part of its content to sanitization still hides part of the artwork.
@@ -757,20 +824,29 @@ const breaksReference = (
   }
   const svgDocument = new window.DOMParser().parseFromString(sanitizedSvg, 'text/html');
   const elements = collectElements(svgDocument, window);
-  const elementsById = indexById(elements);
+  const foreignElements = collectForeignElements(elements);
+  const elementsById = indexById(elements, foreignElements);
   const descendants = countDescendants(elements);
+  const positions = new Map(elements.map((element, index) => [element, index]));
+  const tree: SanitizedTree = {
+    foreignElements,
+    subtree: (element) => {
+      const start = (positions.get(element) ?? 0) + 1;
+      return elements.slice(start, start + (descendants.get(element) ?? 0));
+    },
+  };
   const isIntact = (id: string, before: number): boolean => {
     const target = elementsById.get(id);
     return (
       target !== undefined &&
-      isRenderableTarget(target) &&
+      isRenderableTarget(target, tree) &&
       (descendants.get(target) ?? 0) === before
     );
   };
   return (
     references.some(({ property, id }) => {
       const target = elementsById.get(id);
-      return !target || !isRenderableReference(property, target);
+      return !target || !isRenderableReference(property, target, tree);
     }) || Array.from(dependencies).some(([id, before]) => !isIntact(id, before))
   );
 };

@@ -888,5 +888,105 @@ describe('sanitizeSvg style inlining', () => {
 
       expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
     });
+
+    it('falls back when a referenced clip path, mask, pattern or filter would draw nothing', () => {
+      const paintedWith = (defs: string): string =>
+        `<svg><defs><style>.a{fill:url(#paint)}</style>${defs}</defs><rect class="a" width="9" height="9"/></svg>`;
+      for (const svg of [
+        '<svg><defs><style>.a{clip-path:url(#clip)}</style><clipPath id="clip"><title>label</title>' +
+          '<desc/><metadata/></clipPath></defs><rect class="a" width="9" height="9" fill="green"/></svg>',
+        '<svg><defs><style>.a{clip-path:url(#clip)}</style><clipPath id="clip"><g><rect width="5" height="5"/>' +
+          '</g></clipPath></defs><rect class="a" width="9" height="9" fill="green"/></svg>',
+        paintedWith('<pattern id="paint" width="1" height="1"><title>label</title></pattern>'),
+        paintedWith(
+          '<mask id="hide"><metadata/></mask><pattern id="paint" width="1" height="1">' +
+            '<rect width="1" height="1" mask="url(#hide)"/></pattern>'
+        ),
+        paintedWith(
+          '<filter id="hide"><title>label</title></filter><pattern id="paint" width="1" height="1">' +
+            '<rect width="1" height="1" filter="url(#hide)"/></pattern>'
+        ),
+      ]) {
+        expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+      }
+    });
+
+    it('keeps references that draw next to descriptive elements', () => {
+      const clipped = (clipPath: string): string =>
+        `<svg><defs><style>.a{clip-path:url(#clip)}</style><clipPath id="clip">${clipPath}</clipPath></defs>` +
+        '<rect class="a" width="9" height="9"/></svg>';
+      const painted = (defs: string): string =>
+        `<svg><defs><style>.a{fill:url(#paint)}</style>${defs}</defs><rect class="a" width="9" height="9"/></svg>`;
+
+      for (const svg of [
+        clipped('<title>label</title><rect width="5" height="5"/>'),
+        clipped('<text y="9">W</text>'),
+      ]) {
+        expect(sanitize(svg)).toMatch(/<rect class="a"[^>]*clip-path="url\(#clip\)"/);
+      }
+      for (const svg of [
+        painted(
+          '<pattern id="paint" width="1" height="1"><title>label</title><g><path d="M0 0h1v1z"/></g></pattern>'
+        ),
+        painted(
+          '<mask id="show"><g><rect width="1" height="1" fill="#fff"/></g></mask>' +
+            '<pattern id="paint" width="1" height="1"><rect width="1" height="1" mask="url(#show)"/></pattern>'
+        ),
+        painted(
+          '<filter id="soften"><feGaussianBlur stdDeviation="1"/></filter>' +
+            '<pattern id="paint" width="1" height="1"><rect width="1" height="1" filter="url(#soften)"/></pattern>'
+        ),
+      ]) {
+        expect(sanitize(svg)).toMatch(/<rect class="a"[^>]*fill="url\(#paint\)"/);
+      }
+    });
+
+    it('falls back when a reference reaches an element outside the SVG namespace', () => {
+      for (const svg of [
+        '<svg><defs><style>.a{fill:url(#paint)}</style><linearGradient xmlns="urn:not-svg" id="paint">' +
+          '<stop stop-color="#f00"/></linearGradient></defs><rect class="a" fill="green"/></svg>',
+        '<svg><defs><style>.a{clip-path:url(#clip)}</style><g xmlns="urn:not-svg"><clipPath id="clip">' +
+          '<rect width="5" height="5"/></clipPath></g></defs><rect class="a" fill="green"/></svg>',
+        '<svg><defs><style>.a{clip-path:url(#clip)}</style><clipPath id="clip">' +
+          '<rect xmlns="urn:not-svg" width="5" height="5"/></clipPath></defs><rect class="a" fill="green"/></svg>',
+        '<svg><defs><style>.a{fill:url(#child)}</style><linearGradient xmlns="urn:not-svg" id="base">' +
+          '<stop stop-color="#f00"/></linearGradient><linearGradient id="child" href="#base"/></defs>' +
+          '<rect class="a" fill="green"/></svg>',
+      ]) {
+        expect(sanitize(svg)).toEqual(sanitizeWithoutStyles(svg));
+      }
+    });
+
+    it('reads a shared gradient once however many gradients inherit from it', () => {
+      const inheritors = '<linearGradient href="#base"/>'.repeat(1500);
+      for (const baseContent of [
+        '<desc/>'.repeat(1500),
+        `${'<stop/>'.repeat(1500)}<stop stop-color="currentColor"/>`,
+      ]) {
+        const startedAt = Date.now();
+        sanitize(
+          `<svg><style>.a{fill:#f00}</style><defs><linearGradient id="base">${baseContent}</linearGradient>` +
+            `${inheritors}</defs><rect class="a"/></svg>`
+        );
+
+        // Re-reading the shared gradient for every inheritor takes well over ten seconds here.
+        expect(Date.now() - startedAt).toBeLessThan(5000);
+      }
+    });
+
+    it('reads each referenced element once however deeply referenced ids nest', () => {
+      const depth = 195;
+      const references = Array.from({ length: depth }, (_, index) => `url(#g${index})`).join('');
+      const groups = Array.from({ length: depth }, (_, index) => `<g id="g${index}">`).join('');
+      const startedAt = Date.now();
+      sanitize(
+        `<svg><style>.a{clip-path:url(#g0)}</style><defs>${groups}<rect mask="${references.repeat(
+          800
+        )}"/>` + `${'</g>'.repeat(depth)}</defs><rect class="a"/></svg>`
+      );
+
+      // Re-reading the innermost element once per enclosing id takes about four seconds and 1.4 GB here.
+      expect(Date.now() - startedAt).toBeLessThan(2500);
+    });
   });
 });
