@@ -221,6 +221,7 @@ const proposal: ProposalItem = {
   conversationId: 'inv-1',
   conversationTitle: 'Impossible travel — exec account',
   conversationAgentId: 'elastic-ai-agent',
+  title: 'Investigate impossible travel',
   comment: 'MFA satisfied from two countries in 40 minutes.',
   status: 'pending',
   impact: 'high',
@@ -446,6 +447,8 @@ describe('ConversationsPage decisions', () => {
     id: 'prop-1',
     conversationTitle: 'Impossible travel — exec account',
     category: 'respond',
+    // What `create()` stores for a caller that names nothing itself.
+    title: 'Revoke sessions',
     actionWorkflowId: 'system-alertzero-action-revoke-sessions',
     actionInput: { user: 'cfo@corp' },
     action: { name: 'Revoke sessions' },
@@ -464,7 +467,9 @@ describe('ConversationsPage decisions', () => {
   // The recommended action lives in the ⋮ menu, not on the card.
   const openApproval = () => {
     fireEvent.click(screen.getByRole('button', { name: 'Open actions menu' }));
-    fireEvent.click(screen.getByText('Revoke sessions'));
+    // By role: the card's summary carries the same text, because the title the
+    // server stored for this proposal is the action's own name.
+    fireEvent.click(screen.getByRole('menuitem', { name: 'Revoke sessions' }));
   };
 
   it('submits the action input the analyst was shown, so the API can refuse a stale approval', () => {

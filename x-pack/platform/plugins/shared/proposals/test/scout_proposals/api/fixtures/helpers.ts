@@ -7,7 +7,7 @@
 
 import type { ApiClientFixture, ApiClientResponse } from '@kbn/scout';
 import type { Client } from '@elastic/elasticsearch';
-import type { ProposalOrigin } from '@kbn/proposals-common';
+import { DEFAULT_PROPOSAL_TITLE, type ProposalOrigin } from '@kbn/proposals-common';
 import { v4 as uuidv4 } from 'uuid';
 import { COMMON_HEADERS } from './constants';
 
@@ -245,7 +245,9 @@ export const seedProposal = async (
       // Namespaced whatever the caller asked for, so teardown can find the whole
       // chain by query while distinct inputs stay distinct.
       conversationId: `${SUITE_NAMESPACE}-${options.conversationId ?? 'conversation'}`,
-      title: options.title,
+      // Required by `proposalSchema` and always resolved by `create()`, so a
+      // seed without one is a shape this plugin never writes.
+      title: options.title ?? DEFAULT_PROPOSAL_TITLE,
       comment: options.comment ?? 'Seeded by the revisions Scout suite',
       status: options.status ?? 'pending',
       rootProposalId: undefined,

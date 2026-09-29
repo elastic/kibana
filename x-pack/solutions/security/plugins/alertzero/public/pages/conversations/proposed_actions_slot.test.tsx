@@ -61,6 +61,7 @@ const mockProposal: ProposalWithMetadata = {
   id: 'proposal-1',
   spaceId: 'default',
   conversationId: 'conversation-1',
+  title: 'Isolate cfo-mbp-14 — host isolation',
   comment: 'Isolate the host to cut off the replayed session.',
   status: 'pending',
   impact: 'critical',
@@ -78,6 +79,7 @@ const decidedProposal: ProposalWithMetadata = {
   decision: 'approved',
   decidedBy: { fullName: 'Bonnie Fishel', username: 'bfishel', email: null },
   decidedAt: '2024-01-01T17:20:00.000Z',
+  title: 'After-hours domain admin logins — fin-dc-01',
   action: { name: 'After-hours domain admin logins — fin-dc-01', category: 'Response action' },
 };
 

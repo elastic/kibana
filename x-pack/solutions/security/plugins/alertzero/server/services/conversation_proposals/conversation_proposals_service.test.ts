@@ -18,6 +18,7 @@ const makeProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   id: 'p1',
   spaceId: 'default',
   conversationId: 'conv-1',
+  title: 'Do something',
   comment: 'do something',
   status: 'pending',
   impact: 'low',

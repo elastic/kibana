@@ -12,6 +12,7 @@ const baseProposal: ProposalItem = {
   id: 'prop-1',
   spaceId: 'default',
   conversationId: 'conv-1',
+  title: 'A proposed action',
   comment: 'A proposed action.',
   status: 'pending',
   impact: 'high',

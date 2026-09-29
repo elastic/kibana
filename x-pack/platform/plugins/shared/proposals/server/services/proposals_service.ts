@@ -21,7 +21,11 @@ import {
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { ActionMetadata } from '@kbn/workflows';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
-import { PROPOSAL_ATTACHMENT_TYPE, PROPOSALS_RESUME_CHANNEL } from '@kbn/proposals-common';
+import {
+  DEFAULT_PROPOSAL_TITLE,
+  PROPOSAL_ATTACHMENT_TYPE,
+  PROPOSALS_RESUME_CHANNEL,
+} from '@kbn/proposals-common';
 import type {
   CreateProposalRequest,
   DismissReason,
@@ -153,9 +157,10 @@ export class ProposalsService {
     const document: ProposalDocument = {
       spaceId,
       conversationId: params.conversationId,
-      // Same precedence as `category`: the caller knows the situation the
-      // proposal came out of, which the action's own name cannot.
-      title: blankToUndefined(params.title),
+      // Resolved once here rather than re-derived by every reader: same
+      // precedence as `category`, with the action's own name behind it and a
+      // constant behind that, so every proposal is named exactly once.
+      title: blankToUndefined(params.title) ?? metadata?.name ?? DEFAULT_PROPOSAL_TITLE,
       comment: params.comment,
       actionWorkflowId,
       actionInput: params.actionInput,
@@ -177,15 +182,7 @@ export class ProposalsService {
 
     await this.deps.storage.index({ id, document, op_type: 'create' });
 
-    // The proposal's own title first, then the action's name; the workflow id
-    // is the last resort so an unnamed action still reads as something more
-    // specific than the generic fallback the UI supplies for none of the three.
-    await this.attachToConversation(
-      id,
-      params.conversationId,
-      document.title ?? metadata?.name ?? actionWorkflowId,
-      request
-    );
+    await this.attachToConversation(id, params.conversationId, document.title, request);
 
     const proposal = toProposal(id, document);
     return { ...proposal, action: metadata, expired: isExpired(proposal) };
@@ -202,7 +199,7 @@ export class ProposalsService {
   private async attachToConversation(
     proposalId: string,
     conversationId: string,
-    title: string | undefined,
+    title: string,
     request: KibanaRequest
   ): Promise<void> {
     try {
@@ -686,6 +683,9 @@ export class ProposalsService {
     // Resolved once, so the enums and the ranks derived from them cannot drift.
     const nextImpact = impact ?? original.impact;
     const nextConfidence = confidence ?? original.confidence;
+    // Only a real override replaces the predecessor's: a blank would strip the
+    // proposal of the name `create()` resolved for it.
+    const nextTitle = blankToUndefined(title);
 
     const revisionId = uuidv4();
     const rootProposalId = original.rootProposalId ?? id;
@@ -709,10 +709,7 @@ export class ProposalsService {
       // `previousExecutionError` rides along with the spread untouched: a
       // revision corrects a proposal, it does not run anything, so the last
       // attempt to fail is still the one the predecessor was re-offered for.
-      // Blanked like `create()` does, so a caller clearing the title gets the
-      // action's name back rather than an empty label: every renderer falls
-      // back with `??`, which an empty string satisfies.
-      ...(title !== undefined ? { title: blankToUndefined(title) } : {}),
+      ...(nextTitle !== undefined ? { title: nextTitle } : {}),
       ...(comment !== undefined ? { comment } : {}),
       ...(mergedActionInput !== undefined ? { actionInput: mergedActionInput } : {}),
       impact: nextImpact,

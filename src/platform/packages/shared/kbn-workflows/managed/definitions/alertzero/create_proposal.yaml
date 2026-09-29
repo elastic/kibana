@@ -41,7 +41,9 @@ triggers:
           type: string
           description: >
             Short plain-text label naming what is proposed — `comment` is
-            already the markdown body.
+            already the markdown body. Optional here, but stored on every
+            proposal: omitting it stores the action workflow's own name, or
+            `Proposed action` when the action has no name either.
         comment:
           type: string
           description: >

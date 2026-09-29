@@ -23,7 +23,7 @@ export const CreateProposalStepId = 'proposals.createProposal' as const;
 export const createProposalStepInputSchema = z.object({
   conversationId: z.string().describe('Conversation this proposal belongs to.'),
   title: optionalStepInput(z.string().max(MAX_TITLE_LENGTH)).describe(
-    'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Takes precedence over the action workflow\u2019s own name wherever a title is rendered.'
+    'Short plain-text label naming what is proposed \u2014 `comment` is already the markdown body. Optional here, but stored on every proposal: omitting it stores the action workflow\u2019s own name, or `Proposed action` when the action has no name either.'
   ),
   comment: z
     .string()

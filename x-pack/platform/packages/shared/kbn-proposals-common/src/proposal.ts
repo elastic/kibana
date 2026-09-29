@@ -100,6 +100,15 @@ const MAX_ID_LENGTH = 256;
 const MAX_NAME_LENGTH = 256;
 /** One line in a queue row, and written by a worker's LLM, so it is kept short. */
 export const MAX_TITLE_LENGTH = 256;
+
+/**
+ * Names a proposal whose caller supplied no title and whose action declares no
+ * name — including one carrying no action at all, where the comment describes
+ * something the analyst performs themselves. Stamped on write rather than
+ * resolved per viewer, and so deliberately untranslated: the `comment` beside
+ * it is stored English too.
+ */
+export const DEFAULT_PROPOSAL_TITLE = 'Proposed action';
 /** Markdown shown to a human, so it needs room without being unbounded. */
 export const MAX_COMMENT_LENGTH = 8192;
 const MAX_RATIONALE_LENGTH = 4096;
@@ -141,10 +150,11 @@ export const proposalSchema = z.object({
   conversationId: z.string().max(MAX_ID_LENGTH),
   /**
    * Short label naming what is proposed. Plain text, not markdown: `comment` is
-   * already the body. Optional, so the surfaces that render it keep the
-   * action-name fallback chain they had before it existed.
+   * already the body. Required like `comment`, and resolved on write — the
+   * caller's own title, else the action's name, else `DEFAULT_PROPOSAL_TITLE` —
+   * so every reader renders this field instead of re-deriving a fallback chain.
    */
-  title: z.string().max(MAX_TITLE_LENGTH).optional(),
+  title: z.string().max(MAX_TITLE_LENGTH),
   /** Markdown explaining what is being proposed. Every proposal carries one. */
   comment: z.string().max(MAX_COMMENT_LENGTH),
 
@@ -190,16 +200,18 @@ export const proposalSchema = z.object({
   rationale: z.string().max(MAX_RATIONALE_LENGTH).optional(),
   executionError: z.string().max(MAX_ERROR_LENGTH).optional(),
   /**
-   * The `executionError` of the proposal this one supersedes, copied once when
-   * the successor is created and never updated afterwards. Absent on a first
-   * attempt, and equally absent on a revision whose predecessor never ran — so
-   * a consumer must not read absence as "the previous attempt succeeded".
+   * The `executionError` of the attempt this proposal re-offers: copied from
+   * the predecessor when a failed proposal is cloned, then carried through
+   * revisions untouched, since revising runs nothing. It therefore names the
+   * last attempt that actually ran and failed, which sits further back than
+   * `supersedes` once a clone has been revised. Absent while nothing in the
+   * chain has run and failed — a consumer must not read absence as "the
+   * previous attempt succeeded".
    *
-   * A deliberate denormalisation of something `supersedes` can already derive.
+   * A deliberate denormalisation of something the chain can already derive.
    * The queue answers "did the last attempt fail, and how" on every row it
-   * renders, and deriving it would cost one extra fetch per row. It holds the
-   * immediately preceding attempt only: "failed three times" is `revision` plus
-   * a chain query, not this field.
+   * renders, and deriving it would cost one extra fetch per row. It holds one
+   * failure only: "failed three times" is `revision` plus a chain query.
    */
   previousExecutionError: z.string().max(MAX_ERROR_LENGTH).optional(),
 
@@ -222,7 +234,8 @@ export const createProposalRequestSchema = z.object({
   /**
    * Short plain-text label. Same precedence as `category` — the caller wins,
    * because it knows the situation the proposal came out of, which the action's
-   * own metadata cannot.
+   * own metadata cannot. Optional here only: omitting it stores the action's
+   * name, or `DEFAULT_PROPOSAL_TITLE` when the action has none either.
    */
   title: z.string().max(MAX_TITLE_LENGTH).optional(),
   comment: z.string().max(MAX_COMMENT_LENGTH),

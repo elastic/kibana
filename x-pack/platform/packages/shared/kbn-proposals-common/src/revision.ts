@@ -25,7 +25,10 @@ import {
  * the chain, which a revision does not change.
  */
 export const reviseProposalRequestSchema = z.object({
-  /** Renaming is exactly the kind of feedback that produces a revision. */
+  /**
+   * Renaming is exactly the kind of feedback that produces a revision. A blank
+   * keeps the predecessor's, since every proposal carries one.
+   */
   title: z.string().max(MAX_TITLE_LENGTH).optional(),
   /** Updated rationale, rendered as markdown. */
   comment: z.string().max(MAX_COMMENT_LENGTH).optional(),

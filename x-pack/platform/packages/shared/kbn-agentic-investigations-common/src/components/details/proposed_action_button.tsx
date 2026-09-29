@@ -15,7 +15,6 @@ import {
   getApprovalOutcomeBadge,
   getProposalCaption,
   getProposalDecision,
-  getProposalTitle,
   ProposedActionStatusBadge,
   type ApprovalPhase,
   type ApprovalProposal,
@@ -154,7 +153,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
           role="button"
           tabIndex={0}
           aria-label={DETAILS_FLYOUT_LABELS.proposedAction.ariaLabel({
-            title: getProposalTitle(proposal),
+            title: proposal.title,
             status: badge.label,
           })}
           data-test-subj={dataTestSubj}
@@ -183,7 +182,7 @@ export const ProposedActionButton = memo<ProposedActionButtonProps>(
               >
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <strong>{getProposalTitle(proposal)}</strong>
+                    <strong>{proposal.title}</strong>
                   </EuiText>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>

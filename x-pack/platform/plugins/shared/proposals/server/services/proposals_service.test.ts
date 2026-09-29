@@ -8,7 +8,7 @@
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { ListProposalsQuery } from '@kbn/proposals-common';
+import { DEFAULT_PROPOSAL_TITLE, type ListProposalsQuery } from '@kbn/proposals-common';
 import type { ProposalDocument, ProposalsStorageClient } from '../storage/proposals_storage';
 import {
   ProposalConflictError,
@@ -34,6 +34,7 @@ const analyst = (username: string, profileUid = `${username}-uid`) => ({
 const baseDocument = (overrides: Partial<ProposalDocument> = {}): ProposalDocument => ({
   spaceId: SPACE_ID,
   conversationId: 'conv-1',
+  title: 'Tune the noisy rule',
   comment: 'Tune the noisy rule',
   actionWorkflowId: 'system-alertzero-action-create-rule',
   actionInput: { name: 'Suspicious PowerShell' },
@@ -238,9 +239,9 @@ describe('ProposalsService', () => {
       });
     });
 
-    // Falls back rather than leaving the card untitled, so an action whose
-    // workflow declares no metadata still reads as something specific.
-    it('should title the attachment with the workflow id when the action has no metadata', async () => {
+    // Not the workflow id: an opaque id reads as a name a caller chose, where
+    // a constant plainly reads as the absence of one.
+    it('should name the proposal with a constant when neither the caller nor the action does', async () => {
       const storage = createStorage();
       const workflowsApi = createWorkflowsApi();
       workflowsApi.getWorkflow.mockResolvedValue({ definition: {} });
@@ -257,11 +258,56 @@ describe('ProposalsService', () => {
         { spaceId: SPACE_ID, request }
       );
 
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.document.title).toBe(DEFAULT_PROPOSAL_TITLE);
       expect(attachmentsClient.create).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ title: 'system-alertzero-action-create-rule' }),
+          data: expect.objectContaining({ title: DEFAULT_PROPOSAL_TITLE }),
         })
       );
+    });
+
+    // Resolved on write so every reader renders one field instead of re-deriving
+    // the chain, and a later rename leaves the record naming what was offered.
+    it('should store the action name as the title when the caller supplies none', async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          actionInput: { name: 'Suspicious PowerShell' },
+          confidence: 'medium',
+          origin: 'alertzero',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.document.title).toBe('Create detection rule');
+    });
+
+    it("should prefer the caller's title over the action name", async () => {
+      const storage = createStorage();
+      const { service } = createService(storage);
+
+      await service.create(
+        {
+          conversationId: 'conv-1',
+          title: 'Tune the Okta rule',
+          comment: 'Tune the noisy rule',
+          actionWorkflowId: 'system-alertzero-action-create-rule',
+          actionInput: { name: 'Suspicious PowerShell' },
+          confidence: 'medium',
+          origin: 'alertzero',
+        },
+        { spaceId: SPACE_ID, request }
+      );
+
+      const [[createArgs]] = storage.index.mock.calls;
+      expect(createArgs.document.title).toBe('Tune the Okta rule');
     });
 
     it('should still return the proposal when the conversation attachment fails', async () => {
@@ -1374,7 +1420,7 @@ describe('ProposalsService', () => {
       expect(reviseArgs.document.origin).toBe('nightshift');
     });
 
-    it('clears the title when the override is blank, rather than storing one', async () => {
+    it('keeps the predecessor title when the override is blank', async () => {
       const storage = createStorage(baseDocument({ title: 'Tune the Okta rule' }));
       const { service } = createService(storage);
 
@@ -1382,9 +1428,9 @@ describe('ProposalsService', () => {
 
       // The revision is written first; the second call marks the predecessor.
       const [[revisionArgs]] = storage.index.mock.calls;
-      // Not `''`: the renderers fall back with `??`, so a blank would win and
-      // show an empty label where the action's name belongs.
-      expect(revisionArgs.document.title).toBeUndefined();
+      // A blank is not a rename: clearing the title would strip the proposal of
+      // the name `create()` resolved for it, leaving the queue a generic row.
+      expect(revisionArgs.document.title).toBe('Tune the Okta rule');
     });
 
     it('applies a title override, since renaming is exactly what produces a revision', async () => {

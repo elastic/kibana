@@ -13,6 +13,7 @@ const baseProposal: ProposalItem = {
   id: 'prop-001',
   spaceId: 'default',
   conversationId: 'conv-001',
+  title: 'A proposed action',
   comment: 'A detailed description of the proposed action.',
   status: 'pending',
   impact: 'high',
@@ -39,6 +40,8 @@ describe('proposalToInvestigation', () => {
       // decision is about, and repeats the CTA label right beside it.
       const result = proposalToInvestigation({
         ...baseProposal,
+        // What the server stores when the caller names nothing itself.
+        title: 'Isolate host',
         action: { name: 'Isolate host' } as ProposalWithMetadata['action'],
         actionWorkflowId: 'system-alertzero-action-isolate-host',
       });
@@ -69,14 +72,6 @@ describe('proposalToInvestigation', () => {
       });
 
       expect(result.primaryActionLabel).toBe('Tune the Okta rule');
-    });
-
-    // The label doubles as the row button's name, so a proposal naming nothing
-    // gets none rather than the shared helper's "no action" sentence.
-    it('leaves the row unlabelled when there is neither a title nor an action', () => {
-      const result = proposalToInvestigation({ ...baseProposal });
-
-      expect(result.primaryActionLabel).toBeUndefined();
     });
 
     it('falls back to a placeholder when the conversation title could not be read', () => {

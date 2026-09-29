@@ -174,6 +174,7 @@ const baseProposal = (overrides: Partial<ProposalWithMetadata> = {}): ProposalWi
   id: 'proposal-1',
   spaceId: 'default',
   conversationId: 'conv-1',
+  title: 'Tune the noisy rule',
   comment: 'Tune the noisy rule',
   status: 'pending',
   impact: 'low',
