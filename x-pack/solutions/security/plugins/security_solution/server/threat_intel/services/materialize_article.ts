@@ -66,6 +66,9 @@ const reason = (value: unknown): string =>
  * Transient failures worth another materialization pass. Permanent validation /
  * 4xx / private-URL / NXDOMAIN failures stay `fallback` so enrichment can
  * finish on RSS instead of crowding the oldest-first pending batch.
+ *
+ * Match error codes / known transport phrases only. A bare `network` substring
+ * would also hit hostnames like `research.network.example` in validation errors.
  */
 const isRetryableMaterializationError = (error: unknown): boolean => {
   const message = reason(error);
@@ -76,9 +79,10 @@ const isRetryableMaterializationError = (error: unknown): boolean => {
     const code = Number(httpMatch[1]);
     return code === 429 || code >= 500;
   }
-  // EAI_AGAIN is a transient resolver failure. ENOTFOUND / NXDOMAIN is not:
-  // a dead hostname would otherwise defer forever.
-  return /fetch failed|network|ECONNRESET|ECONNREFUSED|EAI_AGAIN/i.test(message);
+  // EAI_AGAIN is a transient resolver failure. ENOTFOUND / NXDOMAIN is not.
+  return /\bfetch failed\b|ECONNRESET|ECONNREFUSED|EAI_AGAIN|ENETUNREACH|EHOSTUNREACH/i.test(
+    message
+  );
 };
 
 const sliceWithoutSplittingSurrogatePair = (value: string, maxChars: number): string => {

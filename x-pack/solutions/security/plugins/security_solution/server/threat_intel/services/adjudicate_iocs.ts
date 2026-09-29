@@ -84,6 +84,35 @@ const sliceContext = (source: string, index: number, valueLength: number): strin
     .trim();
 
 /**
+ * Prefer an occurrence whose surrounding prose looks like attacker attribution
+ * over a bare first hit (often a citation). When scores tie, keep the later
+ * occurrence so mid/late campaign write-ups win over an early docs link.
+ */
+const ATTRIBUTION_CONTEXT_CUE =
+  /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
+
+const bestOccurrenceIndex = (source: string, lowerSource: string, lowerValue: string): number => {
+  let bestIndex = -1;
+  let bestScore = Number.NEGATIVE_INFINITY;
+  let from = 0;
+  while (from < lowerSource.length) {
+    const index = lowerSource.indexOf(lowerValue, from);
+    if (index < 0) break;
+    const window = source.slice(
+      Math.max(0, index - CONTEXT_CHARS),
+      Math.min(source.length, index + lowerValue.length + CONTEXT_CHARS)
+    );
+    const score = (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index;
+    if (score >= bestScore) {
+      bestScore = score;
+      bestIndex = index;
+    }
+    from = index + Math.max(lowerValue.length, 1);
+  }
+  return bestIndex;
+};
+
+/**
  * Prefer the original article span. When the IOC was published defanged
  * (`hxxps://evil[.]example/...`), the canonical value only appears in the
  * refanged copy that extraction already uses — take context from there.
@@ -96,9 +125,9 @@ const contextFor = (
   value: string
 ): string => {
   const lowerValue = value.toLowerCase();
-  const originalIndex = lowerOriginal.indexOf(lowerValue);
+  const originalIndex = bestOccurrenceIndex(originalText, lowerOriginal, lowerValue);
   if (originalIndex >= 0) return sliceContext(originalText, originalIndex, value.length);
-  const refangedIndex = lowerRefanged.indexOf(lowerValue);
+  const refangedIndex = bestOccurrenceIndex(refangedText, lowerRefanged, lowerValue);
   if (refangedIndex >= 0) return sliceContext(refangedText, refangedIndex, value.length);
   return '';
 };

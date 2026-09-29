@@ -100,30 +100,59 @@ steps:
           existing_rendered_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rendered_body_text | default: '' }}"
           existing_status: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.materialization.status | default: '' }}"
 
+      # Only transient Jina/transport failures use status `retryable_fallback`.
+      # Skip before persist and the gate so an outage cannot re-embed semantic_text
+      # or spend Fast-tier calls on teaser text every four hours.
+      - name: defer_rss_retryable_fallback
+        type: loop.continue
+        if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}"
+
+      # Always set per-item flags. A conditional data.set would leave the previous
+      # foreach item's body comparison variables in place for non-RSS reports.
+      - name: capture_materialization_persist
+        type: data.set
+        with:
+          is_rss_report: "${{ steps.load_full_doc.output.hits.hits[0]._source.source.type == 'rss' }}"
+          # Bounded semantic_text body used for equality checks and writes.
+          materialization_body_text: "{{ steps.materialize_article.output.body_text | slice: 0, 32000 }}"
+          existing_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text | default: '' }}"
+
+      # Rewrite semantic body_text only when the effective body changed. Retries
+      # after a gate/core failure otherwise re-embed up to 32K chars every run.
       - name: persist_materialization
         type: elasticsearch.update
-        if: "steps.load_full_doc.output.hits.hits[0]._source.source.type: rss"
+        if: "${{ variables.is_rss_report == true and variables.materialization_body_text != variables.existing_body_text }}"
         with:
           index: "{{ foreach.item._index }}"
           id: "{{ foreach.item._id }}"
           doc:
             content:
-              # Keep semantic_text embedding bounded; the complete retained
-              # render remains available once in rendered_body_text and all
-              # inference in this run uses the transient step output.
-              body_text: "{{ steps.materialize_article.output.body_text | slice: 0, 32000 }}"
+              body_text: "{{ variables.materialization_body_text }}"
               rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
               rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
               materialization: "${{ steps.materialize_article.output.materialization }}"
-        # Continue the foreach so one bad update cannot stall the other 49
-        # pending reports. The next step skips this item so the gate/core never
-        # finalize a report whose retained article failed to write.
+        on-failure:
+          continue: true
+
+      # Body unchanged: still refresh retained RSS/render metadata without
+      # touching semantic_text.
+      - name: persist_materialization_metadata
+        type: elasticsearch.update
+        if: "${{ variables.is_rss_report == true and variables.materialization_body_text == variables.existing_body_text }}"
+        with:
+          index: "{{ foreach.item._index }}"
+          id: "{{ foreach.item._id }}"
+          doc:
+            content:
+              rss_body_text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.rss_body_text | default: steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
+              rendered_body_text: "{{ steps.materialize_article.output.rendered_body_text }}"
+              materialization: "${{ steps.materialize_article.output.materialization }}"
         on-failure:
           continue: true
 
       - name: retry_materialization_persist_failure
         type: loop.continue
-        if: "${{ steps.persist_materialization.error != null }}"
+        if: "${{ steps.persist_materialization.error != null or steps.persist_materialization_metadata.error != null }}"
 
       # Cheap hard gate: a negative Haiku verdict stops this report before
       # deterministic extraction, Sonnet core extraction, or Opus Diamond.
@@ -156,14 +185,6 @@ steps:
           gate_needs_render: "${{ steps.assess_relevance.output.needs_render }}"
           gate_has_original_commentary: "${{ steps.assess_relevance.output.has_original_commentary }}"
           gate_reason: "{{ steps.assess_relevance.output.reason }}"
-
-      # Only transient Jina/network failures use status `retryable_fallback`.
-      # Permanent validation / 4xx / private-URL / challenge results stay
-      # `fallback` so enrichment can finish on the retained RSS body instead of
-      # occupying the oldest-first pending batch forever.
-      - name: defer_rss_retryable_fallback
-        type: loop.continue
-        if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}"
 
       - name: persist_gate_rejection
         type: elasticsearch.update

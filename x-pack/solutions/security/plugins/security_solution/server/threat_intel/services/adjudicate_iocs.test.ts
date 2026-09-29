@@ -124,6 +124,21 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable[0].context).toContain(canonical);
   });
 
+  it('prefers an attributed later IOC occurrence over an earlier citation', () => {
+    const url = 'https://evil.example/payload';
+    const prepared = prepareIocAdjudication({
+      text:
+        `See the vendor write-up at ${url} for background. ` +
+        `${'unrelated prose. '.repeat(40)}` +
+        `The attacker later downloaded the payload from ${url} during staging.`,
+      iocs: [candidate(url)],
+    });
+
+    expect(prepared.reviewable).toHaveLength(1);
+    expect(prepared.reviewable[0].context).toContain('attacker later downloaded');
+    expect(prepared.reviewable[0].context).not.toContain('vendor write-up');
+  });
+
   it('keeps an approved tier_basis within the response schema bound', () => {
     const longBasis = 'b'.repeat(MAX_IOC_TIER_BASIS_LENGTH);
     const prepared = prepareIocAdjudication({

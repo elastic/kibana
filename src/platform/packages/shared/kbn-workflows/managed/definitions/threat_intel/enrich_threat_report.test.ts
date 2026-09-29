@@ -123,18 +123,43 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     });
   });
 
-  it('defers only retryable RSS Jina fallbacks before gate rejection or core', () => {
+  it('defers retryable RSS Jina fallbacks before persist and the relevance gate', () => {
     expect(findStepByName(workflow.steps, 'defer_rss_retryable_fallback')).toMatchObject({
       type: 'loop.continue',
       if: "${{ steps.materialize_article.output.materialization.status == 'retryable_fallback' }}",
     });
     const yaml = THREAT_INTEL_ENRICH_REPORT_WORKFLOW.yaml;
-    expect(yaml.indexOf('name: defer_rss_retryable_fallback')).toBeLessThan(
-      yaml.indexOf('name: persist_gate_rejection')
-    );
-    expect(yaml.indexOf('name: defer_rss_retryable_fallback')).toBeLessThan(
-      yaml.indexOf('name: extract_iocs')
-    );
+    const deferAt = yaml.indexOf('name: defer_rss_retryable_fallback');
+    expect(deferAt).toBeGreaterThan(yaml.indexOf('name: materialize_article'));
+    expect(deferAt).toBeLessThan(yaml.indexOf('name: persist_materialization'));
+    expect(deferAt).toBeLessThan(yaml.indexOf('name: assess_relevance'));
+  });
+
+  it('rewrites semantic body_text only when the materialized body changed', () => {
+    const withBody = findStepByName(workflow.steps, 'persist_materialization') as {
+      if?: string;
+      'on-failure'?: { continue?: boolean };
+      with?: { doc?: { content?: Record<string, unknown> } };
+    };
+    const metadataOnly = findStepByName(workflow.steps, 'persist_materialization_metadata') as {
+      if?: string;
+      'on-failure'?: { continue?: boolean };
+      with?: { doc?: { content?: Record<string, unknown> } };
+    };
+
+    expect(withBody.if).toContain('materialization_body_text != variables.existing_body_text');
+    expect(withBody.with?.doc?.content).toHaveProperty('body_text');
+    expect(withBody['on-failure']?.continue).toBe(true);
+
+    expect(metadataOnly.if).toContain('materialization_body_text == variables.existing_body_text');
+    expect(metadataOnly.with?.doc?.content).not.toHaveProperty('body_text');
+    expect(metadataOnly['on-failure']?.continue).toBe(true);
+
+    // Per-item capture must always run so foreach variables cannot leak across items.
+    expect(findStepByName(workflow.steps, 'capture_materialization_persist')).toMatchObject({
+      type: 'data.set',
+    });
+    expect(findStepByName(workflow.steps, 'capture_materialization_persist')?.if).toBeUndefined();
   });
 
   it('skips a report on gate-rejection persist failure without aborting the foreach', () => {
@@ -160,7 +185,7 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     expect(persist?.['on-failure']?.continue).toBe(true);
     expect(findStepByName(workflow.steps, 'retry_materialization_persist_failure')).toMatchObject({
       type: 'loop.continue',
-      if: '${{ steps.persist_materialization.error != null }}',
+      if: '${{ steps.persist_materialization.error != null or steps.persist_materialization_metadata.error != null }}',
     });
   });
 

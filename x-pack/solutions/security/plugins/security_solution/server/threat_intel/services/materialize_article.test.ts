@@ -183,6 +183,24 @@ describe('materializeArticle', () => {
     expect(fetchFn).not.toHaveBeenCalled();
   });
 
+  it('does not treat a hostname containing "network" as a retryable failure', async () => {
+    const fetchFn = jest.fn();
+    const lookupFn = jest.fn().mockRejectedValue(
+      Object.assign(new Error('getaddrinfo ENOTFOUND research.network.example'), {
+        code: 'ENOTFOUND',
+      })
+    );
+    const result = await run(
+      { article_url: 'https://research.network.example/report' },
+      fetchFn as typeof fetch,
+      { lookupFn }
+    );
+
+    expect(result.materialization.status).toBe('fallback');
+    expect(result.materialization.reason).toMatch(/research\.network\.example/);
+    expect(fetchFn).not.toHaveBeenCalled();
+  });
+
   it('strips URL userinfo before calling Jina and recording source_url', async () => {
     const fetchFn = jest.fn().mockResolvedValue(
       new Response(
