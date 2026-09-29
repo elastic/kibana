@@ -84,60 +84,165 @@ describe('CommentsLayer', () => {
     expect(document.activeElement).toBe(target());
   });
 
-  it('lists comments by page, the current page first, in groups that are open but can be closed', async () => {
+  it('lists comments by page, the current page first and open, the others closed until opened or arrived at', async () => {
+    const { location, navigate } = createLocation();
     const elsewhere = createComment('far', {
       route: { pageKey: '/app/two', path: '/app/two' },
       anchor: anchorById('missing'),
     });
-    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere, seeded]) });
+    const controller = await renderLayer({
+      location,
+      api: createInMemoryCommentsApi([elsewhere, seeded]),
+    });
     act(() => controller.setActive(true));
 
     const [current, other] = await screen.findAllByTestId('devCommentsPanelPage');
     expect(current).toHaveTextContent('/page');
     expect(other).toHaveTextContent('/app/two');
+    expect(other).toHaveTextContent('1');
+    const currentTrigger = within(current).getByRole('button', { name: '/page' });
+    const otherTrigger = within(other).getByRole('button', { name: '/app/two' });
+    expect(currentTrigger).toHaveAttribute('aria-expanded', 'true');
     expect(within(current).getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
-    expect(within(other).getByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
+    expect(otherTrigger).toHaveAttribute('aria-expanded', 'false');
+    expect(within(other).queryByTestId('devCommentsPanelItem-far')).toBeNull();
 
-    const trigger = within(current).getByText('/page').closest('button') as HTMLButtonElement;
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    fireEvent.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(within(current).queryByTestId('devCommentsPanelItem-a')).toBeNull();
+    fireEvent.click(otherTrigger);
     expect(within(other).getByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
-    fireEvent.click(trigger);
-    expect(within(current).getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
+    fireEvent.click(currentTrigger);
+    expect(within(current).queryByTestId('devCommentsPanelItem-a')).toBeNull();
+    fireEvent.click(otherTrigger);
+
+    // Arriving at a page opens its comments.
+    act(() => navigate('/app/two'));
+    await waitFor(() => expect(screen.getByTestId('devCommentsPanelItem-far')).toBeInTheDocument());
   });
 
-  it('scrolls to a page whose header is stuck at the bottom of the list when it is clicked, rather than closing it', async () => {
+  it('opens the only page listed, whichever it is', async () => {
     const elsewhere = createComment('far', {
       route: { pageKey: '/app/two', path: '/app/two' },
       anchor: anchorById('missing'),
     });
-    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere, seeded]) });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([elsewhere]) });
     act(() => controller.setActive(true));
-    const [, other] = await screen.findAllByTestId('devCommentsPanelPage');
-    const list = screen.getByTestId('devCommentsPanel').lastElementChild as HTMLElement;
-    const header = other.firstElementChild as HTMLElement;
-    const content = other.lastElementChild as HTMLElement;
-    const trigger = within(other).getByText('/app/two').closest('button') as HTMLButtonElement;
-    list.setAttribute('data-rect', '0,100,400,400');
+    expect(await screen.findByTestId('devCommentsPanelItem-far')).toBeInTheDocument();
+  });
 
-    // Stuck at the bottom, the header is above its content, which is further down the list.
-    header.setAttribute('data-rect', '0,468,400,32');
-    content.setAttribute('data-rect', '0,740,400,100');
-    fireEvent.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
-    // The content comes right under the two headers stuck at the top: 740 - 100 - 2 * 32.
-    expect(list.scrollTop).toBe(576);
+  it('keeps pointer input in the panel menus from the page, which closes popovers on clicks outside of them', async () => {
+    const outsideClick = jest.fn();
+    const events = ['pointerdown', 'mousedown', 'mouseup', 'click'] as const;
+    events.forEach((type) => document.addEventListener(type, outsideClick));
+    try {
+      const controller = await renderLayer();
+      act(() => controller.setActive(true));
+      const row = await screen.findByTestId('devCommentsPanelItem-a');
+      const menus = [
+        [screen.getByTestId('devCommentsPanelActions'), 'devCommentsPanelRefresh'],
+        [screen.getByTestId('devCommentsPanelFilter'), 'devCommentsPanelShowResolved'],
+        [within(row).getByTestId('devCommentsPanelRowActions'), 'devCommentsCopy'],
+      ] as const;
 
-    // In place, the content right under it, the header closes and opens the page.
-    header.setAttribute('data-rect', '0,200,400,32');
-    content.setAttribute('data-rect', '0,232,400,100');
-    fireEvent.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'false');
-    expect(list.scrollTop).toBe(576);
-    fireEvent.click(trigger);
-    expect(trigger).toHaveAttribute('aria-expanded', 'true');
+      for (const [button, item] of menus) {
+        fireEvent.click(button);
+        const menuItem = await screen.findByTestId(item);
+        outsideClick.mockClear();
+        fireEvent.pointerDown(menuItem);
+        fireEvent.mouseDown(menuItem);
+        fireEvent.mouseUp(menuItem);
+        expect(outsideClick).not.toHaveBeenCalled();
+        // Not the button EuiPanel makes of anything with an onClick: buttons cannot nest.
+        expect(menuItem.closest('[data-popover-panel]')?.tagName).toBe('DIV');
+        act(() => menuItem.focus());
+        escape();
+        await waitFor(() => expect(screen.queryByTestId(item)).toBeNull());
+      }
+    } finally {
+      events.forEach((type) => document.removeEventListener(type, outsideClick));
+    }
+  });
+
+  it('closes an open menu of the panel on Escape, staying in comment mode', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    const row = await screen.findByTestId('devCommentsPanelItem-a');
+    const menus = [
+      [screen.getByTestId('devCommentsPanelActions'), 'devCommentsPanelRefresh'],
+      [screen.getByTestId('devCommentsPanelFilter'), 'devCommentsPanelShowResolved'],
+      [within(row).getByTestId('devCommentsPanelRowActions'), 'devCommentsPanelShow'],
+    ] as const;
+
+    for (const [button, item] of menus) {
+      fireEvent.click(button);
+      const menuItem = await screen.findByTestId(item);
+      act(() => menuItem.focus());
+      escape();
+      await waitFor(() => expect(screen.queryByTestId(item)).toBeNull());
+      expect(controller.store.getState().active).toBe(true);
+      expect(document.activeElement).toBe(button);
+    }
+
+    // With no menu open, Escape leaves comment mode as before.
+    escape();
+    expect(controller.store.getState().active).toBe(false);
+  });
+
+  it('leaves resolved comments out of the list until asked for, the filter showing as on while it hides some', async () => {
+    const done = createComment('done', { resolved: true });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, done]) });
+    act(() => controller.setActive(true));
+
+    await screen.findByTestId('devCommentsPanelItem-a');
+    expect(screen.queryByTestId('devCommentsPanelItem-done')).toBeNull();
+    expect(screen.getByTestId('devCommentsPanelCount')).toHaveTextContent('1');
+    const filter = screen.getByTestId('devCommentsPanelFilter');
+    expect(filter.className).toContain('base');
+
+    fireEvent.click(filter);
+    const toggle = await screen.findByTestId('devCommentsPanelShowResolved');
+    expect(toggle).toHaveAttribute('aria-checked', 'false');
+    fireEvent.click(toggle);
+    expect(screen.getByTestId('devCommentsPanelItem-done')).toBeInTheDocument();
+    expect(screen.getByTestId('devCommentsPanelCount')).toHaveTextContent('2');
+    expect(filter.className).toContain('empty');
+
+    fireEvent.click(filter);
+    fireEvent.click(await screen.findByTestId('devCommentsPanelShowResolved'));
+    expect(screen.queryByTestId('devCommentsPanelItem-done')).toBeNull();
+
+    // A comment resolved from the list leaves it; the last one leaves a note that all are.
+    fireEvent.click(
+      within(screen.getByTestId('devCommentsPanelItem-a')).getByTestId('devCommentsToggleResolved')
+    );
+    await waitFor(() => expect(screen.queryByTestId('devCommentsPanelItem-a')).toBeNull());
+    expect(screen.getByTestId('devCommentsPanelAllResolved')).toBeInTheDocument();
+    // Its Resolve button gone, focus moves to the filter that hid it.
+    await waitFor(() => expect(document.activeElement).toBe(filter));
+  });
+
+  it('moves focus on to the next comment when the one resolved leaves the list, or to the previous one', async () => {
+    const comments = ['first', 'second', 'third'].map((id) => createComment(id));
+    const controller = await renderLayer({ api: createInMemoryCommentsApi(comments) });
+    act(() => controller.setActive(true));
+    const rowButton = (id: string) =>
+      within(screen.getByTestId(`devCommentsPanelItem-${id}`)).getByRole('button', {
+        name: new RegExp(`Comment ${id}`),
+      });
+    const resolve = async (id: string) => {
+      const button = within(screen.getByTestId(`devCommentsPanelItem-${id}`)).getByTestId(
+        'devCommentsToggleResolved'
+      );
+      act(() => button.focus());
+      fireEvent.click(button);
+      await waitFor(() => expect(screen.queryByTestId(`devCommentsPanelItem-${id}`)).toBeNull());
+    };
+
+    await screen.findByTestId('devCommentsPanelItem-first');
+    await resolve('first');
+    await waitFor(() => expect(document.activeElement).toBe(rowButton('second')));
+
+    // The last one has no next: focus goes back to the one before it.
+    await resolve('third');
+    await waitFor(() => expect(document.activeElement).toBe(rowButton('second')));
   });
 
   it('shows when a comment was written the way the host does, or as the local time without it', async () => {
@@ -155,43 +260,30 @@ describe('CommentsLayer', () => {
     expect(within(hosted).getByText(`written ${seeded.createdAt}`)).toBeInTheDocument();
   });
 
-  it('opens threads from the panel with the keyboard, inline when the element is not on screen', async () => {
+  it('takes the reader to a comment from its row with the keyboard: its pin, or the guide to it when the element is not on screen', async () => {
     const user = userEvent.setup();
     const gone = createComment('gone', { anchor: anchorById('missing'), text: 'Where did it go' });
     const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, gone]) });
     act(() => controller.setActive(true));
-    const goneRow = await screen.findByTestId('devCommentsPanelItem-gone');
-    const preview = within(goneRow).getByRole('button', { name: /Where did it go/ });
 
-    // The element is not on the page: Enter on the preview opens the thread in the
-    // row, the text taking the preview's place and focus moving to the toggle that
-    // closes it; Space there closes it, bringing the preview back.
-    preview.focus();
-    await user.keyboard('{Enter}');
-    expect(preview).not.toBeInTheDocument();
-    expect(within(goneRow).getByTestId('devCommentsReplyInput')).toBeInTheDocument();
-    const toggle = within(goneRow).getByTestId('devCommentsPanelToggle');
-    expect(toggle).toHaveAttribute('aria-expanded', 'true');
-    expect(document.activeElement).toBe(toggle);
-    await user.keyboard(' ');
-    expect(toggle).toHaveAttribute('aria-expanded', 'false');
-    expect(within(goneRow).queryByTestId('devCommentsReplyInput')).toBeNull();
-    expect(within(goneRow).getByRole('button', { name: /Where did it go/ })).toBeInTheDocument();
-
-    // The element is on the page: Enter opens the thread at its pin, the toggle in the row.
-    const seededRow = screen.getByTestId('devCommentsPanelItem-a');
-    // Focus leaves the toggle, whose tooltip reacts to that.
-    act(() =>
-      within(seededRow)
-        .getByRole('button', { name: /Comment a/ })
-        .focus()
-    );
+    // The element is on the page: Enter opens the thread at its pin, which takes focus.
+    const seededRow = await screen.findByTestId('devCommentsPanelItem-a');
+    within(seededRow)
+      .getByRole('button', { name: /Comment a/ })
+      .focus();
     await user.keyboard('{Enter}');
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByTestId('devCommentsPin-a'))
     );
-    fireEvent.click(within(seededRow).getByTestId('devCommentsPanelToggle'));
-    expect(within(seededRow).getByTestId('devCommentsReplyInput')).toBeInTheDocument();
+
+    // The element is not on the page: the row says so, and Enter starts the guide to it.
+    const goneRow = screen.getByTestId('devCommentsPanelItem-gone');
+    const row = within(goneRow).getByRole('button', { name: /Where did it go/ });
+    expect(row).toHaveAccessibleName(expect.stringContaining('Comment not visible on this page'));
+    act(() => row.focus());
+    await user.keyboard('{Enter}');
+    expect(controller.store.getState().guide).toEqual({ id: 'gone', navigating: false });
+    expect(within(goneRow).queryByTestId('devCommentsReplyInput')).toBeNull();
   });
 
   it('renders comments as Markdown, leaving out the HTML and unsafe links anyone could have stored', async () => {
@@ -199,29 +291,29 @@ describe('CommentsLayer', () => {
       'Use `EuiButtonEmpty` here, see [the issue](https://github.com/elastic/kibana/issues/1).',
       '<img src=x onerror="alert(1)"> [run](javascript:alert(1))',
     ].join('\n');
-    const gone = createComment('gone', { anchor: anchorById('missing'), text });
-    const controller = await renderLayer({ api: createInMemoryCommentsApi([gone]) });
+    const pinned = createComment('pinned', { text });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([pinned]) });
     act(() => controller.setActive(true));
-    const row = await screen.findByTestId('devCommentsPanelItem-gone');
+    const row = await screen.findByTestId('devCommentsPanelItem-pinned');
 
-    // Folded, the row previews the rendered text in a button, with links as text only.
+    // The row previews the rendered text in a button, with links as text only.
     const preview = within(row).getByRole('button', { name: /Use EuiButtonEmpty here/ });
     expect(within(preview).getByText('EuiButtonEmpty').tagName).toBe('CODE');
     expect(within(preview).queryByRole('link')).toBeNull();
     expect(preview).toHaveTextContent('see the issue.');
     expect(preview.querySelector('img')).toBeNull();
 
-    // Opened, the rendered text with its links takes the preview's place.
+    // Opened at its pin, the thread shows the rendered text with its links.
     fireEvent.click(preview);
-    expect(preview).not.toBeInTheDocument();
-    expect(within(row).getByText('EuiButtonEmpty').tagName).toBe('CODE');
-    expect(within(row).getByRole('link', { name: 'the issue' })).toHaveAttribute(
+    const thread = await screen.findByTestId('devCommentsThread');
+    expect(within(thread).getByText('EuiButtonEmpty').tagName).toBe('CODE');
+    expect(within(thread).getByRole('link', { name: 'the issue' })).toHaveAttribute(
       'href',
       'https://github.com/elastic/kibana/issues/1'
     );
-    expect(row.querySelector('img')).toBeNull();
-    expect(within(row).queryByRole('link', { name: 'run' })).toBeNull();
-    expect(row).toHaveTextContent('[run](javascript:alert(1))');
+    expect(thread.querySelector('img')).toBeNull();
+    expect(within(thread).queryByRole('link', { name: 'run' })).toBeNull();
+    expect(thread).toHaveTextContent('[run](javascript:alert(1))');
   });
 
   it('shows that comments are loading, then a failed load with a retry, and the empty state only once loaded', async () => {
@@ -256,10 +348,13 @@ describe('CommentsLayer', () => {
       RelativeTime: ({ value }) => <>{`at ${value}`}</>,
     });
     act(() => controller.setActive(true));
+
+    // The panel fetches them again from its menu.
+    fireEvent.click(await screen.findByTestId('devCommentsPanelActions'));
+    fireEvent.click(await screen.findByTestId('devCommentsPanelRefresh'));
+    await act(flush);
+    expect(list).toHaveBeenCalledTimes(2);
     const { loadedAt } = controller.store.getState();
-    expect(await screen.findByTestId('devCommentsPanelRefresh')).toHaveTextContent(
-      `Updated at ${loadedAt}`
-    );
 
     act(() => controller.openThread('a'));
     const thread = await screen.findByTestId('devCommentsThread');
@@ -270,7 +365,7 @@ describe('CommentsLayer', () => {
 
     fireEvent.click(within(thread).getByTestId('devCommentsThreadRefresh'));
     await act(flush);
-    expect(list).toHaveBeenCalledTimes(2);
+    expect(list).toHaveBeenCalledTimes(3);
     expect(controller.store.getState().loading).toBe(false);
     expect(within(thread).getByTestId('devCommentsThreadRefresh')).toHaveTextContent(
       `Updated at ${controller.store.getState().loadedAt}`
@@ -507,13 +602,13 @@ describe('CommentsLayer', () => {
     expect(await screen.findByTestId('devCommentsPin-late')).toBeInTheDocument();
   });
 
-  it('takes the pin of an element covered by a dialog down with it, and the panel then offers to navigate', async () => {
+  it('takes the pin of an element covered by a dialog down with it, and the panel then shows it as not visible', async () => {
     const inDialog = createComment('ok', { anchor: anchorById('ok') });
     const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, inDialog]) });
     act(() => controller.setActive(true));
     expect(await screen.findByTestId('devCommentsPin-a')).toBeInTheDocument();
     const row = screen.getByTestId('devCommentsPanelItem-a');
-    expect(within(row).getByTestId('devCommentsPanelOpen')).toBeInTheDocument();
+    expect(within(row).queryByTestId('devCommentsPanelNotVisible')).toBeNull();
 
     // The dialog is drawn over the whole page, its button on it.
     const dialog = parse(
@@ -522,12 +617,164 @@ describe('CommentsLayer', () => {
     act(() => document.body.append(dialog));
     await waitFor(() => expect(screen.queryByTestId('devCommentsPin-a')).toBeNull());
     expect(await screen.findByTestId('devCommentsPin-ok')).toBeInTheDocument();
-    expect(within(row).queryByTestId('devCommentsPanelOpen')).toBeNull();
-    expect(within(row).getByTestId('devCommentsPanelGuide')).toBeInTheDocument();
+    expect(within(row).getByTestId('devCommentsPanelNotVisible')).toBeInTheDocument();
 
     act(() => dialog.remove());
     expect(await screen.findByTestId('devCommentsPin-a')).toBeInTheDocument();
-    expect(within(row).getByTestId('devCommentsPanelOpen')).toBeInTheDocument();
+    expect(within(row).queryByTestId('devCommentsPanelNotVisible')).toBeNull();
+  });
+
+  it('shows a comment whose element cannot be found in the panel, with its screenshot, from the guide', async () => {
+    const lost = createComment('lost', {
+      anchor: anchorById('missing'),
+      text: 'Where did it go',
+      snapshot: { mimeType: 'image/jpeg', width: 800, height: 600, image: 'AAAA' },
+    });
+    const api = createInMemoryCommentsApi([lost]);
+    const getSnapshot = jest.spyOn(api, 'getSnapshot');
+    const controller = await renderLayer({ api });
+    act(() => controller.setActive(true));
+    await screen.findByTestId('devCommentsPanelItem-lost');
+
+    jest.useFakeTimers();
+    try {
+      await act(() => controller.guideTo(lost));
+      expect(screen.queryByTestId('devCommentsGuideShow')).toBeNull();
+      act(() => jest.advanceTimersByTime(SETTLE_MS));
+      expect(screen.getByTestId('devCommentsGuide')).toHaveTextContent('cannot be found');
+    } finally {
+      jest.useRealTimers();
+    }
+    const show = screen.getByTestId('devCommentsGuideShow');
+    expect(show).toHaveTextContent('View screenshot');
+    expect(document.activeElement).toBe(show);
+
+    // The thread takes the list's place, the guide ends, and the screenshot is shown from the start.
+    fireEvent.click(show);
+    const thread = await screen.findByTestId('devCommentsPanelThread');
+    expect(screen.queryByTestId('devCommentsGuide')).toBeNull();
+    expect(screen.queryByTestId('devCommentsPanelItem-lost')).toBeNull();
+    expect(within(thread).getByText('Where did it go')).toBeInTheDocument();
+    expect(within(thread).getByTestId('devCommentsShowSnapshot')).toHaveTextContent(
+      'Hide screenshot'
+    );
+    expect(getSnapshot).toHaveBeenCalledWith('lost');
+    expect(within(thread).getByTestId('devCommentsReplyInput')).toBeInTheDocument();
+    expect(document.activeElement).toBe(screen.getByTestId('devCommentsPanelBack'));
+
+    // Back in the list, focus returns to the comment's row.
+    fireEvent.click(screen.getByTestId('devCommentsPanelBack'));
+    const row = await screen.findByTestId('devCommentsPanelItem-lost');
+    expect(screen.queryByTestId('devCommentsPanelThread')).toBeNull();
+    await waitFor(() =>
+      expect(document.activeElement).toBe(
+        within(row).getByRole('button', { name: /Where did it go/ })
+      )
+    );
+  });
+
+  it('returns focus to the page, or to the filter, when going back to a row that is not listed', async () => {
+    const elsewhere = createComment('far', {
+      route: { pageKey: '/app/two', path: '/app/two' },
+      anchor: anchorById('missing'),
+    });
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([seeded, elsewhere]) });
+    act(() => controller.setActive(true));
+    await screen.findByTestId('devCommentsPanelItem-a');
+
+    // Its page is closed: focus goes to the page's header.
+    act(() => controller.showInPanel('far'));
+    fireEvent.click(await screen.findByTestId('devCommentsPanelBack'));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByRole('button', { name: '/app/two' }))
+    );
+
+    // Resolved while shown, it is filtered out: focus goes to the filter.
+    act(() => controller.showInPanel('a'));
+    const thread = await screen.findByTestId('devCommentsPanelThread');
+    fireEvent.click(within(thread).getByTestId('devCommentsToggleResolved'));
+    await waitFor(() =>
+      expect(within(thread).getByTestId('devCommentsToggleResolved')).toHaveAttribute(
+        'aria-label',
+        'Unresolve this thread'
+      )
+    );
+    fireEvent.click(screen.getByTestId('devCommentsPanelBack'));
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByTestId('devCommentsPanelFilter'))
+    );
+    expect(screen.queryByTestId('devCommentsPanelItem-a')).toBeNull();
+  });
+
+  it('goes back to the list on Escape from a thread shown in the panel, focus on its row', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    await screen.findByTestId('devCommentsPanelItem-a');
+
+    act(() => controller.showInPanel('a'));
+    await screen.findByTestId('devCommentsPanelThread');
+    await waitFor(() =>
+      expect(document.activeElement).toBe(screen.getByTestId('devCommentsPanelBack'))
+    );
+    escape();
+    expect(controller.store.getState().active).toBe(true);
+    expect(screen.queryByTestId('devCommentsPanelThread')).toBeNull();
+    const row = screen.getByTestId('devCommentsPanelItem-a');
+    await waitFor(() =>
+      expect(document.activeElement).toBe(within(row).getByRole('button', { name: /Comment a/ }))
+    );
+
+    // From the list, Escape leaves comment mode as before.
+    escape();
+    expect(controller.store.getState().active).toBe(false);
+  });
+
+  it('finds the row to go back to by its id, even one with selector syntax in it', async () => {
+    const id = 'comment-"1]';
+    const controller = await renderLayer({ api: createInMemoryCommentsApi([createComment(id)]) });
+    act(() => controller.setActive(true));
+    await screen.findByTestId(`devCommentsPanelItem-${id}`);
+
+    act(() => controller.showInPanel(id));
+    fireEvent.click(await screen.findByTestId('devCommentsPanelBack'));
+    const row = await screen.findByTestId(`devCommentsPanelItem-${id}`);
+    await waitFor(() =>
+      expect(document.activeElement).toBe(within(row).getByRole('button', { name: /Comment/ }))
+    );
+  });
+
+  it('shows any comment in the panel from its row menu', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    const row = await screen.findByTestId('devCommentsPanelItem-a');
+
+    fireEvent.click(within(row).getByTestId('devCommentsPanelRowActions'));
+    fireEvent.click(await screen.findByTestId('devCommentsPanelShow'));
+    const thread = await screen.findByTestId('devCommentsPanelThread');
+    expect(within(thread).getByText(seeded.text)).toBeInTheDocument();
+    // Without a screenshot, there is none to show.
+    expect(within(thread).queryByTestId('devCommentsShowSnapshot')).toBeNull();
+    expect(screen.queryByTestId('devCommentsPanelFilter')).toBeNull();
+
+    // Leaving comment mode forgets it.
+    act(() => controller.setActive(false));
+    act(() => controller.setActive(true));
+    expect(await screen.findByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
+    expect(screen.queryByTestId('devCommentsPanelThread')).toBeNull();
+  });
+
+  it('shows one thread at a time: a pin opened while the panel shows a thread takes its place', async () => {
+    const controller = await renderLayer();
+    act(() => controller.setActive(true));
+    const pin = await screen.findByTestId('devCommentsPin-a');
+
+    act(() => controller.showInPanel('a'));
+    await screen.findByTestId('devCommentsPanelThread');
+    fireEvent.click(pin);
+    await waitFor(() => expect(screen.queryByTestId('devCommentsPanelThread')).toBeNull());
+    expect(screen.getAllByTestId('devCommentsThread')).toHaveLength(1);
+    expect(screen.getByTestId('devCommentsPanelItem-a')).toBeInTheDocument();
+    expect(controller.store.getState()).toMatchObject({ activeThreadId: 'a', panelThreadId: null });
   });
 
   it('guides to a covered element by waiting for what covers it to be closed', async () => {

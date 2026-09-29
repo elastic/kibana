@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo, useState, useSyncExternalStore, type SyntheticEvent } from 'react';
 import { useEuiTheme } from '@elastic/eui';
-import { IGNORE_ATTR } from '../constants';
+import { IGNORE_ATTR, MENU_ATTR } from '../constants';
 import { createLayoutTracker } from '../lib/layout_tracker';
 import { useCommentsState } from './comments_context';
 
@@ -75,6 +75,12 @@ const FOCUS_ALLOW_ATTR = 'data-no-focus-lock';
 
 /** For the layer's EUI popover panels, which EUI renders outside of the layer's containers. */
 export const popoverPanelProps = { [IGNORE_ATTR]: true, [FOCUS_ALLOW_ATTR]: true } as Record<
+  string,
+  unknown
+>;
+
+/** For the panel's menus: EUI closes them on Escape, which comment mode then leaves to it. */
+export const menuPanelProps = { ...popoverPanelProps, [MENU_ATTR]: true } as Record<
   string,
   unknown
 >;

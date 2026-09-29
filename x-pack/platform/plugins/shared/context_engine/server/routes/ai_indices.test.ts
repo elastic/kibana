@@ -48,6 +48,7 @@ import {
   AiIndexConflictError,
   AiIndexDescribeResponseTooLargeError,
   AiIndexNotFoundError,
+  AiIndexNotReadableError,
   AiIndexAlreadyExistsError,
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
@@ -313,7 +314,9 @@ describe('ai indices routes', () => {
       body: { enabled: true },
     });
 
-    expect(response.notFound).toHaveBeenCalledTimes(10);
+    expect(response.notFound.mock.calls).toEqual(
+      Array(10).fill([{ body: { message: 'Not Found' } }])
+    );
     expect(aiIndexService.create).not.toHaveBeenCalled();
     expect(aiIndexService.put).not.toHaveBeenCalled();
     expect(aiIndexService.get).not.toHaveBeenCalled();
@@ -371,6 +374,21 @@ describe('ai indices routes', () => {
       security: { authz: { requiredPrivileges: [apiPrivileges.writeContextEngine] } },
     });
   });
+
+  const createEsError = (statusCode: number, message: string) =>
+    new errors.ResponseError({
+      meta: {
+        aborted: false,
+        attempts: 1,
+        connection: null,
+        context: null,
+        name: message,
+        request: {} as unknown as DiagnosticResult['meta']['request'],
+      },
+      warnings: [],
+      body: { error: { type: message, reason: message } },
+      statusCode,
+    });
 
   describe('POST /api/context_engine/ai_index', () => {
     const postBody = {
@@ -497,6 +515,20 @@ describe('ai indices routes', () => {
         body: {
           message: `Index trace 'missing-logs' does not match any index, data stream, or alias`,
         },
+      });
+    });
+
+    it('returns 403 without creating when Elasticsearch denies an index trace lookup', async () => {
+      esResolveIndex.mockRejectedValue(createEsError(403, 'security_exception'));
+
+      await callRoute('POST', AI_INDEX_PATH, {
+        body: { ...postBody, traces: [{ type: 'index', value: 'traces-support' }] },
+      });
+
+      expect(aiIndexService.create).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringMatching(/^security_exception: /) },
       });
     });
 
@@ -635,6 +667,21 @@ describe('ai indices routes', () => {
         },
       });
     });
+
+    it('returns 403 without updating when Elasticsearch denies an index trace lookup', async () => {
+      esResolveIndex.mockRejectedValue(createEsError(403, 'security_exception'));
+
+      await callRoute('PUT', AI_INDEX_BY_ID_PATH, {
+        ...putRequest,
+        body: { ...putRequest.body, traces: [{ type: 'index', value: 'traces-support' }] },
+      });
+
+      expect(aiIndexService.put).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 403,
+        body: { message: expect.stringMatching(/^security_exception: /) },
+      });
+    });
   });
 
   describe('GET /api/context_engine/ai_index/{aiIndexId}', () => {
@@ -697,21 +744,6 @@ describe('ai indices routes', () => {
       });
     });
   });
-
-  const createEsError = (statusCode: number, message: string) =>
-    new errors.ResponseError({
-      meta: {
-        aborted: false,
-        attempts: 1,
-        connection: null,
-        context: null,
-        name: message,
-        request: {} as unknown as DiagnosticResult['meta']['request'],
-      },
-      warnings: [],
-      body: { error: { type: message, reason: message } },
-      statusCode,
-    });
 
   describe('POST /api/context_engine/ai_index/_query', () => {
     const queryBody = { query: 'FROM ai-index-idx-a | LIMIT 10', params: { type: 'faq' } };
@@ -861,6 +893,31 @@ describe('ai indices routes', () => {
 
       expect(response.notFound).toHaveBeenCalledWith({
         body: { message: "AI index 'missing' not found" },
+      });
+    });
+
+    it('returns 403 when the caller cannot read the backing indices', async () => {
+      readService.describe.mockRejectedValue(new AiIndexNotReadableError('a'));
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
+
+      expect(response.forbidden).toHaveBeenCalledWith({
+        body: { message: expect.stringContaining("AI index 'a' is not readable") },
+      });
+      expect(logger.error).not.toHaveBeenCalled();
+    });
+
+    it('does not report a backing index that cannot be searched as forbidden', async () => {
+      readService.describe.mockRejectedValue(
+        new Error("AI index 'a' is not available: index_closed_exception")
+      );
+
+      await callRoute('GET', AI_INDEX_DESCRIBE_PATH, { params: { aiIndexId: 'a' } });
+
+      expect(response.forbidden).not.toHaveBeenCalled();
+      expect(response.customError).toHaveBeenCalledWith({
+        statusCode: 500,
+        body: { message: "AI index 'a' is not available: index_closed_exception" },
       });
     });
 

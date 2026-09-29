@@ -6,6 +6,7 @@
  */
 
 import { parse } from 'yaml';
+import { MAX_TITLE_LENGTH } from '@kbn/proposals-common';
 import type { RuleTuningWorkerExtras } from '@kbn/alertzero-common';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { createWorkflowLiquidEngine } from '@kbn/workflows';
@@ -16,12 +17,12 @@ import {
   ALERTZERO_COVERAGE_WORKER_WORKFLOW_ID,
   ALERTZERO_ACTION_ADD_RULE_EXCEPTION_WORKFLOW_ID,
   ALERTZERO_ACTION_EDIT_RULE_WORKFLOW_ID,
+  ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID,
   ALERTZERO_RULE_CREATION_WORKFLOW_ID,
   ALERTZERO_RULE_PREVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID,
   ALERTZERO_RULE_TUNING_WORKER_WORKFLOW_ID,
   ALERTZERO_WORKER_DETECTION_RULE_TUNING_WORKFLOW_ID,
-  CREATE_PROPOSAL_WORKFLOW_ID,
 } from '@kbn/workflows/managed';
 import { projectSkillsFromDefinition } from '../services/utils';
 import { workerRegistry } from './worker_registry';
@@ -256,7 +257,8 @@ describe('detection rule workflows', () => {
 
       const proposals = all.filter(
         ({ type, with: input }) =>
-          type === 'workflow.execute' && input?.['workflow-id'] === CREATE_PROPOSAL_WORKFLOW_ID
+          type === 'workflow.execute' &&
+          input?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
       );
       expect(proposals.map(({ name }) => name)).toEqual([
         'propose_entry',
@@ -366,18 +368,35 @@ describe('detection rule workflows', () => {
       expect(settingsInputs.impact).toBe('low');
     });
 
-    // The review parks in WAITING_FOR_CHILD while the gate holds the decision for up
-    // to 72h (80h with the gate's own margin); the engine's default 6h workflow
-    // timeout would cancel it under the analyst.
-    it('outlives the proposal gate it waits on', () => {
+    // The review parks in WAITING_FOR_CHILD while the gate holds the decision,
+    // and the engine's default 6h workflow timeout would cancel it under the
+    // analyst. What it has to outlive is the *deadline* its own proposals get,
+    // not the gate workflow's `settings.timeout` — that is a sentinel meaning
+    // "never", so comparing against it would only ever assert that this
+    // workflow's timeout is longer than a year.
+    it('outlives the decision deadline its own proposals get', () => {
       const review = parse(
         getManagedYaml(ALERTZERO_RULE_TUNING_REVIEW_WORKFLOW_ID)
       ) as WorkflowYaml;
-      const gate = parse(getManagedYaml(CREATE_PROPOSAL_WORKFLOW_ID)) as WorkflowYaml;
       const hours = (timeout: unknown) => Number(String(timeout).replace(/h$/, ''));
 
+      // None of this workflow's gates passes `expiresIn`, so each takes the
+      // gate's 72h default — the bridge forwards the field unset. A gate that
+      // starts asking for its own deadline has to be checked against the
+      // ceiling here.
+      //
+      // Flattened, not top-level: only `propose_entry` sits at the top, and
+      // the other six hang off `propose_tuning`'s switch cases and default.
+      const proposals = flattenSteps(review.steps as NestedStep[]).filter(
+        (step) => step.with?.['workflow-id'] === ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID
+      );
+      expect(proposals.length).toBe(7);
+      for (const proposal of proposals) {
+        expect((proposal.with?.inputs as Record<string, unknown>)?.expiresIn).toBeUndefined();
+      }
+
       expect(String(review.settings?.timeout)).toMatch(/^\d+h$/);
-      expect(hours(review.settings?.timeout)).toBeGreaterThan(hours(gate.settings?.timeout));
+      expect(hours(review.settings?.timeout)).toBeGreaterThan(72);
     });
 
     // The sweep has no ai.agent step; the diagnosing skill lives in the review child.
@@ -835,6 +854,21 @@ describe('detection rule workflows', () => {
         expect(comment).toContain('Approving still applies the proposed query');
         expect(comment).not.toContain('not previewed or applied automatically');
         expect(comment).not.toContain('marks these alerts acknowledged');
+      });
+
+      // The diagnosis schema leaves its title unbounded and the proposal step
+      // rejects anything longer, so an unbounded forward fails the whole review.
+      it('bounds the proposal title to what the proposal step accepts', async () => {
+        const compose = reviewSteps.find(({ name }) => name === 'compose_proposal')!;
+        const title = String((compose.with as Record<string, string>).title);
+
+        const rendered = await createWorkflowLiquidEngine().parseAndRender(title, {
+          steps: {
+            diagnose_rule: { output: { structured_output: { title: 'T'.repeat(900) } } },
+          },
+        });
+
+        expect(rendered.length).toBeLessThanOrEqual(MAX_TITLE_LENGTH);
       });
 
       // A skipped step renders as nil, so `nil == 'succeeded'` is false and the

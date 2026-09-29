@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_deprecated_tags');
+const rule = require('../oxlint_plugin').rules.scout_no_deprecated_tags;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
