@@ -53,6 +53,7 @@ export const InvestigateEpisodeMenuItem = ({
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    origin: 'alerting_v2_inbox',
     enabled: Boolean(alertId),
     onInvestigate: onSuccess,
   });

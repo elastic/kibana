@@ -137,6 +137,9 @@ describe('createInvestigateEpisodeAction', () => {
     );
 
     const button = screen.getByTestId('investigateAlert');
+    expect(mockUseInvestigateAlert).toHaveBeenCalledWith(
+      expect.objectContaining({ alertId: 'alert-1', origin: 'alerting_v2_inbox' })
+    );
     expect(button).toBeInTheDocument();
     expect(button).toHaveTextContent('Investigate');
     expect(button).not.toBeDisabled();

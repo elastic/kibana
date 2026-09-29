@@ -53,6 +53,7 @@ function InvestigateAlertActionItem({
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    origin: 'alerts_table',
     enabled,
     onInvestigate: onActionExecuted,
   });

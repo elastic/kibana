@@ -27,5 +27,6 @@ export type {
   NightshiftInvestigationsRepositoryClient,
   NightshiftInvestigationsEndpoint,
 } from './api';
+export type { InvestigationTelemetry } from './telemetry/investigation_telemetry';
 export { InvestigationDetailFlyout, InvestigationRunStatusBadge } from './components';
 export type { InvestigationDetailFlyoutProps } from './components';

@@ -183,6 +183,7 @@ export function HeaderActions({
     markInvestigationViewed,
   } = useInvestigateAlert({
     alertId,
+    origin: 'alert_details',
     enabled: isPopoverOpen,
     onInvestigate: () => setIsPopoverOpen(false),
   });
