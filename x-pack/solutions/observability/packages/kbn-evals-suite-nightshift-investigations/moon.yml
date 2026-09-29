@@ -28,6 +28,7 @@ dependsOn:
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-genai-utils'
   - '@kbn/core'
+  - '@kbn/inference-common'
   - '@kbn/inference-tracing'
   - '@kbn/repo-info'
   - '@kbn/nightshift-investigations-plugin'

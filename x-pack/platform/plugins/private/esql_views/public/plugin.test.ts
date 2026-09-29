@@ -15,6 +15,10 @@ jest.mock('@kbn/app-header', () => ({
   AppHeader: () => null,
 }));
 
+jest.mock('@kbn/esql/public', () => ({
+  ESQLLangEditor: () => null,
+}));
+
 jest.mock('@kbn/esql-utils', () => ({
   createEsqlViewsManagementClient: () => ({
     getViews: jest.fn().mockResolvedValue({ views: [] }),
