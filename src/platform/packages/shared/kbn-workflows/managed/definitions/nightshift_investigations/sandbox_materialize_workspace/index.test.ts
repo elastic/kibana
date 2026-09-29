@@ -22,6 +22,8 @@ import {
   NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID,
 } from '.';
 import { createWorkflowLiquidEngine } from '../../../../common/utils';
+import { convertToWorkflowGraph } from '../../../../graph/build_execution_graph/build_execution_graph';
+import type { WorkflowYaml } from '../../../../spec/schema';
 
 const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) as {
   name: string;
@@ -33,12 +35,17 @@ const workflow = parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) a
     type?: string;
     if?: string;
     mode?: string;
+    timeout?: string;
+    'on-failure'?: unknown;
     with?: Record<string, string>;
     branches?: Array<{
       name: string;
       steps: Array<{
         name: string;
         type?: string;
+        if?: string;
+        timeout?: string;
+        'on-failure'?: unknown;
         with?: Record<string, string>;
       }>;
     }>;
@@ -75,7 +82,7 @@ describe('nightshift sandbox materialize workspace workflow', () => {
     expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.id).toBe(
       NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW_ID
     );
-    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(2);
+    expect(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.version).toBe(3);
     expect(workflow.triggers[0].inputs.properties.round_execution_index).toMatchObject({
       type: 'integer',
       default: 0,
@@ -119,6 +126,21 @@ describe('nightshift sandbox materialize workspace workflow', () => {
               }),
             ],
           }),
+          // The tree writer is the third parallel branch. It takes the obtained sandbox_id
+          // rather than a conversation id, so it cannot address a different workspace.
+          expect.objectContaining({
+            name: 'decision_trees',
+            steps: [
+              expect.objectContaining({
+                name: 'hydrate_decision_trees',
+                type: 'nightshift.decisionTreeHydrate',
+                with: {
+                  sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}',
+                  prompt: '{{ inputs.prompt }}',
+                },
+              }),
+            ],
+          }),
         ],
       }),
       expect.objectContaining({
@@ -134,5 +156,78 @@ describe('nightshift sandbox materialize workspace workflow', () => {
         },
       }),
     ]);
+  });
+
+  // A parallel branch body must compile to leaf nodes only. A step-level `if`, `on-failure`,
+  // or `timeout` wraps the step in enter-*/exit-* nodes, which the graph builder rejects with
+  // GraphBuildError before the workflow can ever run. The tree branch therefore cannot gate
+  // itself in YAML — the step handler no-ops on the feature flag instead. This test is the
+  // guard that stops someone "restoring" the swallowed tree failure and breaking every install.
+  it('keeps every parallel branch body a straight line of atomic steps', () => {
+    const parallel = workflow.steps.find((step) => step.type === 'parallel');
+    if (!parallel?.branches) throw new Error('Missing parallel branches');
+
+    for (const branch of parallel.branches) {
+      for (const step of branch.steps) {
+        expect({ branch: branch.name, step: step.name, if: step.if }).toEqual({
+          branch: branch.name,
+          step: step.name,
+          if: undefined,
+        });
+        expect(step.timeout).toBeUndefined();
+        expect(step['on-failure']).toBeUndefined();
+      }
+    }
+  });
+
+  // The shape assertions above describe the rule; this proves the rule actually holds by
+  // running the real YAML through the graph builder. If a branch ever grows an `if`,
+  // `on-failure`, or `timeout`, this throws GraphBuildError here rather than at install
+  // time in production, which is the failure mode the previous test guards against.
+  it('compiles the merged workflow into an execution graph', () => {
+    const graph = convertToWorkflowGraph(
+      parse(NIGHTSHIFT_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW.yaml) as WorkflowYaml
+    );
+
+    const nodes = graph
+      .nodes()
+      .map((nodeId) => graph.node(nodeId))
+      .filter((node): node is NonNullable<typeof node> => Boolean(node));
+
+    // The parallel step itself compiles to enter-parallel/exit-parallel, not an atomic node.
+    expect(nodes.map((node) => node.type)).toContain('enter-parallel');
+
+    // All three writers compiled as leaf atomic steps inside that parallel. This is the
+    // assertion that matters: it only holds if every branch body stayed flow-control free.
+    const atomicStepIds = nodes
+      .filter((node) => node.type === 'atomic')
+      .map((node) => (node as { stepId: string }).stepId)
+      .sort();
+
+    expect(atomicStepIds).toEqual([
+      'compose_prompt',
+      'hydrate_cortex',
+      'hydrate_decision_trees',
+      'memory_materialize_to_sandbox',
+      'obtain_sandbox',
+    ]);
+
+    // Top-level steps legitimately compile `if`/`timeout` into enter-*/exit-* wrapper nodes.
+    // A branch writer must NOT: a wrapper inside a branch body is what the parallel executor
+    // cannot drive, and the graph builder rejects it. No wrapper may name a writer step.
+    const writerStepIds = new Set([
+      'hydrate_cortex',
+      'hydrate_decision_trees',
+      'memory_materialize_to_sandbox',
+    ]);
+    const wrappedWriters = nodes
+      .filter(
+        (node) =>
+          (node.type.startsWith('enter-') || node.type.startsWith('exit-')) &&
+          writerStepIds.has((node as { stepId: string }).stepId)
+      )
+      .map((node) => (node as { stepId: string }).stepId);
+
+    expect(wrappedWriters).toEqual([]);
   });
 });

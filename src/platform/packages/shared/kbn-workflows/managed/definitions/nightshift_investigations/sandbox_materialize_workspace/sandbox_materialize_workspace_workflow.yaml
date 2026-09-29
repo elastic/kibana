@@ -2,9 +2,9 @@ version: '1'
 name: Nightshift Sandbox Materialize Workspace
 description: >
   Pre-execution workflow that allocates the investigator sandbox once, then
-  materializes Cortex and Semantic Memory into that same workspace. Writers run
-  as parallel branches so they share the sandbox_id from obtain rather than each
-  triggering GetContainer.
+  materializes Cortex, Semantic Memory, and the decision trees into that same
+  workspace. Writers run as parallel branches so they share the sandbox_id from
+  obtain rather than each triggering GetContainer.
 enabled: true
 tags:
   - observability
@@ -12,6 +12,7 @@ tags:
   - investigation
   - cortex
   - semantic-memory
+  - decision-tree
 
 triggers:
   - type: manual
@@ -64,6 +65,16 @@ steps:
               prompt: '{{ inputs.prompt }}'
               agent_id: '{{ inputs.agent_id }}'
               conversation_id: '{{ inputs.conversation_id }}'
+      # No `if`, `on-failure`, or `timeout` on this step: a parallel branch body must be a
+      # straight line of atomic steps, and anything else is rejected at graph-build time.
+      # The feature flag is honored inside the handler, which no-ops when trees are off.
+      - name: decision_trees
+        steps:
+          - name: hydrate_decision_trees
+            type: nightshift.decisionTreeHydrate
+            with:
+              sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              prompt: '{{ inputs.prompt }}'
   - name: compose_prompt
     type: nightshift.composeHydrateNotifications
     if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'

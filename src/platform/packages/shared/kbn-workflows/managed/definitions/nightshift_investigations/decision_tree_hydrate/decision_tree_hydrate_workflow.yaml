@@ -32,13 +32,22 @@ triggers:
       additionalProperties: false
 
 steps:
-  - name: hydrate_decision_trees
-    type: nightshift.decisionTreeHydrate
+  # The reinforcement agent runs in its own conversation, so it allocates its own sandbox
+  # rather than reusing the investigator's. Obtain once, then hand the sandbox_id to the
+  # writer, which no longer resolves a session from a bare conversation id.
+  - name: obtain_sandbox
+    type: nightshift.obtainSandbox
     # `${{ }}` must render a boolean. A bare conversation id becomes a KQL string
     # and evaluateCondition treats it as a field query, which skips the step.
     if: '${{ inputs.round_execution_index == 0 and inputs.conversation_id != null }}'
+    timeout: 45s
     with:
       conversation_id: '{{ inputs.conversation_id }}'
+  - name: hydrate_decision_trees
+    type: nightshift.decisionTreeHydrate
+    if: '${{ steps.obtain_sandbox.output.sandbox_id != null }}'
+    with:
+      sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
       prompt: '{{ inputs.prompt }}'
     on-failure:
       continue: true

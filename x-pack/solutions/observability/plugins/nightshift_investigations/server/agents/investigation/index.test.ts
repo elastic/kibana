@@ -85,7 +85,7 @@ describe('Nightshift investigation agent type', () => {
     expect(base.instructions).not.toContain('{{semantic_memory_load_step}}');
   });
 
-  it('hydrates and reinforces decision trees when they are enabled', () => {
+  it('hydrates and reinforces decision trees through the combined workflows', () => {
     const base = staticBase(
       getInvestigationAgentType({
         sandboxEnabled: true,
@@ -94,10 +94,9 @@ describe('Nightshift investigation agent type', () => {
       })
     );
 
-    expect(base.workflow_ids).toEqual([
-      'system-nightshift-sandbox-materialize-workspace',
-      'system-nightshift-decision-tree-hydrate',
-    ]);
+    // One pre-hook, not two: decision trees hydrate as a third parallel branch of the
+    // combined materialize workflow, which already carries the sandbox_id they need.
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
     expect(base.post_execution_workflow_ids).toEqual([
       'system-nightshift-agent-optimize',
       'system-nightshift-decision-tree-reinforce',
@@ -116,7 +115,24 @@ describe('Nightshift investigation agent type', () => {
     expect(base.post_execution_workflow_ids).toBeUndefined();
   });
 
-  it('drops the hydrate workflow when cortex is on but the sandbox is not configured', () => {
+  // Trees reach the sandbox through the combined workflow now, so trees alone still need
+  // that pre-hook even when Cortex and Memory are both off. The tree writer no-ops in the
+  // handler if the feature is off, so the reference is safe either way.
+  it('attaches the combined pre-hook for trees alone', () => {
+    const base = staticBase(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: false,
+        memoryEnabled: false,
+        decisionTreesEnabled: true,
+      })
+    );
+
+    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
+    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-decision-tree-reinforce']);
+  });
+
+  it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
     const base = staticBase(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
     );
