@@ -1,0 +1,238 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { spawnSync } from 'child_process';
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from 'fs';
+import { tmpdir } from 'os';
+import Path from 'path';
+
+const HOOK = Path.join(__dirname, 'scout_hook.sh');
+const PEM_DIR = mkdtempSync(Path.join(tmpdir(), 'scout-hook-pem-'));
+const CERT = Path.join(PEM_DIR, 'client.crt');
+const KEY = Path.join(PEM_DIR, 'client.key');
+const CA = Path.join(PEM_DIR, 'ca.crt');
+const SHELL_KEY = Path.join(PEM_DIR, 'shell.key');
+writeFileSync(CERT, '-----BEGIN CERTIFICATE-----\nabc\n-----END CERTIFICATE-----');
+writeFileSync(KEY, 'KEY', { mode: 0o600 });
+writeFileSync(SHELL_KEY, 'SHELL_KEY', { mode: 0o600 });
+writeFileSync(CA, 'CA');
+
+const runHook = (config: unknown, env: Record<string, string> = {}) => {
+  const baseEnv = Object.fromEntries(
+    Object.entries(process.env).filter(
+      ([name]) => !name.startsWith('SANDBOX_') && !name.startsWith('NIGHTSHIFT_')
+    )
+  );
+  const result = spawnSync('bash', [HOOK], {
+    input: typeof config === 'string' ? config : JSON.stringify(config),
+    env: { ...baseEnv, ...env },
+    encoding: 'utf8',
+  });
+  return {
+    status: result.status,
+    stderr: result.stderr,
+    output: result.status === 0 ? JSON.parse(result.stdout) : undefined,
+  };
+};
+
+const SANDBOX = {
+  host: 'sandbox.example.com',
+  port: 9443,
+  apiKey: 'key',
+  ssl: { certificate: CERT, key: KEY, certificateAuthorities: CA },
+};
+
+describe('nightshift-investigations scout hook', () => {
+  afterAll(() => {
+    rmSync(PEM_DIR, { recursive: true, force: true });
+  });
+
+  it('adds nothing without sandbox credentials, so Scout starts plain evals_tracing', () => {
+    expect(runHook({})).toEqual({ status: 0, stderr: '', output: {} });
+    expect(runHook('')).toEqual({ status: 0, stderr: '', output: {} });
+  });
+
+  it('maps the sandbox block to SANDBOX_* and points the config set at kibana.sandbox.yml', () => {
+    const { output } = runHook({ sandbox: SANDBOX });
+    expect(output).toEqual({
+      env: {
+        SANDBOX_API_HOST: 'sandbox.example.com',
+        SANDBOX_API_PORT: '9443',
+        SANDBOX_API_KEY: 'key',
+        SANDBOX_CLIENT_CERT_PATH: CERT,
+        SANDBOX_CLIENT_KEY_PATH: KEY,
+        SANDBOX_CA_CERT_PATH: CA,
+        SANDBOX_KIBANA_CONFIG: Path.join(__dirname, 'kibana.sandbox.yml'),
+      },
+    });
+  });
+
+  it('exports an empty CA when the sandbox has no private CA, since kibana.sandbox.yml needs it', () => {
+    const { ssl, ...rest } = SANDBOX;
+    const { output } = runHook({ sandbox: { ...rest, ssl: { certificate: CERT, key: KEY } } });
+    expect(output.env.SANDBOX_CA_CERT_PATH).toBe('');
+  });
+
+  it('leaves host and port unset so kibana.sandbox.yml defaults them', () => {
+    const { host, port, ...rest } = SANDBOX;
+    const { output } = runHook({ sandbox: rest });
+    expect(output.env).not.toHaveProperty('SANDBOX_API_HOST');
+    expect(output.env).not.toHaveProperty('SANDBOX_API_PORT');
+  });
+
+  it('falls back to SANDBOX_* exported in the shell, with the config taking precedence', () => {
+    const shell = {
+      SANDBOX_API_KEY: 'shell-key',
+      SANDBOX_CLIENT_CERT_PATH: CERT,
+      SANDBOX_CLIENT_KEY_PATH: SHELL_KEY,
+    };
+    expect(runHook({}, shell).output.env).toMatchObject(shell);
+    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
+      SANDBOX_API_KEY: 'key',
+      SANDBOX_CLIENT_KEY_PATH: KEY,
+    });
+  });
+
+  it('rejects PEM file paths that cannot be read', () => {
+    const { status, stderr } = runHook({
+      sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, key: '/missing/key' } },
+    });
+    expect(status).toBe(1);
+    expect(stderr).toContain('cannot read sandbox PEM file /missing/key');
+    expect(
+      runHook({
+        sandbox: { ...SANDBOX, ssl: { ...SANDBOX.ssl, certificateAuthorities: '/no/ca' } },
+      }).status
+    ).toBe(1);
+  });
+
+  it('treats REPLACE_ME placeholders as unset', () => {
+    expect(runHook({ sandbox: { apiKey: 'REPLACE_ME', host: 'REPLACE_ME' } }).output).toEqual({});
+  });
+
+  it('rejects sandbox settings without an API key instead of silently running only smoke', () => {
+    const { status, stderr } = runHook({ sandbox: { host: 'sandbox.example.com' } });
+    expect(status).toBe(1);
+    expect(stderr).toContain('sandbox host set without an API key');
+  });
+
+  it('exports empty PEM paths without a client certificate, so Kibana uses the API key only', () => {
+    const { output } = runHook({ sandbox: { apiKey: 'key' } });
+    expect(output.env).toMatchObject({
+      SANDBOX_API_KEY: 'key',
+      SANDBOX_CLIENT_CERT_PATH: '',
+      SANDBOX_CLIENT_KEY_PATH: '',
+      SANDBOX_CA_CERT_PATH: '',
+    });
+  });
+
+  it('requires the client certificate and key as a pair', () => {
+    const { status, stderr } = runHook({ sandbox: { apiKey: 'key', ssl: { certificate: CERT } } });
+    expect(status).toBe(1);
+    expect(stderr).toContain('set both sandbox.ssl.certificate and sandbox.ssl.key');
+    expect(runHook({ sandbox: { apiKey: 'key', ssl: { key: KEY } } }).status).toBe(1);
+  });
+
+  it('rejects input that is not a JSON object', () => {
+    expect(runHook('not json').status).toBe(1);
+  });
+
+  it('never passes the API keys to jq as command-line arguments', () => {
+    // A jq shim records every argv it receives, then defers to the real jq.
+    const shimDir = mkdtempSync(Path.join(tmpdir(), 'scout-hook-jq-'));
+    const argvLog = Path.join(shimDir, 'argv.log');
+    const realJq = spawnSync('bash', ['-c', 'command -v jq'], { encoding: 'utf8' }).stdout.trim();
+    writeFileSync(
+      Path.join(shimDir, 'jq'),
+      `#!/usr/bin/env bash\nprintf '%s\\n' "$*" >> "${argvLog}"\nexec "${realJq}" "$@"\n`,
+      { mode: 0o755 }
+    );
+    try {
+      const { status } = runHook(
+        {
+          nightshift: {
+            telemetry: { url: 'https://remote.example.com', apiKey: 'SECRET_TELEMETRY_KEY' },
+          },
+          sandbox: { ...SANDBOX, apiKey: 'SECRET_API_KEY' },
+        },
+        { PATH: `${shimDir}:${process.env.PATH}` }
+      );
+      expect(status).toBe(0);
+      const argv = readFileSync(argvLog, 'utf8');
+      expect(argv).not.toContain('SECRET_API_KEY');
+      expect(argv).not.toContain('SECRET_TELEMETRY_KEY');
+    } finally {
+      rmSync(shimDir, { recursive: true, force: true });
+    }
+  });
+  it('keeps dataset selection out of the server fingerprint', () => {
+    expect(runHook({ sandbox: SANDBOX }, { NIGHTSHIFT_DATASET_NAME: 'first' }).output).toEqual(
+      runHook(
+        { sandbox: SANDBOX },
+        { NIGHTSHIFT_DATASET_NAME: 'second', NIGHTSHIFT_DATASETS: 'trace-only' }
+      ).output
+    );
+  });
+
+  it('leaves dataset validation to Playwright, including smoke-only startup', () => {
+    const result = runHook(
+      {},
+      { NIGHTSHIFT_DATASET_NAME: 'stored', NIGHTSHIFT_EXAMPLES_FILE: 'examples.json' }
+    );
+    expect(result.status).toBe(0);
+    expect(result.output).toEqual({});
+  });
+
+  it('exports telemetry from the profile, with shell fallback and an optional index hint', () => {
+    const shell = {
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://shell.example.com',
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'shell-key',
+    };
+    expect(runHook({ sandbox: SANDBOX }, shell).output.env).toMatchObject({
+      ...shell,
+      NIGHTSHIFT_SANDBOX_READABLE_INDICES: '',
+      NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG: Path.join(__dirname, 'kibana.telemetry.yml'),
+    });
+    expect(
+      runHook(
+        {
+          sandbox: SANDBOX,
+          nightshift: {
+            telemetry: {
+              url: 'https://profile.example.com',
+              apiKey: 'profile-key',
+              readableIndices: 'remote:logs-*',
+            },
+          },
+        },
+        shell
+      ).output.env
+    ).toMatchObject({
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL: 'https://profile.example.com',
+      NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY: 'profile-key',
+      NIGHTSHIFT_SANDBOX_READABLE_INDICES: 'remote:logs-*',
+    });
+  });
+
+  it.each([
+    { url: 'https://remote.example.com' },
+    { apiKey: 'key' },
+    { readableIndices: 'logs-*' },
+  ])('rejects incomplete telemetry settings %j', (telemetry) => {
+    const result = runHook({ sandbox: SANDBOX, nightshift: { telemetry } });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('requires both URL and API key');
+  });
+
+  it('requires sandbox credentials when telemetry is configured', () => {
+    const result = runHook({
+      nightshift: { telemetry: { url: 'https://remote.example.com', apiKey: 'key' } },
+    });
+    expect(result.status).not.toBe(0);
+    expect(result.stderr).toContain('requires sandbox credentials');
+  });
+});

@@ -7,12 +7,12 @@
 
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import { APP_HEADER_TEST_SUBJECTS, getAppMenuItemTestSubj } from '@kbn/app-header';
+import { APP_HEADER_TEST_SUBJECTS } from '@kbn/app-header';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
 import { test } from '../fixtures';
 
 test.describe(
-  'Nightshift navigation from Significant Events Discovery',
+  'Nightshift navigation',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
     test.beforeAll(async ({ apiServices, config }) => {
@@ -52,24 +52,13 @@ test.describe(
       });
     });
 
-    test('navigates between Significant Events, Nightshift, and settings', async ({ page }) => {
-      await page.gotoApp('significant_events/streams');
-
-      const nightshiftButton = page.testSubj.locator(getAppMenuItemTestSubj('nightshift'));
-      await expect(nightshiftButton).toBeVisible({ timeout: 60_000 });
-      await nightshiftButton.click();
-
-      await expect(page).toHaveURL(/\/app\/nightshift/, { timeout: 60_000 });
+    test('links to Settings', async ({ page, pageObjects }) => {
+      await page.gotoApp('nightshift');
       await expect(page.testSubj.locator('nightshiftPage')).toBeVisible({ timeout: 60_000 });
-
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.root)).toHaveCount(1);
       await expect(page.testSubj.locator(APP_HEADER_TEST_SUBJECTS.title)).toHaveText('Nightshift');
 
-      // Single settings action stays inline at Scout's default viewport — click it directly
-      // (no overflow branch; expect() auto-waits for mount).
-      const settingsLink = page.testSubj.locator('nightshiftSettingsLink');
-      await expect(settingsLink).toBeVisible();
-      await settingsLink.click();
+      await pageObjects.appMenu.clickItem('nightshiftSettingsLink');
       await expect(page).toHaveURL(/\/app\/significant_events\/settings/);
     });
   }

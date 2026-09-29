@@ -147,6 +147,10 @@ export type { RendererTypeDefinition } from './renderers';
 export type {
   ConversationEventTypeDefinition,
   ConversationEventPayloadOf,
+  ConversationEventOf,
+  ConversationEventFormatContext,
+  ConversationEventRepresentation,
+  TextConversationEventRepresentation,
 } from './conversation_events';
 export type {
   AgentBuilderPluginSetup,

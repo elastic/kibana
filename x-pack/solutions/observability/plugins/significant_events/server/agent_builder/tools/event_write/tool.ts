@@ -19,11 +19,12 @@ import {
 } from '@kbn/significant-events-schema';
 import { z } from '@kbn/zod/v4';
 import dedent from 'dedent';
-import type { StreamsServer } from '@kbn/streams-plugin/server/types';
+import type { SignificantEventsServer } from '../../../types';
 import type { GetScopedClients } from '../../../routes/types';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { KnowledgeIndicatorClient } from '../../../lib/knowledge_indicators';
 import { assertSignificantEventsAccess } from '../../../routes/utils/assert_significant_events_access';
+import { assertCanManageSignificantEvents } from '../../../routes/utils/assert_can_manage_significant_events';
 import { createSignificantEventsAvailability } from '../significant_events_availability';
 import {
   getBulkWriteToolErrorCode,
@@ -65,7 +66,6 @@ export const eventsWriteItemSchema = significantEventSchema
           stream name. If found, the write is skipped and the existing event_id is returned
           (written: false, reason: existing_active_event). Otherwise a new event is created with
           a generated event_id.
-          Otherwise a new event is created with a generated event_id.
         `
       ),
   })
@@ -269,7 +269,7 @@ export function createEventsWriteTool({
   telemetry,
 }: {
   getScopedClients: GetScopedClients;
-  server: StreamsServer;
+  server: SignificantEventsServer;
   logger: Logger;
   telemetry: EbtTelemetryClient;
 }): StaticToolRegistration<typeof eventsWriteSchema> {
@@ -311,10 +311,17 @@ export function createEventsWriteTool({
     handler: async (toolParams, context) => {
       const { request } = context;
       try {
-        const { getEventClient, getKnowledgeIndicatorClient, licensing } = await getScopedClients({
+        const {
+          getEventClient,
+          getEventSearchClient,
+          getKnowledgeIndicatorClient,
+          getAlertEventsClient,
+          licensing,
+        } = await getScopedClients({
           request,
         });
         await assertSignificantEventsAccess({ server, licensing });
+        await assertCanManageSignificantEvents({ request, server });
         const items = await enrichCausalFeatures(
           toolParams.items,
           getKnowledgeIndicatorClient,
@@ -323,8 +330,11 @@ export function createEventsWriteTool({
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
+          eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
+          alertEventsClient: await getAlertEventsClient(),
+          logger,
         });
 
         data.forEach((result) => {

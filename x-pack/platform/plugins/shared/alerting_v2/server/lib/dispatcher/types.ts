@@ -199,7 +199,11 @@ export interface DispatcherPipelineState {
   readonly outcome?: DispatchOutcome;
 }
 
-export type DispatcherHaltReason = 'no_episodes' | 'no_actions' | 'aborted';
+export type DispatcherHaltReason =
+  | 'no_episodes'
+  | 'no_actions'
+  | 'aborted'
+  | 'inline_stats_too_large';
 
 export type DispatcherStepOutput =
   | { type: 'continue'; data?: Partial<Omit<DispatcherPipelineState, 'input'>> }

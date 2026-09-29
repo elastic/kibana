@@ -16,12 +16,18 @@ import type { QueryClient } from '@kbn/react-query';
 import type { BulkAssignEpisodeActionItem } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisode } from '../queries/episodes_query';
 import { episodeSupportsActions } from '../queries/episodes_query';
-import type { EpisodeAction, EpisodeActionContext, EpisodeActionMenuItemContext } from './types';
+import type {
+  EpisodeAction,
+  EpisodeActionContext,
+  EpisodeActionInlineControlContext,
+  EpisodeActionMenuItemContext,
+} from './types';
 import { bulkAssignEpisodeActions } from './bulk_create_alert_actions';
 import { successOrPartialToast } from './helpers';
 import * as i18n from './translations';
 import { openAssigneeModal } from '../components/assignee_modal';
 import { EditEpisodeAssigneePopoverItem } from '../components/actions/edit_episode_assignee_popover_item';
+import { EpisodeAssigneeInlineControl } from '../components/actions/episode_assignee_inline_control';
 
 export const EDIT_EPISODE_ASSIGNEE_ACTION_ID = 'ALERTING_V2_EDIT_EPISODE_ASSIGNEE';
 
@@ -78,6 +84,15 @@ export const createEditAssigneeAction = (deps: EditAssigneeActionDeps): EpisodeA
       label={i18n.EDIT_ASSIGNEE}
       iconType="user"
       closeMenu={closeMenu}
+      onApply={(uid) => applyAssignee(deps, { episodes, onSuccess }, uid)}
+    />
+  ),
+  renderInlineControl: ({ episodes, onSuccess, isDisabled }: EpisodeActionInlineControlContext) => (
+    <EpisodeAssigneeInlineControl
+      assigneeUid={getCurrentAssigneeUid(episodes)}
+      userProfile={deps.userProfile}
+      episodeCount={episodes.length}
+      isDisabled={isDisabled || episodes.length === 0}
       onApply={(uid) => applyAssignee(deps, { episodes, onSuccess }, uid)}
     />
   ),

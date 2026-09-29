@@ -9,7 +9,16 @@ import type { AnalyticsServiceSetup, EventTypeOpts, Logger } from '@kbn/core/ser
 import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { isCustomizedPrebuiltRule } from '../../../../../../common/api/detection_engine/model/rule_schema/utils';
 import type { RuleAlertType } from '../../../rule_schema';
-import { DETECTION_RULE_DUPLICATE_EVENT } from '../../../../telemetry/event_based/events';
+import {
+  DETECTION_RULE_DUPLICATE_EVENT,
+  DETECTION_RULE_IMPORT_EVENT,
+  DETECTION_RULE_INSTALL_EVENT,
+} from '../../../../telemetry/event_based/events';
+import type {
+  BulkCreatePrebuiltRulesArgs,
+  BulkCreatePrebuiltRulesResult,
+} from './detection_rules_client_interface';
+import { createDefaultExternalRuleSource } from './mergers/rule_source/create_default_external_rule_source';
 
 export type RuleLifecycleTelemetryData = Pick<RuleResponse, 'id' | 'type' | 'rule_source'>;
 
@@ -31,6 +40,41 @@ export function sendRuleLifecycleTelemetryEvent(
   } catch (e) {
     // we don't want telemetry errors to impact the main flow
     logger?.debug(`Failed to send ${eventType.eventType} telemetry`, e);
+  }
+}
+
+export function sendRuleInstallTelemetryEvents(
+  analytics: AnalyticsServiceSetup,
+  {
+    rules,
+    results,
+  }: {
+    rules: BulkCreatePrebuiltRulesArgs['rules'];
+    results: BulkCreatePrebuiltRulesResult['results'];
+  },
+  logger?: Logger
+): void {
+  const typeByRule = new Map(rules.map((rule) => [`${rule.rule_id}:${rule.version}`, rule.type]));
+  for (const { id, rule_id: ruleId, version } of results) {
+    const type = typeByRule.get(`${ruleId}:${version}`);
+    if (type) {
+      sendRuleLifecycleTelemetryEvent(
+        analytics,
+        DETECTION_RULE_INSTALL_EVENT,
+        { id, type, rule_source: createDefaultExternalRuleSource() },
+        logger
+      );
+    }
+  }
+}
+
+export function sendRuleImportTelemetryEvents(
+  analytics: AnalyticsServiceSetup,
+  rules: RuleLifecycleTelemetryData[],
+  logger?: Logger
+): void {
+  for (const rule of rules) {
+    sendRuleLifecycleTelemetryEvent(analytics, DETECTION_RULE_IMPORT_EVENT, rule, logger);
   }
 }
 

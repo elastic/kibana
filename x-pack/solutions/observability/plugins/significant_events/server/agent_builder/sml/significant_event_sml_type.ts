@@ -17,6 +17,7 @@ import {
   EventService,
   eventsDataStream,
   type eventsMappings,
+  type SignificantEventsReadClient,
   type StoredEvent,
 } from '../../lib/significant_events/events';
 import type { GetScopedClients } from '../../routes/types';
@@ -25,6 +26,8 @@ interface CreateSignificantEventSmlTypeOptions {
   getScopedClients: GetScopedClients;
   getDataStreams: () => Promise<DataStreamsStart>;
   isAvailable: () => Promise<boolean>;
+  /** Gated by `SIGNIFICANT_EVENTS_USE_RULE_EVENTS_READ` (`@kbn/nightshift-shared`). */
+  getUseRuleEventsRead: () => Promise<boolean>;
 }
 
 const PAGE_SIZE = 100;
@@ -47,9 +50,12 @@ export const createSignificantEventSmlType = ({
   getScopedClients,
   getDataStreams,
   isAvailable,
+  getUseRuleEventsRead,
 }: CreateSignificantEventSmlTypeOptions): SmlTypeDefinition => {
   const eventService = new EventService();
-  const getSmlEventClient = async (esClient: ElasticsearchClient) => {
+  const getSmlEventClient = async (
+    esClient: ElasticsearchClient
+  ): Promise<SignificantEventsReadClient | undefined> => {
     if (!(await isAvailable())) {
       return;
     }
@@ -58,8 +64,14 @@ export const createSignificantEventSmlType = ({
     const dataStreamClient = await dataStreams.initializeClient<typeof eventsMappings, StoredEvent>(
       eventsDataStream.name
     );
+    const useRuleEventsRead = await getUseRuleEventsRead();
 
-    return eventService.getClient({ dataStreamClient, esClient, space: DEFAULT_SPACE_ID });
+    return eventService.getClient({
+      dataStreamClient,
+      esClient,
+      space: DEFAULT_SPACE_ID,
+      useRuleEventsRead,
+    });
   };
 
   return {
@@ -106,8 +118,7 @@ export const createSignificantEventSmlType = ({
         if (!eventClient) {
           return undefined;
         }
-        const { hits } = await eventClient.findByEventId(originId);
-        const event = hits.at(-1);
+        const event = await eventClient.findLatestByEventId(originId);
 
         if (!event) {
           return undefined;
@@ -137,10 +148,9 @@ export const createSignificantEventSmlType = ({
       if (!originId) {
         return undefined;
       }
-      const { getEventClient } = await getScopedClients({ request: context.request });
-      const eventClient = await getEventClient();
-      const { hits } = await eventClient.findByEventId(originId);
-      const event = hits.at(-1);
+      const { getEventSearchClient } = await getScopedClients({ request: context.request });
+      const eventClient = await getEventSearchClient();
+      const event = await eventClient.findLatestByEventId(originId);
 
       if (!event) {
         return undefined;
