@@ -106,6 +106,7 @@ steps:
           body:
             text: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.body_text }}"
             title: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.title }}"
+            url: "{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}"
         on-failure:
           continue: true
 

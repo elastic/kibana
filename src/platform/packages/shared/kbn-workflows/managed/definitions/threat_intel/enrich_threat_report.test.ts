@@ -215,6 +215,17 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     );
   });
 
+  it('sends the stored article URL to assess_relevance', () => {
+    // The gate prompt uses the URL to identify rollups and render failures;
+    // without it, a terse RSS summary can be permanently mis-gated.
+    const step = findStepByName(workflow.steps, 'assess_relevance') as {
+      with?: { body?: Record<string, unknown> };
+    };
+    expect(step.with?.body?.url).toBe(
+      '{{ steps.load_full_doc.output.hits.hits[0]._source.content.article_url }}'
+    );
+  });
+
   it('selects pending reports space-blind (no space_id filter on load_pending_reports)', () => {
     const load = findStepByName(workflow.steps, 'load_pending_reports') as {
       with?: { query?: { bool?: { filter?: unknown } } };
