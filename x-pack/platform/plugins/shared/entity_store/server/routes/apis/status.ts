@@ -48,8 +48,8 @@ interface NonPriorityEngineStatus {
   error: EngineError | null;
   lastExecutionTimestamp: string | undefined;
   /**
-   * Configured non-priority sampling rate, `null` when unset. Stored and reported only - extraction
-   * still samples at the built-in rate.
+   * Fixed non-priority sampling rate, `null` when unset. Unset is the normal case: the process
+   * then computes a rate per slice from the remaining volume budget.
    */
   samplingRate: number | null;
 }
@@ -131,7 +131,8 @@ function toPublicEngine(
             error: nonPriorityError ?? null,
             lastExecutionTimestamp:
               nonPriorityLogExtractionState?.lastExecutionTimestamp ?? undefined,
-            // getMergedConfig strips samplingRate, so it is read straight off the descriptor.
+            // Read off the descriptor: this reports what was configured, not the rate
+            // getMergedConfig resolves for a run.
             samplingRate: nonPriorityLogExtractionConfig?.samplingRate ?? null,
           },
         }

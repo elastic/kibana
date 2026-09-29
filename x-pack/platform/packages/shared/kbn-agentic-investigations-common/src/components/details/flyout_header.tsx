@@ -16,12 +16,17 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { Investigation } from '../../types';
-import { InvestigationHeaderBlocks } from './header_blocks';
+import { ConversationHeaderBlocks } from './header_blocks';
 
 export interface ConversationDetailsFlyoutHeaderProps {
   investigation: Investigation;
   /** Optional pre-rendered interactive assignee picker from the consuming plugin. */
   assigneesNode?: React.ReactNode;
+  /**
+   * Optional pre-rendered interactive status widget from the consuming plugin (e.g. a toggle).
+   * Falls back to a read-only badge when absent.
+   */
+  statusNode?: React.ReactNode;
 }
 
 /**
@@ -31,6 +36,7 @@ export interface ConversationDetailsFlyoutHeaderProps {
 export const ConversationDetailsFlyoutHeader = ({
   investigation,
   assigneesNode,
+  statusNode,
 }: ConversationDetailsFlyoutHeaderProps) => {
   const { title, createdAt } = investigation;
 
@@ -58,7 +64,7 @@ export const ConversationDetailsFlyoutHeader = ({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
-      <InvestigationHeaderBlocks investigation={investigation} assigneesNode={assigneesNode} />
+      <ConversationHeaderBlocks status={investigation.status} assigneesNode={assigneesNode} />
     </>
   );
 };

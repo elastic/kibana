@@ -40,6 +40,7 @@ import { buildExtractionAttributes, entityStoreMetrics } from '../monitor/metric
 import { NonPriorityExtractionDisabledError } from '../domain/errors';
 import { shouldDeleteOrphanedEntityStoreTask } from './should_delete_orphaned_task';
 import { getMergedConfig } from '../domain/config';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from './execution_context';
 
 /** The priority and single processes share one task; non-priority has its own so the two can run
  * on independent schedules and be started, stopped and monitored separately. */
@@ -176,7 +177,7 @@ async function runTask({
   fakeRequest,
   signal,
   entityType,
-  logger,
+  logger: taskLogger,
   core,
   isServerless,
   extractionMode: registeredExtractionMode,
@@ -190,7 +191,7 @@ async function runTask({
    * `nonPriority`, which the flag never resolves to. */
   extractionMode: ExtractionMode;
 }): Promise<RunResult> {
-  logger.info(`Running extract entity task`);
+  taskLogger.info(`Running extract entity task`);
 
   const currentState = taskInstance.state;
   const runs = currentState.runs || 0;
@@ -205,7 +206,7 @@ async function runTask({
     await shouldDeleteOrphanedEntityStoreTask({
       coreStart,
       namespace,
-      logger,
+      logger: taskLogger,
     })
   ) {
     return {
@@ -226,6 +227,8 @@ async function runTask({
       ? registeredExtractionMode
       : resolveExtractionMode(dualProcessEnabled, entityType);
 
+  const logger = taskLogger.get(extractionMode);
+
   if (!fakeRequest) {
     logger.error(`No fake request found, skipping extract entity task`);
     return {
@@ -245,7 +248,7 @@ async function runTask({
       entityType,
       namespace,
       dualProcessEnabled,
-      logger,
+      logger: taskLogger.get(EXTRACTION_MODE.nonPriority),
     });
   }
 
@@ -403,29 +406,38 @@ function registerOne({
         executionUuid,
         setCustomTaskRunEventFields,
       }) => ({
-        run: () =>
-          wrapTaskRun({
-            spanName: 'entityStore.task.extract_entity.run',
-            namespace: taskInstance.state.namespace,
-            attributes: {
-              'entity_store.task.id': taskInstance.id,
-              'entity_store.task.type': taskType,
-              'entity_store.entity.type': type,
-            },
-            run: () =>
-              runTask({
-                taskInstance,
-                signal,
-                executionUuid,
-                setCustomTaskRunEventFields,
-                logger: logger.get(taskInstance.id),
-                core,
-                entityType: type,
-                fakeRequest,
-                isServerless,
-                extractionMode,
-              }),
-          }),
+        run: async () => {
+          const [coreStart] = await core.getStartServices();
+          return coreStart.executionContext.withContext(
+            buildEaExecutionContext(
+              EA_EXECUTION_CONTEXT_NAMES.ENTITY_STORE_EXTRACT_TASK,
+              taskInstance.id
+            ),
+            () =>
+              wrapTaskRun({
+                spanName: 'entityStore.task.extract_entity.run',
+                namespace: taskInstance.state.namespace,
+                attributes: {
+                  'entity_store.task.id': taskInstance.id,
+                  'entity_store.task.type': taskType,
+                  'entity_store.entity.type': type,
+                },
+                run: () =>
+                  runTask({
+                    taskInstance,
+                    signal,
+                    executionUuid,
+                    setCustomTaskRunEventFields,
+                    logger: logger.get(taskInstance.id),
+                    core,
+                    entityType: type,
+                    fakeRequest,
+                    isServerless,
+                    extractionMode,
+                  }),
+              })
+          );
+        },
       }),
     },
   });

@@ -7,6 +7,7 @@
 
 import type { EntityType, ExtractionMode } from '../../../common/domain/definitions/entity_schema';
 import { EXTRACTION_MODE } from '../../../common/domain/definitions/entity_schema';
+import { supportsNonPrioritySampling } from '../../../common/domain/definitions/registry';
 import type {
   LogExtractionConfig,
   LogExtractionTypeOverride,
@@ -80,8 +81,8 @@ const setNonExclusiveFields = (
 
 /**
  * Converts a `NonPriorityLogExtractionTypeOverride` to the subset that belongs in
- * `LogExtractionConfig`. `samplingRate` is non-priority-specific and not part of
- * `LogExtractionConfig`, so it is stripped here and read separately by the caller.
+ * `LogExtractionConfig`. `samplingRate` is not a shared config field; it is attached to the
+ * merged result separately, and only for sampling-capable non-priority processes.
  */
 const setNonPriorityFields = (
   layer: NonPriorityLogExtractionTypeOverride | undefined
@@ -91,6 +92,13 @@ const setNonPriorityFields = (
     Object.entries(rest).filter(([, value]) => value !== null && value !== undefined)
   ) as Partial<LogExtractionConfig>;
 };
+
+/**
+ * Resolved config for one entity type and process. `samplingRate` exists only on the config of a
+ * non-priority process whose entity type declares the sampling capability; every other process
+ * resolves a config without the key.
+ */
+export type MergedLogExtractionConfig = LogExtractionConfig & { samplingRate?: number };
 
 /**
  * Config in effect for one entity type and extraction process.
@@ -115,7 +123,7 @@ export const getMergedConfig = (
   typeOverride: LogExtractionTypeOverride | undefined,
   extractionMode: ExtractionMode = EXTRACTION_MODE.single,
   nonPriorityOverride?: NonPriorityLogExtractionTypeOverride
-): LogExtractionConfig => {
+): MergedLogExtractionConfig => {
   const base = {
     ...LATEST_LOG_EXTRACTION_DEFAULTS,
     ...DEFAULT_CONFIG_BY_TYPE[type],
@@ -130,5 +138,12 @@ export const getMergedConfig = (
       ? { ...setNonExclusiveFields(typeOverride), ...setNonPriorityFields(nonPriorityOverride) }
       : setFields(typeOverride);
 
-  return LogExtractionConfigSchema.parse({ ...base, ...typeFields });
+  const config = LogExtractionConfigSchema.parse({ ...base, ...typeFields });
+
+  const samplingRate =
+    extractionMode === EXTRACTION_MODE.nonPriority && supportsNonPrioritySampling(type)
+      ? nonPriorityOverride?.samplingRate
+      : undefined;
+
+  return samplingRate != null ? { ...config, samplingRate } : config;
 };

@@ -52,16 +52,6 @@ const startInvestigationBodySchema = z.union([
     concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
     ...startInvestigationMessage,
   }),
-  z.object({
-    subject: z.object({
-      type: z.literal('significant_event'),
-      ...subjectIdAndSummary,
-    }),
-    title: titleSchema,
-    concurrency_key: z.string().max(MAX_KEYWORD_LENGTH).optional(),
-    context: freeFormContextSchema.optional(),
-    ...startInvestigationMessage,
-  }),
   // A manual investigation is defined by its question, so `message` is required and the
   // subject id is optional: there is no entity to point at, only the prompt. The title is
   // optional for the same reason: the handler derives it from the question when omitted.
@@ -84,14 +74,9 @@ const startInvestigationBodySchema = z.union([
 
 type StartInvestigationBody = z.infer<typeof startInvestigationBodySchema>;
 type AlertInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'alert' } }>;
-type ManualInvestigationBody = Extract<StartInvestigationBody, { subject: { type: 'manual' } }>;
-
 /** Narrows the whole body, which a `switch` on the nested `subject.type` cannot do. */
 const isAlertBody = (body: StartInvestigationBody): body is AlertInvestigationBody =>
   body.subject.type === 'alert';
-const isManualBody = (body: StartInvestigationBody): body is ManualInvestigationBody =>
-  body.subject.type === 'manual';
-
 export const startInvestigationRoute = createNightshiftInvestigationsServerRoute({
   endpoint: 'POST /internal/nightshift/investigations',
   options: {
@@ -134,15 +119,9 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
           message: body.message,
         });
       }
-      if (isManualBody(body)) {
-        return await client.start({
-          ...body,
-          title: body.title ?? deriveTitleFromMessage(body.message),
-          trigger_type: 'manual',
-        });
-      }
       return await client.start({
         ...body,
+        title: body.title ?? deriveTitleFromMessage(body.message),
         trigger_type: 'manual',
       });
     } catch (error) {
