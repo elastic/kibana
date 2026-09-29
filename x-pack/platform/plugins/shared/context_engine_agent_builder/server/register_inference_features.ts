@@ -10,7 +10,7 @@ import type { SearchInferenceEndpointsPluginSetup } from '@kbn/search-inference-
 const CONTEXT_ENGINE_PARENT_FEATURE_ID = 'context_engine';
 const CONTEXT_ENGINE_PROMPT_FEATURE_ID = 'context_engine_prompt';
 const CONTEXT_ENGINE_PROMPT_RECOMMENDED_ENDPOINTS = [
-  '.google-gemini-3.5-flash-lite-chat_completion',
+  '.google-gemini-3.8-flash-chat_completion',
   '.anthropic-claude-4.5-haiku-chat_completion',
 ];
 
@@ -30,7 +30,7 @@ export const registerContextEngineInferenceFeatures = (
     featureId: CONTEXT_ENGINE_PROMPT_FEATURE_ID,
     featureName: 'Context Engine AI Prompt',
     featureDescription:
-      'AI model used for ai.prompt steps inside Context Engine automation workflows. Defaults to a fast, cost-efficient model (Gemini Flash Lite) since these steps run once per document.',
+      'AI model used for ai.prompt steps inside Context Engine automation workflows. Defaults to Gemini 3.8 Flash, since these steps run once per document and still need to emit ES|QL that passes verification.',
     taskType: 'chat_completion',
     recommendedEndpoints: CONTEXT_ENGINE_PROMPT_RECOMMENDED_ENDPOINTS,
     ignoreGlobalDefault: true,
