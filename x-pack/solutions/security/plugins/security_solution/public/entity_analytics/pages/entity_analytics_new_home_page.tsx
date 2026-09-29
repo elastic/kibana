@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useRef, useState } from 'react';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { EuiLoadingSpinner, EuiPanel, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -560,10 +560,12 @@ const EntityAnalyticsEntitiesTableContent = ({
     defaultQuery: getDefaultQuery,
   });
 
-  const { onChangePage } = urlState;
+  const onChangePageRef = useRef(urlState.onChangePage);
+  onChangePageRef.current = urlState.onChangePage;
+  const filterResetKey = `${JSON.stringify(baseFilter ?? null)}|${JSON.stringify(cardFilter)}`;
   useUpdateEffect(() => {
-    onChangePage(0);
-  }, [baseFilter, cardFilter, onChangePage]);
+    onChangePageRef.current(0);
+  }, [filterResetKey]);
 
   const state = useMemo(() => {
     const extraFilters = (

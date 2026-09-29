@@ -49,8 +49,11 @@ export const useEntitiesWithAnomaliesCount = ({
 }) => {
   const { data } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    error: indexError,
+  } = useResolvedLatestEntitiesIndexName(spaceId);
   const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
 
   const isEnabled =
@@ -75,6 +78,7 @@ export const useEntitiesWithAnomaliesCount = ({
   const {
     data: queryResult,
     isLoading,
+    isFetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['entitiesWithAnomaliesCount', query],
@@ -110,13 +114,13 @@ export const useEntitiesWithAnomaliesCount = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.entitiesWithAnomalies.queryError', {
       defaultMessage: 'There was an error loading entities with anomalies count',
     }),
-    filteredError
+    filteredError ?? indexError
   );
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isJobsLoading || isIndexLoading || isLoading,
-    error: filteredError,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    isLoading: isJobsLoading || isIndexLoading || isLoading || isFetching,
+    error: filteredError ?? indexError,
   };
 };

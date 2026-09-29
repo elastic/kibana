@@ -53,6 +53,7 @@ export const buildRiskMoversCountQuery = (
     `| WHERE current_score IS NOT NULL AND boundary_score IS NOT NULL AND current_score - boundary_score >= 10`,
     `| RENAME entity_euid AS \`entity.id\``,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+    `| WHERE entity.name IS NOT NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
     `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,

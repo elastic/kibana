@@ -77,8 +77,11 @@ export const useAlertBasedTiles = ({
 }) => {
   const { data } = useKibana().services;
   const euidApi = useEntityStoreEuidApi();
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    error: indexError,
+  } = useResolvedLatestEntitiesIndexName(spaceId);
 
   const isEnabled =
     !skip && !isIndexLoading && Boolean(euidApi) && Boolean(resolvedIndex?.indexName);
@@ -97,6 +100,7 @@ export const useAlertBasedTiles = ({
   const {
     data: queryResult,
     isLoading,
+    isFetching,
     error,
   } = useQuery<AlertBasedTilesResult, SecurityAppError>(
     ['alertBasedTiles', query],
@@ -130,15 +134,19 @@ export const useAlertBasedTiles = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.alertBasedTiles.queryError', {
       defaultMessage: 'There was an error loading entity alert data',
     }),
-    filteredError
+    filteredError ?? indexError
   );
 
   return {
     alertsCount: queryResult?.alertsCount ?? 0,
-    alertsEntityIds: queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
+    alertsEntityIds: isFetching
+      ? EMPTY_ENTITY_IDS
+      : queryResult?.alertsEntityIds ?? EMPTY_ENTITY_IDS,
     watchlistedCount: queryResult?.watchlistedCount ?? 0,
-    watchlistedEntityIds: queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isIndexLoading || isLoading,
-    error: filteredError,
+    watchlistedEntityIds: isFetching
+      ? EMPTY_ENTITY_IDS
+      : queryResult?.watchlistedEntityIds ?? EMPTY_ENTITY_IDS,
+    isLoading: isIndexLoading || isLoading || isFetching,
+    error: filteredError ?? indexError,
   };
 };

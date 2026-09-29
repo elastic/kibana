@@ -47,6 +47,18 @@ describe('buildEntitiesWithAnomaliesCountQuery', () => {
     expect(query).not.toContain('COALESCE(user_euid, host_euid, service_euid)');
   });
 
+  it('restricts the shared ML index to the supplied job IDs before the entity lookup', () => {
+    const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1', '24h', [], [
+      'job-a',
+      'job-b',
+    ]);
+    const jobPredicate = 'job_id IN ("job-a", "job-b")';
+    const whereIdx = query.indexOf(jobPredicate);
+    const joinIdx = query.indexOf('| LOOKUP JOIN');
+    expect(whereIdx).toBeGreaterThan(-1);
+    expect(joinIdx).toBeGreaterThan(whereIdx);
+  });
+
   it('applies entity filter clauses after the LOOKUP JOIN', () => {
     const filter = '| WHERE entity.type == "host"';
     const query = buildEntitiesWithAnomaliesCountQuery(mockEuid, '.entities-v1', '24h', [filter]);

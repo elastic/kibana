@@ -59,6 +59,7 @@ export const buildNewlyHighCriticalCountQuery = (
     `| WHERE current_level_num >= 3 AND (boundary_level_num IS NULL OR boundary_level_num < 3)`,
     `| RENAME entity_euid AS \`entity.id\``,
     `| LOOKUP JOIN ${entitiesIndexName} ON entity.id`,
+    `| WHERE entity.name IS NOT NULL`,
     ...entityFilterClauses,
     `| EVAL effective_id = COALESCE(\`entity.relationships.resolution.resolved_to\`, entity.id)`,
     `| STATS value = COUNT_DISTINCT(effective_id), entity_ids = VALUES(entity.id)`,

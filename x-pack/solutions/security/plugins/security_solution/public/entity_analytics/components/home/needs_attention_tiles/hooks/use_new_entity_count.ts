@@ -105,7 +105,7 @@ export const useNewEntityCount = ({
 
   return {
     count: result?.count ?? 0,
-    entityIds: result?.entityIds ?? EMPTY_ENTITY_IDS,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : result?.entityIds ?? EMPTY_ENTITY_IDS,
     isLoading: isLoading || isFetching,
     error,
   };

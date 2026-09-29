@@ -35,8 +35,11 @@ export const useRiskMoversCount = ({
   entityFilters?: EntityFilters;
 }) => {
   const { data } = useKibana().services;
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    error: indexError,
+  } = useResolvedLatestEntitiesIndexName(spaceId);
 
   const isEnabled = !skip && !isIndexLoading && Boolean(resolvedIndex?.indexName);
 
@@ -56,6 +59,7 @@ export const useRiskMoversCount = ({
   const {
     data: queryResult,
     isLoading,
+    isFetching,
     error,
   } = useQuery<{ count: number; entityIds: string[] }, SecurityAppError>(
     ['riskMoversCount', query],
@@ -94,14 +98,14 @@ export const useRiskMoversCount = ({
     i18n.translate('xpack.securitySolution.entityAnalytics.home.riskMovers.queryError', {
       defaultMessage: 'There was an error loading risk movers data',
     }),
-    filteredError
+    filteredError ?? indexError
   );
 
   return {
     count: queryResult?.count ?? 0,
-    entityIds: queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
-    isLoading: isIndexLoading || isLoading,
+    entityIds: isFetching ? EMPTY_ENTITY_IDS : queryResult?.entityIds ?? EMPTY_ENTITY_IDS,
+    isLoading: isIndexLoading || isLoading || isFetching,
     isMissingIndex,
-    error: filteredError,
+    error: filteredError ?? indexError,
   };
 };
