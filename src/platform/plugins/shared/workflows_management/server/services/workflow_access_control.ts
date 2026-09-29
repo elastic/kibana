@@ -308,7 +308,8 @@ export class WorkflowAccessControlService {
     if (!stored) throw new WorkflowNotFoundError(id);
     const { source: existing, seqNo, primaryTerm } = stored;
     const ownerId = existing.owner_id ?? profileId;
-    if (!ownerId || existing.managed) {
+    if (existing.managed) throw new WorkflowAccessDeniedError();
+    if (!ownerId) {
       logWorkflowAccess('denied', 'manage', { core: this.core, request, id, spaceId });
       throw new WorkflowAccessDeniedError();
     }

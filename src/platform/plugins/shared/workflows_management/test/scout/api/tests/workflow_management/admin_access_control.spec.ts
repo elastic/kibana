@@ -89,6 +89,9 @@ steps:
       if (ownerProfileId) await esClient.security.enableUserProfile({ uid: ownerProfileId });
     } finally {
       if (workflowId) {
+        await esClient.indices.refresh({
+          index: ['.workflows-executions', '.workflows-step-executions'],
+        });
         expect(
           await apiClient.delete(
             `s/${spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,

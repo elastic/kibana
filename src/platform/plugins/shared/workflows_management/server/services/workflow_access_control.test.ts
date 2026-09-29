@@ -122,17 +122,12 @@ describe('WorkflowAccessControlService', () => {
       expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
-    it('audits rejected sharing changes for a managed workflow', async () => {
+    it('does not label the managed-workflow restriction as an ACL denial', async () => {
       document.managed = true;
       await expect(
         service.update('id', 'default', { access_mode: 'private' }, request)
       ).rejects.toThrow(WorkflowAccessDeniedError);
-      expect(core.security.audit.asScoped(request).log).toHaveBeenCalledWith(
-        expect.objectContaining({
-          message: expect.stringContaining('"operation":"manage"'),
-          event: expect.objectContaining({ action: 'workflow_access_control_denied' }),
-        })
-      );
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
     it('records an override at the storage check, not the write precheck', async () => {
@@ -325,6 +320,7 @@ describe('WorkflowAccessControlService', () => {
         service.update('id', 'default', { access_mode: 'public' }, request)
       ).rejects.toBeInstanceOf(WorkflowAccessDeniedError);
       expect(crud.writeWorkflowDocumentWithOcc).not.toHaveBeenCalled();
+      expect(core.security.audit.asScoped(request).log).not.toHaveBeenCalled();
     });
 
     it('does not apply the override to a read without caller context', async () => {
