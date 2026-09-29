@@ -88,7 +88,7 @@ const mockUnmanagedRule = {
     ownership: { managed: false },
   },
   schedule: { every: '1m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-* | LIMIT 1' } },
+  query: { base: 'FROM logs-* | LIMIT 1' },
 };
 
 const defaultProps: RulesListTableProps = {

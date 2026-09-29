@@ -203,11 +203,8 @@ describe('securityDetectionQuery.generateQuery', () => {
   it('compiles the design example rule to the expected ES|QL (kuery)', async () => {
     const result = await securityDetectionQuery.generateQuery(makeInput(exampleRuleFields));
 
-    expect(result.query.format).toBe('standalone');
-    if (result.query.format !== 'standalone') return;
-
     // Snapshot of what the Builder actually emits.
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\", \\"winlogbeat-*\\"
       | WHERE KQL(\\"process.args:/tmp/* and event.type:start\\")
       | LIMIT 100"
@@ -234,10 +231,7 @@ describe('securityDetectionQuery.generateQuery', () => {
 
     const result = await securityDetectionQuery.generateQuery(makeInput(luceneFields));
 
-    expect(result.query.format).toBe('standalone');
-    if (result.query.format !== 'standalone') return;
-
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"logs-*\\", \\"winlogbeat-*\\"
       | WHERE QSTR(\\"process.args:/tmp/* AND event.type:start\\", {\\"allow_wildcard\\": TRUE})
       | LIMIT 100"
@@ -260,19 +254,18 @@ describe('securityDetectionQuery.generateQuery', () => {
 
     const result = await securityDetectionQuery.generateQuery(makeInput(noLimitFields));
 
-    expect(result.query.format).toBe('standalone');
-    if (result.query.format !== 'standalone') return;
-
-    expect(result.query.breach.query).toMatchInlineSnapshot(`
+    expect(result.query.base).toMatchInlineSnapshot(`
       "FROM \\"filebeat-*\\"
       | WHERE KQL(\\"event.action:login\\")"
     `);
-    expect(result.query.breach.query).not.toContain('LIMIT');
+    expect(result.query.base).not.toContain('LIMIT');
   });
 
-  it('returns the standalone format (not composed)', async () => {
+  it('returns the whole query as `base`, with no breach condition of its own', async () => {
     const result = await securityDetectionQuery.generateQuery(makeInput(minimalFields));
-    expect(result.query.format).toBe('standalone');
+
+    expect(result.query.base).toContain('FROM');
+    expect(result.query.breach).toBeUndefined();
   });
 
   it('does not carry time_field or grouping overrides (execution-time rule contract)', async () => {
@@ -290,8 +283,7 @@ describe('securityDetectionQuery.generateQuery', () => {
       index: ['index-a', 'index-b', 'index-c'],
     };
     const result = await securityDetectionQuery.generateQuery(makeInput(multiIndexFields));
-    if (result.query.format !== 'standalone') return;
-    expect(result.query.breach.query).toContain('FROM "index-a", "index-b", "index-c"');
+    expect(result.query.base).toContain('FROM "index-a", "index-b", "index-c"');
   });
 
   it('quotes index names so a pipe character cannot inject a second pipeline command', async () => {
@@ -305,8 +297,7 @@ describe('securityDetectionQuery.generateQuery', () => {
       index: ['logs-* | LIMIT 1 | WHERE true'],
     };
     const result = await securityDetectionQuery.generateQuery(makeInput(maliciousFields));
-    if (result.query.format !== 'standalone') return;
-    const compiledQuery = result.query.breach.query;
+    const compiledQuery = result.query.base;
     // The injected text must appear only inside a quoted index name, not as
     // a bare pipeline command.
     expect(compiledQuery).toContain('"logs-* | LIMIT 1 | WHERE true"');
@@ -320,30 +311,26 @@ describe('securityDetectionQuery.generateQuery', () => {
 
   it('places the user query inside KQL() for kuery language', async () => {
     const result = await securityDetectionQuery.generateQuery(makeInput(minimalFields));
-    if (result.query.format !== 'standalone') return;
-    expect(result.query.breach.query).toContain('KQL(');
-    expect(result.query.breach.query).not.toContain('QSTR(');
+    expect(result.query.base).toContain('KQL(');
+    expect(result.query.base).not.toContain('QSTR(');
   });
 
   it('places the user query inside QSTR() for lucene language', async () => {
     const luceneFields: CustomQueryBuilderFields = { ...minimalFields, language: 'lucene' };
     const result = await securityDetectionQuery.generateQuery(makeInput(luceneFields));
-    if (result.query.format !== 'standalone') return;
-    expect(result.query.breach.query).toContain('QSTR(');
-    expect(result.query.breach.query).not.toContain('KQL(');
+    expect(result.query.base).toContain('QSTR(');
+    expect(result.query.base).not.toContain('KQL(');
   });
 
   it('includes allow_wildcard = TRUE for lucene language', async () => {
     const luceneFields: CustomQueryBuilderFields = { ...minimalFields, language: 'lucene' };
     const result = await securityDetectionQuery.generateQuery(makeInput(luceneFields));
-    if (result.query.format !== 'standalone') return;
-    expect(result.query.breach.query).toContain('allow_wildcard');
+    expect(result.query.base).toContain('allow_wildcard');
   });
 
   it('emits LIMIT equal to max_signals when present', async () => {
     const result = await securityDetectionQuery.generateQuery(makeInput(exampleRuleFields));
-    if (result.query.format !== 'standalone') return;
-    expect(result.query.breach.query).toContain('| LIMIT 100');
+    expect(result.query.base).toContain('| LIMIT 100');
   });
 });
 

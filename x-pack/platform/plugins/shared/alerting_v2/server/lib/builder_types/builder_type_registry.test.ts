@@ -21,10 +21,7 @@ const simpleSchema = z.object({ value: z.string().max(100) }).strict();
 
 /** A GeneratedQuery that satisfies the type without requiring ES|QL validation. */
 const makeQuery = (): GeneratedQuery => ({
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | WHERE @timestamp > now() - 5m | LIMIT 10' },
-  },
+  query: { base: 'FROM logs-* | WHERE @timestamp > now() - 5m | LIMIT 10' },
 });
 
 /** A minimal valid definition that registers without errors. */

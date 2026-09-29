@@ -1,5 +1,5 @@
 {
-  "sha1": "12ae6a6414fd5126be608fdc8fc610879b6b8440",
+  "sha1": "db561f190b69bb48c436ca7c2cddfe0a37feecc1",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -299,8 +299,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 321,
-        "column": 46
+        "line": 320,
+        "column": 52
       }
     },
     {
@@ -312,7 +312,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 328,
+        "line": 326,
         "column": 11
       }
     },
@@ -325,7 +325,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/crud.spec.ts",
-        "line": 337,
+        "line": 335,
         "column": 20
       }
     },
@@ -534,7 +534,7 @@
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
         "line": 133,
-        "column": 23
+        "column": 54
       }
     },
     {
@@ -546,8 +546,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 137,
-        "column": 34
+        "line": 136,
+        "column": 51
       }
     },
     {
@@ -559,7 +559,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 140,
+        "line": 138,
         "column": 11
       }
     },
@@ -572,7 +572,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 147,
+        "line": 145,
         "column": 24
       }
     },
@@ -585,7 +585,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 154,
+        "line": 152,
         "column": 73
       }
     },
@@ -598,7 +598,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 167,
+        "line": 165,
         "column": 14
       }
     },
@@ -611,7 +611,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 179,
+        "line": 177,
         "column": 7
       }
     },
@@ -624,7 +624,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 192,
+        "line": 190,
         "column": 5
       }
     },
@@ -637,7 +637,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 213,
+        "line": 211,
         "column": 20
       }
     },
@@ -650,7 +650,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 236,
+        "line": 234,
         "column": 81
       }
     },
@@ -663,7 +663,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 259,
+        "line": 257,
         "column": 26
       }
     },
@@ -676,7 +676,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 279,
+        "line": 277,
         "column": 16
       }
     },
@@ -689,7 +689,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 300,
+        "line": 298,
         "column": 81
       }
     },
@@ -702,7 +702,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/managed_rule_invariant.spec.ts",
-        "line": 318,
+        "line": 316,
         "column": 32
       }
     },
@@ -824,8 +824,8 @@
       }
     },
     {
-      "id": "96e78cfe9352b4f-6adf1cd69ecaf6e",
-      "title": "Detection Engine v2 — persistent-mode workaround create: query rule persists kind=alert, both strategies none, pending_count=0, no grouping",
+      "id": "96e78cfe9352b4f-ace92a5180fef1a",
+      "title": "Detection Engine v2 — persistent-mode workaround create: query rule persists kind=alert, the lifecycle off, pending count 0, no grouping",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
@@ -837,16 +837,16 @@
       }
     },
     {
-      "id": "96e78cfe9352b4f-e97f452821d0df5",
-      "title": "Detection Engine v2 — persistent-mode workaround create: threshold rule persists kind=alert, both strategies none, pending_count=0, no grouping",
+      "id": "96e78cfe9352b4f-1f3f2ee4d8be4da",
+      "title": "Detection Engine v2 — persistent-mode workaround create: threshold rule persists kind=alert, the lifecycle off, pending count 0, no grouping",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 90,
-        "column": 15
+        "line": 98,
+        "column": 16
       }
     },
     {
@@ -858,8 +858,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 115,
-        "column": 15
+        "line": 125,
+        "column": 16
       }
     },
     {
@@ -871,21 +871,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 146,
-        "column": 17
+        "line": 154,
+        "column": 15
       }
     },
     {
-      "id": "96e78cfe9352b4f-bc5234a7068ed6f",
-      "title": "Detection Engine v2 — persistent-mode workaround trap: creating a rule with recovering_count while recovery_strategy is none is rejected",
+      "id": "96e78cfe9352b4f-36679310d1e1f21",
+      "title": "Detection Engine v2 — persistent-mode workaround trap: creating a rule with a recovering phase while recovery is manual is rejected",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic"
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_detections/test/scout_detections_v2/api/tests/persistent_mode_workaround.spec.ts",
-        "line": 190,
-        "column": 11
+        "line": 201,
+        "column": 16
       }
     }
   ]
