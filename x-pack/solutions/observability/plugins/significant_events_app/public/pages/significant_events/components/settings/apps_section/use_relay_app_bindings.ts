@@ -13,14 +13,13 @@ import type {
   SlackAppUnbindChannelResponse,
   SlackChannelBinding,
 } from '@kbn/significant-events-plugin/common';
+import { buildPath } from '@kbn/core-http-browser';
 import { useKibana } from '../../../../../hooks/use_kibana';
 import { getFormattedError } from '../../../../../util/errors';
 
 const BINDINGS_ROUTE = '/internal/significant_events/apps/slack/bindings';
-const BIND_CHANNEL_ROUTE = (channelId: string) =>
-  `/internal/significant_events/apps/slack/bindings/${channelId}/bind`;
-const UNBIND_CHANNEL_ROUTE = (channelId: string) =>
-  `/internal/significant_events/apps/slack/bindings/${channelId}/unbind`;
+const BIND_CHANNEL_ROUTE = `/internal/significant_events/apps/slack/bindings/{channelId}/bind`;
+const UNBIND_CHANNEL_ROUTE = `/internal/significant_events/apps/slack/bindings/{channelId}/unbind`;
 
 export const RELAY_APP_BINDINGS_QUERY_KEY = ['relayAppConnectionBindings'] as const;
 
@@ -93,7 +92,7 @@ export function useBindChannel(): UseBindChannel {
 
   const mutation = useMutation<SlackAppBindChannelResponse, Error, string>({
     mutationFn: (channelId: string) =>
-      http.post<SlackAppBindChannelResponse>(BIND_CHANNEL_ROUTE(channelId)),
+      http.post<SlackAppBindChannelResponse>(buildPath(BIND_CHANNEL_ROUTE, { channelId })),
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.significantEventsApp.settings.apps.bindChannelError', {
@@ -124,7 +123,7 @@ export function useUnbindChannel(): UseUnbindChannel {
 
   const mutation = useMutation<SlackAppUnbindChannelResponse, Error, string>({
     mutationFn: (channelId: string) =>
-      http.post<SlackAppUnbindChannelResponse>(UNBIND_CHANNEL_ROUTE(channelId)),
+      http.post<SlackAppUnbindChannelResponse>(buildPath(UNBIND_CHANNEL_ROUTE, { channelId })),
     onError: (error) => {
       notifications.toasts.addError(getFormattedError(error), {
         title: i18n.translate('xpack.significantEventsApp.settings.apps.unbindChannelError', {

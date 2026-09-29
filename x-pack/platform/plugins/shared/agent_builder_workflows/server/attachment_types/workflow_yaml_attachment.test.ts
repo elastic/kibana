@@ -14,6 +14,8 @@ import { WORKFLOW_YAML_ATTACHMENT_TYPE } from '@kbn/workflows/common/constants';
 import { workflowTools } from '../../common/constants';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -56,7 +58,10 @@ interface RegisteredAttachmentType {
   getAgentDescription: () => string;
 }
 
-const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
+const registerAndCapture = (
+  api: Partial<WorkflowsManagementApi> = {},
+  security?: SecurityPluginStart
+) => {
   let registeredType: RegisteredAttachmentType | undefined;
   const mockAgentBuilder = {
     attachments: {
@@ -66,7 +71,7 @@ const registerAndCapture = (api: Partial<WorkflowsManagementApi> = {}) => {
     },
   } as unknown as AgentBuilderPluginSetup;
 
-  registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi);
+  registerWorkflowYamlAttachment(mockAgentBuilder, api as WorkflowsManagementApi, () => security);
   return registeredType!;
 };
 
@@ -93,6 +98,61 @@ const createWorkflowAttachment = (
 });
 
 describe('workflow_yaml_attachment', () => {
+  describe('authorization', () => {
+    it.each([true, false])('checks read access before resolving (allowed=%s)', async (allowed) => {
+      const atSpace = jest.fn().mockResolvedValue({ hasAllRequested: allowed });
+      const security = {
+        authz: {
+          actions: { api: { get: (action: string) => `api:${action}` } },
+          checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpace }),
+        },
+      } as unknown as SecurityPluginStart;
+      const workflow = { id: 'workflow-1', yaml: 'name: Workflow', name: 'Workflow' };
+      const getWorkflow = jest.fn().mockResolvedValue(workflow);
+      const type = registerAndCapture({ getWorkflow }, security);
+      const request = httpServerMock.createKibanaRequest();
+
+      const result = await type.resolve('workflow-1', { spaceId: 'another-space', request });
+
+      expect(security.authz.checkPrivilegesWithRequest).toHaveBeenCalledWith(request);
+      expect(atSpace).toHaveBeenCalledWith('another-space', {
+        kibana: [`api:${WorkflowsManagementApiActions.read}`],
+      });
+      if (allowed) {
+        expect(result).toEqual({
+          yaml: workflow.yaml,
+          workflowId: workflow.id,
+          name: workflow.name,
+        });
+        expect(getWorkflow).toHaveBeenCalledWith('workflow-1', 'another-space', request);
+      } else {
+        expect(result).toBeUndefined();
+        expect(getWorkflow).not.toHaveBeenCalled();
+      }
+    });
+
+    it('does not fetch the workflow for a stale check when read access is denied', async () => {
+      const security = {
+        authz: {
+          actions: { api: { get: (action: string) => action } },
+          checkPrivilegesWithRequest: () => ({
+            atSpace: async () => ({ hasAllRequested: false }),
+          }),
+        },
+      } as unknown as SecurityPluginStart;
+      const getWorkflow = jest.fn();
+      const type = registerAndCapture({ getWorkflow }, security);
+
+      await expect(
+        type.isStale(createWorkflowAttachment('name: Workflow'), {
+          spaceId: 'default',
+          request: httpServerMock.createKibanaRequest(),
+        })
+      ).resolves.toBe(false);
+      expect(getWorkflow).not.toHaveBeenCalled();
+    });
+  });
+
   describe('getTools', () => {
     it('includes all workflow tools, generate_workflow, and execute_workflow', () => {
       const type = registerAndCapture();
