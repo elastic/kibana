@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { Evaluator } from '@kbn/evals';
+import { TRACE_INDEX_PATTERN, type Evaluator } from '@kbn/evals';
 import {
   internalTools,
   isAttachmentTool,
@@ -63,7 +63,7 @@ const fetchToolCalls = async (
   where: string
 ): Promise<ToolCalls | undefined> => {
   const response = (await traceEsClient.esql.query({
-    query: `FROM traces-*\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments`,
+    query: `FROM ${TRACE_INDEX_PATTERN}\n| WHERE ${where} AND ${LLM_ISSUED_TOOL_SPAN}\n| SORT @timestamp ASC\n| KEEP span_id, trace_id, attributes.gen_ai.tool.name, attributes.gen_ai.tool.call.arguments`,
   })) as unknown as EsqlResponse;
 
   const seen = new Set<string>();
