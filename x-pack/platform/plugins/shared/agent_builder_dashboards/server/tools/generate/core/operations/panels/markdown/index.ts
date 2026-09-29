@@ -65,4 +65,5 @@ export const editMarkdownPanelConfigInputSchema = markdownPanelConfigInputSchema
 /** Registry entry for the `markdown` by-value panel type. */
 export const markdownPanelDefinition: ConfigPanelTypeDefinition = {
   embeddableType: MARKDOWN_EMBEDDABLE_TYPE,
+  label: 'markdown',
 };

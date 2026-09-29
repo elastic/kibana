@@ -112,8 +112,8 @@ Persists the resulting dashboard as an attachment and returns its id plus a comp
 
 Use operations[] to:
 1. set metadata
-2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), markdown panels, or existing visualization attachments
-3. edit existing Lens, Vega, custom content, or markdown panel content
+2. add panels generated from a natural-language query (\`source: "request"\`; pick the engine with "renderer": Lens (default), Vega, or custom content for HTML-based layouts that Lens and Vega cannot express), by-value panels (\`source: "config"\`: markdown or ML anomaly panels), or existing visualization attachments by id (\`source: "attachment"\`)
+3. edit existing Lens, Vega, custom content, markdown, or ML anomaly panel content
 4. update panel layouts without changing content
 5. add / remove sections, including inline section panels during add_section
 6. remove panels
@@ -204,7 +204,7 @@ Use operations[] to:
               type: ToolResultType.error,
               data: {
                 message: `Failed to generate dashboard: ${errorMessage}`,
-                metadata: { dashboardAttachmentId: previousAttachmentId, operations },
+                metadata: { dashboardAttachmentId: previousAttachmentId },
               },
             },
           ],

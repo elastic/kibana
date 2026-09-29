@@ -32,7 +32,7 @@ import type {
 import {
   buildEcfTemplateUrl,
   ECF_FALLBACK_TEMPLATE_VERSION,
-} from '../../common/ecf_template_version';
+} from '../../common/providers/aws/ecf_template_version';
 
 // ── Template filenames ────────────────────────────────────────────────────────
 

@@ -52,7 +52,7 @@ Each visualization request is authored in a separate context. New-panel authors 
 
 - Use \`source: "request"\` to create or edit a Lens, Vega, or custom content panel from a natural-language query — this is the only way to make a **new** generated panel. Set \`renderer\` to pick the engine; each renderer accepts only its own fields.
 - Use \`source: "attachment"\` with an \`attachment_id\` to place any visualization that already exists in this conversation — anything \`${platformCoreTools.createVisualization}\` returned. Pass only the id and a \`grid\`; the attachment's own renderer decides the panel type. A \`source: "request"\` would generate a **new**, different panel instead.
-- Use \`source: "config"\` for markdown only.
+- Use \`source: "config"\` for panels you author by value: markdown and ML anomaly panels.
 
 ## Panel Type Selection
 
@@ -125,7 +125,7 @@ Do not add controls to dashboards already scoped to a single entity (one host, o
 ## Generation Edge Cases
 
 - Use \`update_panel_layouts\` when the user wants to resize, reposition, or move panels without changing panel content.
-- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels and custom content panels (\`source: "request"\` with the panel's \`renderer\`), and markdown panels (\`source: "config"\`, \`type: "markdown"\`).
+- If a user wants to change a dashboard panel's content, prefer \`edit_panels\` over removing and re-adding the panel. \`edit_panels\` works for ES|QL-backed Lens and Vega panels and custom content panels (\`source: "request"\` with the panel's \`renderer\`), markdown panels (\`source: "config"\`, \`type: "markdown"\`), and ML anomaly panels (\`source: "config"\`, \`type: "ml_anomaly_charts"\` / \`"ml_anomaly_swimlane"\` / \`"ml_single_metric_viewer"\`).
 - A dashboard can include DSL-based, form-based, or other non-ES|QL Lens panels. Do not attempt to edit those panels directly.
 - If the user asks to modify a DSL visualization or any other non-ES|QL panel, explicitly explain that direct editing is not supported, propose recreating and replacing it as a new ES|QL-based Lens chart, and ask for confirmation before you remove or replace the existing panel.
 - Never silently follow a remove-and-recreate flow for a non-ES|QL panel. Wait for explicit user confirmation before regenerating the dashboard with replacement operations.`;

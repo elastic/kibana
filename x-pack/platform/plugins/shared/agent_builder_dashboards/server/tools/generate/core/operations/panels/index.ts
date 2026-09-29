@@ -26,6 +26,17 @@ import {
   customContentEditPanelRequestSchema,
   type CustomContentPanelResolutionRequest,
 } from './custom_content';
+import {
+  anomalyChartsPanelConfigInputSchema,
+  anomalyChartsPanelDefinition,
+  anomalySwimlaneConfigInputSchema,
+  anomalySwimlaneDefinition,
+  editAnomalyChartsPanelConfigInputSchema,
+  editAnomalySwimlaneConfigInputSchema,
+  editSingleMetricViewerConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
+  singleMetricViewerPanelDefinition,
+} from './ml_panels';
 import { attachmentPanelInputSchema } from './attachment_source';
 
 /**
@@ -54,20 +65,28 @@ const sectionIdField = z
     'Existing section id or the key of an add_section earlier in this call. If omitted, panel is added at the top level.'
   );
 
-const configPanelInputSchema = z.discriminatedUnion('type', [markdownPanelConfigInputSchema]);
+const configPanelInputSchema = z.discriminatedUnion('type', [
+  markdownPanelConfigInputSchema,
+  anomalyChartsPanelConfigInputSchema,
+  anomalySwimlaneConfigInputSchema,
+  singleMetricViewerConfigInputSchema,
+]);
 
 export type ConfigPanelInput = z.infer<typeof configPanelInputSchema>;
 
 /**
  * Behavior of every by-value (`source: 'config'`) panel type, keyed by its
- * model-facing `type`. Markdown is the only entry today; ML anomaly panels (swim
- * lane, anomaly charts, single metric viewer) and any other panel type whose
- * config the agent authors directly register here, next to their members of the
- * `config` unions below. Panels generated server-side belong in the `request`
- * unions instead, with a resolver branch in `core/resolvers/panel_resolver.ts`.
+ * model-facing `type`: markdown, the ML anomaly panels (swim lane, anomaly
+ * charts, single metric viewer), and any other panel type whose config the agent
+ * authors directly. Each type registers here, next to its members of the
+ * `config` unions. Panels generated server-side belong in the `request` unions
+ * instead, with a resolver branch in `core/resolvers/panel_resolver.ts`.
  */
 const CONFIG_PANEL_TYPES: Record<ConfigPanelInput['type'], ConfigPanelTypeDefinition> = {
   markdown: markdownPanelDefinition,
+  ml_anomaly_charts: anomalyChartsPanelDefinition,
+  ml_anomaly_swimlane: anomalySwimlaneDefinition,
+  ml_single_metric_viewer: singleMetricViewerPanelDefinition,
 };
 
 /** Builds panel content from a by-value panel's `type` and `config`. */
@@ -83,10 +102,12 @@ export const buildConfigPanelContent = (
 export const getConfigPanelEditError = (
   type: ConfigPanelInput['type'],
   existingPanel: AttachmentPanel
-): string | undefined =>
-  existingPanel.type === CONFIG_PANEL_TYPES[type].embeddableType
+): string | undefined => {
+  const { embeddableType, label } = CONFIG_PANEL_TYPES[type];
+  return existingPanel.type === embeddableType
     ? undefined
-    : `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as ${type}. Use source: "request" with the panel's renderer for Lens, Vega, or custom content panels.`;
+    : `Panel "${existingPanel.id}" with type "${existingPanel.type}" cannot be edited as ${label}. Use source: "request" with the panel's renderer for Lens, Vega, or custom content panels.`;
+};
 
 /** A single inline panel item accepted by `add_section` (section-relative, no sectionId). */
 export const addSectionPanelItemSchema = z.discriminatedUnion('source', [
@@ -113,6 +134,9 @@ export type PanelRequestInput = Extract<NewPanelInput, { source: 'request' }>;
 export const addPanelsItemSchema = z.discriminatedUnion('source', [
   z.discriminatedUnion('type', [
     markdownPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalyChartsPanelConfigInputSchema.extend({ sectionId: sectionIdField }),
+    anomalySwimlaneConfigInputSchema.extend({ sectionId: sectionIdField }),
+    singleMetricViewerConfigInputSchema.extend({ sectionId: sectionIdField }),
   ]),
   z.discriminatedUnion('renderer', [
     lensPanelRequestSchema.extend({ sectionId: sectionIdField }),
@@ -131,7 +155,12 @@ export const editPanelItemSchema = z.discriminatedUnion('source', [
     vegaEditPanelRequestSchema,
     customContentEditPanelRequestSchema,
   ]),
-  z.discriminatedUnion('type', [editMarkdownPanelConfigInputSchema]),
+  z.discriminatedUnion('type', [
+    editMarkdownPanelConfigInputSchema,
+    editAnomalyChartsPanelConfigInputSchema,
+    editAnomalySwimlaneConfigInputSchema,
+    editSingleMetricViewerConfigInputSchema,
+  ]),
 ]);
 
 export type EditPanelItem = z.infer<typeof editPanelItemSchema>;

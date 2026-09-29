@@ -65,12 +65,10 @@ test.describe('Rule tags — edit via ES|QL form', { tag: '@local-stateful-class
           // No `builder_type`, so the edit flyout opens in ES|QL mode.
           metadata: { name: 'scout-esql-clear-tags', tags: ['prod', 'infra'] },
           query: {
-            format: 'composed',
             base: `FROM ${TEST_INDEX} | STATS count = COUNT(*)`,
             breach: { segment: '| WHERE count > 5' },
           },
           time_field: '@timestamp',
-          recovery_strategy: undefined,
         })
       );
       ruleId = rule.id;

@@ -18,6 +18,8 @@ import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 export interface ConfigPanelTypeDefinition {
   /** Embeddable type id panels of this type map to. Edits may only target panels of this type. */
   readonly embeddableType: string;
+  /** Human-readable name used in error messages, e.g. "anomaly charts". */
+  readonly label: string;
   /** Maps the agent-facing config onto the embeddable's stored config. Defaults to passing it through. */
   readonly toEmbeddableConfig?: (config: AttachmentPanel['config']) => AttachmentPanel['config'];
 }

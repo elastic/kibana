@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { EuiProvider } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
@@ -43,14 +45,38 @@ const SUPPORTED_TYPES = [
   { id: '.github', name: 'GitHub', supported_feature_ids: ['contextEngine'] },
 ];
 
-const createServices = () => {
+const buildMatchedItem = (name: string): MatchedItem => ({
+  name,
+  tags: [],
+  item: { name },
+});
+
+const INDEX_MATCHES = [
+  buildMatchedItem('logs-*'),
+  buildMatchedItem('metrics-*'),
+  buildMatchedItem('.ds-traces-default'),
+];
+
+const createServices = ({
+  indices = INDEX_MATCHES,
+  indicesError,
+}: {
+  indices?: MatchedItem[];
+  indicesError?: Error;
+} = {}) => {
   const services = coreMock.createStart();
+  const data = dataPluginMock.createStartContract();
+  data.dataViews.getIndices = indicesError
+    ? jest.fn().mockRejectedValue(indicesError)
+    : jest.fn().mockResolvedValue(indices);
+
   (services.http.get as jest.Mock).mockImplementation((path: string) => {
     if (path === '/api/actions/connector_types') return Promise.resolve(SUPPORTED_TYPES);
     if (path === '/api/actions/connectors') return Promise.resolve(CONNECTORS);
     return Promise.resolve(undefined);
   });
-  return { ...services, triggersActionsUi: triggersActionsUiMock.createStart() };
+
+  return { ...services, data, triggersActionsUi: triggersActionsUiMock.createStart() };
 };
 
 const Harness = ({ initialSources = [] }: { initialSources?: SelectedSource[] }) => {
@@ -74,7 +100,13 @@ const renderWithProviders = (ui: React.ReactElement, services = createServices()
   };
 };
 
-const addEsqlSource = (query: string) => {
+const openAdvancedEsqlAccordion = async () => {
+  fireEvent.click(screen.getByTestId('contextAdvancedEsqlAccordionButton'));
+  await screen.findByTestId('mockEsqlEditor');
+};
+
+const addEsqlSource = async (query: string) => {
+  await openAdvancedEsqlAccordion();
   fireEvent.change(screen.getByTestId('mockEsqlEditor'), { target: { value: query } });
   fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 };
@@ -83,35 +115,88 @@ const openConnectorsTab = () => {
   fireEvent.click(screen.getByTestId('contextSourcePickerTab-connectors'));
 };
 
+const selectIndexSource = async (indexName: string) => {
+  const comboBox = screen.getByTestId('contextIndexComboBox');
+  const input = within(comboBox).getByRole('combobox');
+
+  fireEvent.focus(input);
+  fireEvent.click(input);
+  fireEvent.click(await screen.findByText(indexName));
+};
+
 describe('SourcePicker', () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+  });
+
   afterEach(() => {
+    jest.runOnlyPendingTimers();
+    jest.useRealTimers();
     jest.clearAllMocks();
   });
 
-  it('adds a raw ES|QL query as a source from the ES|QL tab', () => {
+  it('selects the Elasticsearch data tab by default with index picker visible', () => {
     renderWithProviders(<Harness />);
 
-    // The add button is disabled until a non-empty query is entered.
+    expect(screen.getByTestId('contextElasticsearchSourcesTab')).toBeInTheDocument();
+    expect(screen.getByTestId('contextIndexComboBox')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAdvancedEsqlAccordion')).toBeInTheDocument();
+    expect(screen.getByTestId('mockEsqlEditor')).not.toBeVisible();
+  });
+
+  it('adds an index selection as an ES|QL source from the index picker', async () => {
+    renderWithProviders(<Harness />);
+
+    await selectIndexSource('logs-*');
+
+    const row = screen.getByTestId('contextSelectedSource-esql-0');
+    expect(row).toHaveTextContent('FROM logs-*');
+  });
+
+  it('does not add a duplicate index source', async () => {
+    renderWithProviders(<Harness />);
+
+    await selectIndexSource('logs-*');
+    expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
+
+    const comboBox = screen.getByTestId('contextIndexComboBox');
+    const input = within(comboBox).getByRole('combobox');
+    fireEvent.focus(input);
+    fireEvent.click(input);
+
+    const listbox = await screen.findByRole('listbox');
+    expect(within(listbox).queryByText('logs-*')).not.toBeInTheDocument();
+    expect(within(listbox).getByText('metrics-*')).toBeInTheDocument();
+  });
+
+  it('adds a raw ES|QL query as a source from the advanced accordion', async () => {
+    renderWithProviders(<Harness />);
+
+    await openAdvancedEsqlAccordion();
+
     expect(screen.getByTestId('contextAddEsqlSourceButton')).toBeDisabled();
 
-    addEsqlSource('FROM logs-* | LIMIT 10');
+    fireEvent.change(screen.getByTestId('mockEsqlEditor'), {
+      target: { value: 'FROM logs-* | LIMIT 10' },
+    });
+    fireEvent.click(screen.getByTestId('contextAddEsqlSourceButton'));
 
     expect(screen.getByTestId('contextSelectedSource-esql-0')).toBeInTheDocument();
   });
 
-  it('does not add a duplicate ES|QL query', () => {
+  it('does not add a duplicate ES|QL query', async () => {
     renderWithProviders(<Harness />);
 
-    addEsqlSource('FROM logs-* | LIMIT 10');
-    addEsqlSource('FROM logs-* | LIMIT 10');
+    await addEsqlSource('FROM logs-* | LIMIT 10');
+    await addEsqlSource('FROM logs-* | LIMIT 10');
 
     expect(screen.getAllByTestId('contextSelectedSource-esql-0')).toHaveLength(1);
   });
 
-  it('removes a selected source when its remove button is clicked', () => {
+  it('removes a selected source when its remove button is clicked', async () => {
     renderWithProviders(<Harness />);
 
-    addEsqlSource('FROM logs-* | LIMIT 10');
+    await addEsqlSource('FROM logs-* | LIMIT 10');
 
     const row = screen.getByTestId('contextSelectedSource-esql-0');
     fireEvent.click(within(row).getByTestId('contextRemoveSourceButton'));
@@ -119,10 +204,11 @@ describe('SourcePicker', () => {
     expect(screen.queryByTestId('contextSelectedSource-esql-0')).not.toBeInTheDocument();
   });
 
-  it('does not fetch connectors on mount when only the ES|QL tab is shown', () => {
+  it('does not fetch connectors or indices on mount when only the Elasticsearch data tab is shown', () => {
     const { services } = renderWithProviders(<Harness />);
 
     expect(services.http.get).not.toHaveBeenCalled();
+    expect(services.data.dataViews.getIndices).not.toHaveBeenCalled();
   });
 
   it('lists only the data-retrieval connectors in the connectors tab', async () => {
