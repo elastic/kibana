@@ -9,10 +9,6 @@ import { randomUUID } from 'crypto';
 import { tags } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../scout/ui/fixtures';
-import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../../../scout/ui/fixtures/alerting_v2_setting';
 
 const suffix = randomUUID();
 const alertId = `nightshift-v2-alert-${suffix}`;
@@ -55,8 +51,7 @@ test.describe(
   'Observability Alerting v2 Inbox investigation actions',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ esClient, kbnClient }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
+    test.beforeAll(async ({ esClient }) => {
       const timestamp = new Date().toISOString();
       await esClient.create({
         index: alertIndex,
@@ -84,13 +79,12 @@ test.describe(
       });
     });
 
-    test.beforeEach(async ({ browserAuth, kbnClient, page }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
+    test.beforeEach(async ({ browserAuth, page }) => {
       await mockNightshiftApis(page);
       await browserAuth.loginAsAdmin();
     });
 
-    test.afterAll(async ({ esClient, kbnClient }) => {
+    test.afterAll(async ({ esClient }) => {
       await esClient.deleteByQuery({
         index: alertIndex,
         query: { ids: { values: [alertId] } },
@@ -98,7 +92,6 @@ test.describe(
         conflicts: 'proceed',
         ignore_unavailable: true,
       });
-      await unsetAlertingV2EnabledSetting(kbnClient);
     });
 
     test('triggers investigation from inbox table row overflow menu', async ({

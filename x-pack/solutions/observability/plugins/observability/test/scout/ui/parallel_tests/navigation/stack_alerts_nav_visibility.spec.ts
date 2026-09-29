@@ -24,7 +24,7 @@ test.describe(
       await pageObjects.observabilityNavigation.waitForLoad();
     });
 
-    test('hides Stack Alerts and keeps Stack Rules while alerting v2 is disabled', async ({
+    test('hides Stack Alerts and Stack Rules', async ({
       config,
       pageObjects,
     }) => {
@@ -38,11 +38,9 @@ test.describe(
       const panel = nav.sidePanel(panelId);
       await expect(panel).toBeVisible();
 
-      // Rules stays as the control that the panel finished resolving deep links.
-      // The default Scout server leaves alerting:v2:enabled unpinned (false).
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActions"]')
-      ).toBeVisible();
+      ).toHaveCount(0);
       await expect(
         panel.locator('[data-test-subj~="nav-item-id-management:triggersActionsAlerts"]')
       ).toHaveCount(0);

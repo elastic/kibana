@@ -6,9 +6,6 @@
  */
 
 /**
- * Sequential (`tests/`, not `parallel_tests/`) because it toggles
- * `alerting:v2:enabled`, a server-wide global setting.
- *
  * Jest already covers `visibleIn` on Observability Alerting deep links. This
  * suite searches Chrome as one authorized custom role and one role that lacks
  * that surface.
@@ -22,10 +19,6 @@ import {
   type ObservabilityNavigation,
 } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import {
-  setAlertingV2EnabledSetting,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const ACTION_POLICIES_TITLE = 'Action Policies';
@@ -48,16 +41,10 @@ test.describe(
   'Observability Alerting global search — alerting v2',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
-    test.beforeAll(async ({ scoutSpace, kbnClient, config }) => {
+    test.beforeAll(async ({ scoutSpace, config }) => {
       if (!config.serverless) {
         await scoutSpace.setSolutionView('oblt');
       }
-      await setAlertingV2EnabledSetting(kbnClient, true);
-    });
-
-    test.afterAll(async ({ kbnClient }) => {
-      await unsetAlertingV2EnabledSetting(kbnClient);
-      await kbnClient.uiSettings.waitForEventualCacheRefresh();
     });
 
     test('offers Action Policies in global search when the user has v2 action policies read', async ({

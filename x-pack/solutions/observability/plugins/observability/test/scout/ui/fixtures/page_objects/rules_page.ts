@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { AppMenu } from '@kbn/scout-oblt';
 import type { Locator, ScoutPage } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
 import {
@@ -26,17 +27,10 @@ export class RulesPage {
   async goto(ruleId: string = '') {
     await this.page.gotoApp(ruleId ? `rules/rule/${ruleId}` : 'rules');
     if (!ruleId) {
-      await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB, {
+      await this.page.testSubj.waitForSelector(RULES_SETTINGS_TEST_SUBJECTS.RULES_TABLE_CONTAINER, {
         timeout: BIGGER_TIMEOUT,
       });
     }
-  }
-
-  /**
-   * Gets the page title/tab locator
-   */
-  public get pageTitle() {
-    return this.page.testSubj.locator(RULES_SETTINGS_TEST_SUBJECTS.RULE_PAGE_TAB);
   }
 
   // Rules Settings Flyout methods
@@ -191,14 +185,7 @@ export class RulesPage {
     );
   }
 
-  // Logs Tab methods
-  /**
-   * Gets the logs tab button locator
-   */
-  public get logsTab() {
-    return this.page.testSubj.locator(LOGS_TAB_TEST_SUBJECTS.LOGS_TAB);
-  }
-
+  // Logs methods
   /**
    * Gets the event log table container locator
    */
@@ -207,9 +194,9 @@ export class RulesPage {
   }
 
   /**
-   * Navigates to the logs tab page via URL
+   * Navigates to the logs page via URL
    */
-  async gotoLogsTab() {
+  async gotoLogsPage() {
     await this.page.gotoApp('rules/logs');
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
       timeout: BIGGER_TIMEOUT,
@@ -217,11 +204,10 @@ export class RulesPage {
   }
 
   /**
-   * Clicks the logs tab to navigate to it
+   * Navigates to the Logs page via the app menu's "Logs" item.
    */
-  async clickLogsTab() {
-    await expect(this.logsTab).toBeVisible({ timeout: SHORTER_TIMEOUT });
-    await this.logsTab.click();
+  async openLogsFromMoreMenu() {
+    await new AppMenu(this.page).clickItem(LOGS_TAB_TEST_SUBJECTS.RULES_LOGS_MENU_ITEM);
     await this.page.testSubj.waitForSelector(LOGS_TAB_TEST_SUBJECTS.EVENT_LOG_TABLE, {
       timeout: BIGGER_TIMEOUT,
     });
@@ -237,10 +223,10 @@ export class RulesPage {
   }
 
   /**
-   * Verifies the logs tab is active/selected
+   * Verifies the Logs page is the current page.
    */
-  async expectLogsTabActive() {
-    await expect(this.logsTab).toHaveAttribute('aria-selected', 'true');
+  async expectLogsPageActive() {
+    expect(this.page.url()).toContain('/logs');
   }
 
   /**

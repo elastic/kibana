@@ -24,11 +24,6 @@ const FULL_V2_CAPABILITIES = {
   },
 };
 
-const enableV2 = (core: CoreStart) => {
-  core.settings.globalClient.get = <T>(_key: string) => true as T;
-  core.settings.client.get = <T>(_key: string) => false as T;
-};
-
 const setCapabilities = (core: CoreStart, capabilities: Record<string, unknown>) => {
   const management = capabilities.management as
     | { insightsAndAlerting?: Record<string, boolean> }
@@ -63,32 +58,14 @@ describe('getAlertsNavPanel', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
     core.settings.client.get = <T>(_key: string) => false as T;
   });
 
-  it('returns the classic Alerts link when alerting v2 is disabled', () => {
-    const result = getAlertsNavPanel(core);
-
-    expect(result).toHaveLength(1);
-    expect(result[0]).toEqual(
-      expect.objectContaining({
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-      })
-    );
-    expect(result[0]).not.toHaveProperty('renderAs');
-  });
-
-  it('includes Stack Management Rules only while alerting v2 is disabled', () => {
-    expect(shouldIncludeStackManagementRules(core)).toBe(true);
-
-    enableV2(core);
+  it('does not include Stack Management Rules', () => {
     expect(shouldIncludeStackManagementRules(core)).toBe(false);
   });
 
   it('returns a full Alerting panel when the user has v1 and v2 read capabilities', () => {
-    enableV2(core);
     setCapabilities(core, FULL_V2_CAPABILITIES);
 
     const result = getAlertsNavPanel(core);
@@ -142,17 +119,11 @@ describe('getAlertsNavPanel', () => {
     ]);
   });
 
-  it('returns an empty array when alerting v2 is enabled but the user has no capabilities', () => {
-    enableV2(core);
-
+  it('returns an empty array when the user has no capabilities', () => {
     expect(getAlertsNavPanel(core)).toEqual([]);
   });
 
   describe('alerts section', () => {
-    beforeEach(() => {
-      enableV2(core);
-    });
-
     it('shows Alerts when the user has v2 alerts read', () => {
       setCapabilities(core, { alerting_v2_alerts: { read: true } });
 
@@ -245,10 +216,6 @@ describe('getAlertsNavPanel', () => {
   });
 
   describe('rule management section', () => {
-    beforeEach(() => {
-      enableV2(core);
-    });
-
     it('shows the v2 Rules link without the library when the user has v2 rules read', () => {
       setCapabilities(core, { alerting_v2_rules: { read: true } });
 
@@ -291,10 +258,6 @@ describe('getAlertsNavPanel', () => {
   });
 
   describe('other sections', () => {
-    beforeEach(() => {
-      enableV2(core);
-    });
-
     it('shows action policies when the user has v2 action policies read', () => {
       setCapabilities(core, { alerting_v2_action_policies: { read: true } });
 

@@ -14,13 +14,11 @@ import { createDefinition } from './navigation_tree';
 import type { ObservabilityPublicPluginsStart } from './plugin';
 
 const getStackManagementSectionLinks = async (
-  sectionId: string,
-  alertingV2Enabled = false
+  sectionId: string
 ): Promise<Array<string | undefined>> => {
   const coreStart = coreMock.createStart();
   coreStart.featureFlags.getBooleanValue$ = jest.fn().mockReturnValue(of(false));
   coreStart.settings.client.get$ = jest.fn().mockReturnValue(of(AIChatExperience.Classic));
-  coreStart.settings.globalClient.get.mockReturnValue(alertingV2Enabled);
 
   const definition = createDefinition(coreStart, {
     streams: { navigationStatus$: of({ status: 'disabled' as const }) },
@@ -38,21 +36,8 @@ const getStackManagementSectionLinks = async (
 };
 
 describe('Observability solution navigation tree', () => {
-  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', async () => {
-    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', false);
-
-    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
-    expect(alertsLinks).toEqual(
-      expect.arrayContaining([
-        'management:triggersActions',
-        'management:triggersActionsConnectors',
-        'management:maintenanceWindows',
-      ])
-    );
-  });
-
-  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', async () => {
-    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights', true);
+  it('hides Stack Alerts and Stack Rules', async () => {
+    const alertsLinks = await getStackManagementSectionLinks('alerts_and_insights');
 
     expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
     expect(alertsLinks).not.toContain('management:triggersActions');

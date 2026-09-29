@@ -29,7 +29,6 @@ describe('Navigation Tree', () => {
 
   beforeEach(() => {
     core = coreMock.createStart();
-    core.settings.globalClient.get = <T>(_key: string) => false as T;
   });
 
   it('should generate tree with overview', () => {
@@ -164,7 +163,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('uses a single Alerts link to classic Observability alerts when alerting v2 is disabled', () => {
+  it('omits a classic Alerts link when the user has no alerting privileges', () => {
     const { body } = createNavigationTree({ core }) as NavigationTreeDefinition;
     const alertsPanel = body.find(
       (item) => 'id' in item && item.id === 'alerting' && item.renderAs === 'panelOpener'
@@ -172,17 +171,10 @@ describe('Navigation Tree', () => {
     const flatAlerts = body.find((item) => item.link === 'observability-overview:alerts');
 
     expect(alertsPanel).toBeUndefined();
-    expect(flatAlerts).toEqual(
-      expect.objectContaining({
-        link: 'observability-overview:alerts',
-        icon: 'warning',
-      })
-    );
-    expect(flatAlerts).not.toHaveProperty('renderAs');
+    expect(flatAlerts).toBeUndefined();
   });
 
-  it('opens an Alerts panel pointing at observability alerting deep links when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
+  it('opens an Alerts panel pointing at observability alerting deep links', () => {
     core.application.capabilities = {
       ...core.application.capabilities,
       alerting_v2_alerts: { read: true },
@@ -249,9 +241,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('omits Alerting V2 Preview from Admin and Settings when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('omits Alerting V2 Preview from Admin and Settings', () => {
     const adminSettingsNode = getAdminSettingsNode({ core });
 
     expect(adminSettingsNode.children).not.toEqual(
@@ -262,26 +252,7 @@ describe('Navigation Tree', () => {
     );
   });
 
-  it('keeps Stack Rules and hides Stack Alerts while alerting v2 is disabled', () => {
-    const adminSettingsNode = getAdminSettingsNode({ core });
-    const alertsSection = adminSettingsNode.children?.find(
-      (item) => item.id === 'alerts_and_insights'
-    );
-    const alertsLinks = alertsSection?.children?.map((item) => item.link) ?? [];
-
-    expect(alertsLinks).not.toContain('management:triggersActionsAlerts');
-    expect(alertsLinks).toEqual(
-      expect.arrayContaining([
-        'management:triggersActions',
-        'management:triggersActionsConnectors',
-        'management:maintenanceWindows',
-      ])
-    );
-  });
-
-  it('hides Stack Alerts and Stack Rules when alerting v2 is enabled', () => {
-    core.settings.globalClient.get = <T>(_key: string) => true as T;
-
+  it('hides Stack Alerts and Stack Rules', () => {
     const adminSettingsNode = getAdminSettingsNode({ core });
     const alertsSection = adminSettingsNode.children?.find(
       (item) => item.id === 'alerts_and_insights'

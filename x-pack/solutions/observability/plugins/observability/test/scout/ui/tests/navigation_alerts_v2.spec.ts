@@ -6,9 +6,8 @@
  */
 
 /**
- * Sequential (`tests/`, not `parallel_tests/`) because it toggles
- * `alerting:v2:enabled`, a server-wide global setting. Parallel workers would
- * leak that change into other suites.
+ * Sequential (`tests/`, not `parallel_tests/`) because it toggles the
+ * space-scoped standard alerts page setting.
  *
  * Runs on stateful classic (oblt solution view) and serverless Observability
  * complete. Alerts sits at the primary/More overflow boundary on serverless,
@@ -29,11 +28,7 @@ import {
   type ObservabilityNavigation,
 } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/ui';
-import {
-  setAlertingV2EnabledSetting,
-  setAlertingV2NavSettings,
-  unsetAlertingV2EnabledSetting,
-} from '../fixtures/alerting_v2_setting';
+import { setAlertingV2NavSettings } from '../fixtures/alerting_v2_setting';
 import { observabilityAlertingNavRole } from '../fixtures/roles';
 
 const ALERTS_PANEL_ID = 'alerting';
@@ -54,13 +49,6 @@ const expectPageTitle = async (pageTitle: Locator, title: string) => {
   await expect(pageTitle).toHaveText(title, {
     timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS,
   });
-};
-
-const expectPlainAlertsLink = async (nav: ObservabilityNavigation) => {
-  const alertsLink = await nav.revealBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
-  await expect(alertsLink).toBeVisible({ timeout: OBSERVABILITY_SPA_SHELL_TIMEOUT_MS });
-  await expect(alertsLink).toHaveAttribute('href', /\/app\/observability\/alerts/);
-  await expect(nav.navItemInBodyById(ALERTS_PANEL_ID)).not.toBeVisible();
 };
 
 const ALL_PANEL_LINKS = [
@@ -100,7 +88,6 @@ const enableV2AndOpenNav = async ({
   scoutSpace: Parameters<typeof setAlertingV2NavSettings>[1];
 }) => {
   await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-    v2Enabled: true,
     showStandardAlertsPage: false,
   });
   await browserAuth.loginAsAdmin();
@@ -156,7 +143,6 @@ const expectPanelForRole = async (
   { showStandardAlertsPage = false }: { showStandardAlertsPage?: boolean } = {}
 ) => {
   await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-    v2Enabled: true,
     showStandardAlertsPage,
   });
   const nav = pageObjects.observabilityNavigation;
@@ -175,38 +161,19 @@ test.describe(
         await scoutSpace.setSolutionView('oblt');
       }
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-        v2Enabled: false,
         showStandardAlertsPage: false,
       });
     });
 
-    test.afterAll(async ({ scoutSpace, kbnClient }) => {
-      await unsetAlertingV2EnabledSetting(kbnClient);
+    test.afterAll(async ({ scoutSpace }) => {
       await scoutSpace.uiSettings.unset(ALERTING_V2_SHOW_STANDARD_ALERTS_PAGE_SETTING_ID);
     });
 
-    test('shows a plain Alerts link that loads the classic alerts page when v2 is disabled', async ({
+    test('hides Alerting V2 Preview from project settings', async ({
       browserAuth,
       pageObjects,
-    }) => {
-      await browserAuth.loginAsAdmin();
-      await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
-
-      const nav = pageObjects.observabilityNavigation;
-      await expectPlainAlertsLink(nav);
-      await nav.clickBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
-      await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
-    });
-
-    test('hides Alerting V2 Preview from project settings when v2 is enabled', async ({
-      browserAuth,
-      pageObjects,
-      kbnClient,
       config,
     }) => {
-      await setAlertingV2EnabledSetting(kbnClient, true);
-
       await browserAuth.loginAsAdmin();
       await pageObjects.observabilityNavigation.goto();
       await pageObjects.observabilityNavigation.waitForLoad();
@@ -237,7 +204,6 @@ test.describe(
       scoutSpace,
     }) => {
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-        v2Enabled: true,
         showStandardAlertsPage: false,
       });
 
@@ -366,7 +332,6 @@ test.describe(
       scoutSpace,
     }) => {
       await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-        v2Enabled: true,
         showStandardAlertsPage: true,
       });
 
@@ -387,27 +352,6 @@ test.describe(
       });
 
       await nav.navItemInPanelByDeepLinkId(ALERTS_PANEL_ID, ALERTS_DEEP_LINK).click();
-      await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
-    });
-
-    test('reverts to a plain Alerts link that loads the classic alerts page after disabling v2', async ({
-      browserAuth,
-      pageObjects,
-      kbnClient,
-      scoutSpace,
-    }) => {
-      await setAlertingV2NavSettings(kbnClient, scoutSpace, {
-        v2Enabled: false,
-        showStandardAlertsPage: false,
-      });
-
-      await browserAuth.loginAsAdmin();
-      await pageObjects.observabilityNavigation.goto();
-      await pageObjects.observabilityNavigation.waitForLoad();
-
-      const nav = pageObjects.observabilityNavigation;
-      await expectPlainAlertsLink(nav);
-      await nav.clickBodyNavItemByDeepLinkId(ALERTS_DEEP_LINK);
       await expectPageTitle(pageObjects.chrome.pageTitle, CLASSIC_ALERTS_TITLE);
     });
 

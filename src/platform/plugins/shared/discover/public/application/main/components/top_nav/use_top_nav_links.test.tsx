@@ -66,7 +66,6 @@ const createTestServices = (overrides: Partial<DiscoverServices> = {}): Discover
     return key === ENABLE_ESQL ? (true as T) : uiSettingsGetMock<T>(key);
   };
 
-  services.settings.globalClient.get = <T,>(_key: string) => true as T;
   services.core.application.capabilities = {
     ...services.core.application.capabilities,
     alerting_v2_rules: {
@@ -477,7 +476,7 @@ describe('useTopNavLinks', () => {
   describe('alerting v2 rules menu', () => {
     const setupWithAlertingV2 = async (
       hookAttrs: Partial<UseTopNavLinksParams> = {},
-      alertingV2Enabled = true
+      alertingV2Available = true
     ) => {
       const baseMock = createDiscoverServicesMock();
       const v2Services = createTestServices({
@@ -494,12 +493,11 @@ describe('useTopNavLinks', () => {
             },
           },
         },
-        alertingVTwo: alertingV2Enabled ? baseMock.alertingVTwo : undefined,
+        alertingVTwo: alertingV2Available ? baseMock.alertingVTwo : undefined,
         triggersActionsUi: triggersActionsUiMock.createStart(),
       });
 
-      v2Services.settings.globalClient.get = <T,>(_key: string) => alertingV2Enabled as T;
-      if (!alertingV2Enabled) {
+      if (!alertingV2Available) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2Services.core.application.capabilities;
         v2Services.core.application.capabilities = capabilitiesWithoutRules;
@@ -642,10 +640,10 @@ describe('useTopNavLinks', () => {
      * mode. Verifies the parent gate considers v2 access independently.
      */
     const setupV2OnlyServices = (
-      overrides: { alertingVTwoEnabled?: boolean } = {}
+      overrides: { alertingV2Available?: boolean } = {}
     ): DiscoverServices => {
       const baseMock = createDiscoverServicesMock();
-      const { alertingVTwoEnabled = true } = overrides;
+      const { alertingV2Available = true } = overrides;
       const v2OnlyServices = createTestServices({
         capabilities: {
           ...baseMock.capabilities,
@@ -659,12 +657,11 @@ describe('useTopNavLinks', () => {
             insightsAndAlerting: {},
           },
         },
-        alertingVTwo: alertingVTwoEnabled ? baseMock.alertingVTwo : undefined,
+        alertingVTwo: alertingV2Available ? baseMock.alertingVTwo : undefined,
         triggersActionsUi: triggersActionsUiMock.createStart(),
       });
 
-      v2OnlyServices.settings.globalClient.get = <T,>(_key: string) => alertingVTwoEnabled as T;
-      if (!alertingVTwoEnabled) {
+      if (!alertingV2Available) {
         const { alerting_v2_rules: _alertingV2Rules, ...capabilitiesWithoutRules } =
           v2OnlyServices.core.application.capabilities;
         v2OnlyServices.core.application.capabilities = capabilitiesWithoutRules;
@@ -703,7 +700,7 @@ describe('useTopNavLinks', () => {
     });
 
     it('should NOT include the alerts menu when neither v1 nor v2 access is granted', async () => {
-      const services = setupV2OnlyServices({ alertingVTwoEnabled: false });
+      const services = setupV2OnlyServices({ alertingV2Available: false });
       const appMenuConfig = await setup({ services, isEsqlMode: true });
 
       const alertsItem = appMenuConfig.items?.find((item) => item.id === AppMenuActionId.alerts);

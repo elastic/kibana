@@ -65,8 +65,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     // uncomment after rules tests a11y violations get fixed
-    it.skip('a11y test on logs tab', async () => {
-      await testSubjects.click('logsTab');
+    it.skip('a11y test on Logs page', async () => {
+      await PageObjects.common.navigateToApp('management', {
+        path: 'insightsAndAlerting/triggersActions/logs',
+      });
       await a11y.testAppSnapshot();
     });
 

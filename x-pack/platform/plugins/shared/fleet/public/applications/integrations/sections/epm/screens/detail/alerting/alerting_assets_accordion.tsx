@@ -9,9 +9,8 @@ import React, { useState } from 'react';
 import { EuiBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 
-import { useAlertingV2RuleLibraryLocator, useStartServices } from '../../../../../hooks';
+import { useAlertingV2RuleLibraryLocator } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
 import { AssetsAccordion, type DisplayedAssetType } from '../assets/assets_accordion';
 
@@ -58,12 +57,6 @@ const getAlertingAssetTitleHref = (
   }
   return asset.appLink;
 };
-
-const listAlertingAssets = (
-  savedObjects: AlertingAsset[],
-  { hideV2 }: { hideV2: boolean }
-): AlertingAsset[] =>
-  hideV2 ? savedObjects.filter((asset) => !isV2AlertingAsset(asset)) : savedObjects;
 
 const filterAlertingAssetsByEngine = (
   savedObjects: AlertingAsset[],
@@ -120,18 +113,14 @@ const AlertingEngineBadge: React.FunctionComponent<{
 };
 
 const useAlertingEngineAssets = (savedObjects: AlertingAsset[], type: DisplayedAssetType) => {
-  const startServices = useStartServices();
   const isAlertingRuleTemplate = type === KibanaAssetType.alertingRuleTemplate;
   const hasV2Templates = savedObjects.some(isV2AlertingAsset);
-  const alertingV2Enabled = isAlertingV2Enabled(startServices);
-  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && alertingV2Enabled;
+  const showEngineUi = isAlertingRuleTemplate && hasV2Templates;
   const [selectedEngineTab, setSelectedEngineTab] = useState<AlertingEngine>(
     hasV2Templates ? 'v2' : 'v1'
   );
 
-  const listedSavedObjects = listAlertingAssets(savedObjects, {
-    hideV2: isAlertingRuleTemplate && !alertingV2Enabled,
-  });
+  const listedSavedObjects = savedObjects;
   const visibleSavedObjects = showEngineUi
     ? filterAlertingAssetsByEngine(listedSavedObjects, selectedEngineTab)
     : listedSavedObjects;

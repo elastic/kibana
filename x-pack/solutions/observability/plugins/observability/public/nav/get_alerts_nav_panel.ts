@@ -10,7 +10,6 @@ import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   hasAlertingV2Capability,
-  isAlertingV2Enabled,
   shouldShowStandardObservabilityAlertsPage,
 } from '@kbn/alerting-v2-utils';
 import {
@@ -156,17 +155,12 @@ const getOperationsSection = (core: CoreStart): PanelOpenerChildDefinition[] => 
 };
 
 /**
- * While v2 is off, `getAlertsNavPanel` only returns the classic Alerts link.
- * Stack Management Rules is then the only project-nav path to the Rules page.
+ * Alerting v2 is always on, so Rules live in the Alerting panel rather than
+ * Stack Management.
  */
-export const shouldIncludeStackManagementRules = (core: CoreStart): boolean =>
-  !isAlertingV2Enabled(core);
+export const shouldIncludeStackManagementRules = (_core: CoreStart): boolean => false;
 
 export const getAlertsNavPanel = (core: CoreStart): RootNodeDefinition[] => {
-  if (!isAlertingV2Enabled(core)) {
-    return [{ link: ALERTS_LINK, icon: ALERTS_ICON, getIsActive: getAlertsIsActive }];
-  }
-
   const children = [
     ...getAlertsSection(core),
     ...getRuleManagementSection(core),

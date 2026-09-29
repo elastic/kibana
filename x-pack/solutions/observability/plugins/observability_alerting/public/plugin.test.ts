@@ -6,15 +6,13 @@
  */
 
 import type { App, AppUpdater, AppUpdatableFields, Capabilities } from '@kbn/core/public';
-import { AppStatus } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import React from 'react';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
 import {
   OBSERVABILITY_ALERTING_APP_ID,
   OBSERVABILITY_ALERTING_BASE_PATH,
 } from '@kbn/deeplinks-observability';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { firstValueFrom } from 'rxjs';
 import { ObservabilityAlertingPlugin } from './plugin';
 import {
   OBSERVABILITY_ALERTING_ALERTS_DEEP_LINK_ID,
@@ -34,8 +32,7 @@ const APP_STUB: App = {
 };
 
 const readLatestUpdate = async (
-  updater$: App['updater$'],
-  enabled$: BehaviorSubject<boolean>
+  updater$: App['updater$']
 ): Promise<Partial<AppUpdatableFields> | undefined> => {
   const updates: Array<Partial<AppUpdatableFields>> = [];
   const subscription = updater$!.subscribe((updater: AppUpdater) => {
@@ -45,20 +42,15 @@ const readLatestUpdate = async (
     }
   });
 
-  enabled$.next(enabled$.getValue());
   await firstValueFrom(updater$!);
   subscription.unsubscribe();
   return updates[updates.length - 1];
 };
 
 describe('ObservabilityAlertingPlugin', () => {
-  const setupWithSetting = (
-    enabled: boolean,
-    capabilities: Record<string, Record<string, boolean>> = {}
-  ) => {
+  const setup = (capabilities: Record<string, Record<string, boolean>> = {}) => {
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
-    const enabled$ = new BehaviorSubject(enabled);
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -87,29 +79,22 @@ describe('ObservabilityAlertingPlugin', () => {
       },
       {},
     ]);
-    coreStart.settings.globalClient.get$.mockImplementation((key: string, fallback = false) => {
-      if (key === ALERTING_V2_ENABLED_SETTING_ID) {
-        return enabled$;
-      }
-      return new BehaviorSubject(Boolean(fallback));
-    });
 
     const plugin = new ObservabilityAlertingPlugin();
     plugin.setup(coreSetup);
 
     const registered = coreSetup.application.register.mock.calls[0][0];
-    return { coreSetup, coreStart, enabled$, plugin, registered };
+    return { coreSetup, coreStart, plugin, registered };
   };
 
   it('registers the app with correct id, appRoute, and visibleIn', () => {
-    const { coreSetup } = setupWithSetting(false);
+    const { coreSetup } = setup();
 
     expect(coreSetup.application.register).toHaveBeenCalledWith(
       expect.objectContaining({
         id: OBSERVABILITY_ALERTING_APP_ID,
         appRoute: OBSERVABILITY_ALERTING_BASE_PATH,
         euiIconType: 'logoObservability',
-        status: AppStatus.inaccessible,
         visibleIn: [],
         deepLinks: expect.arrayContaining([
           expect.objectContaining({
@@ -145,23 +130,20 @@ describe('ObservabilityAlertingPlugin', () => {
         ]),
       })
     );
+
+    const registeredApp = coreSetup.application.register.mock.calls[0][0];
+    expect(registeredApp.status).toBeUndefined();
   });
 
-  it('makes the app accessible when alerting v2 is enabled', async () => {
-    const { registered, enabled$, coreStart } = setupWithSetting(true);
-    const update = await readLatestUpdate(registered.updater$, enabled$);
-
-    expect(update).toEqual({
-      status: AppStatus.accessible,
-      deepLinks: getObservabilityAlertingDeepLinks(coreStart.application.capabilities),
-    });
-  });
-
-  it('hides unauthorized deep links from global search when v2 is enabled', async () => {
-    const { registered, enabled$ } = setupWithSetting(true, {
+  it('filters deep links from the current capabilities', async () => {
+    const { registered, coreStart } = setup({
       alerting_v2_alerts: { read: true },
     });
-    const update = await readLatestUpdate(registered.updater$, enabled$);
+    const update = await readLatestUpdate(registered.updater$);
+
+    expect(update).toEqual({
+      deepLinks: getObservabilityAlertingDeepLinks(coreStart.application.capabilities),
+    });
 
     const visibilityById = Object.fromEntries(
       (update?.deepLinks ?? []).map((dl) => [dl.id, dl.visibleIn ?? []])
@@ -177,17 +159,8 @@ describe('ObservabilityAlertingPlugin', () => {
     });
   });
 
-  it('keeps the app inaccessible when alerting v2 is disabled', async () => {
-    const { registered, enabled$ } = setupWithSetting(false);
-    const update = await readLatestUpdate(registered.updater$, enabled$);
-
-    expect(update).toEqual({
-      status: AppStatus.inaccessible,
-    });
-  });
-
-  it('mounts the app when accessible', async () => {
-    const { registered } = setupWithSetting(true);
+  it('mounts the app', async () => {
+    const { registered } = setup();
     const unmount = await registered.mount!(coreMock.createAppMountParameters());
 
     expect(unmount).toEqual(expect.any(Function));

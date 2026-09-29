@@ -20,21 +20,15 @@ import type { RulesClient } from '../../lib/rules_client';
 
 interface CreateRuleSmlTypeOptions {
   getScopedRulesClient: (request: KibanaRequest) => RulesClient;
-  getIsAlertingV2Enabled: () => Promise<boolean>;
 }
 
 export const createRuleSmlType = ({
   getScopedRulesClient,
-  getIsAlertingV2Enabled,
 }: CreateRuleSmlTypeOptions): SmlTypeDefinition => ({
   id: RULE_KI_TYPE,
   fetchFrequency: () => '1m',
 
   async *list(context) {
-    if (!(await getIsAlertingV2Enabled())) {
-      return;
-    }
-
     const finder = context.savedObjectsClient.createPointInTimeFinder<RuleSavedObjectAttributes>({
       type: RULE_SAVED_OBJECT_TYPE,
       perPage: 1000,
@@ -56,10 +50,6 @@ export const createRuleSmlType = ({
   },
 
   getSmlEntry: async (originId, context) => {
-    if (!(await getIsAlertingV2Enabled())) {
-      return undefined;
-    }
-
     try {
       const so = await context.savedObjectsClient.get<RuleSavedObjectAttributes>(
         RULE_SAVED_OBJECT_TYPE,
@@ -98,10 +88,6 @@ export const createRuleSmlType = ({
   getPermissions: () => kibanaPermissions({ kiType: RULE_KI_TYPE }),
 
   toAttachment: async (item, context) => {
-    if (!(await getIsAlertingV2Enabled())) {
-      return undefined;
-    }
-
     try {
       const rulesClient = getScopedRulesClient(context.request);
       const rule = await rulesClient.getRule({ id: getSmlOriginId(item) });

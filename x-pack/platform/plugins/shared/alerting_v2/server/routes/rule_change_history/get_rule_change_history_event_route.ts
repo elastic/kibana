@@ -24,7 +24,10 @@ import { ALERTING_V2_API_PRIVILEGES } from '../../lib/security/privileges';
 import { BaseAlertingRoute } from '../base_alerting_route';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_INTERNAL_CHANGE_HISTORY_RULES_API_PATH } from '../constants';
-import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
+import {
+  INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
+  RULE_CHANGE_HISTORY_UNAVAILABLE_DESCRIPTION,
+} from '../route_descriptions';
 import { getRuleChangeHistoryEventOasExamples } from './get_rule_change_history_event_oas_example';
 
 @injectable()
@@ -60,6 +63,10 @@ export class GetRuleChangeHistoryEventRoute extends BaseAlertingRoute {
       404: {
         body: () => errorResponseSchema,
         description: 'Indicates a change-history event with the given ID does not exist.',
+      },
+      503: {
+        body: () => errorResponseSchema,
+        description: RULE_CHANGE_HISTORY_UNAVAILABLE_DESCRIPTION,
       },
     },
   };
