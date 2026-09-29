@@ -42,5 +42,9 @@ export function createInboundEventsClient(args: InboundEventsClientArgs): Inboun
       createUnsecuredInboundSavedObjectsClient({ getStartServices, spaceId }),
     getDecryptedConnectorAttributes: (connectorId, spaceId) =>
       getDecryptedInboundConnector({ getStartServices, connectorId, spaceId }),
+    getElasticsearchClient: async () => {
+      const [coreStart] = await getStartServices();
+      return coreStart.elasticsearch.client;
+    },
   });
 }

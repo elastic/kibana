@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import type { IClusterClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 
 import type { InMemoryConnector, RawAction } from '../types';
 import type { IngestInboundEventInput, IngestInboundEventResult } from './ingest';
@@ -25,6 +25,7 @@ interface InboundEventsClientInternalDeps {
   emitConnectorEvents: (params: ConnectorEventEmitParams) => Promise<DispatchConnectorEventsResult>;
   getUnsecuredSavedObjectsClient: (spaceId: string) => Promise<SavedObjectsClientContract>;
   getDecryptedConnectorAttributes: (connectorId: string, spaceId: string) => Promise<RawAction>;
+  getElasticsearchClient: () => Promise<IClusterClient>;
   inMemoryConnectors: InMemoryConnector[];
 }
 
@@ -50,6 +51,7 @@ export function buildInboundEventsClient(
         logger: deps.logger,
         getUnsecuredSavedObjectsClient: deps.getUnsecuredSavedObjectsClient,
         getDecryptedConnectorAttributes: deps.getDecryptedConnectorAttributes,
+        getElasticsearchClient: deps.getElasticsearchClient,
         inMemoryConnectors: deps.inMemoryConnectors,
       }),
   };
