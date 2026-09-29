@@ -10,11 +10,13 @@ import type { PluginScopedManagedWorkflowsApi } from '@kbn/workflows/server/type
 import { installRegisteredWorker, workerRegistry } from './worker_registry';
 
 /**
- * Rewrites installed Worker documents that are missing extras or schedule keys, filling those
- * keys from the current defaults. Reconciliation re-renders from the stored values and does not
- * fill them, so this has to run before `ready()` or the upgrade keeps the old shape. A document
- * that is still invalid after the fill is left alone. The install is bound to the listed document
- * version, so a settings save that landed after the list is not overwritten.
+ * Rewrites installed Worker documents that are behind the current declaration: missing extras or
+ * schedule keys are filled from the current defaults, and an autonomy level the Worker no longer
+ * allows is lowered to the nearest allowed level below it. Reconciliation re-renders from the
+ * stored values and does neither, so this has to run before `ready()` or the upgrade keeps the old
+ * shape and the running workflow keeps the old level. A document that is still invalid afterwards
+ * is left alone. The install is bound to the listed document version, so a settings save that
+ * landed after the list is not overwritten.
  */
 export const applyMissingInstalledWorkerSettings = async (
   client: PluginScopedManagedWorkflowsApi,
@@ -25,7 +27,7 @@ export const applyMissingInstalledWorkerSettings = async (
     states = await client.listInstalledWorkflowStates();
   } catch (error) {
     logger.warn(
-      `Failed to read installed AlertZero workers while applying missing setting defaults: ${
+      `Failed to read installed AlertZero workers while upgrading stored settings: ${
         error instanceof Error ? error.message : String(error)
       }`
     );
@@ -40,16 +42,16 @@ export const applyMissingInstalledWorkerSettings = async (
     if (!registration) {
       continue;
     }
-    let filled;
+    let upgraded;
     try {
-      filled = registration.settings.withMissingDefaults(state.templateValues);
-      if (filled === state.templateValues) {
+      upgraded = registration.settings.upgradeStoredValues(state.templateValues);
+      if (upgraded === state.templateValues) {
         continue;
       }
-      registration.settings.toSettings(filled);
+      registration.settings.toSettings(upgraded);
     } catch (error) {
       logger.warn(
-        `Skipping missing setting defaults for AlertZero worker "${state.workflowId}": ${
+        `Skipping the stored settings upgrade for AlertZero worker "${state.workflowId}": ${
           error instanceof Error ? error.message : String(error)
         }`
       );
@@ -59,15 +61,21 @@ export const applyMissingInstalledWorkerSettings = async (
       await installRegisteredWorker(client, registration, {
         spaceId: state.spaceId,
         workflowId: state.workflowId,
-        values: filled,
+        values: upgraded,
         expectedDocumentVersion: state.documentVersion,
       });
+      const lowered =
+        upgraded.autonomyLevel !== state.templateValues.autonomyLevel
+          ? `, autonomy lowered from "${String(state.templateValues.autonomyLevel)}" to "${String(
+              upgraded.autonomyLevel
+            )}" because the Worker no longer allows it`
+          : '';
       logger.info(
-        `Reinstalled AlertZero worker "${state.workflowId}" in space "${state.spaceId}" with missing settings filled from defaults`
+        `Reinstalled AlertZero worker "${state.workflowId}" in space "${state.spaceId}" with its stored settings upgraded to the current declaration${lowered}`
       );
     } catch (error) {
       logger.warn(
-        `Failed to apply missing setting defaults for AlertZero worker "${state.workflowId}": ${
+        `Failed to upgrade stored settings for AlertZero worker "${state.workflowId}": ${
           error instanceof Error ? error.message : String(error)
         }`
       );

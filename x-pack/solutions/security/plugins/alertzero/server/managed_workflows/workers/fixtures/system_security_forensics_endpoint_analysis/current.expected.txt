@@ -1,0 +1,3 @@
+settingsVersion: 1
+autonomy: "manual"
+every: "1m"

@@ -1,0 +1,2 @@
+settingsVersion: 1
+autonomy: "assisted"

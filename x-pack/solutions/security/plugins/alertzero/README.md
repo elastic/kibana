@@ -181,7 +181,7 @@ Managed Worker definitions:
 
 Those definitions live in `src/platform/packages/shared/kbn-workflows/managed/definitions/alertzero/`. Each Worker's settings contract is one `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/`, one file per Watch team); AlertZero's `server/managed_workflows/workers/` derives defaults, validation, patch application and API projection from it, registered from `server/managed_workflows/worker_registry.ts`. Watch GET/list returns catalog placeholders only.
 
-Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write. A schedule or extras key the declaration now requires, and the document does not have yet, is filled from the current default at startup (before `ready()`) and again on read. A value that is already stored is left as-is, including when it is out of range. Renames and other breaking shape changes have no compatibility path (see [Pre-customer state](#pre-customer-state)).
+Worker definitions are `dynamic` + `auto` + `restorable`. They are installed on enable or a settings save with `workflowIdSuffix: spaceId`, so every space owns an independent copy. Disable changes enablement in place. Each Worker is a `yamlTemplate` whose template values mirror the settings API (shared fields flat, Worker-specific fields under `extras`) and are re-used during definition upgrades. Persisted values are validated against the Worker's current declaration on every read and write. A schedule or extras key the declaration now requires, and the document does not have yet, is filled from the current default at startup (before `ready()`) and again on read. A stored autonomy level the Worker no longer allows is lowered the same way, to the nearest allowed level below it, so the settings page and the running workflow agree; it is never raised. Any other value that is already stored is left as-is, including when it is out of range. Renames and other breaking shape changes have no compatibility path (see [Pre-customer state](#pre-customer-state)).
 
 The prototype rule workflows remain static global installs and are not advertised to workflow selector UIs:
 
@@ -201,7 +201,7 @@ Two different version fields:
 | YAML `version: "1"` | Top of each Worker `*.yaml` | Workflow document schema / format version (stays `"1"` until the YAML language changes). |
 | Definition `version: N` | The Worker's module under `managed/definitions/alertzero/` | **Managed reconciliation counter** for `@kbn/workflows/managed`. Bump when you need install/`ready()` to re-apply the definition (`versionStrategy: 'auto'`). |
 
-Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision.
+Start a new definition at `1` and increment it for intentional definition changes. This counter is not product SemVer; once a definition has been published, do not reset it without an explicit managed-document migration decision. A render-helper change needs a definition version bump.
 
 ### Central AlertZero Worker registry guide
 
@@ -209,7 +209,7 @@ The current YAML files are Worker stubs rather than final Watch-team definitions
 
 1. Define the stable Worker id, display name, and Watch membership in `@kbn/alertzero-common` (`SYSTEM_SECURITY_WORKER_CATALOG`). Per-space document ids are produced later by `workflowIdSuffix: spaceId`.
 2. Add a per-Worker managed definition module under `kbn-workflows/managed/definitions/alertzero` and include it in the platform `managedWorkflowDefinitions` registry. Keep `pluginId: 'alertzero'` and `ALERTZERO_WORKER_MANAGEMENT` (`dynamic` / `auto` / `restorable`).
-3. Add the Worker's `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/<watch>.ts`) and list it in `WORKER_SETTINGS_DECLARATIONS`: `workerId`, `allowedAutonomyLevels` (1–3 of the shared scale, ascending), optional `scheduleInterval: { defaultValue }`, optional `extras: { schema, defaultValue }`. On the server add the Worker to `WORKER_SETTINGS_VERSIONS` (and the `RegisteredWorkerId` union) in `server/managed_workflows/workers/worker_settings.ts`; `workers/index.ts` then registers it from the catalog through the shared registration, which reads the declaration.
+3. Add the Worker's `WorkerSettingsDeclaration` in `@kbn/alertzero-common` (`impl/worker_settings/<watch>.ts`) and list it in `WORKER_SETTINGS_DECLARATIONS`: `workerId`, `allowedAutonomyLevels` (1–3 of the shared scale, ascending), optional `scheduleInterval: { defaultValue }`, optional `extras: { schema, defaultValue }`. On the server add the Worker to `WORKER_SETTINGS_VERSIONS` (and the `RegisteredWorkerId` union) in `server/managed_workflows/workers/worker_settings.ts`; `workers/index.ts` then registers it from the catalog through the shared registration, which reads the declaration. Add a stored-shape fixture at `server/managed_workflows/workers/fixtures/<worker_id_in_snake_case>/current.json` with its `current.expected.txt`, and regenerate the settings contract snapshot ([Changing Worker settings safely](#changing-worker-settings-safely)).
 4. Enablement is lifecycle state: templates start with `enabled: false`, and AlertZero enables the installed per-space document through the request-authorized Workflows update API. After any settings install, AlertZero also calls that CRUD path so Task Manager resyncs.
 5. Defaults from the declaration are used for a fresh per-space install. Persisted values are untrusted: on read and write they are parsed by the Worker's complete schema (`workerId` literal, `autonomy` restricted to the allowed levels, `scheduleInterval` only if declared, `extras` only if declared, unknown keys rejected). A stored document that fails projects the Worker as `unavailable`.
 6. A PATCH composes the next settings from the stored ones and validates the result with the same complete schema (semantics under [Worker-specific settings](#worker-specific-settings-extras)). Failures return 400 naming the field; nothing is written. Do not add per-Worker branches to the server path — extend the declaration.
@@ -262,6 +262,7 @@ Tests to update:
 - `managed_workflow_definitions.test.ts` — add `scheduleInterval` to the Worker's `templateRepresentativeValuesById` entry and update its fingerprint row to `<newVersion>:<newHash>` (the failure message prints the hash).
 - `worker_registry.test.ts` — set the Worker's `EXPECTED_WORKER_SETTINGS` entry with its `scheduleInterval` and add `'scheduled'` to `triggerTypes` (keep `'manual'` if the YAML keeps that trigger).
 - `worker_settings.test.ts` — add the Worker to `SCHEDULED_WORKER_IDS` so the "rejects an interval patch" cases stop running against it.
+- `worker_settings_compat.test.ts` — regenerate the settings contract snapshot (see [Changing Worker settings safely](#changing-worker-settings-safely)).
 
 ### Worker-specific settings (`extras`)
 
@@ -277,16 +278,36 @@ Adding a field to an existing Worker touches only Watch-owned code (Rule Tuning'
 
 1. **Schema** — add the field to the Worker's extras object in `@kbn/alertzero-common/impl/schemas/components/<watch>_watch_settings.schema.yaml` (`additionalProperties: false`, required) and run `yarn openapi:generate` in that package.
 2. **Declaration** — add its fresh-install default to `extras.defaultValue` in `impl/worker_settings/<watch>.ts`. An already installed document that lacks the key receives that default at startup and on read. A stored value is not overwritten when the default later changes.
-3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run.
+3. **Template** — forward `values.extras.<field>` in the Worker's `yamlTemplate` renderer and YAML and bump the definition `version`; the setting is done only when the saved value reaches the run. Then regenerate the settings contract snapshot ([Changing Worker settings safely](#changing-worker-settings-safely)).
 4. **Control** — build a real control in the Worker's own folder under `public/pages/watches/custom_settings/<worker>/` (Rule Tuning lives in `custom_settings/rule_tuning/`), registered by Worker id in `custom_settings/registry.ts`. It receives `settings` and `onExtrasChange(extras)` and hands back the complete `extras` object. It never calls an API and there is no form generator or app-load completeness check; cover it with a component test.
 
 The shared Watch page renders the interval control from the presence of `scheduleInterval`, offers only the Worker's `allowedAutonomyLevels` (one level renders as a fixed value), and mounts the registered custom component. Every edit, including Enabled, changes a draft. Save validates all dirty Workers, then writes Worker by Worker with the revision each draft started from; failed Workers keep draft and error; Discard drops unsaved edits without undoing successful writes.
 
 Hard Worker dependencies (`WORKER_DEPENDENCIES`) are judged client-side against every Worker's saved enabled state, with this page's draft on top, so they work across Watches. Turning off a Worker that an enabled Worker depends on asks for confirmation before the draft changes; turning a Worker on never asks. Each Worker header carries one warning icon listing its reasons. After Save, a Worker the save turned on that is still blocked gets an acknowledge-only notice; settings-only saves get none, and the notice never blocks the save.
 
+### Changing Worker settings safely
+
+Every configured space stores its own copy of a Worker's settings, and that copy must keep reading after your change. `worker_settings_compat.test.ts` enforces this; you do not need to remember any of it.
+
+- **Settings contract.** `server/managed_workflows/workers/test_helpers/settings_contract.snapshot.json` records each Worker's settings schema and defaults. When they change, the test says whether the change is safe for stored documents and gives the command that updates the snapshot. For a breaking change, that command refuses to run until you pass `--pre-customer-reset <issue-url>`, naming the issue where the reset of the affected environments was agreed with the Common Worker Layer team. That URL is written into the snapshot. A PR that breaks the base branch's contract without a newly recorded reset stays red. The flag exists only while AlertZero has no customers; [security-team#19312](https://github.com/elastic/security-team/issues/19312) replaces it with a migration check.
+- **Stored fixtures.** `fixtures/<worker_id_in_snake_case>/*.json` are documents configured Workers store. Every fixture must read, render, install as a valid workflow, and read back unchanged. Next to a fixture, `<name>.expected.txt` lists lines its rendered workflow must contain, such as `autonomy: "assisted"`; list only values the fixture stores. A new Worker needs `current.json` and `current.expected.txt`.
+
+Workflow versioning is separate: a YAML edit needs a definition `version` bump, which `managed_workflow_definitions.test.ts` already enforces.
+
+| Change | Result | What to do |
+|---|---|---|
+| New setting with a default, loosened bound, added allowed value | Safe | Run the snapshot command. Bump the definition version when the YAML changes. |
+| New schedule on an existing Worker | Safe | As above. The schedule starts on the next save or enable in each space. |
+| Changed default | Safe | Run the snapshot command. It reaches fresh installs only; stored values are not rewritten. |
+| YAML or render-helper edit | Not a settings change | Bump the definition version. |
+| Removed autonomy level that has a lower allowed level (for example `supervised` when `assisted` stays) | Safe | Run the snapshot command. Stored documents holding the removed level are lowered to the nearest allowed level at startup. |
+| Renamed, removed or retyped setting; tightened bound; removed allowed value (autonomy: the lowest allowed level); new setting without a default; settings version bump | Breaking | Prefer keeping the stored key and changing only the label. Otherwise, before customers, a coordinated reset recorded with `--pre-customer-reset <issue-url>`; after that, a migration ([security-team#19312](https://github.com/elastic/security-team/issues/19312)). |
+
+The contract covers what JSON Schema can express. A zod refinement (`.refine`, `.superRefine`, which the OpenAPI generator emits for the `nonempty` and `date-math` formats) is not part of it, so tightening one is not caught.
+
 ### Pre-customer state
 
-AlertZero is not live. A new required extra or schedule key that has a default is filled when it is absent. Renames, type changes, and other breaking shape changes still have no compatibility path. When documents from earlier development builds do not validate, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
+AlertZero is not live. A new required extra or schedule key that has a default is filled when it is absent. Renames, type changes, and other breaking shape changes still have no compatibility path. A deliberate breaking change needs a migration under [security-team#19312](https://github.com/elastic/security-team/issues/19312) or a reset decision. When documents from earlier development builds do not validate, the fix is a clean reset of the affected per-space Worker documents, coordinated with the Watch teams.
 
 ## Working-group contribution map
 

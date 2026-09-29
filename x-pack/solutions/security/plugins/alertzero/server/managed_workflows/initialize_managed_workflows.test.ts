@@ -231,6 +231,39 @@ describe('initializeManagedWorkflows', () => {
       expect(client.install).not.toHaveBeenCalledWith(RULE_TUNING_ID, expect.anything());
     });
 
+    it('reinstalls a document whose autonomy level the Worker no longer allows, lowered', async () => {
+      const { client, workflowsExtensions, logger } = createDependencies();
+      const stored = {
+        settingsVersion: 1,
+        autonomyLevel: 'supervised',
+        scheduleInterval: '2h',
+        extras: RULE_TUNING_DEFAULT_EXTRAS,
+      };
+      client.listInstalledWorkflowStates.mockResolvedValue([
+        {
+          workflowId: `${RULE_TUNING_ID}-default`,
+          spaceId: 'default',
+          definitionId: RULE_TUNING_ID,
+          templateValues: stored,
+          documentVersion: 9,
+        },
+      ]);
+
+      await initializeManagedWorkflows({ workflowsExtensions, logger });
+
+      expect(client.install).toHaveBeenCalledWith(RULE_TUNING_ID, {
+        workflowId: `${RULE_TUNING_ID}-default`,
+        spaceId: 'default',
+        values: { ...stored, autonomyLevel: 'assisted' },
+        expectedDocumentVersion: 9,
+      });
+      expect(logger.info).toHaveBeenCalledWith(
+        expect.stringContaining('autonomy lowered from "supervised" to "assisted"')
+      );
+      const upgradeOrder = client.install.mock.invocationCallOrder.at(-1) ?? 0;
+      expect(upgradeOrder).toBeLessThan(client.ready.mock.invocationCallOrder[0] ?? 0);
+    });
+
     it('does not reinstall a document whose present extras value is invalid', async () => {
       const { client, workflowsExtensions, logger } = createDependencies();
       client.listInstalledWorkflowStates.mockResolvedValue([
