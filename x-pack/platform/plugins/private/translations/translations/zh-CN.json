@@ -41018,7 +41018,6 @@
     "xpack.securitySolution.attackDetailsFlyout.table.fieldCellLabel": "字段",
     "xpack.securitySolution.attackDetailsFlyout.table.filterPlaceholderLabel": "按字段或值筛选......",
     "xpack.securitySolution.attackDetailsFlyout.table.valueCellLabel": "值",
-    "xpack.securitySolution.attackDiscovery.agentBuilder.attachmentLabel": "Attack Discovery",
     "xpack.securitySolution.attackDiscovery.alertSelection.alertSelection.selectFewerAlertsLabel": "如果此模型的上下文窗口较小，则发送更少告警；或者如果窗口更大，则发送更多告警。",
     "xpack.securitySolution.attackDiscovery.anonymizationArialLabel": "匿名处理",
     "xpack.securitySolution.attackDiscovery.attackDiscoveryPanel.actions.takeAction.addToDatasetButtonLabel": "添加到数据集",
