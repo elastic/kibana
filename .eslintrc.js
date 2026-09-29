@@ -1058,9 +1058,6 @@ module.exports = {
     {
       files: ['**/*.{js,mjs,ts,tsx}'],
       rules: {
-        '@kbn/eslint/no_unsafe_dynamic_http_path': 'warn',
-        '@kbn/eslint/no_wrapped_error_in_logger': 'error',
-        '@kbn/eslint/no_npx_playwright': 'error',
         'no-restricted-imports': ['error', ...RESTRICTED_IMPORTS],
         '@kbn/eslint/security_imports_restriction': ['error', ...SECURITY_RESTRICTED_IMPORTS],
         '@kbn/eslint/no_deprecated_imports': [
@@ -3249,16 +3246,27 @@ module.exports = {
       },
     },
     {
-      // These files are allowed to reference 'npx playwright' — either because they define
-      // the rule itself, test it with invalid-code fixtures, or mention it in an error message
-      // to explain what went wrong.
       files: [
-        'src/platform/packages/private/kbn-scout-reporting/src/helpers/cli_processing.ts',
-        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.js',
-        'packages/kbn-eslint-plugin-eslint/rules/no_npx_playwright.test.js',
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.{ts,tsx}',
+      ],
+      excludedFiles: [
+        'x-pack/solutions/observability/plugins/**/*.test.*',
+        'x-pack/solutions/observability/plugins/**/*.stories.*',
+        'x-pack/solutions/observability/plugins/**/*.mock.*',
+        'x-pack/solutions/observability/plugins/**/*.storybook_decorator.*',
+        'x-pack/solutions/observability/packages/**/*.test.*',
+        'x-pack/solutions/observability/packages/**/*.stories.*',
+        'x-pack/solutions/observability/packages/**/*.mock.*',
+        'x-pack/solutions/observability/packages/**/*.storybook_decorator.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.test.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.stories.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.mock.*',
+        'src/platform/packages/shared/kbn-apm-ui-shared/**/*.storybook_decorator.*',
       ],
       rules: {
-        '@kbn/eslint/no_npx_playwright': 'off',
+        '@kbn/telemetry/ebt_props_should_be_present': 'warn',
       },
     },
   ],
