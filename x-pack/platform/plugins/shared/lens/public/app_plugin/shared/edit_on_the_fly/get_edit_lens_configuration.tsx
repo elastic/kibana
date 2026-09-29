@@ -46,6 +46,7 @@ import type { EditConfigPanelProps, LensPanelStateUpdater } from './types';
 import { LensDocumentService } from '../../../persistence';
 import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor_frame_service_context';
 import { ESQLEditorContext } from '../../../editor_frame_service/editor_frame/config_panel/esql_editor_context';
+import type { ESQLDataGridAttrs } from './helpers';
 
 export type EditLensConfigurationProps = Omit<
   EditConfigPanelProps,
@@ -187,6 +188,7 @@ const EditLensConfiguration: FC<
     useState<TypedLensSerializedState['attributes']>(attributes);
 
   const editorHeightRef = useRef<number | undefined>(undefined);
+  const lastPreviewRef = useRef<ESQLDataGridAttrs | undefined>(undefined);
 
   /**
    * During inline editing of a by reference panel, the panel is converted to a by value one.
@@ -281,7 +283,7 @@ const EditLensConfiguration: FC<
 
   return (
     <MaybeWrapper wrapInFlyout={wrapInFlyout} closeFlyout={closeFlyout}>
-      <ESQLEditorContext.Provider value={{ editorHeightRef }}>
+      <ESQLEditorContext.Provider value={{ editorHeightRef, lastPreviewRef }}>
         <Provider store={lensStore}>
           <KibanaRenderContextProvider {...coreStart}>
             <KibanaContextProvider services={lensServices}>

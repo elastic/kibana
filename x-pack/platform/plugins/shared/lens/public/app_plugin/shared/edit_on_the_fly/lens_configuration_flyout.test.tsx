@@ -21,6 +21,7 @@ import { EditorFrameServiceProvider } from '../../../editor_frame_service/editor
 import { LensEditConfigurationFlyout } from './lens_configuration_flyout';
 import type { EditConfigPanelProps } from './types';
 import type { TypedLensSerializedState } from '@kbn/lens-common';
+import { getESQLResults } from '@kbn/esql-utils';
 import * as getApplicationUserMessagesModule from '../../get_application_user_messages';
 import { coreContextMock } from '@kbn/core-base-browser-mocks';
 import { CoreEnvContextProvider } from '@kbn/react-kibana-context-env';
@@ -34,6 +35,10 @@ const createAddContextMock = () => {
       </CoreEnvContextProvider>
     ));
 };
+
+jest.mock('@kbn/esql-datagrid/public', () => ({
+  ESQLDataGrid: () => null,
+}));
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -452,6 +457,22 @@ describe('LensEditConfigurationFlyout', () => {
     expect(screen.getByTestId('InlineEditingSuggestions')).toBeInTheDocument();
   });
 
+  it('should display the ES|QL results header before query results load', async () => {
+    (getESQLResults as jest.Mock).mockReturnValueOnce(new Promise(() => {}));
+    await renderConfigFlyout(
+      { hideTextBasedEditor: false, attributes: esqlLensAttributes },
+      { esql: 'from index1 | limit 10' },
+      {
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedState },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+        activeDatasourceId: 'textBased',
+      }
+    );
+    expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument();
+  });
+
   it('should display the ES|QL results table if hideTextBasedEditor is false and query is ES|QL', async () => {
     await renderConfigFlyout(
       { hideTextBasedEditor: false, attributes: esqlLensAttributes },
@@ -465,6 +486,69 @@ describe('LensEditConfigurationFlyout', () => {
       }
     );
     await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+  });
+
+  async function renderEsqlConfigFlyout() {
+    return renderConfigFlyout(
+      { hideTextBasedEditor: false, attributes: esqlLensAttributes },
+      { esql: 'from index1 | limit 10' },
+      {
+        datasourceStates: {
+          formBased: { isLoading: false, state: mockFormBasedState },
+          textBased: { isLoading: false, state: { layers: {} } },
+        },
+        activeDatasourceId: 'textBased',
+      }
+    );
+  }
+
+  it('closes visualization parameters when the ES|QL results accordion opens', async () => {
+    await renderEsqlConfigFlyout();
+    await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+    const resultsButton = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
+    expect(screen.getByRole('button', { name: /Visualization parameters/i })).toHaveAttribute(
+      'aria-expanded',
+      'false'
+    );
+  });
+
+  it('closes ES|QL results when visualization parameters open', async () => {
+    await renderEsqlConfigFlyout();
+    await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+    const resultsButton = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(screen.getByRole('button', { name: /Visualization parameters/i }));
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'false');
+  });
+
+  it('closes the ES|QL results accordion from its own header', async () => {
+    await renderEsqlConfigFlyout();
+    await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+    const resultsButton = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+    const layerButton = screen.getByRole('button', { name: /Visualization parameters/i });
+
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
+
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'false');
+    expect(layerButton).toHaveAttribute('aria-expanded', 'false');
+
+    await userEvent.click(resultsButton);
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
+  });
+
+  it('keeps the ES|QL results accordion open after results load', async () => {
+    await renderEsqlConfigFlyout();
+    await waitFor(() => expect(screen.getByTestId('ESQLQueryResults')).toBeInTheDocument());
+    const resultsButton = screen.getByRole('button', { name: /ES\|QL Query Results/i });
+    await userEvent.click(resultsButton);
+    await waitFor(() => expect(getESQLResults).toHaveBeenCalled());
+    expect(resultsButton).toHaveAttribute('aria-expanded', 'true');
   });
 
   it('save button is disabled if no changes have been made', async () => {
