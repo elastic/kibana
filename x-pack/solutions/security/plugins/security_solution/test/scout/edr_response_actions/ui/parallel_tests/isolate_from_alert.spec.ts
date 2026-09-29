@@ -17,7 +17,6 @@ const AGENT_STATUS_CELL = 'securitySolutionFlyoutHighlightedFieldsAgentStatusCel
 spaceTest.describe(
   'Isolate a host from an alert',
   {
-    // The Cypress spec was `@brokenInServerless`.
     tag: tags.stateful.classic,
   },
   () => {

@@ -16,7 +16,6 @@ import { captureEndpointAction } from '../fixtures/page_objects/host_isolation_f
 spaceTest.describe(
   'Isolate a host from a case',
   {
-    // The Cypress spec was `@brokenInServerless`.
     tag: tags.stateful.classic,
   },
   () => {

@@ -28,7 +28,7 @@ const requireSeededHistory = (
 spaceTest.describe(
   'Response actions history page',
   {
-    // Stateful only. The Cypress spec was `@brokenInServerless` for this role.
+    // Stateful only.
     tag: tags.stateful.classic,
   },
   () => {

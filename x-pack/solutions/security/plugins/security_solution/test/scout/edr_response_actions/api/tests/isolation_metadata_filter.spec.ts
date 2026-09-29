@@ -30,7 +30,6 @@ const agentIdFilter = (agentIds: readonly string[]): string =>
 apiTest.describe(
   'Endpoint isolation metadata',
   {
-    // The Cypress spec was `@brokenInServerless`.
     tag: tags.stateful.classic,
   },
   () => {
