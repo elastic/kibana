@@ -73,6 +73,8 @@ const describeTier2Skip = (reason: HuntCoordinatorTier2SkipReason): string => {
       return 'Tier 2 behavior hunting was skipped because Tier 1 found no environment hits and this run only escalates to Tier 2 on a hit.';
     case 'no_inference':
       return 'Tier 2 behavior hunting was skipped because no GenAI connector was available.';
+    case 'no_matched_scope':
+      return 'Tier 2 behavior hunting was skipped because Tier 1 matched no index for it to generate against.';
     case 'no_report_text':
       return 'Tier 2 behavior hunting was skipped because the report has no body text to derive behaviors from.';
     case 'no_searchable_input':

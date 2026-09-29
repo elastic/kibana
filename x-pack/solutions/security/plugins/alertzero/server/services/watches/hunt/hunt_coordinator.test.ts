@@ -1390,7 +1390,7 @@ describe('huntCoordinator', () => {
             {
               technique_id: 'T1078',
               technique_name: 'Valid Accounts',
-              rule_name: 'grounded',
+              title: 'grounded',
               esql: 'FROM logs-* | LIMIT 1',
               evidence_quote: 'q',
               confidence: 0.6,

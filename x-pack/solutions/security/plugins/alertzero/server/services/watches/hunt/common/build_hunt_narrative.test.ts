@@ -72,6 +72,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   report_id: 'ti-report-aws-iam-historic-01',
   run_id: 'run-1',
   technologies: ['aws_iam'],
+  index_patterns: [],
   tier1: tier1(),
   message: 'Tier 1: no_environment_hits.',
   next_step: 'n/a',

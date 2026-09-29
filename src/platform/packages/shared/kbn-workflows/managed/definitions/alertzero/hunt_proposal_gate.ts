@@ -19,8 +19,8 @@ export const ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW_ID = 'system-security-hunt-pr
 /**
  * Child dispatched by PR 4's packaging child (`hunt_package_report.yaml`) via
  * `workflow.executeAsync`, one per minted Proposal. Wraps
- * `system-create-proposal`'s single `waitForApproval`, then closes the
- * Investigation on settlement. Tagged `security` + `continuous-threat-hunt`
+ * `system-create-alertzero-proposal`'s single `waitForApproval`, then closes
+ * the Investigation on settlement. Tagged `security` + `continuous-threat-hunt`
  * (not `watch`/`watch-hunt`, which stays Worker-only) for Workflows-list
  * findability, matching `hunt_package_report.yaml` and every other Watch's
  * own feature children. Owns no trigger of its own, so enablement is

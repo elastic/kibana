@@ -3,16 +3,18 @@ name: Hunt Watch - proposal gate
 description: >
   Child dispatched by PR 4's packaging child (`hunt_package_report.yaml`) via
   `workflow.executeAsync`, one per minted Proposal (registered id
-  system-security-hunt-proposal-gate). Wraps `system-create-proposal`'s single
-  `waitForApproval` (no second gate); that workflow creates the Proposal
-  idempotently, parks on the decision, records it, and settles expiry. After
-  the wrap returns, re-queries every Proposal on the Investigation's
-  conversation and closes it (`close_reason: resolved`) only when the section
-  C settlement predicate holds: created >= expectedProposalCount, zero
-  pending, zero executing. Never throws past its own on-failure fallbacks; a
-  requery or close failure continues rather than aborting, since the
-  Investigation staying open with its pending state visible is the accepted
-  unrecoverable case (section H) -- recovery is manual.
+  system-security-hunt-proposal-gate). Wraps `system-create-alertzero-proposal`
+  (the AlertZero bridge, which stamps `origin: alertzero` and forwards to
+  `system-create-proposal`'s single `waitForApproval`, no second gate here);
+  that path creates the Proposal idempotently, parks on the decision, records
+  it, and settles expiry. After the wrap returns, re-queries every Proposal on
+  the Investigation's conversation and closes it (`close_reason: resolved`)
+  only when the section C settlement predicate holds: created >=
+  expectedProposalCount, zero pending, zero executing. Never throws past its
+  own on-failure fallbacks; a requery or close failure continues rather than
+  aborting, since the Investigation staying open with its pending state
+  visible is the accepted unrecoverable case (section H) -- recovery is
+  manual.
 enabled: true
 tags:
   - security
@@ -78,24 +80,27 @@ outputs:
     type: boolean
 steps:
   # The gate child adds no second gate (mvp-slice.md:934): this is the settled
-  # single sync wrap of system-create-proposal's own waitForApproval.
-  # on-failure: continue rather than a fallback ending in workflow.output,
-  # since this is this workflow's own terminal concern, not a stage a Worker
-  # branch depends on continuing past (section A's rule is for the Worker's
-  # parallel branch specifically) -- but continuing here still lets the
-  # requery/close steps below run their own best-effort cleanup rather than
-  # aborting the whole execution if the wrap itself never resolves normally.
+  # single sync wrap of system-create-alertzero-proposal's own waitForApproval.
+  # Goes through the bridge, not straight to system-create-proposal, so this
+  # child's Proposals are stamped origin: alertzero like every other AlertZero
+  # caller's. on-failure: continue rather than a fallback ending in
+  # workflow.output, since this is this workflow's own terminal concern, not a
+  # stage a Worker branch depends on continuing past (section A's rule is for
+  # the Worker's parallel branch specifically) -- but continuing here still
+  # lets the requery/close steps below run their own best-effort cleanup
+  # rather than aborting the whole execution if the wrap itself never resolves
+  # normally.
   - name: create_and_gate_proposal
     type: workflow.execute
     with:
-      workflow-id: system-create-proposal
+      workflow-id: system-create-alertzero-proposal
       inputs:
-        conversationId: "{{ inputs.conversationId }}"
-        comment: "{{ inputs.comment }}"
-        actionWorkflowId: "{{ inputs.actionWorkflowId }}"
+        conversationId: "${{ inputs.conversationId }}"
+        comment: "${{ inputs.comment }}"
+        actionWorkflowId: "${{ inputs.actionWorkflowId }}"
         actionInput: "${{ inputs.actionInput }}"
-        impact: "{{ inputs.impact }}"
-        category: "{{ inputs.category }}"
+        impact: "${{ inputs.impact }}"
+        category: "${{ inputs.category }}"
     on-failure:
       continue: true
 
