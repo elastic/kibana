@@ -34,10 +34,10 @@ export default function (providerContext: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.savedObjects.cleanStandardList({ space: TEST_SPACE_1 });
       await cleanFleetIndices(esClient);
+      await setupTestUsers(getService('security'), true);
       await apiClient.postEnableSpaceAwareness();
       await apiClient.setup();
       await createTestSpace(providerContext, TEST_SPACE_1);
-      await setupTestUsers(getService('security'), true);
 
       defaultSpaceOnlyApiClient = new SpaceTestApiClient(supertestWithoutAuth, {
         username: testUsers.fleet_all_int_all_default_space_only.username,
