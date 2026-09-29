@@ -39,7 +39,9 @@ export const AssigneeAvatarStack = ({ profiles }: AssigneeAvatarStackProps) => {
       {overflow.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiToolTip
-            content={overflow.map((p) => p.user.full_name || p.user.email || p.uid).join(', ')}
+            content={overflow
+              .map((p) => p.user.full_name || p.user.email || p.user.username || p.uid)
+              .join(', ')}
           >
             <EuiBadge color="hollow" tabIndex={0}>
               +{overflow.length}
