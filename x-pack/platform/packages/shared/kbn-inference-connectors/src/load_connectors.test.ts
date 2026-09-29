@@ -38,6 +38,8 @@ describe('toAIConnector', () => {
       isPreconfigured: true,
       isDeprecated: true,
       isConnectorTypeDeprecated: true,
+      isEis: undefined,
+      isInferenceEndpoint: true,
       isMissingSecrets: true,
     });
 
@@ -53,8 +55,11 @@ describe('toAIConnector', () => {
       isSystemAction: false,
       isDeprecated: true,
       isConnectorTypeDeprecated: true,
+      isEis: undefined,
+      isInferenceEndpoint: true,
       isMissingSecrets: true,
       isRecommended: undefined,
+      metadata: undefined,
       apiProvider: undefined,
     });
   });

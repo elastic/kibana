@@ -88,6 +88,7 @@ export const createNlToEsqlGraph = ({
   documentation,
   esqlCallbacks,
   includeDatasets = false,
+  includeViews = false,
   includeFrozen = false,
   sessionId,
   cacheControl,
@@ -98,6 +99,7 @@ export const createNlToEsqlGraph = ({
   documentation: EsqlLoadedDocumentation;
   esqlCallbacks?: ValidateEsqlQueryCallbacks;
   includeDatasets?: boolean;
+  includeViews?: boolean;
   includeFrozen?: boolean;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
@@ -107,6 +109,7 @@ export const createNlToEsqlGraph = ({
       resourceName: state.target,
       samplingSize: 100,
       includeDatasets,
+      includeViews,
       includeFrozen,
       esClient,
     });

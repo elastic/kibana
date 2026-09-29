@@ -47,6 +47,14 @@ describe('StaleEventCleanupSection', () => {
     } as never);
   });
 
+  it('shows the Dev badge in the header', () => {
+    renderSection();
+
+    expect(screen.getByTestId('streams-settings-stale-event-cleanup-header')).toHaveTextContent(
+      'Dev'
+    );
+  });
+
   it('runs cleanup and reports the number of closed events', async () => {
     fetch.mockResolvedValue({ scanned: 3, closed: 2, kept: 1, skipped: 0 });
     renderSection();

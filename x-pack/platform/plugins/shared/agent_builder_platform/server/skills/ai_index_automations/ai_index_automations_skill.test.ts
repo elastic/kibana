@@ -40,6 +40,7 @@ const templates = () =>
 interface WorkflowStep {
   name?: string;
   type?: string;
+  condition?: string;
   with?: Record<string, unknown>;
   steps?: WorkflowStep[];
   else?: WorkflowStep[];
@@ -154,9 +155,33 @@ describe('aiIndexAutomationsSkill', () => {
       // it, and the `consts` block that is the whole of the adaptation.
       expect(reference.content).toContain('consts:');
       expect(reference.content).toContain('ai_index_id');
-      expect(reference.content).toContain('context-engine.verifyKi');
       expect(reference.content).toContain('context-engine.createKi');
+      expect(reference.content).toContain('verifiers:');
       expect(reference.content).toContain('esql-valid-runtime');
+    }
+  });
+
+  it('verifies inside create_ki and reports a rejected KI from its verification output', () => {
+    for (const name of TEMPLATE_NAMES) {
+      const template = parsedTemplate(name);
+      const createKi = stepNamed(template, 'create_ki');
+      const gate = stepNamed(template, 'check_verification');
+      const failureLog = stepNamed(template, 'log_verification_failure');
+
+      expect(allSteps(template.steps).map(({ type }) => type)).not.toContain(
+        'context-engine.verifyKi'
+      );
+      expect(createKi.type).toBe('context-engine.createKi');
+      expect(createKi.with?.verifiers).toEqual(['esql-valid-syntax', 'esql-valid-runtime']);
+      expect(createKi.with?.ki).toBeDefined();
+      expect(gate.type).toBe('if');
+      expect(gate.condition).toBe('steps.create_ki.output.verification.passed : false');
+      expect(gate.else).toBeUndefined();
+      expect(gate.steps).toContain(failureLog);
+      expect(failureLog.type).toBe('console');
+      expect(failureLog.with?.message).toContain(
+        '{{ steps.create_ki.output.verification.results | json }}'
+      );
     }
   });
 
@@ -668,6 +693,8 @@ describe('aiIndexAutomationsSkill', () => {
       `${internalNamespaces.workflows}.get_examples`,
       `${internalNamespaces.workflows}.get_connectors`,
       `${internalNamespaces.workflows}.workflow_execute_step`,
+      'platform.context_engine.save_automation',
+      'platform.context_engine.run_automation',
     ]);
   });
 
@@ -729,7 +756,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('states the sink contract every automation has to satisfy', () => {
-      expect(content).toContain('context-engine.verifyKi');
+      expect(content).toMatch(/pass\s+`verifiers` to every `context-engine\.createKi`/);
       expect(content).toContain('ki_id');
       expect(content).toContain('attributes.esql');
     });
@@ -954,7 +981,6 @@ describe('aiIndexAutomationsSkill', () => {
         'data.set',
         'console',
         'context-engine.createKi',
-        'context-engine.verifyKi',
       ];
 
       for (const reference of templates()) {
@@ -1161,18 +1187,20 @@ describe('aiIndexAutomationsSkill', () => {
     it('does not let piloting a workflow be read as licence to run the saved one', () => {
       expect(content).toContain('Running one is a separate decision');
       expect(content).toMatch(
-        /do not\s+execute a saved\s+workflow unless the run you are in has told you/
+        /do not\s+execute a saved\s+workflow unless the context in this conversation calls for it/
       );
     });
 
-    it('has the save tool perform the run, so a failure is reported rather than retried', () => {
-      expect(content).toMatch(/starts that run itself, in its own code/);
+    it('has run_automation report a failed start as the final answer, not a retryable task', () => {
+      expect(content).toMatch(
+        /run_automation` reports that the run did not start, that is the answer/
+      );
       expect(content).toMatch(/that is the answer, not a task/);
       expect(content).toMatch(/a second attempt doubles it/);
     });
 
-    it('does not treat the save tool run flag as an unauthorized run', () => {
-      expect(content).toMatch(/approving the save approves the run/);
+    it('gives save and run each their own confirmation dialog', () => {
+      expect(content).toMatch(/two separate operations, each with its own confirmation\s+dialog/);
     });
 
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
