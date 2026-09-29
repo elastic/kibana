@@ -273,7 +273,16 @@ export function useMiDeploy({
           if (!byPolicy.has(policyId)) byPolicy.set(policyId, []);
           byPolicy.get(policyId)!.push(instanceId);
         }
-        if (byPolicy.size === 0) return { hadFailures: false, allFailedIds: [] };
+        if (byPolicy.size === 0) {
+          // No policies resolved from policyIdsByInstance. If deployed policies exist but none
+          // resolved, instances are absent from session (e.g. ?deploymentId resume that skipped
+          // Step 2). Fail closed so the caller does not clear isDirty without any Fleet PUT —
+          // the auth change would be written to the SO record but not applied to the integration
+          // (4132745938). An empty policyIdsByInstance is a legitimate no-op (nothing deployed).
+          return Object.keys(policyIdsByInstance).length > 0
+            ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
+            : { hadFailures: false, allFailedIds: [] };
+        }
         const results = await Promise.allSettled(
           [...byPolicy.entries()].map(([policyId, instanceIdsForPolicy]) =>
             updateManagedIntegrationsPolicy(policyId, instanceIdsForPolicy, {

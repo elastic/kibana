@@ -136,6 +136,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         !isRetry &&
         agentBasedDeployment.agentHostsMode === 'new' &&
         !agentBasedDeployment.agentPolicyId;
+      // Broader than isNewPolicySwitch: also true on Retry of a failed switch (isRetry=true,
+      // but agentHostsMode still 'new' and agentPolicyId still unset). Used for old-policy
+      // cleanup staging and policyIdsByInstance preservation across retries (4132650240).
+      const isNewPolicyDeploy =
+        agentBasedDeployment.agentHostsMode === 'new' && !agentBasedDeployment.agentPolicyId;
       const targetsToDeploy = isRetry
         ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : isNewPolicySwitch
@@ -154,7 +159,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // once deployNewAgentPolicy succeeds, but must NOT be cleaned up until after that succeeds —
       // if creation fails, Retry must keep the old IDs intact to retry creation rather than
       // attempting dirty PUTs against already-deleted policies (4132197367).
-      const oldPolicyIdsByInstance: Record<string, string> = isNewPolicySwitch
+      // isNewPolicyDeploy (not isNewPolicySwitch) so Retry of a failed creation also snapshots:
+      // on the first failure policyIdsByInstance is preserved (not cleared), so Retry reads the
+      // same old IDs here and stages them after a successful retry creation (4132650240).
+      const oldPolicyIdsByInstance: Record<string, string> = isNewPolicyDeploy
         ? { ...(detectAndReviewStep.policyIdsByInstance ?? {}) }
         : {};
       const effectivePendingCleanup = buildEffectivePendingCleanup(
@@ -535,7 +543,11 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             // is reflected on resume rather than presenting the original method's form.
             authMethod: toSOAuthMethod(agentCredentialMethod),
             status: mergedFailed.length === 0 ? 'succeeded' : 'failed',
-            ...(cleanupFullySucceeded
+            // Persist per-instance package-policy mapping on new-policy success so hydration
+            // restores the correct (new) IDs — without this the SO's policyIdsByInstance stays
+            // at the old values, and resume attaches subsequent edits to deleted policies (4132650246).
+            ...(isNewPolicyDeploy && mergedFailed.length === 0 ? { policyIdsByInstance } : {}),
+            ...(cleanupFullySucceeded || (dirtyUpdateApplied && mergedFailed.length === 0)
               ? {
                   services: selectedServiceIds,
                   serviceVars: toSOServiceVars(
@@ -567,7 +579,10 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         updateDetectAndReviewStep({
           isDeploying: false,
           serviceStatuses: statuses,
-          policyIdsByInstance,
+          // When a new-policy deploy fails, preserve the old policyIdsByInstance so Retry can
+          // capture them in oldPolicyIdsByInstance and stage cleanup after a successful retry.
+          // deployNewAgentPolicy is transactional — Fleet state is unchanged on failure (4132650240).
+          ...(isNewPolicyDeploy && mergedFailed.length > 0 ? {} : { policyIdsByInstance }),
           failedInstances: mergedFailed,
           deployErrors: mergedErrors,
           // Clear drift flag only when the SO write confirmed the new state — if the SO PUT
@@ -579,9 +594,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // Stage them for cleanup on the next deploy ONLY after successful creation — staging
           // before creation would delete old policies before the replacement exists, making
           // Retry impossible if creation failed (4132197367).
-          ...(isNewPolicySwitch &&
-          mergedFailed.length === 0 &&
-          Object.keys(oldPolicyIdsByInstance).length > 0
+          // isNewPolicyDeploy (not isNewPolicySwitch) so retries of a failed creation also stage
+          // cleanup when they eventually succeed (4132650240).
+          ...(isNewPolicyDeploy && mergedFailed.length === 0 && Object.keys(oldPolicyIdsByInstance).length > 0
             ? { pendingCleanupPolicyIds: { ...remainingPending, ...oldPolicyIdsByInstance } }
             : {}),
         });

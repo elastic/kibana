@@ -309,6 +309,139 @@ test.describe(
       );
     });
 
+    test('agent-based clean return: no drift callout shown and Next enabled when session matches SO', async ({
+      browserAuth,
+      page,
+    }) => {
+      // Verifies that a real ?deploymentId resume (no authMethod in session, no instances seeded)
+      // does not falsely show a drift callout when the session matches the SO exactly.
+      // The drift check uses agentCredentialMethod (not authMethod) for agent-based mode;
+      // this test catches regressions where the absent authMethod triggers false drift (r4132650249).
+      const DEP_ID = 'dep-ab-clean-001';
+      const AGENT_POLICY_ID = 'clean-agent-policy-id';
+      const PKG_POLICY_ID = 'clean-pkg-policy-id';
+
+      await page.route(
+        (url) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+        (route) =>
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              item: {
+                id: DEP_ID,
+                provider: 'aws',
+                connectorId: null,
+                authMethod: 'assume_role',
+                mechanisms: ['agent_based'],
+                services: ['elb'],
+                serviceVars: {},
+                policyIdsByInstance: { elb: PKG_POLICY_ID },
+                agentPolicyIds: [AGENT_POLICY_ID],
+                status: 'succeeded',
+                attemptCount: 1,
+                globalRegion: 'us-east-1',
+              },
+            }),
+          })
+      );
+
+      await page.route(
+        (url) => /\/api\/fleet\/agent_policies/.test(url.pathname),
+        (route) =>
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({
+              items: [{ id: AGENT_POLICY_ID, name: 'Clean Agent Policy' }],
+              total: 1,
+              page: 1,
+              perPage: 20,
+            }),
+          })
+      );
+
+      await browserAuth.loginAsAdmin();
+      await page.gotoApp('onboarding/aws', {
+        params: { deploymentId: DEP_ID },
+        hash: 'authenticate-and-deploy',
+      });
+      await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+      // Seed session state matching the actual hydrateOnboardingSession output:
+      // - authenticateAndDeployStep has agentCredentialMethod but NOT authMethod (as real hydration writes).
+      // - serviceSettingsStep has globalRegion + serviceVars but NOT instances (hydration skips them).
+      // - detectAndReviewStep has policyIdsByInstance matching the SO.
+      await page.evaluate(
+        ({ authKey, svcKey, detectKey, depId, agentPolicyId, pkgPolicyId }) => {
+          sessionStorage.setItem(
+            authKey,
+            JSON.stringify({
+              deploymentMethod: 'agent_based',
+              agentHostsMode: 'existing',
+              selectedAgentPolicyIds: [agentPolicyId],
+              agentCredentialMethod: 'assume_role',
+              // authMethod intentionally absent — hydrateOnboardingSession does not write it
+              // for agent-based deployments. The drift check must use agentCredentialMethod.
+            })
+          );
+          sessionStorage.setItem(
+            svcKey,
+            JSON.stringify({
+              globalRegion: 'us-east-1',
+              serviceVars: {},
+              // instances intentionally absent — hydration does not reconstruct them.
+            })
+          );
+          sessionStorage.setItem(
+            detectKey,
+            JSON.stringify({
+              policyIdsByInstance: { elb: pkgPolicyId },
+              serviceStatuses: { elb: 'receiving' },
+              onboardingDeploymentId: depId,
+              failedInstances: [],
+              deployErrors: {},
+            })
+          );
+        },
+        {
+          authKey: AUTHENTICATE_AND_DEPLOY_SESSION_KEY,
+          svcKey: SERVICE_SETTINGS_SESSION_KEY,
+          detectKey: DETECT_AND_REVIEW_SESSION_KEY,
+          depId: DEP_ID,
+          agentPolicyId: AGENT_POLICY_ID,
+          pkgPolicyId: PKG_POLICY_ID,
+        }
+      );
+
+      // Track any package policy PUT — there must be none (no drift = no redeploy needed).
+      const pkgPuts: string[] = [];
+      await page.route(
+        (url) => /\/api\/fleet\/package_policies\//.test(url.pathname),
+        async (route) => {
+          if (route.request().method() === 'PUT') pkgPuts.push(route.request().url());
+          await route.continue();
+        }
+      );
+
+      const soGetPromise = page.waitForResponse(
+        (resp) =>
+          new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+            new URL(resp.url()).pathname
+          ) && resp.status() === 200
+      );
+      await page.reload();
+      await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+      await soGetPromise;
+
+      // No drift: session matches SO — callout must not appear and Next must be enabled.
+      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).not.toBeVisible();
+      await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
+      // No package policy PUT must have fired — the clean state requires no redeploy.
+      expect(pkgPuts).toHaveLength(0);
+    });
+
     test('agent-based policy-selection drift: changed selectedAgentPolicyIds triggers callout and PUT carries new policy', async ({
       browserAuth,
       page,
