@@ -12,6 +12,7 @@ import { act, fireEvent, render, screen, waitFor, within } from '@testing-librar
 import { MemoryRouter, Route, Router } from '@kbn/shared-ux-router';
 import { createMemoryHistory } from 'history';
 import {
+  RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WATCH_HUNT_ID,
   SYSTEM_SECURITY_WATCH_DETECTION_ID,
@@ -164,6 +165,7 @@ const huntWorker = createWorker({
 
 /** Complete Rule Tuning extras; cases vary the window and keep the FP thresholds at default. */
 const RULE_TUNING_EXTRAS = { ...RULE_TUNING_DEFAULT_EXTRAS, analysisWindowDays: 14 };
+const RULE_COVERAGE_EXTRAS = { ...RULE_COVERAGE_DEFAULT_EXTRAS, lookbackDays: 14 };
 
 const detectionWorkers: Worker[] = [
   createWorker({
@@ -181,6 +183,12 @@ const detectionWorkers: Worker[] = [
     id: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
     name: 'Rule Coverage',
     watchIds: [SYSTEM_SECURITY_WATCH_DETECTION_ID],
+    settings: {
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+      autonomy: 'manual',
+      scheduleInterval: '1h',
+      extras: RULE_COVERAGE_EXTRAS,
+    },
   }),
 ];
 
@@ -747,6 +755,40 @@ describe('WatchDetailPage', () => {
       workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
       patch: {
         settings: { extras: { ...RULE_TUNING_EXTRAS, analysisWindowDays: 21 } },
+        settingsRevision: null,
+      },
+    });
+  });
+
+  it('renders the Rule Coverage controls from the registry and saves an edited lookback', async () => {
+    const { mutateAsync } = renderWatch(SYSTEM_SECURITY_WATCH_DETECTION_ID, detectionWorkers);
+    const ruleCoverage = screen.getByTestId(
+      `alertZeroWatchWorkerSection-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
+    );
+
+    expect(
+      within(ruleCoverage).getByTestId(
+        `alertZeroTriggerAmount-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
+      )
+    ).toHaveValue(1);
+    expect(
+      within(ruleCoverage).getByTestId(
+        `alertZeroTriggerUnit-${SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID}`
+      )
+    ).toHaveValue('h');
+    const lookback = within(ruleCoverage).getByTestId('alertZeroLookbackDays');
+    expect(lookback).toHaveValue(14);
+    expect(within(ruleCoverage).getByTestId('alertZeroMaxGapsPerRun')).toHaveValue(5);
+
+    fireEvent.change(lookback, { target: { value: '30' } });
+    fireEvent.blur(lookback);
+    fireEvent.click(screen.getByTestId('alertZeroWatchSettingsSave'));
+
+    await waitFor(() => expect(mutateAsync).toHaveBeenCalledTimes(1));
+    expect(mutateAsync).toHaveBeenCalledWith({
+      workerId: SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+      patch: {
+        settings: { extras: { ...RULE_COVERAGE_EXTRAS, lookbackDays: 30 } },
         settingsRevision: null,
       },
     });

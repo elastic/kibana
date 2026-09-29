@@ -7,6 +7,7 @@
 
 import {
   getAllowedAutonomyLevels,
+  RULE_COVERAGE_DEFAULT_EXTRAS,
   RULE_TUNING_DEFAULT_EXTRAS,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
   SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID,
@@ -22,12 +23,13 @@ import { createWorkerSettingsRegistration } from './worker_settings';
 
 const AD_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
 const RULE_TUNING_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_TUNING_ID;
+const RULE_COVERAGE_WORKER_ID = SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID;
 const FORENSICS_WORKER_ID = SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID;
 
 const SCHEDULED_WORKER_IDS: string[] = [
   AD_WORKER_ID,
   RULE_TUNING_WORKER_ID,
-  SYSTEM_SECURITY_WORKER_DETECTION_RULE_COVERAGE_ID,
+  RULE_COVERAGE_WORKER_ID,
 ];
 
 const UNSCHEDULED_WORKER_IDS = SYSTEM_SECURITY_WORKER_IDS.filter(
@@ -485,6 +487,82 @@ describe('createWorkerSettingsRegistration', () => {
         },
       });
     });
+  });
+
+  describe('Worker-specific settings — detection rule coverage', () => {
+    const registration = createWorkerSettingsRegistration(RULE_COVERAGE_WORKER_ID);
+    const defaultExtras = RULE_COVERAGE_DEFAULT_EXTRAS;
+    const storedDefaults = {
+      settingsVersion: 1,
+      autonomyLevel: 'manual',
+      scheduleInterval: '1h',
+      extras: defaultExtras,
+    };
+
+    it('stores extras nested and projects them under settings.extras', () => {
+      expect(registration.createDefaultValues()).toEqual(storedDefaults);
+      expect(registration.toSettings(registration.createDefaultValues())).toEqual({
+        workerId: RULE_COVERAGE_WORKER_ID,
+        autonomy: 'manual',
+        scheduleInterval: '1h',
+        extras: defaultExtras,
+      });
+    });
+
+    it('replaces extras whole when the patch supplies them', () => {
+      const extras = { lookbackDays: 30, maxGapsPerRun: 20 };
+
+      expect(registration.applyPatch(storedDefaults, { extras })).toEqual({
+        values: { ...storedDefaults, extras },
+      });
+    });
+
+    it.each(['lookbackDays', 'maxGapsPerRun'] as const)(
+      'rejects an extras replacement missing %s, naming it',
+      (missing) => {
+        const extras: Record<string, number> = { ...defaultExtras };
+        delete extras[missing];
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          `extras.${missing}`
+        );
+      }
+    );
+
+    it('rejects an unknown extras key, naming it', () => {
+      expect(
+        expectInvalid(
+          registration.applyPatch(storedDefaults, {
+            extras: { ...defaultExtras, maxOpenChecks: 100 },
+          })
+        )
+      ).toMatch(/extras.*maxOpenChecks/);
+    });
+
+    it.each([0, 91, 7.5])('rejects a lookback of %s in a patch and in storage', (lookbackDays) => {
+      const extras = { ...defaultExtras, lookbackDays };
+
+      expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+        'extras.lookbackDays'
+      );
+      expect(() => registration.toSettings({ ...storedDefaults, extras })).toThrow(
+        /extras\.lookbackDays/
+      );
+    });
+
+    it.each([0, 51, 2.5])(
+      'rejects max gaps per run of %s in a patch and in storage',
+      (maxGapsPerRun) => {
+        const extras = { ...defaultExtras, maxGapsPerRun };
+
+        expect(expectInvalid(registration.applyPatch(storedDefaults, { extras }))).toContain(
+          'extras.maxGapsPerRun'
+        );
+        expect(() => registration.toSettings({ ...storedDefaults, extras })).toThrow(
+          /extras\.maxGapsPerRun/
+        );
+      }
+    );
   });
 
   describe('Workers that declare no extras', () => {
