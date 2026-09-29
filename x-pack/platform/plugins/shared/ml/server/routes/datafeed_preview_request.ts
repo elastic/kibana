@@ -32,6 +32,9 @@ export const createDatafeedPreviewRequest = ({
     : {
         ...(start !== undefined ? { start } : {}),
         ...(end !== undefined ? { end } : {}),
-        job_config: job,
-        datafeed_config: datafeed,
+        // Request schemas validate classic vs. ES|QL inline job/datafeed shapes
+        // before this boundary; estypes' MlJobConfig/MlDatafeedConfig types
+        // don't (yet) model the ES|QL variant, hence the narrow cast here.
+        job_config: job as estypes.MlJobConfig,
+        datafeed_config: datafeed as estypes.MlDatafeedConfig,
       };

@@ -10,6 +10,7 @@ import { getMlClient } from './ml_client';
 import type { MLSavedObjectService } from '../../saved_objects';
 import type { MlAuditLogger } from './ml_audit_logger';
 import type { MlLicense } from '../../../common/license/ml_license';
+import type { estypes } from '@elastic/elasticsearch';
 import type { ServerlessInfo } from '../../types';
 import { MLJobNotFound } from './errors';
 
@@ -42,11 +43,11 @@ describe('getMlClient previewDatafeed', () => {
     const { client, mlClient } = setup();
     client.asInternalUser.ml.previewDatafeed.mockResponse([] as never);
 
-    const inlinePreviewRequest = {
+    const inlinePreviewRequest: estypes.MlPreviewDatafeedRequest = {
       start: 'now-15m',
       end: 'now',
-      job_config: { job_id: 'preview-esql-job' },
-      datafeed_config: { datafeed_id: 'preview-esql-datafeed' },
+      job_config: { job_id: 'preview-esql-job' } as estypes.MlJobConfig,
+      datafeed_config: { datafeed_id: 'preview-esql-datafeed' } as estypes.MlDatafeedConfig,
     };
 
     await mlClient.previewDatafeed(inlinePreviewRequest, { maxRetries: 0 });
