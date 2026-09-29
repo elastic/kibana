@@ -75,14 +75,14 @@ describe('AgentRestartModal', () => {
 
   it('calls sendPostAgentRestart for single agent on confirm', async () => {
     const onClose = jest.fn();
-    const { getByText } = render({
+    const { getByTestId } = render({
       agents: [makeAgent('agent-1')],
       agentCount: 1,
       onClose,
     });
 
     await act(async () => {
-      fireEvent.click(getByText('Restart agent'));
+      fireEvent.click(getByTestId('confirmModalConfirmButton'));
     });
 
     expect(mockSendPostAgentRestart).toHaveBeenCalledWith('agent-1');
@@ -91,14 +91,14 @@ describe('AgentRestartModal', () => {
 
   it('calls sendPostBulkAgentRestart for multiple agents on confirm', async () => {
     const onClose = jest.fn();
-    const { getByText } = render({
+    const { getByTestId } = render({
       agents: [makeAgent('agent-1'), makeAgent('agent-2')],
       agentCount: 2,
       onClose,
     });
 
     await act(async () => {
-      fireEvent.click(getByText('Restart 2 agents'));
+      fireEvent.click(getByTestId('confirmModalConfirmButton'));
     });
 
     expect(mockSendPostBulkAgentRestart).toHaveBeenCalledWith({
@@ -110,14 +110,14 @@ describe('AgentRestartModal', () => {
 
   it('calls sendPostBulkAgentRestart with kuery string', async () => {
     const onClose = jest.fn();
-    const { getByText } = render({
+    const { getByTestId } = render({
       agents: 'status:online',
       agentCount: 5,
       onClose,
     });
 
     await act(async () => {
-      fireEvent.click(getByText('Restart 5 agents'));
+      fireEvent.click(getByTestId('confirmModalConfirmButton'));
     });
 
     expect(mockSendPostBulkAgentRestart).toHaveBeenCalledWith({
@@ -128,14 +128,14 @@ describe('AgentRestartModal', () => {
 
   it('shows success toast and calls onClose after confirm', async () => {
     const onClose = jest.fn();
-    const { getByText } = render({
+    const { getByTestId } = render({
       agents: [makeAgent('agent-1')],
       agentCount: 1,
       onClose,
     });
 
     await act(async () => {
-      fireEvent.click(getByText('Restart agent'));
+      fireEvent.click(getByTestId('confirmModalConfirmButton'));
     });
 
     await waitFor(() => {
@@ -147,14 +147,14 @@ describe('AgentRestartModal', () => {
   it('shows error toast and calls onClose on failure', async () => {
     mockSendPostAgentRestart.mockRejectedValue(new Error('network error'));
     const onClose = jest.fn();
-    const { getByText } = render({
+    const { getByTestId } = render({
       agents: [makeAgent('agent-1')],
       agentCount: 1,
       onClose,
     });
 
     await act(async () => {
-      fireEvent.click(getByText('Restart agent'));
+      fireEvent.click(getByTestId('confirmModalConfirmButton'));
     });
 
     await waitFor(() => {
@@ -165,13 +165,13 @@ describe('AgentRestartModal', () => {
 
   it('calls onClose when cancel is clicked', () => {
     const onClose = jest.fn();
-    const { getByText } = render({
+    const { getByTestId } = render({
       agents: [makeAgent('agent-1')],
       agentCount: 1,
       onClose,
     });
 
-    fireEvent.click(getByText('Cancel'));
+    fireEvent.click(getByTestId('confirmModalCancelButton'));
 
     expect(onClose).toHaveBeenCalled();
     expect(mockSendPostAgentRestart).not.toHaveBeenCalled();

@@ -23,7 +23,9 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const fleetAndAgents = getService('fleetAndAgents');
-  let policy1: any;
+
+  // 'policy1' is the policy ID pre-loaded by the fleet/agents archive fixture.
+  const ARCHIVE_POLICY_ID = 'policy1';
 
   async function createAgent(
     agentId: string,
@@ -32,7 +34,7 @@ export default function (providerContext: FtrProviderContext) {
     policyBaseId?: string
   ) {
     const now = new Date().toISOString();
-    const resolvedPolicyId = policyId ?? policy1.id;
+    const resolvedPolicyId = policyId ?? ARCHIVE_POLICY_ID;
     await es.index({
       refresh: 'wait_for',
       index: AGENTS_INDEX,
@@ -84,17 +86,12 @@ export default function (providerContext: FtrProviderContext) {
 
     before(async () => {
       await fleetAndAgents.setup();
-      const policyRes = await supertest
-        .post(`/api/fleet/agent_policies`)
-        .set('kbn-xsrf', 'xx')
-        .send({ name: 'Restart test policy', namespace: 'default' })
-        .expect(200);
-      policy1 = policyRes.body.item;
     });
 
     beforeEach(async () => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/agents');
+      await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxx').send();
     });
 
     afterEach(async () => {
