@@ -55,7 +55,7 @@ export function AlertEpisodeStatusBadges({
             <EuiBadge
               tabIndex={0}
               iconType="chartGauge"
-              aria-label={flappingI18n.FLAPPING_BADGE_ARIA_LABEL}
+              aria-label={flappingI18n.FLAPPING_BADGE_LABEL}
               data-test-subj="alertEpisodeFlappingBadge"
             />
           </EuiToolTip>
