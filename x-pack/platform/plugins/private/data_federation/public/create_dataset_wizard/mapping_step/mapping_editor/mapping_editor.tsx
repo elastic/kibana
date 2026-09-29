@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import type { FC, SetStateAction } from 'react';
 import {
   EuiBadge,
@@ -17,6 +17,7 @@ import {
   EuiText,
   EuiTitle,
   useEuiTheme,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -96,6 +97,8 @@ export const buildDatasetMappings = (value: MappingEditorValue): DatasetMappings
   };
 };
 
+const generateFieldId = htmlIdGenerator('mapping-field');
+
 export const MappingEditor: FC<MappingEditorProps> = ({
   value,
   onChange,
@@ -106,7 +109,6 @@ export const MappingEditor: FC<MappingEditorProps> = ({
   const isDefineSchemaSelected = !value.dynamic;
   const isInferSchemaSelected = value.dynamic;
   const typeInfoByValue = useMemo(() => getTypeInfoByValue(docLinks), [docLinks]);
-  const nextId = useRef(0);
   const validation = useMemo(
     () => validateMappingEditorValue(value, { reservedFieldNames }),
     [reservedFieldNames, value]
@@ -167,7 +169,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
         return;
       }
 
-      const id = `mapping-field-${nextId.current++}`;
+      const id = generateFieldId();
       onChange((prev) => ({
         ...prev,
         fields: [
@@ -330,6 +332,7 @@ export const MappingEditor: FC<MappingEditorProps> = ({
               return (
                 <EuiFlexItem key={f.id}>
                   <div
+                    data-test-subj="dataFederationMappingEditorField"
                     style={{
                       backgroundColor: isEditing
                         ? euiTheme.colors.backgroundBaseSubdued
