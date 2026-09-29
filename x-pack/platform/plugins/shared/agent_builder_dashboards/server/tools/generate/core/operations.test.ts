@@ -3095,6 +3095,7 @@ describe('add_controls / remove_controls operations', () => {
     expect(esClient.fieldCaps).toHaveBeenCalledWith(
       expect.objectContaining({
         index: 'kibana_sample_data_logs',
+        fields: ['host', 'host.keyword'],
         project_routing: '_alias:*',
       })
     );

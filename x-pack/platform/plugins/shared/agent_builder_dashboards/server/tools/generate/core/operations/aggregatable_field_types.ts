@@ -12,10 +12,21 @@ import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 /** ES field types keyed by name, for fields that can back a `STATS BY` across the whole index. */
 export type AggregatableFieldTypes = Map<string, string[]>;
 
-export type LoadAggregatableFieldTypes = (params: {
+interface FieldTypesTarget {
   index: string;
   projectRouting?: string;
-}) => Promise<AggregatableFieldTypes>;
+}
+
+export interface AggregatableFieldTypesLoader {
+  /** Load the given fields, requesting only the ones not loaded before for this target. */
+  loadFields: (
+    params: FieldTypesTarget & { fieldNames: readonly string[] }
+  ) => Promise<AggregatableFieldTypes>;
+  /** Load every field of the given ES types, for suggesting alternatives. */
+  loadFieldsOfTypes: (
+    params: FieldTypesTarget & { types: readonly string[] }
+  ) => Promise<AggregatableFieldTypes>;
+}
 
 /**
  * A field spanning several indices is only usable when it is aggregatable in all of them and
@@ -25,14 +36,21 @@ const isAggregatableEverywhere = (capabilities: FieldCapsFieldCapability[]): boo
   capabilities.every(({ aggregatable }) => aggregatable) &&
   new Set(capabilities.map(({ type }) => castEsToKbnFieldTypeName(type))).size === 1;
 
-const fetchAggregatableFieldTypes = async (
-  esClient: ElasticsearchClient,
-  index: string,
-  projectRouting?: string
-): Promise<AggregatableFieldTypes> => {
+const fetchAggregatableFieldTypes = async ({
+  esClient,
+  index,
+  projectRouting,
+  fields,
+  types,
+}: FieldTypesTarget & {
+  esClient: ElasticsearchClient;
+  fields: readonly string[];
+  types?: readonly string[];
+}): Promise<AggregatableFieldTypes> => {
   const response = await esClient.fieldCaps({
     index,
-    fields: ['*'],
+    fields: [...fields],
+    ...(types ? { types: [...types] } : {}),
     filters: '-metadata',
     ignore_unavailable: true,
     allow_no_indices: true,
@@ -48,24 +66,74 @@ const fetchAggregatableFieldTypes = async (
   );
 };
 
+const toCacheKey = (...parts: Array<string | undefined>): string =>
+  JSON.stringify(parts.map((part) => part ?? null));
+
 /**
- * Create a loader that calls `_field_caps` at most once per index and project
- * routing for the lifetime of one operations execution.
+ * Create a loader that caches `_field_caps` results per field and per type list
+ * for the lifetime of one operations execution.
  */
 export const createAggregatableFieldTypesLoader = (
   esClient: ElasticsearchClient
-): LoadAggregatableFieldTypes => {
-  const cache = new Map<string, Promise<AggregatableFieldTypes>>();
+): AggregatableFieldTypesLoader => {
+  const fieldCache = new Map<string, Promise<string[] | undefined>>();
+  const typesCache = new Map<string, Promise<AggregatableFieldTypes>>();
 
-  return ({ index, projectRouting }) => {
-    const cacheKey = JSON.stringify([index, projectRouting ?? null]);
-    const cached = cache.get(cacheKey);
+  const loadFields: AggregatableFieldTypesLoader['loadFields'] = async ({
+    index,
+    projectRouting,
+    fieldNames,
+  }) => {
+    const uniqueFieldNames = [...new Set(fieldNames)];
+    const toFieldCacheKey = (fieldName: string) => toCacheKey(index, projectRouting, fieldName);
+
+    const uncachedFieldNames = uniqueFieldNames.filter(
+      (fieldName) => !fieldCache.has(toFieldCacheKey(fieldName))
+    );
+    if (uncachedFieldNames.length > 0) {
+      const pending = fetchAggregatableFieldTypes({
+        esClient,
+        index,
+        projectRouting,
+        fields: uncachedFieldNames,
+      });
+      uncachedFieldNames.forEach((fieldName) =>
+        fieldCache.set(
+          toFieldCacheKey(fieldName),
+          pending.then((fieldTypes) => fieldTypes.get(fieldName))
+        )
+      );
+    }
+
+    const entries = await Promise.all(
+      uniqueFieldNames.map(
+        async (fieldName) => [fieldName, await fieldCache.get(toFieldCacheKey(fieldName))] as const
+      )
+    );
+    return new Map(entries.flatMap(([fieldName, types]) => (types ? [[fieldName, types]] : [])));
+  };
+
+  const loadFieldsOfTypes: AggregatableFieldTypesLoader['loadFieldsOfTypes'] = ({
+    index,
+    projectRouting,
+    types,
+  }) => {
+    const cacheKey = toCacheKey(index, projectRouting, ...[...types].sort());
+    const cached = typesCache.get(cacheKey);
     if (cached) {
       return cached;
     }
 
-    const pending = fetchAggregatableFieldTypes(esClient, index, projectRouting);
-    cache.set(cacheKey, pending);
+    const pending = fetchAggregatableFieldTypes({
+      esClient,
+      index,
+      projectRouting,
+      fields: ['*'],
+      types,
+    });
+    typesCache.set(cacheKey, pending);
     return pending;
   };
+
+  return { loadFields, loadFieldsOfTypes };
 };

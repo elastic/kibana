@@ -17,7 +17,7 @@ import type {
   PanelContentAttempt,
 } from '../resolve_panel';
 import type { ResolvedPanelCreationRequest } from './panel_creation';
-import type { LoadAggregatableFieldTypes } from './aggregatable_field_types';
+import type { AggregatableFieldTypesLoader } from './aggregatable_field_types';
 
 export type ResolveCustomContentTemplate = (params: {
   prompt: string;
@@ -45,7 +45,7 @@ export interface OperationExecutionContext {
   resolvePanelContent?: ResolvePanelContent;
   resolveCustomContentTemplate?: ResolveCustomContentTemplate;
   resolveAttachmentPanel?: ResolveAttachmentPanel;
-  loadAggregatableFieldTypes?: LoadAggregatableFieldTypes;
+  aggregatableFieldTypesLoader?: AggregatableFieldTypesLoader;
 }
 
 export interface OperationHandlerParams<TOperation> {

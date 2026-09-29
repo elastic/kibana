@@ -18,14 +18,14 @@ import {
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
 import type { Logger } from '@kbn/core/server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
-import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { castEsToKbnFieldTypeName, getKbnFieldType, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import { defineOperation } from './types';
 import type {
   AggregatableFieldTypes,
-  LoadAggregatableFieldTypes,
+  AggregatableFieldTypesLoader,
 } from './aggregatable_field_types';
 
 const controlWidthSchema = z
@@ -129,12 +129,22 @@ const getFieldCandidates = ({ type, field_name: fieldName }: DataControlInput): 
 const hasKbnFieldType = (types: string[], kbnFieldType: KBN_FIELD_TYPES): boolean =>
   types.every((type) => castEsToKbnFieldTypeName(type) === kbnFieldType);
 
-const describeAvailableFields = (
-  fieldTypes: AggregatableFieldTypes,
-  controlType: DataControlInput['type']
-): string => {
+const describeAvailableFields = async ({
+  loader,
+  index,
+  projectRouting,
+  controlType,
+}: {
+  loader: AggregatableFieldTypesLoader;
+  index: string;
+  projectRouting?: string;
+  controlType: DataControlInput['type'];
+}): Promise<string> => {
   const isRangeSlider = controlType === RANGE_SLIDER_CONTROL;
   const kbnFieldType = isRangeSlider ? KBN_FIELD_TYPES.NUMBER : KBN_FIELD_TYPES.STRING;
+  const fieldTypes = await loader
+    .loadFieldsOfTypes({ index, projectRouting, types: getKbnFieldType(kbnFieldType).esTypes })
+    .catch((): AggregatableFieldTypes => new Map());
   const availableFields = [...fieldTypes]
     .filter(([, types]) => hasKbnFieldType(types, kbnFieldType))
     .map(([fieldName]) => fieldName)
@@ -167,40 +177,32 @@ const recordControlFailure = ({
   }
 };
 
-/**
- * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
- * text fields to their `.keyword` sibling. Range sliders additionally require a
- * numeric field. Other data controls are left out; user-requested ones are
- * reported as failures with the mapped fields that could back them instead.
- * Controls on an index whose fields cannot be loaded are kept unvalidated.
- */
-const resolveControlFields = async ({
+const loadFieldTypesByIndex = async ({
   controls,
-  loadAggregatableFieldTypes,
+  loader,
   projectRouting,
   logger,
-  failures,
 }: {
-  controls: ControlInput[];
-  loadAggregatableFieldTypes?: LoadAggregatableFieldTypes;
+  controls: DataControlInput[];
+  loader: AggregatableFieldTypesLoader;
   projectRouting?: string;
   logger: Logger;
-  failures: OperationFailure[];
-}): Promise<ControlInput[]> => {
-  if (!loadAggregatableFieldTypes) {
-    return controls;
-  }
+}): Promise<Map<string, AggregatableFieldTypes | undefined>> => {
+  const fieldNamesByIndex = new Map<string, string[]>();
+  controls.forEach((control) => {
+    fieldNamesByIndex.set(control.index, [
+      ...(fieldNamesByIndex.get(control.index) ?? []),
+      ...getFieldCandidates(control),
+    ]);
+  });
 
-  const indices = new Set(
-    controls.flatMap((control) => (control.type === TIME_SLIDER_CONTROL ? [] : [control.index]))
-  );
-  const fieldTypesByIndex = new Map(
+  return new Map(
     await Promise.all(
-      [...indices].map(
-        async (index) =>
+      [...fieldNamesByIndex].map(
+        async ([index, fieldNames]) =>
           [
             index,
-            await loadAggregatableFieldTypes({ index, projectRouting }).catch((error) => {
+            await loader.loadFields({ index, projectRouting, fieldNames }).catch((error) => {
               logger.warn(
                 `Could not load fields for index "${index}", adding its controls unvalidated: ${getErrorMessage(
                   error
@@ -212,47 +214,110 @@ const resolveControlFields = async ({
       )
     )
   );
+};
 
-  return controls.flatMap((control): ControlInput[] => {
-    if (control.type === TIME_SLIDER_CONTROL) {
-      return [control];
-    }
+const resolveControlField = (
+  control: DataControlInput,
+  fieldTypes: AggregatableFieldTypes
+): { resolvedFieldName: string } | { reason: string } => {
+  const resolvedFieldName = getFieldCandidates(control).find((candidate) =>
+    fieldTypes.has(candidate)
+  );
+  if (resolvedFieldName === undefined) {
+    return { reason: `Not mapped on index "${control.index}".` };
+  }
 
-    const { index, field_name: fieldName } = control;
-    const fieldTypes = fieldTypesByIndex.get(index);
-    if (!fieldTypes) {
-      return [control];
-    }
+  if (
+    control.type === RANGE_SLIDER_CONTROL &&
+    !hasKbnFieldType(fieldTypes.get(resolvedFieldName) ?? [], KBN_FIELD_TYPES.NUMBER)
+  ) {
+    return { reason: `range_slider_control needs a numeric field on index "${control.index}".` };
+  }
 
-    const skip = (reason: string): ControlInput[] => {
-      if (control.user_requested !== true) {
-        logger.debug(`Left out control on "${fieldName}": ${reason}`);
-        return [];
-      }
-      recordControlFailure({
-        failures,
-        fieldName,
-        message: `${reason}${describeAvailableFields(fieldTypes, control.type)}`,
-      });
-      return [];
-    };
+  return { resolvedFieldName };
+};
 
-    const resolvedFieldName = getFieldCandidates(control).find((candidate) =>
-      fieldTypes.has(candidate)
-    );
-    if (resolvedFieldName === undefined) {
-      return skip(`Not mapped on index "${index}".`);
-    }
+/**
+ * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
+ * text fields to their `.keyword` sibling. Range sliders additionally require a
+ * numeric field. Other data controls are left out; user-requested ones are
+ * reported as failures with the mapped fields that could back them instead.
+ * Controls on an index whose fields cannot be loaded are kept unvalidated.
+ */
+const resolveControlFields = async ({
+  controls,
+  loader,
+  projectRouting,
+  logger,
+  failures,
+}: {
+  controls: ControlInput[];
+  loader?: AggregatableFieldTypesLoader;
+  projectRouting?: string;
+  logger: Logger;
+  failures: OperationFailure[];
+}): Promise<ControlInput[]> => {
+  if (!loader) {
+    return controls;
+  }
 
-    if (
-      control.type === RANGE_SLIDER_CONTROL &&
-      !hasKbnFieldType(fieldTypes.get(resolvedFieldName) ?? [], KBN_FIELD_TYPES.NUMBER)
-    ) {
-      return skip(`range_slider_control needs a numeric field on index "${index}".`);
-    }
-
-    return [{ ...control, field_name: resolvedFieldName }];
+  const fieldTypesByIndex = await loadFieldTypesByIndex({
+    controls: controls.filter(
+      (control): control is DataControlInput => control.type !== TIME_SLIDER_CONTROL
+    ),
+    loader,
+    projectRouting,
+    logger,
   });
+
+  const resolvedControls: ControlInput[] = [];
+  const unresolvedRequestedControls: Array<{ control: DataControlInput; reason: string }> = [];
+
+  controls.forEach((control) => {
+    if (control.type === TIME_SLIDER_CONTROL) {
+      resolvedControls.push(control);
+      return;
+    }
+
+    const fieldTypes = fieldTypesByIndex.get(control.index);
+    if (!fieldTypes) {
+      resolvedControls.push(control);
+      return;
+    }
+
+    const resolution = resolveControlField(control, fieldTypes);
+    if ('resolvedFieldName' in resolution) {
+      resolvedControls.push({ ...control, field_name: resolution.resolvedFieldName });
+      return;
+    }
+
+    if (control.user_requested === true) {
+      unresolvedRequestedControls.push({ control, reason: resolution.reason });
+      return;
+    }
+    logger.debug(`Left out control on "${control.field_name}": ${resolution.reason}`);
+  });
+
+  const failureMessages = await Promise.all(
+    unresolvedRequestedControls.map(
+      async ({ control, reason }) =>
+        `${reason}${await describeAvailableFields({
+          loader,
+          index: control.index,
+          projectRouting,
+          controlType: control.type,
+        })}`
+    )
+  );
+  unresolvedRequestedControls.forEach(({ control }, position) =>
+    recordControlFailure({
+      failures,
+      fieldName: control.field_name,
+      message: failureMessages[position],
+    })
+  );
+
+  return resolvedControls;
 };
 
 const buildStoredControl = (control: ControlInput): DashboardPinnedPanel => {
@@ -326,7 +391,7 @@ export const addControlsOperation = defineOperation({
         controlsToAdd: operation.controls,
         failures: context.failures,
       }),
-      loadAggregatableFieldTypes: context.loadAggregatableFieldTypes,
+      loader: context.aggregatableFieldTypesLoader,
       projectRouting: dashboardData.project_routing,
       logger: context.logger,
       failures: context.failures,

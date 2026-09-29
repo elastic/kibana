@@ -81,7 +81,9 @@ export const prepareOperationExecution = async ({
     resolvePanelContent,
     resolveCustomContentTemplate,
     resolveAttachmentPanel,
-    loadAggregatableFieldTypes: esClient ? createAggregatableFieldTypesLoader(esClient) : undefined,
+    aggregatableFieldTypesLoader: esClient
+      ? createAggregatableFieldTypesLoader(esClient)
+      : undefined,
   };
 };
 
