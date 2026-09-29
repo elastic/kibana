@@ -10,22 +10,26 @@ import { act, fireEvent, waitFor } from '@testing-library/react';
 
 import { createFleetTestRendererMock } from '../../../../../../mock';
 
+import { sendPostAgentRestart, sendPostBulkAgentRestart } from '../../../../hooks';
+
 import { AgentRestartModal } from '.';
 
-const mockSendPostAgentRestart = jest.fn();
-const mockSendPostBulkAgentRestart = jest.fn();
 const mockAddSuccess = jest.fn();
 const mockAddError = jest.fn();
 
 jest.mock('../../../../hooks', () => ({
-  sendPostAgentRestart: (...args: any[]) => mockSendPostAgentRestart(...args),
-  sendPostBulkAgentRestart: (...args: any[]) => mockSendPostBulkAgentRestart(...args),
+  ...jest.requireActual('../../../../hooks'),
+  sendPostAgentRestart: jest.fn().mockResolvedValue({}),
+  sendPostBulkAgentRestart: jest.fn().mockResolvedValue({}),
   useStartServices: () => ({
     notifications: {
       toasts: { addSuccess: mockAddSuccess, addError: mockAddError },
     },
   }),
 }));
+
+const mockSendPostAgentRestart = sendPostAgentRestart as jest.Mock;
+const mockSendPostBulkAgentRestart = sendPostBulkAgentRestart as jest.Mock;
 
 function makeAgent(id: string, hostname = 'host-1') {
   return {
@@ -40,6 +44,8 @@ describe('AgentRestartModal', () => {
     jest.clearAllMocks();
     mockSendPostAgentRestart.mockResolvedValue({});
     mockSendPostBulkAgentRestart.mockResolvedValue({});
+    mockAddSuccess.mockClear();
+    mockAddError.mockClear();
   });
 
   function render(props: React.ComponentProps<typeof AgentRestartModal>) {
