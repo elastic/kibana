@@ -26,4 +26,31 @@ describe('ServiceAccountsAPIClient', () => {
       });
     });
   });
+
+  describe('#list', () => {
+    it('gets one page from the internal route', async () => {
+      const http = httpServiceMock.createStartContract();
+      const response = {
+        serviceAccounts: [
+          {
+            id: 'service-account-id',
+            name: 'nightshift-relay',
+            roles: ['viewer'],
+            enabled: true,
+            assumable: true,
+          },
+        ],
+        nextPage: 'next-page',
+      };
+      http.get.mockResolvedValue(response);
+
+      await expect(
+        new ServiceAccountsAPIClient(http).list({ limit: 20, after: 'current-page' })
+      ).resolves.toBe(response);
+
+      expect(http.get).toHaveBeenCalledWith('/internal/security/service_account', {
+        query: { limit: 20, after: 'current-page' },
+      });
+    });
+  });
 });
