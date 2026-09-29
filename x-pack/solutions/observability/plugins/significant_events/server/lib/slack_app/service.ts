@@ -336,7 +336,6 @@ export class SlackAppService {
       throw error;
     }
 
-    // The new key has taken over — safe to invalidate whatever it's replacing now.
     if (existingConnection?.apiKeyId) {
       await this.invalidateApiKey(existingConnection.apiKeyId, 'after successful reconnect');
     }
@@ -359,24 +358,9 @@ export class SlackAppService {
   }
 
   /**
-   * Serverless install when `xpack.actions.relay.uiam.enabled` is on.
-   *
-   * Creates a user-managed service account, or reuses the id already stored on
-   * the connection, and tells UIAM that Relay's platform account may assume it.
-   * `startInstall` receives that id and nothing else. A raw token is never minted
-   * here.
-   *
-   * Every connect authorizes through the security service before a stored id is
-   * used or a new account is created. The saved id is not authorization.
-   *
-   * If the Relay rejects the install, the account is retained: Kibana has no
-   * service-account revoke or update API, and the id is not a credential. The id
-   * is recorded so the retry selects it. On a working API-key connection that
-   * record keeps the existing status and key. A 403 on an id we were reusing
-   * clears it, and the next connect has to create another account. Other
-   * failures, including 5xx, leave the id in place. Creation itself refuses an
-   * account whose `assumable_by` does not include Relay, and that refusal is
-   * not registered.
+   * Serverless install path. There is no service-account revoke API, so a failed install keeps the
+   * account and records its id for the retry; a Relay 403 on a reused id clears it so the next
+   * connect creates a new account.
    */
   private async connectWithServiceAccount(
     request: KibanaRequest,
@@ -398,21 +382,20 @@ export class SlackAppService {
       );
     }
 
-    // Same gate as creation. A stored id must not let a caller skip `manage_security`.
+    // Runs even when reusing a stored id: the stored id must not let a caller skip `manage_security`.
     await serviceAccounts.authorize(request);
 
-    const storedServiceAccountId = existingConnection?.serviceAccountId;
-    const selectingStoredAccount =
-      typeof storedServiceAccountId === 'string' && storedServiceAccountId.length > 0;
-    const serviceAccountId = selectingStoredAccount
-      ? storedServiceAccountId
-      : (
-          await serviceAccounts.create(request, {
-            name: RELAY_SERVICE_ACCOUNT_NAME,
-            roles: RELAY_SERVICE_ACCOUNT_ROLES,
-            trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
-          })
-        ).id;
+    const storedServiceAccountId = existingConnection?.serviceAccountId ?? null;
+    const selectingStoredAccount = storedServiceAccountId !== null;
+    const serviceAccountId =
+      storedServiceAccountId ??
+      (
+        await serviceAccounts.create(request, {
+          name: RELAY_SERVICE_ACCOUNT_NAME,
+          roles: RELAY_SERVICE_ACCOUNT_ROLES,
+          trustedPlatformAssumers: RELAY_PLATFORM_ASSUMERS,
+        })
+      ).id;
 
     const username = this.server.security.authc.getCurrentUser(request)?.username;
     const license = await this.server.licensing.getLicense();
@@ -428,14 +411,27 @@ export class SlackAppService {
       });
     } catch (error) {
       this.logger.error(`Slack app install failed: ${this.toErrorMessage(error)}`);
-      if (selectingStoredAccount && this.isStoredServiceAccountRejected(error)) {
-        await this.clearStoredServiceAccount(soClient, existingConnection);
+      if (
+        selectingStoredAccount &&
+        error instanceof RelayRequestError &&
+        error.statusCode === 403
+      ) {
+        await this.writeConnection(soClient, { ...existingConnection!, serviceAccountId: null });
       } else if (!selectingStoredAccount) {
-        await this.rememberServiceAccount(soClient, existingConnection, serviceAccountId, {
-          error: this.toErrorMessage(error),
-          username,
-          now,
-        });
+        if (existingConnection) {
+          await this.writeConnection(soClient, { ...existingConnection, serviceAccountId });
+        } else {
+          await this.writeConnection(soClient, {
+            status: RELAY_APP_CONNECTION_STATUS.error,
+            apiKeyId: null,
+            serviceAccountId,
+            tenantKey: null,
+            surface: 'slack',
+            createdBy: username,
+            createdAt: now,
+            error: this.toErrorMessage(error),
+          });
+        }
       }
       throw error;
     }
@@ -460,66 +456,6 @@ export class SlackAppService {
     return { authorizeUrl: installResponse.authorize_url };
   }
 
-  /** Relay 403 on a reused id means that account cannot be assumed. 5xx stays retryable. */
-  private isStoredServiceAccountRejected(error: unknown): boolean {
-    return error instanceof RelayRequestError && error.statusCode === 403;
-  }
-
-  /**
-   * Drops a reused id Relay refused, without creating a replacement in this request.
-   * The rest of the connection, including a live API key, stays as it was.
-   */
-  private async clearStoredServiceAccount(
-    soClient: SavedObjectsClientContract,
-    existingConnection: RelayAppConnectionAttributes | undefined
-  ): Promise<void> {
-    if (!existingConnection) {
-      return;
-    }
-    this.logger.warn(
-      'Relay rejected the stored service account with 403. The id was cleared so the next connect can create a new account.'
-    );
-    await this.writeConnection(soClient, {
-      ...existingConnection,
-      serviceAccountId: null,
-    });
-  }
-
-  /**
-   * Stores a service-account id after a failed install so the next connect selects
-   * it. An existing connection keeps its status and API key.
-   */
-  private async rememberServiceAccount(
-    soClient: SavedObjectsClientContract,
-    existingConnection: RelayAppConnectionAttributes | undefined,
-    serviceAccountId: string,
-    failure: { error: string; username: string | undefined; now: string }
-  ): Promise<void> {
-    if (existingConnection) {
-      await this.writeConnection(soClient, {
-        ...existingConnection,
-        serviceAccountId,
-      });
-      return;
-    }
-
-    await this.writeConnection(soClient, {
-      status: RELAY_APP_CONNECTION_STATUS.error,
-      apiKeyId: null,
-      serviceAccountId,
-      tenantKey: null,
-      surface: 'slack',
-      error: failure.error,
-      createdBy: failure.username,
-      createdAt: failure.now,
-    });
-  }
-
-  /**
-   * Transitions a stuck in-progress install to a terminal `error` state: the
-   * claim is gone Relay-side, so the minted key will never be used — invalidate
-   * it and record the reason for the UI. The user can then retry Connect cleanly.
-   */
   private async failInProgressInstall(
     soClient: SavedObjectsClientContract,
     connection: RelayAppConnectionAttributes,
@@ -557,11 +493,7 @@ export class SlackAppService {
       return { available: true, status: RELAY_APP_CONNECTION_STATUS.notConnected };
     }
 
-    // While an install is in progress, poll the Relay for claim fulfillment (the Slack
-    // OAuth callback lands on the Relay, not Kibana). The Relay resolves the pending
-    // claim from the transport-level deployment identity.
     if (connection.status === RELAY_APP_CONNECTION_STATUS.oauthInProgress) {
-      // An in-progress install without a claim id cannot be polled: fail it terminally.
       if (!connection.claimId) {
         return this.failInProgressInstall(
           soClient,
@@ -572,11 +504,6 @@ export class SlackAppService {
       try {
         const claim = await relayClient.fetchClaim(connection.claimId);
         if (claim.status === 'complete') {
-          // A completed claim must carry a tenant key: it's what every connected
-          // operation (listBindings / bind / unbind / disconnect) keys off. Marking
-          // the connection `connected` without one would strand it in a permanently
-          // broken state that never self-heals (getStatus only polls while in
-          // progress). Treat a tenant-less completion as a terminal install failure.
           if (!claim.tenant_key) {
             return this.failInProgressInstall(
               soClient,
@@ -597,9 +524,6 @@ export class SlackAppService {
           return { available: true, status: RELAY_APP_CONNECTION_STATUS.connected };
         }
       } catch (error) {
-        // A 4xx claim response is terminal (claim expired, consumed, or rejected):
-        // retrying can never succeed, so stop the install, release the orphaned
-        // key, and surface the reason. 5xx / network errors stay transient.
         if (error instanceof RelayRequestError && error.isTerminal) {
           return this.failInProgressInstall(soClient, connection, error);
         }
@@ -710,20 +634,11 @@ export class SlackAppService {
     if (connection.apiKeyId) {
       await this.invalidateApiKey(connection.apiKeyId, 'on disconnect');
     }
-    // A UIAM service account cannot be revoked or updated, so a successful disconnect
-    // keeps its id on a not-connected document. The next connect selects that account
-    // instead of creating another one that Relay can still assume.
 
-    // Only ask the Relay to unbind if this connection has a tenantKey: an in-progress
-    // install (no tenantKey) has no Relay-side binding to tear down yet.
     if (relayClient && connection.tenantKey) {
       try {
         await relayClient.unbind(connection.tenantKey);
       } catch (error) {
-        // The Relay's own contract requires the caller never see success while a
-        // binding survives (a partial teardown returns 502 and must be retried).
-        // Keep the connection record in an `error` state instead of deleting it,
-        // so the settings UI surfaces the failure and the user can retry.
         const message = this.toErrorMessage(error);
         this.logger.warn(`Failed to unbind from Relay on disconnect: ${message}`);
         await this.writeConnection(soClient, {
@@ -732,31 +647,16 @@ export class SlackAppService {
           apiKeyId: null,
           error: message,
         });
-        // Surface the failure to the caller instead of a misleading success: the
-        // route maps this to a retryable 5xx and the connection stays in `error`
-        // state so the settings UI shows it and the user can retry.
         throw error;
       }
     }
 
-    const serviceAccountId = connection.serviceAccountId;
-    if (typeof serviceAccountId === 'string' && serviceAccountId.length > 0) {
-      await this.writeConnection(soClient, {
-        status: RELAY_APP_CONNECTION_STATUS.notConnected,
-        apiKeyId: null,
-        serviceAccountId,
-        tenantKey: null,
-        surface: connection.surface ?? 'slack',
-      });
-    } else {
-      await soClient
-        .delete(RELAY_APP_CONNECTION_SO_TYPE, RELAY_APP_CONNECTION_SO_ID)
-        .catch((error) => {
-          if (!SavedObjectsErrorHelpers.isNotFoundError(error as Error)) {
-            throw error;
-          }
-        });
-    }
+    await this.writeConnection(soClient, {
+      ...connection,
+      status: RELAY_APP_CONNECTION_STATUS.notConnected,
+      apiKeyId: null,
+      tenantKey: null,
+    });
 
     return { status: 'disconnected' };
   }

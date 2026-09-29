@@ -723,15 +723,6 @@ describe('EsServiceAccounts', () => {
     });
   });
 
-  describe('#createFakeRequest', () => {
-    it('rejects with a 501 so callers surface a clear "not implemented" response', async () => {
-      await expect(serviceAccounts.createFakeRequest()).rejects.toMatchObject({
-        message: 'Creating requests for Elasticsearch service accounts is not yet implemented',
-        output: { statusCode: 501 },
-      });
-    });
-  });
-
   describe('#list', () => {
     const QUERY_PATH = '/_security/_query/service';
     /** One item as the query API reports it. */

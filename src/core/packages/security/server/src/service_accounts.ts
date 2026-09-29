@@ -55,12 +55,6 @@ export interface CoreServiceAccountsService {
    */
   isEnabled(): boolean;
 
-  /**
-   * Rejects unless this request may use a service account, including one already
-   * stored. Possession of an id is not authorization. The gate is `manage_security`,
-   * the same one as {@link CoreServiceAccountsService.create}. This does not mint a
-   * token, and it cannot re-bound privileges UIAM snapshotted at creation.
-   */
   authorize(request: KibanaRequest): Promise<void>;
 
   /**

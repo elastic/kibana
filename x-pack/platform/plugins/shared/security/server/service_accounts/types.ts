@@ -35,10 +35,6 @@ export interface ListServiceAccountsParams {
  * ones, so the route and contract layers stay backend-agnostic.
  */
 export interface ServiceAccountsBackend {
-  /**
-   * Rejects unless `request` holds `manage_security`. Callers must do this before
-   * using a service-account id they already hold. Does not mint a token.
-   */
   authorize(request: KibanaRequest): Promise<void>;
 
   create(request: KibanaRequest, params: CreateServiceAccountServerParams): Promise<ServiceAccount>;

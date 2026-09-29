@@ -315,6 +315,7 @@ describe('UiamServiceAccounts', () => {
 
       await serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
         name: 'nightshift-relay',
+        roles: ['editor'],
         trustedPlatformAssumers: ['relay'],
         assumable_by: [{ type: 'platform-service-account', service_account_id: 'attacker' }],
       } as never);
@@ -344,6 +345,7 @@ describe('UiamServiceAccounts', () => {
       await expect(
         serviceAccounts.create(createMockRequest('Bearer essu_my_token'), {
           name: 'nightshift-relay',
+          roles: ['editor'],
           trustedPlatformAssumers: ['relay'],
         })
       ).rejects.toThrow(/not registered/);

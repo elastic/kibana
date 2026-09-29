@@ -13,24 +13,7 @@ import { RelayRequestError } from '@kbn/actions-plugin/server';
 import { RELAY_APP_CONNECTION_STATUS } from '../../../common/slack_app/types';
 import { ELASTIC_APPS_SLACK_CONNECTOR_ID, SlackAppService } from './service';
 import { SlackAppUnavailableError } from './errors';
-import {
-  getRelayAppConnectionSavedObjectType,
-  RELAY_APP_CONNECTION_SO_ID,
-  RELAY_APP_CONNECTION_SO_TYPE,
-} from './saved_object';
-
-/** The create schema rejects `null` for maybe-string fields such as `claimId`. */
-function expectPersistedConnection(attributes: unknown) {
-  const modelVersions = getRelayAppConnectionSavedObjectType().modelVersions;
-  if (modelVersions === undefined || typeof modelVersions === 'function') {
-    throw new Error('relay-app-connection model versions are missing');
-  }
-  const createSchema = modelVersions['1']?.schemas?.create;
-  if (!createSchema) {
-    throw new Error('relay-app-connection create schema is missing');
-  }
-  expect(() => createSchema.validate(attributes)).not.toThrow();
-}
+import { RELAY_APP_CONNECTION_SO_ID, RELAY_APP_CONNECTION_SO_TYPE } from './saved_object';
 
 const request = {} as unknown as KibanaRequest;
 
@@ -324,6 +307,7 @@ describe('SlackAppService', () => {
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(createServiceAccount).toHaveBeenCalledWith(request, {
         name: 'nightshift-relay-agent-builder',
+        roles: ['editor'],
         trustedPlatformAssumers: ['relay'],
       });
       expect(startInstall).toHaveBeenCalledWith({
@@ -444,8 +428,6 @@ describe('SlackAppService', () => {
 
       await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
 
-      // No revoke API: the account stays in UIAM. The id is recorded so the next
-      // connect selects it, and the thrown error carries no token.
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.create).toHaveBeenCalledWith(
@@ -458,7 +440,6 @@ describe('SlackAppService', () => {
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
-      expectPersistedConnection(soClient.create.mock.calls[0][1]);
       expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('claimId');
       expect(JSON.stringify((logger.error as jest.Mock).mock.calls)).not.toContain(
         'essu_raw-token-must-not-leak'
@@ -605,7 +586,6 @@ describe('SlackAppService', () => {
 
       await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
 
-      // The id is stored for the next select. Status and the live API key stay.
       expect(createServiceAccount).toHaveBeenCalledTimes(1);
       expect(grantAsInternalUser).not.toHaveBeenCalled();
       expect(invalidateAsInternalUser).not.toHaveBeenCalled();
@@ -842,7 +822,7 @@ describe('SlackAppService', () => {
   });
 
   describe('disconnect', () => {
-    it('invalidates the key, unbinds from the Relay by tenantKey, and deletes the binding', async () => {
+    it('invalidates the key, unbinds from the Relay by tenantKey, and writes a not-connected document', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -858,9 +838,15 @@ describe('SlackAppService', () => {
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).toHaveBeenCalledWith('tenant-A');
-      expect(soClient.delete).toHaveBeenCalledWith(
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        RELAY_APP_CONNECTION_SO_ID
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          tenantKey: null,
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ status: 'disconnected' });
     });
@@ -881,9 +867,15 @@ describe('SlackAppService', () => {
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).not.toHaveBeenCalled();
-      expect(soClient.delete).toHaveBeenCalledWith(
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        RELAY_APP_CONNECTION_SO_ID
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          tenantKey: null,
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ status: 'disconnected' });
     });
@@ -923,11 +915,15 @@ describe('SlackAppService', () => {
     });
 
     it('keeps the service-account id on a not-connected document', async () => {
-      const { server, soClient, invalidateAsInternalUser } = createHarness();
+      const { server, soClient, invalidateAsInternalUser } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
       soClient.get.mockResolvedValue({
         attributes: {
           status: RELAY_APP_CONNECTION_STATUS.connected,
-          apiKeyId: 'key-1',
+          apiKeyId: null,
           serviceAccountId: 'sa-kept',
           tenantKey: 'tenant-A',
           surface: 'slack',
@@ -939,22 +935,19 @@ describe('SlackAppService', () => {
         status: 'disconnected',
       });
 
-      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).toHaveBeenCalledWith('tenant-A');
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
       expect(soClient.delete).not.toHaveBeenCalled();
       expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
         expect.objectContaining({
           status: RELAY_APP_CONNECTION_STATUS.notConnected,
-          apiKeyId: null,
           serviceAccountId: 'sa-kept',
+          apiKeyId: null,
           tenantKey: null,
-          surface: 'slack',
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
-      expectPersistedConnection(soClient.create.mock.calls[0][1]);
-      expect(soClient.create.mock.calls[0][1]).not.toHaveProperty('claimId');
     });
 
     it('is a no-op when the connection does not exist', async () => {

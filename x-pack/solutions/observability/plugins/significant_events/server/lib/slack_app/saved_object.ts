@@ -14,13 +14,8 @@ export const RELAY_APP_CONNECTION_SO_TYPE = 'relay-app-connection';
  * A single, deployment-wide connection document. The Slack workspace binding is
  * deployment-level (not per-space), so a fixed id + `agnostic` namespace is used.
  *
- * No secrets are stored here. M1 hands the managed ES API key secret to the Relay
- * and keeps only the key id so it can be invalidated. M2
- * (`xpack.actions.relay.uiam.enabled`) stores the UIAM service-account id, which
- * is an identifier and not a credential: the ephemeral token never leaves the
- * security plugin. Kibana has no service-account revoke or update API, so the id
- * is kept after a failed install and after disconnect (`not_connected`). A Relay
- * 403 on a reused id clears it. Using the id still requires `manage_security`.
+ * No secrets are stored here: only the managed API key's id (so it can be invalidated) and the
+ * UIAM service-account id, which is an identifier rather than a credential.
  */
 export const RELAY_APP_CONNECTION_SO_ID = 'relay-app-connection';
 
@@ -31,10 +26,9 @@ const relayAppConnectionAttributesV1 = schema.object({
     schema.literal('connected'),
     schema.literal('error'),
   ]),
-  // Id of the managed ES API key minted for the Relay; kept so we can invalidate it
-  // on disconnect. The secret itself is never stored (it is handed to the Relay).
+  // Id of the managed ES API key minted for the Relay; kept so we can invalidate it on disconnect.
   apiKeyId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
-  // UIAM service-account id for an M2 install. Not a secret. Absent on M1.
+  // UIAM service-account id. Not a secret.
   serviceAccountId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
   // Claim id issued at install start; required by the Relay's claim poll
   // (`parseClaimInstallInput` on relay main mandates `claim_id` in the body).
