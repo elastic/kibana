@@ -204,6 +204,7 @@ const DEV_DIRECTORIES = [
 const DEV_FILE_PATTERNS = [
   '*.mock.{js,ts,tsx}',
   '*.test.{js,ts,tsx}',
+  '*.test.mocks.{js,ts,tsx}',
   '*.test.helpers.{js,ts,tsx}',
   '*.stories.{js,ts,tsx}',
   '*.story.{js,ts,tsx}',
@@ -211,7 +212,7 @@ const DEV_FILE_PATTERNS = [
   'mock.{js,ts,tsx}',
   '_stubs.{js,ts,tsx}',
   '{testHelpers,test_helper,test_utils}.{js,ts,tsx}',
-  '{postcss,webpack,cypress}.config.{js,ts}',
+  '{postcss,webpack,cypress,vitest}.config.{js,ts}',
 ];
 
 /** Glob patterns which describe dev-only code. */

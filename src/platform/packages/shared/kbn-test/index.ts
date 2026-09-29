@@ -77,6 +77,7 @@ export {
 export type { JestConfigResult, JestValidationResult } from './src/jest/run_contract';
 
 export { runJestAll } from './src/jest/run_all';
+export { runVitest } from './src/vitest/run';
 
 export { runJestNegative, NEGATIVE_SCENARIOS, evaluateScenario } from './src/jest/run_negative';
 export type {

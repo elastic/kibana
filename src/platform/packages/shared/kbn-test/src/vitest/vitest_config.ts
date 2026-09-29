@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { toExpression } from '@kbn/interpreter';
-import type { ExpressionAstExpression, ExpressionAstArgument } from './types';
+import { basename } from 'path';
 
-export function format<T extends ExpressionAstExpression | ExpressionAstArgument>(
-  ast: T,
-  type: T extends ExpressionAstExpression ? 'expression' : 'argument'
-): string {
-  return toExpression(ast, type);
-}
+/** File name of a unit test group config; unit tests run on Vitest, integration tests on Jest. */
+export const VITEST_CONFIG_NAME = 'vitest.config.js';
+
+export const isVitestConfig = (configPath: string): boolean =>
+  basename(configPath) === VITEST_CONFIG_NAME;

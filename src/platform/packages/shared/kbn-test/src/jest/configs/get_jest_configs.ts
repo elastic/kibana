@@ -8,11 +8,14 @@
  */
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { dirname, resolve, sep as osSep } from 'path';
+import { dirname, relative, resolve, sep as osSep } from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { createRequire } from 'module';
 import { readFileSync, existsSync } from 'fs';
 import { asyncMapWithLimit } from '@kbn/std';
+import picomatch from 'picomatch';
+import { isVitestConfig } from '../../vitest/vitest_config';
 
 const execAsync = promisify(exec);
 
@@ -64,7 +67,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
       // canaries) are never treated as real tests or orphaned. This mirrors CI's
       // discoverJestUnitConfigs, which already ignores **/__fixtures__/**.
       const combinedResult = await execAsync(
-        `git ls-files -- '*.test.ts' '*.test.tsx' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' ':(glob,exclude)**/__fixtures__/**'`,
+        `git ls-files -- '*.test.ts' '*.test.tsx' '**/vitest.config.js' '**/*/vitest.config.js' '**/jest.config.js' '**/*/jest.config.js' '**/jest.config.cjs' '**/*/jest.config.cjs' '**/jest.integration.config.js' '**/*/jest.integration.config.js' '**/jest.integration.config.cjs' '**/*/jest.integration.config.cjs' ':(glob,exclude)**/__fixtures__/**'`,
         { cwd: REPO_ROOT, maxBuffer: 1024 * 1024 * 10 }
       );
 
@@ -75,7 +78,7 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
         .filter((file) => existsSync(file));
 
       // Separate configs from test files using regex patterns
-      const configPattern = /jest(\.integration)?\.config\.(c?js|ts)$/;
+      const configPattern = /(jest(\.integration)?\.config\.(c?js|ts)|vitest\.config\.js)$/;
       const testPattern = /\.(test|spec)\.(ts|tsx)$/;
 
       configFiles = allFiles.filter((file) => configPattern.test(file));
@@ -85,6 +88,11 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
     // Step 2: Parse all config files in parallel and apply Jest matching rules using fast heuristic
     const configTestResults = await Promise.all(
       configFiles.map(async (configPath) => {
+        // Vitest configs carry exact include/exclude globs, so they need no heuristic or recheck.
+        if (isVitestConfig(configPath)) {
+          return { config: configPath, testFiles: getVitestConfigTestFiles(configPath, allTestFiles) };
+        }
+
         const rules = parseJestConfig(configPath);
 
         // If parsing failed, return empty (will be rechecked with Jest's SearchSource)
@@ -128,12 +136,16 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
     const configsToRecheck = new Set<string>();
 
     // Add empty configs for rechecking
-    emptyConfigs.forEach((config) => configsToRecheck.add(config));
+    emptyConfigs
+      .filter((config) => !isVitestConfig(config))
+      .forEach((config) => configsToRecheck.add(config));
 
     // Add configs involved in duplicates for rechecking
     testFileToConfigs.forEach((configs) => {
       if (configs.length > 1) {
-        configs.forEach((config) => configsToRecheck.add(config));
+        configs
+          .filter((config) => !isVitestConfig(config))
+          .forEach((config) => configsToRecheck.add(config));
       }
     });
 
@@ -186,6 +198,28 @@ export async function getJestConfigs(configPaths?: string[]): Promise<{
   } catch (error) {
     throw new Error(`Failed to get tests for configs: ${error}`);
   }
+}
+
+/**
+ * Test files selected by a vitest.config.js, using the include/exclude globs Vitest itself
+ * applies (repo-root relative, since every Kibana Vitest config uses the repo as its root).
+ */
+interface VitestConfigShape {
+  test?: { include?: string[]; exclude?: string[] };
+}
+
+function getVitestConfigTestFiles(configPath: string, allTestFiles: string[]): string[] {
+  const loaded = createRequire(__filename)(configPath) as VitestConfigShape & {
+    default?: VitestConfigShape;
+  };
+  // Configs of `"type": "module"` packages are ESM; require() returns their namespace.
+  const { test = {} } = loaded.default ?? loaded;
+  const isIncluded = picomatch(test.include ?? [], { dot: true });
+  const isExcluded = picomatch(test.exclude ?? [], { dot: true });
+  return allTestFiles.filter((testFile) => {
+    const relativePath = relative(REPO_ROOT, testFile);
+    return isIncluded(relativePath) && !isExcluded(relativePath);
+  });
 }
 
 /**

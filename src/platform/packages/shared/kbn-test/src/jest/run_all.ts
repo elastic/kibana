@@ -20,6 +20,7 @@ import { tmpdir } from 'os';
 import { getJestConfigs } from './configs/get_jest_configs';
 import { isInBuildkite, markConfigCompleted, isConfigCompleted } from './buildkite_checkpoint';
 import { parseShardAnnotation, annotateConfigWithShard } from './shard_config';
+import { isVitestConfig } from '../vitest/vitest_config';
 
 interface JestConfigResult {
   config: string;
@@ -261,15 +262,23 @@ async function runConfigs(
         const relConfig = relative(REPO_ROOT, config);
         log.info(`Starting ${relConfig}`);
 
-        const args = [
-          'scripts/jest',
-          '--config',
-          relative(REPO_ROOT, cleanConfig),
-          '--runInBand',
-          '--coverage=false',
-          '--passWithNoTests',
-          ...(shard ? [`--shard=${shard}`] : []),
-        ];
+        const args = isVitestConfig(cleanConfig)
+          ? [
+              'scripts/vitest',
+              '--config',
+              relative(REPO_ROOT, cleanConfig),
+              '--passWithNoTests',
+              ...(shard ? [`--shard=${shard}`] : []),
+            ]
+          : [
+              'scripts/jest',
+              '--config',
+              relative(REPO_ROOT, cleanConfig),
+              '--runInBand',
+              '--coverage=false',
+              '--passWithNoTests',
+              ...(shard ? [`--shard=${shard}`] : []),
+            ];
 
         const proc = spawn(process.execPath, args, {
           env: {

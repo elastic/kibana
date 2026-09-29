@@ -57,6 +57,11 @@ const ALLOWED_CALLERS = [
   /jest-snapshot/,
   // Jest's own environment uses new Function() for code generation. Dev-only, this is OK.
   /jest-environment/,
+  // Vitest evaluates snapshot files with new Function(). Dev-only, this is OK.
+  /node_modules\/vitest\//,
+  // Vitest installs jsdom into the test realm (Jest keeps it outside the sandbox), so jsdom's
+  // selector compiler (nwsapi) runs against the patched Function. Dev-only, this is OK.
+  /node_modules\/nwsapi\//,
   // kbn-handlebars tests intentionally exercise the eval-based Handlebars compiler
   // to verify parity with the safe AST-based replacement. The CSP probe
   // (kbnUnsafeEvalTest) is blocked separately above, so this exception only
