@@ -346,6 +346,16 @@
       }
     },
     {
+      // ESLint skips hidden directories except those .eslintignore re-includes; keep the
+      // license header rules off in the same set now that oxlint owns them.
+      "files": ["**/.*/**"],
+      "excludeFiles": ["**/.buildkite/**", "**/.github/**", "**/.storybook/**"],
+      "rules": {
+        "@kbn/eslint/require-license-header": "off",
+        "@kbn/eslint/disallow-license-headers": "off"
+      }
+    },
+    {
       "files": [
         "{src/platform,src/core,x-pack/**}/{plugins,packages}/**/test/scout{_*,}/**/*.ts",
         "{examples,x-pack/examples}/**/test/scout{_*,}/**/*.ts",
