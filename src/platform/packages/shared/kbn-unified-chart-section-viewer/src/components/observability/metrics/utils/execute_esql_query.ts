@@ -41,6 +41,7 @@ export interface ExecuteEsqlParams {
    * error telemetry filterable by the same profile.
    */
   profileId: string;
+  executionContextName?: MetricsExecutionContextName;
 }
 
 export const fetchEsqlResponseOrThrow = async (
@@ -75,6 +76,7 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
   variables,
   uiSettings,
   profileId,
+  executionContextName = MetricsExecutionContextName.METRICS_INFO,
 }: ExecuteEsqlParams): Promise<ExecuteEsqlResult<TDocument>> {
   const esQueryConfig = getEsQueryConfig(uiSettings);
   const timeFilter =
@@ -94,11 +96,9 @@ export async function executeEsqlQuery<TDocument extends object = Record<string,
     filter,
     timeRange,
     variables,
-    ...getMetricsExecutionContext(
-      MetricsExecutionContextAction.FETCH,
-      MetricsExecutionContextName.METRICS_INFO,
-      { profile_id: profileId }
-    ),
+    ...getMetricsExecutionContext(MetricsExecutionContextAction.FETCH, executionContextName, {
+      profile_id: profileId,
+    }),
   });
 
   return {

@@ -117,6 +117,21 @@ export interface ParsedMetricItem {
   readonly dimensionFields: Dimension[];
 }
 
+export type HistogramBounds =
+  | { readonly status: 'empty' }
+  | { readonly status: 'point'; readonly value: number }
+  | { readonly status: 'range'; readonly min: number; readonly max: number };
+
+export type HistogramBoundsResult =
+  | HistogramBounds
+  | { readonly status: 'error'; readonly error: Error };
+
+export interface HistogramBoundsQuery {
+  readonly metricKey: string;
+  readonly source: string;
+  readonly esqlQuery: string;
+}
+
 export interface MetricsTelemetry {
   total_number_of_metrics: number;
   total_number_of_dimensions: number;

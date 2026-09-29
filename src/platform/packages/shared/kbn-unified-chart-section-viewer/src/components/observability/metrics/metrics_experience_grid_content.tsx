@@ -18,14 +18,16 @@ import {
   useEuiTheme,
   type EuiFlexGridProps,
 } from '@elastic/eui';
+import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { Dimension, ParsedMetricItem, UnifiedMetricsGridProps } from '../../../types';
 import { getEsqlQuery } from './utils/get_esql_query';
-import { PAGE_SIZE } from '../../../common/constants';
+import { FEATURE_FLAG_DEFAULTS, FEATURE_FLAGS, PAGE_SIZE } from '../../../common/constants';
+import { useFeatureFlag } from '../../../hooks';
 import { isLegacyHistogram } from '../../../common/utils/legacy_histogram';
 import { LEGACY_HISTOGRAM_USER_MESSAGES } from '../../../common/utils/user_messages';
 import { MetricsGrid } from './metrics_grid';
 import { Pagination } from '../../pagination';
-import { usePagination } from './hooks';
+import { useFetchHistogramBounds, usePagination } from './hooks';
 import { MetricsGridLoadingProgress } from '../../empty_state/empty_state';
 import { useMetricsExperienceState } from './context/metrics_experience_state_provider';
 import { firstNonNullable } from '../../../common/utils';
@@ -42,6 +44,7 @@ export interface MetricsExperienceGridContentProps
   activeDimensions: Dimension[];
   isDiscoverLoading?: boolean;
   isTabSelected: boolean;
+  isComponentVisible: boolean;
 }
 
 export const MetricsExperienceGridContent = ({
@@ -56,6 +59,7 @@ export const MetricsExperienceGridContent = ({
   histogramCss,
   isDiscoverLoading = false,
   isTabSelected,
+  isComponentVisible,
 }: MetricsExperienceGridContentProps) => {
   const { query } = fetchParams;
   const euiThemeContext = useEuiTheme();
@@ -65,7 +69,12 @@ export const MetricsExperienceGridContent = ({
 
   const whereStatements = useMemo(() => extractWhereCommand(esqlQuery), [esqlQuery]);
 
-  const { searchTerm, currentPage, onPageChange } = useMetricsExperienceState();
+  const userSource = useMemo(
+    () => (esqlQuery ? getIndexPatternFromESQLQuery(esqlQuery) || undefined : undefined),
+    [esqlQuery]
+  );
+
+  const { searchTerm, currentPage, onPageChange, profileId } = useMetricsExperienceState();
 
   const {
     currentPageItems: currentPageFields = [],
@@ -76,6 +85,21 @@ export const MetricsExperienceGridContent = ({
     pageSize: PAGE_SIZE,
     currentPage,
   }) ?? {};
+
+  const isHeatmapsEnabled = useFeatureFlag(
+    FEATURE_FLAGS.IS_HEATMAPS_ENABLED,
+    FEATURE_FLAG_DEFAULTS[FEATURE_FLAGS.IS_HEATMAPS_ENABLED]
+  );
+
+  useFetchHistogramBounds({
+    enabled: isHeatmapsEnabled && isComponentVisible,
+    metricItems: currentPageFields,
+    fetchParams,
+    services,
+    whereStatements,
+    originalSource: userSource,
+    profileId,
+  });
 
   const columns = useMemo<NonNullable<EuiFlexGridProps['columns']>>(
     () => Math.min(filteredFieldsCount, 4) as NonNullable<EuiFlexGridProps['columns']>,
