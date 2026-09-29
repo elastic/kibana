@@ -21,7 +21,6 @@ import {
 
 export interface LinkCardProps {
   icon: any | string;
-  // icon: EuiIconType | string;
   iconAreaLabel?: string;
   title: any;
   description: any;

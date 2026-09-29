@@ -6,3 +6,4 @@
  */
 
 export { ResultsLinks } from './results_links';
+export { LinkCard, type LinkCardProps } from './link_card';

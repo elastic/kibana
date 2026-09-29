@@ -21,3 +21,7 @@ export { createOpenFileUploadLiteAction } from './src/file_upload_component/new/
 export { FileUploadLiteLookUpView } from './src/file_upload_component/new/file_upload_lite_lookup_view';
 
 export type { FileUploadStartDependencies } from './src/file_upload_component/kibana_context';
+export {
+  LinkCard,
+  type LinkCardProps,
+} from './src/file_upload_component/new/results_links/link_card';
