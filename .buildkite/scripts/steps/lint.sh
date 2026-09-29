@@ -21,7 +21,7 @@ else
 fi
 
 echo '--- Lint: oxlint'
-node scripts/lint.js $fix_flag
+node scripts/lint.js --quiet $fix_flag
 oxlint_exit=$?
 
 echo '--- Lint: eslint'
@@ -30,7 +30,7 @@ eslint_exit=$?
 # re-enable "Exit immediately" mode
 set -e;
 
-desc="node scripts/lint.js $fix_flag && node scripts/eslint_all_files --no-cache $fix_flag"
+desc="node scripts/lint.js --quiet $fix_flag && node scripts/eslint_all_files --no-cache $fix_flag"
 check_for_changed_files "$desc" true
 
 if [[ "${oxlint_exit}" != "0" ]]; then
