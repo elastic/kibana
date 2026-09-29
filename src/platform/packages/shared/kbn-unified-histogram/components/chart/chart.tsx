@@ -75,6 +75,7 @@ export interface UnifiedHistogramChartProps {
   onFilter?: LensEmbeddableInput['onFilter'];
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
+  withLensActions?: boolean;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
 
@@ -100,6 +101,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   onApiAvailable: consumerOnApiAvailable,
+  withLensActions = true,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = lensVisServiceState.currentSuggestionContext;
@@ -304,7 +306,7 @@ export function UnifiedHistogramChart({
 
   const actions: IconButtonGroupProps['buttons'] = [];
 
-  if (canEditVisualizationOnTheFly) {
+  if (withLensActions && canEditVisualizationOnTheFly) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -316,7 +318,7 @@ export function UnifiedHistogramChart({
       'data-test-subj': 'unifiedHistogramEditFlyoutVisualization',
       onClick: () => setIsFlyoutVisible(true),
     });
-  } else if (onEditVisualization) {
+  } else if (withLensActions && onEditVisualization) {
     const editLabel = i18n.translate('unifiedHistogram.editVisualizationButton', {
       defaultMessage: 'Edit visualization',
     });
@@ -329,7 +331,7 @@ export function UnifiedHistogramChart({
     });
   }
 
-  if (canSaveVisualization) {
+  if (withLensActions && canSaveVisualization) {
     const saveLabel = i18n.translate('unifiedHistogram.saveVisualizationButton', {
       defaultMessage: 'Save visualization to dashboard',
     });

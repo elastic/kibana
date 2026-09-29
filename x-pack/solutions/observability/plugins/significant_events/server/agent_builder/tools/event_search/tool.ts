@@ -253,14 +253,14 @@ export function createSearchEventsTool({
       const query = normalizeEventSearchQuery(toolParams.query);
 
       try {
-        const { getEventClient, licensing, sourcesClient } = await getScopedClients({ request });
+        const { getEventSearchClient, licensing, sourcesClient } = await getScopedClients({ request });
         await assertSignificantEventsAccess({ server, licensing });
         const { slugs, ...searchParams } = toolParams;
         const catalog = await loadSourceCatalog(sourcesClient);
         const filterSources = slugs ? resolveSourcesBySlug(catalog, slugs) : [];
 
         const data = await searchEventsToolHandler({
-          eventClient: await getEventClient(),
+          eventClient: await getEventSearchClient(),
           params: {
             ...searchParams,
             stream_names: slugs ? filterSources.map((source) => source.id) : undefined,

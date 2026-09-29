@@ -322,6 +322,7 @@ export function createEventsWriteTool({
       try {
         const {
           getEventClient,
+          getEventSearchClient,
           getKnowledgeIndicatorClient,
           getAlertEventsClient,
           licensing,
@@ -337,6 +338,7 @@ export function createEventsWriteTool({
 
         const data = await eventsWriteBulkHandler({
           eventClient: await getEventClient(),
+          eventSearchClient: await getEventSearchClient(),
           inputs: items,
           source: toolParams.source,
           alertEventsClient: await getAlertEventsClient(),

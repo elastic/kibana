@@ -99,7 +99,7 @@ describe('event_search tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
       sourcesClient: mockSourcesClient(['logs.checkout']),
@@ -167,7 +167,7 @@ describe('event_search tool', () => {
     });
 
     const getScopedClients = jest.fn().mockResolvedValue({
-      getEventClient: jest.fn().mockReturnValue({}),
+      getEventSearchClient: jest.fn().mockReturnValue({}),
       licensing: {},
       uiSettingsClient: {},
       sourcesClient: {
