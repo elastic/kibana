@@ -71,6 +71,16 @@ const fullyMigratedReportMappings = () => ({
             context_coverage: {},
             context_chars: {},
             source_chars: {},
+            adjudication: {
+              properties: {
+                provider: {},
+                reviewed: {},
+                approved: {},
+                downgraded: {},
+                deterministic_references: {},
+                deferred_unreviewed: {},
+              },
+            },
           },
         },
         diamond: {

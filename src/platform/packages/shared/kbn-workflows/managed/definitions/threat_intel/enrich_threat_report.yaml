@@ -251,9 +251,12 @@ steps:
       # boost 5 (exact ioc_set_hash) or boost 2 + score_mode sum (IOC overlap)
       # is what clears it. Technique overlap is omitted on purpose: common
       # ATT&CK IDs have low IDF and never cleared min_score 4 alone.
+      # ioc_set_hash stays the extract_iocs fingerprint (deterministic). Do not
+      # substitute enrich_report_core's adjudicated anchors here: the boost: 5
+      # term was calibrated against a hash that cannot move with model verdicts.
       - name: find_related_reports
         type: elasticsearch.search
-        if: "steps.enrich_report_core.output.ioc_set_hash : *"
+        if: "steps.extract_iocs.output.ioc_set_hash : *"
         with:
           index: .kibana-threat-reports
           size: 15
@@ -270,7 +273,7 @@ steps:
               should:
                 - term:
                     extracted.ioc_set_hash:
-                      value: "{{ steps.enrich_report_core.output.ioc_set_hash }}"
+                      value: "{{ steps.extract_iocs.output.ioc_set_hash }}"
                       boost: 5
                 # `${{ }}` keeps the mapped IOC values as an array.
                 - nested:
@@ -295,7 +298,7 @@ steps:
           doc:
             extracted:
               iocs: "${{ steps.enrich_report_core.output.iocs }}"
-              ioc_set_hash: "{{ steps.enrich_report_core.output.ioc_set_hash }}"
+              ioc_set_hash: "{{ steps.extract_iocs.output.ioc_set_hash }}"
               categories: "${{ steps.enrich_report_core.output.categories }}"
               behaviors: "${{ steps.enrich_report_core.output.behaviors }}"
               artifacts: "${{ steps.enrich_report_core.output.artifacts }}"
@@ -306,6 +309,13 @@ steps:
                 context_coverage: "${{ steps.enrich_report_core.output.context.coverage }}"
                 context_chars: "${{ steps.enrich_report_core.output.context.selected_chars }}"
                 source_chars: "${{ steps.enrich_report_core.output.context.original_chars }}"
+                adjudication:
+                  provider: "{{ steps.enrich_report_core.output.adjudication.provider }}"
+                  reviewed: "${{ steps.enrich_report_core.output.adjudication.reviewed }}"
+                  approved: "${{ steps.enrich_report_core.output.adjudication.approved }}"
+                  downgraded: "${{ steps.enrich_report_core.output.adjudication.downgraded }}"
+                  deterministic_references: "${{ steps.enrich_report_core.output.adjudication.deterministic_references }}"
+                  deferred_unreviewed: "${{ steps.enrich_report_core.output.adjudication.deferred_unreviewed }}"
               diamond:
                 suitable: "${{ variables.diamond_suitable }}"
               gate:

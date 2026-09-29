@@ -17,6 +17,7 @@ import {
   OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS,
   OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES,
   OVERFLOW_RETRY2_MAX_VALUE_CHARS,
+  hashIocSet,
   prepareIocAdjudication,
   reconcileIocAdjudication,
   truncateValuePreservingEnds,
@@ -427,5 +428,26 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.anchor_iocs.some((ioc) => ioc.value === iocs[capacity].value)).toBe(false);
     expect(result.anchor_iocs.some((ioc) => ioc.type === 'hash')).toBe(true);
     expect(result.promotable_count).toBe(capacity + 1);
+  });
+
+  it('keeps ioc_set_hash independent of deferred anchors', () => {
+    const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
+    const iocs = Array.from({ length: capacity + 5 }, (_, index) =>
+      candidate(`https://evil.example/payload-${index}`, {
+        tier: 'discriminating',
+        tier_heuristic: 'discriminating',
+        tier_basis: 'url_path_entropy',
+      })
+    );
+    const text = iocs.map((ioc) => `Seen ${ioc.value}.`).join(' ');
+    const prepared = prepareIocAdjudication({ text, iocs });
+    const approved = new Set(prepared.reviewable.map((entry) => entry.id));
+    const result = reconcileIocAdjudication(prepared, approved, {
+      correlationHash: hashIocSet(iocs),
+    });
+
+    expect(result.ioc_set_hash).toBe(hashIocSet(iocs));
+    expect(result.adjudication.deferred_unreviewed).toBe(5);
+    expect(result.anchor_iocs).toHaveLength(capacity);
   });
 });

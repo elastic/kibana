@@ -14,6 +14,7 @@ import {
   reportCoreModelOutputSchema,
   type ReportCoreModelOutput,
 } from './enrich_report_core';
+import { hashIocSet } from './adjudicate_iocs';
 
 const URL = 'https://evil.example/PAYLOAD/Stage2.exe';
 const HASH = 'A'.repeat(64);
@@ -186,7 +187,7 @@ describe('enrichReportCore', () => {
     await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
 
     const retryPrompt = String(invoke.mock.calls[1][0]);
-    const candidatesMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(retryPrompt);
+    const candidatesMatch = /IOC candidates:\n(\[[\s\S]*?\])(?:\n\nSource:|$)/.exec(retryPrompt);
     expect(candidatesMatch).not.toBeNull();
     const retryCandidates = JSON.parse(candidatesMatch![1]) as Array<{ context: string }>;
     expect(retryCandidates).toHaveLength(50);
@@ -224,8 +225,8 @@ describe('enrichReportCore', () => {
     expect(invoke.mock.calls.length).toBeGreaterThanOrEqual(3);
     const secondRetryPrompt = String(invoke.mock.calls[2][0]);
     const firstRetryPrompt = String(invoke.mock.calls[1][0]);
-    const secondMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(secondRetryPrompt);
-    const firstMatch = /IOC candidates:\n(\[[\s\S]*?\])\n\nSource:/.exec(firstRetryPrompt);
+    const secondMatch = /IOC candidates:\n(\[[\s\S]*?\])(?:\n\nSource:|$)/.exec(secondRetryPrompt);
+    const firstMatch = /IOC candidates:\n(\[[\s\S]*?\])(?:\n\nSource:|$)/.exec(firstRetryPrompt);
     expect(secondMatch).not.toBeNull();
     expect(firstMatch).not.toBeNull();
     const secondRetryCandidates = JSON.parse(secondMatch![1]) as unknown[];
@@ -270,5 +271,68 @@ describe('enrichReportCore', () => {
     // Unreviewed mid-batch IDs from the first call are rejected only if that
     // batch reviewed them. Index 1 was in batch 1 and not approved.
     expect(result.iocs[1].tier).toBe('reference');
+  });
+
+  it('keeps ioc_set_hash as the pre-adjudication extract fingerprint', async () => {
+    const invoke = jest.fn().mockImplementation((prompt: string) => {
+      if (String(prompt).includes('taxonomy')) {
+        return Promise.resolve({
+          raw: { response_metadata: {} },
+          parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+        });
+      }
+      return Promise.resolve({
+        raw: { response_metadata: {} },
+        parsed: { approved_ioc_candidate_ids: [] },
+      });
+    });
+    const manyIocs = Array.from({ length: 320 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'discriminating' as const,
+      tier_heuristic: 'discriminating' as const,
+      tier_basis: 'url_path_entropy',
+    }));
+    const text = manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
+    const expectedHash = hashIocSet(manyIocs);
+
+    const result = await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    expect(result.ioc_set_hash).toBe(expectedHash);
+    // Model verdicts and batching must not move the correlation fingerprint.
+    expect(result.anchor_iocs.length).toBeLessThan(manyIocs.length);
+  });
+
+  it('does not resend the full article on follow-up IOC batches', async () => {
+    const invoke = jest.fn().mockImplementation((prompt: string) => {
+      if (String(prompt).includes('taxonomy')) {
+        return Promise.resolve({
+          raw: { response_metadata: {} },
+          parsed: { ...OUTPUT, approved_ioc_candidate_ids: [0] },
+        });
+      }
+      return Promise.resolve({
+        raw: { response_metadata: {} },
+        parsed: { approved_ioc_candidate_ids: [300] },
+      });
+    });
+    const manyIocs = Array.from({ length: 320 }, (_, index) => ({
+      type: 'url' as const,
+      value: `https://evil.example/payload-${index}`,
+      defanged: `https://evil.example/payload-${index}`,
+      tier: 'discriminating' as const,
+      tier_heuristic: 'discriminating' as const,
+      tier_basis: 'url_path_entropy',
+    }));
+    const uniqueMarker = 'UNIQUE_ARTICLE_BODY_MARKER_FOR_BATCH_TEST';
+    const text = `${uniqueMarker} ${manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ')}`;
+
+    await enrichReportCore(buildModel(invoke), logger, { text, iocs: manyIocs });
+
+    expect(invoke).toHaveBeenCalledTimes(2);
+    expect(String(invoke.mock.calls[0][0])).toContain(uniqueMarker);
+    expect(String(invoke.mock.calls[1][0])).not.toContain(uniqueMarker);
+    expect(String(invoke.mock.calls[1][0])).not.toContain('\nSource:\n');
   });
 });

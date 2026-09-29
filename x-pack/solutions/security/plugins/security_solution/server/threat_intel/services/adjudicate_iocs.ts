@@ -74,17 +74,22 @@ export interface PreparedIocAdjudication {
   deferredUnreviewed: number;
 }
 
-const iocSetHash = (iocs: ExtractedIoc[]): string | null =>
-  iocs.length === 0
-    ? null
-    : createHash('sha256')
-        .update(
-          iocs
-            .map((ioc) => ioc.value.toLowerCase())
-            .sort()
-            .join('\n')
-        )
-        .digest('hex');
+/**
+ * Deterministic correlation fingerprint matching `extract_iocs`: every
+ * non-reference/non-denied value, independent of model adjudication or deferral.
+ */
+export const hashIocSet = (iocs: readonly ExtractedIoc[]): string | null => {
+  const eligible = iocs.filter((ioc) => ioc.tier !== 'reference' && ioc.tier !== 'denied');
+  if (eligible.length === 0) return null;
+  return createHash('sha256')
+    .update(
+      eligible
+        .map((ioc) => ioc.value.toLowerCase())
+        .sort()
+        .join('\n')
+    )
+    .digest('hex');
+};
 
 const sliceContext = (source: string, index: number, valueLength: number): string =>
   source
@@ -501,7 +506,11 @@ export const boundIocAdjudicationForPayload = (
 export const reconcileIocAdjudication = (
   prepared: PreparedIocAdjudication,
   approvedIds: ReadonlySet<number>,
-  truncated?: boolean
+  options?: {
+    truncated?: boolean;
+    /** Pre-adjudication extract fingerprint; must not depend on model verdicts. */
+    correlationHash?: string | null;
+  }
 ): AdjudicateIocsResult => {
   const output = [...prepared.output];
   const reviewedIndexes = new Set(prepared.reviewable.map((candidate) => candidate.originalIndex));
@@ -515,7 +524,7 @@ export const reconcileIocAdjudication = (
   }
 
   // Deferred URL/domain candidates keep heuristic tiers in `iocs`, but stay out
-  // of anchors/hash until a model pass reviews them.
+  // of anchors until a model pass reviews them. Correlation hash is separate.
   const anchorIocs = output.filter((ioc, index) => {
     if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
     if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {
@@ -526,10 +535,14 @@ export const reconcileIocAdjudication = (
   return {
     count: output.length,
     iocs: output,
-    ioc_set_hash: iocSetHash(anchorIocs),
+    // Prefer the extract-time fingerprint. Fallback hashes prepared.output (pre-verdict).
+    ioc_set_hash:
+      options?.correlationHash !== undefined
+        ? options.correlationHash
+        : hashIocSet(prepared.output),
     anchor_iocs: anchorIocs,
     promotable_count: anchorIocs.length,
-    ...(truncated ? { truncated: true as const } : {}),
+    ...(options?.truncated ? { truncated: true as const } : {}),
     adjudication: {
       provider: 'semantic_model',
       reviewed: prepared.reviewable.length,

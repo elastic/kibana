@@ -20,6 +20,7 @@ import {
   boundIocAdjudicationForOverflow,
   boundIocAdjudicationForPayload,
   chunkIocAdjudicationBatches,
+  hashIocSet,
   prepareIocAdjudication,
   reconcileIocAdjudication,
   type AdjudicateIocsResult,
@@ -204,23 +205,26 @@ ${JSON.stringify(candidatePayload(candidates))}
 Source:
 ${text}`;
 
+/**
+ * Follow-up adjudication uses per-candidate context windows only. Resending the
+ * full article on every batch would multiply source tokens by batch count.
+ */
 const buildAdjudicationOnlyPrompt = (
   params: EnrichReportCoreParams,
-  text: string,
   candidates: IocAdjudicationCandidate[]
 ): string => `You are adjudicating threat-intelligence IOC candidates.
 
 ${iocCandidateInstructions}
+
+Each candidate includes a short local context window from the source. Judge from that
+window and the candidate value alone; do not assume facts that are not present there.
 
 Report id: ${params.report_id ?? ''}
 Report title: ${params.title ?? ''}
 Report URL: ${params.article_url ?? ''}
 
 IOC candidates:
-${JSON.stringify(candidatePayload(candidates))}
-
-Source:
-${text}`;
+${JSON.stringify(candidatePayload(candidates))}`;
 
 const withBatchPrepared = (
   base: PreparedIocAdjudication,
@@ -277,11 +281,54 @@ const invokeWithOverflowBounds = async <TParsed>({
   }
 };
 
+/**
+ * Adjudication-only batches omit the article body, so overflow retries only bound
+ * the candidate payload (not article windows).
+ */
+const invokeAdjudicationBatch = async ({
+  invoke,
+  build,
+  prepared,
+}: {
+  invoke: (prompt: string) => Promise<{
+    raw: { response_metadata: Record<string, unknown> };
+    parsed: z.infer<typeof iocAdjudicationOnlySchema>;
+  }>;
+  build: (candidates: IocAdjudicationCandidate[]) => string;
+  prepared: PreparedIocAdjudication;
+}): Promise<{
+  result: {
+    raw: { response_metadata: Record<string, unknown> };
+    parsed: z.infer<typeof iocAdjudicationOnlySchema>;
+  };
+  reviewed: PreparedIocAdjudication;
+}> => {
+  let reviewed = prepared;
+  try {
+    const result = await invoke(build(reviewed.reviewable));
+    return { result, reviewed };
+  } catch (error) {
+    if (!isContextLengthExceededError(error as Error)) throw error;
+    reviewed = boundIocAdjudicationForOverflow(prepared);
+    try {
+      const result = await invoke(build(reviewed.reviewable));
+      return { result, reviewed };
+    } catch (retryError) {
+      if (!isContextLengthExceededError(retryError as Error)) throw retryError;
+      reviewed = boundIocAdjudicationForPayload(reviewed);
+      const result = await invoke(build(reviewed.reviewable));
+      return { result, reviewed };
+    }
+  }
+};
+
 export const enrichReportCore = async (
   model: ScopedModel,
   logger: Logger,
   params: EnrichReportCoreParams
 ): Promise<EnrichReportCoreResult> => {
+  // Correlation fingerprint must match extract_iocs and ignore adjudication.
+  const correlationHash = hashIocSet(params.iocs);
   const prepared = prepareIocAdjudication(params);
   const { batches } = chunkIocAdjudicationBatches(prepared.reviewable);
   const [firstBatch = [], ...queuedBatches] = batches;
@@ -323,14 +370,13 @@ export const enrichReportCore = async (
 
   for (const batch of pendingBatches.filter((entry) => entry.length > 0)) {
     const batchStartedAt = Date.now();
-    const batchCall = await invokeWithOverflowBounds({
+    const batchCall = await invokeAdjudicationBatch({
       invoke: (prompt) =>
         adjudicationStructured.invoke(prompt) as Promise<{
           raw: { response_metadata: Record<string, unknown> };
           parsed: z.infer<typeof iocAdjudicationOnlySchema>;
         }>,
-      build: (text, candidates) => buildAdjudicationOnlyPrompt(params, text, candidates),
-      articleText: params.text,
+      build: (candidates) => buildAdjudicationOnlyPrompt(params, candidates),
       prepared: withBatchPrepared(prepared, batch),
     });
     const batchWallMs = Date.now() - batchStartedAt;
@@ -374,7 +420,10 @@ export const enrichReportCore = async (
     deterministicReferences: prepared.deterministicReferences,
     deferredUnreviewed,
   };
-  const adjudicated = reconcileIocAdjudication(reviewedPrepared, approvedIds, params.truncated);
+  const adjudicated = reconcileIocAdjudication(reviewedPrepared, approvedIds, {
+    truncated: params.truncated,
+    correlationHash,
+  });
   const { text: _text, ...contextMetadata } = coreCall.context;
   const parsed = coreCall.result.parsed;
 

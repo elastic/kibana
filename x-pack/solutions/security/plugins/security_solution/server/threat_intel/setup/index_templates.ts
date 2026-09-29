@@ -245,6 +245,18 @@ const threatReportsTemplate = {
                 context_coverage: { type: 'float' as const },
                 context_chars: { type: 'integer' as const },
                 source_chars: { type: 'integer' as const },
+                // Coverage for semantic IOC review: deferred candidates kept a
+                // heuristic tier and were never model-judged.
+                adjudication: {
+                  properties: {
+                    provider: { type: 'keyword' as const },
+                    reviewed: { type: 'integer' as const },
+                    approved: { type: 'integer' as const },
+                    downgraded: { type: 'integer' as const },
+                    deterministic_references: { type: 'integer' as const },
+                    deferred_unreviewed: { type: 'integer' as const },
+                  },
+                },
               },
             },
             // assess_relevance gate verdict — persisted on every enrichment run.
@@ -944,6 +956,10 @@ const migrateExistingCoreEnrichmentMappings = async (
         extractedProps?.gate as { properties?: Record<string, unknown> } | undefined
       )?.properties;
 
+      const adjudicationProps = (
+        coreProps?.adjudication as { properties?: Record<string, unknown> } | undefined
+      )?.properties;
+
       const needsMigration = !(
         contentProps?.article_url &&
         extractedProps?.artifacts &&
@@ -951,6 +967,7 @@ const migrateExistingCoreEnrichmentMappings = async (
         coreProps?.context_coverage &&
         coreProps?.context_chars &&
         coreProps?.source_chars &&
+        adjudicationProps?.deferred_unreviewed &&
         diamondProps?.context_mode &&
         diamondProps?.context_coverage &&
         diamondProps?.context_chars &&
@@ -985,6 +1002,16 @@ const migrateExistingCoreEnrichmentMappings = async (
                     context_coverage: { type: 'float' },
                     context_chars: { type: 'integer' },
                     source_chars: { type: 'integer' },
+                    adjudication: {
+                      properties: {
+                        provider: { type: 'keyword' },
+                        reviewed: { type: 'integer' },
+                        approved: { type: 'integer' },
+                        downgraded: { type: 'integer' },
+                        deterministic_references: { type: 'integer' },
+                        deferred_unreviewed: { type: 'integer' },
+                      },
+                    },
                   },
                 },
                 diamond: {
@@ -1465,6 +1492,8 @@ const REQUIRED_REPORT_FIELDS: readonly RequiredMapping[] = [
   { path: 'extracted.core.context_coverage' },
   { path: 'extracted.core.context_chars' },
   { path: 'extracted.core.source_chars' },
+  { path: 'extracted.core.adjudication' },
+  { path: 'extracted.core.adjudication.deferred_unreviewed' },
   { path: 'extracted.diamond' },
   { path: 'extracted.diamond.context_mode' },
   { path: 'extracted.diamond.context_coverage' },

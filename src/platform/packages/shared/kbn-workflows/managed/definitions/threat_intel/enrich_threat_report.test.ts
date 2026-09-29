@@ -102,16 +102,28 @@ describe('THREAT_INTEL_ENRICH_REPORT_WORKFLOW yaml', () => {
     expect(s?.['on-failure']?.continue).toBe(true);
   });
 
-  it('persists only IOCs adjudicated by the consolidated core', () => {
+  it('persists adjudicated IOCs with the deterministic extract fingerprint', () => {
     const step = findStepByName(workflow.steps, 'persist_extractions') as {
       if?: string;
-      with?: { doc?: { extracted?: { iocs?: string; ioc_set_hash?: string } } };
+      with?: {
+        doc?: {
+          extracted?: {
+            iocs?: string;
+            ioc_set_hash?: string;
+            core?: { adjudication?: { deferred_unreviewed?: string } };
+          };
+        };
+      };
     };
 
     expect(step.if).toContain('steps.enrich_report_core.error == null');
     expect(step.with?.doc?.extracted?.iocs).toContain('steps.enrich_report_core.output.iocs');
+    // Correlation hash stays on extract_iocs so boost:5 matches pre-adjudication docs.
     expect(step.with?.doc?.extracted?.ioc_set_hash).toContain(
-      'steps.enrich_report_core.output.ioc_set_hash'
+      'steps.extract_iocs.output.ioc_set_hash'
+    );
+    expect(step.with?.doc?.extracted?.core?.adjudication?.deferred_unreviewed).toContain(
+      'steps.enrich_report_core.output.adjudication.deferred_unreviewed'
     );
   });
 

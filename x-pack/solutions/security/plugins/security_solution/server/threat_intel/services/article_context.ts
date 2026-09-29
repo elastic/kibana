@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-export const DEGRADED_ARTICLE_CHAR_BUDGET = 240_000;
 /**
- * Hard cap for a confirmed context-overflow retry. 240K chars still overflows a
- * 32K-token Reasoning window after prompt/IOC overhead; 30K matches the prior
- * safe prefix scale while keeping evenly distributed windows.
+ * Hard cap for a confirmed context-overflow retry. A larger middle rung was
+ * previously listed but unused: every caller goes through this 30K budget, which
+ * matches the prior safe prefix scale while keeping evenly distributed windows.
  */
 export const OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET = 30_000;
+/** @deprecated Use OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET; kept as an alias for tests. */
+export const DEGRADED_ARTICLE_CHAR_BUDGET = OVERFLOW_RETRY_ARTICLE_CHAR_BUDGET;
 const DISTRIBUTED_WINDOW_COUNT = 9;
 /** Floor so a short forced-overflow budget still yields readable spans. */
 const MIN_USEFUL_WINDOW_CHARS = 24;

@@ -77,7 +77,7 @@ describe('article context selection', () => {
     expect(selected.text).not.toContain('omitted for context capacity');
   });
 
-  it('caps a long overflow retry well below the 240K degraded budget', () => {
+  it('caps a long overflow retry at the 30K overflow budget', () => {
     // Balanced padding so the distributed middle window lands on the marker.
     const text = `${'L'.repeat(200_000)}MIDDLE_EVIDENCE${'R'.repeat(200_000)}`;
     const selected = selectOverflowRetryArticleContext(text);
