@@ -1458,17 +1458,52 @@ describe('UnifiedDataTable', () => {
     );
 
     it(
-      'removes the full screen styles from the body when switching the documents display mode in full screen',
+      'keeps the data grid in full screen when switching the documents display mode',
       async () => {
-        const props: UnifiedDataTableProps = { ...getProps(), documentsDisplayModeState: 'table' };
+        const onFullScreenChange = jest.fn();
+        const props: UnifiedDataTableProps = {
+          ...getProps(),
+          documentsDisplayModeState: 'table',
+          onFullScreenChange,
+        };
         const { rerender } = await renderComponent(props);
         await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
-        await waitFor(() =>
-          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
-        );
 
         rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
 
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'true'
+        );
+        expect(onFullScreenChange).toHaveBeenCalledTimes(1);
+        expect(onFullScreenChange).toHaveBeenCalledWith(true);
+        await waitFor(() =>
+          expect(document.body).toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
+        );
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'removes the full screen styles from the body when exiting full screen after switching the documents display mode',
+      async () => {
+        const onFullScreenChange = jest.fn();
+        const props: UnifiedDataTableProps = {
+          ...getProps(),
+          documentsDisplayModeState: 'table',
+          onFullScreenChange,
+        };
+        const { rerender } = await renderComponent(props);
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+        rerender(<DataTableWithI18n {...props} documentsDisplayModeState="json" />);
+
+        await userEvent.click(screen.getByTestId('dataGridFullScreenButton'));
+
+        expect(screen.getByTestId('dataGridFullScreenButton')).toHaveAttribute(
+          'aria-pressed',
+          'false'
+        );
+        expect(onFullScreenChange).toHaveBeenLastCalledWith(false);
         await waitFor(() =>
           expect(document.body).not.toHaveClass(UNIFIED_DATA_TABLE_FULL_SCREEN_CLASS)
         );
