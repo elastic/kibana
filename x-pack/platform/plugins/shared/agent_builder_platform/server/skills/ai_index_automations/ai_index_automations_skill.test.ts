@@ -1071,7 +1071,6 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/two separate operations, each with its own confirmation\s+dialog/);
     });
 
-
     it('carries the workflow syntax itself, rather than depending on another skill for it', () => {
       expect(content).toContain('The rest of the syntax these automations use');
       expect(content).toMatch(/An `if` condition is KQL, not Liquid/);
