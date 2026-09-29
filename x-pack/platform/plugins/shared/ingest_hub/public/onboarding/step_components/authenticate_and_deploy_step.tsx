@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,8 +20,6 @@ import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
-import { sendGetCloudOnboardingDeployment } from '@kbn/fleet-plugin/public';
-
 import { useOnboardingFlow } from '../onboarding_flow_context';
 import { isAgentBasedOnly } from '../aws_service_matrix';
 import type { AwsServiceMatrixEntry } from '../aws_service_matrix';
@@ -29,12 +27,7 @@ import { DeploymentMethodCard } from './authenticate_and_deploy_step/deployment_
 import { ManagedIntegrationsSection } from './authenticate_and_deploy_step/managed_integrations_section';
 import { buildIacIntegrations } from './authenticate_and_deploy_step/package_inputs';
 import { useDeploy, toSOServiceVars } from './authenticate_and_deploy_step/use_deploy';
-import {
-  detectServiceVarsDrift,
-  detectAuthDrift,
-  detectAgentPoliciesDrift,
-} from './authenticate_and_deploy_step/detect_drift';
-import { toSOAuthMethod } from './authenticate_and_deploy_step/agent_based_section/credential_method_selector';
+import { useOnboardingDriftDetection } from './authenticate_and_deploy_step/use_onboarding_drift_detection';
 import { useAgentBasedDeploy } from './authenticate_and_deploy_step/use_agent_based_deploy';
 import { AgentBasedSection } from './authenticate_and_deploy_step/agent_based_section';
 import { useOnboardingSO } from './authenticate_and_deploy_step/use_onboarding_so';
@@ -130,122 +123,22 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const { globalRegion, serviceVars } = serviceSettings ?? DEFAULT_SERVICE_SETTINGS;
 
   // ── Drift detection ───────────────────────────────────────────────────────────
-  // Compare current session values against the SO whenever edit mode is active and the user
-  // changes auth (connector / auth method). serviceVars drift is checked at the same time.
   const { onboardingDeploymentId, policyIdsByInstance } = detectAndReviewStep;
   const { authMethod, connectorId } = authenticateAndDeployStep ?? {};
-  // Stable key for selectedAgentPolicyIds so the drift effect re-runs when policy selection
-  // changes in agent-based edit mode. Gated to agent_based: MI SOs never store
-  // agentPolicyIds, so a leftover selection from a prior agent-based session would falsely mark
-  // an unchanged MI deployment dirty on every visit.
-  const selectedAgentPoliciesKey =
-    deploymentMethod === 'agent_based'
-      ? agentBasedDeploymentFromFlow.selectedAgentPolicyIds.slice().sort().join(',')
-      : '';
-  // SO-derived dirty result — merged by the replace-form cancel handler without re-fetching.
-  const driftDirtyRef = useRef(false);
-  // Replace-form dirty — merged with SO-derived dirty so a clean SO doesn't clear isDirty
-  // while the user has unsaved keys in the static-key form.
-  const replaceFormDirtyRef = useRef(false);
-  // Sequence counter to discard stale drift fetch responses.
-  const driftCheckIdRef = useRef(0);
-  // false until drift check resolves — gates Next. true for fresh deploys (no SO to check).
-  const [driftSettled, setDriftSettled] = useState(!onboardingDeploymentId);
-  const [driftCheckError, setDriftCheckError] = useState(false);
-  const [driftRetryKey, setDriftRetryKey] = useState(0);
-  useEffect(() => {
-    const thisId = ++driftCheckIdRef.current;
-    // Nothing to fetch — leave driftSettled unchanged (already true for fresh deploys; remains
-    // false for edit mode while awsServicesMap is still loading, allowing it to settle once the
-    // effect re-runs with a loaded map).
-    if (!onboardingDeploymentId || awsServicesMap === undefined) return;
-    setDriftSettled(false);
-    setDriftCheckError(false);
-    sendGetCloudOnboardingDeployment(onboardingDeploymentId)
-      .then(({ item }) => {
-        if (thisId !== driftCheckIdRef.current) return; // stale response — discard
-        if (!item) {
-          // SO does not exist or was cleared — nothing to compare against; treat as clean.
-          setDriftSettled(true);
-          return;
-        }
-        // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO
-        // (same as serviceVars) and does not change during the component's lifetime at Step 3.
-        // Filter against currently selected instances: policyIdsByInstance may include stale entries
-        // for deselected services that are cleanup targets, not drift subjects.
-        const selectedInstanceIdSet = new Set(
-          serviceSettings?.instances?.map((i) => i.instanceId) ?? []
-        );
-        const deployedInstanceIds = new Set(
-          Object.keys(policyIdsByInstance ?? {}).filter((id) => selectedInstanceIdSet.has(id))
-        );
-        const dirtyVarIds = detectServiceVarsDrift(
-          serviceSettings?.serviceVars ?? {},
-          (item.serviceVars ?? {}) as Record<string, Record<string, unknown>>,
-          awsServicesMap,
-          deployedInstanceIds
-        );
-        // Agent-based: use agentCredentialMethod (canonical UI state) so an unchanged return
-        // to Step 3 doesn't falsely report auth drift (authMethod not written to session).
-        const sessionAuthMethod =
-          deploymentMethod === 'agent_based'
-            ? toSOAuthMethod(agentBasedDeploymentFromFlow.agentCredentialMethod)
-            : authMethod;
-        const authDirty = detectAuthDrift(
-          { authMethod: sessionAuthMethod, connectorId },
-          { authMethod: item.authMethod, connectorId: item.connectorId }
-        );
-        const agentPoliciesDirty = detectAgentPoliciesDrift(
-          {
-            deploymentMethod,
-            agentHostsMode: agentBasedDeploymentFromFlow.agentHostsMode,
-            agentPolicyId: agentBasedDeploymentFromFlow.agentPolicyId,
-            selectedAgentPolicyIds: agentBasedDeploymentFromFlow.selectedAgentPolicyIds,
-          },
-          { agentPolicyIds: item.agentPolicyIds }
-        );
-        const dirty = dirtyVarIds.length > 0 || authDirty || agentPoliciesDirty;
-        driftDirtyRef.current = dirty;
-        // Merge with replace-form dirty: a clean SO result still clears isDirty when the form
-        // hasn't been touched.
-        updateDetectAndReviewStep({
-          isDirty: dirty || replaceFormDirtyRef.current,
-          isAuthDirty: authDirty,
-        });
-        // Settle only after a successful compare. A failed or empty fetch leaves driftSettled=false
-        // so Next stays blocked rather than enabling with a stale (default false) isDirty value.
-        setDriftSettled(true);
-      })
-      .catch(() => {
-        if (thisId !== driftCheckIdRef.current) return;
-        setDriftCheckError(true);
-      });
-    // serviceSettings.serviceVars and globalRegion are intentionally captured from the closure:
-    // service-var and region changes come from Step 2 navigation (full remount), not same-step
-    // edits. Auth mutations (connector swap, authMethod, agentCredentialMethod) and agent-based
-    // mode changes (agentHostsMode, policy selection) happen in this component's lifetime.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [
-    onboardingDeploymentId,
-    awsServicesMap,
-    authMethod,
-    connectorId,
-    selectedAgentPoliciesKey,
-    driftRetryKey,
-    agentBasedDeploymentFromFlow?.agentCredentialMethod,
-    agentBasedDeploymentFromFlow?.agentHostsMode,
-    agentBasedDeploymentFromFlow?.agentPolicyId,
-  ]);
-
-  // Called when the static-key replace form becomes ready or is cancelled — merges form dirty
-  // with SO-derived drift so cancelling correctly clears the callout when no service-var drift.
-  const handleReplaceFormDirtyChange = useCallback(
-    (replaceFormDirty: boolean) => {
-      replaceFormDirtyRef.current = replaceFormDirty;
-      updateDetectAndReviewStep({ isDirty: replaceFormDirty || driftDirtyRef.current });
-    },
-    [updateDetectAndReviewStep]
-  );
+  const isDirty = detectAndReviewStep.isDirty ?? false;
+  const { driftSettled, driftCheckError, retryDriftCheck, handleReplaceFormDirtyChange } =
+    useOnboardingDriftDetection({
+      onboardingDeploymentId,
+      policyIdsByInstance,
+      awsServicesMap,
+      deploymentMethod,
+      authMethod,
+      connectorId,
+      agentBasedDeployment: agentBasedDeploymentFromFlow,
+      serviceSettings,
+      isDirty,
+      updateDetectAndReviewStep,
+    });
 
   const otlpEndpoint = services.cloud?.managedOtlp?.url;
 
@@ -274,17 +167,6 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   } = useDeploy({
     onContinue: () => {},
   });
-  const isDirty = detectAndReviewStep.isDirty ?? false;
-  // Sync driftDirtyRef with isDirty so a successful deploy (which clears isDirty) also resets the
-  // ref — otherwise the stale pre-deploy value merges with StaticKeysReplaceView's onReadyChange(false).
-  useEffect(() => {
-    if (!isDirty) {
-      driftDirtyRef.current = false;
-      // Also reset the replace-form dirty ref so a pending drift fetch that resolves after a
-      // successful static-key redeploy does not re-set isDirty via the stale ref value.
-      replaceFormDirtyRef.current = false;
-    }
-  }, [isDirty]);
   const [deployAttempted, setDeployAttempted] = useState(false);
   // hasFailed not gated on deployAttempted: persisted failures on Back/Next remount must still
   // show the callout even without a new deploy attempt.
@@ -774,10 +656,7 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
             <EuiButton
               size="s"
               color="warning"
-              onClick={() => {
-                setDriftCheckError(false);
-                setDriftRetryKey((k) => k + 1);
-              }}
+              onClick={retryDriftCheck}
               data-test-subj="authenticateAndDeployStep-driftCheckRetryButton"
             >
               <FormattedMessage
