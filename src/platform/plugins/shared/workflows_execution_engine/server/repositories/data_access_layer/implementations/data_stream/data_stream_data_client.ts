@@ -227,6 +227,7 @@ export class DataStreamDataClient<TExecution extends { id: string }>
     if (request.items.length === 0) {
       return { items: [], errors: false };
     }
+
     const { backingIndexes } = this.deps.metadataManager.getMeta();
     const fallbackIndexes = backingIndexes.slice(-2).concat(this.additionalIndexesToQuery);
 
@@ -285,7 +286,73 @@ export class DataStreamDataClient<TExecution extends { id: string }>
       });
     }
 
-    return { items: result, errors: hasErrors };
+    const errors = await this.retryConflictingUpserts({
+      request,
+      result,
+      hasErrors,
+      fallbackIndexes,
+    });
+
+    return { items: result, errors };
+  }
+
+  // Upserts rewritten to create can 409 if the doc already exists. Retry those
+  // as updates against the backing index named on the conflict.
+  private async retryConflictingUpserts(params: {
+    request: BulkRequestOptions<TExecution>;
+    result: Array<BulkItemResponse>;
+    hasErrors: boolean;
+    fallbackIndexes: string[];
+  }): Promise<boolean> {
+    const { request, result, fallbackIndexes } = params;
+
+    const upserts = new Map<string, BulkPlainItem<TExecution>>(
+      request.items
+        .filter(
+          (item): item is BulkPlainItem<TExecution> =>
+            item.operation === 'upsert' && !!item.document
+        )
+        .map((item) => [item.document.id, item])
+    );
+    if (upserts.size === 0) {
+      return params.hasErrors;
+    }
+
+    const conflicted: Array<{
+      requestIndex: number;
+      item: BulkPlainItem<TExecution>;
+    }> = [];
+
+    result.forEach((responseItem, requestIndex) => {
+      const upsert = upserts.get(responseItem.id);
+      if (upsert && responseItem.error?.type === 'version_conflict_engine_exception') {
+        conflicted.push({
+          requestIndex,
+          item: {
+            ...upsert,
+            operation: 'update',
+            index: responseItem.index,
+            retryOnConflict: 3, // Retry 3 times on conflict to ensure the document is updated.
+          },
+        });
+      }
+    });
+
+    if (conflicted.length === 0) {
+      return params.hasErrors;
+    }
+
+    const retryResponse = await sharedBulk({
+      esClient: this.deps.esClient,
+      request: { ...request, items: conflicted.map(({ item }) => item) },
+      logger: this.deps.logger,
+      fallbackIndexes,
+    });
+
+    retryResponse.items.forEach((responseItem, idx) => {
+      result[conflicted[idx].requestIndex] = responseItem;
+    });
+    return result.some((item) => !!item?.error);
   }
 
   // Classifies plain items into sendable or preFailed, resolves the backing-index +
