@@ -365,6 +365,7 @@ export function CasesTableServiceProvider(
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
       await header.waitUntilLoadingHasFinished();
       await this.waitForTableToFinishLoading();
+      await testSubjects.existOrFail(`case-severity-badge-${severity}`);
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {
