@@ -766,7 +766,7 @@ const loadPriorCitationIdsByReport = async ({
   const reportIdSet = new Set(reportIds);
   const pageSize = 1000;
   let pitId: string | undefined;
-  let searchAfter: Array<string | number | null> | undefined;
+  let searchAfter: estypes.SortResults | undefined;
 
   try {
     const pit = await esClient.openPointInTime(
@@ -778,12 +778,13 @@ const loadPriorCitationIdsByReport = async ({
     );
     pitId = pit.id;
 
-    while (!signal.aborted) {
-      const response = await esClient.search<{
+    while (!signal.aborted && pitId) {
+      const activePitId: string = pitId;
+      const response: estypes.SearchResponse<{
         sources?: Array<{ report_id?: string }>;
-      }>(
+      }> = await esClient.search(
         {
-          pit: { id: pitId, keep_alive: PIT_KEEP_ALIVE },
+          pit: { id: activePitId, keep_alive: PIT_KEEP_ALIVE },
           size: pageSize,
           _source: ['sources.report_id'],
           query: {
@@ -821,10 +822,11 @@ const loadPriorCitationIdsByReport = async ({
       if (hits.length < pageSize) {
         break;
       }
-      searchAfter = hits[hits.length - 1]?.sort as Array<string | number | null> | undefined;
-      if (!searchAfter) {
+      const nextSearchAfter = hits[hits.length - 1]?.sort;
+      if (!nextSearchAfter) {
         break;
       }
+      searchAfter = nextSearchAfter;
     }
   } catch (err) {
     const status = (err as { statusCode?: number }).statusCode;
