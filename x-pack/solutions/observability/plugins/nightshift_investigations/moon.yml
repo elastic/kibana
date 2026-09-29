@@ -36,6 +36,7 @@ dependsOn:
   - '@kbn/scout-oblt'
   - '@kbn/agent-builder-plugin'
   - '@kbn/agent-builder-common'
+  - '@kbn/core-http-server-mocks'
   - '@kbn/logging-mocks'
   - '@kbn/significant-events-schema'
   - '@kbn/nightshift-shared'

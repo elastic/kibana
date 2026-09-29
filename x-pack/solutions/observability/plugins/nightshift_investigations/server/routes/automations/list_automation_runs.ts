@@ -29,13 +29,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       size: z.coerce.number().int().min(1).max(100).optional().default(20),
     }),
   }),
-  handler: async ({
-    request,
-    params,
-    getAutomationsSoClient,
-    getWorkflowsManagement,
-    context,
-  }) => {
+  handler: async ({ request, params, getAutomationsSoClient, getWorkflowsManagement, context }) => {
     const workflowsManagement = getWorkflowsManagement();
     if (!workflowsManagement) {
       throw serverUnavailable('Workflows management is not available');
