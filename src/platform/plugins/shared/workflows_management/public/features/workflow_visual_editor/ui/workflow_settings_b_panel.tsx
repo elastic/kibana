@@ -185,6 +185,7 @@ export function WorkflowSettingsBPanel({
             <EuiTab
               isSelected={tab === 'form'}
               onClick={() => setTab('form')}
+              prepend={<EuiIcon type="workflow" aria-hidden />}
               data-test-subj="workflowSettingsBPanelView-form"
             >
               {i18n.translate('workflows.settingsSurface.b.visualTab', {
@@ -194,6 +195,7 @@ export function WorkflowSettingsBPanel({
             <EuiTab
               isSelected={tab === 'yaml'}
               onClick={() => setTab('yaml')}
+              prepend={<EuiIcon type="code" aria-hidden />}
               data-test-subj="workflowSettingsBPanelView-yaml"
             >
               {i18n.translate('workflows.settingsSurface.b.yamlTab', {
