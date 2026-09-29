@@ -10,8 +10,8 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_INDEX_PATTERNS,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
@@ -426,7 +426,7 @@ export function registerFeatureFlags(
             readonly: true,
             readonlyMode: 'ui',
           },
-          [OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED]: {
+          [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.continuousOnboardingEnabledName', {
               defaultMessage: 'Continuous KI onboarding enabled',
@@ -446,7 +446,7 @@ export function registerFeatureFlags(
             readonly: true,
             readonlyMode: 'ui',
           },
-          [OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS]: {
+          [OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS]: {
             category: ['observability'],
             name: i18n.translate('xpack.significantEvents.continuousOnboardingIntervalHoursName', {
               defaultMessage: 'Continuous KI onboarding interval (hours)',

@@ -52,38 +52,7 @@ describe('classifySources', () => {
     });
 
     expect(candidateNames(result)).toEqual(['source-a', 'source-b']);
-    expect(result.candidates).toEqual([
-      { sourceId: 'source-a', sourceSlug: 'source-a-slug', lastCompletedAt: null },
-      { sourceId: 'source-b', sourceSlug: 'source-b-slug', lastCompletedAt: null },
-    ]);
     expect(result.unsupported).toEqual([]);
-  });
-
-  it('matches executions to sources by slug, not by id', () => {
-    const result = classifySources({
-      ...defaultArgs,
-      sources: [makeSource('source-a')],
-      executions: [
-        makeExecution('source-a', {
-          concurrencyGroupKey: 'nightshift-source-onboarding-source-a',
-          status: ExecutionStatus.RUNNING,
-        }),
-      ],
-    });
-
-    expect(result.alreadyRunning).toEqual([]);
-    expect(candidateNames(result)).toEqual(['source-a']);
-  });
-
-  it('ignores executions whose slug belongs to no source', () => {
-    const result = classifySources({
-      ...defaultArgs,
-      sources: [makeSource('source-a')],
-      executions: [makeExecution('gone-source', { status: ExecutionStatus.RUNNING })],
-    });
-
-    expect(result.alreadyRunning).toEqual([]);
-    expect(candidateNames(result)).toEqual(['source-a']);
   });
 
   it('identifies already running executions, even when the query changed mid-run', () => {

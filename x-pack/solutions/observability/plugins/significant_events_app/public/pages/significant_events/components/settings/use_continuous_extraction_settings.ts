@@ -8,8 +8,8 @@
 import { useCallback, useMemo, useState } from 'react';
 import type { HttpSetup, IUiSettingsClient } from '@kbn/core/public';
 import {
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import { DEFAULT_EXTRACTION_INTERVAL_HOURS } from '@kbn/significant-events-plugin/common';
 import { useSyncEnabledFromStatus } from './use_sync_enabled_from_status';
@@ -20,12 +20,9 @@ export interface ContinuousExtractionState {
 }
 
 const readSettingsFromClient = (client: IUiSettingsClient): ContinuousExtractionState => ({
-  enabled: client.get<boolean>(
-    OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-    false
-  ),
+  enabled: client.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, false),
   intervalHours: client.get<number>(
-    OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
+    OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
     DEFAULT_EXTRACTION_INTERVAL_HOURS
   ),
 });
@@ -48,7 +45,7 @@ export const useContinuousExtractionSettings = ({
 
   useSyncEnabledFromStatus({
     client,
-    settingId: OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
+    settingId: OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
     enabledFromStatus,
     setSaved,
     setDraft,
@@ -69,9 +66,9 @@ export const useContinuousExtractionSettings = ({
     });
 
     await Promise.all([
-      client.set(OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED, draft.enabled),
+      client.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, draft.enabled),
       client.set(
-        OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
+        OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
         draft.intervalHours
       ),
     ]);

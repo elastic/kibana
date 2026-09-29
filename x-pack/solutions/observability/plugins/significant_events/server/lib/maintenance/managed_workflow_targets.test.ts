@@ -14,7 +14,6 @@ import {
 } from '@kbn/workflows/managed';
 import {
   ALL_INSTALLABLE_WORKFLOW_IDS,
-  buildCancelTargets,
   buildDisableTargets,
   GLOBAL_CORE_WORKFLOW_IDS,
   GLOBAL_MAINTENANCE_WORKFLOW_IDS,
@@ -47,30 +46,6 @@ describe('managed_workflow_targets registry', () => {
         SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
       ])
     );
-
-    const spaceIds = [asSpaceId('default'), asSpaceId('space-a')];
-    const disableTargets = buildDisableTargets(spaceIds);
-    const cancelTargets = buildCancelTargets(spaceIds);
-    for (const spaceId of spaceIds) {
-      for (const baseId of [
-        SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-        SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      ]) {
-        const target = { id: `${baseId}-${spaceId}`, spaceId };
-        expect(disableTargets).toContainEqual(target);
-        expect(cancelTargets).toContainEqual(target);
-      }
-    }
-  });
-
-  it('does not sweep the unsuffixed pre-per-space documents', () => {
-    const spaceIds = [asSpaceId('default')];
-    const ids = [...buildDisableTargets(spaceIds), ...buildCancelTargets(spaceIds)].map(
-      ({ id }) => id
-    );
-
-    expect(ids).not.toContain(SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID);
-    expect(ids).not.toContain(SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID);
   });
 
   it('tracks cleanup as a per-space scheduled workflow', () => {

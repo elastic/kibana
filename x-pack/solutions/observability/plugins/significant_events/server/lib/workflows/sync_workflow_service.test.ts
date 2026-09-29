@@ -59,32 +59,12 @@ describe('SyncWorkflowService', () => {
       getManagedWorkflowsClient: jest.fn().mockResolvedValue(managedWorkflowsClient),
     });
 
-  it('installs and enables the workflow for the requested space', async () => {
-    (managementApi.getWorkflow as jest.Mock)
-      .mockResolvedValueOnce(undefined)
-      .mockResolvedValueOnce({ enabled: false });
-
-    await createService().ensureEnabled({ request, spaceId });
-
-    expect(managedWorkflowsClient.install).toHaveBeenCalledWith(
-      SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW_ID,
-      { spaceId, workflowIdSuffix: spaceId }
-    );
-    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-      workflowDocumentId,
-      { enabled: true },
-      spaceId,
-      request
-    );
-  });
-
   it('enables the workflow when it is installed but disabled', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: false });
 
     await createService().ensureEnabled({ request, spaceId });
 
     expect(managementApi.getWorkflow).toHaveBeenCalledWith(workflowDocumentId, spaceId);
-    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
       workflowDocumentId,
       { enabled: true },
@@ -93,23 +73,20 @@ describe('SyncWorkflowService', () => {
     );
   });
 
-  it('is a no-op when the per-space workflow is already enabled', async () => {
+  it('is a no-op when the workflow is already enabled', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue({ enabled: true });
 
     await createService().ensureEnabled({ request, spaceId });
 
-    expect(managedWorkflowsClient.install).not.toHaveBeenCalled();
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
   });
 
-  it('does not enable when installation did not persist the workflow', async () => {
+  it('does not update when the workflow is not installed yet', async () => {
     (managementApi.getWorkflow as jest.Mock).mockResolvedValue(undefined);
 
     await createService().ensureEnabled({ request, spaceId });
 
     expect(managementApi.updateWorkflow).not.toHaveBeenCalled();
-    expect(logger.warn).toHaveBeenCalledWith(
-      `Managed KI sync workflow ${workflowDocumentId} was not installed; skipping enablement`
-    );
+    expect(logger.warn).toHaveBeenCalled();
   });
 });

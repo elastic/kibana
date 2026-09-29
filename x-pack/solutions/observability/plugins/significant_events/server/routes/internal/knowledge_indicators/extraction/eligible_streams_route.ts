@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import {
   MAX_ID_LENGTH,
@@ -106,7 +106,7 @@ const eligibleStreamsRoute = createServerRoute({
     const query = params?.query ?? {};
 
     const enabled = await uiSettingsClient.get<boolean>(
-      OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
     );
 
     if (!enabled) {
@@ -114,7 +114,7 @@ const eligibleStreamsRoute = createServerRoute({
     }
 
     const intervalHoursSetting = await uiSettingsClient.get<number>(
-      OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS
     );
 
     const maxStreams = query.maxScheduledStreams ?? MAX_SCHEDULED_STREAMS;

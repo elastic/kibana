@@ -7,8 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import {
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS,
 } from '@kbn/management-settings-ids';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../../create_server_route';
@@ -71,11 +71,11 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     const updates: Record<string, boolean | number | string> = {};
 
     if (continuousKiExtraction.enabled !== undefined) {
-      updates[OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED] =
+      updates[OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED] =
         continuousKiExtraction.enabled;
     }
     if (continuousKiExtraction.intervalHours !== undefined) {
-      updates[OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_INTERVAL_HOURS] =
+      updates[OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_INTERVAL_HOURS] =
         continuousKiExtraction.intervalHours;
     }
 
@@ -92,7 +92,7 @@ const putContinuousKIExtractionSettingsRoute = createServerRoute({
     // Only reconcile the workflow on an actual enabled-state transition. Interval
     // changes are picked up by the running workflow at execution time.
     const previousEnabled = allSettings[
-      OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED
+      OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED
     ] as boolean;
     const nextEnabled = continuousKiExtraction.enabled;
 

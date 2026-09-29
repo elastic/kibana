@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { parse } from 'yaml';
-import { collectAllSteps } from '@kbn/workflows';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
   getManagedWorkflowDefinition,
@@ -40,32 +38,6 @@ const assertYamlContains = (expected: string) => {
 describe('continuous_onboarding.yaml stays in sync with constants', () => {
   it('is registered as a restorable managed workflow', () => {
     expect(definition?.management.enablement).toBe('restorable');
-  });
-
-  it('is a dynamic workflow that upgrades automatically', () => {
-    expect(definition?.management.lifecycle).toBe('dynamic');
-    expect(definition?.management.versionStrategy).toBe('auto');
-  });
-
-  it('prefixes every kibana.request path with the workflow space', () => {
-    const paths = collectAllSteps(parse(WORKFLOW_YAML).steps).flatMap((step) =>
-      step.type === 'kibana.request' ? [(step.with as { path: string }).path] : []
-    );
-
-    expect(paths.length).toBeGreaterThan(0);
-    for (const path of paths) {
-      expect(path.startsWith('/s/{{ workflow.spaceId }}/internal/')).toBe(true);
-    }
-  });
-
-  it('hands the source id and slug of each candidate to the onboarding workflow', () => {
-    assertYamlContains("sourceId: '${{ foreach.item.sourceId }}'");
-    assertYamlContains("sourceSlug: '${{ foreach.item.sourceSlug }}'");
-    expect(WORKFLOW_YAML).not.toContain('streamName');
-  });
-
-  it('polls the onboarding status of each candidate by source id', () => {
-    assertYamlContains('/internal/streams/{{ foreach.item.sourceId }}/onboarding/_status');
   });
 
   it('is disabled by default so the user setting controls enablement', () => {

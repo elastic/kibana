@@ -39,10 +39,6 @@ describe('createKiIdentificationCancelTool', () => {
 
     const result = await tool.handler({ stream_name: 'logs.nginx' }, context);
 
-    expect(managementApi.getWorkflowExecutions).toHaveBeenCalledWith(
-      expect.objectContaining({ concurrencyGroupKey: 'nightshift-source-onboarding-logs-nginx' }),
-      'default'
-    );
     expect(managementApi.cancelWorkflowExecution).toHaveBeenCalledWith(
       'exec-1',
       'default',

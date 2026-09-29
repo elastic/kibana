@@ -9,7 +9,7 @@ import type { FakeRawRequest, IUiSettingsClient, KibanaRequest } from '@kbn/core
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import {
-  OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
+  OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED,
   OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED,
 } from '@kbn/management-settings-ids';
 import { SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from '@kbn/workflows/managed';
@@ -149,14 +149,9 @@ export const createFeatureSettingsController = ({
         const spaceClient = await uiSettingsClients.space(spaceId);
         try {
           if (
-            await spaceClient.get<boolean>(
-              OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED
-            )
+            await spaceClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
           ) {
-            await spaceClient.set(
-              OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-              false
-            );
+            await spaceClient.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, false);
           }
         } catch (error) {
           failures.push({
@@ -266,7 +261,7 @@ export const createFeatureSettingsController = ({
   }): Promise<boolean> => {
     try {
       const spaceClient = await getUiSettingsClients({ request, access: 'user' }).space(spaceId);
-      await spaceClient.set(OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED, true);
+      await spaceClient.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, true);
       return true;
     } catch (error) {
       failures.push({
@@ -287,7 +282,7 @@ export const createFeatureSettingsController = ({
     const { uiSettingsClient } = await getScopedClients({ request });
     const [continuousOnboardingEnabled, scheduledDiscoveryEnabled] = await Promise.all([
       uiSettingsClient
-        .get<boolean>(OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED)
+        .get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
         .then(Boolean),
       uiSettingsClient
         .get<boolean>(OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_SCHEDULED_DISCOVERY_ENABLED)
@@ -316,14 +311,9 @@ export const createFeatureSettingsController = ({
         const spaceClient = await uiSettingsClients.space(spaceId);
         try {
           if (
-            await spaceClient.get<boolean>(
-              OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED
-            )
+            await spaceClient.get<boolean>(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED)
           ) {
-            await spaceClient.set(
-              OBSERVABILITY_SIGNIFICANT_EVENTS_CONTINUOUS_ONBOARDING_ENABLED,
-              false
-            );
+            await spaceClient.set(OBSERVABILITY_NIGHTSHIFT_CONTINUOUS_ONBOARDING_ENABLED, false);
           }
         } catch (error) {
           failures.push({
