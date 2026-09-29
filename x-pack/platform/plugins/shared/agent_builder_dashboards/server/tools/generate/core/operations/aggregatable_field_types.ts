@@ -9,8 +9,11 @@ import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/ty
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
 
-/** ES field types keyed by name, for fields that can back a `STATS BY` across the whole index. */
-export type AggregatableFieldTypes = Map<string, string[]>;
+/** A field that can back a `STATS BY` across the whole index, or one whose mappings conflict. */
+export type ControlFieldCapability = { types: string[] } | { conflicting: true };
+
+/** Field capabilities keyed by name. Fields missing or not aggregatable anywhere are absent. */
+export type ControlFieldCapabilities = Map<string, ControlFieldCapability>;
 
 interface FieldTypesTarget {
   index: string;
@@ -21,7 +24,7 @@ export interface AggregatableFieldTypesLoader {
   /** Load the given fields, requesting only the ones not loaded before for this target. */
   loadFields: (
     params: FieldTypesTarget & { fieldNames: readonly string[] }
-  ) => Promise<AggregatableFieldTypes>;
+  ) => Promise<ControlFieldCapabilities>;
 }
 
 /**
@@ -32,6 +35,17 @@ const isAggregatableEverywhere = (capabilities: FieldCapsFieldCapability[]): boo
   capabilities.every(({ aggregatable }) => aggregatable) &&
   new Set(capabilities.map(({ type }) => castEsToKbnFieldTypeName(type))).size === 1;
 
+const toControlFieldCapability = (
+  capabilities: FieldCapsFieldCapability[]
+): ControlFieldCapability | undefined => {
+  if (isAggregatableEverywhere(capabilities)) {
+    return { types: capabilities.map(({ type }) => type) };
+  }
+  return capabilities.length > 1 && capabilities.some(({ aggregatable }) => aggregatable)
+    ? { conflicting: true }
+    : undefined;
+};
+
 const fetchAggregatableFieldTypes = async ({
   esClient,
   index,
@@ -40,7 +54,7 @@ const fetchAggregatableFieldTypes = async ({
 }: FieldTypesTarget & {
   esClient: ElasticsearchClient;
   fields: readonly string[];
-}): Promise<AggregatableFieldTypes> => {
+}): Promise<ControlFieldCapabilities> => {
   const response = await esClient.fieldCaps({
     index,
     fields: [...fields],
@@ -51,10 +65,8 @@ const fetchAggregatableFieldTypes = async ({
   });
   return new Map(
     Object.entries(response.fields).flatMap(([fieldName, capsByType]) => {
-      const capabilities = Object.values(capsByType);
-      return isAggregatableEverywhere(capabilities)
-        ? [[fieldName, capabilities.map(({ type }) => type)] as const]
-        : [];
+      const capability = toControlFieldCapability(Object.values(capsByType));
+      return capability ? [[fieldName, capability] as const] : [];
     })
   );
 };
@@ -69,7 +81,7 @@ const toCacheKey = (...parts: Array<string | undefined>): string =>
 export const createAggregatableFieldTypesLoader = (
   esClient: ElasticsearchClient
 ): AggregatableFieldTypesLoader => {
-  const fieldCache = new Map<string, Promise<string[] | undefined>>();
+  const fieldCache = new Map<string, Promise<ControlFieldCapability | undefined>>();
 
   const loadFields: AggregatableFieldTypesLoader['loadFields'] = async ({
     index,
@@ -92,7 +104,7 @@ export const createAggregatableFieldTypesLoader = (
       uncachedFieldNames.forEach((fieldName) =>
         fieldCache.set(
           toFieldCacheKey(fieldName),
-          pending.then((fieldTypes) => fieldTypes.get(fieldName))
+          pending.then((capabilities) => capabilities.get(fieldName))
         )
       );
     }
@@ -102,7 +114,9 @@ export const createAggregatableFieldTypesLoader = (
         async (fieldName) => [fieldName, await fieldCache.get(toFieldCacheKey(fieldName))] as const
       )
     );
-    return new Map(entries.flatMap(([fieldName, types]) => (types ? [[fieldName, types]] : [])));
+    return new Map(
+      entries.flatMap(([fieldName, capability]) => (capability ? [[fieldName, capability]] : []))
+    );
   };
 
   return { loadFields };

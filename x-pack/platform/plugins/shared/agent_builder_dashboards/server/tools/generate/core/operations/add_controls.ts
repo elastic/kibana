@@ -24,8 +24,8 @@ import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
 import { getErrorMessage, type OperationFailure } from '../utils';
 import { defineOperation } from './types';
 import type {
-  AggregatableFieldTypes,
   AggregatableFieldTypesLoader,
+  ControlFieldCapabilities,
 } from './aggregatable_field_types';
 
 const controlWidthSchema = z
@@ -148,22 +148,30 @@ const TEXT_FIELD_TYPES: ReadonlySet<string> = new Set([
   ES_FIELD_TYPES.MATCH_ONLY_TEXT,
 ]);
 
+const getUsableFieldTypes = (
+  capabilities: ControlFieldCapabilities,
+  fieldName: string
+): string[] | undefined => {
+  const capability = capabilities.get(fieldName);
+  return capability && 'types' in capability ? capability.types : undefined;
+};
+
 /**
- * Pick the first mapped candidate, but prefer the `.keyword` sibling over an analyzed
+ * Pick the first usable candidate, but prefer the `.keyword` sibling over an analyzed
  * text field, which can be aggregatable through `fielddata` yet groups on tokens.
  */
 const pickFieldName = (
   candidates: string[],
-  fieldTypes: AggregatableFieldTypes
+  capabilities: ControlFieldCapabilities
 ): string | undefined => {
-  const [firstCandidate, ...otherCandidates] = candidates.filter((candidate) =>
-    fieldTypes.has(candidate)
+  const [firstCandidate, ...otherCandidates] = candidates.filter(
+    (candidate) => getUsableFieldTypes(capabilities, candidate) !== undefined
   );
   if (firstCandidate === undefined) {
     return undefined;
   }
 
-  const isTextField = (fieldTypes.get(firstCandidate) ?? []).some((type) =>
+  const isTextField = (getUsableFieldTypes(capabilities, firstCandidate) ?? []).some((type) =>
     TEXT_FIELD_TYPES.has(type)
   );
   return isTextField && otherCandidates.length > 0 ? otherCandidates[0] : firstCandidate;
@@ -201,7 +209,7 @@ const loadFieldTypesByIndex = async ({
   loader: AggregatableFieldTypesLoader;
   projectRouting?: string;
   logger: Logger;
-}): Promise<Map<string, AggregatableFieldTypes | undefined>> => {
+}): Promise<Map<string, ControlFieldCapabilities | undefined>> => {
   const fieldNamesByIndex = new Map<string, string[]>();
   controls.forEach((control) => {
     fieldNamesByIndex.set(control.index, [
@@ -232,16 +240,25 @@ const loadFieldTypesByIndex = async ({
 
 const resolveControlField = (
   control: DataControlInput,
-  fieldTypes: AggregatableFieldTypes
+  capabilities: ControlFieldCapabilities
 ): { resolvedFieldName: string } | { reason: string } => {
-  const resolvedFieldName = pickFieldName(getFieldCandidates(control), fieldTypes);
+  const candidates = getFieldCandidates(control);
+  const resolvedFieldName = pickFieldName(candidates, capabilities);
   if (resolvedFieldName === undefined) {
-    return { reason: `Not mapped on index "${control.index}".` };
+    const hasConflictingMappings = candidates.some((candidate) => capabilities.has(candidate));
+    return {
+      reason: hasConflictingMappings
+        ? `Has conflicting mappings on index "${control.index}".`
+        : `Not mapped on index "${control.index}".`,
+    };
   }
 
   if (
     control.type === RANGE_SLIDER_CONTROL &&
-    !hasKbnFieldType(fieldTypes.get(resolvedFieldName) ?? [], KBN_FIELD_TYPES.NUMBER)
+    !hasKbnFieldType(
+      getUsableFieldTypes(capabilities, resolvedFieldName) ?? [],
+      KBN_FIELD_TYPES.NUMBER
+    )
   ) {
     return { reason: `range_slider_control needs a numeric field on index "${control.index}".` };
   }
@@ -273,7 +290,7 @@ const resolveControlFields = async ({
     return controls;
   }
 
-  const fieldTypesByIndex = await loadFieldTypesByIndex({
+  const capabilitiesByIndex = await loadFieldTypesByIndex({
     controls: controls.filter(
       (control): control is DataControlInput => control.type !== TIME_SLIDER_CONTROL
     ),
@@ -290,13 +307,13 @@ const resolveControlFields = async ({
       return;
     }
 
-    const fieldTypes = fieldTypesByIndex.get(control.index);
-    if (!fieldTypes) {
+    const capabilities = capabilitiesByIndex.get(control.index);
+    if (!capabilities) {
       resolvedControls.push(control);
       return;
     }
 
-    const resolution = resolveControlField(control, fieldTypes);
+    const resolution = resolveControlField(control, capabilities);
     if ('resolvedFieldName' in resolution) {
       resolvedControls.push({ ...control, field_name: resolution.resolvedFieldName });
       return;

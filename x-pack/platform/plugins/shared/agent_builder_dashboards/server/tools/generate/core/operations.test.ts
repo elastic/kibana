@@ -3054,7 +3054,7 @@ describe('add_controls / remove_controls operations', () => {
     ]);
   });
 
-  it('add_controls rejects a field that is not aggregatable in every index', async () => {
+  it('add_controls reports conflicting mappings for a field not aggregatable in every index', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     esClient.fieldCaps.mockResolvedValue({
       indices: ['logs-a', 'logs-b'],
@@ -3090,7 +3090,7 @@ describe('add_controls / remove_controls operations', () => {
       {
         type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
         identifier: 'host',
-        error: 'Not mapped on index "logs-*".',
+        error: 'Has conflicting mappings on index "logs-*".',
       },
     ]);
   });
