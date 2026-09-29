@@ -69,16 +69,30 @@ const makeStoredEvent = (
   } as SignificantEvent);
 
 /**
- * Returns a typed eventClient mock with default no-op implementations.
- * Override individual methods by passing a partial mock.
+ * Returns a typed eventSearchClient mock (SignificantEventsReadClient) with default no-op
+ * implementations. Override individual methods by passing a partial mock.
+ */
+const makeEventSearchClient = (
+  overrides: Partial<jest.Mocked<SignificantEventsReadClient>> = {}
+): jest.Mocked<SignificantEventsReadClient> => ({
+  findLatestPaginated: jest.fn(),
+  findLatestByCurrentStatePaginated: jest.fn(),
+  findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+  findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
+  findLatestByEventId: jest.fn(),
+  ...overrides,
+});
+
+/**
+ * Returns a typed eventClient mock. Extends makeEventSearchClient with EventClient-specific
+ * methods. Override individual methods by passing a partial mock.
  */
 const makeEventClient = (
   overrides: Partial<jest.Mocked<EventClient>> = {}
 ): jest.Mocked<EventClient> =>
   ({
-    findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    ...makeEventSearchClient(),
     findLatestByEventIds: jest.fn().mockResolvedValue(new Map()),
-    findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
     bulkCreate: jest.fn().mockImplementation(successfulBulkCreate),
     emitTrigger: jest.fn(),
     ...overrides,
@@ -1193,12 +1207,7 @@ describe('eventsWriteBulkHandler — narrative hijack guard', () => {
 
 describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', () => {
   it('uses eventSearchClient for dedup and current-state reads while eventClient supplies legacy lineage', async () => {
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    };
+    const eventSearchClient = makeEventSearchClient();
     const eventClient = makeEventClient();
 
     await eventsWriteBulkHandler({
@@ -1216,13 +1225,8 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
 
   it('suppresses write when .rule-events returns no hits but canonical client finds a matching active event', async () => {
     const activeEvent = makeStoredEvent('checkout__latency-active');
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      // .rule-events lags — no hits here
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
-      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    };
+    // .rule-events lags — no hits from the read store; canonical has the active event
+    const eventSearchClient = makeEventSearchClient();
     const eventClient = makeEventClient({
       // canonical write store has the active event
       findLatestActive: jest.fn().mockResolvedValue({ hits: [activeEvent] }),
@@ -1245,14 +1249,11 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
 
   it('uses the canonical event UUID for continuation lineage when eventSearchClient has a synthetic UUID', async () => {
     const eventId = 'existing-event-id';
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    const eventSearchClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({
         hits: [makeStoredEvent(eventId, { event_uuid: 'group-hash' })],
       }),
-    };
+    });
     const eventClient = makeEventClient({
       findByEventId: jest.fn().mockResolvedValue({
         hits: [makeStoredEvent(eventId, { event_uuid: 'legacy-event-uuid' })],
@@ -1273,10 +1274,7 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
     const eventId = 'event-with-investigations';
     const staleInvestigation = { workflow_execution_id: 'wf-old', started_at: TS_EARLIER };
     const freshInvestigation = { workflow_execution_id: 'wf-new', started_at: TS_EARLIER };
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    const eventSearchClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({
         // eventSearchClient (RuleEventsClient) missed the dual-write for wf-new
         hits: [
@@ -1286,7 +1284,7 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
           }),
         ],
       }),
-    };
+    });
     const eventClient = makeEventClient({
       findByEventId: jest.fn().mockResolvedValue({
         hits: [
@@ -1322,12 +1320,9 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
     // RuleEventsClient exposes 'closed' for 'dismissed'
     const readStorePredecessor = makeStoredEvent(eventId, { status: 'closed' });
 
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    const eventSearchClient = makeEventSearchClient({
       findByEventId: jest.fn().mockResolvedValue({ hits: [readStorePredecessor] }),
-    };
+    });
     const eventClient = makeEventClient({
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
       findByEventId: jest.fn().mockResolvedValue({ hits: [canonicalPredecessor] }),
@@ -1359,13 +1354,10 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
   });
 
   it('still writes when eventSearchClient.findLatestActive rejects (dedup fallback to canonical)', async () => {
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
+    const eventSearchClient = makeEventSearchClient({
       // .rule-events read store is unavailable
       findLatestActive: jest.fn().mockRejectedValue(new Error('read-store outage')),
-      findByEventId: jest.fn().mockResolvedValue({ hits: [] }),
-    };
+    });
     const eventClient = makeEventClient({
       findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
     });
@@ -1383,13 +1375,10 @@ describe('eventsWriteBulkHandler — eventSearchClient (flag-aware read path)', 
 
   it('still writes when eventSearchClient.findByEventId rejects (continuation fallback to canonical)', async () => {
     const eventId = 'checkout__latency-continuation';
-    const eventSearchClient: jest.Mocked<SignificantEventsReadClient> = {
-      findLatestPaginated: jest.fn(),
-      findLatestByCurrentStatePaginated: jest.fn(),
-      findLatestActive: jest.fn().mockResolvedValue({ hits: [] }),
+    const eventSearchClient = makeEventSearchClient({
       // .rule-events lookup for the existing event_id fails
       findByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
-    };
+    });
     const eventClient = makeEventClient({
       findByEventId: jest.fn().mockResolvedValue({
         // predecessor has lower severity so the write is not skipped as a no-op
