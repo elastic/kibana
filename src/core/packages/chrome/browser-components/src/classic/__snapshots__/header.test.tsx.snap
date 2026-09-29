@@ -26,7 +26,7 @@ exports[`Header renders 1`] = `
             role="status"
           />
           <a
-            class="euiButton euiSkipLink emotion-euiButtonDisplay-s-defaultMinWidth-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
+            class="euiButton euiSkipLink emotion-euiButtonDisplay-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
             data-test-subj="skipToMainButton"
             href="#"
             rel="noreferrer"
