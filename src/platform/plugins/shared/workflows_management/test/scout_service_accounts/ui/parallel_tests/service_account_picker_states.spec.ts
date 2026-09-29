@@ -115,6 +115,18 @@ test.describe('Service account picker states', { tag: tags.stateful.classic }, (
     await editor.openServiceAccountPicker(workflowYaml);
     const draft = await editor.getYamlEditorValue();
     await editor.openCreateServiceAccount();
+    await editor.openServiceAccountRoles();
+    await expect(page.getByRole('link', { name: /Create new role/ })).toBeVisible();
+    expect(
+      (
+        await page.checkA11y({
+          include: ['[data-test-subj="createServiceAccountFlyout"]', '[role="listbox"]'],
+        })
+      ).violations
+    ).toStrictEqual([]);
+    await page.screenshot({ path: testInfo.outputPath('service-account-create-role-menu.png') });
+    await editor.closeServiceAccountRoles();
+    await expect(page.testSubj.locator('createServiceAccountFlyout')).toBeVisible();
     await editor.cancelCreateServiceAccount();
     expect(await editor.getYamlEditorValue()).toBe(draft);
     await editor.openServiceAccountPicker(workflowYaml);

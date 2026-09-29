@@ -390,13 +390,23 @@ export class WorkflowEditorPage {
     await this.page.testSubj.locator('createServiceAccountFlyout').waitFor();
   }
 
+  async openServiceAccountRoles(): Promise<void> {
+    await this.page.testSubj.locator('serviceAccountRolesSelector').click();
+  }
+
+  async closeServiceAccountRoles(): Promise<void> {
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('Escape');
+    await this.page.getByRole('listbox', { name: 'Select roles' }).waitFor({ state: 'hidden' });
+  }
+
   async fillServiceAccount(name: string, description: string): Promise<void> {
     const flyout = this.page.testSubj.locator('createServiceAccountFlyout');
     await this.page.testSubj.locator('serviceAccountNameInput').fill(name);
     await this.page.testSubj.locator('createServiceAccountDescription').fill(description);
-    await flyout.getByRole('combobox').fill('viewer');
+    await flyout.getByRole('button', { name: 'Select roles' }).click();
+    await this.page.getByRole('listbox', { name: 'Select roles' }).press('End');
     await this.page.testSubj.locator('roleOption-viewer').click();
-    await this.page.testSubj.locator('serviceAccountNameInput').click();
+    await this.closeServiceAccountRoles();
   }
 
   async submitServiceAccount(): Promise<void> {
