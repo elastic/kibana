@@ -36,6 +36,7 @@ import {
 } from '@kbn/alertzero-common';
 import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { AlertZeroPageSection } from '../../components/layout/alertzero_page_section';
+import { ScanFailureCallout } from '../../components/scan_failure_callout/scan_failure_callout';
 import { useAlertZeroDocTitle } from '../../hooks/use_alertzero_doc_title';
 import { useCurrentUser } from '../../hooks/use_current_user';
 import { useWorkers } from '../../hooks/use_workers_api';
@@ -118,6 +119,7 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
   if (!canWrite) {
     return (
       <AlertZeroPageSection>
+        <ScanFailureCallout />
         <EuiEmptyPrompt
           iconType="watchesApp"
           title={<h2>{i18n.ONBOARDING_TITLE}</h2>}
@@ -146,6 +148,8 @@ export const OnboardingPage: React.FC<Props> = ({ onSavingChange }) => {
         <p>{i18n.ONBOARDING_SUBTITLE}</p>
       </EuiText>
       <EuiSpacer size="l" />
+
+      <ScanFailureCallout />
 
       <EuiPanel hasBorder hasShadow={false} paddingSize="none">
         {onboardingWorkers.length === 0 ? (

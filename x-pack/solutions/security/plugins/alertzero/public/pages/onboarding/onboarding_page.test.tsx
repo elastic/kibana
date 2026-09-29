@@ -25,6 +25,10 @@ import { SECURITY_APP_ID } from '@kbn/deeplinks-security';
 import { queryKeys } from '../../query_keys';
 import { OnboardingPage } from './onboarding_page';
 
+jest.mock('../../components/scan_failure_callout/scan_failure_callout', () => ({
+  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+}));
+
 const ALL_ONBOARDING_WORKER_IDS = [
   SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID,
   SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID,
@@ -82,6 +86,11 @@ const renderPage = ({
 };
 
 describe('OnboardingPage', () => {
+  it('mounts the scan-failure callout', () => {
+    renderPage();
+    expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
+  });
+
   it('renders the title', () => {
     renderPage({ canWrite: true });
     expect(screen.getByText('Enable your workers')).toBeInTheDocument();

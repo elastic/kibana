@@ -42,6 +42,9 @@ jest.mock('./conversations', () => ({
 jest.mock('../components/layout/alertzero_page_section', () => ({
   AlertZeroPageSection: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
+jest.mock('../components/scan_failure_callout/scan_failure_callout', () => ({
+  ScanFailureCallout: () => <div data-test-subj="alertZeroScanFailureCallout" />,
+}));
 jest.mock('../hooks/use_alertzero_doc_title', () => ({ useAlertZeroDocTitle: jest.fn() }));
 jest.mock('../hooks/use_current_user', () => ({
   useCurrentUser: jest.fn().mockReturnValue(undefined),
@@ -111,6 +114,12 @@ beforeEach(() => {
 afterEach(() => jest.clearAllMocks());
 
 describe('LandingPage', () => {
+  it('mounts the scan-failure callout on onboarding', () => {
+    renderPage();
+
+    expect(screen.getByTestId('alertZeroScanFailureCallout')).toBeInTheDocument();
+  });
+
   it('shows onboarding when there are no workers and no investigations', () => {
     mockUseWorkers.mockReturnValue(workersResult([]));
 

@@ -108,10 +108,11 @@ describe('ConversationsActionsGroup', () => {
     });
 
     it('omits the recommended action when no handler is wired', () => {
+      // With no recommended-action handler and no escalation/close capability, the menu
+      // has nothing left to show, so the trigger itself is hidden.
       renderGroup(makeInvestigation(), { withRecommendedAction: false });
-      openMenu();
 
-      expect(screen.queryByText('Revoke sessions')).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Open actions menu' })).not.toBeInTheDocument();
     });
 
     it('no longer duplicates opening the chat, which is on the card', () => {
@@ -121,7 +122,7 @@ describe('ConversationsActionsGroup', () => {
       expect(screen.queryByText('Open in chat')).not.toBeInTheDocument();
     });
 
-    it('drops assign and close on a decided investigation', () => {
+    it('drops close on a decided investigation', () => {
       // A decided investigation with canManageEscalations=false has no available actions;
       // the trigger is hidden and there is nothing to open.
       renderGroup(makeInvestigation({ recommendedAction: 'closed' }));
@@ -144,7 +145,7 @@ describe('ConversationsActionsGroup', () => {
       openMenu();
 
       expect(screen.getByText('Open an escalation')).toBeInTheDocument();
-      expect(screen.getByText('Add to an escalation')).toBeInTheDocument();
+      expect(screen.getByText('Attach to an escalation')).toBeInTheDocument();
     });
 
     it('hides escalation actions when canManageEscalations is false (default)', () => {
@@ -153,10 +154,10 @@ describe('ConversationsActionsGroup', () => {
       openMenu();
 
       expect(screen.queryByText('Open an escalation')).not.toBeInTheDocument();
-      expect(screen.queryByText('Add to an escalation')).not.toBeInTheDocument();
+      expect(screen.queryByText('Attach to an escalation')).not.toBeInTheDocument();
     });
 
-    it('keeps assign and close while the decision is open when canCloseInvestigation is true', () => {
+    it('keeps close available while the decision is open when canCloseInvestigation is true', () => {
       const onClickAction = jest.fn();
       renderWithKibanaRenderContext(
         <ConversationsActionsGroup

@@ -54,9 +54,11 @@
     "@kbn/proposals-common",
     "@kbn/proposals-plugin",
     "@kbn/security-plugin",
+    "@kbn/core-chrome-browser-context-mocks",
+    "@kbn/core-chrome-browser-mocks",
     "@kbn/security-mitre-attack-server",
     "@kbn/security-mitre-attack-common",
     "@kbn/inference-plugin",
-    "@kbn/management-settings-ids",
+    "@kbn/management-settings-ids"
   ]
 }

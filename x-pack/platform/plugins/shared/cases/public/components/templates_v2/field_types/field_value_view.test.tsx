@@ -41,6 +41,183 @@ describe('FieldValueView', () => {
     expect(onEdit).toHaveBeenCalledTimes(1);
   });
 
+  it('renders a markdown textarea value as formatted HTML instead of raw markdown', () => {
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: true },
+        }}
+        value="[Visit Elastic](https://elastic.co)"
+        isRequired={false}
+        isRequiredOnClose={false}
+      />
+    );
+
+    // The link text must be rendered as an anchor, not raw markdown syntax.
+    const link = screen.getByRole('link', { name: 'Visit Elastic' });
+    expect(link).toBeInTheDocument();
+    expect(link).toHaveAttribute('href', 'https://elastic.co');
+    expect(screen.queryByText('[Visit Elastic](https://elastic.co)')).not.toBeInTheDocument();
+  });
+
+  it('does not open edit mode when clicking a link inside a markdown textarea', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: true },
+        }}
+        value="[Visit Elastic](https://elastic.co)"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    await userEvent.click(screen.getByRole('link', { name: 'Visit Elastic' }));
+    expect(onEdit).not.toHaveBeenCalled();
+  });
+
+  it('opens edit mode when clicking the markdown content area outside a link', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: true },
+        }}
+        value="plain prose without links"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    await userEvent.click(screen.getByText('plain prose without links'));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens edit mode when the row is activated with Enter', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'investigation_notes',
+          label: 'Investigation notes',
+          control: FieldType.INPUT_TEXT,
+          type: 'keyword',
+        }}
+        value="some value"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    screen.getByRole('button', { name: 'Edit Investigation notes' }).focus();
+    await userEvent.keyboard('{Enter}');
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('opens edit mode when the row is activated with Space', async () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'investigation_notes',
+          label: 'Investigation notes',
+          control: FieldType.INPUT_TEXT,
+          type: 'keyword',
+        }}
+        value="some value"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    screen.getByRole('button', { name: 'Edit Investigation notes' }).focus();
+    await userEvent.keyboard(' ');
+    expect(onEdit).toHaveBeenCalledTimes(1);
+  });
+
+  it('uses a div element for the row, not a native button, so nested links are valid HTML', () => {
+    const onEdit = jest.fn();
+
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: true },
+        }}
+        value="[Visit Elastic](https://elastic.co)"
+        isRequired={false}
+        isRequiredOnClose={false}
+        onEdit={onEdit}
+      />
+    );
+
+    const row = screen.getByRole('button', { name: 'Edit Notes' });
+    expect(row.tagName).toBe('DIV');
+  });
+
+  it('renders a plain textarea value as text without markdown parsing', () => {
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+        }}
+        value="plain text value"
+        isRequired={false}
+        isRequiredOnClose={false}
+      />
+    );
+
+    expect(screen.getByText('plain text value')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
+  it('renders a textarea with explicit markdown:false as plain text', () => {
+    renderWithTestingProviders(
+      <FieldValueView
+        field={{
+          name: 'notes',
+          label: 'Notes',
+          control: FieldType.TEXTAREA,
+          type: 'keyword',
+          metadata: { markdown: false },
+        }}
+        value="[not a link](https://elastic.co)"
+        isRequired={false}
+        isRequiredOnClose={false}
+      />
+    );
+
+    expect(screen.getByText('[not a link](https://elastic.co)')).toBeInTheDocument();
+    expect(screen.queryByRole('link')).not.toBeInTheDocument();
+  });
+
   it('renders saved people by name rather than their serialized field value', () => {
     renderWithTestingProviders(
       <FieldValueView
