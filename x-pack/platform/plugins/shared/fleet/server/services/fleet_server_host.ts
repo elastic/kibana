@@ -323,19 +323,22 @@ class FleetServerHostService {
     }
 
     if (options?.request) {
-      const { spaceIds, truncated } =
-        await agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id);
-      if (truncated) {
-        throw new FleetServerHostUnauthorizedError(
-          `Unable to verify delete authorization for Fleet Server host ${id}: too many agent policies to enumerate`
-        );
+      const security = appContextService.getSecurity();
+      if (security && security.authz.mode.useRbacForRequest(options.request)) {
+        const { spaceIds, truncated } =
+          await agentPolicyService.getSpacesForPoliciesUsingFleetServerHost(id);
+        if (truncated) {
+          throw new FleetServerHostUnauthorizedError(
+            `Unable to verify delete authorization for Fleet Server host ${id}: too many agent policies to enumerate`
+          );
+        }
+        await assertPrivilegesInSpaces({
+          request: options.request,
+          spaceIds,
+          apiPrivileges: ['fleet-agent-policies-all'],
+          errorMessage: `Insufficient privileges to delete Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
+        });
       }
-      await assertPrivilegesInSpaces({
-        request: options.request,
-        spaceIds,
-        apiPrivileges: ['fleet-agent-policies-all'],
-        errorMessage: `Insufficient privileges to delete Fleet Server host ${id}: it is used by agent policies in spaces you are not authorized to access`,
-      });
     }
 
     await agentPolicyService.removeFleetServerHostFromAll(esClient, id, {

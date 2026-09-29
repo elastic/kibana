@@ -138,6 +138,32 @@ export default function (providerContext: FtrProviderContext) {
         // Prevent afterEach from trying to delete again
         outputId = '';
       });
+
+      it('returns 403 when output is referenced by a policy shared across multiple spaces', async () => {
+        // Share the policy created in beforeEach into default as well
+        await apiClient.putAgentPolicy(
+          agentPolicyId,
+          {
+            name: 'shared-policy',
+            namespace: 'default',
+            data_output_id: outputId,
+            monitoring_output_id: outputId,
+            space_ids: ['default', TEST_SPACE_1],
+          },
+          TEST_SPACE_1
+        );
+
+        const res = await supertestWithoutAuth
+          .delete(`/api/fleet/outputs/${outputId}`)
+          .auth(
+            testUsers.fleet_all_int_all_default_space_only.username,
+            testUsers.fleet_all_int_all_default_space_only.password
+          )
+          .set('kbn-xsrf', 'xxxx');
+        // Even though the policy is also in default, TEST_SPACE_1 membership
+        // means the restricted user must not be allowed to delete.
+        expect(res.status).to.eql(403);
+      });
     });
 
     // ---------------------------------------------------------------------------
