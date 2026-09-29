@@ -453,7 +453,7 @@ export function getEuidEsqlEvaluation(
   outputColumn: string,
   { withTypeId = true, options }: { withTypeId?: boolean; options?: EntityDefinitionOptions } = {}
 ): string {
-  const entityDefinition = getEntityDefinitionWithoutId(entityType, options);
+  const entityDefinition = getEntityDefinitionWithoutId(entityType, undefined, options);
   const { identityField } = entityDefinition;
   const mustPrependTypeId = withTypeId && !identityField.skipTypePrepend;
 
