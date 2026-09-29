@@ -14,6 +14,7 @@ import {
   OBSERVABILITY_OVERVIEW_APP_ID,
   SIGNIFICANT_EVENTS_APP_ID,
 } from '@kbn/deeplinks-observability';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftApp } from './app/app';
 import { NightshiftAppHeader } from './app/app_header';
@@ -28,6 +29,7 @@ export function NightshiftPage(): React.ReactElement | null {
     observabilityShared,
   } = useKibana().services;
   const { PageTemplate: ObservabilityPageTemplate } = observabilityShared.navigation;
+  const { canConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
   const settingsHref = application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, {
     path: '/settings',
   });
@@ -80,8 +82,8 @@ export function NightshiftPage(): React.ReactElement | null {
       <NightshiftAppHeader
         onManagementClick={navigateToManagement}
         managementHref={managementHref}
-        onSettingsClick={navigateToSettings}
-        settingsHref={settingsHref}
+        onSettingsClick={canConfigure ? navigateToSettings : undefined}
+        settingsHref={canConfigure ? settingsHref : undefined}
       />
       <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
         <NightshiftApp />

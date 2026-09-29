@@ -814,7 +814,7 @@ export const getXyVisualization = ({
       return null;
     }
 
-    return () => (
+    return (
       <SubtypeSwitch
         layer={layer}
         setLayerState={(newLayer: XYDataLayerConfig) =>

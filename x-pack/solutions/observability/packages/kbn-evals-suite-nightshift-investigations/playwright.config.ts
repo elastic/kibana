@@ -7,16 +7,24 @@
 
 import Path from 'path';
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { resolveEvalSelection } from './src/datasets/eval_selection';
 
-const selection = process.env.NIGHTSHIFT_DATASETS ?? 'synthetic-smoke';
-if (!['all', 'synthetic-smoke', 'trace-only'].includes(selection)) {
-  throw new Error(
-    `Unknown NIGHTSHIFT_DATASETS: ${selection}. Choose synthetic-smoke or trace-only.`
+// The suite's scout hook exports SANDBOX_API_KEY together with SANDBOX_KIBANA_CONFIG, which is what
+// makes the `evals_nightshift_investigations` config set start the investigation server.
+const { runSmoke, runInvestigations, fellBackToSmoke } = resolveEvalSelection();
+// Workers re-evaluate this config; only the main process (no TEST_WORKER_INDEX) warns.
+if (fellBackToSmoke && process.env.TEST_WORKER_INDEX === undefined) {
+  process.stderr.write(
+    '[nightshift-investigations] No sandbox credentials (SANDBOX_API_KEY); running only the smoke eval. ' +
+      'Use --profile dev-vault or set NIGHTSHIFT_DATASETS to choose explicitly.\n'
   );
 }
 
 export default createPlaywrightEvalsConfig({
   testDir: Path.resolve(__dirname, './evals'),
-  timeout: selection === 'trace-only' ? 45 * 60_000 : 10 * 60_000,
-  testIgnore: selection === 'trace-only' ? '**/smoke/**' : '**/investigation/**',
+  timeout: runInvestigations ? 45 * 60_000 : 10 * 60_000,
+  testIgnore: [
+    ...(runSmoke ? [] : ['**/smoke/**']),
+    ...(runInvestigations ? [] : ['**/investigation/**']),
+  ],
 });
