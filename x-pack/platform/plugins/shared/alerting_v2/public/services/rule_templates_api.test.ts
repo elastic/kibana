@@ -62,6 +62,25 @@ describe('RuleTemplatesApi', () => {
     });
   });
 
+  describe('listTags', () => {
+    it('fetches tags using the search prefix', async () => {
+      http.get.mockResolvedValue({ tags: ['production'] });
+
+      await expect(api.listTags({ search: 'pro' })).resolves.toEqual({ tags: ['production'] });
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/tags`, {
+        query: { search: 'pro' },
+      });
+    });
+
+    it.each([undefined, ''])('omits an absent or empty prefix: %p', async (search) => {
+      await api.listTags(search === undefined ? undefined : { search });
+
+      expect(http.get).toHaveBeenCalledWith(`${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/tags`, {
+        query: { search: undefined },
+      });
+    });
+  });
+
   describe('getRuleTemplate', () => {
     it('sends a GET request with the template id in the path', async () => {
       http.get.mockResolvedValue({ id: 'template-1' });

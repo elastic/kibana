@@ -13,6 +13,8 @@ import type {
   FindRuleTemplatesRequest,
   FindRuleTemplatesResponse,
   RuleTemplateResponse,
+  RuleTemplateTagsParams,
+  RuleTemplateTagsResponse,
 } from '@kbn/alerting-v2-schemas';
 import { ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH } from '../constants';
 
@@ -34,6 +36,15 @@ export class RuleTemplatesApi {
         sort_order: params.sort_order,
       },
     });
+  }
+
+  public async listTags(params: RuleTemplateTagsParams = {}): Promise<RuleTemplateTagsResponse> {
+    return this.http.get<RuleTemplateTagsResponse>(
+      `${ALERTING_V2_INTERNAL_RULE_TEMPLATE_API_PATH}/tags`,
+      {
+        query: { search: params.search || undefined },
+      }
+    );
   }
 
   public async getRuleTemplate(id: string, signal?: AbortSignal) {

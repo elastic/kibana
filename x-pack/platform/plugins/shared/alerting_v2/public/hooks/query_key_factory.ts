@@ -28,6 +28,8 @@ export const ruleKeys = {
 
 export const ruleTemplateKeys = {
   all: ['ruleTemplate'] as const,
+  allTags: () => [...ruleTemplateKeys.all, 'tags'] as const,
+  tags: (search?: string) => [...ruleTemplateKeys.allTags(), { search }] as const,
   lists: () => [...ruleTemplateKeys.all, 'list'] as const,
   list: (filters: {
     page: number;
