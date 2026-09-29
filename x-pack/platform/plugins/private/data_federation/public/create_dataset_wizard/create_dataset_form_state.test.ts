@@ -17,6 +17,7 @@ import {
   validateMaxErrors,
   validatePartitionPath,
   validateSkipRows,
+  type CreateDatasetSettingsFormValues,
 } from './create_dataset_form_state';
 
 const empty = () => emptyCreateDatasetSettingsFormValues();
@@ -162,43 +163,95 @@ describe('create_dataset_form_state', () => {
   });
 
   describe('validateDistinctCsvCharacter', () => {
-    const formValues = (settings: { delimiter?: string; quote?: string; escape?: string }) => {
+    const formValues = (settings: Partial<CreateDatasetSettingsFormValues>) => {
       const values = emptyDatasetFormValues();
-      return { ...values, settings: { ...values.settings, ...settings } };
+      return { ...values, settings: { ...values.settings, format: 'csv' as const, ...settings } };
     };
-    const conflict = createDatasetWizardStrings.settingsCsvCharactersNotDistinct;
+    const conflictsOf = (settings: Partial<CreateDatasetSettingsFormValues>) => {
+      const values = formValues(settings);
+      return (['delimiter', 'quote', 'escape'] as const).filter(
+        (name) => validateDistinctCsvCharacter(name)('', values) !== true
+      );
+    };
 
-    it('accepts distinct and unset characters', () => {
-      const values = formValues({ delimiter: ',', quote: '"', escape: '' });
-      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(true);
-      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(true);
-      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(true);
+    it('returns the conflict message', () => {
+      expect(validateDistinctCsvCharacter('quote')('', formValues({ quote: ',' }))).toBe(
+        createDatasetWizardStrings.settingsCsvCharactersNotDistinct
+      );
     });
 
-    it('flags only the fields that share a character', () => {
-      const values = formValues({ delimiter: '|', quote: '|', escape: '\\\\' });
-      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(conflict);
-      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(conflict);
-      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(true);
+    it('accepts distinct and unset characters', () => {
+      expect(conflictsOf({ delimiter: ';', quote: "'", escape: '/' })).toEqual([]);
+      expect(conflictsOf({})).toEqual([]);
+    });
+
+    it('flags only the explicitly set fields that share a character', () => {
+      expect(conflictsOf({ delimiter: '|', quote: '|', escape: '/' })).toEqual([
+        'delimiter',
+        'quote',
+      ]);
     });
 
     it('compares escape sequences by the character they represent', () => {
-      const values = formValues({ delimiter: '\t', quote: '\\t', escape: '\\' });
-      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(conflict);
-      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(conflict);
-      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(true);
+      expect(conflictsOf({ delimiter: '\t', quote: '\\t' })).toEqual(['delimiter', 'quote']);
+      expect(conflictsOf({ delimiter: '\\\\', escape: '\\' })).toEqual(['delimiter', 'escape']);
     });
 
-    it('flags an escape sequence that matches a literal character', () => {
-      const values = formValues({ delimiter: '\\\\', escape: '\\' });
-      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(conflict);
-      expect(validateDistinctCsvCharacter('escape')('', values)).toBe(conflict);
+    it('ignores non-CSV formats', () => {
+      expect(conflictsOf({ format: 'parquet', delimiter: '|', quote: '|' })).toEqual([]);
+      expect(conflictsOf({ format: '', delimiter: '|', quote: '|' })).toEqual([]);
     });
 
-    it('ignores a quote of none', () => {
-      const values = formValues({ delimiter: 'n', quote: 'none', escape: '' });
-      expect(validateDistinctCsvCharacter('quote')('', values)).toBe(true);
-      expect(validateDistinctCsvCharacter('delimiter')('', values)).toBe(true);
+    describe('WHEN the format is csv (quoting and escaping on by default)', () => {
+      it('flags a delimiter or escape that matches the default quote', () => {
+        expect(conflictsOf({ delimiter: '"' })).toEqual(['delimiter']);
+        expect(conflictsOf({ escape: '"' })).toEqual(['escape']);
+      });
+
+      it('flags a delimiter or quote that matches the default escape', () => {
+        expect(conflictsOf({ delimiter: '\\\\' })).toEqual(['delimiter']);
+        expect(conflictsOf({ quote: '\\' })).toEqual(['quote']);
+      });
+
+      it('flags a quote or escape that matches the default delimiter', () => {
+        expect(conflictsOf({ quote: ',' })).toEqual(['quote']);
+        expect(conflictsOf({ escape: ',' })).toEqual(['escape']);
+      });
+
+      it('ignores a character turned off with none', () => {
+        expect(conflictsOf({ delimiter: '"', quote: 'none' })).toEqual([]);
+        expect(conflictsOf({ delimiter: '\\\\', escape: 'NONE' })).toEqual([]);
+      });
+    });
+
+    describe('WHEN the format is tsv (quoting and escaping off by default)', () => {
+      it('ignores the inactive default quote and escape', () => {
+        expect(conflictsOf({ format: 'tsv', delimiter: '"' })).toEqual([]);
+        expect(conflictsOf({ format: 'tsv', delimiter: '\\\\' })).toEqual([]);
+      });
+
+      it('flags an explicit quote or escape that matches the default tab delimiter', () => {
+        expect(conflictsOf({ format: 'tsv', quote: '\\t' })).toEqual(['quote']);
+        expect(conflictsOf({ format: 'tsv', escape: '\\t' })).toEqual(['escape']);
+      });
+    });
+
+    describe('WHEN a mode is set', () => {
+      it('plain turns off the default quote and escape', () => {
+        expect(conflictsOf({ mode: 'plain', delimiter: '"' })).toEqual([]);
+        expect(conflictsOf({ mode: 'plain', delimiter: '\\\\' })).toEqual([]);
+      });
+
+      it('escaped turns on only the default escape', () => {
+        expect(conflictsOf({ mode: 'escaped', delimiter: '"' })).toEqual([]);
+        expect(conflictsOf({ mode: 'escaped', delimiter: '\\\\' })).toEqual(['delimiter']);
+      });
+
+      it('quoted turns on the default quote and escape for tsv', () => {
+        expect(conflictsOf({ format: 'tsv', mode: 'quoted', delimiter: '"' })).toEqual([
+          'delimiter',
+        ]);
+      });
     });
   });
 

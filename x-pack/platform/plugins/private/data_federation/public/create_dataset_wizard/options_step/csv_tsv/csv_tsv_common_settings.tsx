@@ -37,7 +37,11 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
       deps: ['settings.quote', 'settings.escape'],
     },
   });
-  const { field: modeField } = useController({ name: 'settings.mode', control });
+  const { field: modeField } = useController({
+    name: 'settings.mode',
+    control,
+    rules: { deps: ['settings.delimiter', 'settings.quote', 'settings.escape'] },
+  });
   const { field: headerRowField } = useController({ name: 'settings.header_row', control });
   const { field: nullValueField } = useController({ name: 'settings.null_value', control });
 

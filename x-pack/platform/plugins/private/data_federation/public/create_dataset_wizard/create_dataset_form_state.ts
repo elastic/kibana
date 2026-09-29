@@ -205,8 +205,15 @@ export const validateQuoteCharacter = (value: string): true | string => {
 export const validateDistinctCsvCharacter =
   (name: CsvCharacterSettingName) =>
   (_value: string, { settings }: CreateDatasetFormValues): true | string => {
-    const { delimiter, quote, escape } = settings;
-    if (!getConflictingCsvCharacterSettings({ delimiter, quote, escape }).includes(name)) {
+    const { format, mode, delimiter, quote, escape } = settings;
+    const conflicts = getConflictingCsvCharacterSettings({
+      format,
+      mode,
+      delimiter,
+      quote,
+      escape,
+    });
+    if (!conflicts.includes(name)) {
       return true;
     }
     return createDatasetWizardStrings.settingsCsvCharactersNotDistinct;

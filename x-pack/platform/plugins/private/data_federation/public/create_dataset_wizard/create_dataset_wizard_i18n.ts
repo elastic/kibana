@@ -834,7 +834,8 @@ export const createDatasetWizardStrings = {
   settingsCsvCharactersNotDistinct: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsCsvCharactersNotDistinct',
     {
-      defaultMessage: 'Delimiter, quote character, and escape character must all be different.',
+      defaultMessage:
+        'Delimiter, quote character, and escape character must all be different, including their defaults.',
     }
   ),
   settingsQuoteInvalid: i18n.translate(

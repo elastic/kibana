@@ -74,37 +74,75 @@ export const isValidQuoteOrEscapeCharacter = (value: string): boolean =>
 
 const CHARACTER_SEQUENCES: Readonly<Record<string, string>> = {
   '\\t': '\t',
-  '\\n': '\n',
-  '\\r': '\r',
   '\\\\': '\\',
 };
 
 export type CsvCharacterSettingName = 'delimiter' | 'quote' | 'escape';
 
-export type CsvCharacterSettings = Partial<Record<CsvCharacterSettingName, string>>;
+export type CsvCharacterSettings = Partial<
+  Record<CsvCharacterSettingName | 'format' | 'mode', string>
+>;
 
-const CSV_CHARACTER_SETTING_NAMES: readonly CsvCharacterSettingName[] = [
-  'delimiter',
-  'quote',
-  'escape',
-];
+interface CsvCharacterDefaults {
+  delimiter: string;
+  quoting: boolean;
+  escaping: boolean;
+}
 
-const resolveCsvCharacter = (value: string | undefined): string | undefined => {
-  if (!value || value.toLowerCase() === CSV_CHARACTER_NONE) return undefined;
+const DEFAULT_QUOTE_CHARACTER = '"';
+const DEFAULT_ESCAPE_CHARACTER = '\\';
+
+const CSV_CHARACTER_DEFAULTS_BY_FORMAT: Readonly<Record<string, CsvCharacterDefaults>> = {
+  csv: { delimiter: ',', quoting: true, escaping: true },
+  tsv: { delimiter: '\t', quoting: false, escaping: false },
+};
+
+const QUOTING_AND_ESCAPING_BY_MODE: Readonly<
+  Record<string, Pick<CsvCharacterDefaults, 'quoting' | 'escaping'>>
+> = {
+  quoted: { quoting: true, escaping: true },
+  escaped: { quoting: false, escaping: true },
+  plain: { quoting: false, escaping: false },
+};
+
+/** The character Elasticsearch uses for a setting, or `undefined` when the setting is turned off. */
+const resolveActiveCharacter = (
+  value: string | undefined,
+  isOnByDefault: boolean,
+  defaultCharacter: string
+): string | undefined => {
+  if (!value) return isOnByDefault ? defaultCharacter : undefined;
+  if (value.toLowerCase() === CSV_CHARACTER_NONE) return undefined;
   return CHARACTER_SEQUENCES[value] ?? value;
 };
 
-/** Returns the delimiter/quote/escape settings that resolve to the same character as another of them. */
+/**
+ * Returns the explicitly set delimiter/quote/escape settings that resolve to the same character as another
+ * active one, applying the format and mode defaults the same way Elasticsearch does.
+ */
 export const getConflictingCsvCharacterSettings = (
   settings: CsvCharacterSettings
-): CsvCharacterSettingName[] =>
-  CSV_CHARACTER_SETTING_NAMES.filter((name) => {
-    const character = resolveCsvCharacter(settings[name]);
-    if (character === undefined) return false;
-    return CSV_CHARACTER_SETTING_NAMES.some(
-      (other) => other !== name && resolveCsvCharacter(settings[other]) === character
-    );
+): CsvCharacterSettingName[] => {
+  const formatDefaults = settings.format
+    ? CSV_CHARACTER_DEFAULTS_BY_FORMAT[settings.format]
+    : undefined;
+  if (!formatDefaults) return [];
+
+  const { quoting, escaping } =
+    (settings.mode && QUOTING_AND_ESCAPING_BY_MODE[settings.mode]) || formatDefaults;
+  const active: Record<CsvCharacterSettingName, string | undefined> = {
+    delimiter: resolveActiveCharacter(settings.delimiter, true, formatDefaults.delimiter),
+    quote: resolveActiveCharacter(settings.quote, quoting, DEFAULT_QUOTE_CHARACTER),
+    escape: resolveActiveCharacter(settings.escape, escaping, DEFAULT_ESCAPE_CHARACTER),
+  };
+  const names: readonly CsvCharacterSettingName[] = ['delimiter', 'quote', 'escape'];
+
+  return names.filter((name) => {
+    const character = active[name];
+    if (!settings[name] || character === undefined) return false;
+    return names.some((other) => other !== name && active[other] === character);
   });
+};
 
 export type { Dataset, DataSetWithName, DatasetSettings } from './dataset_types';
 export type {
