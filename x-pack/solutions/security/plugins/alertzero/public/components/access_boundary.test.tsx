@@ -93,6 +93,12 @@ describe('AlertZero access boundary', () => {
     expect(screen.queryByText('Contact your administrator for access')).not.toBeInTheDocument();
   });
 
+  it('allows other pages without Proposals privileges', () => {
+    const { contentMounted } = setup();
+    expect(contentMounted).toHaveBeenCalled();
+    expect(screen.getByText('Feature content')).toBeInTheDocument();
+  });
+
   it('preserves the per-space setting as an independent gate', () => {
     const { contentMounted } = setup({ enabled: false });
     expect(contentMounted).not.toHaveBeenCalled();
@@ -118,7 +124,7 @@ describe('AlertZero access boundary', () => {
   });
 
   it.each([
-    { billingUrl: 'javascript:alert(1)', billingRejected: false },
+    { billingUrl: 'data:text/html,<h1>Untrusted billing page</h1>', billingRejected: false },
     { billingRejected: true },
   ])('falls back to contacting an administrator without a usable billing URL', async (billing) => {
     const { getPrivilegedUrls } = setup({ subscription: 'serverless_tier', ...billing });

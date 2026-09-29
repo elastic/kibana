@@ -173,15 +173,16 @@ export class AlertZeroPublicPlugin
 
     const canRead = core.application.capabilities[ALERTZERO_FEATURE_ID]?.show === true;
     const settingEnabled$ = core.uiSettings.get$<boolean>(ALERTZERO_ENABLED_SETTING_ID, false);
-    this.statusSubscription = settingEnabled$.subscribe((settingEnabled) => {
-      this.appUpdater$.next(() => ({
-        status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
-        visibleIn:
-          settingEnabled && canRead ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
-        deepLinks:
-          settingEnabled && canRead ? getAlertZeroDeepLinks(core.application.capabilities) : [],
-      }));
-    });
+    this.statusSubscription = combineLatest([settingEnabled$, this.availability$]).subscribe(
+      ([settingEnabled, availability]) => {
+        const showNavigation = settingEnabled && canRead && availability === 'available';
+        this.appUpdater$.next(() => ({
+          status: settingEnabled ? AppStatus.accessible : AppStatus.inaccessible,
+          visibleIn: showNavigation ? ['classicSideNav', 'projectSideNav', 'globalSearch'] : [],
+          deepLinks: showNavigation ? getAlertZeroDeepLinks(core.application.capabilities) : [],
+        }));
+      }
+    );
 
     const { agentBuilder } = startDeps;
     if (!agentBuilder || !startDeps.agenticInvestigations || !startDeps.proposals) {
