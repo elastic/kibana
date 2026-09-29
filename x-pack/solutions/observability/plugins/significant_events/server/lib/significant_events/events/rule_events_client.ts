@@ -361,6 +361,16 @@ export class RuleEventsClient {
     return { hits: hits.map(decodeSignificantEventResponse) };
   }
 
+  /**
+   * Resolves the latest version for an event_id lineage. `findByEventId` returns all versions
+   * sorted ascending by `@timestamp`, so the latest version is always the last element — never
+   * the first (a caller-supplied id must never pin a read to a stale revision).
+   */
+  async findLatestByEventId(eventId: string): Promise<SignificantEventResponse | undefined> {
+    const { hits } = await this.findByEventId(eventId);
+    return hits.at(-1);
+  }
+
   async findLatestByEventIds(eventIds: string[]): Promise<Map<string, SignificantEvent>> {
     if (!eventIds.length) return new Map();
 
