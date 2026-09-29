@@ -271,6 +271,63 @@ describe('attachInvestigationToEvent', () => {
     expect(dataStreamClient.create).not.toHaveBeenCalled();
   });
 
+  it('falls back to canonical eventClient when eventSearchClient returns empty hits (dual-write lag)', async () => {
+    const existing = createEvent({ event_uuid: 'event-1' });
+    // eventSearchClient simulates a stale `.rule-events` index: returns no hits
+    const { client: searchClient } = createEventClient([]);
+    // eventClient is the authoritative legacy store: has the event
+    const { client: canonicalClient, dataStreamClient } = createEventClient([existing]);
+    const investigation = createInvestigation();
+
+    const result = await attachInvestigationToEvent({
+      eventClient: canonicalClient,
+      eventSearchClient: searchClient,
+      eventId: 'agent-event-1',
+      investigation,
+    });
+
+    // Investigation must be written to the canonical store via the fallback
+    expect(result.updated).toBe(1);
+    expect(result.ignored).toBe(0);
+    expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    expect(written.investigations).toEqual([investigation]);
+    expect(written.previous_event_uuid).toBe('event-1');
+  });
+
+  it('falls back to canonical eventClient when eventSearchClient.findLatestByEventId rejects (read-store outage)', async () => {
+    const existing = createEvent({ event_uuid: 'event-1' });
+    // eventSearchClient simulates a read-store outage
+    const rejectingSearchClient = {
+      findLatestByEventId: jest.fn().mockRejectedValue(new Error('read-store outage')),
+    };
+    // eventClient is the authoritative legacy store: has the event
+    const { client: canonicalClient, dataStreamClient } = createEventClient([existing]);
+    const investigation = createInvestigation();
+
+    const result = await attachInvestigationToEvent({
+      eventClient: canonicalClient,
+      eventSearchClient: rejectingSearchClient as never,
+      eventId: 'agent-event-1',
+      investigation,
+    });
+
+    // Attachment must still write via the canonical client despite the read-store rejection
+    expect(result.updated).toBe(1);
+    expect(result.ignored).toBe(0);
+    expect(dataStreamClient.create).toHaveBeenCalledTimes(1);
+
+    const [[callArg]] = dataStreamClient.create.mock.calls;
+    const written: SignificantEvent = callArg.documents[0];
+
+    expect(written.investigations).toEqual([investigation]);
+    // Chain must use the real UUID from the canonical store, not a synthetic one
+    expect(written.previous_event_uuid).toBe('event-1');
+  });
+
   it('resolves lineage: attach targets the latest event version for the given event_id', async () => {
     const pending = createInvestigation({ workflow_execution_id: 'exec-1' });
     const e0 = createEvent({ event_uuid: 'event-0', event_id: 'slug-1' });
