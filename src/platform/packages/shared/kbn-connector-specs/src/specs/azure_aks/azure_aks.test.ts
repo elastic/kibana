@@ -74,6 +74,26 @@ describe('AzureAks', () => {
       );
       expect(result).toEqual({ value: [{ id: 'sub1' }] });
     });
+
+    it('follows nextLink and reports truncation when the page cap is hit', async () => {
+      mockClient.get.mockResolvedValue({
+        data: { value: [{ id: 'sub1' }], nextLink: 'https://management.azure.com/subscriptions?skip=next' },
+      });
+      const result = await AzureAks.actions.listSubscriptions.handler(mockContext, {});
+      expect(mockClient.get.mock.calls.length).toBeGreaterThan(1);
+      expect(result).toEqual(
+        expect.objectContaining({ truncated: true, value: expect.any(Array) })
+      );
+    });
+
+    it('stops pagination at a cross-origin nextLink without following it', async () => {
+      mockClient.get.mockResolvedValueOnce({
+        data: { value: [{ id: 'sub1' }], nextLink: 'https://evil.example/subscriptions?skip=next' },
+      });
+      const result = await AzureAks.actions.listSubscriptions.handler(mockContext, {});
+      expect(mockClient.get).toHaveBeenCalledTimes(1);
+      expect(result).toEqual({ value: [{ id: 'sub1' }], truncated: true });
+    });
   });
 
   describe('listResourceGroups', () => {
@@ -127,8 +147,11 @@ describe('AzureAks', () => {
   });
 
   describe('scaleNodePool', () => {
-    it('patches only the count property', async () => {
-      mockClient.patch.mockResolvedValueOnce({
+    it('PUTs the current pool with only the count overridden (no PATCH support on this route)', async () => {
+      mockClient.get.mockResolvedValueOnce({
+        data: { properties: { count: 1, vmSize: 'Standard_D2s_v4', mode: 'System' } },
+      });
+      mockClient.put.mockResolvedValueOnce({
         data: { properties: { provisioningState: 'Updating' } },
       });
       await AzureAks.actions.scaleNodePool.handler(mockContext, {
@@ -137,9 +160,26 @@ describe('AzureAks', () => {
         nodePoolName: 'nodepool1',
         count: 3,
       });
-      expect(mockClient.patch).toHaveBeenCalledWith(
+      expect(mockClient.patch).not.toHaveBeenCalled();
+      expect(mockClient.put).toHaveBeenCalledWith(
         expect.stringContaining('/agentPools/nodepool1'),
-        { properties: { count: 3 } },
+        { properties: { count: 3, vmSize: 'Standard_D2s_v4', mode: 'System' } },
+        expect.any(Object)
+      );
+    });
+  });
+
+  describe('runCommand', () => {
+    it('sends a flat body without a properties wrapper', async () => {
+      mockClient.post.mockResolvedValueOnce({ headers: {}, data: { status: 'Succeeded' } });
+      await AzureAks.actions.runCommand.handler(mockContext, {
+        resourceGroupName: RG,
+        clusterName: CLUSTER,
+        command: 'kubectl get nodes',
+      });
+      expect(mockClient.post).toHaveBeenCalledWith(
+        expect.stringContaining('/runCommand'),
+        { command: 'kubectl get nodes' },
         expect.any(Object)
       );
     });
