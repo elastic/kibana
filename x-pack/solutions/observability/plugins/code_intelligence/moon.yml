@@ -1,0 +1,36 @@
+$schema: https://moonrepo.dev/schemas/project.json
+id: '@kbn/code-intelligence-plugin'
+layer: unknown
+owners:
+  defaultOwner: '@elastic/obs-knowledge-team'
+toolchains:
+  default: node
+language: typescript
+project:
+  title: '@kbn/code-intelligence-plugin'
+  description: Moon project for @kbn/code-intelligence-plugin
+  channel: ''
+  owner: '@elastic/obs-knowledge-team'
+  sourceRoot: x-pack/solutions/observability/plugins/code_intelligence
+dependsOn:
+  - '@kbn/config-schema'
+  - '@kbn/core'
+  - '@kbn/core-plugins-server'
+  - '@kbn/spaces-plugin'
+  - '@kbn/workflows'
+  - '@kbn/workflows-extensions'
+  - '@kbn/workflows-management-plugin'
+tags:
+  - plugin
+  - prod
+  - group-observability
+  - private
+  - jest-unit-tests
+fileGroups:
+  src:
+    - common/**/*
+    - server/**/*
+    - '!target/**/*'
+  jest-config:
+    - jest.config.js
+tasks: {}
