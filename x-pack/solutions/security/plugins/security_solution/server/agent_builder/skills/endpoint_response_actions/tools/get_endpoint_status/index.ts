@@ -9,7 +9,7 @@ import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import { z } from '@kbn/zod/v4';
 import { ToolResultType, ToolType } from '@kbn/agent-builder-common';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
-import { escapeKuery, escapeQuotes } from '@kbn/es-query';
+import { escapeQuotes } from '@kbn/es-query';
 
 import { HostStatus } from '../../../../../../common/endpoint/types';
 
@@ -195,9 +195,11 @@ export const getEndpointStatusTool = (
         // matched metadata below; with it the hostname constraint is retained
         // so a mismatched id+name pair reports not-found rather than the
         // wrong host.
-        const idKuery = `(united.agent.agent.id: ${escapeKuery(agentId)} OR agent.id: ${escapeKuery(
-          agentId
-        )})`;
+        // Quoted: `escapeKuery` leaves plain spaces unescaped, so an unquoted
+        // ID with a space would parse as separate terms and, with pageSize 1,
+        // could return another endpoint's status as a successful lookup.
+        const quotedAgentId = `"${escapeQuotes(agentId)}"`;
+        const idKuery = `(united.agent.agent.id: ${quotedAgentId} OR agent.id: ${quotedAgentId})`;
         const metadataService = endpointAppContextService.getEndpointMetadataService(spaceId);
         const hostInfo = await metadataService.getHostMetadataList(
           {

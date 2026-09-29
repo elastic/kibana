@@ -100,9 +100,29 @@ describe('getEndpointStatusTool', () => {
           page: 0,
           pageSize: 1,
           // No hostname constraint when only the ID is supplied.
-          kuery: '(united.agent.agent.id: agent-123 OR agent.id: agent-123)',
+          kuery: '(united.agent.agent.id: "agent-123" OR agent.id: "agent-123")',
         },
         expect.objectContaining({ isCpsRead: expect.any(Function) })
+      );
+    });
+
+    it('quotes an agent ID containing a space so it stays one exact term', async () => {
+      const getHostMetadataList = jest.fn().mockResolvedValue({ data: [], total: 0 });
+      jest
+        .spyOn(mockEndpointAppContextService, 'getEndpointMetadataService')
+        .mockImplementation((() => ({
+          getHostMetadataList,
+        })) as unknown as EndpointAppContextService['getEndpointMetadataService']);
+
+      const result = await tool.handler({ agentId: 'agent 123' }, mockContext);
+
+      const data = assertStandardReturn(result)[0].data as Record<string, unknown>;
+      expect(data.found).toBe(false);
+      expect(getHostMetadataList).toHaveBeenCalledWith(
+        expect.objectContaining({
+          kuery: '(united.agent.agent.id: "agent 123" OR agent.id: "agent 123")',
+        }),
+        expect.anything()
       );
     });
 
@@ -272,7 +292,7 @@ describe('getEndpointStatusTool', () => {
           // endpoint's own id (top-level `agent.id`), which diverge on
           // current agents.
           kuery:
-            '(united.agent.agent.id: agent-123 OR agent.id: agent-123) AND united.endpoint.host.hostname: "my-host"',
+            '(united.agent.agent.id: "agent-123" OR agent.id: "agent-123") AND united.endpoint.host.hostname: "my-host"',
         },
         // Scoped services are required for this read to fan out under CPS.
         expect.objectContaining({ isCpsRead: expect.any(Function) })
@@ -491,7 +511,7 @@ describe('getEndpointStatusTool', () => {
           page: 0,
           pageSize: 1,
           kuery:
-            '(united.agent.agent.id: live-b OR agent.id: live-b) AND united.endpoint.host.hostname: "duplicated-host"',
+            '(united.agent.agent.id: "live-b" OR agent.id: "live-b") AND united.endpoint.host.hostname: "duplicated-host"',
         },
         expect.objectContaining({ isCpsRead: expect.any(Function) })
       );
