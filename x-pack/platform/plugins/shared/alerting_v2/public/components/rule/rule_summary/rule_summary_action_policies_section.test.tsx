@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
 import type { RuleSummaryData } from '../types';
 import { RuleSummaryBody } from './rule_summary_body';
 import { RuleSummaryActionPoliciesSection } from './rule_summary_action_policies_section';
@@ -22,8 +23,18 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 jest.mock('../../rule_details/overview/artifacts/action_policies_artifacts_subsection', () => ({
-  ActionPoliciesArtifactsSubsection: () => (
-    <div data-test-subj="mockActionPoliciesArtifactsSubsection" />
+  ActionPoliciesArtifactsSubsection: ({
+    flyoutSession,
+    showTitle,
+  }: {
+    flyoutSession?: string;
+    showTitle?: boolean;
+  }) => (
+    <div
+      data-test-subj="mockActionPoliciesArtifactsSubsection"
+      data-session={flyoutSession}
+      data-show-title={String(showTitle)}
+    />
   ),
 }));
 
@@ -33,31 +44,44 @@ const rule: RuleSummaryData = {
   metadata: { name: 'Test rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+  query: { base: 'FROM logs-*' },
 };
+
+const renderSection = (summaryRule: RuleSummaryData = rule) =>
+  render(
+    <I18nProvider>
+      <RuleSummaryBody rule={summaryRule}>
+        <RuleSummaryActionPoliciesSection />
+      </RuleSummaryBody>
+    </I18nProvider>
+  );
 
 describe('RuleSummaryActionPoliciesSection', () => {
   beforeEach(() => {
     mockCanRead.mockReturnValue(true);
   });
 
-  it('renders action policies for alert rules', () => {
-    render(
-      <RuleSummaryBody rule={rule}>
-        <RuleSummaryActionPoliciesSection />
-      </RuleSummaryBody>
-    );
+  it('renders action policies for alert rules inside the summary flyout', () => {
+    renderSection();
 
-    expect(screen.getByTestId('ruleSummaryActionPolicies')).toBeInTheDocument();
-    expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toBeInTheDocument();
+    expect(screen.getByTestId('ruleSummaryActionPolicies')).toHaveTextContent('Action policies');
+    expect(
+      screen
+        .getByTestId('ruleSummaryActionPolicies')
+        .querySelector('[data-euiicon-type="tablePlay"]')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toHaveAttribute(
+      'data-session',
+      'inherit'
+    );
+    expect(screen.getByTestId('mockActionPoliciesArtifactsSubsection')).toHaveAttribute(
+      'data-show-title',
+      'false'
+    );
   });
 
   it('does not render action policies for signal rules', () => {
-    render(
-      <RuleSummaryBody rule={{ ...rule, kind: 'signal' }}>
-        <RuleSummaryActionPoliciesSection />
-      </RuleSummaryBody>
-    );
+    renderSection({ ...rule, kind: 'signal' });
 
     expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockActionPoliciesArtifactsSubsection')).not.toBeInTheDocument();
@@ -66,11 +90,7 @@ describe('RuleSummaryActionPoliciesSection', () => {
   it('does not render action policies without read access', () => {
     mockCanRead.mockReturnValue(false);
 
-    render(
-      <RuleSummaryBody rule={rule}>
-        <RuleSummaryActionPoliciesSection />
-      </RuleSummaryBody>
-    );
+    renderSection();
 
     expect(screen.queryByTestId('ruleSummaryActionPolicies')).not.toBeInTheDocument();
     expect(screen.queryByTestId('mockActionPoliciesArtifactsSubsection')).not.toBeInTheDocument();

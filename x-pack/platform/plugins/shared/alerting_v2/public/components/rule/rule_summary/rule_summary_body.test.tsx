@@ -17,7 +17,7 @@ const rule: RuleSummaryData = {
   metadata: { name: 'Test rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+  query: { base: 'FROM logs-*' },
 };
 
 const SummaryConsumer = () => {

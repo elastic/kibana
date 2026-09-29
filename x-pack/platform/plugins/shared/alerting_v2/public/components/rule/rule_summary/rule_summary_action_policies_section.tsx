@@ -24,13 +24,14 @@ export const RuleSummaryActionPoliciesSection: React.FC = () => {
   return (
     <FlyoutAccordion
       title={i18n.translate('xpack.alertingV2.ruleSummary.actionPolicies', {
-        defaultMessage: 'Action Policies',
+        defaultMessage: 'Action policies',
       })}
+      icon="tablePlay"
       hasBorder={false}
       initialIsOpen
       data-test-subj="ruleSummaryActionPolicies"
     >
-      <ActionPoliciesArtifactsSubsection rule={rule} />
+      <ActionPoliciesArtifactsSubsection rule={rule} flyoutSession="inherit" showTitle={false} />
     </FlyoutAccordion>
   );
 };

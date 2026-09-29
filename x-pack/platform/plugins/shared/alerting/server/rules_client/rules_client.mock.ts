@@ -45,6 +45,7 @@ const create = () => {
     spaceId: 'default',
     namespace: 'default',
     getUserName: jest.fn(),
+    getProfileUid: jest.fn(),
     createAPIKey: jest.fn(),
     logger: loggingSystemMock.create().get(),
     internalSavedObjectsRepository,

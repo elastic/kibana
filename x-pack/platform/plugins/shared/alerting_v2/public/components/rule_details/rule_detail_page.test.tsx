@@ -140,10 +140,7 @@ const baseRule: RuleApiResponse = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | STATS count() BY host.name' },
-  },
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
   created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: { profile_uid: 'bob@example.com' },

@@ -40,11 +40,7 @@ const rule: RuleSummaryData = {
   metadata: { name: 'Test rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: {
-    format: 'composed',
-    base: 'FROM logs-* | STATS count() BY host.name',
-    breach: { segment: '' },
-  },
+  query: { base: 'FROM logs-* | STATS count() BY host.name' },
 };
 
 const renderQueryPreview = (summaryRule: RuleSummaryData = rule) =>
