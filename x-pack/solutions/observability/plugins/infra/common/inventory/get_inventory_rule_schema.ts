@@ -21,7 +21,7 @@ export const getInventoryRuleSchema = (
   nodeType: InventoryItemType,
   schema: DataSchemaFormat | null | undefined,
   isPodSchemaSelectorEnabled: boolean = false
-): DataSchemaFormat | undefined => {
+): DataSchemaFormat => {
   if (nodeType === 'pod') {
     const storedSchema = isPodSchemaSelectorEnabled ? schema : undefined;
     return storedSchema ?? 'ecs';
