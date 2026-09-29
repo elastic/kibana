@@ -566,7 +566,13 @@ describe('promote task runner', () => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
-    (esClient.search as jest.Mock).mockImplementation(async () => {
+    (esClient.search as jest.Mock).mockImplementation(async (req: { pit?: unknown }) => {
+      // Report scan pages use a PIT. Prior-citation lookups hit the indicators
+      // index without one and default to empty so existing page fixtures stay
+      // focused on the report scan.
+      if (!req?.pit) {
+        return { hits: { hits: [] } };
+      }
       const response = searchResponses[call] ?? { hits: { hits: [] } };
       call += 1;
       return response;
@@ -1165,6 +1171,41 @@ describe('sources[] citation ranks on upsert', () => {
   it('recomputes document ranks from sources after a citation refresh', () => {
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('mutatedSources');
     expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('tiersComplete && bestTier != null');
+  });
+
+  it('falls back to raise-only when legacy sources lack per-citation ranks', () => {
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (!tiersComplete || !sevsComplete)');
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain('if (incomingTier > currentTier)');
+  });
+
+  it('skips absolute recompute while sources_truncated so unrecorded citations cannot demote', () => {
+    expect(SOURCES_UPSERT_SCRIPT_FOR_TEST).toContain(
+      'mutatedSources && ctx._source.sources_truncated != true'
+    );
+    expect(SOURCES_REMOVE_SCRIPT_FOR_TEST).toContain('if (ctx._source.sources_truncated != true)');
+  });
+
+  it('retracts prior live citations whose values left extracted.iocs', () => {
+    const staleId = 'default:url:https://evil.example/old%60';
+    const ops = buildBulkOpsForTest(
+      [
+        makeReport({
+          id: 'r-renorm',
+          iocs: [
+            {
+              type: 'url',
+              value: 'https://evil.example/old',
+              tier: 'discriminating',
+            },
+          ],
+        }),
+      ],
+      NOW,
+      new Map([['r-renorm', [staleId]]])
+    );
+
+    expect(upsertOps(ops).map((op) => op._id)).toEqual(['default:url:https://evil.example/old']);
+    expect(retractOps(ops).map((op) => op._id)).toEqual([staleId]);
   });
 
   it('passes the alert-reference prefix on retract ops', () => {

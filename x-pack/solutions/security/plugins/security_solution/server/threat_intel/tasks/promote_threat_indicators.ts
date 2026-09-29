@@ -9,7 +9,7 @@ import { createHash } from 'crypto';
 import net from 'node:net';
 import type { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import type { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   TaskCost,
   type TaskManagerSetupContract,
@@ -227,11 +227,44 @@ const PROMOTABLE_TIER_RANK_LITERAL = PROMOTABLE_TIERS_BY_PRECISION.map(
 const SEVERITY_RANK_LITERAL = `['low': 1, 'medium': 2, 'high': 3, 'critical': 4]`;
 
 /**
+ * Shared Painless fragment: raise document `ioc_tier` / `severity` from
+ * `params` when the incoming ranks beat the current document (never demotes).
+ * Used for truncated citations and as a legacy-safe fallback when `sources[]`
+ * still has unranked pre-PR entries.
+ */
+const RAISE_RANKS_FROM_PARAMS = `
+if (params.severity != null) {
+  Map rank = ${SEVERITY_RANK_LITERAL};
+  int incoming = rank.containsKey(params.severity) ? rank[params.severity] : 0;
+  int current = ctx._source.severity != null && rank.containsKey(ctx._source.severity)
+    ? rank[ctx._source.severity]
+    : 0;
+  if (incoming > current) {
+    ctx._source.severity = params.severity;
+    ctx._source.threat.indicator.confidence = params.severity;
+  }
+}
+if (params.ioc_tier != null) {
+  Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
+  int incomingTier = tierRank.containsKey(params.ioc_tier) ? tierRank[params.ioc_tier] : 0;
+  int currentTier = ctx._source.ioc_tier != null && tierRank.containsKey(ctx._source.ioc_tier)
+    ? tierRank[ctx._source.ioc_tier]
+    : 0;
+  if (incomingTier > currentTier) {
+    ctx._source.ioc_tier = params.ioc_tier;
+  }
+}
+`.trim();
+
+/**
  * Shared Painless fragment: set document `ioc_tier` / `severity` from the current
  * `sources[]` citations. Skips the update when any remaining citation is missing
  * the per-entry rank (pre-PR documents), so we never invent a demotion or wipe
  * severity from incomplete provenance. When every citation is ranked, absolute
  * best-wins applies (including demotion after a refresh or retract).
+ *
+ * Leaves `tiersComplete` / `sevsComplete` in scope for the caller so incomplete
+ * provenance can fall back to raise-only from `params`.
  */
 const RECOMPUTE_RANKS_FROM_SOURCES = `
 Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
@@ -299,11 +332,15 @@ if (sevsComplete) {
  *   severity   — severity.level of the citing report, or null
  *   ioc_tier   — the extract_iocs tier this citation assigned the value
  *
- * Each sources[] entry stores `ioc_tier` / `severity`. When a citation is added or
- * refreshed, document ranks are recomputed from every ranked citation so a
- * demotion on re-enrichment actually lowers the live indicator. Truncated
- * citations that never enter `sources[]` still apply raise-only best-wins so a
- * later high-precision report is not dropped on the floor.
+ * Each sources[] entry stores `ioc_tier` / `severity`. Rank policy on upsert:
+ * - Full provenance (not truncated, every citation ranked): absolute recompute
+ *   so a demotion on re-enrichment actually lowers the live indicator.
+ * - Truncated provenance: raise-only only. Absolute recompute would ignore
+ *   unrecorded high-tier contributors past the cap.
+ * - Legacy incomplete ranks: recompute is skipped for the incomplete axis, then
+ *   raise-only from `params` still lets a new discriminating report raise the
+ *   document even when historical `sources[]` entries lack per-citation ranks.
+ * - Citation omitted at the cap (`!mutatedSources`): raise-only.
  *
  * `source_report_id`, `source_report_url`, and `threat.indicator.reference` stay
  * at their first-seen values on upsert; retract rebinds them when that report
@@ -345,31 +382,17 @@ if (ctx._source.threat == null) { ctx._source.threat = ['indicator': [:]]; }
 if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
 ctx._source.threat.indicator.last_seen = params.now;
 ctx._source['@timestamp'] = params.now;
-if (mutatedSources) {
+if (mutatedSources && ctx._source.sources_truncated != true) {
   ${RECOMPUTE_RANKS_FROM_SOURCES}
+  // Pre-PR sources[] lack per-citation ranks. Absolute recompute no-ops those
+  // axes; raise-only still lets this citation promote a legacy uncertain row.
+  if (!tiersComplete || !sevsComplete) {
+    ${RAISE_RANKS_FROM_PARAMS}
+  }
 } else {
-  // Truncated citation: not stored in sources[], but still raise document ranks.
-  if (params.severity != null) {
-    Map rank = ${SEVERITY_RANK_LITERAL};
-    int incoming = rank.containsKey(params.severity) ? rank[params.severity] : 0;
-    int current = ctx._source.severity != null && rank.containsKey(ctx._source.severity)
-      ? rank[ctx._source.severity]
-      : 0;
-    if (incoming > current) {
-      ctx._source.severity = params.severity;
-      ctx._source.threat.indicator.confidence = params.severity;
-    }
-  }
-  if (params.ioc_tier != null) {
-    Map tierRank = [${PROMOTABLE_TIER_RANK_LITERAL}];
-    int incomingTier = tierRank.containsKey(params.ioc_tier) ? tierRank[params.ioc_tier] : 0;
-    int currentTier = ctx._source.ioc_tier != null && tierRank.containsKey(ctx._source.ioc_tier)
-      ? tierRank[ctx._source.ioc_tier]
-      : 0;
-    if (incomingTier > currentTier) {
-      ctx._source.ioc_tier = params.ioc_tier;
-    }
-  }
+  // Truncated provenance (recorded refresh or omitted citation): raise-only so
+  // unrecorded contributors past the cap cannot be demoted out of existence.
+  ${RAISE_RANKS_FROM_PARAMS}
 }
 `.trim();
 
@@ -402,7 +425,11 @@ if (ctx._source.sources.size() == 0) {
   if (ctx._source.threat.indicator == null) { ctx._source.threat.indicator = [:]; }
   ctx._source.threat.indicator.last_seen = params.now;
 
-  ${RECOMPUTE_RANKS_FROM_SOURCES}
+  // Truncated provenance: do not absolute-recompute. Unrecorded citations past
+  // the cap may still justify the current document ranks.
+  if (ctx._source.sources_truncated != true) {
+    ${RECOMPUTE_RANKS_FROM_SOURCES}
+  }
 
   def earliest = null;
   for (def entry : ctx._source.sources) {
@@ -537,7 +564,16 @@ const isRejectedReport = (report: ReportHit): boolean =>
   report._source?.extracted?.gate?.is_intelligence === false ||
   report._source?.lineage?.extraction_method === 'workflow_v4_rejected';
 
-const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
+const buildBulkOps = (
+  reports: ReportHit[],
+  now: string,
+  /**
+   * Indicator ids previously citing each report (from the live index). Values that
+   * disappeared from `extracted.iocs` on re-extraction still need retracts; the
+   * current IOC array alone cannot see them.
+   */
+  priorCitationIdsByReport: ReadonlyMap<string, readonly string[]> = new Map()
+): PromoteBulkOp[] => {
   const ops: PromoteBulkOp[] = [];
   for (const report of reports) {
     const reportId = report._id;
@@ -572,6 +608,7 @@ const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
             ioc.deferred_unreviewed !== true
         );
     const usableIds = new Set(usableIocs.map((ioc) => indicatorId(spaceId, ioc.type, ioc.value)));
+    const retractIds = new Set<string>();
 
     for (const ioc of usableIocs) {
       const id = indicatorId(spaceId, ioc.type, ioc.value);
@@ -647,19 +684,31 @@ const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
             isPromotableTier(ioc.tier) ||
             (typeof ioc.tier_basis === 'string' && ioc.tier_basis.startsWith('semantic_'));
           if (mayHaveBeenPromoted) {
-            ops.push({
-              kind: 'retract',
-              _index: THREAT_INTEL_INDICATORS_INDEX,
-              _id: id,
-              scriptParams: {
-                report_id: reportId,
-                now,
-                reference_prefix: INDICATOR_REFERENCE_PREFIX,
-              },
-            });
+            retractIds.add(id);
           }
         }
       }
+    }
+
+    // Values that left `extracted.iocs` entirely (extractor trim/normalization)
+    // still need retracts; the current array cannot see them.
+    for (const priorId of priorCitationIdsByReport.get(reportId) ?? []) {
+      if (!usableIds.has(priorId)) {
+        retractIds.add(priorId);
+      }
+    }
+
+    for (const id of retractIds) {
+      ops.push({
+        kind: 'retract',
+        _index: THREAT_INTEL_INDICATORS_INDEX,
+        _id: id,
+        scriptParams: {
+          report_id: reportId,
+          now,
+          reference_prefix: INDICATOR_REFERENCE_PREFIX,
+        },
+      });
     }
   }
   return ops;
@@ -667,6 +716,71 @@ const buildBulkOps = (reports: ReportHit[], now: string): PromoteBulkOp[] => {
 
 /** Exported for unit tests only — not part of the public plugin API. */
 export const buildBulkOpsForTest = buildBulkOps;
+
+/**
+ * Look up live indicator ids that still cite any of these reports. Used to retract
+ * citations whose IOC values left `extracted.iocs` on re-extraction.
+ */
+const loadPriorCitationIdsByReport = async ({
+  esClient,
+  reportIds,
+  signal,
+  logger,
+}: {
+  esClient: ElasticsearchClient;
+  reportIds: string[];
+  signal: AbortSignal;
+  logger: Logger;
+}): Promise<Map<string, string[]>> => {
+  const prior = new Map<string, string[]>();
+  if (reportIds.length === 0) {
+    return prior;
+  }
+  const reportIdSet = new Set(reportIds);
+  try {
+    const response = await esClient.search<{
+      sources?: Array<{ report_id?: string }>;
+    }>(
+      {
+        index: THREAT_INTEL_INDICATORS_INDEX,
+        size: Math.min(Math.max(reportIds.length * 32, 100), 10_000),
+        _source: ['sources.report_id'],
+        query: {
+          nested: {
+            path: 'sources',
+            query: { terms: { 'sources.report_id': reportIds } },
+          },
+        },
+      },
+      { signal }
+    );
+    for (const hit of response.hits.hits) {
+      const indicatorIdValue = hit._id;
+      if (indicatorIdValue) {
+        for (const entry of hit._source?.sources ?? []) {
+          const citingReportId = entry?.report_id;
+          if (typeof citingReportId === 'string' && reportIdSet.has(citingReportId)) {
+            const list = prior.get(citingReportId) ?? [];
+            list.push(indicatorIdValue);
+            prior.set(citingReportId, list);
+          }
+        }
+      }
+    }
+  } catch (err) {
+    const status = (err as { statusCode?: number }).statusCode;
+    if (status === 404 || signal.aborted) {
+      // Indicators index not created yet, or the task timed out mid-lookup.
+      return prior;
+    }
+    logger.warn(
+      `Failed to load prior indicator citations for orphan retracts: ${
+        (err as Error).message ?? String(err)
+      }`
+    );
+  }
+  return prior;
+};
 
 /**
  * Exported for unit tests only. The Painless body cannot be executed without a
@@ -920,7 +1034,18 @@ export const registerPromoteThreatIndicatorsTask = ({
                 break;
               }
 
-              const ops = buildBulkOps(hits, now);
+              const priorCitationIdsByReport = await loadPriorCitationIdsByReport({
+                esClient,
+                reportIds: hits.map((hit) => hit._id),
+                signal,
+                logger,
+              });
+              if (signal.aborted) {
+                abortedMidRun = true;
+                break;
+              }
+
+              const ops = buildBulkOps(hits, now, priorCitationIdsByReport);
               if (ops.length > 0) {
                 for (
                   let chunkStart = 0;

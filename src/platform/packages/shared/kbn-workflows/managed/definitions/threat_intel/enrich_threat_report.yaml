@@ -270,6 +270,12 @@ steps:
                 - ids:
                     values:
                       - "{{ foreach.item._id }}"
+                # Hard-rejected reports keep stale ioc_set_hash / iocs for forensics;
+                # they must not surface as related intelligence.
+                - term:
+                    lineage.extraction_method: workflow_v4_rejected
+                - term:
+                    extracted.gate.is_intelligence: false
               should:
                 - term:
                     extracted.ioc_set_hash:
