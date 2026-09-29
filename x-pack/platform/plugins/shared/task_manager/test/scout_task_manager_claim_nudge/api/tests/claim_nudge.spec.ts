@@ -133,13 +133,20 @@ apiTest.describe('Task Manager claim nudge', { tag: ['@local-stateful-classic'] 
    * the signal was written, while the throttle window opens when the watcher acts on it.
    */
   apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    // This hook waits out a whole poll interval, well past the default hook budget.
+    apiTest.setTimeout(NUDGE_TEST_TIMEOUT_MS);
+
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
 
-    // A nudge racing the watcher's first call is spent on its baseline rather than delivered (see
-    // `claim_nudge_service`). Nothing else in Kibana nudges now that it is opt-in, so spend it on a
-    // throwaway task instead of the one under test.
+    // Spend the suite's first nudge on a task nothing asserts on, then wait out the throttle
+    // window. Whether that nudge is delivered at all depends on something the suite cannot
+    // control: against a signal index that already exists the watcher has its baseline, so the
+    // nudge lands and opens a window that would drop the next one, while against a fresh index it
+    // is consumed as the baseline and opens nothing (see `claim_nudge_service`). Waiting covers
+    // both, so the measured nudge below is never the one that gets dropped.
     const { taskId: primingTaskId } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
     await runSoon(apiClient, cookieHeader, primingTaskId);
+    await new Promise((resolve) => setTimeout(resolve, POLL_INTERVAL_MS));
 
     const { taskId, runAt: originalRunAt } = await scheduleTaskDueInAnHour(apiClient, cookieHeader);
 

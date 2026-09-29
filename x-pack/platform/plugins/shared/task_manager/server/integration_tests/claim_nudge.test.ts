@@ -143,14 +143,22 @@ describe('claim nudge', () => {
 
     mockTaskTypeRunFn.mockImplementation(() => ({ state: {} }));
 
-    const id = uuidV4();
     const esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
-    await injectFutureTask(esClient, id);
 
-    // A process's first nudge is spent establishing the watcher's baseline rather than delivered
-    // (see `claim_nudge_service`). Spend it here, then put the task back out of regular polling's
-    // reach so only the nudge below can make it eligible.
-    await taskManagerPlugin.runSoon(id, { requestImmediateClaim: true });
+    // Spend this process's first nudge on a throwaway task, then wait out the throttle window.
+    // Whether that nudge is delivered depends on whether the signal index already existed when
+    // this Kibana started: against a fresh one it is consumed as the watcher's baseline, against
+    // an existing one it lands and opens a window that would drop the next nudge (see
+    // `claim_nudge_service`). Waiting covers both, and clearing the spy afterwards keeps the
+    // throwaway task's own run out of the count below.
+    const primingId = uuidV4();
+    await injectFutureTask(esClient, primingId);
+    await taskManagerPlugin.runSoon(primingId, { requestImmediateClaim: true });
+    await new Promise((resolve) => setTimeout(resolve, POLLING_INTERVAL));
+    await cleanupTask(taskManagerPlugin, primingId);
+    mockTaskTypeRunFn.mockClear();
+
+    const id = uuidV4();
     await injectFutureTask(esClient, id);
 
     const before = Date.now();
