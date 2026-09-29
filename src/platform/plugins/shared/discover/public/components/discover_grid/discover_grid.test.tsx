@@ -73,6 +73,7 @@ describe('DiscoverGrid preview mode', () => {
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.canDragAndDropColumns).toBe(true);
     expect(lastProps?.visibleCellActions).toBe(3);
+    expect(lastProps?.enableInTableSearch).toBe(true);
     expect(lastProps?.isSortEnabled).not.toBe(false);
     expect(lastProps?.disableCellActions).not.toBe(true);
   });
@@ -84,7 +85,6 @@ describe('DiscoverGrid preview mode', () => {
     expect(lastProps?.disableCellActions).toBe(true);
     expect(lastProps?.disableColumnActions).toBe(true);
     expect(lastProps?.isColumnSelectorEnabled).toBe(false);
-    expect(lastProps?.enableInTableSearch).toBe(false);
     expect(lastProps?.showKeyboardShortcuts).toBe(false);
     expect(lastProps?.showDisplaySelector).toBe(false);
     expect(lastProps?.rowsPerPageOptions).toEqual([]);
