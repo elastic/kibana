@@ -96,18 +96,25 @@ export const enrichReportCoreBodySchema = schema.object({
 });
 
 const reportBehaviorSchema = schema.object({
-  id: schema.string(),
-  technique_id: schema.string(),
-  description: schema.string(),
-  telemetry_targets: schema.arrayOf(schema.string(), { maxSize: 20 }),
+  // `id` is always a sha256 hex digest computed server-side (behaviorId), never
+  // model output. `technique_id` is either '' or a regex-validated ATT&CK id
+  // (normalizeAttackTechniqueId); `description` is already sliced to 2,000
+  // chars before this schema runs. Bounds here are defense-in-depth, matching
+  // the zod transforms upstream rather than trusting them alone.
+  id: schema.string({ maxLength: 64 }),
+  technique_id: schema.string({ maxLength: 16 }),
+  description: schema.string({ maxLength: 2_000 }),
+  telemetry_targets: schema.arrayOf(schema.string({ maxLength: 256 }), { maxSize: 20 }),
   confidence: schema.number(),
   llm_confidence: schema.number(),
 });
 
 const reportArtifactSchema = schema.object({
-  type: schema.string(),
-  value: schema.string(),
-  context: schema.string(),
+  // `value`/`context` are already sliced (2,048 / 1,000 chars) by artifactSchema
+  // upstream; bounds here are defense-in-depth, not the primary guarantee.
+  type: schema.string({ maxLength: 32 }),
+  value: schema.string({ maxLength: 2_048 }),
+  context: schema.string({ maxLength: 1_000 }),
 });
 
 export const enrichReportCoreResponseSchema = schema.object({
