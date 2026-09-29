@@ -120,7 +120,7 @@ const settingsToFormValues = (
     mode: s.mode ?? '',
     header_row: boolToFormValue(s.header_row),
     skip_rows: s.skip_rows !== undefined ? String(s.skip_rows) : '',
-    datetime_format: s.datetime_format === 'ISO-8601' ? 'ISO8601' : s.datetime_format ?? '',
+    datetime_format: s.datetime_format ?? '',
     null_value: s.null_value ?? '',
     encoding: s.encoding ?? defaults.encoding,
     column_prefix: s.column_prefix ?? defaults.column_prefix,

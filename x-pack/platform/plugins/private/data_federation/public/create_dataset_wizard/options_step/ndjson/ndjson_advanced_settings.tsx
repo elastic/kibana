@@ -12,6 +12,7 @@ import type { Control } from 'react-hook-form';
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import { type CreateDatasetFormValues } from '../../create_dataset_form_state';
 import { DatetimeFormatSelect } from '../../components/fields/datetime_format_select';
+import { DatetimeFormatHelpText } from '../../components/datetime_format_help_text';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 
 export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -24,7 +25,7 @@ export function NdjsonAdvancedSettings({ control }: { control: Control<CreateDat
             infoText={createDatasetWizardStrings.settingsDatetimeFormatNdjsonAdvancedDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsDatetimeFormatHelp}
+        helpText={<DatetimeFormatHelpText />}
         fullWidth
       >
         <DatetimeFormatSelect control={control} />

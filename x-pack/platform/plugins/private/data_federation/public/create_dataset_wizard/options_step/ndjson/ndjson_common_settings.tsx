@@ -6,13 +6,13 @@
  */
 
 import React from 'react';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiCode, EuiFormRow } from '@elastic/eui';
+import { EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import type { CreateDatasetFormValues } from '../../create_dataset_form_state';
 import { DatetimeFormatSelect } from '../../components/fields/datetime_format_select';
+import { DatetimeFormatHelpText } from '../../components/datetime_format_help_text';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 
 export function NdjsonCommonSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
@@ -25,13 +25,7 @@ export function NdjsonCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDatetimeFormatNdjsonDescription}
           />
         }
-        helpText={
-          <FormattedMessage
-            id="xpack.dataFederation.createDatasetForm.settingsDatetimeFormatNdjsonHelpText"
-            defaultMessage="If left blank, defaults to {defaultValue} (an ISO 8601 format)."
-            values={{ defaultValue: <EuiCode>strict_date_optional_time</EuiCode> }}
-          />
-        }
+        helpText={<DatetimeFormatHelpText />}
         fullWidth
       >
         <DatetimeFormatSelect control={control} />

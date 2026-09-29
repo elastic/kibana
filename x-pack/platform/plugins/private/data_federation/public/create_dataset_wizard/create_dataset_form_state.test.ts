@@ -262,14 +262,14 @@ describe('create_dataset_form_state', () => {
       ).toEqual({ format: 'csv', encoding: 'UTF-16' });
     });
 
-    it('omits default ISO-8601 datetime_format', () => {
+    it('includes a selected default datetime_format', () => {
       expect(
         buildDatasetSettingsFromFormValues({
           ...empty(),
           format: 'csv',
-          datetime_format: 'ISO8601',
+          datetime_format: 'strict_date_optional_time',
         })
-      ).toEqual({ format: 'csv' });
+      ).toEqual({ format: 'csv', datetime_format: 'strict_date_optional_time' });
     });
 
     it('omits default CSV quote and escape characters', () => {

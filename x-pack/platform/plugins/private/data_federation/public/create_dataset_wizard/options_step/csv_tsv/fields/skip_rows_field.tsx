@@ -6,9 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiFieldNumber, EuiFormRow } from '@elastic/eui';
+import { EuiCode, EuiFieldNumber, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
 import { useController } from 'react-hook-form';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import { validateSkipRows, type CreateDatasetFormValues } from '../../../create_dataset_form_state';
@@ -37,7 +38,13 @@ export function SkipRowsField({ control }: { control: Control<CreateDatasetFormV
           infoText={createDatasetWizardStrings.settingsSkipRowsDescription}
         />
       }
-      helpText={createDatasetWizardStrings.settingsSkipRowsHelp}
+      helpText={
+        <FormattedMessage
+          id="xpack.dataFederation.createDatasetForm.settingsSkipRowsHelp"
+          defaultMessage="{zeroValue} by default"
+          values={{ zeroValue: <EuiCode>0</EuiCode> }}
+        />
+      }
       fullWidth
       isInvalid={isSkipRowsInvalid}
       error={skipRowsErrorMessage}

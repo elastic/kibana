@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { MappingEditorValue } from './mapping_editor';
 import { DatetimeFormatComboBox } from '../components/datetime_format_combo_box';
+import { DatetimeFormatHelpText } from '../components/datetime_format_help_text';
 
 const TIMESTAMP_LOGICAL_FIELD_NAME = '@timestamp';
 
@@ -165,13 +166,7 @@ export function TimeseriesDataSection({
                     defaultMessage: 'Date and time format (optional)',
                   }
                 )}
-                helpText={
-                  <FormattedMessage
-                    id="xpack.dataFederation.createDatasetWizard.timestampFieldFormatHelp"
-                    defaultMessage="If left blank, defaults to {defaultValue}."
-                    values={{ defaultValue: <EuiCode>ISO-8601</EuiCode> }}
-                  />
-                }
+                helpText={<DatetimeFormatHelpText />}
                 fullWidth
               >
                 <DatetimeFormatComboBox

@@ -68,6 +68,13 @@ export const createDatasetWizardStrings = {
       defaultMessage: 'Common settings (optional)',
     }
   ),
+
+  commonSettingsReference: i18n.translate(
+    'xpack.dataFederation.createDatasetWizard.commonSettingsReference',
+    {
+      defaultMessage: 'Common settings',
+    }
+  ),
   advancedSettingsSectionTitle: i18n.translate(
     'xpack.dataFederation.createDatasetWizard.advancedSettingsSectionTitle',
     {
@@ -612,13 +619,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsDelimiterHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsDelimiterHelp',
-    {
-      defaultMessage: 'CSV: , by default · TSV: \\t by default',
-    }
-  ),
-
   settingsDelimiterPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsDelimiterPlaceholder',
     {
@@ -676,6 +676,27 @@ export const createDatasetWizardStrings = {
     defaultMessage: 'Plain',
   }),
 
+  settingsModeQuotedDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsModeQuotedDescription',
+    {
+      defaultMessage: 'Fields may be wrapped in quote characters.',
+    }
+  ),
+
+  settingsModeEscapedDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsModeEscapedDescription',
+    {
+      defaultMessage: 'Special characters are escaped within fields.',
+    }
+  ),
+
+  settingsModePlainDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsModePlainDescription',
+    {
+      defaultMessage: 'Fields are read without quoting rules.',
+    }
+  ),
+
   settingsHeaderRowLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsHeaderRowLabel',
     {
@@ -683,10 +704,10 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsHeaderRowHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsHeaderRowHelp',
+  settingsHeaderRowDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsHeaderRowDescription',
     {
-      defaultMessage: 'true by default',
+      defaultMessage: 'Whether the first row holds column names rather than data.',
     }
   ),
 
@@ -718,13 +739,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsSkipRowsHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsSkipRowsHelp',
-    {
-      defaultMessage: '0 by default',
-    }
-  ),
-
   settingsSkipRowsPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsSkipRowsPlaceholder',
     {
@@ -753,13 +767,6 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsNullValueHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsNullValueHelp',
-    {
-      defaultMessage: 'Empty by default',
-    }
-  ),
-
   settingsEncodingLabel: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsEncodingLabel',
     {
@@ -767,10 +774,11 @@ export const createDatasetWizardStrings = {
     }
   ),
 
-  settingsEncodingHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsEncodingHelp',
+  settingsEncodingDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsEncodingDescription',
     {
-      defaultMessage: 'UTF-8 by default',
+      defaultMessage:
+        'Character encoding of the file. If your encoding is not available, create a custom one.',
     }
   ),
 
@@ -869,6 +877,13 @@ export const createDatasetWizardStrings = {
     }
   ),
 
+  settingsColumnPrefixDescription: i18n.translate(
+    'xpack.dataFederation.createDatasetForm.settingsColumnPrefixDescription',
+    {
+      defaultMessage: 'Prefix for generated column names when no header row is present.',
+    }
+  ),
+
   settingsColumnPrefixPlaceholder: i18n.translate(
     'xpack.dataFederation.createDatasetForm.settingsColumnPrefixPlaceholder',
     {
@@ -901,13 +916,6 @@ export const createDatasetWizardStrings = {
     'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatLabel',
     {
       defaultMessage: 'Date and time format',
-    }
-  ),
-
-  settingsDatetimeFormatHelp: i18n.translate(
-    'xpack.dataFederation.createDatasetForm.settingsDatetimeFormatHelp',
-    {
-      defaultMessage: 'ISO-8601 by default',
     }
   ),
 

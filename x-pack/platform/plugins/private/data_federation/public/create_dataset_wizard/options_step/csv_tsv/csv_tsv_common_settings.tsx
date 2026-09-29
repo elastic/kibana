@@ -18,6 +18,7 @@ import {
   type DatasetFormatFormValue,
 } from '../../create_dataset_form_state';
 import { DatetimeFormatSelect } from '../../components/fields/datetime_format_select';
+import { DatetimeFormatHelpText } from '../../components/datetime_format_help_text';
 import { DelimiterSelect } from './fields/delimiter_select';
 import { EncodingSelect } from './fields/encoding_select';
 import { HeaderRow } from './fields/header_row';
@@ -45,7 +46,13 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDelimiterDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsDelimiterHelp}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsDelimiterHelp"
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>{format === 'tsv' ? '\\t' : ','}</EuiCode> }}
+          />
+        }
         fullWidth
         isInvalid={Boolean(delimiterState.error)}
         error={delimiterState.error?.message}
@@ -58,8 +65,19 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsModeLabel}
-        helpText={createDatasetWizardStrings.settingsQuoteModeDescription}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsModeLabel}
+            infoText={createDatasetWizardStrings.settingsQuoteModeDescription}
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsModeHelp"
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>{format === 'tsv' ? 'plain' : 'quoted'}</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <QuoteMode
@@ -70,8 +88,19 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsHeaderRowLabel}
-        helpText={createDatasetWizardStrings.settingsHeaderRowHelp}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsHeaderRowLabel}
+            infoText={createDatasetWizardStrings.settingsHeaderRowDescription}
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsHeaderRowHelp"
+            defaultMessage="{trueValue} by default"
+            values={{ trueValue: <EuiCode>true</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <HeaderRow
@@ -88,13 +117,7 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsDatetimeFormatDescription}
           />
         }
-        helpText={
-          <FormattedMessage
-            id="xpack.dataFederation.createDatasetForm.settingsDatetimeFormatHelpText"
-            defaultMessage="If left blank, defaults to {defaultValue}."
-            values={{ defaultValue: <EuiCode>ISO-8601</EuiCode> }}
-          />
-        }
+        helpText={<DatetimeFormatHelpText />}
         fullWidth
       >
         <DatetimeFormatSelect control={control} />
@@ -106,7 +129,13 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
             infoText={createDatasetWizardStrings.settingsNullValueDescription}
           />
         }
-        helpText={createDatasetWizardStrings.settingsNullValueHelp}
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsNullValueHelp"
+            defaultMessage="{empty} by default"
+            values={{ empty: <EuiCode>empty</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <EuiFieldText
@@ -120,8 +149,19 @@ export function CsvTsvCommonSettings({ control }: { control: Control<CreateDatas
         />
       </EuiFormRow>
       <EuiFormRow
-        label={createDatasetWizardStrings.settingsEncodingLabel}
-        helpText={createDatasetWizardStrings.settingsEncodingHelp}
+        label={
+          <FormRowLabelWithInfo
+            label={createDatasetWizardStrings.settingsEncodingLabel}
+            infoText={createDatasetWizardStrings.settingsEncodingDescription}
+          />
+        }
+        helpText={
+          <FormattedMessage
+            id="xpack.dataFederation.createDatasetForm.settingsEncodingHelp"
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>UTF-8</EuiCode> }}
+          />
+        }
         fullWidth
       >
         <EncodingSelect control={control} />

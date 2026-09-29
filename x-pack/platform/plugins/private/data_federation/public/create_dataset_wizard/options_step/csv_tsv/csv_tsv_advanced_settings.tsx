@@ -9,18 +9,21 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode, EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { Control } from 'react-hook-form';
-import { useController } from 'react-hook-form';
+import { useController, useWatch } from 'react-hook-form';
 
 import { createDatasetWizardStrings } from '../../create_dataset_wizard_i18n';
 import {
+  DEFAULT_COLUMN_PREFIX,
   validateEscapeCharacter,
   validateQuoteCharacter,
   type CreateDatasetFormValues,
+  type DatasetFormatFormValue,
 } from '../../create_dataset_form_state';
 import { FormRowLabelWithInfo } from '../../components/form_row_label_with_info';
 import { TrimSpaces } from './fields/trim_spaces';
 
 export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDatasetFormValues> }) {
+  const format: DatasetFormatFormValue = useWatch({ control, name: 'settings.format' });
   const { field: quoteField, fieldState: quoteState } = useController({
     name: 'settings.quote',
     control,
@@ -47,7 +50,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 values={{
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
-                    <strong>{createDatasetWizardStrings.commonSettingsSectionTitle}</strong>
+                    <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
                   ),
                 }}
               />
@@ -55,11 +58,19 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           />
         }
         helpText={
-          <FormattedMessage
-            id="xpack.dataFederation.createDatasetForm.settingsQuoteHelpText"
-            defaultMessage="Defaults to {quote} for CSV and no quote character for TSV."
-            values={{ quote: <EuiCode>&quot;</EuiCode> }}
-          />
+          format === 'tsv' ? (
+            <FormattedMessage
+              id="xpack.dataFederation.createDatasetForm.settingsQuoteTsvHelpText"
+              defaultMessage="{empty} by default"
+              values={{ empty: <EuiCode>empty</EuiCode> }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.dataFederation.createDatasetForm.settingsQuoteHelpText"
+              defaultMessage="{quote} by default"
+              values={{ quote: <EuiCode>&quot;</EuiCode> }}
+            />
+          )
         }
         fullWidth
         isInvalid={Boolean(quoteState.error)}
@@ -88,7 +99,7 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
                 values={{
                   quoteMode: <strong>{createDatasetWizardStrings.settingsModeLabel}</strong>,
                   commonSettings: (
-                    <strong>{createDatasetWizardStrings.commonSettingsSectionTitle}</strong>
+                    <strong>{createDatasetWizardStrings.commonSettingsReference}</strong>
                   ),
                 }}
               />
@@ -96,11 +107,19 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
           />
         }
         helpText={
-          <FormattedMessage
-            id="xpack.dataFederation.createDatasetForm.settingsEscapeHelpText"
-            defaultMessage="Defaults to {escape} for CSV and no escape character for TSV."
-            values={{ escape: <EuiCode>\</EuiCode> }}
-          />
+          format === 'tsv' ? (
+            <FormattedMessage
+              id="xpack.dataFederation.createDatasetForm.settingsEscapeTsvHelpText"
+              defaultMessage="{empty} by default"
+              values={{ empty: <EuiCode>empty</EuiCode> }}
+            />
+          ) : (
+            <FormattedMessage
+              id="xpack.dataFederation.createDatasetForm.settingsEscapeHelpText"
+              defaultMessage="{escape} by default"
+              values={{ escape: <EuiCode>\</EuiCode> }}
+            />
+          )
         }
         fullWidth
         isInvalid={Boolean(escapeState.error)}
@@ -119,15 +138,17 @@ export function CsvTsvAdvancedSettings({ control }: { control: Control<CreateDat
         />
       </EuiFormRow>
       <EuiFormRow
+        label={
+          <FormRowLabelWithInfo
             label={createDatasetWizardStrings.settingsColumnPrefixLabel}
+            infoText={createDatasetWizardStrings.settingsColumnPrefixDescription}
+          />
+        }
         helpText={
           <FormattedMessage
             id="xpack.dataFederation.createDatasetForm.settingsColumnPrefixHelpText"
-            defaultMessage="Prefix for generated field names when {headerRow} is {falseValue}."
-            values={{
-              headerRow: <strong>{createDatasetWizardStrings.settingsHeaderRowLabel}</strong>,
-              falseValue: <strong>{createDatasetWizardStrings.falseLabel}</strong>,
-            }}
+            defaultMessage="{defaultValue} by default"
+            values={{ defaultValue: <EuiCode>{DEFAULT_COLUMN_PREFIX}</EuiCode> }}
           />
         }
         fullWidth

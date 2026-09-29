@@ -41,7 +41,7 @@ const renderComponent = () => {
 };
 
 describe('DatetimeFormatSelect', () => {
-  it('normalizes ISO-8601 to ISO8601', async () => {
+  it('stores the selected format value', async () => {
     const { getByTestId } = renderComponent();
 
     const combo = getByTestId('createDatasetSettingsDatetimeFormat');
@@ -49,10 +49,12 @@ describe('DatetimeFormatSelect', () => {
     expect(input).not.toBeNull();
 
     await act(async () => {
-      fireEvent.change(input as HTMLInputElement, { target: { value: 'ISO-8601' } });
+      fireEvent.change(input as HTMLInputElement, {
+        target: { value: 'strict_date_optional_time' },
+      });
       fireEvent.keyDown(input as HTMLInputElement, { key: 'Enter', code: 'Enter' });
     });
 
-    expect(getByTestId('datetimeFormatValue')).toHaveTextContent('ISO8601');
+    expect(getByTestId('datetimeFormatValue')).toHaveTextContent('strict_date_optional_time');
   });
 });

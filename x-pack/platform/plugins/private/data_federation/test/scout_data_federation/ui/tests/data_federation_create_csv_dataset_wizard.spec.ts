@@ -170,7 +170,7 @@ test.describe(
           type: 'date_nanos',
           name: 'created_at_nanos',
           path: 'created_at_nanos',
-          format: 'ISO8601',
+          format: 'strict_date_optional_time',
         },
         { type: 'double', name: 'duration_ms', path: 'duration_ms' },
         { type: 'integer', name: 'http_status', path: 'http_status' },

@@ -26,8 +26,7 @@ export const DEFAULT_FILE_EXCLUSIONS = [
 ] as const;
 
 export const DEFAULT_ENCODING = 'UTF-8';
-export const DEFAULT_DATETIME_FORMAT = 'ISO8601';
-export const DEFAULT_DATETIME_FORMAT_LABEL = 'ISO-8601';
+export const DEFAULT_DATETIME_FORMAT = 'strict_date_optional_time';
 export const DEFAULT_COLUMN_PREFIX = 'col';
 export const DEFAULT_CSV_QUOTE = '"';
 export const DEFAULT_CSV_ESCAPE = '\\';
@@ -277,9 +276,7 @@ export const buildDatasetSettingsFromFormValues = (
   // Parquet has no wizard-managed advanced settings.
 
   if (isCsvTsv || isNdjson) {
-    if (settings.datetime_format && settings.datetime_format !== DEFAULT_DATETIME_FORMAT) {
-      applied.datetime_format = settings.datetime_format;
-    }
+    if (settings.datetime_format) applied.datetime_format = settings.datetime_format;
   }
 
   return Object.keys(applied).length > 0 ? applied : undefined;

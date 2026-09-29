@@ -10,26 +10,36 @@ import { EuiBadge, EuiComboBox, type EuiComboBoxOptionOption } from '@elastic/eu
 
 import { createDatasetWizardStrings } from '../../../create_dataset_wizard_i18n';
 import type { DatasetModeFormValue } from '../../../create_dataset_form_state';
+import { DescribedOptionDisplay } from '../../../components/described_option_display';
 
 type QuoteModeOption = EuiComboBoxOptionOption<string> & {
   value: DatasetModeFormValue;
+  description: string;
   'data-test-subj': string;
+};
+
+const renderQuoteModeOption = (option: EuiComboBoxOptionOption<string>) => {
+  const opt = option as QuoteModeOption;
+  return <DescribedOptionDisplay title={opt.label} description={opt.description} />;
 };
 
 const OPTIONS: QuoteModeOption[] = [
   {
     value: 'quoted',
     label: createDatasetWizardStrings.settingsModeQuoted,
+    description: createDatasetWizardStrings.settingsModeQuotedDescription,
     'data-test-subj': 'createDatasetSettingsModeOption-quoted',
   },
   {
     value: 'escaped',
     label: createDatasetWizardStrings.settingsModeEscaped,
+    description: createDatasetWizardStrings.settingsModeEscapedDescription,
     'data-test-subj': 'createDatasetSettingsModeOption-escaped',
   },
   {
     value: 'plain',
     label: createDatasetWizardStrings.settingsModePlain,
+    description: createDatasetWizardStrings.settingsModePlainDescription,
     'data-test-subj': 'createDatasetSettingsModeOption-plain',
   },
 ];
@@ -80,6 +90,8 @@ export function QuoteMode({
       aria-label={createDatasetWizardStrings.settingsModeLabel}
       singleSelection={{ asPlainText: true }}
       isClearable
+      rowHeight="auto"
+      renderOption={renderQuoteModeOption}
       selectedOptions={selectedOptions}
       onChange={(nextSelectedOptions) => {
         const next = nextSelectedOptions?.[0] as QuoteModeOption | undefined;
