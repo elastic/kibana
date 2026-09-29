@@ -334,66 +334,71 @@ export const createEntitySourcesService = ({
       index: getIndexForWatchlist(namespace),
     };
 
-    const { sources } = await descriptorClient.list({});
+    const { sources: existingReferencedSources } = sourceIds.length
+      ? await descriptorClient.list({ per_page: sourceIds.length }, sourceIds)
+      : { sources: [] };
 
     await Promise.all(
-      sources
-        .filter((s) => sourceIds.includes(s.id))
-        .map(async (source) => {
-          const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
-          if (!dataEsClient) {
-            logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
-            return;
-          }
+      existingReferencedSources.map(async (source) => {
+        const dataEsClient = source.type === 'index' ? await getSourceEsClient(source) : esClient;
+        if (!dataEsClient) {
+          logger.warn(`[WatchlistSync] Skipping index source ${source.id}: no API key stored.`);
+          return;
+        }
 
-          const indexSyncService = createIndexSyncService({
-            internalEsClient: esClient,
-            dataEsClient,
-            crudClient,
-            logger,
-            descriptorClient,
-            watchlist: meta,
-          });
+        const indexSyncService = createIndexSyncService({
+          internalEsClient: esClient,
+          dataEsClient,
+          crudClient,
+          logger,
+          descriptorClient,
+          watchlist: meta,
+        });
 
-          const identity = buildIdentityProvider(source);
-          let prevMaxEntityId: string | undefined;
-          let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
+        const identity = buildIdentityProvider(source);
+        let prevMaxEntityId: string | undefined;
+        let lastWatchlistsByEuid: WatchlistsByEuid = new Map();
 
-          for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
-            await indexSyncService.plainIndexSync([
-              {
-                source,
-                entityStoreEntityIdsByType: page.entityIdsByType,
-                correlationMap: page.correlationMap,
-                watchlistsByEuid: page.watchlistsByEuid,
-                pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
-              },
-            ]);
-            prevMaxEntityId = page.maxEntityId;
-            lastWatchlistsByEuid = page.watchlistsByEuid;
-            if (abortSignal?.aborted) return;
-          }
-
-          if (abortSignal?.aborted) return;
-
-          // Tail pass: catch watchlist entries with entity.id beyond the last store page.
-          // Empty correlationMap causes detectForIndexSource to no-op (no correlation values to query).
+        for await (const page of watchlistEntitiesService.listEntityStoreEntities(identity)) {
           await indexSyncService.plainIndexSync([
             {
               source,
-              entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
-              correlationMap: new Map(),
-              watchlistsByEuid: lastWatchlistsByEuid,
-              pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
+              entityStoreEntityIdsByType: page.entityIdsByType,
+              correlationMap: page.correlationMap,
+              watchlistsByEuid: page.watchlistsByEuid,
+              pageRange: { gt: prevMaxEntityId, lte: page.maxEntityId },
             },
           ]);
-        })
+          prevMaxEntityId = page.maxEntityId;
+          lastWatchlistsByEuid = page.watchlistsByEuid;
+          if (abortSignal?.aborted) return;
+        }
+
+        if (abortSignal?.aborted) return;
+
+        // Tail pass: catch watchlist entries with entity.id beyond the last store page.
+        // Empty correlationMap causes detectForIndexSource to no-op (no correlation values to query).
+        await indexSyncService.plainIndexSync([
+          {
+            source,
+            entityStoreEntityIdsByType: { user: [], host: [], service: [], generic: [] },
+            correlationMap: new Map(),
+            watchlistsByEuid: lastWatchlistsByEuid,
+            pageRange: prevMaxEntityId ? { gt: prevMaxEntityId } : undefined,
+          },
+        ]);
+      })
     );
 
     if (isAborted(abortSignal, `after index sync for watchlist ${watchlistId}, skipping cleanup`))
       return;
 
-    await cleanupOrphanedEntities(meta, sourceIds, undefined, abortSignal);
+    // Use ids of sources that are both referenced and still exist (not just referenced) as
+    // "active" for cleanup — a source can end up referenced-but-deleted if removing it was
+    // interrupted between deleting the source and unlinking the reference; treating a dangling
+    // reference as active here would permanently exclude its entities from cleanup.
+    const existingSourceIds = existingReferencedSources.map((s) => s.id);
+    await cleanupOrphanedEntities(meta, existingSourceIds, undefined, abortSignal);
 
     logger.info(`[WatchlistSync] Completed sync for watchlist ${watchlistId} (${watchlist.name})`);
   };

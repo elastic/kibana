@@ -453,20 +453,20 @@ Resolve the watchlist id via \`security.get_watchlist_id\` first when the user n
           }
         }
 
-        // Enforce the one-rule-based-source invariant for non-managed watchlists
+        // Enforce the one-rule-based-source invariant for non-managed watchlists.
         if (willReplaceConflictingSource && conflictingSource) {
+          await entitySourceClient.delete(conflictingSource.id);
           try {
             await watchlistClient.removeEntitySourceReference(
               source.watchlistId,
               conflictingSource
             );
-            await entitySourceClient.delete(conflictingSource.id);
-          } catch (cleanupError) {
+          } catch (unlinkError) {
             logger.error(
-              `Failed to remove conflicting entity source "${
+              `Failed to unlink already-deleted conflicting entity source "${
                 conflictingSource.id
-              }" after replacing it with "${savedSource.id}": ${
-                cleanupError instanceof Error ? cleanupError.message : 'Unknown error'
+              }" from watchlist "${source.watchlistId}": ${
+                unlinkError instanceof Error ? unlinkError.message : 'Unknown error'
               }`
             );
           }

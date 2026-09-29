@@ -331,7 +331,7 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
         expect(askArgs.message).toMatch(/remove its existing.*index pattern.*source/i);
       });
 
-      it('on accept: removes the other-type source after the new one is created and linked', async () => {
+      it('on accept: removes the other-type source, after the new one is created and linked, by deleting it before unlinking it', async () => {
         const conflictingSource = { id: 'src-old-index', type: 'index' as const, name: 'wl-index' };
         mockGetWatchlistFn.mockResolvedValueOnce(
           buildWatchlist({ managed: false, entitySourceIds: ['src-old-index'] })
@@ -357,16 +357,94 @@ describe('setWatchlistRuleBasedDataSourceTool', () => {
         mockDeleteFn.mockImplementationOnce(async () => {
           callOrder.push('delete-conflicting');
         });
+        mockRemoveEntitySourceReferenceFn.mockImplementationOnce(async () => {
+          callOrder.push('unlink-conflicting');
+        });
 
         await tool.handler({ type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' }, ctx);
 
         expect(mockRemoveEntitySourceReferenceFn).toHaveBeenCalledWith('wl-1', conflictingSource);
         expect(mockDeleteFn).toHaveBeenCalledWith('src-old-index');
         expect(mockCreateFn).toHaveBeenCalled();
-        // The conflicting source is only deleted once the replacement is safely created and
+        // The conflicting source is only touched once the replacement is safely created and
         // linked — never before, since a failure at either step would otherwise leave the
-        // watchlist with no rule-based source at all.
-        expect(callOrder).toEqual(['create', 'link', 'delete-conflicting']);
+        // watchlist with no rule-based source at all. It's deleted before being unlinked — if
+        // unlinking then fails, the leftover reference just points to an already-deleted source
+        // (harmless — see syncWatchlist), instead of leaving the old source and its credential
+        // orphaned but still live.
+        expect(callOrder).toEqual(['create', 'link', 'delete-conflicting', 'unlink-conflicting']);
+      });
+
+      it('on accept: fails the whole request if deleting the conflicting source fails, leaving it fully untouched', async () => {
+        const conflictingSource = { id: 'src-old-index', type: 'index' as const, name: 'wl-index' };
+        mockGetWatchlistFn.mockResolvedValueOnce(
+          buildWatchlist({ managed: false, entitySourceIds: ['src-old-index'] })
+        );
+        mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-old-index']);
+        mockListFn.mockResolvedValueOnce({ sources: [conflictingSource] });
+        mockCreateFn.mockResolvedValueOnce({
+          id: 'src-new-store',
+          type: 'store',
+          name: 'wl-store',
+          managed: false,
+        });
+        mockDeleteFn.mockRejectedValueOnce(new Error('ES unavailable'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+        ctx.stateManager.getState = jest.fn().mockReturnValue({
+          existingSourceFingerprint: fingerprintDataSource(undefined),
+          conflictingSourceId: conflictingSource.id,
+        });
+
+        const result = (await tool.handler(
+          { type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        // Delete failed, so unlink is never attempted — the conflicting source stays fully
+        // intact (rather than being unlinked-but-not-deleted, i.e. orphaned) — and the request
+        // reports the failure instead of a misleading full success.
+        expect(mockRemoveEntitySourceReferenceFn).not.toHaveBeenCalled();
+        const error = result.results[0] as ErrorResult;
+        expect(error.type).toBe(ToolResultType.error);
+        expect(error.data.message).toMatch(/ES unavailable/);
+      });
+
+      it('on accept: still succeeds if unlinking the conflicting source fails after it was deleted', async () => {
+        const conflictingSource = { id: 'src-old-index', type: 'index' as const, name: 'wl-index' };
+        mockGetWatchlistFn.mockResolvedValueOnce(
+          buildWatchlist({ managed: false, entitySourceIds: ['src-old-index'] })
+        );
+        mockGetEntitySourceIdsFn.mockResolvedValueOnce(['src-old-index']);
+        mockListFn.mockResolvedValueOnce({ sources: [conflictingSource] });
+        mockCreateFn.mockResolvedValueOnce({
+          id: 'src-new-store',
+          type: 'store',
+          name: 'wl-store',
+          managed: false,
+        });
+        mockRemoveEntitySourceReferenceFn.mockRejectedValueOnce(new Error('SO update conflict'));
+        const ctx = buildHandlerContextWithPrompts(mocks, {
+          checkStatus: ConfirmationStatus.accepted,
+        });
+        ctx.stateManager.getState = jest.fn().mockReturnValue({
+          existingSourceFingerprint: fingerprintDataSource(undefined),
+          conflictingSourceId: conflictingSource.id,
+        });
+
+        const result = (await tool.handler(
+          { type: 'store', watchlistId: 'wl-1', queryRule: 'a: b' },
+          ctx
+        )) as ToolHandlerStandardReturn;
+
+        // The real work (deleting the old source) succeeded — only unlinking the now-dangling
+        // reference failed, which is harmless (see syncWatchlist's active-ids fix) and just
+        // logged, so the request still reports success.
+        expect(mockDeleteFn).toHaveBeenCalledWith('src-old-index');
+        const other = result.results[0] as OtherResult;
+        expect(other.type).toBe(ToolResultType.other);
+        expect(other.data).toMatchObject({ action: 'created' });
       });
 
       it('on accept: does not touch the conflicting source if creating the replacement fails', async () => {
