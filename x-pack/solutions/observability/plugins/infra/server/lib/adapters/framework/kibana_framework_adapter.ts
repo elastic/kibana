@@ -281,7 +281,7 @@ export class KibanaFramework {
             elasticsearch.client.asCurrentUser.indices.getAlias(
               {
                 ...params,
-              },
+              } as estypes.IndicesGetAliasRequest,
               { signal }
             ),
         });
