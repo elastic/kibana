@@ -585,6 +585,10 @@ most likely cause in concrete terms — the sentence you would say out loud to t
 - Bad: "The investigation has determined that the ROOT CAUSE is a mapping configuration issue
   impacting search functionality across multiple components."
 
+When no hypothesis is `confirmed`, open instead by saying the cause is unverified: name the leading
+candidate as unconfirmed and the telemetry that would settle it. Never state an unconfirmed
+candidate as the cause.
+
 If the headline alone doesn't carry the mechanism, add at most one or two sentences explaining why
 it fails. Stop there — the supporting evidence is already in `hypotheses`, and the investigative
 narrative is already in `summary`; repeat neither here. Next steps belong in `recommendations`, not
