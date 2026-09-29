@@ -100,16 +100,16 @@ pci-compliance,security,Check whether our logging and access control meets PCI D
 pci-compliance,security,We are getting audited for card payment security next month — can you check our current compliance posture?,indirect,pci-compliance,
 pci-compliance,security,Our compliance team needs to know if we are meeting access monitoring standards for payment processing systems,indirect,pci-compliance,
 pci-compliance,security,Do we have enough detection and log coverage across our network and endpoint data sources?,distractor,siem-readiness,Distractor: general detection coverage maps to siem-readiness not pci-compliance
-observability.investigation,observability,Investigate why the checkout service has had elevated error rates for the last 30 minutes,direct,investigation,AMBIGUOUS with observability.rca: investigation vs root cause analysis hard to distinguish without deeper phrasing analysis
+observability.investigation,observability,Investigate why the checkout service has had elevated error rates for the last 30 minutes,direct,investigation,
 observability.investigation,observability,Show me all firing observability alerts for services in the payments namespace,direct,investigation,
-observability.investigation,observability,Something is wrong with our order flow — customers are reporting slow checkouts and intermittent failures,indirect,investigation,AMBIGUOUS with observability.rca: both handle degradation reports
+observability.investigation,observability,Something is wrong with our order flow — customers are reporting slow checkouts and intermittent failures,indirect,investigation,
 observability.investigation,observability,My SLO is breaching — which service is the likely cause and what does the recent metrics data show?,indirect,investigation,
-observability.investigation,observability,Why did our checkout service start failing at 14:32 UTC today — trace back exactly what broke and why,distractor,rca,Distractor: root-cause phrasing maps to observability.rca not general investigation
-observability.rca,observability,Perform a root cause analysis for the payment service outage that occurred between 02:00 and 03:15 UTC today,direct,rca,AMBIGUOUS with observability.investigation: both handle service failures; RCA targets causal chain not general health
-observability.rca,observability,Why is the order-service throwing NullPointerExceptions — trace the failure back to its originating cause,direct,rca,
-observability.rca,observability,Our database connection pool exhausted at midnight last night — what actually triggered that cascade failure?,indirect,rca,
-observability.rca,observability,Users are seeing errors but I do not know where the breakage is in the system — help me trace it to the source,indirect,rca,
-observability.rca,observability,Show me all current APM alerts and their statuses for services in the production environment,distractor,investigation,Distractor: listing current alerts maps to observability.investigation not root cause analysis
+observability.investigation,observability,Why did our checkout service start failing at 14:32 UTC today — trace back exactly what broke and why,indirect,investigation,
+observability.investigation,observability,Perform a root cause analysis for the payment service outage that occurred between 02:00 and 03:15 UTC today,direct,investigation,
+observability.investigation,observability,Why is the order-service throwing NullPointerExceptions — trace the failure back to its originating cause,direct,investigation,
+observability.investigation,observability,Our database connection pool exhausted at midnight last night — what actually triggered that cascade failure?,indirect,investigation,
+observability.investigation,observability,Users are seeing errors but I do not know where the breakage is in the system — help me trace it to the source,indirect,investigation,
+observability.investigation,observability,Show me all current APM alerts and their statuses for services in the production environment,direct,investigation,
 service-map,observability,Show me the APM service map for our production environment,direct,service-map,
 service-map,observability,Display the service topology of all services connected to the payments-api in APM,direct,service-map,
 service-map,observability,Which downstream services does the order API call and are any of them currently showing latency increases?,indirect,service-map,

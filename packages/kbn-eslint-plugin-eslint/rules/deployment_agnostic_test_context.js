@@ -31,7 +31,7 @@ module.exports = {
       supertestService: SUPERTEST_SERVICE_ERROR,
     },
   },
-  create: (context) => {
+  createOnce: (context) => {
     return {
       // Check function parameter types for DeploymentAgnosticFtrProviderContext
       FunctionDeclaration(node) {

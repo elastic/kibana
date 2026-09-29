@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { sortBy } from 'lodash';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
@@ -60,7 +61,11 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        expect(response.body).to.eql({
+        const { body } = response;
+        // the endpoint does not guarantee an order for the fleet server policies
+        body.fleet_server.policies = sortBy(body.fleet_server.policies, 'id');
+
+        expect(body).to.eql({
           fleet_server: {
             policies: [
               {
