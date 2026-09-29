@@ -18,7 +18,7 @@ export const AiPromptStepTypeId = 'ai.prompt';
 
 export const ConfigSchema = z
   .object({
-    'connector-id': z.string().optional(),
+    'connector-id': z.string().max(255).optional(),
     'reasoning-level': z
       .enum(['none', 'minimal', 'low', 'medium', 'high', 'xhigh'])
       .optional()
@@ -27,6 +27,7 @@ export const ConfigSchema = z
       ),
     'connector-id-by-feature': z
       .string()
+      .max(255)
       .optional()
       .describe(
         'Resolve the connector from a named inference feature (as configured in Management → Model Settings) rather than using a literal connector id. Mutually exclusive with connector-id. Example: "context_engine_prompt".'
