@@ -31,7 +31,7 @@ export const automaticMigrationRulesUpdateTranslatedRuleSkill = defineSkillType(
 
 Use when the user reports that the translated rule is wrong — the query has errors, it was matched to the wrong prebuilt rule, or it was matched to the wrong integration.
 Multiple aspects can be corrected in one call (e.g. a new ES|QL query together with a corrected integration).
-Internally there are two write paths: (1) prebuilt rule match via prebuilt_rule_id (integrations derived from the prebuilt rule), (2) ES|QL query update (optionally with integration_ids). Integration is never written on its own.`,
+Internally there are two write paths: (1) prebuilt rule match via prebuilt_rule_id (integrations derived from the prebuilt rule), (2) ES|QL query update (always with integration_ids, [] if none). Integration is never written on its own.`,
   content: `
 # When to use this skill
 
@@ -76,8 +76,9 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
     description, severity, risk score and integrations are derived from the prebuilt rule, and any
     previous ES|QL query is cleared. Never supply \`integration_ids\` with it — the tool rejects it.
   - **Path 2 — ES|QL query update**: supply \`esql_query\` (validated automatically before
-    applying). Optionally add \`integration_ids\` when the index pattern comes from specific
-    integrations; **omit it entirely** otherwise.
+    applying) **and always** \`integration_ids\` — the integrations whose index pattern the query
+    uses. For a query-only fix, resend the rule's current \`integration_ids\`; pass \`[]\` if the
+    query uses no integration. The tool rejects \`esql_query\` without \`integration_ids\`.
   - \`integration_ids\` can only be supplied with \`esql_query\`.
   - \`comment\` (required): markdown explanation of every aspect updated in this call —
     appended to the rule's comment history and shown to the user in the rule details flyout.
@@ -149,7 +150,8 @@ and field details, and rewriting both the query and the integration match in one
    In case you are not able to find the correct field names, ask user which field names are incorrect
    and what field names they think it should be, and present your analysis.
 
-Example tool call for a placeholder or field-name fix (query only). Note: the tool hard-rejects any
+Example tool call for a placeholder or field-name fix (query change; the rule's current
+\`integration_ids\` are resent unchanged). Note: the tool hard-rejects any
 query still containing \`[macro:…]\`, \`[lookup:…]\`, or the missing-index-pattern placeholder, and
 then validates the ES|QL syntax — so ensure all placeholders are resolved before calling.
 
@@ -158,6 +160,7 @@ then validates the ES|QL syntax — so ensure all placeholders are resolved befo
   "migration_id": "<migration_id>",
   "rule_id": "<rule_id>",
   "esql_query": "FROM logs-windows.sysmon_operational-* | WHERE process.name == \"powershell.exe\" AND process.args LIKE \"*-EncodedCommand*\" | STATS count = COUNT() BY host.name",
+  "integration_ids": ["windows"],
   "comment": "**ES|QL query updated**\\n\\nRemoved the unresolvable \`[macro:sysmon_index]\` placeholder and replaced it with \`logs-windows.sysmon_operational-*\`. Renamed \`CommandLine\` → \`process.args\` and \`Image\` → \`process.name\` to match ECS field names used by the Elastic Windows integration. Detection logic unchanged: still alerts on PowerShell invocations with the \`-EncodedCommand\` flag."
 }
 \`\`\`
@@ -272,7 +275,7 @@ and \`CommandLine\` → \`process.args\`. Detection logic unchanged.
   \`prebuilt_rule_id\` is cleared and title/description revert to the original rule's values. Only
   do this when the user genuinely wants a custom translation instead of the prebuilt rule, and
   say so in the \`comment\`.
-- **\`integration_ids\` cannot be supplied alone or with \`prebuilt_rule_id\`.** It must accompany \`esql_query\`.
+- **\`integration_ids\` cannot be supplied alone or with \`prebuilt_rule_id\`.** It must accompany \`esql_query\`, and \`esql_query\` always requires it (\`[]\` if the query uses no integration).
 - **Never call the tool for a rule with \`elastic_rule.id\` set.** Installed rules are immutable —
   say so and stop.
 - Only propose ES|QL (query_language: esql). No other query languages are accepted by this tool.

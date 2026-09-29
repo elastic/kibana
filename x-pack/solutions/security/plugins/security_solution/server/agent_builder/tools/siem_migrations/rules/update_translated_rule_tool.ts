@@ -49,7 +49,7 @@ const schema = z.object({
     .max(10_000)
     .optional()
     .describe(
-      `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Can be combined with new integration_ids, provided the index in the query is created from those integrations. Mutually exclusive with prebuilt_rule_id — if both are supplied, prebuilt_rule_id takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
+      `The corrected ES|QL query. Provide ONLY when the translated query needs to be updated. Must be supplied together with integration_ids (the integrations whose index the query uses, or [] if none). Mutually exclusive with prebuilt_rule_id — if both are supplied, prebuilt_rule_id takes precedence. When supplied for a rule that currently has a prebuilt rule match, the match is cleared and the rule title and description revert to the original rule values. Cannot be used on rules that are already installed (elastic_rule.id is set).`
     ),
   prebuilt_rule_id: z
     .string()
@@ -61,11 +61,10 @@ const schema = z.object({
     ),
   integration_ids: z
     .array(z.string().min(1).max(256))
-    .min(1)
     .max(10)
     .optional()
     .describe(
-      `The correct integration id(s) for an esql_query update. Must be supplied together with esql_query — integration_ids cannot be updated on its own or combined with prebuilt_rule_id. Pass one or more integration ids (up to 10).`
+      `The integration id(s) whose index pattern the esql_query uses. Required with esql_query — resend the rule's current integration_ids if they are unchanged, or pass [] if the query uses no integration. Cannot be updated on its own or combined with prebuilt_rule_id. Up to 10 ids.`
     ),
   comment: z
     .string()
@@ -120,7 +119,8 @@ Two write paths — supply exactly one:
 - esql_query: corrected ES|QL query (validated before applying). If the rule currently has a
   prebuilt rule match, supplying esql_query clears the match and resets the title and description
   to the original rule values.
-- integration_ids (optional): corrected integration ids whose index pattern the query uses
+- integration_ids (required): integration ids whose index pattern the query uses — resend the
+  rule's current ones if unchanged, or [] if the query uses no integration
 
 If both prebuilt_rule_id and esql_query are supplied, prebuilt_rule_id takes precedence.
 integration_ids is only valid with esql_query.
@@ -183,6 +183,13 @@ integration_ids is only valid with esql_query.
           }
           elasticRulePatch = getUpdatePrebuiltRulePatch(prebuiltRuleId);
         } else if (esqlQuery) {
+          // Required so an unmatched prebuilt rule doesn't keep the prebuilt rule's integrations
+          // (the PATCH is a partial merge). `[]` means the query uses no integration.
+          if (integrationIds === undefined) {
+            return createToolError(
+              'integration_ids is required with esql_query — supply the integration id(s) whose index pattern the query uses, or [] if it uses none.'
+            );
+          }
           elasticRulePatch = await getEsqlQueryUpdatePatch(esqlQuery, integrationIds, {
             validateEsql,
             currentRule,

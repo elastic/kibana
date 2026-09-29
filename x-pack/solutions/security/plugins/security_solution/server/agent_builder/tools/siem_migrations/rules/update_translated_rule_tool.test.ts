@@ -27,6 +27,7 @@ const validInput = {
   migration_id: MIGRATION_ID,
   rule_id: RULE_ID,
   esql_query: 'FROM logs-* | WHERE event.action == "login"',
+  integration_ids: ['system'],
   comment: 'Updated the ES|QL query to fix field reference.',
 };
 
@@ -174,6 +175,27 @@ describe('updateTranslatedRuleTool', () => {
     expect(sendUiEvent).not.toHaveBeenCalled();
   });
 
+  it('should reject esql_query without integration_ids without PATCHing', async () => {
+    mockFetch.mockResolvedValueOnce(makeGetResponse(mockCurrentRule));
+    const context = createToolHandlerContext(mockRequest, mockEsClient, mockLogger, {
+      events: { reportProgress: jest.fn(), sendUiEvent: jest.fn() },
+    });
+    const { integration_ids: _, ...inputWithoutIntegrations } = validInput;
+
+    const result = (await tool.handler(
+      inputWithoutIntegrations,
+      context
+    )) as ToolHandlerStandardReturn;
+
+    expect({
+      message: (result.results[0].data as { message: string }).message,
+      fetchCalls: mockFetch.mock.calls.length,
+    }).toEqual({
+      message: expect.stringContaining('integration_ids is required with esql_query'),
+      fetchCalls: 1,
+    });
+  });
+
   describe('installed-rule guard', () => {
     const installedRule = {
       ...mockCurrentRule,
@@ -290,6 +312,7 @@ describe('updateTranslatedRuleTool', () => {
         query: validInput.esql_query,
         query_language: 'esql',
         prebuilt_rule_id: null,
+        integration_ids: validInput.integration_ids,
       });
     });
   });
