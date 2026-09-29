@@ -54,7 +54,9 @@ triggers:
                         type: string
         tool_calls:
           type: array
-          description: Tool calls from the completed round. Unused by this workflow.
+          description: >
+            Tool calls from the completed round. Shows the Cortex optimizer which services,
+            indices, and integrations the investigator queried.
           items:
             type: object
             additionalProperties: true
@@ -87,6 +89,8 @@ steps:
               conversation_id: '{{ inputs.conversation_id }}'
               round_id: '{{ inputs.round_id }}'
               sandbox_id: '{{ steps.obtain_sandbox.output.sandbox_id }}'
+              # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…".
+              tool_calls: '${{ inputs.tool_calls }}'
       - name: memory
         steps:
           - name: optimize_memory

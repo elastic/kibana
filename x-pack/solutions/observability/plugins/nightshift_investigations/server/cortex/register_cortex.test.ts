@@ -15,6 +15,7 @@ import {
 } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../agents/investigation';
 import { NIGHTSHIFT_CORTEX_EDIT_APPLIED_EVENT_TYPE } from '../telemetry';
+import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
 import { hydrateCortexWorkspace, runCortexOptimize } from './register_cortex';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { materializeCortex } from './materialize';
@@ -107,12 +108,26 @@ describe('runCortexOptimize', () => {
     runtime: { createModelProvider },
   });
 
-  const run = (agentId?: string, connectorId?: string) =>
+  const toolCalls: InvestigationToolCall[] = [
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'cat /workspace/cortex/README.md' } },
+    { tool_id: 'nightshift_sandbox_bash', params: { command: 'esql "FROM logs-* | LIMIT 5"' } },
+    { tool_id: 'nightshift_sandbox_view_file', params: { file_path: '/workspace/elastic.md' } },
+  ];
+  const progressReport: InvestigationToolCall = {
+    tool_id: 'platform.streams.investigation_progress_report',
+    params: { step: 'triage' },
+  };
+
+  const run = (
+    agentId?: string,
+    { calls = toolCalls, connectorId }: { calls?: InvestigationToolCall[]; connectorId?: string } = {}
+  ) =>
     runCortexOptimize({
       request,
       agentId,
       userMessage: 'why?',
       assistantMessage: 'redis',
+      toolCalls: calls,
       esClient,
       spaceId: 'default',
       interactionId: 'execution-1',
@@ -137,11 +152,19 @@ describe('runCortexOptimize', () => {
 
   it('runs for the Nightshift investigation agent', async () => {
     await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-    expect(optimizeCortex).toHaveBeenCalled();
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  // A reply that made almost no tool calls answered from what the wiki already said, or was a
+  // smoke test. Neither should mint pages.
+  it('skips a round with fewer than three tool calls', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { calls: toolCalls.slice(0, 2) });
+    expect(optimizeCortex).not.toHaveBeenCalled();
+    expect(createModelProvider).not.toHaveBeenCalled();
   });
 
   it('attributes inherited connector calls to the Nightshift investigation feature', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, 'anthropic-sonnet');
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { connectorId: 'anthropic-sonnet' });
     expect(createModelProvider).toHaveBeenCalledWith({
       request,
       defaultConnectorId: 'anthropic-sonnet',
@@ -163,7 +186,7 @@ describe('runCortexOptimize', () => {
   });
 
   it('reports applied Cortex edits with the completed round identifiers', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, 'anthropic-sonnet');
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { connectorId: 'anthropic-sonnet' });
     const call = jest.mocked(optimizeCortex).mock.calls[0]?.[0];
     if (!call) {
       throw new Error('Cortex optimizer was not invoked');
@@ -176,6 +199,20 @@ describe('runCortexOptimize', () => {
       entity_type: 'service',
       edit_count: 1,
     });
+  });
+
+  it('passes only sandbox tool calls to the optimizer', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: [progressReport, ...toolCalls, progressReport],
+    });
+    expect(optimizeCortex).toHaveBeenCalledWith(expect.objectContaining({ toolCalls }));
+  });
+
+  it('does not count non-sandbox tool calls towards the minimum', async () => {
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+      calls: [...toolCalls.slice(0, 2), progressReport, progressReport],
+    });
+    expect(optimizeCortex).not.toHaveBeenCalled();
   });
 
   // The optimize workflow has a manual trigger, so it can be invoked without an agent id. Writing
@@ -192,7 +229,7 @@ describe('runCortexOptimize', () => {
   });
 
   it('inherits the triggering agent connector via createModelProvider', async () => {
-    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, 'anthropic-sonnet');
+    await run(NIGHTSHIFT_INVESTIGATION_AGENT_ID, { connectorId: 'anthropic-sonnet' });
 
     expect(createModelProvider).toHaveBeenCalledWith(
       expect.objectContaining({ request, defaultConnectorId: 'anthropic-sonnet' })

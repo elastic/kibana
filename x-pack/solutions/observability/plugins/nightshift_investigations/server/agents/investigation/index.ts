@@ -25,7 +25,7 @@ import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_
 export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
 
-const SANDBOX_TOOL_IDS = [
+export const SANDBOX_TOOL_IDS = [
   SANDBOX_BASH_TOOL_ID,
   SANDBOX_VIEW_FILE_TOOL_ID,
   SANDBOX_STR_REPLACE_TOOL_ID,
