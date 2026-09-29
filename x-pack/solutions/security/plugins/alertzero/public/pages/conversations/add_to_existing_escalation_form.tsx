@@ -182,7 +182,7 @@ export const AddToExistingEscalationForm = memo<AddToExistingEscalationFormProps
             onClick={() => selectedId && onSubmit(selectedId)}
             isLoading={isSubmitting}
             isDisabled={!selectedId || isSubmitting}
-            data-test-subj="escalationModalAddToEscalation"
+            data-test-subj="escalationModalattachToEscalation"
           >
             {T.submitButton}
           </EuiButton>

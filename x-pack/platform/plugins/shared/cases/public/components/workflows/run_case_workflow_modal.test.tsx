@@ -17,11 +17,13 @@ jest.mock('@kbn/workflows-ui', () => ({
     onExecutionSettled,
     inputs,
     runWorkflow,
+    showSuccessToast,
   }: {
     onClose: () => void;
     onExecutionSettled?: () => void;
     inputs: unknown;
     runWorkflow?: RunWorkflowExecutor;
+    showSuccessToast?: boolean;
   }) => (
     <div data-test-subj="run-workflow-panel-mock">
       <span data-test-subj="panel-inputs">{JSON.stringify(inputs)}</span>
@@ -37,6 +39,7 @@ jest.mock('@kbn/workflows-ui', () => ({
         {'Settled'}
       </button>
       <span data-test-subj="panel-has-executor">{runWorkflow ? 'yes' : 'no'}</span>
+      <span data-test-subj="panel-show-success-toast">{String(showSuccessToast)}</span>
     </div>
   ),
 }));
@@ -105,5 +108,11 @@ describe('RunCaseWorkflowModal', () => {
 
     // The EuiModal renders the aria-label on the role="dialog" element.
     expect(screen.getByRole('dialog')).toHaveAttribute('aria-label', 'Select workflow');
+  });
+
+  it('always passes showSuccessToast=false to RunWorkflowPanel so Cases executors own the toast', () => {
+    render(<RunCaseWorkflowModal inputs={inputs} runWorkflow={mockExecutor} onClose={onClose} />);
+
+    expect(screen.getByTestId('panel-show-success-toast').textContent).toBe('false');
   });
 });
