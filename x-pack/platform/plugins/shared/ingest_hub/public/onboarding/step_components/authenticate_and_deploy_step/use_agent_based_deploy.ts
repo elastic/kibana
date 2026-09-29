@@ -579,7 +579,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // Stage them for cleanup on the next deploy ONLY after successful creation — staging
           // before creation would delete old policies before the replacement exists, making
           // Retry impossible if creation failed (4132197367).
-          ...(isNewPolicySwitch && mergedFailed.length === 0 && Object.keys(oldPolicyIdsByInstance).length > 0
+          ...(isNewPolicySwitch &&
+          mergedFailed.length === 0 &&
+          Object.keys(oldPolicyIdsByInstance).length > 0
             ? { pendingCleanupPolicyIds: { ...remainingPending, ...oldPolicyIdsByInstance } }
             : {}),
         });
