@@ -15,8 +15,8 @@ import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { kiShapesReference, strategyCatalogReference } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import content from './ai_index_automations.skill.md.text';
+import unitProfileTemplateYaml from './unit_profile_template.yaml.text';
 import targetedKiWriterTemplateYaml from './targeted_ki_writer_template.yaml.text';
-import CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE from './unit_profile_template.yaml.text';
 
 export const UNIT_PROFILE_TEMPLATE_NAME = 'unit-profile-template' as const;
 export const TARGETED_KI_WRITER_TEMPLATE_NAME = 'targeted-ki-writer' as const;
@@ -30,16 +30,16 @@ export const aiIndexAutomationsSkill = defineSkillType({
   description:
     'Read, draft and change the workflow automations that generate Knowledge Indicators for a Context Engine AI Index. Load when authoring a KI generation workflow, when inspecting what an existing automation does, when a proposed fix names a workflow step, or when validating or piloting an automation.',
   content,
-  // The unit profile is the worked example for strategies with no template of their own, and it
-  // is the same YAML the install tool renders, so the example cannot drift from what ships. The
-  // targeted KI writer has no install path, so the skill still carries it. The KI shape and
-  // strategy catalog are the shared references the analysis skill also reads, so the brief and
-  // the template speak the same vocabulary.
+  // One runnable workflow per strategy that comes up most, plus the writer for targeted KIs.
+  // These are the starting point for authoring: an agent handed a template edits it, where one
+  // handed only a prose shape writes a workflow from nothing and rediscovers what the template
+  // already encodes. The KI shape and strategy catalog are the shared references the analysis
+  // skill also reads, so the brief and the template speak the same vocabulary.
   referencedContent: [
     {
       name: UNIT_PROFILE_TEMPLATE_NAME,
       relativePath: '.',
-      content: CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE,
+      content: unitProfileTemplateYaml,
     },
     {
       name: TARGETED_KI_WRITER_TEMPLATE_NAME,

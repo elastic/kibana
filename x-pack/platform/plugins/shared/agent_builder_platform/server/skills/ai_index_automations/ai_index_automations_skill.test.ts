@@ -16,12 +16,8 @@ import {
   kiShapesReference,
 } from '../context_engine_shared';
 import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
-import CONTEXT_ENGINE_DOCUMENT_ORCHESTRATION_TEMPLATE from './document_orchestration_template.yaml.text';
-import DOCUMENT_SUMMARY_YAML from './document_summary_workflow.yaml.text';
 import CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE from './index_metadata_template.yaml.text';
 import CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE from './unit_profile_template.yaml.text';
-
-const CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW = { yaml: DOCUMENT_SUMMARY_YAML };
 import {
   aiIndexAutomationsSkill,
   TARGETED_KI_WRITER_TEMPLATE_NAME,
@@ -29,7 +25,6 @@ import {
 } from './ai_index_automations_skill';
 
 const INDEX_METADATA_TEMPLATE_NAME = 'index-metadata-template';
-const DOCUMENT_TEMPLATE_NAME = 'document-template';
 
 const attached = (name: string): string => {
   const reference = (aiIndexAutomationsSkill.referencedContent ?? []).find(
@@ -48,14 +43,12 @@ const attached = (name: string): string => {
 const TEMPLATE_NAMES: readonly string[] = [
   INDEX_METADATA_TEMPLATE_NAME,
   UNIT_PROFILE_TEMPLATE_NAME,
-  DOCUMENT_TEMPLATE_NAME,
   TARGETED_KI_WRITER_TEMPLATE_NAME,
 ];
 
 const templates = (): Array<{ name: string; content: string }> => [
   { name: INDEX_METADATA_TEMPLATE_NAME, content: CONTEXT_ENGINE_INDEX_METADATA_TEMPLATE },
   { name: UNIT_PROFILE_TEMPLATE_NAME, content: CONTEXT_ENGINE_UNIT_PROFILE_TEMPLATE },
-  { name: DOCUMENT_TEMPLATE_NAME, content: CONTEXT_ENGINE_DOCUMENT_SUMMARY_WORKFLOW.yaml },
   { name: TARGETED_KI_WRITER_TEMPLATE_NAME, content: attached(TARGETED_KI_WRITER_TEMPLATE_NAME) },
 ];
 
@@ -188,16 +181,17 @@ describe('aiIndexAutomationsSkill', () => {
     expect(content).not.toContain('document_workflow_id');
   });
 
-  it('routes ai.prompt via the context-engine-prompt feature rather than a literal connector', () => {
+  it('pins every ai.prompt to the default connector, which the user can change after the save', () => {
     const blocks = templates().flatMap(({ content: yaml }) => aiPromptBlocks(yaml));
 
     expect(blocks.length).toBeGreaterThan(0);
     for (const block of blocks) {
-      expect(block).toContain('connector-id-by-feature: context_engine_prompt');
+      expect(block).toMatch(/^\s*connector-id: \.google-gemini-3\.5-flash-chat_completion\s*$/m);
     }
-    // The feature routes the call, so no template names a literal connector anywhere.
+    // The connector belongs on the prompt steps only; nothing else in a template names one.
     for (const reference of templates()) {
-      expect(reference.content).not.toMatch(/^\s*connector-id: /m);
+      const pinned = reference.content.match(/connector-id:/g) ?? [];
+      expect(pinned).toHaveLength(aiPromptBlocks(reference.content).length);
     }
   });
 
@@ -397,11 +391,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('writes each literal reference as a derived_from URI in one of the four schemes', () => {
-      for (const name of [
-        INDEX_METADATA_TEMPLATE_NAME,
-        DOCUMENT_TEMPLATE_NAME,
-        TARGETED_KI_WRITER_TEMPLATE_NAME,
-      ]) {
+      for (const name of [INDEX_METADATA_TEMPLATE_NAME, TARGETED_KI_WRITER_TEMPLATE_NAME]) {
         for (const ki of assembledKis(name)) {
           expect(Array.isArray(ki.references)).toBe(true);
           for (const reference of ki.references as KiReference[]) {
@@ -416,15 +406,6 @@ describe('aiIndexAutomationsSkill', () => {
       const [ki] = assembledKis(INDEX_METADATA_TEMPLATE_NAME);
 
       expect(referenceUris(ki)).toEqual(['index://{{ consts.source_index }}']);
-    });
-
-    it('references the source index and document from the document template', () => {
-      const [ki] = assembledKis(DOCUMENT_TEMPLATE_NAME);
-
-      expect(referenceUris(ki)).toEqual([
-        'index://{{ inputs.source_index }}',
-        'doc://{{ inputs.source_index }}/{{ inputs.doc_id }}',
-      ]);
     });
 
     it('references the unit index, and the catalog index only when it is a separate index', async () => {
@@ -802,21 +783,25 @@ describe('aiIndexAutomationsSkill', () => {
       expect(content).toMatch(/one call for the example library rather than one per step/);
     });
 
-    it('routes ai.prompt through a named feature rather than a literal connector-id', () => {
-      expect(content).toMatch(/`connector-id-by-feature`/);
-      expect(content).toContain('context_engine_prompt');
-      expect(content).toMatch(/Leave `connector-id`\s+off/);
+    it('names the default connector for every prompt step, inside and outside the templates', () => {
+      expect(content).toMatch(
+        /set its\s+`connector-id` to `\.google-gemini-3\.5-flash-chat_completion`/
+      );
+      expect(content).toMatch(/default model for\s+every prompt step in every automation/);
+      expect(content).toMatch(
+        /a\s+workflow you assemble outside the templates carries it too, on each `ai\.prompt` and `ai\.agent`\s+step/
+      );
+      expect(content).toMatch(/Use a different connector only when the user names one/);
     });
 
-    it('says the templates use connector-id-by-feature deliberately, so no literal connector is added', () => {
+    it('says the templates carry the default connector and it is not a placeholder', () => {
       expect(content).toMatch(
-        /connector-id-by-feature: context_engine_prompt.*on their `ai\.prompt` steps/s
+        /Every `ai\.prompt` step in the templates carries `connector-id: \.google-gemini-3\.5-flash-chat_completion`/
       );
-      expect(content).toMatch(/do not add a `connector-id`/);
+      expect(content).toMatch(/That is the default, not a placeholder/);
       expect(content).toMatch(
-        /put the same line on any prompt step you add or write outside the templates/
+        /put the same id on any prompt step you add or write outside the templates/
       );
-      expect(content).not.toContain('.google-gemini-3.5-flash-chat_completion');
     });
 
     it('requires ${{ }} for non-strings, since {{ }} stringifies objects and booleans', () => {
@@ -1014,12 +999,7 @@ describe('aiIndexAutomationsSkill', () => {
     });
 
     it('documents only filters a template uses', () => {
-      // Includes the orchestration, which is installed rather than attached, so a filter only it
-      // uses still counts as documented.
-      const templateYaml = [
-        ...templates().map(({ content: yaml }) => yaml),
-        CONTEXT_ENGINE_DOCUMENT_ORCHESTRATION_TEMPLATE,
-      ].join('\n');
+      const templateYaml = templates().map(({ content: yaml }) => yaml).join('\n');
       const table = content.slice(content.indexOf('| Filter | Use |')).split('\n\n')[0];
       const documented = table
         .split('\n')
