@@ -10,7 +10,7 @@ hide-features:
 entries:
 - file:
     name: 293010.yaml
-    checksum: 38a3b4da2186b6ad3514350b4d55225c9b357b48
+    checksum: 95db1ceb8871842bfb608490ab393593ec83398d
   type: bug-fix
   title: Fix `deployPolicies` failing for non-default space policies
   products:
@@ -123,9 +123,9 @@ entries:
   - https://github.com/elastic/kibana/pull/292349
 - file:
     name: 292471.yaml
-    checksum: 9ddef7538ccdda366c88be90134e0add8152af25
+    checksum: 28b17dc2c1cf4970026c90a8f30b23ea52273827
   type: enhancement
-  title: Add blocked banners and a Blocked badge on model cards
+  title: Add a badge and banners on Elastic Inference Service models to indicate they are blocked
   products:
   - product: cloud-serverless
   - product: kibana
@@ -248,9 +248,9 @@ entries:
   - https://github.com/elastic/kibana/issues/291117
 - file:
     name: 289590.yaml
-    checksum: 6281b7e4b13937d7b09a4ec105bb271e757678e7
+    checksum: ef409b559806897df56cbc98489f14abb94df944
   type: bug-fix
-  title: Fix automatic rule migrations defaulting to local ELSER when EIS ELSER is available
+  title: Fix automatic rule migrations defaulting to local ELSER even when ELSER on Elastic Inference Service is available
   products:
   - product: cloud-serverless
   - product: kibana
@@ -407,7 +407,7 @@ entries:
   - https://github.com/elastic/kibana/pull/291767
 - file:
     name: 293439.yaml
-    checksum: 433f6b23a1bb087427515978648b0cc94265d9a9
+    checksum: 66f8a72b23d8bb602f392c55597a07acaeb9bbd3
   type: bug-fix
   title: Fix `create_detection_rule` tool reporting a generic error instead of the actual failure reason
   products:
@@ -504,7 +504,7 @@ entries:
   - https://github.com/elastic/kibana/pull/291203
 - file:
     name: 293286.yaml
-    checksum: 87b090521acdeb38b8fe98b2ecb12fb9a9b845c5
+    checksum: 6f06c90fea45b02a66ba9e0a4606f7c977718a2f
   type: bug-fix
   title: Fix ES|QL generation failure when lacking permissions on one index
   products:

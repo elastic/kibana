@@ -4,5 +4,5 @@ type: enhancement
 products:
 - product: cloud-serverless
 - product: kibana
-title: Add blocked banners and a Blocked badge on model cards
+title: Add a badge and banners on Elastic Inference Service models to indicate they are blocked
 description: Adds a Blocked badge and usability banners for Elastic Inference Service models that are blocked by region policy, in preview, or at end of life.
