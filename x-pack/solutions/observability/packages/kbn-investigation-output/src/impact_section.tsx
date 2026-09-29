@@ -145,26 +145,21 @@ export const ImpactSection: React.FC<ImpactSectionProps> = ({ impact }) => {
         </>
       )}
       {visible.isTruncated && (
-        <EuiFlexGroup justifyContent="center" responsive={false} gutterSize="none">
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              color="text"
-              iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
-              onClick={() => setIsExpanded((expanded) => !expanded)}
-              aria-expanded={isExpanded}
-              data-test-subj="investigationOutputImpactShowMore"
-            >
-              {isExpanded
-                ? i18n.translate('xpack.investigationOutput.impact.showLess', {
-                    defaultMessage: 'Show less',
-                  })
-                : i18n.translate('xpack.investigationOutput.impact.showMore', {
-                    defaultMessage: 'Show more',
-                  })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiButtonEmpty
+          size="xs"
+          flush="left"
+          onClick={() => setIsExpanded((expanded) => !expanded)}
+          aria-expanded={isExpanded}
+          data-test-subj="investigationOutputImpactShowMore"
+        >
+          {isExpanded
+            ? i18n.translate('xpack.investigationOutput.impact.showLess', {
+                defaultMessage: 'Show less',
+              })
+            : i18n.translate('xpack.investigationOutput.impact.showMore', {
+                defaultMessage: 'Show more',
+              })}
+        </EuiButtonEmpty>
       )}
     </div>
   );
