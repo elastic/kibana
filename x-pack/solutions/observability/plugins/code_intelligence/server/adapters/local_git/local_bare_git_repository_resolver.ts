@@ -53,7 +53,9 @@ export class LocalBareGitRepositoryResolver implements RepositoryResolver {
       /** Validates disk state for every acquisition. */
       const verified = await verifyBareRepository(this.configuration, mapping);
       if (verified !== true) return commandFailure(verified);
-      /** Refreshes only the configured remote's heads and tags. */
+      /** Fetches the remote HEAD only when requested, so an unborn remote HEAD cannot block other revisions. */
+      const requestsHead = request.revision === 'HEAD';
+      /** Refreshes only the configured remote's heads and tags, plus its HEAD when requested. */
       const fetched = await runGit(
         mapping.bareRepositoryPath,
         [
@@ -65,6 +67,7 @@ export class LocalBareGitRepositoryResolver implements RepositoryResolver {
           mapping.remoteName,
           `+refs/heads/*:refs/code-intelligence/${mapping.remoteName}/heads/*`,
           `+refs/tags/*:refs/code-intelligence/${mapping.remoteName}/tags/*`,
+          ...(requestsHead ? [`+HEAD:refs/code-intelligence/${mapping.remoteName}/HEAD`] : []),
         ],
         this.configuration.commandTimeoutMs,
         64 * 1024
@@ -113,9 +116,11 @@ export class LocalBareGitRepositoryResolver implements RepositoryResolver {
             false
           );
       }
-      /** Selects no local-head fallback candidates. */
+      /** Selects no local-head fallback candidates; HEAD means the fetched remote default branch. */
       const candidates = rawSha
         ? [request.revision]
+        : requestsHead
+        ? [`${ownedRefPrefix}/HEAD`]
         : request.revision.startsWith('refs/heads/')
         ? [`${ownedRefPrefix}/heads/${request.revision.slice('refs/heads/'.length)}`]
         : request.revision.startsWith('refs/tags/')
