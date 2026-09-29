@@ -171,3 +171,55 @@ interface AliasOnlyParentDefinition {
 // children and must not appear in the required source-document keys.
 type AliasParentIsIgnored = EnsureSubsetOf<AliasOnlyParentDefinition, AlertDocumentFields>;
 export const testAliasParentIsIgnored: AliasParentIsIgnored = true;
+
+// Test: the check is recursive, so `episode` is ignored when its only child is
+// an object whose children are all aliases.
+interface NestedAliasOnlyParentDefinition {
+  properties: {
+    alert: ObjectMapping<{ id: KeywordMapping }>;
+    episode: ObjectMapping<{
+      meta: ObjectMapping<{
+        id: { type: 'alias'; path: 'alert.id' };
+      }>;
+    }>;
+  };
+}
+
+// Should succeed: neither episode nor episode.meta appears in _source.
+type NestedAliasParentIsIgnored = EnsureSubsetOf<
+  NestedAliasOnlyParentDefinition,
+  AlertDocumentFields
+>;
+export const testNestedAliasParentIsIgnored: NestedAliasParentIsIgnored = true;
+
+// Test: an alias-only child object is ignored while its writable siblings are kept.
+interface MixedObjectDefinition {
+  properties: {
+    alert: ObjectMapping<{
+      id: KeywordMapping;
+      legacy: ObjectMapping<{
+        id: { type: 'alias'; path: 'alert.id' };
+      }>;
+    }>;
+  };
+}
+
+// Should succeed: alert.id is kept and alert.legacy is ignored.
+type MixedObjectKeepsWritableFields = EnsureSubsetOf<MixedObjectDefinition, AlertDocumentFields>;
+export const testMixedObjectKeepsWritableFields: MixedObjectKeepsWritableFields = true;
+
+// Test: an object without declared properties can still hold _source data, so it is
+// not treated as alias-only.
+interface EmptyObjectDefinition {
+  properties: {
+    alert: ObjectMapping<{ id: KeywordMapping }>;
+    payload: ObjectMapping<{}>;
+  };
+}
+
+// Should fail: payload is defined but missing from the document fields.
+type EmptyObjectIsRequired = EnsureSubsetOf<EmptyObjectDefinition, AlertDocumentFields>;
+export const testEmptyObjectIsRequired: EmptyObjectIsRequired = Object.assign(
+  new Error(),
+  'The following keys are missing from the document fields: payload'
+);
