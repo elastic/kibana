@@ -25,6 +25,7 @@ const iocs: ExtractedIoc[] = [
     tier: 'contextual',
     tier_heuristic: 'contextual',
     tier_basis: 'test',
+    context: `The attacker downloaded ${URL}.`,
   },
   {
     type: 'hash',
@@ -181,6 +182,7 @@ describe('enrichReportCore', () => {
       tier: 'uncertain' as const,
       tier_heuristic: 'uncertain' as const,
       tier_basis: 'uncertain_default',
+      context: `Fetched https://evil.example/payload-${index} from C2.`,
     }));
     const text = manyIocs.map((ioc) => `Fetched ${ioc.value}.`).join(' ');
 
@@ -217,6 +219,7 @@ describe('enrichReportCore', () => {
       tier: 'uncertain' as const,
       tier_heuristic: 'uncertain' as const,
       tier_basis: 'uncertain_default',
+      context: `Fetched https://evil.example/${'a'.repeat(1_800)}-${index} from C2.`,
     }));
     const text = manyIocs.map((ioc) => `Fetched ${ioc.value}.`).join(' ');
 
@@ -259,6 +262,7 @@ describe('enrichReportCore', () => {
       tier: 'discriminating' as const,
       tier_heuristic: 'discriminating' as const,
       tier_basis: 'url_path_entropy',
+      context: `C2 fetched https://evil.example/payload-${index}.`,
     }));
     const text = manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
 
@@ -293,6 +297,7 @@ describe('enrichReportCore', () => {
       tier: 'discriminating' as const,
       tier_heuristic: 'discriminating' as const,
       tier_basis: 'url_path_entropy',
+      context: `C2 fetched https://evil.example/payload-${index}.`,
     }));
     const text = manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
     const expectedHash = hashIocSet(manyIocs);
@@ -317,6 +322,7 @@ describe('enrichReportCore', () => {
         tier: 'discriminating' as const,
         tier_heuristic: 'discriminating' as const,
         tier_basis: 'url_path_entropy',
+        context: 'C2 fetched https://evil.example/payload-0.',
       },
     ];
     const extractHash = 'a'.repeat(64);
@@ -352,6 +358,7 @@ describe('enrichReportCore', () => {
       tier: 'discriminating' as const,
       tier_heuristic: 'discriminating' as const,
       tier_basis: 'url_path_entropy',
+      context: `C2 fetched https://evil.example/payload-${index}.`,
     }));
     const uniqueMarker = 'UNIQUE_ARTICLE_BODY_MARKER_FOR_BATCH_TEST';
     const text = `${uniqueMarker} ${manyIocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ')}`;

@@ -23,6 +23,11 @@ import {
   truncateValuePreservingEnds,
 } from './adjudicate_iocs';
 
+// extract_iocs now locates the source span and builds `context` at extraction
+// time (it already has the offset of every occurrence), so adjudication only
+// ever consumes a candidate's own `context` — it never re-finds a value in the
+// article. Fixtures below set `context` directly rather than deriving it from
+// article text.
 const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): ExtractedIoc => ({
   type: 'url',
   value,
@@ -30,40 +35,13 @@ const candidate = (value: string, overrides: Partial<ExtractedIoc> = {}): Extrac
   tier: 'uncertain',
   tier_heuristic: 'uncertain',
   tier_basis: 'uncertain_default',
+  context: `The attacker downloaded ${value} during the campaign.`,
   ...overrides,
 });
 
 describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
-  it('sends Markdown link destinations to semantic review', () => {
-    // Markdown link forms of attacker payload URLs exist too. Auto-downgrading
-    // every `](url)` destination would drop real IOCs before the model sees them.
-    const payload = 'https://evil.example/payload';
-    const citation = 'https://attack.mitre.org/techniques/T1059/';
-    const prepared = prepareIocAdjudication({
-      text:
-        `The attacker downloaded [the payload](${payload}). ` +
-        `See [ATT&CK](${citation}) for background.`,
-      article_url: 'https://www.elastic.co/security-labs/example',
-      iocs: [candidate(payload), candidate(citation)],
-    });
-    const result = reconcileIocAdjudication(prepared, new Set([0]));
-
-    expect(prepared.reviewable).toHaveLength(2);
-    expect(result.iocs[0]).toEqual(
-      expect.objectContaining({
-        tier: 'uncertain',
-        tier_basis: 'semantic_indicator:uncertain_default',
-      })
-    );
-    expect(result.iocs[1]).toEqual(
-      expect.objectContaining({ tier: 'reference', tier_basis: 'semantic_reference' })
-    );
-    expect(result.promotable_count).toBe(1);
-  });
-
   it('downgrades same-origin article links without semantic review', () => {
     const prepared = prepareIocAdjudication({
-      text: 'More research at https://research.example/another-post',
       article_url: 'https://research.example/current-post',
       iocs: [candidate('https://research.example/another-post')],
     });
@@ -74,17 +52,13 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable).toHaveLength(0);
   });
 
-  it('keeps only candidates selected by stable candidate id', () => {
-    const malicious = 'https://evil.example/payload';
-    const documentation = 'https://docs.example/product';
-    const prepared = prepareIocAdjudication({
-      text:
-        `The attacker downloaded its payload from ${malicious}. ` +
-        `Defenders can read ${documentation} for product guidance.`,
-      iocs: [candidate(malicious), candidate(documentation)],
-    });
+  it('sends non-origin URL candidates to semantic review and applies verdicts by candidate id', () => {
+    const malicious = candidate('https://evil.example/payload');
+    const documentation = candidate('https://docs.example/product');
+    const prepared = prepareIocAdjudication({ iocs: [malicious, documentation] });
     const result = reconcileIocAdjudication(prepared, new Set([0]));
 
+    expect(prepared.reviewable).toHaveLength(2);
     expect(result.iocs[0]).toEqual(
       expect.objectContaining({
         tier: 'uncertain',
@@ -97,19 +71,18 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(result.anchor_iocs).toHaveLength(1);
     expect(result.promotable_count).toBe(1);
     expect(result.ioc_set_hash).toMatch(/^[a-f0-9]{64}$/);
-    expect(prepared.reviewable[0].context).toContain('attacker downloaded its payload');
   });
 
   it('preserves deterministic non-URL indicators without semantic review', () => {
     const hash = 'a'.repeat(64);
     const prepared = prepareIocAdjudication({
-      text: `Payload SHA-256: ${hash}`,
       iocs: [
         candidate(hash, {
           type: 'hash',
           tier: 'discriminating',
           tier_heuristic: 'discriminating',
           tier_basis: 'hash_high_entropy',
+          context: undefined,
         }),
       ],
     });
@@ -120,79 +93,56 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.reviewable).toHaveLength(0);
   });
 
-  it('locates defanged IOC values in a refanged copy for review context', () => {
-    const canonical = 'https://evil.example/payload.exe';
-    const defanged = 'hxxps://evil[.]example/payload.exe';
+  it('defers a candidate with an empty context instead of sending it', () => {
+    // extract_iocs never located this value's occurrence in the article
+    // (context stays '') — sending it anyway would produce a predictable model
+    // rejection indistinguishable from a real semantic_reference verdict.
     const prepared = prepareIocAdjudication({
-      text: `The dropper fetched ${defanged} over HTTPS.`,
-      iocs: [candidate(canonical, { defanged })],
+      iocs: [
+        candidate('https://evil.example/', {
+          tier: 'discriminating',
+          tier_heuristic: 'discriminating',
+          tier_basis: 'url_path_entropy',
+          context: '',
+        }),
+      ],
     });
 
-    expect(prepared.reviewable).toHaveLength(1);
-    expect(prepared.reviewable[0].context).toContain('dropper fetched');
-    expect(prepared.reviewable[0].context).toContain(canonical);
+    expect(prepared.reviewable).toHaveLength(0);
+    expect(prepared.deferredUnreviewed).toBe(1);
+
+    const adjudicated = reconcileIocAdjudication(prepared, new Set());
+    expect(adjudicated.iocs[0].tier).toBe('discriminating');
+    expect(adjudicated.iocs[0].deferred_unreviewed).toBe(true);
+    expect(adjudicated.anchor_iocs).toHaveLength(0);
+    expect(adjudicated.adjudication.deferred_unreviewed).toBe(1);
   });
 
-  it('matches an explicit default HTTPS port as the same URL for review context', () => {
-    // extract_iocs strips :443 via URL.toString(); source text often keeps it.
-    const canonical = 'https://evil.example/payload';
-    const prepared = prepareIocAdjudication({
-      text: `The attacker downloaded https://evil.example:443/payload during staging.`,
-      iocs: [candidate(canonical)],
+  it('strips context from every output IOC, not just reviewed ones', () => {
+    // extracted.iocs is a dynamic: strict nested mapping that does not declare
+    // `context`; persist_extractions would fail if it leaked through.
+    const reviewed = candidate('https://evil.example/payload');
+    const deterministic = candidate('https://research.example/another-post');
+    const hash = candidate('a'.repeat(64), {
+      type: 'hash',
+      tier: 'discriminating',
+      tier_heuristic: 'discriminating',
+      tier_basis: 'hash_high_entropy',
     });
-
-    expect(prepared.reviewable).toHaveLength(1);
-    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
-    expect(prepared.reviewable[0].context).toContain('evil.example:443/payload');
-  });
-
-  it('prefers an attributed later IOC occurrence over an earlier citation', () => {
-    const url = 'https://evil.example/payload';
     const prepared = prepareIocAdjudication({
-      text:
-        `See the vendor write-up at ${url} for background. ` +
-        `${'unrelated prose. '.repeat(40)}` +
-        `The attacker later downloaded the payload from ${url} during staging.`,
-      iocs: [candidate(url)],
+      article_url: 'https://research.example/current-post',
+      iocs: [reviewed, deterministic, hash],
     });
+    const result = reconcileIocAdjudication(prepared, new Set([0]));
 
-    expect(prepared.reviewable).toHaveLength(1);
-    expect(prepared.reviewable[0].context).toContain('attacker later downloaded');
-    expect(prepared.reviewable[0].context).not.toContain('vendor write-up');
-  });
-
-  it('prefers an attributed defanged occurrence over an earlier canonical citation', () => {
-    const canonical = 'https://evil.example/payload';
-    const defanged = 'hxxps://evil[.]example/payload';
-    const prepared = prepareIocAdjudication({
-      text:
-        `See ${canonical} for background. ` +
-        `${'unrelated prose. '.repeat(40)}` +
-        `The attacker downloaded ${defanged} during staging.`,
-      iocs: [candidate(canonical, { defanged })],
-    });
-
-    expect(prepared.reviewable).toHaveLength(1);
-    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
-    expect(prepared.reviewable[0].context).not.toContain('for background');
-  });
-
-  it('reuses cached review context for duplicate candidate values', () => {
-    const url = 'https://evil.example/payload';
-    const prepared = prepareIocAdjudication({
-      text: `The attacker downloaded ${url} twice.`,
-      iocs: [candidate(url), candidate(url)],
-    });
-
-    expect(prepared.reviewable).toHaveLength(2);
-    expect(prepared.reviewable[0].context).toBe(prepared.reviewable[1].context);
-    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
+    for (const ioc of result.iocs) {
+      expect(ioc).not.toHaveProperty('context');
+    }
   });
 
   it('keeps an approved tier_basis within the response schema bound', () => {
     const longBasis = 'b'.repeat(MAX_IOC_TIER_BASIS_LENGTH);
     const prepared = prepareIocAdjudication({
-      text: 'The attacker downloaded https://evil.example/payload.',
       iocs: [candidate('https://evil.example/payload', { tier_basis: longBasis })],
     });
     const result = reconcileIocAdjudication(prepared, new Set([0]));
@@ -209,8 +159,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
         tier_basis: 'url_path_entropy',
       })
     );
-    const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const bounded = boundIocAdjudicationForOverflow(prepared);
     const result = reconcileIocAdjudication(bounded, new Set([0]));
 
@@ -228,10 +177,8 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
 
   it('centers overflow context on the IOC instead of taking a leading prefix', () => {
     const url = 'https://evil.example/payload';
-    const prepared = prepareIocAdjudication({
-      text: `${'leading attribution prose '.repeat(20)}${url} trailing notes`,
-      iocs: [candidate(url)],
-    });
+    const context = `${'leading attribution prose '.repeat(20)}${url} trailing notes`;
+    const prepared = prepareIocAdjudication({ iocs: [candidate(url, { context })] });
     expect(prepared.reviewable[0].context.length).toBeGreaterThan(120);
 
     const bounded = boundIocAdjudicationForOverflow(prepared);
@@ -242,10 +189,8 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
 
   it('keeps attribution prose when an overflow window is shorter than the URL', () => {
     const url = `https://evil.example/${'a'.repeat(200)}`;
-    const prepared = prepareIocAdjudication({
-      text: `The attacker downloaded ${url} during exfiltration.`,
-      iocs: [candidate(url)],
-    });
+    const context = `The attacker downloaded ${url} during exfiltration.`;
+    const prepared = prepareIocAdjudication({ iocs: [candidate(url, { context })] });
     const bounded = boundIocAdjudicationForOverflow(prepared, 1, 80);
 
     expect(bounded.reviewable[0].context.length).toBeLessThanOrEqual(80);
@@ -264,8 +209,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
         tier_basis: 'url_path_entropy',
       })
     );
-    const text = iocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const { batches, deferred } = chunkIocAdjudicationBatches(prepared.reviewable);
 
     expect(batches).toHaveLength(MAX_SEMANTIC_REVIEW_BATCHES);
@@ -280,185 +224,8 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.output[prepared.reviewable.length].tier).toBe('discriminating');
   });
 
-  it('keeps case-sensitive URL path contexts distinct in the cache', () => {
-    const upper = 'https://evil.example/PAYLOAD';
-    const lower = 'https://evil.example/payload';
-    const prepared = prepareIocAdjudication({
-      text:
-        `The attacker staged ${upper} during initial access. ` +
-        `${'filler prose. '.repeat(40)}` +
-        `Documentation casually mentions ${lower} as an older sample name.`,
-      iocs: [candidate(upper), candidate(lower)],
-    });
-
-    expect(prepared.reviewable).toHaveLength(2);
-    expect(prepared.reviewable[0].context).toContain('attacker staged');
-    expect(prepared.reviewable[0].context).not.toContain('Documentation casually');
-    expect(prepared.reviewable[1].context).toContain('Documentation casually');
-    expect(prepared.reviewable[1].context).not.toContain('attacker staged');
-  });
-
-  it('matches URL review context with case-insensitive hosts and exact paths', () => {
-    const url = 'https://evil.example/PAYLOAD';
-    const prepared = prepareIocAdjudication({
-      text: 'The attacker downloaded https://Evil.Example/PAYLOAD during staging.',
-      iocs: [candidate(url)],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('attacker downloaded');
-    expect(prepared.reviewable[0].context).toContain('/PAYLOAD');
-  });
-
-  it('matches bare host URLs when the source omits the normalized trailing slash', () => {
-    const url = 'https://evil.example/';
-    const prepared = prepareIocAdjudication({
-      text: 'The attacker beaconed to https://evil.example during exfiltration.',
-      iocs: [candidate(url)],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('attacker beaconed');
-    expect(prepared.reviewable[0].context).toContain('https://evil.example');
-  });
-
-  it('matches a bare host URL before a sentence-final period', () => {
-    const prepared = prepareIocAdjudication({
-      text: 'The attacker beaconed to https://evil.example.',
-      iocs: [candidate('https://evil.example/')],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('attacker beaconed');
-  });
-
-  it('does not treat a longer hostname as a bare-host match', () => {
-    const prepared = prepareIocAdjudication({
-      text: 'Docs mention https://evil.example.other as a CDN hostname.',
-      iocs: [candidate('https://evil.example/')],
-    });
-
-    // No occurrence found → deferred rather than sent with an empty context.
-    expect(prepared.reviewable).toHaveLength(0);
-    expect(prepared.deferredUnreviewed).toBe(1);
-  });
-
-  it('does not reuse path or port evidence for a bare-host candidate', () => {
-    const prepared = prepareIocAdjudication({
-      text:
-        'The attacker staged https://evil.example/payload.bin during access. ' +
-        'Later the panel listened on https://evil.example:8443.',
-      iocs: [candidate('https://evil.example/')],
-    });
-
-    expect(prepared.reviewable).toHaveLength(0);
-    expect(prepared.deferredUnreviewed).toBe(1);
-  });
-
-  it('defers an unmatched candidate on reconcile instead of a semantic_reference verdict', () => {
-    const prepared = prepareIocAdjudication({
-      text: 'Docs mention https://evil.example.other as a CDN hostname.',
-      iocs: [
-        candidate('https://evil.example/', {
-          tier: 'discriminating',
-          tier_heuristic: 'discriminating',
-          tier_basis: 'url_path_entropy',
-        }),
-      ],
-    });
-
-    const adjudicated = reconcileIocAdjudication(prepared, new Set());
-
-    expect(adjudicated.iocs[0].tier).toBe('discriminating');
-    expect(adjudicated.iocs[0].deferred_unreviewed).toBe(true);
-    expect(adjudicated.anchor_iocs).toHaveLength(0);
-    expect(adjudicated.adjudication.deferred_unreviewed).toBe(1);
-  });
-
-  it('does not attribute a shorter path to a longer path suffix', () => {
-    const shortUrl = 'https://evil.example/payload';
-    const prepared = prepareIocAdjudication({
-      text:
-        'Docs list https://evil.example/payload as a reference. ' +
-        `${'filler prose. '.repeat(40)}` +
-        'The attacker later downloaded https://evil.example/payload.exe.',
-      iocs: [candidate(shortUrl)],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('Docs list');
-    expect(prepared.reviewable[0].context).not.toContain('attacker later downloaded');
-  });
-
-  it('matches percent-encoded URL candidates against Unicode source spelling', () => {
-    const prepared = prepareIocAdjudication({
-      text: 'The attacker staged https://evil.com/café during exfiltration.',
-      iocs: [candidate('https://evil.com/caf%C3%A9')],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('attacker staged');
-    expect(prepared.reviewable[0].context).toContain('café');
-  });
-
-  it('matches punycode URL hosts against Unicode source spelling', () => {
-    const prepared = prepareIocAdjudication({
-      text: 'The attacker staged https://café.example/payload during exfiltration.',
-      iocs: [candidate('https://xn--caf-dma.example/payload')],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('attacker staged');
-    expect(prepared.reviewable[0].context).toContain('café.example');
-  });
-
-  it('does not treat percent-encoded reserved path bytes as a different URL path', () => {
-    const prepared = prepareIocAdjudication({
-      text:
-        'Docs list https://evil.example/a%2Fb as a reference. ' +
-        `${'filler prose. '.repeat(40)}` +
-        'The attacker later downloaded https://evil.example/a/b.',
-      iocs: [candidate('https://evil.example/a%2Fb')],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('Docs list');
-    expect(prepared.reviewable[0].context).not.toContain('attacker later downloaded');
-  });
-
-  it('requires whole-hostname boundaries for domain review context', () => {
-    const prepared = prepareIocAdjudication({
-      text:
-        'Docs mention evil.com in passing. ' +
-        `${'filler prose. '.repeat(40)}` +
-        'The attacker later used not-evil.com for C2.',
-      iocs: [
-        candidate('evil.com', {
-          type: 'domain',
-          tier: 'discriminating',
-          tier_heuristic: 'discriminating',
-          tier_basis: 'defanged_source',
-        }),
-      ],
-    });
-
-    expect(prepared.reviewable[0].context).toContain('Docs mention');
-    expect(prepared.reviewable[0].context).not.toContain('attacker later used');
-  });
-
-  it('does not treat a longer FQDN as a domain match', () => {
-    const prepared = prepareIocAdjudication({
-      text: 'The attacker used evil.com.au for staging.',
-      iocs: [
-        candidate('evil.com', {
-          type: 'domain',
-          tier: 'discriminating',
-          tier_heuristic: 'discriminating',
-          tier_basis: 'defanged_source',
-        }),
-      ],
-    });
-
-    expect(prepared.reviewable).toHaveLength(0);
-    expect(prepared.deferredUnreviewed).toBe(1);
-  });
-
   it('does not treat a different port as the same origin citation', () => {
     const prepared = prepareIocAdjudication({
-      text: 'Payload mirrored at https://blog.example:8443/payload',
       article_url: 'https://blog.example/article',
       iocs: [candidate('https://blog.example:8443/payload')],
     });
@@ -469,7 +236,6 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
 
   it('does not treat http and https as the same origin citation', () => {
     const prepared = prepareIocAdjudication({
-      text: 'See http://blog.example/payload for the binary.',
       article_url: 'https://blog.example/article',
       iocs: [candidate('http://blog.example/payload')],
     });
@@ -478,7 +244,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     expect(prepared.deterministicReferences).toBe(0);
   });
 
-  it('applies the semantic review budget before building review contexts', () => {
+  it('applies the semantic review budget before batching', () => {
     const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
     const total = capacity + 25;
     const iocs = Array.from({ length: total }, (_, index) =>
@@ -488,8 +254,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
         tier_basis: 'url_path_entropy',
       })
     );
-    const text = iocs.map((ioc) => `C2 fetched ${ioc.value}.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
 
     expect(prepared.reviewable).toHaveLength(capacity);
     expect(prepared.deferredUnreviewed).toBe(25);
@@ -502,8 +267,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
       candidate(`https://evil.example/${'a'.repeat(1_800)}-${index}`)
     );
-    const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const first = boundIocAdjudicationForOverflow(prepared);
     const second = boundIocAdjudicationForPayload(first);
 
@@ -526,8 +290,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     const iocs = Array.from({ length: OVERFLOW_MAX_SEMANTIC_CANDIDATES }, (_, index) =>
       candidate(`https://evil.example/${'a'.repeat(1_800)}-${index}`)
     );
-    const text = iocs.map((ioc) => `Fetched ${ioc.value} from C2.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const second = boundIocAdjudicationForPayload(boundIocAdjudicationForOverflow(prepared));
 
     expect(second.reviewable.every((candidateEntry) => candidateEntry.degraded)).toBe(true);
@@ -544,8 +307,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     const left = `${prefix}-LEFT_UNIQUE`;
     const right = `${prefix}-RIGHT_UNIQUE`;
     const iocs = [candidate(left), candidate(right)];
-    const text = `Fetched ${left} then ${right}.`;
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const second = boundIocAdjudicationForPayload(boundIocAdjudicationForOverflow(prepared));
 
     expect(second.reviewable).toHaveLength(2);
@@ -584,8 +346,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
     );
     expect(withSchemeLeft).toBe(withSchemeRight);
 
-    const text = `Fetched ${iocs[0].value} then ${iocs[1].value}.`;
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const second = boundIocAdjudicationForPayload(boundIocAdjudicationForOverflow(prepared));
 
     expect(second.reviewable).toHaveLength(1);
@@ -606,10 +367,10 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
       tier: 'discriminating',
       tier_heuristic: 'discriminating',
       tier_basis: 'hash_high_entropy',
+      context: undefined,
     });
     const all = [...iocs, hash];
-    const text = all.map((ioc) => `Seen ${ioc.value}.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs: all });
+    const prepared = prepareIocAdjudication({ iocs: all });
     const approved = new Set(prepared.reviewable.map((entry) => entry.id));
     const result = reconcileIocAdjudication(prepared, approved);
 
@@ -630,8 +391,7 @@ describe('prepareIocAdjudication and reconcileIocAdjudication', () => {
         tier_basis: 'url_path_entropy',
       })
     );
-    const text = iocs.map((ioc) => `Seen ${ioc.value}.`).join(' ');
-    const prepared = prepareIocAdjudication({ text, iocs });
+    const prepared = prepareIocAdjudication({ iocs });
     const approved = new Set(prepared.reviewable.map((entry) => entry.id));
     const result = reconcileIocAdjudication(prepared, approved, {
       correlationHash: hashIocSet(iocs),

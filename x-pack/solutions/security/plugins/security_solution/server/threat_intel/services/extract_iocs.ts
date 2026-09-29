@@ -34,9 +34,36 @@ export interface ExtractedIoc {
    * model rejection.
    */
   deferred_unreviewed?: boolean;
+  /**
+   * Source-text window around the best occurrence of this value (url/domain
+   * only), for semantic adjudication to judge without re-finding the value in
+   * the article. Prompt-only: stripped before the result reaches persistence.
+   */
+  context?: string;
 }
 
-type WorkingIoc = ExtractedIoc & { _offset?: number; _sectionKind?: SectionKind };
+type WorkingIoc = ExtractedIoc & {
+  _offset?: number;
+  _sectionKind?: SectionKind;
+  _hasAttributionCue?: boolean;
+};
+
+/** Chars of source text kept on each side of a value when building its context window. */
+const CONTEXT_WINDOW_CHARS = 240;
+
+/**
+ * Prefer an occurrence whose surrounding prose looks like attacker attribution
+ * over a bare first hit (often a citation). Among ties, prefer the later
+ * occurrence so a mid/late campaign write-up wins over an early docs link.
+ */
+const ATTRIBUTION_CONTEXT_CUE =
+  /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
+
+const windowAround = (source: string, offset: number, length: number, radius: number): string =>
+  source.slice(Math.max(0, offset - radius), Math.min(source.length, offset + length + radius));
+
+const hasAttributionCue = (source: string, offset: number, length: number): boolean =>
+  ATTRIBUTION_CONTEXT_CUE.test(windowAround(source, offset, length, CONTEXT_WINDOW_CHARS));
 
 export interface ExtractIocsResult {
   /** How many IOCs were found, before the nested-object cap. */
@@ -967,6 +994,12 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     }
   };
 
+  // Only url/domain candidates ever reach semantic adjudication (isSemanticCandidate
+  // in adjudicate_iocs.ts), so only those need a context window tracked across
+  // duplicate occurrences.
+  const isContextCandidate = (ioc: WorkingIoc): boolean =>
+    ioc.type === 'url' || ioc.type === 'domain';
+
   const pushIoc = (ioc: WorkingIoc): WorkingIoc | undefined => {
     // An over-long value is not a usable indicator and it is actively harmful.
     // `extracted.iocs.value` is a keyword on the reports index, and a keyword term
@@ -983,7 +1016,23 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
     const existing = iocByKey.get(dedupKey);
     if (existing) {
       recordSectionKind(existing, ioc._offset);
+      if (isContextCandidate(ioc) && ioc._offset !== undefined) {
+        const cue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length);
+        const existingOffset = existing._offset;
+        const existingCue = existing._hasAttributionCue ?? false;
+        if (
+          existingOffset === undefined ||
+          (cue && !existingCue) ||
+          (cue === existingCue && ioc._offset > existingOffset)
+        ) {
+          existing._offset = ioc._offset;
+          existing._hasAttributionCue = cue;
+        }
+      }
       return existing;
+    }
+    if (isContextCandidate(ioc) && ioc._offset !== undefined) {
+      ioc._hasAttributionCue = hasAttributionCue(refangedText, ioc._offset, ioc.value.length);
     }
     recordSectionKind(ioc, ioc._offset);
     seen.add(dedupKey);
@@ -1356,7 +1405,18 @@ export const extractIocs = ({ text, defang = true }: ExtractIocsParams): Extract
           )
           .digest('hex');
 
-  const cleanedIocs: ExtractedIoc[] = iocs.map(({ _offset, _sectionKind, ...rest }) => rest);
+  const cleanedIocs: ExtractedIoc[] = iocs.map(
+    ({ _offset, _sectionKind, _hasAttributionCue, ...rest }) => ({
+      ...rest,
+      ...(rest.type === 'url' || rest.type === 'domain'
+        ? _offset !== undefined
+          ? {
+              context: windowAround(refangedText, _offset, rest.value.length, CONTEXT_WINDOW_CHARS),
+            }
+          : { context: '' }
+        : {}),
+    })
+  );
 
   // Highest tier first, so a truncated report keeps its most promotable indicators
   // rather than whichever happened to appear earliest in the text.

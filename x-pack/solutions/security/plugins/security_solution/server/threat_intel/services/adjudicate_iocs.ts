@@ -6,10 +6,8 @@
  */
 
 import { createHash } from 'node:crypto';
-import { domainToUnicode } from 'node:url';
 import { MAX_IOC_TIER_BASIS_LENGTH } from '../../../common/threat_intel/contracts/enrichment';
 import type { ExtractedIoc, ExtractIocsResult, IocTier } from './extract_iocs';
-import { refang } from './extract_iocs';
 
 const SEMANTIC_INDICATOR_PREFIX = 'semantic_indicator:';
 
@@ -36,7 +34,6 @@ export const OVERFLOW_MAX_SEMANTIC_CANDIDATES = 50;
 export const OVERFLOW_RETRY2_MAX_SEMANTIC_CANDIDATES = 15;
 export const OVERFLOW_RETRY2_MAX_PAYLOAD_CHARS = 12_000;
 export const OVERFLOW_RETRY2_MAX_VALUE_CHARS = 256;
-const CONTEXT_CHARS = 240;
 const OVERFLOW_CONTEXT_CHARS = 120;
 const OVERFLOW_RETRY2_CONTEXT_CHARS = 40;
 const PROMOTABLE_TIERS: ReadonlySet<IocTier> = new Set([
@@ -105,310 +102,6 @@ export const hashIocSet = (iocs: readonly ExtractedIoc[]): string | null => {
     .digest('hex');
 };
 
-const sliceContext = (source: string, index: number, valueLength: number): string =>
-  source
-    .slice(
-      Math.max(0, index - CONTEXT_CHARS),
-      Math.min(source.length, index + valueLength + CONTEXT_CHARS)
-    )
-    .replace(/\s+/g, ' ')
-    .trim();
-
-/**
- * Prefer an occurrence whose surrounding prose looks like attacker attribution
- * over a bare first hit (often a citation). When scores tie, keep the later
- * occurrence so mid/late campaign write-ups win over an early docs link.
- *
- * Cap scored occurrences per value and cache by value so a pathological article
- * with millions of repeats cannot multiply work across hundreds of candidates.
- */
-const ATTRIBUTION_CONTEXT_CUE =
-  /\b(attacker|adversary|c2|c&c|payload|malware|downloaded|beacon|exfiltrat|command.?and.?control|infrastructure|dropper|staged)\b/i;
-const MAX_OCCURRENCES_TO_SCORE = 32;
-
-interface ScoredOccurrence {
-  source: string;
-  index: number;
-  /** Matched span length in `source` (may differ from IOC value length for decoded URLs). */
-  length: number;
-  score: number;
-}
-
-const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-
-/**
- * End-of-URL at `index`. A bare `.` / `,` only counts when it is sentence
- * punctuation (as `extract_iocs` trims), not when it continues a path segment
- * (`/payload.exe`) or hostname (`evil.example.other`).
- */
-const isUrlBoundaryAt = (source: string, index: number): boolean => {
-  const char = source[index];
-  if (char === undefined) return true;
-  if (char === '.' || char === ',') {
-    const next = source[index + 1];
-    return next === undefined || /[\s"'<>)\]},;]/.test(next) || next === '.' || next === ',';
-  }
-  // Not `/`, `:`, `?`, or `#`: those continue or reshape the same URL.
-  return /[\s"'<>)\]},;]/.test(char);
-};
-
-/**
- * `new URL('https://evil.example').toString()` normalizes to a trailing `/`.
- * Prose often omits that root slash; treat an empty path as an equivalent match.
- * Also try the decoded path so percent-encoded IOC values still match Unicode prose.
- */
-const urlPathCandidates = (parsed: URL): string[] => {
-  const encoded = `${parsed.pathname}${parsed.search}${parsed.hash}`;
-  if (parsed.pathname === '/' && parsed.search === '' && parsed.hash === '') {
-    return ['/', ''];
-  }
-  const candidates = [encoded];
-  try {
-    // decodeURI keeps reserved path delimiters (`%2F`, `%3F`, …) encoded so a
-    // candidate like `/a%2Fb` cannot steal context from a distinct `/a/b` URL.
-    // Non-reserved UTF-8 sequences (`%C3%A9` → é) still decode for source matching.
-    const decodedPath = decodeURI(parsed.pathname);
-    const decoded = `${decodedPath}${parsed.search}${parsed.hash}`;
-    if (decoded !== encoded) candidates.push(decoded);
-  } catch {
-    // Malformed percent-encoding; keep the serialized form only.
-  }
-  return candidates;
-};
-
-/**
- * `extract_iocs` serializes IDN hosts via `new URL().toString()` (punycode), but
- * reports usually write the Unicode spelling. Match both so adjudication windows
- * are not empty for internationalized URLs.
- */
-const urlHostCandidates = (parsed: URL): string[] => {
-  const hosts = [parsed.host];
-  // Source text often writes the default port explicitly; extract_iocs strips it
-  // via `new URL().toString()`, so match both spellings.
-  if (!parsed.port) {
-    if (parsed.protocol === 'https:') {
-      hosts.push(`${parsed.hostname}:443`);
-    } else if (parsed.protocol === 'http:') {
-      hosts.push(`${parsed.hostname}:80`);
-    }
-  }
-  try {
-    const unicodeHostname = domainToUnicode(parsed.hostname);
-    if (unicodeHostname && unicodeHostname !== parsed.hostname) {
-      const unicodeHost = parsed.port ? `${unicodeHostname}:${parsed.port}` : unicodeHostname;
-      hosts.push(unicodeHost);
-      if (!parsed.port) {
-        if (parsed.protocol === 'https:') {
-          hosts.push(`${unicodeHostname}:443`);
-        } else if (parsed.protocol === 'http:') {
-          hosts.push(`${unicodeHostname}:80`);
-        }
-      }
-    }
-  } catch {
-    // domainToUnicode throws on malformed labels; keep the canonical host only.
-  }
-  return hosts;
-};
-
-const scoreUrlOccurrences = (source: string, urlValue: string): ScoredOccurrence[] => {
-  const scored: ScoredOccurrence[] = [];
-  try {
-    const parsed = new URL(urlValue);
-    const pathCandidates = urlPathCandidates(parsed);
-    // Match protocol+host case-insensitively (punycode and Unicode), then require
-    // an exact path/query/hash so `/PAYLOAD` and `/payload` never share context.
-    for (const host of urlHostCandidates(parsed)) {
-      const hostPattern = new RegExp(
-        `${escapeRegExp(parsed.protocol)}//${escapeRegExp(host)}`,
-        'gi'
-      );
-      let hostMatch: RegExpExecArray | null;
-      while (
-        scored.length < MAX_OCCURRENCES_TO_SCORE &&
-        (hostMatch = hostPattern.exec(source)) !== null
-      ) {
-        const hostEnd = hostMatch.index + hostMatch[0].length;
-        let matchedPath: string | undefined;
-        for (const pathPart of pathCandidates) {
-          const after = hostEnd + pathPart.length;
-          if (source.slice(hostEnd, after) === pathPart && isUrlBoundaryAt(source, after)) {
-            matchedPath = pathPart;
-            break;
-          }
-        }
-        if (matchedPath !== undefined) {
-          const after = hostEnd + matchedPath.length;
-          const index = hostMatch.index;
-          const window = source.slice(
-            Math.max(0, index - CONTEXT_CHARS),
-            Math.min(source.length, after + CONTEXT_CHARS)
-          );
-          scored.push({
-            source,
-            index,
-            length: after - index,
-            score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-          });
-        }
-      }
-    }
-  } catch {
-    // Fall through to exact search below when URL parsing fails.
-  }
-  if (scored.length === 0) {
-    const exactValues = (() => {
-      const values = [urlValue];
-      try {
-        const parsed = new URL(urlValue);
-        if (
-          parsed.pathname === '/' &&
-          parsed.search === '' &&
-          parsed.hash === '' &&
-          urlValue.endsWith('/')
-        ) {
-          values.push(urlValue.slice(0, -1));
-        }
-        for (const host of urlHostCandidates(parsed)) {
-          if (host !== parsed.host) {
-            const unicodeExact = `${parsed.protocol}//${host}${parsed.pathname}${parsed.search}${parsed.hash}`;
-            if (!values.includes(unicodeExact)) values.push(unicodeExact);
-            if (
-              parsed.pathname === '/' &&
-              parsed.search === '' &&
-              parsed.hash === '' &&
-              unicodeExact.endsWith('/')
-            ) {
-              const withoutSlash = unicodeExact.slice(0, -1);
-              if (!values.includes(withoutSlash)) values.push(withoutSlash);
-            }
-          }
-        }
-      } catch {
-        // Keep the original value when parsing fails.
-      }
-      try {
-        const decoded = decodeURI(urlValue);
-        if (decoded !== urlValue && !values.includes(decoded)) values.push(decoded);
-      } catch {
-        // Malformed percent-encoding; skip the decoded spelling.
-      }
-      return values;
-    })();
-    for (const exactValue of exactValues) {
-      let from = 0;
-      while (from < source.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
-        const index = source.indexOf(exactValue, from);
-        if (index < 0) break;
-        const after = index + exactValue.length;
-        from = index + Math.max(exactValue.length, 1);
-        if (isUrlBoundaryAt(source, after)) {
-          const window = source.slice(
-            Math.max(0, index - CONTEXT_CHARS),
-            Math.min(source.length, after + CONTEXT_CHARS)
-          );
-          scored.push({
-            source,
-            index,
-            length: exactValue.length,
-            score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-          });
-        }
-      }
-      if (scored.length > 0) break;
-    }
-  }
-  return scored;
-};
-
-const isHostnameLabelChar = (char: string | undefined): boolean =>
-  char !== undefined && /[a-z0-9-]/i.test(char);
-
-/** Whole-host match: reject `evil.com` inside `not-evil.com` or `evil.com.au`. */
-const isDomainBoundaryAt = (source: string, start: number, end: number): boolean => {
-  const before = source[start - 1];
-  if (before === '.' || isHostnameLabelChar(before)) return false;
-  const after = source[end];
-  if (after === undefined) return true;
-  if (after === '.') return !isHostnameLabelChar(source[end + 1]);
-  return !isHostnameLabelChar(after);
-};
-
-const scoreDomainOccurrences = (
-  source: string,
-  lowerSource: string,
-  lowerDomain: string
-): ScoredOccurrence[] => {
-  const scored: ScoredOccurrence[] = [];
-  const domainSpellings = [lowerDomain];
-  try {
-    const unicode = domainToUnicode(lowerDomain).toLowerCase();
-    if (unicode && unicode !== lowerDomain) domainSpellings.push(unicode);
-  } catch {
-    // Malformed label; keep the canonical domain only.
-  }
-  for (const spelling of domainSpellings) {
-    let from = 0;
-    while (from < lowerSource.length && scored.length < MAX_OCCURRENCES_TO_SCORE) {
-      const index = lowerSource.indexOf(spelling, from);
-      if (index < 0) break;
-      const after = index + spelling.length;
-      from = index + Math.max(spelling.length, 1);
-      if (isDomainBoundaryAt(lowerSource, index, after)) {
-        const window = source.slice(
-          Math.max(0, index - CONTEXT_CHARS),
-          Math.min(source.length, after + CONTEXT_CHARS)
-        );
-        scored.push({
-          source,
-          index,
-          length: spelling.length,
-          score: (ATTRIBUTION_CONTEXT_CUE.test(window) ? 1_000_000 : 0) + index,
-        });
-      }
-    }
-  }
-  return scored;
-};
-
-/**
- * Pick review context from the best-scoring occurrence across both the original
- * article and its refanged copy. Canonical citations and later defanged attacker
- * mentions must compete in one pass so we do not lock onto the first spelling.
- */
-const contextFor = (
-  originalText: string,
-  lowerOriginal: string,
-  refangedText: string,
-  lowerRefanged: string,
-  value: string,
-  iocType: ExtractedIoc['type'],
-  cache: Map<string, string>
-): string => {
-  // URLs cache on the exact value so `/PAYLOAD` and `/payload` stay distinct.
-  // Domains stay case-insensitive.
-  const cacheKey = iocType === 'url' ? value : value.toLowerCase();
-  const cached = cache.get(cacheKey);
-  if (cached !== undefined) return cached;
-
-  const scored =
-    iocType === 'url'
-      ? [...scoreUrlOccurrences(originalText, value), ...scoreUrlOccurrences(refangedText, value)]
-      : [
-          ...scoreDomainOccurrences(originalText, lowerOriginal, cacheKey),
-          ...scoreDomainOccurrences(refangedText, lowerRefanged, cacheKey),
-        ];
-  const best = scored.reduce<ScoredOccurrence | undefined>((winner, candidate) => {
-    if (!winner || candidate.score > winner.score) return candidate;
-    if (candidate.score === winner.score && candidate.index > winner.index) return candidate;
-    return winner;
-  }, undefined);
-
-  const context = best === undefined ? '' : sliceContext(best.source, best.index, best.length);
-  cache.set(cacheKey, context);
-  return context;
-};
-
 const originFor = (value: string): string | undefined => {
   try {
     return new URL(value).origin.toLowerCase();
@@ -468,13 +161,9 @@ export const chunkIocAdjudicationBatches = (
 };
 
 export const prepareIocAdjudication = (
-  params: Pick<AdjudicateIocsParams, 'text' | 'iocs' | 'article_url'>
+  params: Pick<AdjudicateIocsParams, 'iocs' | 'article_url'>
 ): PreparedIocAdjudication => {
   const output = [...params.iocs];
-  const lowerOriginal = params.text.toLowerCase();
-  const refangedText = refang(params.text);
-  const lowerRefanged = refangedText.toLowerCase();
-  const contextCache = new Map<string, string>();
   let deterministicReferences = 0;
 
   const candidates = params.iocs
@@ -497,8 +186,8 @@ export const prepareIocAdjudication = (
         left.originalIndex - right.originalIndex
     );
 
-  // Apply the call budget before context search: scanning millions of characters
-  // for every extracted URL/domain would stall the server on IOC-rich reports.
+  // Apply the call budget before batching: an IOC-rich report cannot spend an
+  // unbounded number of model calls.
   const capacity = MAX_SEMANTIC_CANDIDATES_PER_BATCH * MAX_SEMANTIC_REVIEW_BATCHES;
   const deferredCount = Math.max(0, candidates.length - capacity);
   const inBudget = candidates.slice(0, capacity);
@@ -506,18 +195,12 @@ export const prepareIocAdjudication = (
   const withContext = inBudget.map((candidate) => ({
     ...candidate,
     id: candidate.originalIndex,
-    context: contextFor(
-      params.text,
-      lowerOriginal,
-      refangedText,
-      lowerRefanged,
-      candidate.ioc.value,
-      candidate.ioc.type,
-      contextCache
-    ),
+    // extract_iocs already located the best occurrence and sliced this window;
+    // adjudication no longer re-finds the (already-normalized) value in the article.
+    context: candidate.ioc.context ?? '',
   }));
 
-  // A candidate the matcher could not locate in the article cannot be judged.
+  // A candidate extract_iocs never located in the article cannot be judged.
   // Sending it anyway produces a predictable model rejection that is stored as
   // `semantic_reference`, indistinguishable from a real one, so defer it instead.
   const reviewable = withContext.filter((candidate) => candidate.context.length > 0);
@@ -723,7 +406,13 @@ export const reconcileIocAdjudication = (
       output[index] = { ...ioc, deferred_unreviewed: true };
     }
   }
-  const anchorIocs = output.filter((ioc, index) => {
+
+  // `context` is prompt-only (extract_iocs sets it for the model to judge
+  // against); `extracted.iocs` is a dynamic: strict nested mapping that does
+  // not declare it, so it must never reach the result persist_extractions writes.
+  const strippedOutput = output.map(({ context, ...rest }) => rest);
+
+  const anchorIocs = strippedOutput.filter((ioc, index) => {
     if (!PROMOTABLE_TIERS.has(ioc.tier)) return false;
     if ((ioc.type === 'url' || ioc.type === 'domain') && !reviewedIndexes.has(index)) {
       return false;
@@ -731,8 +420,8 @@ export const reconcileIocAdjudication = (
     return true;
   });
   return {
-    count: output.length,
-    iocs: output,
+    count: strippedOutput.length,
+    iocs: strippedOutput,
     // Prefer the extract-time fingerprint. Fallback hashes prepared.output (pre-verdict).
     ioc_set_hash:
       options?.correlationHash !== undefined
