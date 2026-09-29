@@ -65,6 +65,7 @@ dependsOn:
   - '@kbn/mcp-client'
   - '@kbn/std'
   - '@kbn/ui-callout'
+  - '@kbn/code-editor'
 tags:
   - plugin
   - prod

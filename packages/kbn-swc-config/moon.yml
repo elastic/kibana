@@ -18,6 +18,7 @@ project:
   sourceRoot: packages/kbn-swc-config
 dependsOn:
   - '@kbn/transpiler-config'
+  - '@kbn/test'
 tags:
   - shared-common
   - package

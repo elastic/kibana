@@ -90,6 +90,7 @@ dependsOn:
   - '@kbn/react-kibana-context-render'
   - '@kbn/ui-callout'
   - '@kbn/app-header'
+  - '@kbn/test'
 tags:
   - plugin
   - prod
