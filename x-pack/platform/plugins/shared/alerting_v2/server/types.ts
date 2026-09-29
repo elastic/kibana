@@ -39,7 +39,14 @@ import type { AlertEventsClient } from './lib/alert_events_client';
 export type RulesClientApi = PublicMethodsOf<RulesClient>;
 
 /** Rules client for system work with no user request; it only disables rules. */
-export type InternalRulesClientApi = Pick<RulesClientApi, 'bulkDisableRules'>;
+export interface InternalRulesClientApi {
+  /**
+   * Disables rules by id in whichever space each one lives in. Unlike a user disable,
+   * `updatedBy` is `null`, the change history has no author, and `alerting.ruleDisabled`
+   * workflow triggers do not fire. Accepts at most `BULK_FILTER_MAX_RESOURCES` ids.
+   */
+  bulkDisableRules: RulesClientApi['bulkDisableRules'];
+}
 
 export type ActionPolicyClientApi = PublicMethodsOf<ActionPolicyClient>;
 
@@ -63,12 +70,8 @@ export interface AlertingServerStart {
 
   /**
    * Returns a rules client that acts as the internal Kibana user across every space,
-   * for system-initiated work with no user request. It only disables rules and
-   * bypasses user authorization, so callers own the decision of which rules to disable.
-   *
-   * Unlike a user disable, `updatedBy` is `null`, the change history has no author,
-   * and `alerting.ruleDisabled` workflow triggers do not fire. A call accepts at most
-   * `BULK_FILTER_MAX_RESOURCES` rule ids.
+   * for system-initiated work with no user request. It bypasses user authorization,
+   * so callers own the decision of which rules to change.
    */
   getInternalRulesClient(): Promise<InternalRulesClientApi>;
 
