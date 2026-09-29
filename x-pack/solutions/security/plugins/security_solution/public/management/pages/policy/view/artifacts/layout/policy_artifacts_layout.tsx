@@ -56,6 +56,11 @@ export interface PolicyArtifactsLayoutProps {
    * Replaces the default field, operator, and value block inside policy artifact cards.
    */
   CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  /**
+   * When true, policy cards show a read-only Enabled column.
+   * Only artifact types that support the `disabled` tag should set this.
+   */
+  showEnabledColumn?: boolean;
 }
 export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
   ({
@@ -68,6 +73,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
     canWriteArtifact = false,
     CardDecorator,
     CriteriaComponent,
+    showEnabledColumn = false,
     disableArtifactsByPolicy,
   }) => {
     const exceptionsListApiClient = useMemo(
@@ -176,6 +182,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
               labels={labels}
               CardDecorator={CardDecorator}
               CriteriaComponent={CriteriaComponent}
+              showEnabledColumn={showEnabledColumn}
             />
           )}
           {allArtifacts && allArtifacts.total !== 0 ? (
@@ -229,6 +236,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             labels={labels}
             CardDecorator={CardDecorator}
             CriteriaComponent={CriteriaComponent}
+            showEnabledColumn={showEnabledColumn}
           />
         )}
         {exceptionItemToDelete && (
@@ -254,6 +262,7 @@ export const PolicyArtifactsLayout = React.memo<PolicyArtifactsLayoutProps>(
             getArtifactPath={getArtifactPath}
             CardDecorator={CardDecorator}
             CriteriaComponent={CriteriaComponent}
+            showEnabledColumn={showEnabledColumn}
           />
         </EuiPageSection>
       </div>

@@ -15,6 +15,7 @@ import type { ArtifactEntryCollapsibleCardProps } from './artifact_entry_collaps
 import { ArtifactEntryCollapsibleCard } from './artifact_entry_collapsible_card';
 import type { ArtifactEntryCardDecoratorProps } from './artifact_entry_card';
 import type { CriteriaConditionsProps } from './components/criteria_conditions';
+import { DISABLED_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifacts';
 
 describe.each([
   ['trusted apps', getTrustedAppProviderMock],
@@ -148,6 +149,34 @@ describe.each([
 
     expect(renderResult.queryByText('mock decorator')).not.toBeInTheDocument();
     expect(passedItem).toBe(null);
+  });
+
+  it('should not show an enabled status by default', () => {
+    render();
+
+    expect(renderResult.queryByTestId('testCard-header-enabledStatus')).toBeNull();
+  });
+
+  it('should show Enabled when showEnabledColumn is set', () => {
+    render({ showEnabledColumn: true });
+
+    expect(renderResult.getByTestId('testCard-header-enabledStatus')).toHaveTextContent('Enabled');
+  });
+
+  it('should show Disabled when the artifact has the disabled tag', () => {
+    if (!('tags' in item) || !Array.isArray(item.tags)) {
+      render({ showEnabledColumn: true });
+
+      expect(renderResult.getByTestId('testCard-header-enabledStatus')).toHaveTextContent(
+        'Enabled'
+      );
+      return;
+    }
+
+    item.tags = [...item.tags, DISABLED_ARTIFACT_TAG];
+    render({ showEnabledColumn: true });
+
+    expect(renderResult.getByTestId('testCard-header-enabledStatus')).toHaveTextContent('Disabled');
   });
 
   it('should replace criteria conditions when CriteriaComponent is provided', () => {

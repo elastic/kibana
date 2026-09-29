@@ -31,6 +31,7 @@ export interface PolicyArtifactsAssignableListProps {
   isListLoading: boolean;
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
   CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  showEnabledColumn?: boolean;
 }
 
 export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignableListProps>(
@@ -41,6 +42,7 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
     selectedArtifactsUpdated,
     CardDecorator,
     CriteriaComponent,
+    showEnabledColumn = false,
   }) => {
     const selectedArtifactIdsByKey = useMemo(
       () =>
@@ -66,6 +68,7 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
               }
               Decorator={CardDecorator}
               CriteriaComponent={CriteriaComponent}
+              showEnabledColumn={showEnabledColumn}
             />
           ))}
         </div>
@@ -73,6 +76,7 @@ export const PolicyArtifactsAssignableList = React.memo<PolicyArtifactsAssignabl
     }, [
       CardDecorator,
       CriteriaComponent,
+      showEnabledColumn,
       artifacts,
       selectedArtifactIdsByKey,
       selectedArtifactsUpdated,

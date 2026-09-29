@@ -44,6 +44,7 @@ interface PolicyArtifactsFlyoutProps {
   labels: typeof POLICY_ARTIFACT_FLYOUT_LABELS;
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
   CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  showEnabledColumn?: boolean;
 }
 
 export const MAX_ALLOWED_RESULTS = 100;
@@ -57,6 +58,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
     labels,
     CardDecorator,
     CriteriaComponent,
+    showEnabledColumn = false,
   }) => {
     const toasts = useToasts();
     const queryClient = useQueryClient();
@@ -226,6 +228,7 @@ export const PolicyArtifactsFlyout = React.memo<PolicyArtifactsFlyoutProps>(
             selectedArtifactsUpdated={handleSelectArtifacts}
             CardDecorator={CardDecorator}
             CriteriaComponent={CriteriaComponent}
+            showEnabledColumn={showEnabledColumn}
           />
 
           {noItemsMessage}

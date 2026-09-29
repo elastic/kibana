@@ -24,7 +24,14 @@ type ArtifactInfoEntries = ArtifactInfoEntry & { entries?: ArtifactInfoEntry[] }
 export interface ArtifactInfo
   extends Pick<
     ExceptionListItemSchema,
-    'name' | 'created_at' | 'updated_at' | 'created_by' | 'updated_by' | 'description' | 'comments'
+    | 'name'
+    | 'created_at'
+    | 'updated_at'
+    | 'created_by'
+    | 'updated_by'
+    | 'description'
+    | 'comments'
+    | 'tags'
   > {
   effectScope: EffectScope;
   os: OsTypeArray;

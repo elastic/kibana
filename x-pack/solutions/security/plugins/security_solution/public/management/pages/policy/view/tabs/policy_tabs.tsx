@@ -546,6 +546,7 @@ export const PolicyTabs = React.memo(() => {
                     getPolicyArtifactsPath={getPolicyCustomYaraSignaturesPath}
                     canWriteArtifact={canWriteCustomYaraSignatures}
                     CriteriaComponent={CustomYaraSignatureCriteria}
+                    showEnabledColumn
                   />
                 </>
               ),

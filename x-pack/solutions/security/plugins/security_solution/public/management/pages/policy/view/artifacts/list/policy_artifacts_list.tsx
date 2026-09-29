@@ -48,6 +48,7 @@ export interface PolicyArtifactsListProps {
   canWriteArtifact?: boolean;
   CardDecorator: React.ComponentType<ArtifactEntryCardDecoratorProps> | undefined;
   CriteriaComponent?: ArtifactEntryCardProps['CriteriaComponent'];
+  showEnabledColumn?: boolean;
 }
 
 export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
@@ -62,6 +63,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
     canWriteArtifact = false,
     CardDecorator,
     CriteriaComponent,
+    showEnabledColumn = false,
   }) => {
     useOldUrlSearchPaginationReplace();
     const { getAppUrl } = useAppUrl();
@@ -223,6 +225,7 @@ export const PolicyArtifactsList = React.memo<PolicyArtifactsListProps>(
           loading={isLoadingArtifacts || isRefetchingArtifacts}
           data-test-subj={'artifacts-collapsed-list'}
           CardDecorator={CardDecorator}
+          showEnabledColumn={showEnabledColumn}
         />
       </>
     );
