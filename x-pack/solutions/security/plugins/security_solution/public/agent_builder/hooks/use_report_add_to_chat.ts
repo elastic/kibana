@@ -44,7 +44,7 @@ export interface AgentBuilderAddToChatTelemetry {
   /**
    * Attachment type
    */
-  attachments?: Array<'alert' | 'entity' | 'rule' | 'rule_migration_items'>;
+  attachments?: Array<'alert' | 'attack_discovery' | 'entity' | 'rule' | 'rule_migration_items'>;
   /** Number of items added (for bulk add-to-chat actions) */
   item_count?: number;
 }

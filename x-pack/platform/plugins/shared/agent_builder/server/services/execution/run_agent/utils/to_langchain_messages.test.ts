@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { AIMessage, ToolMessage } from '@langchain/core/messages';
-import { isAIMessage, isHumanMessage, isToolMessage } from '@langchain/core/messages';
+import type { ToolMessage } from '@langchain/core/messages';
+import {
+  AIMessage,
+  HumanMessage,
+  isAIMessage,
+  isHumanMessage,
+  isToolMessage,
+} from '@langchain/core/messages';
 import type {
   CompactionSummary,
   ConversationRoundStep,
@@ -20,6 +26,7 @@ import {
   ConversationRoundStepType,
   ExecutionStatus,
   TimelineEventType,
+  isTimelineEvent,
 } from '@kbn/agent-builder-common';
 import type { BackgroundExecutionState } from '@kbn/agent-builder-common/chat';
 import { sanitizeToolId, wrapToolResultContent } from '@kbn/agent-builder-genai-utils/langchain';
@@ -39,6 +46,7 @@ import {
   failedExec0Timeline,
   pausedAndResumedRoundTimeline,
   pausedThenInterruptedResumeTimeline,
+  processedCustomEventFixture,
   roundsOfTimeline,
   timelineFromRounds,
   type ProcessedConversationRound,
@@ -1213,6 +1221,89 @@ describe('prepareMessages', () => {
     });
   });
 
+  describe('with custom conversation events', () => {
+    const roundAt = (id: string, message: string, response: string, startedAt: string) =>
+      createRound({
+        id,
+        input: makeRoundInput(message),
+        response: makeAssistantResponse(response),
+        started_at: startedAt,
+      });
+
+    it('renders a custom event as a user message between the rounds it was added between', async () => {
+      const timeline: ProcessedTimelineEvent[] = [
+        ...timelineFromRounds([roundAt('a', 'first', 'answer a', '2026-01-01T00:00:00.000Z')]),
+        processedCustomEventFixture({
+          id: 'note',
+          created_at: '2026-01-01T00:01:30.000Z',
+          representation: 'Deploy freeze\nNo deploys this week.',
+        }),
+        ...timelineFromRounds([roundAt('b', 'second', 'answer b', '2026-01-01T00:02:00.000Z')]),
+      ];
+      const conversation = {
+        ...createConversation({ nextInput: makeRoundInput('bye') }),
+        timeline,
+      };
+
+      const result = await prepareMessages({ conversation });
+
+      // user a, assistant a, note, user b, assistant b, next input
+      expect(result).toHaveLength(6);
+      const [userA, assistantA, note, userB, assistantB, next] = result;
+      expect(userA.content).toContain('first');
+      expect(AIMessage.isInstance(assistantA)).toBe(true);
+      expect(assistantA.content).toBe('answer a');
+      expect(HumanMessage.isInstance(note)).toBe(true);
+      expect(note.content).toBe(
+        '<conversation_event type="text_note" timestamp="2026-01-01T00:01:30Z">Deploy freeze\nNo deploys this week.</conversation_event>'
+      );
+      expect(userB.content).toContain('second');
+      expect(assistantB.content).toBe('answer b');
+      expect(next.content).toBe('bye');
+    });
+
+    it('escapes the representation and exposes the type but not the event id', async () => {
+      const timeline: ProcessedTimelineEvent[] = [
+        processedCustomEventFixture({
+          id: 'secret-id',
+          type: 'security.alert_triaged',
+          created_at: '2026-01-01T00:00:00.000Z',
+          representation: 'Alert <b>escalated</b> & closed',
+        }),
+      ];
+      const conversation = { ...createConversation({ nextInput: makeRoundInput('hi') }), timeline };
+
+      const [note] = await prepareMessages({ conversation });
+
+      expect(note.content).toBe(
+        '<conversation_event type="security.alert_triaged" timestamp="2026-01-01T00:00:00Z">Alert &lt;b&gt;escalated&lt;/b&gt; &amp; closed</conversation_event>'
+      );
+      expect(note.content).not.toContain('secret-id');
+    });
+
+    it('renders each custom event as its own message, in timeline order', async () => {
+      const timeline: ProcessedTimelineEvent[] = [
+        processedCustomEventFixture({
+          id: 'n1',
+          created_at: '2026-01-01T00:00:00.000Z',
+          representation: 'one',
+        }),
+        processedCustomEventFixture({
+          id: 'n2',
+          created_at: '2026-01-01T00:00:01.000Z',
+          representation: 'two',
+        }),
+      ];
+      const conversation = { ...createConversation({ nextInput: makeRoundInput('hi') }), timeline };
+
+      const result = await prepareMessages({ conversation });
+
+      expect(result).toHaveLength(3);
+      expect(result[0].content).toContain('>one<');
+      expect(result[1].content).toContain('>two<');
+    });
+  });
+
   describe('background execution notices (from round steps)', () => {
     const makeBgStep = (overrides: Partial<BackgroundExecutionState> = {}): ConversationRoundStep =>
       ({
@@ -1523,11 +1614,13 @@ describe('prepareMessages — multi-execution (HITL) timelines', () => {
   // The pipeline normalizes the stored timeline (eventsForContext) and processes user_message
   // payloads (prepareConversation) before prepareMessages sees it; mirror both steps here.
   const normalizedAndProcessed = (stored: ReturnType<typeof pausedAndResumedRoundTimeline>) =>
-    eventsForContext(eventsNativeConversation(stored)).map((event) =>
-      event.type === TimelineEventType.userMessage
-        ? { ...event, data: { ...event.data, attachments: [] } }
-        : event
-    ) as ProcessedTimelineEvent[];
+    eventsForContext(eventsNativeConversation(stored))
+      .filter(isTimelineEvent)
+      .map((event) =>
+        event.type === TimelineEventType.userMessage
+          ? { ...event, data: { ...event.data, attachments: [] } }
+          : event
+      ) as ProcessedTimelineEvent[];
 
   it('renders the paused execution, the answer and the resume as one round', async () => {
     const messages = await prepareMessages({
