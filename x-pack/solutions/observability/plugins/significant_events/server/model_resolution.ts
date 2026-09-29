@@ -53,13 +53,11 @@ export const resolveSignificantEventsModelForRequest = async ({
   step: NightshiftModelStep;
   requestedId?: string;
 } & SignificantEventsModelCoreServices): Promise<string> => {
-  const inferenceClient = inference.getClient({ request });
-
   return resolveNightshiftModel({
     step,
     requestedId,
     validateConnector: async (connectorId) => ({
-      connectorId: (await inferenceClient.getConnectorById(connectorId)).connectorId,
+      connectorId: (await inference.getConnectorById(connectorId, request)).connectorId,
     }),
     getModelRestriction: () =>
       getSignificantEventsModelRestriction({

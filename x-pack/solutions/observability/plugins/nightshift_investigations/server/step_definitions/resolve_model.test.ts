@@ -14,9 +14,8 @@ import { resolveModelStepDefinition } from './resolve_model';
 
 const request = {} as KibanaRequest;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
-const getClient = jest.fn().mockReturnValue({ getConnectorById });
 const inference = {
-  getClient,
+  getConnectorById,
   getDefaultConnector: jest.fn(),
 } as unknown as InferenceServerStart;
 const getSetting = jest.fn().mockResolvedValue(false);
@@ -56,6 +55,7 @@ it('resolves the investigation default', async () => {
   await expect(definition.handler(createContext({ step: 'investigation' }))).resolves.toEqual({
     output: { connector_id: NIGHTSHIFT_DEFAULT_MODELS.investigation },
   });
+  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation, request);
 });
 
 it('falls back from a missing round_connector_id', async () => {

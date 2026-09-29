@@ -24,8 +24,10 @@ const workflowsManagement = {
   management: { getClient: () => ({ getWorkflow: jest.fn().mockResolvedValue(workflow) }) },
 } as never;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
+const getClient = jest.fn();
 const inference = {
-  getClient: jest.fn().mockReturnValue({ getConnectorById }),
+  getClient,
+  getConnectorById,
 } as never;
 
 const createFeatureFlagsMock = (enabled = true): FeatureFlagsStart =>
@@ -118,12 +120,13 @@ it('returns true for a valid explicit connector when the default is missing', as
       connectorId: 'custom-model',
     })
   ).resolves.toBe(true);
-  expect(getConnectorById).toHaveBeenCalledWith('custom-model');
+  expect(getConnectorById).toHaveBeenCalledWith('custom-model', request);
+  expect(getClient).not.toHaveBeenCalled();
 });
 
 it('returns false when the default model is missing and no connector is explicit', async () => {
   getConnectorById.mockRejectedValue(new Error('default missing'));
 
   await expect(isInvestigationRunAvailable(createDependencies())).resolves.toBe(false);
-  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation);
+  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.investigation, request);
 });

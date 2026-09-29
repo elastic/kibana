@@ -57,14 +57,12 @@ export const resolveNightshiftModelForRequest = async ({
   roundConnectorId?: string;
   onFallback?: (reason: Error) => void;
 } & NightshiftModelCoreServices): Promise<string> => {
-  const inferenceClient = inference.getClient({ request });
-
   return resolveNightshiftModel({
     step,
     requestedId,
     roundConnectorId,
     validateConnector: async (connectorId) => ({
-      connectorId: (await inferenceClient.getConnectorById(connectorId)).connectorId,
+      connectorId: (await inference.getConnectorById(connectorId, request)).connectorId,
     }),
     getModelRestriction: () =>
       getNightshiftModelRestriction({

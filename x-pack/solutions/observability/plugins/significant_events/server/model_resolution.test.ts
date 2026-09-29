@@ -17,7 +17,8 @@ const request = {} as KibanaRequest;
 const getConnectorById = jest.fn(async (connectorId: string) => ({ connectorId }));
 const getDefaultConnector = jest.fn();
 const inference = {
-  getClient: jest.fn().mockReturnValue({ getConnectorById }),
+  getClient: jest.fn(),
+  getConnectorById,
   getDefaultConnector,
 } as unknown as InferenceServerStart;
 const getSetting = jest.fn().mockResolvedValue(false);
@@ -32,7 +33,7 @@ beforeEach(() => {
   getConnectorById.mockImplementation(async (connectorId: string) => ({ connectorId }));
 });
 
-it('resolves the code-owned default through the request-scoped inference client', async () => {
+it('resolves the code-owned default through the request-aware server lookup', async () => {
   await expect(
     resolveSignificantEventsModelForRequest({
       request,
@@ -43,8 +44,8 @@ it('resolves the code-owned default through the request-scoped inference client'
     })
   ).resolves.toBe(NIGHTSHIFT_DEFAULT_MODELS.kiExtraction);
 
-  expect(inference.getClient).toHaveBeenCalledWith({ request });
-  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.kiExtraction);
+  expect(getConnectorById).toHaveBeenCalledWith(NIGHTSHIFT_DEFAULT_MODELS.kiExtraction, request);
+  expect(inference.getClient).not.toHaveBeenCalled();
 });
 
 it('returns the canonical connector ID for a strict override', async () => {
@@ -60,6 +61,7 @@ it('returns the canonical connector ID for a strict override', async () => {
       requestedId: 'model-alias',
     })
   ).resolves.toBe('canonical-model');
+  expect(getConnectorById).toHaveBeenCalledWith('model-alias', request);
 });
 
 it('does not load the default connector when the default-only setting is off', async () => {
