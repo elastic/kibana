@@ -9,16 +9,16 @@ import type { DashboardOperation } from './operations';
 import { type DashboardOperationFailureType } from './failure_types';
 
 /**
- * Failure record for tracking panel operation errors.
+ * Failure record for tracking dashboard operation errors.
  */
-export interface PanelFailure {
+export interface OperationFailure {
   type: DashboardOperationFailureType;
   identifier: string;
   error: string;
 }
 
 /**
- * Part of an operation the server intentionally left out, mirroring `PanelFailure`.
+ * Part of an operation the server intentionally left out, mirroring `OperationFailure`.
  */
 export interface OperationSkip {
   type: DashboardOperationFailureType;

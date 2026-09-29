@@ -21,7 +21,7 @@ import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { z } from '@kbn/zod/v4';
 import { DASHBOARD_OPERATION_FAILURE_TYPES } from '../failure_types';
-import { getErrorMessage, type PanelFailure, type OperationSkip } from '../utils';
+import { getErrorMessage, type OperationFailure, type OperationSkip } from '../utils';
 import { defineOperation } from './types';
 
 const controlWidthSchema = z
@@ -91,7 +91,7 @@ const filterDuplicateTimeSliders = ({
 }: {
   existingControls: Array<{ type?: string }>;
   controlsToAdd: ControlInput[];
-  failures: PanelFailure[];
+  failures: OperationFailure[];
 }): ControlInput[] => {
   const hasTimeSlider = existingControls.some((control) => control.type === TIME_SLIDER_CONTROL);
   let canAddTimeSlider = !hasTimeSlider;
@@ -178,7 +178,7 @@ const recordUnresolvedControl = ({
   message,
   userRequested,
 }: {
-  failures: PanelFailure[];
+  failures: OperationFailure[];
   skipped: OperationSkip[];
   fieldName: string;
   message: string;
@@ -217,7 +217,7 @@ const resolveControlFields = async ({
 }: {
   controls: ControlInput[];
   esClient?: ElasticsearchClient;
-  failures: PanelFailure[];
+  failures: OperationFailure[];
   skipped: OperationSkip[];
 }): Promise<ControlInput[]> => {
   if (!esClient) {
