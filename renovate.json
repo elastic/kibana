@@ -2429,7 +2429,7 @@
     },
     {
       "groupName": "oxlint",
-      "matchDepNames": ["oxlint", "oxfmt"],
+      "matchDepNames": ["oxlint", "oxfmt", "@oxlint/plugins"],
       "reviewers": ["team:kibana-operations"],
       "matchBaseBranches": ["main"],
       "addLabels": ["Team:Operations"],

@@ -69,3 +69,4 @@ magic-string
 graphql
 oxlint-tsgolint
 bump-cli
+@oxlint/plugins

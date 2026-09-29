@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_async_promise_body');
+const rule = require('..').rules.no_async_promise_body;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({
