@@ -99,26 +99,25 @@ const getStyles = (euiTheme: EuiThemeComputed, gutter: string) => {
         transparent
       );
 
-      button:hover &,
-      a:hover &,
-      button:focus-visible &,
-      a:focus-visible & {
-        --label-fade-start: ${fadeStartWidth};
-        --label-fade-end: 0px;
-        // A slide shorter than the fade would otherwise start the end fade before the slide.
-        ${euiCanAnimate} {
+      // With reduced motion the label stays still and faded; the tooltip shows the full text.
+      ${euiCanAnimate} {
+        button:hover &,
+        a:hover &,
+        button:focus-visible &,
+        a:focus-visible & {
+          --label-fade-start: ${fadeStartWidth};
+          --label-fade-end: 0px;
+          // A slide shorter than the fade would otherwise start the end fade before the slide.
           animation: ${fadeStartIn} ${fadeDuration} ${delay} both,
             ${fadeEndOut} ${fadeDuration} calc(${delay} + max(0ms, ${duration} - ${fadeDuration}))
               both;
         }
-      }
 
-      button:hover & > span,
-      a:hover & > span,
-      button:focus-visible & > span,
-      a:focus-visible & > span {
-        transform: translateX(calc(var(--label-overflow-width) * -1px));
-        ${euiCanAnimate} {
+        button:hover & > span,
+        a:hover & > span,
+        button:focus-visible & > span,
+        a:focus-visible & > span {
+          transform: translateX(calc(var(--label-overflow-width) * -1px));
           transition: transform ${duration} linear ${delay};
         }
       }
