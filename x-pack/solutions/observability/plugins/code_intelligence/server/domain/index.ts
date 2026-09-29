@@ -131,7 +131,11 @@ export {
   sourceWindowRequestRt,
   sourceWindowRt,
 } from './models/source_codec';
-export { type CatalogWriter } from './ports/catalog_writer';
+export {
+  type CatalogPruneRequest,
+  type CatalogPruneResult,
+  type CatalogWriter,
+} from './ports/catalog_writer';
 export { type QueryValidator } from './ports/query_validator';
 export { type RepositoryResolver } from './ports/repository_resolver';
 export {

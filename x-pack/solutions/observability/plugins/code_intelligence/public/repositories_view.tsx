@@ -183,6 +183,13 @@ export const RepositoriesView = ({ http, repositories, loading, error, reload }:
                   </EuiText>
                 </EuiFlexItem>
               )}
+              {(status.warnings?.length ?? 0) > 0 && (
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="warning">
+                    {status.warnings?.join('; ')}
+                  </EuiText>
+                </EuiFlexItem>
+              )}
             </EuiFlexGroup>
           );
         },

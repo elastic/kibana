@@ -427,6 +427,11 @@ export const extractRepository = async (
   /** Empty valid output intentionally performs no catalog call, preserving the previous catalog unchanged. */
   const requests = catalogRequestsFor({ now: dependencies.now, templates, validation });
   if (requests.length === 0) {
+    diagnostics.push({
+      code: 'prune_skipped_no_documents',
+      message:
+        'No catalog documents were produced, so documents from earlier extractions of this repository were kept and may be stale.',
+    });
     return {
       status: 'success',
       value: {
@@ -440,6 +445,23 @@ export const extractRepository = async (
   /** Catalog writes happen only after all required source and workflow stages have completed successfully. */
   const write = await dependencies.catalogWriter.write(requests);
   if (write.status === 'failure') return write;
+  /** Prunes only after a fully successful write, so a partial write never removes the previous catalog. */
+  if (write.value.failures.length === 0) {
+    const prune = await dependencies.catalogWriter.prune({
+      keepIds: write.value.writtenIds,
+      repository: repository.repository,
+    });
+    if (prune.status === 'failure') {
+      return {
+        error: {
+          code: 'catalog_prune_failure',
+          message: `Catalog documents were written, but stale documents from earlier extractions could not be removed, so the catalog may mix revisions. Run the extraction again to repair it. ${prune.error.message}`,
+          retryable: prune.error.retryable,
+        },
+        status: 'failure',
+      };
+    }
+  }
   return {
     status: 'success',
     value: { diagnostics, generatedTemplates: templates, validation, write: write.value },

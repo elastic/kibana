@@ -18,6 +18,7 @@ export interface ExtractionStatus {
   status: 'running' | 'completed' | 'failed';
   counts: Record<string, number>;
   errors: string[];
+  warnings?: string[];
   startedAt: string;
   completedAt?: string;
 }

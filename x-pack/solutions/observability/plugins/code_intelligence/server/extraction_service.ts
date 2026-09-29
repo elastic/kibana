@@ -25,6 +25,7 @@ export interface ExtractionStatus {
   readonly status: 'running' | 'completed' | 'failed';
   readonly counts: Readonly<Record<string, number>>;
   readonly errors: readonly string[];
+  readonly warnings: readonly string[];
   readonly startedAt: string;
   readonly completedAt?: string;
 }
@@ -36,6 +37,7 @@ interface MutableExtractionStatus {
   status: ExtractionStatus['status'];
   counts: Record<string, number>;
   errors: string[];
+  warnings: string[];
   startedAt: string;
   completedAt?: string;
 }
@@ -73,6 +75,7 @@ export class ExtractionService {
       status: 'running',
       counts: {},
       errors: [],
+      warnings: [],
       startedAt: new Date().toISOString(),
     };
     this.runs.set(id, run);
@@ -87,7 +90,12 @@ export class ExtractionService {
     const run = this.runs.get(id);
     return run === undefined
       ? undefined
-      : { ...run, counts: { ...run.counts }, errors: [...run.errors] };
+      : {
+          ...run,
+          counts: { ...run.counts },
+          errors: [...run.errors],
+          warnings: [...run.warnings],
+        };
   }
 
   private async run(
@@ -121,6 +129,9 @@ export class ExtractionService {
       } else {
         status.status = result.value.write.failures.length === 0 ? 'completed' : 'failed';
         status.errors = result.value.write.failures.map(({ error }) => error.message);
+        status.warnings = result.value.diagnostics
+          .filter(({ templateId }) => templateId === undefined)
+          .map(({ message }) => message);
         for (const template of result.value.generatedTemplates) {
           status.counts[template.signalType] = (status.counts[template.signalType] ?? 0) + 1;
         }
