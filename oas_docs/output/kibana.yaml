@@ -43273,6 +43273,14 @@ paths:
       requestBody:
         content:
           application/json:
+            examples:
+              bulkRestartAgentsRequest:
+                value:
+                  agents:
+                    - agent-1
+                    - agent-2
+                  batchSize: 100
+                  includeInactive: false
             schema:
               additionalProperties: false
               type: object
