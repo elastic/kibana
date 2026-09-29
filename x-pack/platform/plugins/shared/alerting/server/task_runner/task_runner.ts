@@ -576,13 +576,15 @@ export class TaskRunner<
     }
 
     // Collect alert status-change events for lifecycle rules on non-cancelled
-    // runs. The batch is returned and published to the bus only after run()
-    // succeeds — so a late failure (e.g. updatePersistedAlerts rejecting)
-    // prevents any publish, and the next run reclassifies from originalState.
+    // runs. The batch is returned and published to the bus only after
+    // processRunResults() completes — so executor-recorded errors and processing
+    // failures both gate the publish, and the next run reclassifies from
+    // originalState when the batch is not published.
     let alertStatusChangedBatch:
       | { events: AlertStatusChangedV1Payload[]; request: typeof fakeRequest }
       | undefined;
     if (
+      !this.cancelled &&
       this.ruleType.autoRecoverAlerts &&
       this.context.alertingEventBus &&
       this.shouldLogAndScheduleActionsForAlerts()
@@ -982,10 +984,20 @@ export class TaskRunner<
       shouldDisableTask = err.reason === RuleExecutionStatusErrorReasons.Disabled;
     }
 
-    // Publish alert status-change events to the in-process bus after the rule
-    // run has fully succeeded. If runRule threw, runRuleResult is Err and we
-    // skip — the next run reclassifies from originalState, no phantom events.
-    if (isOk(runRuleResult) && this.context.alertingEventBus) {
+    await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
+      this.processRunResults({ schedule, runRuleResult })
+    );
+
+    // Publish alert status-change events only after processRunResults() has
+    // completed. This gates publication on executor-recorded errors
+    // (ruleResultService.addLastRunError) that do not cause runRule() to throw,
+    // and ensures processing failures suppress the batch entirely so the next
+    // run reclassifies from originalState rather than re-emitting.
+    if (
+      isOk(runRuleResult) &&
+      this.ruleResult.getLastRunResults().errors.length === 0 &&
+      this.context.alertingEventBus
+    ) {
       const batch = runRuleResult.value.alertStatusChangedBatch;
       if (batch) {
         const bus = this.context.alertingEventBus;
@@ -997,10 +1009,6 @@ export class TaskRunner<
         }
       }
     }
-
-    await withAlertingSpan('alerting:process-run-results-and-update-rule', () =>
-      this.processRunResults({ schedule, runRuleResult })
-    );
 
     return {
       state: getState({
