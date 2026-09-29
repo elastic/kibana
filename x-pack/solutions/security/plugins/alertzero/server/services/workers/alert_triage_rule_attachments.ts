@@ -14,6 +14,11 @@ import type { AlertTriageAttachmentService } from '../../types';
  */
 export const MAX_RULE_ATTACHMENT_PASSES = 50;
 
+interface RulePassesResult {
+  /** Matching rules the caller cannot edit (ML rules without ML authz), left untouched. */
+  skippedRuleCount: number;
+}
+
 const runPasses = async (
   service: AlertTriageAttachmentService,
   direction: 'attach' | 'detach',
@@ -22,7 +27,7 @@ const runPasses = async (
   // attachAlertTriageWorkerToAllRules) rather than only learning about progress once the whole
   // operation resolves.
   onPassComplete?: (ruleIds: string[]) => void
-): Promise<void> => {
+): Promise<RulePassesResult> => {
   let previousFirstId: string | undefined;
   for (let pass = 0; pass < MAX_RULE_ATTACHMENT_PASSES; pass++) {
     const selection = await service.getRuleAttachmentSelection({
@@ -30,7 +35,7 @@ const runPasses = async (
       attachmentFilter: direction === 'attach' ? 'not_attached' : 'attached',
     });
     const ruleIds = direction === 'attach' ? selection.ruleIds : selection.attachedRuleIds;
-    if (ruleIds.length === 0) return;
+    if (ruleIds.length === 0) return { skippedRuleCount: selection.skippedRuleCount ?? 0 };
     if (ruleIds[0] === previousFirstId) {
       throw new Error(`Rule ${direction} made no progress on rule ${previousFirstId}`);
     }
@@ -45,7 +50,9 @@ const runPasses = async (
 };
 
 /**
- * Attaches the Alert Triage Worker to every detection rule that does not carry it yet.
+ * Attaches the Alert Triage Worker to every detection rule that does not carry it yet, except
+ * rules the caller cannot edit (ML rules without ML authz), whose count is returned so the caller
+ * can surface it.
  *
  * `onRulesAttached`, if given, fires once per pass with the rule IDs that pass just attached —
  * even if a later pass throws. A caller that needs to roll back a partial failure should record
@@ -57,12 +64,12 @@ const runPasses = async (
 export const attachAlertTriageWorkerToAllRules = (
   service: AlertTriageAttachmentService,
   onRulesAttached?: (ruleIds: string[]) => void
-): Promise<void> => runPasses(service, 'attach', onRulesAttached);
+): Promise<RulePassesResult> => runPasses(service, 'attach', onRulesAttached);
 
 /** Detaches the Alert Triage Worker from every detection rule that carries it. */
 export const detachAlertTriageWorkerFromAllRules = (
   service: AlertTriageAttachmentService
-): Promise<void> => runPasses(service, 'detach');
+): Promise<RulePassesResult> => runPasses(service, 'detach');
 
 /**
  * Detaches exactly the given rule IDs, in the same page-sized chunks they were originally

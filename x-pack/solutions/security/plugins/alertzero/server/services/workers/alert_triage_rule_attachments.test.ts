@@ -15,7 +15,12 @@ import {
 
 /** In-memory rule-attachment service: attaching moves ids to attached, detaching moves them back. */
 const makeAttachmentService = (
-  opts: { notAttachedIds?: string[]; attachedIds?: string[]; pageSize?: number } = {}
+  opts: {
+    notAttachedIds?: string[];
+    attachedIds?: string[];
+    pageSize?: number;
+    skippedRuleCount?: number;
+  } = {}
 ): AlertTriageAttachmentService & {
   updateRuleAttachments: jest.Mock;
   getRuleAttachmentSelection: jest.Mock;
@@ -27,7 +32,11 @@ const makeAttachmentService = (
     getRuleAttachmentSelection: jest.fn(
       async ({ attachmentFilter }: { search: string; attachmentFilter: string }) =>
         attachmentFilter === 'not_attached'
-          ? { ruleIds: [...notAttached].slice(0, pageSize), attachedRuleIds: [] }
+          ? {
+              ruleIds: [...notAttached].slice(0, pageSize),
+              attachedRuleIds: [],
+              skippedRuleCount: opts.skippedRuleCount,
+            }
           : { ruleIds: [], attachedRuleIds: [...attached].slice(0, pageSize) }
     ),
     updateRuleAttachments: jest.fn(
@@ -88,7 +97,17 @@ describe('attachAlertTriageWorkerToAllRules', () => {
 
   it('works without an onRulesAttached callback', async () => {
     const service = makeAttachmentService({ notAttachedIds: ['r1'] });
-    await expect(attachAlertTriageWorkerToAllRules(service)).resolves.toBeUndefined();
+    await expect(attachAlertTriageWorkerToAllRules(service)).resolves.toEqual({
+      skippedRuleCount: 0,
+    });
+  });
+
+  it('returns the number of rules selection left out because the caller cannot edit them', async () => {
+    const service = makeAttachmentService({ notAttachedIds: ['r1', 'r2'], skippedRuleCount: 3 });
+
+    await expect(attachAlertTriageWorkerToAllRules(service)).resolves.toEqual({
+      skippedRuleCount: 3,
+    });
   });
 
   it('throws rather than looping when a pass makes no progress', async () => {

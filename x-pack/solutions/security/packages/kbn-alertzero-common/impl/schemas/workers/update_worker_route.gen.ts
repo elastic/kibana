@@ -68,6 +68,17 @@ export type UpdateWorkerRequestBodyInput = z.input<typeof UpdateWorkerRequestBod
 export const UpdateWorkerResponse = lazySchema(() =>
   z.object({
     worker: Worker,
+    /**
+     * Present when enabling the Alert Triage Worker left rules without it because the caller cannot edit them (machine learning rules without machine learning permissions). Those rules are not triaged.
+     */
+    skippedRuleCount: z
+      .number()
+      .int()
+      .min(1)
+      .optional()
+      .describe(
+        'Present when enabling the Alert Triage Worker left rules without it because the caller cannot edit them (machine learning rules without machine learning permissions). Those rules are not triaged.'
+      ),
   })
 );
 export type UpdateWorkerResponse = z.infer<typeof UpdateWorkerResponse>;

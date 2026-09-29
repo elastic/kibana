@@ -33,7 +33,7 @@ export interface AlertTriageAttachmentService {
   getRuleAttachmentSelection(params: {
     search: string;
     attachmentFilter: 'all' | 'attached' | 'not_attached';
-  }): Promise<{ ruleIds: string[]; attachedRuleIds: string[] }>;
+  }): Promise<{ ruleIds: string[]; attachedRuleIds: string[]; skippedRuleCount?: number }>;
   updateRuleAttachments(params: {
     attachRuleIds: string[];
     detachRuleIds: string[];

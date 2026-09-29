@@ -68,7 +68,12 @@ const storedIdFromReport = (workflowId: string) =>
 
 /** In-memory rule-attachment service: attaching moves ids to attached, detaching moves them back. */
 const makeAttachmentService = (
-  opts: { notAttachedIds?: string[]; attachedIds?: string[]; pageSize?: number } = {}
+  opts: {
+    notAttachedIds?: string[];
+    attachedIds?: string[];
+    pageSize?: number;
+    skippedRuleCount?: number;
+  } = {}
 ) => {
   const notAttached = new Set(opts.notAttachedIds ?? ['rule-1', 'rule-2']);
   const attached = new Set(opts.attachedIds ?? []);
@@ -77,7 +82,11 @@ const makeAttachmentService = (
     getRuleAttachmentSelection: jest.fn(
       async ({ attachmentFilter }: { search: string; attachmentFilter: string }) =>
         attachmentFilter === 'not_attached'
-          ? { ruleIds: [...notAttached].slice(0, pageSize), attachedRuleIds: [] }
+          ? {
+              ruleIds: [...notAttached].slice(0, pageSize),
+              attachedRuleIds: [],
+              skippedRuleCount: opts.skippedRuleCount,
+            }
           : { ruleIds: [], attachedRuleIds: [...attached].slice(0, pageSize) }
     ),
     updateRuleAttachments: jest.fn(
@@ -885,6 +894,29 @@ describe('WorkersService', () => {
       expect(
         attachment.updateRuleAttachments.mock.calls.map(([args]) => args.attachRuleIds)
       ).toEqual([['r1', 'r2'], ['r3', 'r4'], ['r5']]);
+    });
+
+    it('reports how many rules the caller could not attach to', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService({ skippedRuleCount: 4 });
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result).toEqual({
+        outcome: 'updated',
+        response: expect.objectContaining({ skippedRuleCount: 4 }),
+      });
+    });
+
+    it('omits skippedRuleCount when every rule could be attached', async () => {
+      const harness = createPersistentHarness();
+      const attachment = makeAttachmentService();
+      const { service } = makeService(harness, attachment);
+
+      const result = await service.update(TRIAGE, { enabled: true }, SPACE, request);
+
+      expect(result.outcome === 'updated' && 'skippedRuleCount' in result.response).toBe(false);
     });
 
     it('attach that makes no progress fails the enable rather than looping', async () => {

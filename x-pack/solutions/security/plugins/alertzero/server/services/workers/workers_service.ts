@@ -233,6 +233,9 @@ export class WorkersService {
     });
 
     const isAlertTriageWorker = workerId === SYSTEM_SECURITY_WORKER_FLOOR_ALERT_TRIAGE_ID;
+    // Rules left without the Worker because the caller cannot edit them (ML rules without ML
+    // authz). Reported to the caller: those rules are silently not triaged otherwise.
+    let skippedRuleCount = 0;
     let alertTriageAttachmentService: AlertTriageAttachmentService | undefined;
 
     // Validate the enable half before writing anything: a combined settings-and-enable PATCH
@@ -333,8 +336,9 @@ export class WorkersService {
         // that were attached before this call, which detachAlertTriageWorkerFromAllRules would
         // do by re-querying every currently-attached rule.
         const attachedRuleIdChunks: string[][] = [];
-        await attachAlertTriageWorkerToAllRules(alertTriageAttachmentService, (ruleIds) =>
-          attachedRuleIdChunks.push(ruleIds)
+        const attachResult = await attachAlertTriageWorkerToAllRules(
+          alertTriageAttachmentService,
+          (ruleIds) => attachedRuleIdChunks.push(ruleIds)
         ).catch(async (err: Error) => {
           this.logger.error(`Alert Triage Worker: rule attachment failed: ${err.message}`);
           await detachRuleIdChunks(alertTriageAttachmentService, attachedRuleIdChunks).catch(
@@ -346,6 +350,12 @@ export class WorkersService {
           );
           throw err;
         });
+        skippedRuleCount = attachResult.skippedRuleCount;
+        if (skippedRuleCount > 0) {
+          this.logger.warn(
+            `Alert Triage Worker: ${skippedRuleCount} rule(s) were not attached because the current user cannot edit them`
+          );
+        }
       }
 
       await management.updateWorkflow(
@@ -385,7 +395,10 @@ export class WorkersService {
 
     const agentLookup = await this.buildAgentLookup(request);
     const worker = await this.projectWorker(registration, spaceId, request, agentLookup);
-    return { outcome: 'updated', response: { worker } };
+    return {
+      outcome: 'updated',
+      response: { worker, ...(skippedRuleCount > 0 ? { skippedRuleCount } : {}) },
+    };
   }
 
   /**
