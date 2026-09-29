@@ -57,6 +57,11 @@ confirmation before applying. If user asks to update multiple rules, take them o
 migration's perspective — no write path applies to it. Check for this after the mandatory rule
 fetch (see Workflow) and stop if it is already installed.
 
+**Failed and untranslatable rules cannot be corrected with this skill — they must be reprocessed.**
+A rule with \`status: failed\` or \`translation_result: untranslatable\` has no usable translation to
+correct. Do not call \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\` for it; reprocess the rule
+instead with the \`${RULE_MIGRATION_SKILLS.START}\` skill.
+
 ${AUTOMATIC_MIGRATION_GENERAL_GUIDELINES}
 
 ${AUTOMATIC_RULE_MIGRATION_CAPABILITIES_BLOCK}
@@ -93,11 +98,16 @@ ${MIGRATION_NAME_DISAMBIGUATION_BLOCK}
    not present the correction options and do not call
    \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`. Explain that the rule has already been
    installed as a detection rule and can no longer be corrected through the migration. Stop there.
-3. **Present options**: Ask the user what they want to fix:
+3. **Stop if the rule failed or is untranslatable.** If the fetched rule has \`status: failed\` or
+   \`translation_result: untranslatable\`, do not present the correction options and do not call
+   \`${SIEM_MIGRATION_UPDATE_TRANSLATED_RULE_TOOL_ID}\`. Explain that the rule can only be fixed by
+   reprocessing it, and offer to reprocess it with the \`${RULE_MIGRATION_SKILLS.START}\` skill
+   (retry only this rule by its id). Stop there.
+4. **Present options**: Ask the user what they want to fix:
    - Fix **ES|QL query**
    - Fix **Prebuilt rule match**
    - Fix **Integration match** (for a prebuilt-matched rule, see the caveat in the Integration match update workflow)
-4. Based on the user's selection, follow the appropriate sub-workflow below.
+5. Based on the user's selection, follow the appropriate sub-workflow below.
 
 ### Pre-built rule update workflow
 
@@ -263,6 +273,8 @@ and \`CommandLine\` → \`process.args\`. Detection logic unchanged.
 
 ## Constraints
 
+- **Never call the tool for a rule with \`status: failed\` or \`translation_result: untranslatable\`.**
+  These can only be fixed by reprocessing the rule with the \`${RULE_MIGRATION_SKILLS.START}\` skill.
 - **Do not rely on querying the system for index existence or field mappings.** Migration rule
   indices typically do not exist in the system yet. If a system query returns nothing or fails,
   fall back immediately to \`platform.core.product_documentation\` as the authoritative source
