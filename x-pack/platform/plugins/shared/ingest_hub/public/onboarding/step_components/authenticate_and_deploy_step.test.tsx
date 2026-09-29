@@ -445,7 +445,11 @@ describe('AuthenticateAndDeployStep', () => {
         awsServicesMap: new Map([['vpcflow', agentService]]),
         deploymentMethod: 'agent_based',
         setDeploymentMethod: jest.fn(),
-        agentBasedDeployment: { selectedAgentPolicyIds: [], agentHostsMode: 'new', agentCredentialMethod: 'assume_role' },
+        agentBasedDeployment: {
+          selectedAgentPolicyIds: [],
+          agentHostsMode: 'new',
+          agentCredentialMethod: 'assume_role',
+        },
         detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
         updateDetectAndReviewStep: jest.fn(),
         removeDeployInstances: jest.fn(),
@@ -639,7 +643,12 @@ describe('AuthenticateAndDeployStep', () => {
           deploymentMethod: 'agent_based',
           setDeploymentMethod: jest.fn(),
           // agentBasedDeployment has agentPolicyId already set (flyout created it).
-          agentBasedDeployment: { agentPolicyId: 'existing-policy-id', agentHostsMode: 'new', selectedAgentPolicyIds: [], agentCredentialMethod: 'assume_role' },
+          agentBasedDeployment: {
+            agentPolicyId: 'existing-policy-id',
+            agentHostsMode: 'new',
+            selectedAgentPolicyIds: [],
+            agentCredentialMethod: 'assume_role',
+          },
           detectAndReviewStep: { serviceStatuses: {}, policyIdsByInstance: {} },
           updateDetectAndReviewStep: jest.fn(),
         });

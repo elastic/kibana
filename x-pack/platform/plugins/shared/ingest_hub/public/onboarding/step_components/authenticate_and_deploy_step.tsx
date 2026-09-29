@@ -201,7 +201,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
         const agentPoliciesDirty = (() => {
           if (deploymentMethod !== 'agent_based') return false;
           const selected = new Set(agentBasedDeploymentFromFlow.selectedAgentPolicyIds);
-          if (selected.size === 0 && agentBasedDeploymentFromFlow.agentHostsMode !== 'existing') return false;
+          if (selected.size === 0 && agentBasedDeploymentFromFlow.agentHostsMode !== 'existing')
+            return false;
           const deployed = new Set(item.agentPolicyIds ?? []);
           return selected.size !== deployed.size || [...selected].some((id) => !deployed.has(id));
         })();

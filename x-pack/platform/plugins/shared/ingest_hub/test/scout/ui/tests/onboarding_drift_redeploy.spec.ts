@@ -296,7 +296,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
-            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
             serviceVars: {},
           })
         );
@@ -400,7 +402,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
-            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
             serviceVars: {},
           })
         );
@@ -1066,7 +1070,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
-            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
             serviceVars: {},
           })
         );
@@ -1235,7 +1241,9 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           key,
           JSON.stringify({
             globalRegion: 'us-east-1',
-            instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
+            instances: [
+              { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
+            ],
             serviceVars: {},
           })
         );
