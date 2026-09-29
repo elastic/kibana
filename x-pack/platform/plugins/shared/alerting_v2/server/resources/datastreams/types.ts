@@ -5,8 +5,17 @@
  * 2.0.
  */
 
-import type { IndicesDataStreamLifecycleWithRollover } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IndicesDataStreamLifecycleWithRollover,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { MappingsDefinition } from '@kbn/es-mappings';
+
+export interface IngestPipelineDefinition {
+  id: string;
+  version: number;
+  processors: IngestProcessorContainer[];
+}
 
 export interface ResourceDefinition {
   key: string;
@@ -14,6 +23,7 @@ export interface ResourceDefinition {
   version: number;
   mappings: MappingsDefinition;
   lifecycle: IndicesDataStreamLifecycleWithRollover;
+  finalPipeline: IngestPipelineDefinition;
   /**
    * When true: on startup, checks whether `episode.id` is still a real object field in the
    * live mapping. If so, the data stream is wiped and reinitialized — the episode→alert field
