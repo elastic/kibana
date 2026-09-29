@@ -308,7 +308,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
               // Also include undeployed new target IDs so Retry re-queues them alongside the
               // existing-policy updates — without this they are dropped from failedInstances and
               // never deployed when the user clicks Retry after a mixed dirty+new-target failure
-              //.
+              // .
               const allActiveIds = [
                 ...Object.keys(detectAndReviewStep.policyIdsByInstance ?? {}).filter(
                   (id) => activeInstanceIds.has(id) && !cleanedLiveStale.includes(id)
@@ -357,7 +357,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
                 policyIdsByInstance: postCleanupIds,
                 authMethod: toSOAuthMethod(agentCredentialMethod),
                 // Persist selected agent policies so resume restores the correct selection
-                //.
+                // .
                 ...(targetPolicyIds.length > 0 ? { agentPolicyIds: targetPolicyIds } : {}),
               });
               if (!soOk) {
@@ -599,7 +599,9 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           // Retry impossible if creation failed.
           // isNewPolicyDeploy (not isNewPolicySwitch) so retries of a failed creation also stage
           // cleanup when they eventually succeed.
-          ...(isNewPolicyDeploy && mergedFailed.length === 0 && Object.keys(oldPolicyIdsByInstance).length > 0
+          ...(isNewPolicyDeploy &&
+          mergedFailed.length === 0 &&
+          Object.keys(oldPolicyIdsByInstance).length > 0
             ? { pendingCleanupPolicyIds: { ...remainingPending, ...oldPolicyIdsByInstance } }
             : {}),
         });

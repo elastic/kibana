@@ -278,7 +278,7 @@ export function useMiDeploy({
           // resolved, instances are absent from session (e.g. ?deploymentId resume that skipped
           // Step 2). Fail closed so the caller does not clear isDirty without any Fleet PUT —
           // the auth change would be written to the SO record but not applied to the integration
-          //. An empty policyIdsByInstance is a legitimate no-op (nothing deployed).
+          // . An empty policyIdsByInstance is a legitimate no-op (nothing deployed).
           return Object.keys(policyIdsByInstance).length > 0
             ? { hadFailures: true, allFailedIds: Object.keys(policyIdsByInstance) }
             : { hadFailures: false, allFailedIds: [] };

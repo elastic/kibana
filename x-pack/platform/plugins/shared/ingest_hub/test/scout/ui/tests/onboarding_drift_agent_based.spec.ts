@@ -436,7 +436,9 @@ test.describe(
       await soGetPromise;
 
       // No drift: session matches SO — callout must not appear and Next must be enabled.
-      await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).not.toBeVisible();
+      await expect(
+        page.testSubj.locator('authenticateAndDeployStep-driftCallout')
+      ).not.toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
       // No package policy PUT must have fired — the clean state requires no redeploy.
       expect(pkgPuts).toHaveLength(0);
