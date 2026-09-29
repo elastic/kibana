@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@kbn/react-query';
 import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { ActionPolicyResponse } from '@kbn/alerting-v2-schemas';
 import { ActionPoliciesApi } from '../services/action_policies_api';
 import { actionPolicyKeys } from './query_key_factory';
 
@@ -16,7 +17,7 @@ export const useUpdateActionPolicyApiKey = () => {
   const { toasts } = useService(CoreStart('notifications'));
   const queryClient = useQueryClient();
 
-  return useMutation<void, Error, string>({
+  return useMutation<ActionPolicyResponse, Error, string>({
     mutationFn: (id) => actionPoliciesApi.updateActionPolicyApiKey(id),
     onSuccess: (_, id) => {
       queryClient.invalidateQueries({ queryKey: actionPolicyKeys.lists(), exact: false });
