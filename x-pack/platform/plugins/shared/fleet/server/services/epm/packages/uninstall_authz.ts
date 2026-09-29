@@ -6,7 +6,7 @@
  */
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import type { Installation, PackagePolicy } from '../../../types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../../constants';

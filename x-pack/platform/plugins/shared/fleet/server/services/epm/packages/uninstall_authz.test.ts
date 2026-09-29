@@ -7,7 +7,7 @@
 
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
 
-import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 
 import { FleetUnauthorizedError } from '../../../errors';
 import { appContextService, packagePolicyService } from '../..';
