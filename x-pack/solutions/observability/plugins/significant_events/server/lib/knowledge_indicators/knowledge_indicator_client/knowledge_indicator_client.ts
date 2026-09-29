@@ -81,6 +81,10 @@ export class KnowledgeIndicatorClient {
     return computeExpiresAt(new Date().toISOString(), this.ttlDays);
   }
 
+  countKnowledgeIndicators(type: KnowledgeIndicatorType): Promise<number> {
+    return this.reader.countKnowledgeIndicators(type);
+  }
+
   keepAlivePersistentIndicators(
     stream: string,
     options: { lastRefreshedBefore: string }

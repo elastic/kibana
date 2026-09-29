@@ -22,6 +22,11 @@ import {
 } from '@kbn/workflows/managed';
 import type { GetScopedClients } from '../../routes/types';
 import type { SignificantEventsServer } from '../../types';
+import {
+  KI_TYPE_FEATURE,
+  KI_TYPE_QUERY,
+  type KnowledgeIndicatorType,
+} from '../knowledge_indicators';
 import { KNOWLEDGE_INDICATORS_DATA_STREAM } from '../knowledge_indicators/data_stream';
 import { DETECTIONS_DATA_STREAM } from '../significant_events/detections/data_stream';
 import { DISCOVERIES_DATA_STREAM } from '../significant_events/discoveries_data_stream';
@@ -176,7 +181,7 @@ function makeService(params?: {
   indicatorStreams?: string[];
   ownedRuleStreams?: string[];
   queryLinksByStream?: Record<string, Array<{ rule_backed: boolean; rule_id?: string }>>;
-  featureCountsByStream?: Record<string, number>;
+  knowledgeIndicatorCounts?: Partial<Record<KnowledgeIndicatorType, number>>;
   ownedRuleIdsByStream?: Record<string, string[]>;
   dataStreams?: Record<string, number>;
   investigations?: {
@@ -198,13 +203,9 @@ function makeService(params?: {
       streamNames.map((streamName) => [streamName, params?.queryLinksByStream?.[streamName] ?? []])
     )
   );
-  const getFeatures = jest.fn(async (streamNames: string | string[]) => ({
-    hits: (Array.isArray(streamNames) ? streamNames : [streamNames]).flatMap((streamName) =>
-      Array.from({ length: params?.featureCountsByStream?.[streamName] ?? 0 }, (_, index) => ({
-        id: `${streamName}-${index}`,
-      }))
-    ),
-  }));
+  const countKnowledgeIndicators = jest.fn(
+    async (type: KnowledgeIndicatorType) => params?.knowledgeIndicatorCounts?.[type] ?? 0
+  );
   const findOwnedRuleIds = jest.fn(
     async (streamName: string) => params?.ownedRuleIdsByStream?.[streamName] ?? []
   );
@@ -235,12 +236,8 @@ function makeService(params?: {
       count: streamDocuments.get(index) ?? 0,
     })),
   };
-  const initializeClient = jest.fn(async (name: string) => {
-    if (!streamDocuments.has(name)) {
-      streamDocuments.set(name, 0);
-    }
-    return {};
-  });
+  const initializeClient = jest.fn(async (_name: string) => ({}));
+  const asScoped = jest.fn(() => ({ asCurrentUser: esClient }));
   const deleteAllInvestigations = params?.investigations
     ? jest.fn(async () => params.investigations!)
     : undefined;
@@ -275,7 +272,7 @@ function makeService(params?: {
       dataStreams: { initializeClient },
       elasticsearch: {
         client: {
-          asScoped: jest.fn(() => ({ asCurrentUser: esClient })),
+          asScoped,
         },
       },
       uiSettings: {
@@ -303,8 +300,8 @@ function makeService(params?: {
       getRuleBackedQueryLinks,
       getStreamNamesWithKnowledgeIndicators,
       findStreamNamesWithOwnedRules,
+      countKnowledgeIndicators,
       getStreamToQueryLinksMap,
-      getFeatures,
       findOwnedRuleIds,
     }),
     getSignificantEventsAlertingContext: async () => ({ alertingV2RulesClient: v2RulesClient }),
@@ -327,13 +324,14 @@ function makeService(params?: {
     getRuleBackedQueryLinks,
     getStreamNamesWithKnowledgeIndicators,
     findStreamNamesWithOwnedRules,
+    countKnowledgeIndicators,
     getStreamToQueryLinksMap,
-    getFeatures,
     findOwnedRuleIds,
     initializeClient,
     getScopedClients,
     streamDocuments,
     esClient,
+    asScoped,
     deleteAllInvestigations,
     globalUiSettingsClient,
     spaceUiSettingsClient,
@@ -719,6 +717,7 @@ describe('SignificantEventsMaintenanceService', () => {
         esClient,
         streamDocuments,
         deleteAllInvestigations,
+        asScoped,
       } = makeService({
         management: api,
         indicatorStreams: ['logs.web'],
@@ -726,7 +725,7 @@ describe('SignificantEventsMaintenanceService', () => {
         queryLinksByStream: {
           'logs.web': [{ rule_backed: true, rule_id: 'linked-rule' }, { rule_backed: false }],
         },
-        featureCountsByStream: { 'logs.web': 2 },
+        knowledgeIndicatorCounts: { [KI_TYPE_FEATURE]: 2, [KI_TYPE_QUERY]: 2 },
         ownedRuleIdsByStream: {
           'logs.web': ['linked-rule', 'owned-rule'],
           'logs.orphan': ['orphan-rule'],
@@ -776,7 +775,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
         name: DETECTIONS_DATA_STREAM,
       });
-      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
+      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
         name: KNOWLEDGE_INDICATORS_DATA_STREAM,
       });
       expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
@@ -786,6 +785,7 @@ describe('SignificantEventsMaintenanceService', () => {
       expect(streamDocuments.get(EVENTS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.get(KNOWLEDGE_INDICATORS_DATA_STREAM)).toBe(0);
       expect(streamDocuments.has(DISCOVERIES_DATA_STREAM)).toBe(false);
+      expect(asScoped).toHaveBeenCalledWith(REQUEST);
       expect(cancelAllActiveWorkflowExecutions.mock.invocationCallOrder[0]).toBeLessThan(
         deleteAllInvestigations!.mock.invocationCallOrder[0]
       );
@@ -821,7 +821,11 @@ describe('SignificantEventsMaintenanceService', () => {
         EVENTS_DATA_STREAM,
         KNOWLEDGE_INDICATORS_DATA_STREAM,
       ]);
-      expect(esClient.indices.createDataStream).not.toHaveBeenCalled();
+      expect(esClient.indices.createDataStream.mock.calls.map(([{ name }]) => name)).toEqual([
+        DETECTIONS_DATA_STREAM,
+        EVENTS_DATA_STREAM,
+        KNOWLEDGE_INDICATORS_DATA_STREAM,
+      ]);
       expect(summary.deleted?.dataStreams).toBe(0);
       expect(summary.partialFailures).toEqual([]);
       expect([...streamDocuments.keys()]).toEqual([
@@ -829,6 +833,26 @@ describe('SignificantEventsMaintenanceService', () => {
         EVENTS_DATA_STREAM,
         KNOWLEDGE_INDICATORS_DATA_STREAM,
       ]);
+    });
+
+    it('skips a registered stream after its existence check fails and continues cleanup', async () => {
+      const { api } = makeManagementApi();
+      const { service, esClient } = makeService({ management: api, dataStreams: {} });
+      esClient.indices.exists.mockRejectedValueOnce(new Error('existence check failed'));
+
+      const summary = await service.reset({ request: REQUEST });
+
+      expect(summary.partialFailures).toContainEqual({
+        target: `data-stream:${DETECTIONS_DATA_STREAM}`,
+        error: 'existence check failed',
+      });
+      expect(esClient.indices.createDataStream).not.toHaveBeenCalledWith({
+        name: DETECTIONS_DATA_STREAM,
+      });
+      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({ name: EVENTS_DATA_STREAM });
+      expect(esClient.indices.createDataStream).toHaveBeenCalledWith({
+        name: KNOWLEDGE_INDICATORS_DATA_STREAM,
+      });
     });
 
     it('restores non-settings workflows after a paused reset but leaves settings-backed workflows off', async () => {

@@ -956,6 +956,7 @@ export const createSignificantEventsMaintenanceService = ({
           }
         }
 
+        // `kibana_system` can initialize these streams but cannot delete them.
         const esClient = server.core.elasticsearch.client.asScoped(request).asCurrentUser;
         for (const name of [
           DETECTIONS_DATA_STREAM,
@@ -973,6 +974,7 @@ export const createSignificantEventsMaintenanceService = ({
             exists = await esClient.indices.exists({ index: name });
           } catch (error) {
             failures.push({ target: `data-stream:${name}`, error: toMessage(error) });
+            continue;
           }
 
           let documentCount: number | undefined;
