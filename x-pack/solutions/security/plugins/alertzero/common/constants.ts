@@ -25,7 +25,8 @@ export const ALERTZERO_API_PRIVILEGE_READ = 'alertzero_read' as const;
 
 /**
  * API privilege for AlertZero internal routes that mutate state. Only granted by the `all` feature
- * privilege. This route-level check is the authorization boundary for managed settings installs.
+ * privilege. Settings writes (autonomy, schedule, extras) are authorized by this privilege alone.
+ * Enable/disable also requires Workflows `update` and `managed:update` (see the worker PATCH route).
  */
 export const ALERTZERO_API_PRIVILEGE_WRITE = 'alertzero_write' as const;
 
@@ -38,6 +39,7 @@ export const ALERTZERO_MANAGED_WORKFLOW_OWNER_ID = 'alertzero' as const;
  */
 export const ALERTZERO_ATTACHMENT_TYPES = {
   threat: 'security.threat',
+  significantSecurityEvent: 'security.significant_security_event',
 } as const;
 
 // --- Hunt services ---

@@ -811,7 +811,15 @@ class ConversationClientImpl implements ConversationClient {
         // collide only when a caller re-inserts an existing uuid, which we drop.
         const eventsToWrite = events.filter((event) => !existingIds.has(event.id));
         writtenEvents = eventsToWrite;
-        const replaced = [...nonRoundEvents, ...eventsToWrite];
+        const firstRoundIndex = currentEvents.findIndex((event) =>
+          event.id.startsWith(roundPrefix)
+        );
+        const insertAt = firstRoundIndex === -1 ? nonRoundEvents.length : firstRoundIndex;
+        const replaced = [
+          ...nonRoundEvents.slice(0, insertAt),
+          ...eventsToWrite,
+          ...nonRoundEvents.slice(insertAt),
+        ];
         return {
           events: replaced,
           schema_version: CONVERSATION_SCHEMA_VERSION,

@@ -109,6 +109,7 @@ paths:
                   - status
                   - run_id
                   - technologies
+                  - index_patterns
                   - tier1
                   - message
                   - next_step
@@ -129,6 +130,15 @@ paths:
                       the scope was blocked.
                     items:
                       $ref: '../components/hunt.schema.yaml#/components/schemas/HuntTechnology'
+                  index_patterns:
+                    type: array
+                    description: >-
+                      Index patterns the hunt ran against: the resolved required
+                      patterns. Populated whether the scope came from a pinned or
+                      environment-resolved technology or from discovered datasets;
+                      empty when the scope was blocked or resolution failed.
+                    items:
+                      type: string
                   tier1:
                     allOf:
                       - $ref: '../components/hunt.schema.yaml#/components/schemas/HuntForThreatResult'
@@ -337,6 +347,29 @@ paths:
                       that writes "clean" off this flag alone will record a clean
                       environment for a run that could not search it — use
                       `completeness` for that.
+                  sse:
+                    type: array
+                    description: >-
+                      Populated when `has_confirmed_hit` is true (Tier 1
+                      environment hits or a Tier 2 executed required-index
+                      hit) and the request named a `report_id`: one entry per
+                      technique this run corroborated, meaning its ES|QL
+                      executed and returned required-index rows or a Tier 1
+                      hit was attributed to it. A technique that was only
+                      proposed gets no entry of its own; when no technique was
+                      corroborated, a single report-scoped entry carries all of
+                      them under `hunt_result.tier2.behaviors`. The caller fans
+                      out over this array with ai.attachment.add, one call per
+                      entry; no templated fields.
+                    items:
+                      type: object
+                      required: [attachment_id, data]
+                      properties:
+                        attachment_id:
+                          type: string
+                        data:
+                          type: object
+                          additionalProperties: true
 components:
   schemas:
     HuntCoordinatorStatus:

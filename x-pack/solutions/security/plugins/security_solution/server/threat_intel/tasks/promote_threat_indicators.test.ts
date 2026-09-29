@@ -630,9 +630,16 @@ describe('promote task runner', () => {
         .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
         .run();
 
-      expect(esClient.openPointInTime).toHaveBeenCalledWith(
-        expect.objectContaining({ index: THREAT_REPORTS_INDEX_PATTERN })
-      );
+      const pitArg = (esClient.openPointInTime as jest.Mock).mock.calls[0][0];
+      expect(pitArg.index).toBe(THREAT_REPORTS_INDEX_PATTERN);
+      // `allow_no_indices` is search-only; ES rejects it on PIT open with
+      // x_content_parse_exception (the promotion task used to spread the full
+      // HIDDEN_INDEX_SEARCH_OPTIONS object and fail before scanning reports).
+      expect(pitArg.allow_no_indices).toBeUndefined();
+      expect(pitArg).toMatchObject({
+        expand_wildcards: ['open', 'hidden'],
+        ignore_unavailable: true,
+      });
 
       // The PIT pins the indices, so the search must not also pass `index`.
       const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];
