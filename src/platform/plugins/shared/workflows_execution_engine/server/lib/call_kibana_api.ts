@@ -195,7 +195,8 @@ const headersToRecord = (headers: Headers | undefined): Record<string, string> =
 const parseResponseBody = async (
   response: Response,
   maxResponseBytes: number,
-  onExceed: 'throw' | 'truncate' = 'throw'
+  onExceed: 'throw' | 'truncate' = 'throw',
+  signal?: AbortSignal
 ): Promise<unknown> => {
   if (response.status === 204 || response.status === 304) {
     return {};
@@ -204,7 +205,7 @@ const parseResponseBody = async (
     return null;
   }
   const contentType = response.headers?.get('content-type') ?? null;
-  const { buffer, truncated } = await readResponseStream(response, maxResponseBytes);
+  const { buffer, truncated } = await readResponseStream(response, maxResponseBytes, signal);
   if (truncated) {
     if (onExceed === 'truncate') {
       return `${buffer.toString('utf-8')}... [truncated]`;
@@ -357,8 +358,8 @@ export async function callKibanaApi<T = unknown>(
     // partial-success response without string-parsing the message.
     const errorBody =
       params.maxErrorBodyBytes === undefined
-        ? await parseResponseBody(response, maxResponseBytes)
-        : await parseResponseBody(response, params.maxErrorBodyBytes, 'truncate');
+        ? await parseResponseBody(response, maxResponseBytes, 'throw', params.signal)
+        : await parseResponseBody(response, params.maxErrorBodyBytes, 'truncate', params.signal);
     throw new KibanaApiCallError({
       status: response.status,
       headers: headersToRecord(response.headers),
@@ -368,7 +369,7 @@ export async function callKibanaApi<T = unknown>(
     });
   }
 
-  const body = (await parseResponseBody(response, maxResponseBytes)) as T;
+  const body = (await parseResponseBody(response, maxResponseBytes, 'throw', params.signal)) as T;
 
   return {
     status: response.status,

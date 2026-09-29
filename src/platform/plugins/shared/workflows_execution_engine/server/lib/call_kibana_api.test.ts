@@ -764,6 +764,45 @@ describe('callKibanaApi', () => {
     expect(lastFetchOptions().signal).toBe(controller.signal);
   });
 
+  it('cancels the response body when the signal aborts after headers', async () => {
+    let resolveRead: (result: { done: boolean; value?: Uint8Array }) => void;
+    let signalReadStarted: () => void;
+    const readStarted = new Promise<void>((resolve) => {
+      signalReadStarted = resolve;
+    });
+    const pendingRead = new Promise<{ done: boolean; value?: Uint8Array }>((resolve) => {
+      resolveRead = resolve;
+    });
+    const cancel = jest.fn(() => resolveRead({ done: true }));
+    const response = {
+      ok: true,
+      status: 200,
+      headers: new Headers({ 'content-type': 'application/json' }),
+      body: {
+        getReader: () => ({
+          read: () => {
+            signalReadStarted();
+            return pendingRead;
+          },
+          releaseLock: () => {},
+          cancel,
+        }),
+      },
+    } as unknown as Response;
+    mockSelfFetch.mockResolvedValue(mockSelfResponse(response));
+    const controller = new AbortController();
+
+    const result = callKibanaApi(
+      { fakeRequest: createFakeRequest(), coreStart: createCoreStart() },
+      { method: 'GET', path: '/api/foo', signal: controller.signal }
+    );
+    await readStarted;
+    controller.abort();
+
+    await expect(result).rejects.toMatchObject({ name: 'AbortError' });
+    expect(cancel).toHaveBeenCalledTimes(1);
+  });
+
   it('forwards the timeout to the self client', async () => {
     mockSelfFetch.mockResolvedValue(mockSelfResponse(createMockResponse({ body: { ok: true } })));
 
