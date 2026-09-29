@@ -44,7 +44,20 @@ describe('AiIndexDescriptionField', () => {
   it('shows help text for a short description', () => {
     renderField();
 
-    expect(screen.getByText(/Optional — describe what this AI index is for/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Important: This description shapes generated automation workflows and helps agents decide when the index is relevant/
+      )
+    ).toBeInTheDocument();
+  });
+
+  it('shows placeholder guidance for what to include', () => {
+    renderField();
+
+    expect(screen.getByTestId('contextAiIndexDescriptionInput')).toHaveAttribute(
+      'placeholder',
+      'Describe what this AI index is for and the information its Knowledge Indicators contain. Include example questions they should help answer and any known gaps in that information.'
+    );
   });
 
   it('shows a warning when the description is within 5% of the max length', () => {

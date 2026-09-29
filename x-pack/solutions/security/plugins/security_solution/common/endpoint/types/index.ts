@@ -398,6 +398,12 @@ export type AlertEvent = Partial<{
   rule: Partial<{
     id: ECSField<string>;
     description: ECSField<string>;
+    name: ECSField<string>;
+    custom_yara_signature: Partial<{
+      entry_name: ECSField<string>;
+      rule_identifier: ECSField<string>;
+      entry_id: ECSField<string>;
+    }>;
   }>;
   file: Partial<{
     owner: ECSField<string>;
