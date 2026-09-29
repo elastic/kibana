@@ -219,6 +219,16 @@ export function buildFieldsZodValidator(
       shape[propertyName] = zodSchema;
     }
   }
+
+  if (schema.required && hasTypedAdditionalProperties) {
+    const additionalSchema = jsonRoot!.additionalProperties as JSONSchema7;
+    for (const requiredKey of schema.required) {
+      if (!shape[requiredKey]) {
+        shape[requiredKey] = convertJsonSchemaToZodWithRefs(additionalSchema, schema);
+      }
+    }
+  }
+
   return enrichZodSchema(schema as JSONSchema7, z.object(shape), (valueSchema) =>
     convertJsonSchemaToZodWithRefs(valueSchema, schema)
   ) as z.ZodType<Record<string, unknown>>;

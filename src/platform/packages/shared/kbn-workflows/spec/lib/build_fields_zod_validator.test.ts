@@ -530,6 +530,20 @@ describe('buildFieldsZodValidator', () => {
     expect(validator.safeParse(null).success).toBe(false);
   });
 
+  it('enforces required keys on a map-only root schema', () => {
+    const schema = {
+      type: 'object',
+      additionalProperties: { type: 'string' },
+      required: ['token'],
+    } as Parameters<typeof buildFieldsZodValidator>[0];
+    const validator = buildFieldsZodValidator(schema);
+
+    expect(validator.safeParse({ token: 'abc' }).success).toBe(true);
+    expect(validator.safeParse({ token: 'abc', extra: 'ok' }).success).toBe(true);
+    expect(validator.safeParse({}).success).toBe(false);
+    expect(validator.safeParse({ extra: 'ok' }).success).toBe(false);
+  });
+
   it('should return empty object schema when schema has no properties', () => {
     const validator = buildFieldsZodValidator(null);
     expect(validator.parse({})).toEqual({});
