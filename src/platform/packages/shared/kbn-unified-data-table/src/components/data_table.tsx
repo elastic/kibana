@@ -686,8 +686,6 @@ const InternalUnifiedDataTable = React.forwardRef<
       }
     }, [documentsDisplayMode]);
 
-    // EuiDataGrid doesn't report leaving full screen when it unmounts (e.g. when there are no results
-    // or documents are compared), so report it to keep consumers in sync
     useLayoutEffect(() => {
       if (isFullScreenRef.current && !dataGridRef.current) {
         onDataGridFullScreenChange(false);
