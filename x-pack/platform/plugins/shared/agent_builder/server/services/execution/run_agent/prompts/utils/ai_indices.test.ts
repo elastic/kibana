@@ -100,14 +100,22 @@ describe('getAiIndicesInstructions', () => {
     expect(instructions).not.toContain('(FROM bare-target) —');
   });
 
-  it('points at list -> describe -> query and away from execute_esql', () => {
+  it('points at list -> describe -> query', () => {
     const instructions = render();
 
     expect(instructions).toContain('1. `list_ai_indices`');
     expect(instructions).toContain('2. `describe_ai_index`');
     expect(instructions).toContain('3. `query_ai_indices`');
-    expect(instructions).toContain('Do not query AI Indices with `execute_esql`');
     expect(instructions).not.toContain('sml_');
+  });
+
+  it('hands execute_esql readers the lifecycle filters', () => {
+    const instructions = render();
+
+    expect(instructions).toContain('Reading an AI Index with `execute_esql` applies neither');
+    expect(instructions).toContain(
+      '| WHERE governance.lifecycle.status IS NULL OR governance.lifecycle.status == "active"\n| WHERE expires_at IS NULL OR expires_at > NOW()'
+    );
   });
 
   it('limits query_ai_indices to AI Indices and routes other data to execute_esql', () => {
