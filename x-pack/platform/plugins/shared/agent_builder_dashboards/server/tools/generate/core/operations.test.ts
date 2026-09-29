@@ -2951,6 +2951,155 @@ describe('add_controls / remove_controls operations', () => {
     );
   });
 
+  it('add_controls reports an unmapped user-requested control as a failure', async () => {
+    const esClient = createFieldCapsEsClient({ host: 'keyword', 'host.keyword': 'keyword' });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'method',
+              index: 'kibana_sample_data_logs',
+              user_requested: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
+    expect(failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: 'method',
+        error:
+          'Not mapped on index "kibana_sample_data_logs". Mapped keyword fields: host, host.keyword.',
+      },
+    ]);
+  });
+
+  it('add_controls keeps a numeric range slider and rejects a keyword one', async () => {
+    const esClient = createFieldCapsEsClient({ bytes: 'long', status: 'keyword' });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'range_slider_control',
+              field_name: 'bytes',
+              index: 'kibana_sample_data_logs',
+            },
+            {
+              type: 'range_slider_control',
+              field_name: 'status',
+              index: 'kibana_sample_data_logs',
+              user_requested: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(dashboardData.pinned_panels).toHaveLength(1);
+    const kept = dashboardData.pinned_panels![0] as Record<string, unknown>;
+    expect(kept.type).toBe('range_slider_control');
+    expect((kept.config as Record<string, unknown>).esql_query).toBe(
+      'FROM kibana_sample_data_logs | STATS BY bytes'
+    );
+    expect(failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: 'status',
+        error:
+          'range_slider_control needs a numeric field on index "kibana_sample_data_logs". Mapped numeric fields: bytes.',
+      },
+    ]);
+  });
+
+  it('add_controls rejects a field that is not aggregatable in every index', async () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    esClient.fieldCaps.mockResolvedValue({
+      indices: ['logs-a', 'logs-b'],
+      fields: {
+        host: {
+          keyword: { type: 'keyword', aggregatable: true, searchable: true, metadata_field: false },
+          text: { type: 'text', aggregatable: false, searchable: true, metadata_field: false },
+        },
+      },
+    });
+
+    const { dashboardData, failures } = await executeDashboardOperations({
+      dashboardData: emptyDashboard,
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            {
+              type: 'options_list_control',
+              field_name: 'host',
+              index: 'logs-*',
+              user_requested: true,
+            },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(dashboardData.pinned_panels ?? []).toHaveLength(0);
+    expect(failures).toEqual([
+      {
+        type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
+        identifier: 'host',
+        error: 'Not mapped on index "logs-*".',
+      },
+    ]);
+  });
+
+  it('add_controls loads fields once per index with the dashboard project routing', async () => {
+    const esClient = createFieldCapsEsClient({ host: 'keyword' });
+
+    await executeDashboardOperations({
+      dashboardData: { ...emptyDashboard, project_routing: '_alias:*' },
+      operations: [
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
+          ],
+        },
+        {
+          operation: 'add_controls',
+          controls: [
+            { type: 'options_list_control', field_name: 'host', index: 'kibana_sample_data_logs' },
+          ],
+        },
+      ],
+      logger,
+      esClient,
+    });
+
+    expect(esClient.fieldCaps).toHaveBeenCalledTimes(1);
+    expect(esClient.fieldCaps).toHaveBeenCalledWith(
+      expect.objectContaining({
+        index: 'kibana_sample_data_logs',
+        project_routing: '_alias:*',
+      })
+    );
+  });
+
   it('remove_controls removes by id and leaves others intact', async () => {
     const { dashboardData: withControls } = await executeDashboardOperations({
       dashboardData: emptyDashboard,
