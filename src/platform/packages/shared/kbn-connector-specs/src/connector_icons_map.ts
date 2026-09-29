@@ -385,9 +385,7 @@ export const ConnectorIconsMap: Map<
   ],
   [
     '.azure_aks',
-    lazy(
-      () => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')
-    )
+    lazy(() => import(/* webpackChunkName: "connectorIconAzureAks" */ './specs/azure_aks/icon')),
   ],
   ['.misp', lazy(() => import(/* webpackChunkName: "connectorIconMisp" */ './specs/misp/icon'))],
   [
