@@ -45,8 +45,8 @@ If the registering plugin's feature is gated — by project type, uiSetting, lic
 
 **How to verify:**
 1. Find the registering plugin's `kibana.jsonc` and feature registration (look for `features.registerKibanaFeature` or `features.registerElasticsearchFeature` calls in the plugin's setup)
-2. Check if the plugin or feature has project-type restrictions (`supportedProjectTypes`), license requirements (`minimumLicense`), plugin enable flags (`xpack.*.enabled` / `enabledOnlyIn`), or uiSetting gates
-3. If gated: verify the tool has an `availability` handler matching those conditions
+2. Check if the plugin or feature has runtime gates: project-type restrictions (`supportedProjectTypes`), license requirements (`minimumLicense`), uiSetting gates, or per-space feature toggles. Note: plugin-load gates (`xpack.*.enabled` / `enabledOnlyIn`) do NOT require an availability handler — if the registering plugin is disabled, it never reaches `setup()` and cannot register the tool
+3. If gated by a runtime condition: verify the tool has an `availability` handler matching those conditions. If the handler checks space-specific state (e.g., `spaceId`, space-scoped uiSettings), verify `availability.cacheMode` is set to `'space'` (not `'global'`), since `'global'` caches the result once and reuses it across all spaces
 4. If not gated: confirm the tool genuinely works across all project types and deployment modes
 
 A tool that is available everywhere but only *useful* in one solution should still be flagged — the LLM will waste calls on tools that return errors outside their intended context.
