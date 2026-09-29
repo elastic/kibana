@@ -69,9 +69,10 @@ describe('EsqlQueryStep', () => {
     await act(async () => {
       fireEvent.focus(within(screen.getByTestId('mlEsqlDetectorFields')).getByRole('combobox'));
     });
-    expect(screen.getByText('doc_count')).toBeInTheDocument();
-    expect(screen.getByText('avg_bytes')).toBeInTheDocument();
-    expect(screen.queryByText('host')).not.toBeInTheDocument();
+    const detectorFieldsListbox = screen.getByRole('listbox');
+    expect(within(detectorFieldsListbox).getByText('doc_count')).toBeInTheDocument();
+    expect(within(detectorFieldsListbox).getByText('avg_bytes')).toBeInTheDocument();
+    expect(within(detectorFieldsListbox).queryByText('host')).not.toBeInTheDocument();
 
     await act(async () => {
       fireEvent.focus(within(screen.getByTestId('mlEsqlInfluencers')).getByRole('combobox'));
@@ -221,6 +222,82 @@ describe('EsqlQueryStep', () => {
     expect(screen.getByTestId('mlEsqlQueryWarning')).toHaveTextContent(
       'Review time filter and row limit'
     );
+  });
+
+  it('defaults the summary count field to a COUNT(*)-shaped column and turns on delayed-data checking', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlSummaryCountField')).toHaveTextContent('doc_count')
+    );
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeChecked();
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeEnabled();
+  });
+
+  it('leaves the summary count field unset and forces delayed-data checking off with no count-shaped column', async () => {
+    getEsqlQueryColumns.mockResolvedValue({
+      columns: [
+        { name: 'bucket', type: 'date', hasConflict: false, userDefined: false },
+        { name: 'host', type: 'keyword', hasConflict: false, userDefined: false },
+        { name: 'avg_bytes', type: 'double', hasConflict: false, userDefined: false },
+      ],
+    });
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlEmittedTimeField')).toHaveTextContent('bucket')
+    );
+    expect(screen.getByTestId('mlEsqlSummaryCountField')).toHaveTextContent('');
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).not.toBeChecked();
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeDisabled();
+  });
+
+  it('lets the user manually turn delayed-data checking off while a summary count field is selected', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeChecked());
+
+    fireEvent.click(screen.getByTestId('mlEsqlDelayedDataCheckToggle'));
+
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).not.toBeChecked();
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeEnabled();
+    expect(screen.getByTestId('mlEsqlSummaryCountField')).toHaveTextContent('doc_count');
+  });
+
+  it('re-enables delayed-data checking by default when a different summary count field is picked', async () => {
+    renderWithI18n(<EsqlQueryStep />);
+
+    await act(async () => {
+      jest.advanceTimersByTime(300);
+      await Promise.resolve();
+    });
+
+    await waitFor(() =>
+      expect(screen.getByTestId('mlEsqlSummaryCountField')).toHaveTextContent('doc_count')
+    );
+
+    await act(async () => {
+      fireEvent.focus(within(screen.getByTestId('mlEsqlSummaryCountField')).getByRole('combobox'));
+    });
+    fireEvent.click(screen.getByText('avg_bytes'));
+
+    expect(screen.getByTestId('mlEsqlSummaryCountField')).toHaveTextContent('avg_bytes');
+    expect(screen.getByTestId('mlEsqlDelayedDataCheckToggle')).toBeChecked();
   });
 
   it('does not update state when an in-flight request resolves after unmount', async () => {

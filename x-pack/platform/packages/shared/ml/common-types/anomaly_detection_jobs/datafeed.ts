@@ -22,6 +22,7 @@ export interface EsqlDatafeedConfig {
   esql_query: string;
   source_time_field: string;
   grouping_interval: string;
+  delayed_data_check_config?: estypes.MlDelayedDataCheckConfig;
 }
 
 export type ChunkingConfig = estypes.MlChunkingConfig;

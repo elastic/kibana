@@ -41,6 +41,8 @@ const initialState: EsqlWizardState = {
   emittedTimeField: '',
   detectorFields: [],
   influencers: [],
+  summaryCountFieldName: '',
+  delayedDataCheckEnabled: false,
   wizardStart: 'now-15m',
   wizardEnd: 'now',
 };

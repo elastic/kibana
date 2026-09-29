@@ -29,6 +29,11 @@ import {
   useOptionalEsqlWizardContext,
 } from './esql_wizard_context';
 import { getEsqlQueryWarnings, type EsqlQueryWarningClause } from './esql_query_warnings';
+import {
+  EsqlSummaryCountFieldSelect,
+  findDefaultSummaryCountField,
+} from './esql_summary_count_field_select';
+import { EsqlDelayedDataCheckToggle } from './esql_delayed_data_check_toggle';
 
 const DEBOUNCE_MS = 300;
 const NUMERIC_ESQL_TYPES = new Set([
@@ -85,6 +90,8 @@ export interface EsqlQueryStepState {
   emittedTimeField: string;
   detectorFields: string[];
   influencers: string[];
+  summaryCountFieldName: string;
+  delayedDataCheckEnabled: boolean;
 }
 
 /**
@@ -130,7 +137,14 @@ const EsqlQueryStepContent = () => {
     const generation = ++requestGeneration.current;
     const trimmedQuery = state.query.trim();
 
-    setQueryState({ columns: [], emittedTimeField: '', detectorFields: [], influencers: [] });
+    setQueryState({
+      columns: [],
+      emittedTimeField: '',
+      detectorFields: [],
+      influencers: [],
+      summaryCountFieldName: '',
+      delayedDataCheckEnabled: false,
+    });
     setQueryProbeState(trimmedQuery === '' ? 'idle' : 'loading');
     setError(undefined);
 
@@ -145,7 +159,13 @@ const EsqlQueryStepContent = () => {
         ({ columns: nextColumns }) => {
           if (generation !== requestGeneration.current) return;
 
-          setQueryState({ columns: nextColumns, emittedTimeField: firstTimeField(nextColumns) });
+          const defaultSummaryCountField = findDefaultSummaryCountField(nextColumns);
+          setQueryState({
+            columns: nextColumns,
+            emittedTimeField: firstTimeField(nextColumns),
+            summaryCountFieldName: defaultSummaryCountField,
+            delayedDataCheckEnabled: defaultSummaryCountField !== '',
+          });
           setQueryProbeState('success');
           setIsLoading(false);
         },
@@ -164,6 +184,15 @@ const EsqlQueryStepContent = () => {
       invalidateRequest(requestGeneration);
     };
   }, [mlApi, setQueryProbeState, setQueryState, state.query]);
+
+  const onSummaryCountFieldChange = (nextValue: string) =>
+    setQueryState({
+      summaryCountFieldName: nextValue,
+      delayedDataCheckEnabled: nextValue !== '',
+    });
+
+  const onDelayedDataCheckChange = (nextEnabled: boolean) =>
+    setQueryState({ delayedDataCheckEnabled: nextEnabled });
 
   return (
     <EuiForm component="form">
@@ -295,6 +324,19 @@ const EsqlQueryStepContent = () => {
         />
       </EuiFormRow>
 
+      <EsqlSummaryCountFieldSelect
+        columns={state.columns}
+        value={state.summaryCountFieldName}
+        onChange={onSummaryCountFieldChange}
+        isDisabled={isLoading || state.columns.length === 0}
+      />
+
+      <EsqlDelayedDataCheckToggle
+        enabled={state.delayedDataCheckEnabled}
+        onChange={onDelayedDataCheckChange}
+        hasSummaryCountField={state.summaryCountFieldName !== ''}
+      />
+
       {error ? (
         <EuiCallOut
           title={i18n.translate('xpack.ml.esqlJob.query.readColumnsErrorTitle', {
@@ -312,11 +354,10 @@ const EsqlQueryStepContent = () => {
         <p>
           <FormattedMessage
             id="xpack.ml.esqlJob.query.aggregatedQueryGuidanceDescription"
-            defaultMessage="For aggregated queries, choose influencers from the fields named after {statsBy}. Delayed-data detection needs a {countOutput} output and a matching {summaryCountFieldName}."
+            defaultMessage="For aggregated queries, choose influencers from the fields named after {statsBy}. Pick the {countOutput} output column as the Summary count field below to turn on Check for delayed data."
             values={{
               statsBy: <code>STATS BY</code>,
               countOutput: <code>COUNT(*)</code>,
-              summaryCountFieldName: <code>summary_count_field_name</code>,
             }}
           />
         </p>

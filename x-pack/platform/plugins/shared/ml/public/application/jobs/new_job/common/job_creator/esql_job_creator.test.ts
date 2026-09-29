@@ -94,6 +94,18 @@ describe('buildEsqlJobPayload', () => {
 
     expect(putBody).not.toHaveProperty('project_routing');
   });
+
+  it('includes delayed_data_check_config.enabled only when explicitly supplied', () => {
+    expect(
+      buildEsqlJobPayload({ ...input, delayedDataCheckEnabled: true }).datafeed
+    ).toHaveProperty('delayed_data_check_config', { enabled: true });
+
+    expect(
+      buildEsqlJobPayload({ ...input, delayedDataCheckEnabled: false }).datafeed
+    ).toHaveProperty('delayed_data_check_config', { enabled: false });
+
+    expect(buildEsqlJobPayload(input).datafeed).not.toHaveProperty('delayed_data_check_config');
+  });
 });
 
 describe('createMeanDetectors', () => {

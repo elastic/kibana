@@ -18,6 +18,7 @@ import {
   buildEsqlJobPayload,
   createMeanDetectors,
 } from '../../../common/job_creator/esql_job_creator';
+import { extractEsqlErrorReason } from './esql_error_reason';
 import { useEsqlWizardContext } from './esql_wizard_context';
 
 const NUMERIC_ESQL_TYPES = new Set([
@@ -102,6 +103,9 @@ export const EsqlCreateFlow = () => {
       bucketSpan: state.bucketSpan,
       detectors: createMeanDetectors(state.detectorFields),
       influencers: state.influencers,
+      summaryCountFieldName:
+        state.summaryCountFieldName === '' ? undefined : state.summaryCountFieldName,
+      delayedDataCheckEnabled: state.delayedDataCheckEnabled,
     });
 
     let currentPhase: Exclude<CreatePhase, 'idle' | 'success' | 'error'> = 'creatingJob';
@@ -126,7 +130,7 @@ export const EsqlCreateFlow = () => {
       await navigateToManagement(ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE, { jobId });
     } catch (nextError: unknown) {
       const failedPhase = phaseLabel[currentPhase];
-      const reason = nextError instanceof Error ? nextError.message : String(nextError);
+      const reason = extractEsqlErrorReason(nextError, String(nextError));
       setError(
         i18n.translate('xpack.ml.esqlJob.create.failureMessage', {
           defaultMessage:

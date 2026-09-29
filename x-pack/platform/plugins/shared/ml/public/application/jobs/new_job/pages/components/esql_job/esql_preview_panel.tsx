@@ -23,28 +23,19 @@ import {
   createMeanDetectors,
 } from '../../../common/job_creator/esql_job_creator';
 import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
+import { extractEsqlErrorReason } from './esql_error_reason';
 import { useEsqlWizardContext } from './esql_wizard_context';
 
 const PREVIEW_JOB_ID = 'preview-esql-job';
 const PREVIEW_DATAFEED_ID = 'preview-esql-datafeed';
 
-const isRecord = (value: unknown): value is Record<string, unknown> =>
-  typeof value === 'object' && value !== null;
-
-const previewErrorReason = (error: unknown): string => {
-  if (!isRecord(error)) return error instanceof Error ? error.message : String(error);
-
-  const errorBody = isRecord(error.body) ? error.body : error;
-  const attributes = isRecord(errorBody.attributes) ? errorBody.attributes : undefined;
-  const wrappedErrorBody = isRecord(attributes?.body) ? attributes.body : errorBody;
-  const elasticsearchError = isRecord(wrappedErrorBody.error) ? wrappedErrorBody.error : undefined;
-  if (typeof elasticsearchError?.reason === 'string') return elasticsearchError.reason;
-  if (typeof wrappedErrorBody.reason === 'string') return wrappedErrorBody.reason;
-  if (typeof error.message === 'string') return error.message;
-  return i18n.translate('xpack.ml.esqlJob.preview.fallbackErrorMessage', {
-    defaultMessage: 'Unable to preview ES|QL datafeed.',
-  });
-};
+const previewErrorReason = (error: unknown): string =>
+  extractEsqlErrorReason(
+    error,
+    i18n.translate('xpack.ml.esqlJob.preview.fallbackErrorMessage', {
+      defaultMessage: 'Unable to preview ES|QL datafeed.',
+    })
+  );
 
 const tableValue = (value: unknown): string => {
   if (value === null || value === undefined) return '';
@@ -109,6 +100,9 @@ export const EsqlPreviewPanel = () => {
       bucketSpan: state.bucketSpan,
       detectors,
       influencers: state.influencers,
+      summaryCountFieldName:
+        state.summaryCountFieldName === '' ? undefined : state.summaryCountFieldName,
+      delayedDataCheckEnabled: state.delayedDataCheckEnabled,
     });
 
     setIsLoading(true);

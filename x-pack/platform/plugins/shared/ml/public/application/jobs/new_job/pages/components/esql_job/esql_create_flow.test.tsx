@@ -176,6 +176,77 @@ describe('EsqlCreateFlow', () => {
     });
   });
 
+  it('includes the summary count field and enables delayed-data checking when one is chosen', async () => {
+    renderCreateFlow({
+      queryState: { summaryCountFieldName: 'doc_count', delayedDataCheckEnabled: true },
+    });
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    await waitFor(() => expect(mockAddJob).toHaveBeenCalledTimes(1));
+    expect(mockAddJob).toHaveBeenCalledWith({
+      jobId: 'esql-job-1',
+      job: expect.objectContaining({
+        analysis_config: expect.objectContaining({ summary_count_field_name: 'doc_count' }),
+      }),
+    });
+    expect(mockAddDatafeed).toHaveBeenCalledWith({
+      datafeedId: 'datafeed-esql-job-1',
+      datafeedConfig: expect.objectContaining({
+        delayed_data_check_config: { enabled: true },
+      }),
+    });
+  });
+
+  it('sets delayed_data_check_config.enabled to false and omits the summary count field when none is chosen', async () => {
+    renderCreateFlow();
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    await waitFor(() => expect(mockAddJob).toHaveBeenCalledTimes(1));
+    expect(mockAddJob.mock.calls[0][0].job.analysis_config).not.toHaveProperty(
+      'summary_count_field_name'
+    );
+    expect(mockAddDatafeed).toHaveBeenCalledWith({
+      datafeedId: 'datafeed-esql-job-1',
+      datafeedConfig: expect.objectContaining({
+        delayed_data_check_config: { enabled: false },
+      }),
+    });
+  });
+
+  it('surfaces the unwrapped Elasticsearch error reason instead of the generic HTTP status text', async () => {
+    mockAddJob.mockRejectedValue({
+      body: {
+        message: 'Bad Request',
+        attributes: {
+          body: {
+            error: {
+              reason:
+                'A job configured with a datafeed with an esql_query and delayed_data_check_config enabled must set summary_count_field_name',
+            },
+          },
+        },
+        statusCode: 400,
+      },
+    });
+    renderCreateFlow();
+
+    fireEvent.change(screen.getByLabelText('Job ID'), { target: { value: 'esql-job-1' } });
+    const createButton = screen.getByTestId('mlEsqlCreateJobButton');
+    await waitFor(() => expect(createButton).toBeEnabled());
+    fireEvent.click(createButton);
+
+    expect(await screen.findByText(/must set summary_count_field_name/)).toBeInTheDocument();
+    expect(screen.queryByText(/^Bad Request$/)).not.toBeInTheDocument();
+  });
+
   it.each([
     [
       'creating the job',

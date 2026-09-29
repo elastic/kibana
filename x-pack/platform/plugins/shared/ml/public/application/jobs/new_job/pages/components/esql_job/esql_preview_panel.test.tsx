@@ -5,11 +5,27 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { EsqlPreviewPanel } from './esql_preview_panel';
-import { EsqlWizardProvider } from './esql_wizard_context';
+import { EsqlWizardProvider, useEsqlWizardContext } from './esql_wizard_context';
+
+const SummaryCountFieldState = ({
+  summaryCountFieldName,
+  delayedDataCheckEnabled,
+}: {
+  summaryCountFieldName: string;
+  delayedDataCheckEnabled: boolean;
+}) => {
+  const { setQueryState } = useEsqlWizardContext();
+
+  useEffect(() => {
+    setQueryState({ summaryCountFieldName, delayedDataCheckEnabled });
+  }, [delayedDataCheckEnabled, setQueryState, summaryCountFieldName]);
+
+  return null;
+};
 
 const mockDatafeedPreview = jest.fn();
 
@@ -94,6 +110,41 @@ describe('EsqlPreviewPanel', () => {
     expect(
       await screen.findByText('No output rows were returned for the selected time range.')
     ).toBeInTheDocument();
+  });
+
+  it('includes the summary count field and delayed_data_check_config.enabled when one is chosen', async () => {
+    mockDatafeedPreview.mockResolvedValue([]);
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <SummaryCountFieldState summaryCountFieldName="doc_count" delayedDataCheckEnabled />
+        <EsqlPreviewPanel />
+      </EsqlWizardProvider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+
+    await waitFor(() => expect(mockDatafeedPreview).toHaveBeenCalledTimes(1));
+    const [, job, datafeed] = mockDatafeedPreview.mock.calls[0];
+    expect(job.analysis_config).toHaveProperty('summary_count_field_name', 'doc_count');
+    expect(datafeed).toHaveProperty('delayed_data_check_config', { enabled: true });
+  });
+
+  it('omits the summary count field and sets delayed_data_check_config.enabled false when none is chosen', async () => {
+    mockDatafeedPreview.mockResolvedValue([]);
+
+    renderWithI18n(
+      <EsqlWizardProvider>
+        <EsqlPreviewPanel />
+      </EsqlWizardProvider>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
+
+    await waitFor(() => expect(mockDatafeedPreview).toHaveBeenCalledTimes(1));
+    const [, job, datafeed] = mockDatafeedPreview.mock.calls[0];
+    expect(job.analysis_config).not.toHaveProperty('summary_count_field_name');
+    expect(datafeed).toHaveProperty('delayed_data_check_config', { enabled: false });
   });
 
   it('discards a stale response after a later preview completes', async () => {
