@@ -77,7 +77,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         it('change the severity of cases to medium correctly', async () => {
           await cases.casesTable.selectAndChangeSeverityOfAllCases(CaseSeverity.MEDIUM);
           await cases.casesTable.waitForTableToFinishLoading();
-          await testSubjects.missingOrFail('case-table-column-severity-low');
+          const mediumSeverityBadges = await testSubjects.findAll(
+            `case-severity-badge-${CaseSeverity.MEDIUM}`
+          );
+          expect(mediumSeverityBadges).to.have.length(2);
         });
       });
 
