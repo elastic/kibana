@@ -21,6 +21,7 @@ import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../../tools/sandbox_bash/write_file_tool';
+import { REQUEST_SCOPED_CONNECTOR_ID } from '../../tools/sandbox_bash/request_scoped_connector';
 
 export { NIGHTSHIFT_INVESTIGATION_AGENT_ID };
 export const NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID = 'platform.nightshift.investigation-type';
@@ -51,19 +52,20 @@ const fillDecisionTreeInstructions = (includeDecisionTrees: boolean): string =>
 
 /**
  * Builds the Nightshift investigation agent type. It works from the sandbox, so it carries a
- * standalone prompt and no Elastic tools. Telemetry is reached through `telemetryConnectorId` as
- * described in `/workspace/elastic.md`.
+ * standalone prompt and no Elastic tools. Telemetry is reached through the request-scoped
+ * Elasticsearch connector as described in `/workspace/elastic.md`.
  */
 export const getInvestigationAgentType = ({
   sandboxEnabled,
   cortexEnabled,
   decisionTreesEnabled = false,
-  telemetryConnectorId,
+  elasticsearchConnectorEnabled = true,
 }: {
   sandboxEnabled: boolean;
   cortexEnabled: boolean;
   decisionTreesEnabled?: boolean;
-  telemetryConnectorId?: string;
+  /** Allow-lists the request-scoped Elasticsearch connector. Requires the sandbox. */
+  elasticsearchConnectorEnabled?: boolean;
 }): AgentTypeDefinition => ({
   id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
   name: INVESTIGATION_AGENT_NAME,
@@ -81,7 +83,8 @@ export const getInvestigationAgentType = ({
       },
     ],
     enable_elastic_capabilities: false,
-    connector_ids: telemetryConnectorId ? [telemetryConnectorId] : [],
+    connector_ids:
+      sandboxEnabled && elasticsearchConnectorEnabled ? [REQUEST_SCOPED_CONNECTOR_ID] : [],
     ...(() => {
       const beforeAgentWorkflowIds = [
         ...(sandboxEnabled && cortexEnabled ? [NIGHTSHIFT_CORTEX_HYDRATE_WORKFLOW_ID] : []),
@@ -108,12 +111,12 @@ export const registerInvestigationAgentType = (
     sandboxEnabled,
     cortexEnabled,
     decisionTreesEnabled = false,
-    telemetryConnectorId,
+    elasticsearchConnectorEnabled,
   }: {
     sandboxEnabled: boolean;
     cortexEnabled: boolean;
     decisionTreesEnabled?: boolean;
-    telemetryConnectorId?: string;
+    elasticsearchConnectorEnabled?: boolean;
   }
 ): void => {
   agentBuilder.agents.registerType(
@@ -121,7 +124,7 @@ export const registerInvestigationAgentType = (
       sandboxEnabled,
       cortexEnabled,
       decisionTreesEnabled,
-      telemetryConnectorId,
+      elasticsearchConnectorEnabled,
     })
   );
 };

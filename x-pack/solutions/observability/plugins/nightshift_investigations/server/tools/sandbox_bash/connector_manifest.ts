@@ -18,14 +18,23 @@ export const writeConnectorManifest = async ({
   session,
   callContext,
   getActionsClient,
+  virtualConnectors = [],
   logger,
 }: {
   session: SandboxSession;
   callContext: SandboxCallContext;
   getActionsClient: ((req: KibanaRequest) => Promise<ActionsClient>) | undefined;
+  /** Connectors served by Nightshift itself rather than the actions framework. */
+  virtualConnectors?: readonly AgentConnector[];
   logger: Logger;
 }): Promise<void> => {
-  const connectors = await listAgentConnectors(callContext, getActionsClient);
+  const virtualIds = new Set(virtualConnectors.map(({ id }) => id));
+  const connectors = [
+    ...virtualConnectors,
+    ...(await listAgentConnectors(callContext, getActionsClient)).filter(
+      ({ id }) => !virtualIds.has(id)
+    ),
+  ];
 
   const sections: string[] = [
     '# Sandbox Connectors',
