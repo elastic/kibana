@@ -9,38 +9,38 @@ import { Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { DashboardApi } from '@kbn/dashboard-plugin/public';
-import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
+import {
+  DASHBOARD_ATTACHMENT_TYPE,
+  type DashboardAttachment,
+} from '@kbn/agent-builder-dashboards-common';
+import { DASHBOARD_UPDATED_UI_EVENT } from '../../../common';
 import { createAgentLiveUpdatesSubscription } from './agent_live_updates_subscription';
 
 const DASHBOARD_ID = 'dashboard-1';
 
-const buildAttachment = (data: Record<string, unknown>) => ({
+const buildAttachment = (origin: string | undefined = DASHBOARD_ID): DashboardAttachment => ({
   id: 'attachment-1',
   type: DASHBOARD_ATTACHMENT_TYPE,
-  origin: DASHBOARD_ID,
-  current_version: 1,
-  versions: [{ version: 1, data }],
+  origin,
+  data: { title: 'Agent dashboard', panels: [] },
 });
 
-const buildRoundCompleteEvent = (actor: 'system' | 'user') => ({
-  type: ChatEventType.roundComplete,
+const buildToolUiEvent = (customEvent: string, attachment: DashboardAttachment) => ({
+  type: ChatEventType.toolUi,
   data: {
-    attachments: [buildAttachment({ panels: [] })],
-    round: {
-      input: {
-        attachment_refs: [
-          { attachment_id: 'attachment-1', version: 1, operation: 'updated', actor },
-        ],
-      },
-    },
+    tool_id: 'platform.dashboard.generate_dashboard',
+    tool_call_id: 'tool-call-1',
+    custom_event: customEvent,
+    data: { attachment },
   },
 });
 
 describe('createAgentLiveUpdatesSubscription', () => {
-  const createHarness = () => {
+  const createHarness = (savedObjectId: string | undefined = DASHBOARD_ID) => {
     const chatEvents$ = new Subject();
     const activeConversation$ = new Subject();
     const setState = jest.fn();
+    const upsertAttachment = jest.fn();
 
     const agentBuilder = {
       events: {
@@ -50,35 +50,60 @@ describe('createAgentLiveUpdatesSubscription', () => {
     } as unknown as AgentBuilderPluginStart;
 
     const api = {
-      savedObjectId$: { getValue: () => DASHBOARD_ID },
+      savedObjectId$: { getValue: () => savedObjectId },
       setState,
     } as unknown as DashboardApi;
 
     const subscription = createAgentLiveUpdatesSubscription({
       agentBuilder,
       api,
-      setAttachments: jest.fn(),
+      upsertAttachment,
     });
 
     activeConversation$.next({ id: 'conversation-1', conversation: {} });
 
-    return { chatEvents$, setState, subscription };
+    return { chatEvents$, setState, upsertAttachment, subscription };
   };
 
-  it('applies the dashboard state when an attachment is updated', () => {
-    const { chatEvents$, setState, subscription } = createHarness();
+  it('applies the dashboard state and upserts the attachment on a dashboard updated UI event', () => {
+    const { chatEvents$, setState, upsertAttachment, subscription } = createHarness();
+    const attachment = buildAttachment();
 
-    chatEvents$.next(buildRoundCompleteEvent('system'));
+    chatEvents$.next(buildToolUiEvent(DASHBOARD_UPDATED_UI_EVENT, attachment));
+
+    expect(upsertAttachment).toHaveBeenCalledWith(attachment);
+    expect(setState).toHaveBeenCalledTimes(1);
+    subscription.unsubscribe();
+  });
+
+  it('applies the dashboard state on an unsaved dashboard', () => {
+    const { chatEvents$, setState, subscription } = createHarness(undefined);
+
+    chatEvents$.next(buildToolUiEvent(DASHBOARD_UPDATED_UI_EVENT, buildAttachment(undefined)));
 
     expect(setState).toHaveBeenCalledTimes(1);
     subscription.unsubscribe();
   });
 
-  it('does not apply the dashboard state for the ambient self-sync (user-actor) ref', () => {
-    const { chatEvents$, setState, subscription } = createHarness();
+  it('does not apply the dashboard state when the attachment is linked to another dashboard', () => {
+    const { chatEvents$, setState, upsertAttachment, subscription } = createHarness();
 
-    chatEvents$.next(buildRoundCompleteEvent('user'));
+    chatEvents$.next(
+      buildToolUiEvent(DASHBOARD_UPDATED_UI_EVENT, buildAttachment('other-dashboard'))
+    );
 
+    expect(upsertAttachment).toHaveBeenCalledTimes(1);
+    expect(setState).not.toHaveBeenCalled();
+    subscription.unsubscribe();
+  });
+
+  it('ignores other UI events and chat events', () => {
+    const { chatEvents$, setState, upsertAttachment, subscription } = createHarness();
+
+    chatEvents$.next(buildToolUiEvent('workflow:yaml_changed', buildAttachment()));
+    chatEvents$.next({ type: ChatEventType.roundComplete, data: {} });
+
+    expect(upsertAttachment).not.toHaveBeenCalled();
     expect(setState).not.toHaveBeenCalled();
     subscription.unsubscribe();
   });

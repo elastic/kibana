@@ -8,13 +8,12 @@
 import React from 'react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { render, screen, act } from '@testing-library/react';
-import { ChatEventType } from '@kbn/agent-builder-common';
-import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
+import { ChatEventType, TimelineEventType } from '@kbn/agent-builder-common';
 import { customContentEmbeddableFactory } from './custom_content_embeddable';
 import type { CustomContentApi } from './custom_content_embeddable';
 import type { CustomContentEmbeddableState } from '../server';
 import { readEsqlQuery } from '@kbn/custom-content-common';
-import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from '../common/panel_context_attachment';
+import { CUSTOM_CONTENT_UPDATED_UI_EVENT } from '../common/ui_events';
 import { apiIsPresentationContainer } from '@kbn/presentation-publishing';
 import type { openLazyFlyout } from '@kbn/presentation-util';
 import type { EditCustomContentFlyoutProps } from './components/edit_custom_content_flyout';
@@ -492,55 +491,59 @@ describe('customContentEmbeddableFactory', () => {
   });
 
   describe('agent event subscription', () => {
-    it('applies template update from RoundCompleteEvent attachment', async () => {
-      const chatEvents$ = new Subject<unknown>();
-      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
+    const buildCustomContentUpdatedEvent = (
+      embeddableId: string,
+      panelTemplate: string,
+      customEvent: string = CUSTOM_CONTENT_UPDATED_UI_EVENT
+    ) => ({
+      type: ChatEventType.toolUi,
+      data: {
+        tool_id: 'custom_content_update_panel',
+        tool_call_id: 'tool-call-1',
+        custom_event: customEvent,
+        data: {
+          attachmentId: 'att-1',
+          data: { panel_template: panelTemplate, embeddable_id: embeddableId },
+        },
+      },
+    });
 
+    const setUpAgentBuilder = () => {
+      const chatEvents$ = new Subject<unknown>();
+      const openChat = jest.fn();
       mockAgentBuilder = {
+        openChat,
         events: {
-          ui: { activeConversation$ },
+          ui: { activeConversation$: new BehaviorSubject({ id: 'conv-1' }) },
           getChatEvents$: jest.fn(() => chatEvents$),
         },
       };
+      return { chatEvents$, openChat };
+    };
+
+    const startGenerating = async (openChat: jest.Mock) => {
+      await act(async () => capturedComponentProps?.onGenerateWithChat?.());
+      await act(async () => {
+        openChat.mock.calls[0][0].onSubmit();
+        await new Promise((resolve) => setTimeout(resolve, 0));
+      });
+    };
+
+    const expectGenerating = (isGenerating: boolean) =>
+      expect(screen.getByTestId('mockCustomContentComponent')).toHaveAttribute(
+        'data-is-generating',
+        String(isGenerating)
+      );
+
+    it('applies template update from a custom content updated UI event', async () => {
+      const { chatEvents$ } = setUpAgentBuilder();
 
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      const roundCompleteEvent = {
-        type: ChatEventType.roundComplete,
-        data: {
-          round: {
-            input: {
-              attachment_refs: [
-                {
-                  attachment_id: 'att-1',
-                  version: 2,
-                  operation: 'updated',
-                  actor: ATTACHMENT_REF_ACTOR.agent,
-                },
-              ],
-            },
-          },
-          attachments: [
-            {
-              id: 'att-1',
-              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-              current_version: 2,
-              versions: [
-                {
-                  version: 2,
-                  data: {
-                    panel_template: '<p>agent result</p>',
-                    embeddable_id: 'test-uuid',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      };
-
-      await act(async () => chatEvents$.next(roundCompleteEvent));
+      await act(async () =>
+        chatEvents$.next(buildCustomContentUpdatedEvent('test-uuid', '<p>agent result</p>'))
+      );
 
       expect(embeddable.api.serializeState().template).toBe('<p>agent result</p>');
       expect(mockTelemetry.trackAgentUpdateApplied).toHaveBeenCalledWith({
@@ -549,137 +552,69 @@ describe('customContentEmbeddableFactory', () => {
       });
     });
 
-    it('applies its own update when other attachments were updated in the same round', async () => {
-      const chatEvents$ = new Subject<unknown>();
-      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
-
-      mockAgentBuilder = {
-        events: {
-          ui: { activeConversation$ },
-          getChatEvents$: jest.fn(() => chatEvents$),
-        },
-      };
+    it('applies its own update when another panel was updated in the same run', async () => {
+      const { chatEvents$ } = setUpAgentBuilder();
 
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      // The dashboard attachment leads the ref list, and another custom content panel follows.
-      // Neither may stop this panel from picking up its own update.
-      const roundCompleteEvent = {
-        type: ChatEventType.roundComplete,
-        data: {
-          round: {
-            input: {
-              attachment_refs: [
-                {
-                  attachment_id: 'dashboard-att',
-                  version: 3,
-                  operation: 'updated',
-                  actor: ATTACHMENT_REF_ACTOR.agent,
-                },
-                {
-                  attachment_id: 'other-panel-att',
-                  version: 2,
-                  operation: 'updated',
-                  actor: ATTACHMENT_REF_ACTOR.agent,
-                },
-                {
-                  attachment_id: 'att-1',
-                  version: 2,
-                  operation: 'updated',
-                  actor: ATTACHMENT_REF_ACTOR.agent,
-                },
-              ],
-            },
-          },
-          attachments: [
-            {
-              id: 'dashboard-att',
-              type: 'dashboard',
-              current_version: 3,
-              versions: [{ version: 3, data: { title: 'A dashboard' } }],
-            },
-            {
-              id: 'other-panel-att',
-              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-              current_version: 2,
-              versions: [
-                {
-                  version: 2,
-                  data: { panel_template: '<p>not mine</p>', embeddable_id: 'other-uuid' },
-                },
-              ],
-            },
-            {
-              id: 'att-1',
-              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-              current_version: 2,
-              versions: [
-                {
-                  version: 2,
-                  data: { panel_template: '<p>mine</p>', embeddable_id: 'test-uuid' },
-                },
-              ],
-            },
-          ],
-        },
-      };
-
-      await act(async () => chatEvents$.next(roundCompleteEvent));
+      await act(async () => {
+        chatEvents$.next(buildCustomContentUpdatedEvent('other-uuid', '<p>not mine</p>'));
+        chatEvents$.next(buildCustomContentUpdatedEvent('test-uuid', '<p>mine</p>'));
+      });
 
       expect(embeddable.api.serializeState().template).toBe('<p>mine</p>');
     });
 
-    it('ignores events for a different embeddable_id', async () => {
-      const chatEvents$ = new Subject<unknown>();
-      const activeConversation$ = new BehaviorSubject<{ id: string } | null>({ id: 'conv-1' });
-
-      mockAgentBuilder = {
-        events: {
-          ui: { activeConversation$ },
-          getChatEvents$: jest.fn(() => chatEvents$),
-        },
-      };
+    it('ignores events for a different embeddable_id or other UI events', async () => {
+      const { chatEvents$ } = setUpAgentBuilder();
 
       const { embeddable } = await buildEmbeddable(baseState);
       await act(async () => render(<embeddable.Component />));
 
-      const roundCompleteEvent = {
-        type: ChatEventType.roundComplete,
-        data: {
-          round: {
-            input: {
-              attachment_refs: [
-                {
-                  attachment_id: 'att-1',
-                  version: 2,
-                  operation: 'updated',
-                  actor: ATTACHMENT_REF_ACTOR.agent,
-                },
-              ],
-            },
-          },
-          attachments: [
-            {
-              id: 'att-1',
-              type: CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE,
-              current_version: 2,
-              versions: [
-                {
-                  version: 2,
-                  data: {
-                    panel_template: '<p>other panel</p>',
-                    embeddable_id: 'different-uuid',
-                  },
-                },
-              ],
-            },
-          ],
-        },
-      };
+      await act(async () => {
+        chatEvents$.next(buildCustomContentUpdatedEvent('different-uuid', '<p>other panel</p>'));
+        chatEvents$.next(
+          buildCustomContentUpdatedEvent('test-uuid', '<p>other event</p>', 'workflow:yaml_changed')
+        );
+      });
 
-      await act(async () => chatEvents$.next(roundCompleteEvent));
+      expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
+      expect(mockTelemetry.trackAgentUpdateApplied).not.toHaveBeenCalled();
+    });
 
+    it('clears the generating state once its own update is applied', async () => {
+      const { chatEvents$, openChat } = setUpAgentBuilder();
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await startGenerating(openChat);
+      expectGenerating(true);
+
+      await act(async () =>
+        chatEvents$.next(buildCustomContentUpdatedEvent('test-uuid', '<p>agent result</p>'))
+      );
+
+      expectGenerating(false);
+    });
+
+    it.each([
+      TimelineEventType.executionTerminated,
+      TimelineEventType.executionFailed,
+      TimelineEventType.executionAborted,
+    ])('clears the generating state on %s', async (terminalEventType) => {
+      const { chatEvents$, openChat } = setUpAgentBuilder();
+
+      const { embeddable } = await buildEmbeddable(baseState);
+      await act(async () => render(<embeddable.Component />));
+      await startGenerating(openChat);
+      expectGenerating(true);
+
+      await act(async () =>
+        chatEvents$.next({ type: terminalEventType, execution_id: 'exec-1', data: {} })
+      );
+
+      expectGenerating(false);
       expect(embeddable.api.serializeState().template).toBe('<div>static html</div>');
     });
   });
