@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   EuiComboBox,
   EuiFieldText,
@@ -17,6 +17,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { JOB_ID_MAX_LENGTH } from '@kbn/ml-validators';
 import { isJobIdValid, createDatafeedId } from '../../../../../../../common/util/job_utils';
+import { useMlApi } from '../../../../../contexts/kibana/use_ml_api_context';
 import { useEsqlWizardContext } from './esql_wizard_context';
 import { areGroupsValid } from './esql_step_gating';
 
@@ -27,14 +28,50 @@ import { areGroupsValid } from './esql_step_gating';
  * final create action the way the original flat page did.
  */
 export const EsqlJobDetailsStep = () => {
+  const mlApi = useMlApi();
   const { state, setJobId, setJobDescription, setJobGroups } = useEsqlWizardContext();
   const jobIdInvalid =
     state.jobId !== '' && (!isJobIdValid(state.jobId) || state.jobId.length > JOB_ID_MAX_LENGTH);
   const datafeedId = createDatafeedId(state.jobId);
 
-  const groupOptions: EuiComboBoxOptionOption[] = state.jobGroups.map((group) => ({
+  // Suggest existing groups, mirroring the classic wizard's GroupsInput
+  // (job_details_step/components/groups/groups_input.tsx), which reads
+  // existingJobsAndGroups from JobCreatorContext. The ES|QL wizard has no
+  // equivalent context, so fetch once here via the same ML API.
+  const [existingGroupIds, setExistingGroupIds] = useState<string[]>([]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    mlApi.jobs
+      .getAllJobAndGroupIds()
+      .then(({ groupIds }) => {
+        if (isMounted) {
+          setExistingGroupIds(groupIds);
+        }
+      })
+      .catch(() => {
+        // Suggestions are a convenience; leave the combo box create-only on failure.
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [mlApi]);
+
+  const suggestedGroupOptions: EuiComboBoxOptionOption[] = existingGroupIds
+    .filter((group) => !state.jobGroups.includes(group))
+    .map((group) => ({ label: group }));
+
+  const selectedGroupOptions: EuiComboBoxOptionOption[] = state.jobGroups.map((group) => ({
     label: group,
   }));
+
+  const groupOptions: EuiComboBoxOptionOption[] = [
+    ...selectedGroupOptions,
+    ...suggestedGroupOptions,
+  ];
+
   const invalidGroups = state.jobGroups.filter((group) => !isJobIdValid(group));
 
   const onCreateGroup = (input: string) => {
@@ -116,7 +153,7 @@ export const EsqlJobDetailsStep = () => {
             defaultMessage: 'Select or create groups',
           })}
           options={groupOptions}
-          selectedOptions={groupOptions}
+          selectedOptions={selectedGroupOptions}
           onChange={(options) => setJobGroups(options.map(({ label }) => label))}
           onCreateOption={onCreateGroup}
           isClearable

@@ -6,10 +6,18 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import { renderWithI18n } from '../../../../../test_utils/render_with_ml_context';
 import { EsqlJobDetailsStep } from './esql_job_details_step';
 import { EsqlWizardProvider } from './esql_wizard_context';
+
+const mockGetAllJobAndGroupIds = jest.fn();
+
+jest.mock('../../../../../contexts/kibana/use_ml_api_context', () => ({
+  useMlApi: () => ({
+    jobs: { getAllJobAndGroupIds: mockGetAllJobAndGroupIds },
+  }),
+}));
 
 const renderStep = () =>
   renderWithI18n(
@@ -19,6 +27,11 @@ const renderStep = () =>
   );
 
 describe('EsqlJobDetailsStep', () => {
+  beforeEach(() => {
+    mockGetAllJobAndGroupIds.mockReset();
+    mockGetAllJobAndGroupIds.mockResolvedValue({ jobIds: [], groupIds: [] });
+  });
+
   it('shows an invalid job ID error and a derived datafeed ID', () => {
     renderStep();
 
@@ -52,5 +65,48 @@ describe('EsqlJobDetailsStep', () => {
     fireEvent.keyDown(groupsInput, { key: 'Enter', code: 'Enter' });
 
     expect(screen.getByText(/Invalid group name\(s\): _bad-group/)).toBeInTheDocument();
+  });
+
+  it('fetches and suggests existing groups from the ML API', async () => {
+    mockGetAllJobAndGroupIds.mockResolvedValue({
+      jobIds: ['some-job'],
+      groupIds: ['existing-group-a', 'existing-group-b'],
+    });
+
+    renderStep();
+
+    await waitFor(() => expect(mockGetAllJobAndGroupIds).toHaveBeenCalledTimes(1));
+
+    const groupsInput = screen.getByTestId('mlEsqlJobGroups').querySelector('input')!;
+    await act(async () => {
+      fireEvent.click(groupsInput);
+    });
+
+    expect(await screen.findByText('existing-group-a')).toBeInTheDocument();
+    expect(screen.getByText('existing-group-b')).toBeInTheDocument();
+  });
+
+  it('selects an existing suggested group instead of creating a duplicate', async () => {
+    mockGetAllJobAndGroupIds.mockResolvedValue({
+      jobIds: [],
+      groupIds: ['existing-group-a'],
+    });
+
+    renderStep();
+
+    await waitFor(() => expect(mockGetAllJobAndGroupIds).toHaveBeenCalledTimes(1));
+
+    const groupsInput = screen.getByTestId('mlEsqlJobGroups').querySelector('input')!;
+    await act(async () => {
+      fireEvent.click(groupsInput);
+    });
+
+    const option = await screen.findByText('existing-group-a');
+    fireEvent.click(option);
+
+    expect(
+      within(screen.getByTestId('mlEsqlJobGroups')).getByText('existing-group-a')
+    ).toBeInTheDocument();
+    expect(screen.queryByText(/Invalid group name/)).not.toBeInTheDocument();
   });
 });
