@@ -16,6 +16,7 @@ import {
   TIME_SLIDER_CONTROL,
 } from '@kbn/controls-constants';
 import type { DashboardPinnedPanel } from '@kbn/as-code-dashboard-schema';
+import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { formatEsqlIdentifier } from '@kbn/esql-utils';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -207,16 +208,19 @@ const recordUnresolvedControl = ({
  * Keep controls whose field Elasticsearch can `STATS BY`, rewriting options list
  * text fields to their `.keyword` sibling. Range sliders additionally require a
  * numeric field. Other data controls are reported with the mapped fields that
- * could back them instead.
+ * could back them instead. Controls on an index whose fields cannot be loaded
+ * are kept unvalidated.
  */
 const resolveControlFields = async ({
   controls,
   esClient,
+  logger,
   failures,
   skipped,
 }: {
   controls: ControlInput[];
   esClient?: ElasticsearchClient;
+  logger: Logger;
   failures: OperationFailure[];
   skipped: OperationSkip[];
 }): Promise<ControlInput[]> => {
@@ -234,11 +238,11 @@ const resolveControlFields = async ({
           [
             index,
             await fetchAggregatableFieldTypes(esClient, index).catch((error) => {
-              failures.push({
-                type: DASHBOARD_OPERATION_FAILURE_TYPES.addControls,
-                identifier: index,
-                error: `Could not load fields for index "${index}": ${getErrorMessage(error)}`,
-              });
+              logger.warn(
+                `Could not load fields for index "${index}", adding its controls unvalidated: ${getErrorMessage(
+                  error
+                )}`
+              );
               return undefined;
             }),
           ] as const
@@ -254,7 +258,7 @@ const resolveControlFields = async ({
     const { index, field_name: fieldName } = control;
     const fieldTypes = fieldTypesByIndex.get(index);
     if (!fieldTypes) {
-      return [];
+      return [control];
     }
 
     const skip = (reason: string): ControlInput[] => {
@@ -358,6 +362,7 @@ export const addControlsOperation = defineOperation({
         failures: context.failures,
       }),
       esClient: context.esClient,
+      logger: context.logger,
       failures: context.failures,
       skipped: context.skipped,
     });
