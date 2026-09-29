@@ -754,18 +754,28 @@ const executeEntityTypeRun = async ({
     }
 
     // Refresh so the distribution queries see zero-score records written by reset-to-zero above.
-    await runContext.esClient.indices.refresh({ index: riskScoreAlias });
-    const distributionQuery = {
-      esClient: runContext.esClient,
-      namespace: runContext.namespace,
-      entityType,
-      calculationRunId,
-      logger: runLogger,
-    };
-    [baseScoreDistribution, resolutionScoreDistribution] = await Promise.all([
-      getRiskScoreBaseDistribution(distributionQuery),
-      getRiskScoreResolutionDistribution(distributionQuery),
-    ]);
+    // Wrapped in try/catch: a refresh failure must not abort the run — scoring and reset already
+    // completed successfully, and the distributions are optional telemetry.
+    try {
+      await runContext.esClient.indices.refresh({ index: riskScoreAlias });
+      const distributionQuery = {
+        esClient: runContext.esClient,
+        namespace: runContext.namespace,
+        entityType,
+        calculationRunId,
+        logger: runLogger,
+      };
+      [baseScoreDistribution, resolutionScoreDistribution] = await Promise.all([
+        getRiskScoreBaseDistribution(distributionQuery),
+        getRiskScoreResolutionDistribution(distributionQuery),
+      ]);
+    } catch (error) {
+      runLogger.warn(
+        `Failed to refresh before collecting score distributions; distributions will be omitted from the run summary: ${telemetryReporter.getErrorMessage(
+          error
+        )}`
+      );
+    }
   } else {
     frameworkTelemetryStages.push({
       name: 'reset_to_zero',
