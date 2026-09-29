@@ -432,6 +432,9 @@ describe('AuthenticateAndDeployStep', () => {
       deploymentMethods: [{ method: 'managed_integration', preferred: true }],
       identityFederationSupported: true,
       showInUI: true,
+      isManifestLoaded: true,
+      isManifestError: false,
+      isStaticAgentBasedOnly: false,
     };
 
     beforeEach(() => {
@@ -1008,8 +1011,8 @@ describe('AuthenticateAndDeployStep', () => {
       renderStep();
       const next = screen.getByTestId('authenticateAndDeployStep-nextButton');
       expect(next).toBeDisabled();
-      // EuiButton renders a spinner via aria-busy when isLoading=true
-      expect(next).toHaveAttribute('aria-busy', 'true');
+      // EuiButton renders a loading spinner (role=progressbar) when isLoading=true
+      expect(next.querySelector('[role="progressbar"]')).not.toBeNull();
     });
 
     it('disables Next and shows error callout when a selected service manifest fails to load', () => {

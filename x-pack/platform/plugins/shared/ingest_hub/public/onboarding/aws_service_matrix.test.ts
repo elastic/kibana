@@ -532,27 +532,32 @@ describe('AWS service matrix', () => {
             type: 'logs',
             streams: [
               {
-                input: 'firehose',
+                input: 'http_endpoint',
                 vars: [{ name: 'listen_port', type: 'integer', required: true }],
               },
             ],
           },
         ],
       };
-      const [result] = buildAwsServiceMatrix({ awsfirehose: pkg as any }, [
-        { id: 'awsfirehose', category: 'networking_content_delivery', packageName: 'awsfirehose' },
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
       ]);
       expect(result.dataStreams).toEqual(['log']);
       expect(result.signalTypes).toContain('logs');
-      expect(result.inputs).toContain('firehose');
+      expect(result.inputs).toContain('http_endpoint');
       expect(result.varDefsByDataStream?.log).toBeDefined();
-      expect(result.varDefsByDataStream?.log?.varDefsByInput?.firehose?.listen_port).toBeDefined();
+      expect(result.varDefsByDataStream?.log?.varDefsByInput?.http_endpoint?.listen_port).toBeDefined();
       expect(result.isManifestLoaded).toBe(true);
     });
 
     it('leaves varDefsByInput undefined when streams declare an input but no vars', () => {
-      // Regression guard for awsfirehose: streams have an input key but vars:[].
-      // An empty varDefsByInput bucket must not cause requiresCredentials=true in Step 3.
+      // Streams with an input key but vars:[] must not create an empty varDefsByInput bucket —
+      // that would cause requiresCredentials=true for a credential-free service.
       const pkg = {
         policy_templates: [],
         data_streams: [
@@ -563,8 +568,13 @@ describe('AWS service matrix', () => {
           },
         ],
       };
-      const [result] = buildAwsServiceMatrix({ awsfirehose: pkg as any }, [
-        { id: 'awsfirehose', category: 'analytics', packageName: 'awsfirehose' },
+      const [result] = buildAwsServiceMatrix({ amazon_security_lake: pkg as any }, [
+        {
+          id: 'amazon_security_lake',
+          category: 'security_identity_compliance',
+          packageName: 'amazon_security_lake',
+          deploymentMethods: [{ method: 'agent_based', preferred: true }],
+        },
       ]);
       expect(result.varDefsByInput).toBeUndefined();
       expect(result.inputs).toContain('http_endpoint');

@@ -73,7 +73,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     handleNext,
   } = useServiceSettings({ onContinue });
 
-  const { awsServicesMap, detectAndReviewStep } = useOnboardingFlow();
+  const { awsServicesMap, detectAndReviewStep, servicesStep } = useOnboardingFlow();
+  const { selectedServiceIds } = servicesStep;
+
+  // Gate Next on optional package manifests finishing (loading). Errored manifests are excluded —
+  // Step 3 surfaces those with a retry callout so they don't permanently block here.
+  const hasUnloadedSelectedManifests = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry && !entry.isManifestLoaded && !entry.isManifestError;
+  });
 
   const isRegionDisabled =
     Object.keys(detectAndReviewStep.policyIdsByInstance).length > 0 ||
@@ -123,8 +131,15 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
   const selectedGlobalRegionOption = globalRegion ? [{ label: globalRegion }] : [];
 
   const continueTooltipContent = useMemo(() => {
-    if (isReady) return undefined;
+    if (isReady && !hasUnloadedSelectedManifests) return undefined;
     const reasons: string[] = [];
+    if (hasUnloadedSelectedManifests) {
+      reasons.push(
+        i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.loadingManifests', {
+          defaultMessage: 'Loading service details',
+        })
+      );
+    }
     if (!globalRegion.trim()) {
       reasons.push(
         i18n.translate('xpack.ingestHub.serviceSettingsStep.continueTooltip.noRegion', {
@@ -142,7 +157,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       );
     }
     return reasons.join(' · ');
-  }, [isReady, globalRegion, incompleteInstances]);
+  }, [isReady, hasUnloadedSelectedManifests, globalRegion, incompleteInstances]);
 
   const columns: Array<EuiBasicTableColumn<ServiceInstance>> = useMemo(
     () => [
@@ -528,7 +543,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
               <EuiButton
                 fill
                 onClick={handleNext}
-                disabled={!isReady}
+                disabled={!isReady || hasUnloadedSelectedManifests}
+                isLoading={hasUnloadedSelectedManifests}
                 data-test-subj="serviceSettingsStep-continueButton"
               >
                 <FormattedMessage

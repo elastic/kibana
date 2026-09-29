@@ -83,16 +83,8 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     isError: securityHubIsError,
     refetch: securityHubRefetch,
   } = useGetPackageInfoByKeyQuery('aws_securityhub', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const {
-    data: billingData,
-    isError: billingIsError,
-    refetch: billingRefetch,
-  } = useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
-  const {
-    data: firehoseData,
-    isError: firehoseIsError,
-    refetch: firehoseRefetch,
-  } = useGetPackageInfoByKeyQuery('awsfirehose', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
+  const { data: billingData, isError: billingIsError, refetch: billingRefetch } =
+    useGetPackageInfoByKeyQuery('aws_billing', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
   const {
     data: securityLakeData,
     isError: securityLakeIsError,
@@ -103,11 +95,6 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     PACKAGE_QUERY_OPTIONS,
     CACHE_OPTS
   );
-  const {
-    data: endaceData,
-    isError: endaceIsError,
-    refetch: endaceRefetch,
-  } = useGetPackageInfoByKeyQuery('endace', undefined, PACKAGE_QUERY_OPTIONS, CACHE_OPTS);
 
   const matrix = useMemo(() => {
     if (!awsData?.item) {
@@ -125,9 +112,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
       }),
       ...(securityHubData?.item && { aws_securityhub: securityHubData.item }),
       ...(billingData?.item && { aws_billing: billingData.item }),
-      ...(firehoseData?.item && { awsfirehose: firehoseData.item }),
       ...(securityLakeData?.item && { amazon_security_lake: securityLakeData.item }),
-      ...(endaceData?.item && { endace: endaceData.item }),
     };
     // Track packages whose queries have failed so buildAwsServiceMatrix can set isManifestError.
     // A failed secondary manifest blocks Next in Step 3 and surfaces a retry callout, rather than
@@ -142,9 +127,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
         cloudwatchOtelIsError && !cloudwatchOtelData?.item && 'aws_cloudwatch_input_otel',
         securityHubIsError && !securityHubData?.item && 'aws_securityhub',
         billingIsError && !billingData?.item && 'aws_billing',
-        firehoseIsError && !firehoseData?.item && 'awsfirehose',
         securityLakeIsError && !securityLakeData?.item && 'amazon_security_lake',
-        endaceIsError && !endaceData?.item && 'endace',
       ].filter((name): name is string => typeof name === 'string')
     );
     return buildAwsServiceMatrix(packages, AWS_SERVICES_STATIC, erroredPackageNames);
@@ -166,12 +149,8 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     securityHubIsError,
     billingData,
     billingIsError,
-    firehoseData,
-    firehoseIsError,
     securityLakeData,
     securityLakeIsError,
-    endaceData,
-    endaceIsError,
   ]);
 
   const refetch = useCallback(() => {
@@ -184,9 +163,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     cloudwatchOtelRefetch();
     securityHubRefetch();
     billingRefetch();
-    firehoseRefetch();
     securityLakeRefetch();
-    endaceRefetch();
   }, [
     awsRefetch,
     bedrockRefetch,
@@ -197,9 +174,7 @@ export function useAwsServiceMatrix(): UseAwsServiceMatrixResult {
     cloudwatchOtelRefetch,
     securityHubRefetch,
     billingRefetch,
-    firehoseRefetch,
     securityLakeRefetch,
-    endaceRefetch,
   ]);
 
   return { matrix, isError: awsIsError, refetch };

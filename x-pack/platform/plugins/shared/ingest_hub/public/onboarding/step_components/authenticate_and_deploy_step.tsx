@@ -254,8 +254,8 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
   const showAgentSection = isAgentBased && agentTargets.length > 0;
 
   // True when at least one agent target's service declares configurable vars (e.g. credential
-  // vars). False for packages like awsfirehose that have no vars, so the credential form is
-  // skipped and the user isn't blocked on entering credentials that would be discarded anyway.
+  // vars). False for services with no vars, so the credential form is skipped and the user
+  // isn't blocked on entering credentials that would be discarded anyway.
   const requiresCredentials = useMemo(
     () =>
       agentTargets.some((group) =>

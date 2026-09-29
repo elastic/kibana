@@ -374,8 +374,8 @@ export function AgentBasedSection({
           </EuiText>
 
           {/* Credential fields — omitted entirely when requiresCredentials=false (packages with no
-              credential vars, e.g. awsfirehose); otherwise shown until the policy is created and
-              credentials are in memory (re-shown after Back navigation remount). */}
+              credential vars); otherwise shown until the policy is created and credentials are
+              in memory (re-shown after Back navigation remount). */}
           {requiresCredentials &&
             (!isPolicyCreated || agentHostsMode === 'existing' || !isCredentialReady) && (
               <>

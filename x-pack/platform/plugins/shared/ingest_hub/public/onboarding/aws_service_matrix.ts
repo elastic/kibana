@@ -481,14 +481,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     packageName: 'aws',
   },
 
-  // ── awsfirehose package — Analytics ─────────────────────────────────────
-  {
-    id: 'awsfirehose',
-    name: 'AWS Firehose',
-    category: 'analytics',
-    packageName: 'awsfirehose',
-  },
-
   // ── aws_bedrock package — Machine Learning ──────────────────────────────
   {
     id: 'aws_bedrock',
@@ -617,15 +609,6 @@ const AWS_SERVICES_MATRIX_RAW: AwsServiceStaticEntry[] = [
     signalTypes: ['logs'],
   },
 
-  // ── endace package — Networking and Content Delivery ──────────────────────
-  {
-    id: 'endace',
-    name: 'Endace',
-    category: 'networking_content_delivery',
-    packageName: 'endace',
-    deploymentMethods: [{ method: 'agent_based', preferred: true }],
-    signalTypes: ['logs'],
-  },
 ];
 
 // ── Private helpers ──────────────────────────────────────────────────────────
@@ -653,7 +636,7 @@ function computeDataStreamInfo(
 
   // Build per-DS var defs: input → varName → definition. First-wins within each input bucket.
   // Only create a bucket when the stream actually declares vars — an empty bucket would make
-  // the service appear to have credential vars (e.g. awsfirehose streams have inputs but no vars).
+  // a credential-free service appear to require credentials.
   const dsVarDefsByInput: Record<string, Record<string, RegistryVarsEntry>> = {};
   for (const s of dsStreams) {
     if (!s.input || !dsEffectiveInputs.includes(s.input)) continue;
@@ -995,9 +978,9 @@ export function buildAwsServiceMatrix(
         }
       }
 
-      // Fallback: standalone packages with no matching policy template (e.g. awsfirehose) still
-      // expose their data streams — derive signal types and populate the full per-DS metadata so
-      // that buildPackageInputs can configure the agent policy with a valid input stream.
+      // Fallback: standalone packages with no matching policy template still expose their data
+      // streams — derive signal types and populate the full per-DS metadata so that
+      // buildPackageInputs can configure the agent policy with a valid input stream.
       // The `!entry.policyTemplate` guard prevents aws-package entries (which always have a PT
       // set) from consuming all package data streams when their PT is temporarily not found.
       if (!pt && !entry.policyTemplate) {
