@@ -258,6 +258,35 @@ describe('unit connections', () => {
     ]);
   });
 
+  it('refuses a docs source wired to a logs, metrics, and traces destination', () => {
+    const unit = unitWith([]);
+    unit.unit.sources = [{ id: 'bulk-input', type: 'bulk', supported_telemetry: ['docs'] }];
+    unit.unit.destinations = [
+      {
+        id: 'es-logs',
+        type: 'elasticsearch',
+        supported_telemetry: ['logs', 'metrics', 'traces'],
+      },
+    ];
+
+    expect(canConnectSourceToDestination(unit, 'bulk-input', 'es-logs')).toBe(false);
+    expect(connectSourceToDestination(unit, 'bulk-input', 'es-logs')).toBe(unit);
+  });
+
+  it('builds a new pipeline from the signals both sides support', () => {
+    const unit = unitWith([]);
+    unit.unit.sources = [
+      { id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs', 'metrics'] },
+    ];
+    unit.unit.destinations = [
+      { id: 'es-logs', type: 'elasticsearch', supported_telemetry: ['logs', 'traces'] },
+    ];
+
+    const next = connectSourceToDestination(unit, 'otlp-input', 'es-logs');
+
+    expect(next.unit.pipelines[0]?.supported_telemetry).toEqual(['logs']);
+  });
+
   it('removes a deleted destination from its source pipeline', () => {
     const connected = connectSourceToDestination(createDefaultUnit(), 'otlp-input', 'es-logs');
     const next = removeComponentFromPipelines(connected, 'es-logs');

@@ -40,7 +40,7 @@ export interface DestinationsTableStateInput {
 export interface DestinationsTableStateContext {
   unitDefinition: Unit;
   pendingUnitDefinition?: Unit;
-  pendingDestinationId?: string;
+  pendingDestinationIds?: string[];
   pendingIntent?: 'create' | 'delete';
   destinationsRef: DestinationsActorRef;
   query: string;
@@ -57,7 +57,7 @@ export type DestinationsTableStateEvent =
   | {
       type: 'unit.changed';
       unitDefinition: Unit;
-      destinationId: string;
+      destinationIds: string[];
       intent: 'create' | 'delete';
     }
   | { type: 'unit.reload' }
@@ -65,7 +65,7 @@ export type DestinationsTableStateEvent =
   | { type: 'xstate.error.actor.loadUnitDefinition'; error: unknown }
   | {
       type: 'xstate.done.actor.persistUnitDefinition';
-      output: { unitDefinition: Unit; destinationId: string };
+      output: { unitDefinition: Unit; destinationIds: string[] };
     }
   | { type: 'xstate.error.actor.persistUnitDefinition'; error: unknown }
   | { type: 'search.change'; query: string }
@@ -89,11 +89,11 @@ export const destinationsTableStateMachine = setup({
         input: {
           persist: UnitRepository['persist'];
           unitDefinition: Unit;
-          destinationId: string;
+          destinationIds: string[];
         };
       }) => ({
         unitDefinition: await input.persist(input.unitDefinition),
-        destinationId: input.destinationId,
+        destinationIds: input.destinationIds,
       })
     ),
   },
@@ -101,8 +101,8 @@ export const destinationsTableStateMachine = setup({
     storePendingUnitDefinition: assign({
       pendingUnitDefinition: ({ event }) =>
         event.type === 'unit.changed' ? event.unitDefinition : undefined,
-      pendingDestinationId: ({ event }) =>
-        event.type === 'unit.changed' ? event.destinationId : undefined,
+      pendingDestinationIds: ({ event }) =>
+        event.type === 'unit.changed' ? event.destinationIds : undefined,
       pendingIntent: ({ event }) => (event.type === 'unit.changed' ? event.intent : undefined),
       error: undefined,
     }),
@@ -112,7 +112,7 @@ export const destinationsTableStateMachine = setup({
           ? event.output
           : context.unitDefinition,
       pendingUnitDefinition: undefined,
-      pendingDestinationId: undefined,
+      pendingDestinationIds: undefined,
       pendingIntent: undefined,
       error: undefined,
     }),
@@ -122,7 +122,7 @@ export const destinationsTableStateMachine = setup({
           ? event.output.unitDefinition
           : context.unitDefinition,
       pendingUnitDefinition: undefined,
-      pendingDestinationId: undefined,
+      pendingDestinationIds: undefined,
       pendingIntent: undefined,
       error: undefined,
     }),
@@ -153,7 +153,7 @@ export const destinationsTableStateMachine = setup({
         }
         return {
           type: 'unit.persisted' as const,
-          destinationId: event.output.destinationId,
+          destinationIds: event.output.destinationIds,
           unitDefinition: event.output.unitDefinition,
         };
       }
@@ -164,12 +164,12 @@ export const destinationsTableStateMachine = setup({
         if (event.type !== 'xstate.error.actor.persistUnitDefinition') {
           throw new Error('Expected a unit persistence failure');
         }
-        if (!context.pendingDestinationId || !context.pendingIntent) {
+        if (!context.pendingDestinationIds?.length || !context.pendingIntent) {
           throw new Error('Expected a pending destination mutation');
         }
         return {
           type: 'unit.persistenceFailed' as const,
-          destinationId: context.pendingDestinationId,
+          destinationIds: context.pendingDestinationIds,
           unitDefinition: context.unitDefinition,
           message: getFormattedError(event.error).message,
           intent: context.pendingIntent,
@@ -219,7 +219,7 @@ export const destinationsTableStateMachine = setup({
     return {
       unitDefinition,
       pendingUnitDefinition: undefined,
-      pendingDestinationId: undefined,
+      pendingDestinationIds: undefined,
       pendingIntent: undefined,
       query: '',
       selectedTypes: [],
@@ -253,6 +253,7 @@ export const destinationsTableStateMachine = setup({
   initial: 'loading',
   states: {
     loading: {
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'loadUnitDefinition',
         src: 'loadUnitDefinition',
@@ -283,6 +284,7 @@ export const destinationsTableStateMachine = setup({
       },
     },
     reloading: {
+      entry: 'notifyUnitSaveStarted',
       invoke: {
         id: 'loadUnitDefinition',
         src: 'loadUnitDefinition',
@@ -305,7 +307,7 @@ export const destinationsTableStateMachine = setup({
         input: ({ context }) => ({
           persist: context.persistUnitDefinition,
           unitDefinition: context.pendingUnitDefinition ?? context.unitDefinition,
-          destinationId: context.pendingDestinationId ?? '',
+          destinationIds: context.pendingDestinationIds ?? [],
         }),
         onDone: {
           target: 'ready',

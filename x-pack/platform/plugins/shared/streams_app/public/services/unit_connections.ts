@@ -291,16 +291,58 @@ export const getUnitConnections = (
   return connections;
 };
 
+/**
+ * Signals both components accept. `unknown` means one side is not on the unit,
+ * so compatibility is left to the caller. `incompatible` means both are known
+ * and share no signal.
+ */
+const telemetryFit = (
+  unit: Unit,
+  sourceId: string,
+  destinationId: string
+): 'unknown' | 'incompatible' | UnitPipeline['supported_telemetry'] => {
+  const source = unit.unit.sources?.find((item) => item.id === sourceId);
+  const destination = unit.unit.destinations?.find((item) => item.id === destinationId);
+  if (!source || !destination) {
+    return 'unknown';
+  }
+  const destinationSignals = new Set(destination.supported_telemetry);
+  const shared = source.supported_telemetry.filter((signal) => destinationSignals.has(signal));
+  if (shared.length === 0) {
+    return 'incompatible';
+  }
+  return shared;
+};
+
+const pipelineTelemetry = (
+  unit: Unit,
+  sourceId: string,
+  destinationId: string
+): UnitPipeline['supported_telemetry'] => {
+  const fit = telemetryFit(unit, sourceId, destinationId);
+  return fit === 'unknown' || fit === 'incompatible' ? [...DEFAULT_SUPPORTED_TELEMETRY] : fit;
+};
+
 export const canConnectSourceToDestination = (
   unit: Unit,
   sourceId: string,
   destinationId: string
 ): boolean => {
+  if (telemetryFit(unit, sourceId, destinationId) === 'incompatible') {
+    return false;
+  }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
   if (pipelineIndex === -1) {
     return true;
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
+  const fit = telemetryFit(unit, sourceId, destinationId);
+  if (fit !== 'unknown' && fit !== 'incompatible') {
+    const pipelineSignals = new Set(pipeline.supported_telemetry);
+    if (!fit.some((signal) => pipelineSignals.has(signal))) {
+      return false;
+    }
+  }
   if (pipelineUsesRoutes(pipeline)) {
     const routes = readRoutes(pipeline.config);
     return !routesIncludeDestination(routes, destinationId) && !catchAllBlocksDestination(routes);
@@ -319,12 +361,9 @@ export const connectSourceToDestination = (
   }
   const pipelineIndex = findSourcePipelineIndex(unit.unit.pipelines, sourceId);
   if (pipelineIndex === -1) {
-    return appendSourcePipeline(
-      unit,
-      sourceId,
-      [...DEFAULT_SUPPORTED_TELEMETRY],
-      [{ name: 'destinations', value: [destinationId] }]
-    );
+    return appendSourcePipeline(unit, sourceId, pipelineTelemetry(unit, sourceId, destinationId), [
+      { name: 'destinations', value: [destinationId] },
+    ]);
   }
   const pipeline = unit.unit.pipelines[pipelineIndex];
   const sources = readIdentifiers(pipeline.config, 'sources');

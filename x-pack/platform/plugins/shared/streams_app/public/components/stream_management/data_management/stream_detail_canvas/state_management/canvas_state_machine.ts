@@ -88,22 +88,13 @@ export const canvasStateMachine = setup({
         return {};
       }
       const nextUnit = event.unitDefinition;
-      if ('destinationId' in event) {
+      if ('sourceIds' in event || 'destinationIds' in event) {
         return {
           nextUnit,
           savingUnit: nextUnit,
-          savingComponentId: event.destinationId,
-          savingComponentKind: 'destination' as const,
-          savingComponentIntent: event.intent,
-          error: undefined,
-        };
-      }
-      if ('sourceId' in event) {
-        return {
-          nextUnit,
-          savingUnit: nextUnit,
-          savingComponentId: event.sourceId,
-          savingComponentKind: 'source' as const,
+          savingComponentIds: 'sourceIds' in event ? event.sourceIds : event.destinationIds,
+          savingComponentKind:
+            'sourceIds' in event ? ('source' as const) : ('destination' as const),
           savingComponentIntent: event.intent,
           error: undefined,
         };
@@ -111,7 +102,7 @@ export const canvasStateMachine = setup({
       return {
         nextUnit,
         savingUnit: nextUnit,
-        savingComponentId: undefined,
+        savingComponentIds: undefined,
         savingComponentKind: undefined,
         savingComponentIntent: 'connect' as const,
         error: undefined,
@@ -127,7 +118,7 @@ export const canvasStateMachine = setup({
     ),
     prepareUnitSave: assign({
       savingUnit: ({ context }) => context.nextUnit,
-      savingComponentId: undefined,
+      savingComponentIds: undefined,
       savingComponentKind: undefined,
       savingComponentIntent: undefined,
       error: undefined,
@@ -138,7 +129,7 @@ export const canvasStateMachine = setup({
             unit: event.output,
             nextUnit: event.output,
             savingUnit: undefined,
-            savingComponentId: undefined,
+            savingComponentIds: undefined,
             savingComponentKind: undefined,
             savingComponentIntent: undefined,
             error: undefined,
@@ -153,7 +144,7 @@ export const canvasStateMachine = setup({
         unit: event.output.unitDefinition,
         nextUnit: event.output.unitDefinition,
         savingUnit: undefined,
-        savingComponentId: undefined,
+        savingComponentIds: undefined,
         savingComponentKind: undefined,
         savingComponentIntent: undefined,
         error: undefined,
@@ -234,20 +225,22 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        if (!context.savingComponentId) {
-          return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+        const componentIds = context.savingComponentIds;
+        if (context.savingComponentKind === 'source' && componentIds?.length) {
+          return {
+            type: 'unit.persisted' as const,
+            sourceIds: componentIds,
+            unitDefinition: event.output.unitDefinition,
+          };
         }
-        return context.savingComponentKind === 'destination'
-          ? {
-              type: 'unit.persisted' as const,
-              destinationId: context.savingComponentId,
-              unitDefinition: event.output.unitDefinition,
-            }
-          : {
-              type: 'unit.persisted' as const,
-              sourceId: context.savingComponentId,
-              unitDefinition: event.output.unitDefinition,
-            };
+        if (context.savingComponentKind === 'destination' && componentIds?.length) {
+          return {
+            type: 'unit.persisted' as const,
+            destinationIds: componentIds,
+            unitDefinition: event.output.unitDefinition,
+          };
+        }
+        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
       }
     ),
     syncSavedUnitToPeer: sendTo(
@@ -269,10 +262,11 @@ export const canvasStateMachine = setup({
           : context.sourcesRef,
       ({ context, event }) => {
         const intent = context.savingComponentIntent;
+        const componentIds = context.savingComponentIds ?? [];
         if (
-          !context.savingComponentId ||
-          (intent !== 'create' && intent !== 'delete') ||
-          !context.savingComponentKind
+          !context.savingComponentKind ||
+          componentIds.length === 0 ||
+          (intent !== 'create' && intent !== 'delete')
         ) {
           throw new Error('Expected a unit component mutation to be saving');
         }
@@ -283,17 +277,17 @@ export const canvasStateMachine = setup({
             : i18n.translate('xpack.streams.streamDetailCanvas.unitSaveFailedErrorMessage', {
                 defaultMessage: 'Unable to save the streams configuration.',
               });
-        return context.savingComponentKind === 'destination'
+        return context.savingComponentKind === 'source'
           ? {
               type: 'unit.persistenceFailed' as const,
-              destinationId: context.savingComponentId,
+              sourceIds: componentIds,
               unitDefinition: context.unit,
               message,
               intent,
             }
           : {
               type: 'unit.persistenceFailed' as const,
-              sourceId: context.savingComponentId,
+              destinationIds: componentIds,
               unitDefinition: context.unit,
               message,
               intent,
@@ -307,7 +301,7 @@ export const canvasStateMachine = setup({
       not(stateIn({ ready: { unit: 'validating' } })),
       not(stateIn({ ready: { unit: 'persisting' } })),
     ]),
-    isSavingComponentChange: ({ context }) => context.savingComponentId !== undefined,
+    isSavingComponentChange: ({ context }) => (context.savingComponentIds?.length ?? 0) > 0,
     isSavingConnection: ({ context }) => context.savingComponentIntent === 'connect',
   },
 }).createMachine({
@@ -392,6 +386,7 @@ export const canvasStateMachine = setup({
           initial: 'loading',
           states: {
             loading: {
+              entry: ['notifySourcesUnitSaveStarted', 'notifyDestinationsUnitSaveStarted'],
               invoke: {
                 id: 'loadUnitDefinition',
                 src: 'loadUnitDefinition',
@@ -430,6 +425,7 @@ export const canvasStateMachine = setup({
               },
             },
             reloading: {
+              entry: ['notifySourcesUnitSaveStarted', 'notifyDestinationsUnitSaveStarted'],
               invoke: {
                 id: 'loadUnitDefinition',
                 src: 'loadUnitDefinition',
@@ -448,6 +444,7 @@ export const canvasStateMachine = setup({
               },
             },
             reloadFailed: {
+              entry: ['notifySourcesUnitSaveFinished', 'notifyDestinationsUnitSaveFinished'],
               on: {
                 'unit.reload': { target: 'reloading' },
                 'unit.changed': {
@@ -495,7 +492,7 @@ export const canvasStateMachine = setup({
                 input: ({ context }) => context.savingUnit ?? context.nextUnit,
                 onDone: {
                   target: 'ready',
-                  // Sync while savingComponentId is still set. storePersistedUnitDefinition
+                  // Sync while the saving component is still set. storePersistedUnitDefinition
                   // clears it, and a later sync would tell the source or destination
                   // machine the unit merely reloaded, leaving its create flow on "saving".
                   actions: [
@@ -555,7 +552,7 @@ export const canvasStateMachine = setup({
       unit: unitDefinition,
       nextUnit: unitDefinition,
       savingUnit: undefined,
-      savingComponentId: undefined,
+      savingComponentIds: undefined,
       savingComponentKind: undefined,
       savingComponentIntent: undefined,
       // Kept in the Canvas parent so API-backed coordinates can be loaded and

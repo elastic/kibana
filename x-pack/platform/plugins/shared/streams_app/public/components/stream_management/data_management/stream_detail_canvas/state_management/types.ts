@@ -34,7 +34,7 @@ export interface CanvasState {
   unit: Unit;
   nextUnit: Unit;
   savingUnit?: Unit;
-  savingComponentId?: string;
+  savingComponentIds?: string[];
   savingComponentKind?: 'source' | 'destination';
   savingComponentIntent?: 'create' | 'delete' | 'connect';
   nodePositions: Record<string, XYPosition>;
@@ -49,13 +49,13 @@ export type CanvasUrlEvent =
   | {
       type: 'unit.changed';
       unitDefinition: Unit;
-      sourceId: string;
+      sourceIds: string[];
       intent: 'create' | 'delete';
     }
   | {
       type: 'unit.changed';
       unitDefinition: Unit;
-      destinationId: string;
+      destinationIds: string[];
       intent: 'create' | 'delete';
     }
   | {

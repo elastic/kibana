@@ -34,7 +34,7 @@ export const SourcesTab = () => {
     sortingColumns,
     pagination,
     visibleColumnIds,
-    deleteSource,
+    deleteSources,
     refreshUnit,
     setQuery,
     setSelectedSources,
@@ -169,7 +169,7 @@ export const SourcesTab = () => {
           count={sourcesPendingDeletion.length}
           onCancel={() => setSourcesPendingDeletion([])}
           onConfirm={() => {
-            sourcesPendingDeletion.forEach(({ id }) => deleteSource(id));
+            deleteSources(sourcesPendingDeletion.map(({ id }) => id));
             setSelectedSources([]);
             setSourcesPendingDeletion([]);
           }}

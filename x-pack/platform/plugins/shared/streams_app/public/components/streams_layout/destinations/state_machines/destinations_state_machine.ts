@@ -38,7 +38,7 @@ export type { DestinationCreationFormErrors };
 export interface DestinationsParentEvent {
   type: 'unit.changed';
   unitDefinition: Unit;
-  destinationId: string;
+  destinationIds: string[];
   intent: 'create' | 'delete';
 }
 
@@ -71,16 +71,17 @@ export type DestinationsStateEvent =
   | { type: 'unit.loaded'; unitDefinition: Unit }
   | { type: 'unit.save.started' }
   | { type: 'unit.save.finished' }
-  | { type: 'unit.persisted'; destinationId: string; unitDefinition: Unit }
+  | { type: 'unit.persisted'; destinationIds: string[]; unitDefinition: Unit }
   | {
       type: 'unit.persistenceFailed';
-      destinationId: string;
+      destinationIds: string[];
       unitDefinition: Unit;
       message: string;
       intent: 'create' | 'delete';
     }
   | { type: 'destination.create' }
   | { type: 'destination.delete'; destinationId: string }
+  | { type: 'destination.deleteMany'; destinationIds: string[] }
   | { type: 'destination.view'; destinationId: string }
   | { type: 'storageKind.select'; storageKind: DestinationStorageKind }
   | { type: 'destinationName.change'; destinationName: string }
@@ -89,6 +90,27 @@ export type DestinationsStateEvent =
   | { type: 'modal.openCreate'; associatedUnconfiguredNodeId?: string }
   | { type: 'modal.closeCreate' }
   | { type: 'flyout.close' };
+
+const removeDestinationsFromContext = (
+  context: Pick<DestinationsStateContext, 'unitDefinition' | 'selectedDestinationId'>,
+  destinationIds: readonly string[]
+) => {
+  const removed = new Set(destinationIds);
+  const unitDefinition = [...removed].reduce(
+    (unit, destinationId) => removeComponentFromPipelines(unit, destinationId),
+    withUnitDestinations(
+      context.unitDefinition,
+      getUnitDestinations(context.unitDefinition).filter(({ id }) => !removed.has(id))
+    )
+  );
+  return {
+    unitDefinition,
+    selectedDestinationId:
+      context.selectedDestinationId && removed.has(context.selectedDestinationId)
+        ? undefined
+        : context.selectedDestinationId,
+  };
+};
 
 const getCreationFormErrors = ({
   formData,
@@ -302,7 +324,7 @@ export const destinationsStateMachine = setup({
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
-          destinationId,
+          destinationIds: [destinationId],
           intent: 'create',
         };
       }
@@ -311,21 +333,13 @@ export const destinationsStateMachine = setup({
       if (event.type !== 'destination.delete') {
         return {};
       }
-      return {
-        unitDefinition: removeComponentFromPipelines(
-          withUnitDestinations(
-            context.unitDefinition,
-            getUnitDestinations(context.unitDefinition).filter(
-              ({ id }) => id !== event.destinationId
-            )
-          ),
-          event.destinationId
-        ),
-        selectedDestinationId:
-          context.selectedDestinationId === event.destinationId
-            ? undefined
-            : context.selectedDestinationId,
-      };
+      return removeDestinationsFromContext(context, [event.destinationId]);
+    }),
+    deleteDestinations: assign(({ context, event }) => {
+      if (event.type !== 'destination.deleteMany') {
+        return {};
+      }
+      return removeDestinationsFromContext(context, event.destinationIds);
     }),
     notifyParentDelete: sendTo(
       ({ context }) => context.parentRef,
@@ -336,7 +350,21 @@ export const destinationsStateMachine = setup({
         return {
           type: 'unit.changed',
           unitDefinition: context.unitDefinition,
-          destinationId: event.destinationId,
+          destinationIds: [event.destinationId],
+          intent: 'delete',
+        };
+      }
+    ),
+    notifyParentDeleteMany: sendTo(
+      ({ context }) => context.parentRef,
+      ({ context, event }): DestinationsParentEvent => {
+        if (event.type !== 'destination.deleteMany' || event.destinationIds.length === 0) {
+          throw new Error('Expected destinations to delete');
+        }
+        return {
+          type: 'unit.changed',
+          unitDefinition: context.unitDefinition,
+          destinationIds: event.destinationIds,
           intent: 'delete',
         };
       }
@@ -383,10 +411,17 @@ export const destinationsStateMachine = setup({
             unitDefinition: context.unitDefinition,
           })
       ),
-    isCreatedDestination: ({ context, event }) =>
-      (event.type === 'unit.persisted' ||
-        (event.type === 'unit.persistenceFailed' && event.intent === 'create')) &&
-      context.creationContext?.createdDestination?.id === event.destinationId,
+    isCreatedDestination: ({ context, event }) => {
+      const createdDestinationId = context.creationContext?.createdDestination?.id;
+      return (
+        (event.type === 'unit.persisted' ||
+          (event.type === 'unit.persistenceFailed' && event.intent === 'create')) &&
+        createdDestinationId !== undefined &&
+        event.destinationIds.includes(createdDestinationId)
+      );
+    },
+    hasDestinationsToDelete: ({ event }) =>
+      event.type === 'destination.deleteMany' && event.destinationIds.length > 0,
     loadedUnitRemovedViewedDestination: ({ context, event }) =>
       (event.type === 'unit.loaded' || event.type === 'unit.persisted') &&
       Boolean(
@@ -419,6 +454,10 @@ export const destinationsStateMachine = setup({
     'destination.delete': {
       guard: 'unitSaveIsIdle',
       actions: ['deleteDestination', 'notifyParentDelete', 'closeFlyout'],
+    },
+    'destination.deleteMany': {
+      guard: and(['unitSaveIsIdle', 'hasDestinationsToDelete']),
+      actions: ['deleteDestinations', 'notifyParentDeleteMany'],
     },
   },
   states: {
@@ -551,10 +590,13 @@ function createNotifyDestinationCreatedAction({ toasts }: { toasts: Toasts }) {
 
 function createNotifyDestinationDeletedAction({ toasts }: { toasts: Toasts }) {
   return ({ event }: { event: DestinationsStateEvent }) => {
-    if (
-      event.type !== 'unit.persisted' ||
-      getConfiguredDestinations(event.unitDefinition).some(({ id }) => id === event.destinationId)
-    ) {
+    if (event.type !== 'unit.persisted' || event.destinationIds.length === 0) {
+      return;
+    }
+    const remainingDestinationIds = new Set(
+      getConfiguredDestinations(event.unitDefinition).map(({ id }) => id)
+    );
+    if (event.destinationIds.some((destinationId) => remainingDestinationIds.has(destinationId))) {
       return;
     }
     notifyUnitUpdated(toasts);

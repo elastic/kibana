@@ -46,6 +46,7 @@ export interface SourcesController {
   setCreateSourceName: (sourceName: string) => void;
   validateCreateSourceName: () => void;
   deleteSource: (sourceId: string) => void;
+  deleteSources: (sourceIds: string[]) => void;
   generateApiKey: (sourceId: string) => void;
   revealedApiKey?: RevealedApiKey;
   apiKeyPrivileges?: SourceApiKeyPrivileges;
@@ -328,6 +329,10 @@ export const useSources = ({
     (sourceId: string) => sourcesActorRef.send({ type: 'source.delete', sourceId }),
     [sourcesActorRef]
   );
+  const deleteSources = useCallback(
+    (sourceIds: string[]) => sourcesActorRef.send({ type: 'source.deleteMany', sourceIds }),
+    [sourcesActorRef]
+  );
 
   const generateApiKey = useCallback(
     (sourceId: string) => {
@@ -369,6 +374,7 @@ export const useSources = ({
       setCreateSourceName,
       validateCreateSourceName,
       deleteSource,
+      deleteSources,
       generateApiKey,
       revealedApiKey,
       apiKeyPrivileges,
@@ -400,6 +406,7 @@ export const useSources = ({
       createdSource,
       deleteApiKey,
       deleteSource,
+      deleteSources,
       generateApiKey,
       isGeneratingApiKey,
       isLoadingApiKeys,
