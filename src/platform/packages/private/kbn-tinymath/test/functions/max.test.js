@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { max } = require('../../src/functions/max');
+const { max } = await import('../../src/functions/max');
 
 describe('Max', () => {
   it('numbers', () => {

@@ -34,9 +34,9 @@ vi.mock('../../kibana_services', () => {
 const mockedFetch = vi.spyOn(global, 'fetch');
 
 describe('EMS enabled', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../kibana_services').getEMSSettings = () => {
+    (await import('../../kibana_services')).getEMSSettings = () => {
       return {
         getEMSFontLibraryUrl: () => {
           return 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';
@@ -97,9 +97,9 @@ describe('EMS enabled', () => {
 });
 
 describe('EMS disabled', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../kibana_services').getEMSSettings = () => {
+    (await import('../../kibana_services')).getEMSSettings = () => {
       return {
         getEMSFontLibraryUrl: () => {
           return 'https://tiles.maps.elastic.co/fonts/{fontstack}/{range}.pbf';

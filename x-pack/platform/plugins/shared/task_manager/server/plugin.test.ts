@@ -87,7 +87,7 @@ const pluginInitializerContextParams = {
 describe('TaskManagerPlugin', () => {
   beforeEach(() => {
     mockTaskPollingLifecycle = taskPollingLifecycleMock.create({});
-    (TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).mockClear();
+    (TaskPollingLifecycle as Mock<(...args: unknown[]) => TaskPollingLifecycleClass>).mockClear();
   });
 
   describe('setup', () => {
@@ -154,7 +154,9 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
+      expect(
+        TaskPollingLifecycle as Mock<(...args: unknown[]) => TaskPollingLifecycleClass>
+      ).toHaveBeenCalledTimes(1);
     });
 
     test('should not initialize task polling lifecycle if node.roles.backgroundTasks is false', async () => {
@@ -169,7 +171,9 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).not.toHaveBeenCalled();
+      expect(
+        TaskPollingLifecycle as Mock<(...args: unknown[]) => TaskPollingLifecycleClass>
+      ).not.toHaveBeenCalled();
     });
 
     test('passes the fake request enricher obtained at setup to TaskPollingLifecycle', async () => {
@@ -208,7 +212,9 @@ describe('TaskManagerPlugin', () => {
         licensing: licensingMock.createStart(),
       });
 
-      expect(TaskPollingLifecycle as Mock<TaskPollingLifecycleClass>).toHaveBeenCalledTimes(1);
+      expect(
+        TaskPollingLifecycle as Mock<(...args: unknown[]) => TaskPollingLifecycleClass>
+      ).toHaveBeenCalledTimes(1);
 
       await taskManagerPlugin.stop();
 

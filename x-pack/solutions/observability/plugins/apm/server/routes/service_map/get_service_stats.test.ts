@@ -13,7 +13,7 @@ import { ApmDocumentType } from '@kbn/apm-data-access-plugin/common';
 import { getServiceStats } from './get_service_stats';
 import type { IEnvOptions } from './get_service_map';
 
-type SearchMock = Mock<Promise<unknown>>;
+type SearchMock = Mock<(...args: any[]) => Promise<unknown>>;
 
 function makeOptions(
   overrides: Partial<IEnvOptions & { maxNumberOfServices: number }> = {}

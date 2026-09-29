@@ -30,10 +30,11 @@ const mockGetAbsoluteTime = vi.fn(() => ({
 }));
 
 const mockGetById: Mock<
-  | {
-      fetchRootSpanByTraceId: Mock<Promise<TraceRootSpan | undefined>>;
-    }
-  | undefined
+  (...args: any[]) =>
+    | {
+        fetchRootSpanByTraceId: Mock<(...args: any[]) => Promise<TraceRootSpan | undefined>>;
+      }
+    | undefined
 > = vi.fn(() => ({
   fetchRootSpanByTraceId: mockFetchRootSpanByTraceId,
 }));

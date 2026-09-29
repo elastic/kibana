@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-const {
-  generateOpenrouterConnectors,
-  parseModelList,
-  filterRequestedModels,
-} = require('./generate_openrouter_connectors');
+const { generateOpenrouterConnectors, parseModelList, filterRequestedModels } = await import(
+  './generate_openrouter_connectors'
+);
 
 const BASE_URL = 'https://openrouter.ai/api/v1';
 const API_KEY = 'sk-test';

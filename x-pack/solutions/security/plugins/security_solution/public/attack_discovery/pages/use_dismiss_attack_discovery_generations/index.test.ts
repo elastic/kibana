@@ -70,10 +70,9 @@ interface MockHttp {
 
 interface MockKibanaServices {
   get: Mock<
-    {
+    (...args: []) => {
       http: MockHttp;
-    },
-    []
+    }
   >;
 }
 

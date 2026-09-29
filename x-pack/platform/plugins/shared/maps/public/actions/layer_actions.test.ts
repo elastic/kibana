@@ -48,19 +48,21 @@ describe('layer_actions', () => {
   describe('addLayer', () => {
     const notifyLicensedFeatureUsageMock = vi.fn();
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../licensed_features').notifyLicensedFeatureUsage = (feature: LICENSED_FEATURES) => {
+      (await import('../licensed_features')).notifyLicensedFeatureUsage = (
+        feature: LICENSED_FEATURES
+      ) => {
         notifyLicensedFeatureUsageMock(feature);
       };
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../reducers/non_serializable_instances').getMapReady = () => {
+      (await import('../reducers/non_serializable_instances')).getMapReady = () => {
         return true;
       };
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../selectors/map_selectors').createLayerInstance = () => {
+      (await import('../selectors/map_selectors')).createLayerInstance = () => {
         return {
           getLicensedFeatures() {
             return [LICENSED_FEATURES.GEO_SHAPE_AGGS_GEO_TILE];

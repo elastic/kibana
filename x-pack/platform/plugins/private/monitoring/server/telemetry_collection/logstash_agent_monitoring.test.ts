@@ -10,7 +10,9 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import { LogstashAgentMonitoring } from './logstash_agent_monitoring';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const logstashStatsResultSetOfAgentMonitoring = require('./__mocks__/fixtures/logstash_stats_agent_monitoring_results.json');
+const logstashStatsResultSetOfAgentMonitoring = await import(
+  './__mocks__/fixtures/logstash_stats_agent_monitoring_results.json'
+);
 
 const logstashStateResultsMapOfAgentMonitoring = new Map();
 

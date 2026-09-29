@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { add } = require('../../src/functions/add');
+const { add } = await import('../../src/functions/add');
 
 describe('Add', () => {
   it('numbers', () => {

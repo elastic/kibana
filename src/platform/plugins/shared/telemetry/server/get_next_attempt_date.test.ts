@@ -16,8 +16,7 @@ import { getNextAttemptDate } from './get_next_attempt_date';
 describe('getNextAttemptDate', () => {
   // The casting is needed because `randomInt` has multiple call signatures and typescript is taking the callback one.
   const randomIntSpy = vi.spyOn(crypto, 'randomInt') as unknown as MockInstance<
-    number,
-    [min: number, max: number]
+    (...args: [min: number, max: number]) => number
   >;
 
   afterEach(() => {

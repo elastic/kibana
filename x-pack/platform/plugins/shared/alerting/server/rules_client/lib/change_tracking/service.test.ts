@@ -29,10 +29,12 @@ vi.mock('@kbn/change-history', () => {
 const ChangeHistoryClientMock = ChangeHistoryClient as MockedClass<typeof ChangeHistoryClient>;
 
 interface MockChangeHistoryClient {
-  isInitialized: Mock<boolean, []>;
-  initialize: Mock<Promise<void>, [unknown]>;
-  logBulk: Mock<Promise<void>, [unknown, unknown]>;
-  getHistory: Mock<Promise<{ items: unknown[]; total: number }>, [string, string, string, unknown]>;
+  isInitialized: Mock<(...args: []) => boolean>;
+  initialize: Mock<(...args: [unknown]) => Promise<void>>;
+  logBulk: Mock<(...args: [unknown, unknown]) => Promise<void>>;
+  getHistory: Mock<
+    (...args: [string, string, string, unknown]) => Promise<{ items: unknown[]; total: number }>
+  >;
 }
 
 const createMockClient = (): MockChangeHistoryClient => ({

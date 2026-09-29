@@ -28,10 +28,10 @@ vi.mock('../legacy_shims', () => {
   };
 });
 
-function setModulesAndMocks() {
+async function setModulesAndMocks() {
   vi.clearAllMocks().resetModules();
 
-  const setupMode = require('./setup_mode');
+  const setupMode = await import('./setup_mode');
   toggleSetupMode = setupMode.toggleSetupMode;
   initSetupModeState = setupMode.initSetupModeState;
   getSetupModeState = setupMode.getSetupModeState;

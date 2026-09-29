@@ -15,7 +15,7 @@ import type { Cert } from '../../../../common/runtime_types';
 describe('tls alert', () => {
   describe('getCertSummary', () => {
     let mockCerts: Cert[];
-    let diffSpy: MockInstance<any, unknown[]>;
+    let diffSpy: MockInstance<(...args: unknown[]) => any>;
 
     beforeEach(() => {
       diffSpy = vi.spyOn(moment.prototype, 'diff');

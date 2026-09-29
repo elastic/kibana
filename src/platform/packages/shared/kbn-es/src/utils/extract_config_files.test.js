@@ -23,7 +23,7 @@ vi.mock('fs', () => {
   return { ...mocked, default: mocked };
 });
 
-const { extractConfigFiles } = require('./extract_config_files');
+const { extractConfigFiles } = await import('./extract_config_files');
 const fs = require('fs');
 
 afterEach(() => {

@@ -23,7 +23,7 @@ const baseArgs = (overrides: Partial<ListRuleExecutionsArgs> = {}): ListRuleExec
 
 interface Mocks {
   eventLogService: EventLogService;
-  findRuleExecutions: MockInstance<EventLogService['findRuleExecutions']>;
+  findRuleExecutions: MockInstance<(...args: any[]) => EventLogService['findRuleExecutions']>;
   client: ExecutionHistoryClient;
 }
 

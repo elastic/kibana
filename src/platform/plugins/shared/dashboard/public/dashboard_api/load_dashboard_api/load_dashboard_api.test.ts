@@ -30,9 +30,9 @@ vi.mock('@kbn/content-management-content-insights-public', () => {
   };
 });
 
-vi.mock('../../dashboard_client', () => {
+vi.mock('../../dashboard_client', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const defaultState = require('../../../common/default_dashboard_state');
+  const defaultState = await import('../../../common/default_dashboard_state');
   return {
     dashboardClient: {
       get: vi.fn().mockResolvedValue({
@@ -48,9 +48,9 @@ describe('loadDashboardApi', () => {
   const getDashboardApiMock = vi.fn();
   const userActivity$ = new Subject();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../get_dashboard_api').getDashboardApi = getDashboardApiMock;
+    (await import('../get_dashboard_api')).getDashboardApi = getDashboardApiMock;
     getDashboardApiMock.mockReturnValue({
       api: { userActivity$ },
       cleanUp: vi.fn(),
@@ -58,7 +58,7 @@ describe('loadDashboardApi', () => {
     });
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/dashboard_api_services').getDashboardBackupService = () => ({
+    (await import('../../services/dashboard_api_services')).getDashboardBackupService = () => ({
       getState: () => ({
         query: lastSavedQuery,
       }),

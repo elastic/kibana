@@ -18,7 +18,9 @@ import { useSignalIndex } from '../../../../../detections/containers/detection_e
 vi.mock('../../../../../common/containers/source');
 vi.mock('../../../../../detections/containers/detection_engine/alerts/use_signal_index');
 
-const mockUseSignalIndex = useSignalIndex as Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseSignalIndex = useSignalIndex as Mock<
+  (...args: unknown[]) => Partial<ReturnType<typeof useSignalIndex>>
+>;
 const mockUseFetchIndex = useFetchIndex as Mock;
 
 describe('useSignalIndexPatterns', () => {

@@ -43,7 +43,7 @@ import { deprecationsServiceMock } from '@kbn/core-deprecations-browser-mocks';
 import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
-type MockedPluginInitializer = Mock<Plugin<unknown, unknown>>;
+type MockedPluginInitializer = Mock<(...args: any[]) => Plugin<unknown, unknown>>;
 let mockPluginInitializers: Map<PluginName, MockedPluginInitializer>;
 
 mockPluginInitializerProvider.mockImplementation((pluginName) => ({

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { pow } = require('../../src/functions/pow');
+const { pow } = await import('../../src/functions/pow');
 
 describe('Pow', () => {
   it('numbers', () => {

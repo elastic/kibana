@@ -131,9 +131,9 @@ vi.mock('../../../../common/schema', async () => {
   const mocked = {
     ...(await vi.importActual('../../../../common/schema')),
     getCachedDynamicConnectorTypes: vi.fn(() => ({})),
-    getWorkflowZodSchemaLoose: vi.fn(() => {
+    getWorkflowZodSchemaLoose: vi.fn(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { z } = require('@kbn/zod/v4');
+      const { z } = await import('@kbn/zod/v4');
       // mock actual schema, we only test the name uniqueness validation
       return z
         .object({

@@ -45,23 +45,25 @@ vi.mock('../../services/package_policy', () => {
 });
 
 const packagePolicyServiceMock = packagePolicyService as Mocked<PackagePolicyClient>;
-const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetPackageInfo = getPackageInfo as Mock<
+  (...args: any[]) => ReturnType<typeof getPackageInfo>
+>;
 const mockedGetCustomDatasetStreams = getCustomDatasetStreams as Mock<
-  ReturnType<typeof getCustomDatasetStreams>
+  (...args: any[]) => ReturnType<typeof getCustomDatasetStreams>
 >;
 const mockedFindDataStreamsFromDifferentPackages = findDataStreamsFromDifferentPackages as Mock<
-  ReturnType<typeof findDataStreamsFromDifferentPackages>
+  (...args: any[]) => ReturnType<typeof findDataStreamsFromDifferentPackages>
 >;
 const mockedCheckExistingDataStreamsAreFromDifferentPackage =
   checkExistingDataStreamsAreFromDifferentPackage as Mock<
-    ReturnType<typeof checkExistingDataStreamsAreFromDifferentPackage>
+    (...args: any[]) => ReturnType<typeof checkExistingDataStreamsAreFromDifferentPackage>
   >;
 const mockedRemoveAssetsForInputPackagePolicy = removeAssetsForInputPackagePolicy as Mock<
-  ReturnType<typeof removeAssetsForInputPackagePolicy>
+  (...args: any[]) => ReturnType<typeof removeAssetsForInputPackagePolicy>
 >;
 const mockedIsInputPackageDatasetUsedByMultiplePolicies =
   isInputPackageDatasetUsedByMultiplePolicies as Mock<
-    ReturnType<typeof isInputPackageDatasetUsedByMultiplePolicies>
+    (...args: any[]) => ReturnType<typeof isInputPackageDatasetUsedByMultiplePolicies>
   >;
 
 describe('deletePackageDatastreamAssetsHandler', () => {

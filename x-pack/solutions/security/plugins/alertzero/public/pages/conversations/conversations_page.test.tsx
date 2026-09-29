@@ -116,9 +116,9 @@ vi.mock('../../components/proposals_trend_chart', () => {
 // Stub the lazy close-investigation modal so lazy-loading and provider complexity don't
 // affect unit tests. The stub renders a minimal dialog and calls the mocked status hook
 // so the mutation assertions still hold.
-vi.mock('../../components/connected_status/connected_close_investigation_modal', () => {
+vi.mock('../../components/connected_status/connected_close_investigation_modal', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const agenticInvestigationsPublic = require('@kbn/agentic-investigations-plugin/public');
+  const agenticInvestigationsPublic = await import('@kbn/agentic-investigations-plugin/public');
   // eslint-disable-next-line react/display-name
   const ConnectedCloseInvestigationModal = ({
     investigation,

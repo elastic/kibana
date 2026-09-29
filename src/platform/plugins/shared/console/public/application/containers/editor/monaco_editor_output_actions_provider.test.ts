@@ -41,7 +41,7 @@ const createMockModel = (value: string): monaco.editor.ITextModel => {
 
 describe('MonacoEditorOutputActionsProvider', () => {
   let editor: Mocked<monaco.editor.IStandaloneCodeEditor>;
-  let setEditorActionsCss: Mock<void, [CSSProperties]>;
+  let setEditorActionsCss: Mock<(...args: [CSSProperties]) => void>;
   let triggerCursorPositionChange: () => Promise<void>;
   let triggerCursorSelectionChange: () => Promise<void>;
   let provider: MonacoEditorOutputActionsProvider;

@@ -174,7 +174,7 @@ beforeAll(async () => {
 });
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+  (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => false);
   useKibanaMock().services.application.capabilities = {
     ...capabilities,
     maintenanceWindow: {
@@ -547,7 +547,7 @@ describe('alertToListItem', () => {
 
 describe('execution duration overview', () => {
   it('render last execution status', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
 
     const rule = mockRule({
       executionStatus: { status: 'ok', lastExecutionDate: new Date('2020-08-20T19:23:38Z') },
@@ -620,12 +620,14 @@ describe('disable/enable functionality', () => {
 
 describe('tabbed content', () => {
   it('defaults to alerts tab when no tabId is in the URL', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation((feature: string) => {
-      if (feature === 'rulesDetailLogs') {
-        return true;
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
       }
-      return false;
-    });
+    );
 
     const rule = mockRule();
     const ruleType = mockRuleType();
@@ -647,12 +649,14 @@ describe('tabbed content', () => {
   });
 
   it('defaults to history tab when tabId=history is in the URL', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation((feature: string) => {
-      if (feature === 'rulesDetailLogs') {
-        return true;
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
       }
-      return false;
-    });
+    );
 
     const rule = mockRule();
     const ruleType = mockRuleType();
@@ -674,12 +678,14 @@ describe('tabbed content', () => {
   });
 
   it('tabbed content renders when the event log experiment is on', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation((feature: string) => {
-      if (feature === 'rulesDetailLogs') {
-        return true;
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      (feature: string) => {
+        if (feature === 'rulesDetailLogs') {
+          return true;
+        }
+        return false;
       }
-      return false;
-    });
+    );
 
     const rule = mockRule();
     const ruleType = mockRuleType();

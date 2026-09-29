@@ -45,20 +45,22 @@ vi.mock('./otel_collector');
 vi.mock('./related_saved_objects');
 
 const mockedGetElasticAgentMonitoringPermissions = getMonitoringPermissions as Mock<
-  ReturnType<typeof getMonitoringPermissions>
+  (...args: any[]) => ReturnType<typeof getMonitoringPermissions>
 >;
 const mockedAgentPolicyService = agentPolicyService as Mocked<typeof agentPolicyService>;
 const mockedGenerateOtelcolConfig = generateOtelcolConfig as Mock<
-  ReturnType<typeof generateOtelcolConfig>
+  (...args: any[]) => ReturnType<typeof generateOtelcolConfig>
 >;
 const mockedFetchRelatedSavedObjects = fetchRelatedSavedObjects as Mock<
-  ReturnType<typeof fetchRelatedSavedObjects>
+  (...args: any[]) => ReturnType<typeof fetchRelatedSavedObjects>
 >;
 
 const soClientMock = createSavedObjectClientMock();
-const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetPackageInfo = getPackageInfo as Mock<
+  (...args: any[]) => ReturnType<typeof getPackageInfo>
+>;
 const mockedGetFleetServerHostsForAgentPolicy = getFleetServerHostsForAgentPolicy as Mock<
-  ReturnType<typeof getFleetServerHostsForAgentPolicy>
+  (...args: any[]) => ReturnType<typeof getFleetServerHostsForAgentPolicy>
 >;
 
 function mockAgentPolicy(data: Partial<AgentPolicy>) {

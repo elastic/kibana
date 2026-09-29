@@ -35,7 +35,7 @@ import { take } from 'rxjs';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
 
-const MockPluginsSystem: Mock<PluginsSystem<PluginType>> = PluginsSystem as any;
+const MockPluginsSystem: Mock<(...args: any[]) => PluginsSystem<PluginType>> = PluginsSystem as any;
 
 let pluginsService: PluginsService;
 let pluginsConfig: PluginsConfigType;

@@ -23,7 +23,7 @@ vi.mock('@kbn/upgrade-assistant-pkg-server', () => {
 
 // Need to require to get mock on named export to work.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const ESUpgradeStatusApis = require('../lib/es_deprecations_status');
+const ESUpgradeStatusApis = await import('../lib/es_deprecations_status');
 ESUpgradeStatusApis.getESUpgradeStatus = vi.fn();
 
 import { registerESDeprecationRoutes } from './es_deprecations';

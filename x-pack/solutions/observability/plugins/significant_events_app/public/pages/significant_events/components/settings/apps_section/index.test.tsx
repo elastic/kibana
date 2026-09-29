@@ -41,7 +41,7 @@ const mockUseUnbindChannel = useUnbindChannel as MockedFunction<typeof useUnbind
 
 // AppsSection pulls the whole card + bindings together.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { AppsSection } = require('.');
+const { AppsSection } = await import('.');
 
 const bindChannel = vi.fn().mockResolvedValue(undefined);
 const unbindChannel = vi.fn().mockResolvedValue(undefined);

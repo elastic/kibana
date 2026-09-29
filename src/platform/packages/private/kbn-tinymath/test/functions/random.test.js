@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { random } = require('../../src/functions/random');
+const { random } = await import('../../src/functions/random');
 
 describe('Random', () => {
   it('numbers', () => {

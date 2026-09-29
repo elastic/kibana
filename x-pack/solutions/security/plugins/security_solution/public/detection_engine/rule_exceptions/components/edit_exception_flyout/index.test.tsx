@@ -47,16 +47,20 @@ vi.mock('../../../rule_management/logic/use_rule');
 vi.mock('@kbn/lists-plugin/public');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as Mock<
-  ReturnType<typeof getExceptionBuilderComponentLazy>
+  (...args: unknown[]) => ReturnType<typeof getExceptionBuilderComponentLazy>
 >;
-const mockUseSignalIndex = useSignalIndex as Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseSignalIndex = useSignalIndex as Mock<
+  (...args: unknown[]) => Partial<ReturnType<typeof useSignalIndex>>
+>;
 const mockUseFetchIndex = useFetchIndex as Mock;
-const mockUseCurrentUser = useCurrentUser as Mock<Partial<ReturnType<typeof useCurrentUser>>>;
+const mockUseCurrentUser = useCurrentUser as Mock<
+  (...args: unknown[]) => Partial<ReturnType<typeof useCurrentUser>>
+>;
 const mockFetchIndexPatterns = useFetchIndexPatterns as Mock<
-  ReturnType<typeof useFetchIndexPatterns>
+  (...args: unknown[]) => ReturnType<typeof useFetchIndexPatterns>
 >;
 const mockUseAddOrUpdateException = useCreateOrUpdateException as Mock<
-  ReturnType<typeof useCreateOrUpdateException>
+  (...args: unknown[]) => ReturnType<typeof useCreateOrUpdateException>
 >;
 const mockUseFindExceptionListReferences = useFindExceptionListReferences as Mock;
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;

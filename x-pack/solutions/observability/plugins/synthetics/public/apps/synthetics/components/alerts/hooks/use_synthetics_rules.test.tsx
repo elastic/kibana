@@ -57,7 +57,7 @@ const mockDispatch = vi.fn();
 const mockUseSelector = redux.useSelector as MockedFunction<typeof redux.useSelector>;
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const kibanaModule = require('@kbn/kibana-react-plugin/public');
+const kibanaModule = await import('@kbn/kibana-react-plugin/public');
 const mockUseKibana = kibanaModule.useKibana as MockedFunction<any>;
 
 const mockUptimeCapabilities = (overrides: { save?: boolean; canManageRules?: boolean } = {}) => ({

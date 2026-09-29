@@ -30,10 +30,11 @@ const mockGetAbsoluteTime = vi.fn(() => ({
 }));
 
 const mockGetById: Mock<
-  | {
-      fetchSpan: Mock<Promise<UnifiedSpanDocument | undefined>>;
-    }
-  | undefined
+  (...args: any[]) =>
+    | {
+        fetchSpan: Mock<(...args: any[]) => Promise<UnifiedSpanDocument | undefined>>;
+      }
+    | undefined
 > = vi.fn(() => ({
   fetchSpan: mockFetchSpan,
 }));

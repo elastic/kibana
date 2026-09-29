@@ -167,7 +167,7 @@ interface OrchestrationDeps {
     fetchFindLatestPackage: Mock;
   };
   logger: ReturnType<typeof loggerMock.create>;
-  isPluginInitialized: Mock<boolean, []>;
+  isPluginInitialized: Mock<(...args: []) => boolean>;
 }
 
 const createOrchestrationDeps = (): OrchestrationDeps => {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { log } = require('../../src/functions/log');
+const { log } = await import('../../src/functions/log');
 
 describe('Log', () => {
   it('numbers', () => {

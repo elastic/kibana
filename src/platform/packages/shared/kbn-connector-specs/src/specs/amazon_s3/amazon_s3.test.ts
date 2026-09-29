@@ -30,7 +30,7 @@ vi.mock('./amazon_s3_api', () => {
 
 // Load the module under test after mocks are in place
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { AmazonS3 } = require('./amazon_s3');
+const { AmazonS3 } = await import('./amazon_s3');
 
 describe('AmazonS3', () => {
   const mockClient = {

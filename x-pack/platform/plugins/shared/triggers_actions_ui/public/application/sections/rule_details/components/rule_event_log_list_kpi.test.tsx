@@ -75,7 +75,9 @@ describe('rule_event_log_list_kpi', () => {
     useKibanaMock().services.notifications.toasts = {
       addDanger: addDangerMock,
     } as unknown as IToasts;
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     loadExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
     loadGlobalExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
   });

@@ -139,7 +139,7 @@ describe('SavedObjectsService', () => {
       const coreContext = createCoreContext();
       const soService = new SavedObjectsService(coreContext);
 
-      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as Mock<any, any>;
+      const mockedRegisterCoreObjectTypes = registerCoreObjectTypes as Mock<(...args: any) => any>;
       expect(mockedRegisterCoreObjectTypes).not.toHaveBeenCalled();
       await soService.setup(createSetupDeps());
       expect(mockedRegisterCoreObjectTypes).toHaveBeenCalledTimes(1);

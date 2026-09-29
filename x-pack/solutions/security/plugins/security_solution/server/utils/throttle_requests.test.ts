@@ -20,7 +20,7 @@ describe('throttleRequests', () => {
   let mockContext: SecuritySolutionRequestHandlerContext;
   let mockRequest: KibanaRequest;
   let mockResponse: KibanaResponseFactory;
-  let mockHandler: Mock<MaybePromise<IKibanaResponse>>;
+  let mockHandler: Mock<(...args: unknown[]) => MaybePromise<IKibanaResponse>>;
 
   beforeEach(() => {
     mockContext = {} as SecuritySolutionRequestHandlerContext;

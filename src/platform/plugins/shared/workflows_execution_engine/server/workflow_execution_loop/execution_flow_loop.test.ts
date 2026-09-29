@@ -22,7 +22,7 @@ vi.mock('./run_node', () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { runNode } = require('./run_node');
+const { runNode } = await import('./run_node');
 
 describe('executionFlowLoop', () => {
   beforeEach(() => {

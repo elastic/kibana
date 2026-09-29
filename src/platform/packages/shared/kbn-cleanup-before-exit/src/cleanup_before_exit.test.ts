@@ -23,7 +23,7 @@ const waitForTimers = async (ms = 5) => {
 };
 
 type MockedProcess = NodeJS.Process & {
-  exit: Mock<void, [number?]>;
+  exit: Mock<(...args: [number?]) => void>;
   kill: Mock;
 };
 

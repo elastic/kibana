@@ -149,7 +149,7 @@ describe('Telemetry Collection Manager', () => {
 
           it('calls getStats with passed refreshCache config', async () => {
             const getStatsCollectionConfig: MockInstance<
-              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              (...args: unknown[]) => TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
               // @ts-expect-error spying on private method.
             > = vi.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);
@@ -263,7 +263,7 @@ describe('Telemetry Collection Manager', () => {
 
           it('calls getStats with config { refreshCache: true } even if set to false', async () => {
             const getStatsCollectionConfig: MockInstance<
-              TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
+              (...args: unknown[]) => TelemetryCollectionManagerPlugin['getStatsCollectionConfig']
               // @ts-expect-error spying on private method.
             > = vi.spyOn(telemetryCollectionManager, 'getStatsCollectionConfig');
             await setupApi.getStats(config);

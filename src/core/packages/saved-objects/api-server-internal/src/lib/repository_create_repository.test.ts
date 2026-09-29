@@ -62,7 +62,9 @@ describe('SavedObjectsRepository#createRepository', () => {
   });
 
   const migrator = kibanaMigratorMock.create({ types: typeRegistry.getAllTypes() });
-  const RepositoryConstructor = SavedObjectsRepository as unknown as Mock<SavedObjectsRepository>;
+  const RepositoryConstructor = SavedObjectsRepository as unknown as Mock<
+    (...args: any[]) => SavedObjectsRepository
+  >;
 
   beforeEach(() => {
     logger = loggerMock.create();

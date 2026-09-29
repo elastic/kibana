@@ -25,7 +25,7 @@ import {
 const mockSha256Hash = vi.fn();
 const mockCalculateAWSA4Signature = vi.fn();
 
-require('../../auth_types/aws_crypto_helpers');
+await import('../../auth_types/aws_crypto_helpers');
 
 vi.mock('../../auth_types/aws_crypto_helpers', () => {
   const mocked = {

@@ -486,7 +486,7 @@ describe('rules_settings_flyout', () => {
   });
 
   test('alert delete is disabled when provided with insufficient write permissions', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
 
     const [
       {

@@ -17,8 +17,8 @@ import _ from 'lodash';
 describe('condition.js', function () {
   let comparable;
   let seriesList;
-  beforeEach(function () {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async function () {
+    seriesList = (await import('./fixtures/series_list'))();
     comparable = getSeriesList('', [
       [moment.utc('1980-01-01T00:00:00.000Z'), 12],
       [moment.utc('1981-01-01T00:00:00.000Z'), 33],

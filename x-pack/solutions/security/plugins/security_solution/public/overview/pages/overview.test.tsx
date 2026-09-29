@@ -127,7 +127,9 @@ const endpointNoticeMessage = (hasMessageValue: boolean) => {
 const mockUseUserPrivileges = useUserPrivileges as Mock;
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 const mockUseFetchIndex = useFetchIndex as Mock;
-const mockUseMessagesStorage: Mock = useMessagesStorage as Mock<UseMessagesStorage>;
+const mockUseMessagesStorage: Mock = useMessagesStorage as Mock<
+  (...args: unknown[]) => UseMessagesStorage
+>;
 
 describe('Overview', () => {
   const loadedUserPrivilegesState = (

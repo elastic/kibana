@@ -29,8 +29,8 @@ describe('upload', () => {
   let ctx: FileKindsRequestHandlerContext;
   let fileService: DeeplyMockedKeys<FileServiceStart>;
 
-  let uploadContent: Mock<ReturnType<File['uploadContent']>>;
-  let deleteFn: Mock<ReturnType<File['delete']>>;
+  let uploadContent: Mock<(...args: any[]) => ReturnType<File['uploadContent']>>;
+  let deleteFn: Mock<(...args: any[]) => ReturnType<File['delete']>>;
 
   const testErrorMessage = 'stop';
   const stopFn = async () => {

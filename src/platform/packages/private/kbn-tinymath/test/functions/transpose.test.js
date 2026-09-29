@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { transpose } = require('../../src/functions/lib/transpose');
+const { transpose } = await import('../../src/functions/lib/transpose');
 
 describe('transpose', () => {
   it('2D arrays', () => {

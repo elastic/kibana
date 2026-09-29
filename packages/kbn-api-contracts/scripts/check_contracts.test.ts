@@ -119,8 +119,8 @@ describe('check_contracts', () => {
     error: Mock;
   }
 
-  beforeAll(() => {
-    require('./check_contracts');
+  beforeAll(async () => {
+    await import('./check_contracts');
     runCallback = mockRun.mock.calls[0][0];
   });
 

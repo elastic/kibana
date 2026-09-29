@@ -35,7 +35,7 @@ vi.mock('./data_stream', () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { initializeDataStreamClient } = require('./data_stream');
+const { initializeDataStreamClient } = await import('./data_stream');
 
 describe('LogsRepository', () => {
   let dataStreamClient: ReturnType<typeof createDataStreamClientMock>;

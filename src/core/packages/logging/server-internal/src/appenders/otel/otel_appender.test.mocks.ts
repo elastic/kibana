@@ -25,8 +25,8 @@ export const mockResourceFromAttributes = vi.fn();
 export interface MockResource {
   type: string;
   attributes: Record<string, unknown>;
-  merge: Mock<MockResource>;
-  getRawAttributes: Mock<Array<[string, unknown]>>;
+  merge: Mock<(...args: any[]) => MockResource>;
+  getRawAttributes: Mock<(...args: any[]) => Array<[string, unknown]>>;
 }
 
 export const makeMockResource = (

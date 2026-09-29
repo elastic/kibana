@@ -13,8 +13,9 @@ import { resolve } from 'path';
 import { loggerMock } from '@kbn/logging-mocks';
 import { createPriceService, type PriceService, type PriceServiceFetch } from './price_service';
 
-const mockFetchFn = (): Mock<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>> =>
-  vi.fn<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>>();
+const mockFetchFn = (): Mock<
+  (...args: Parameters<PriceServiceFetch>) => ReturnType<PriceServiceFetch>
+> => vi.fn<ReturnType<PriceServiceFetch>, Parameters<PriceServiceFetch>>();
 
 const FIXTURE: unknown[] = JSON.parse(
   readFileSync(resolve(__dirname, '__fixtures__/base_prices.json'), 'utf8')

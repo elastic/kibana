@@ -24,13 +24,13 @@ import type {
 import { parseExpression } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { __getLastExecution, __getLastRenderMode } = require('./services');
+const { __getLastExecution, __getLastRenderMode } = await import('./services');
 
 const element = null as unknown as HTMLElement;
 
 let testScheduler: TestScheduler;
 
-vi.mock('./services', () => {
+vi.mock('./services', async () => {
   let renderMode: RenderMode | undefined;
   const renderers: Record<string, unknown> = {
     test: {
@@ -43,7 +43,7 @@ vi.mock('./services', () => {
 
   const service: ExpressionsService =
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    new (require('../common/service/expressions_services').ExpressionsService)();
+    new (await import('../common/service/expressions_services')).ExpressionsService();
 
   const testFn: AnyExpressionFunctionDefinition = {
     fn: () => ({ type: 'render', as: 'test' }),
@@ -54,7 +54,8 @@ vi.mock('./services', () => {
   service.registerFunction(testFn);
 
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  for (const func of require('../common/test_helpers/expression_functions').functionTestSpecs) {
+  for (const func of (await import('../common/test_helpers/expression_functions'))
+    .functionTestSpecs) {
     service.registerFunction(func);
   }
 

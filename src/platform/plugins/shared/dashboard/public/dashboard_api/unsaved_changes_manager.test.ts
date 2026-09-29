@@ -83,7 +83,7 @@ let onSave$: Subject<DashboardSaveEvent>;
 const setBackupStateMock = vi.fn();
 
 describe('unsavedChangesManager', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
     setBackupStateMock.mockReset();
     onSave$ = new Subject<DashboardSaveEvent>();
@@ -91,7 +91,7 @@ describe('unsavedChangesManager', () => {
     layoutUnsavedChanges$.next({});
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/dashboard_api_services').getDashboardBackupService = () => ({
+    (await import('../services/dashboard_api_services')).getDashboardBackupService = () => ({
       setState: setBackupStateMock,
     });
   });

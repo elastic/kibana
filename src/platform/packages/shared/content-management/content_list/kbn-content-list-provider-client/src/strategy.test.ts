@@ -39,7 +39,7 @@ describe('createClientStrategy', () => {
 
   const createMockFindItems = (
     items: UserContentCommonSchema[] = []
-  ): Mock<ReturnType<TableListViewFindItemsFn>> => {
+  ): Mock<(...args: any[]) => ReturnType<TableListViewFindItemsFn>> => {
     return vi.fn().mockResolvedValue({ hits: items, total: items.length });
   };
 

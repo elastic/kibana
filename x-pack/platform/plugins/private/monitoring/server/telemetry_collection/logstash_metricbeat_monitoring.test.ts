@@ -15,7 +15,9 @@ import {
 } from '../../common/constants';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const logstashStatsResultSetOfMetricbeatMonitoring = require('./__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json');
+const logstashStatsResultSetOfMetricbeatMonitoring = await import(
+  './__mocks__/fixtures/logstash_stats_metricbeat_monitoring_results.json'
+);
 
 const logstashStateResultsMapOfMetricbeatMonitoring = new Map();
 

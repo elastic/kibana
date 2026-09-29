@@ -46,15 +46,17 @@ vi.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_pr
 vi.mock('../../../rule_management/api/hooks/use_fetch_rule_by_id_query');
 
 const mockGetExceptionBuilderComponentLazy = getExceptionBuilderComponentLazy as Mock<
-  ReturnType<typeof getExceptionBuilderComponentLazy>
+  (...args: unknown[]) => ReturnType<typeof getExceptionBuilderComponentLazy>
 >;
 const mockUseAddOrUpdateException = useCreateOrUpdateException as Mock<
-  ReturnType<typeof useCreateOrUpdateException>
+  (...args: unknown[]) => ReturnType<typeof useCreateOrUpdateException>
 >;
 const mockFetchIndexPatterns = useFetchIndexPatterns as Mock<
-  ReturnType<typeof useFetchIndexPatterns>
+  (...args: unknown[]) => ReturnType<typeof useFetchIndexPatterns>
 >;
-const mockUseSignalIndex = useSignalIndex as Mock<Partial<ReturnType<typeof useSignalIndex>>>;
+const mockUseSignalIndex = useSignalIndex as Mock<
+  (...args: unknown[]) => Partial<ReturnType<typeof useSignalIndex>>
+>;
 const mockUseFetchIndex = useFetchIndex as Mock;
 const mockUseAlertsPrivileges = useAlertsPrivileges as Mock;
 
@@ -65,7 +67,9 @@ const alertDataMock: AlertData = {
 };
 
 describe('When the add exception modal is opened', () => {
-  let defaultEndpointItems: MockInstance<ReturnType<typeof helpers.defaultEndpointExceptionItems>>;
+  let defaultEndpointItems: MockInstance<
+    (...args: unknown[]) => ReturnType<typeof helpers.defaultEndpointExceptionItems>
+  >;
   beforeEach(() => {
     mockGetExceptionBuilderComponentLazy.mockReturnValue(
       <span data-test-subj="alertExceptionBuilder" />

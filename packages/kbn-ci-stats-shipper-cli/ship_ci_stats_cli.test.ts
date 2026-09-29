@@ -50,8 +50,8 @@ describe('ship_ci_stats_cli', () => {
   const mockMetrics = vi.fn();
   const mockFromEnv = CiStatsReporter.fromEnv as MockedFunction<typeof CiStatsReporter.fromEnv>;
 
-  beforeAll(() => {
-    require('./ship_ci_stats_cli');
+  beforeAll(async () => {
+    await import('./ship_ci_stats_cli');
     runCallback = mockRun.mock.calls[0][0];
   });
 

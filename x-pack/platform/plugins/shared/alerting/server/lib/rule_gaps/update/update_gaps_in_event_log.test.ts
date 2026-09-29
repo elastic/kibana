@@ -23,7 +23,7 @@ vi.spyOn(global, 'setTimeout').mockImplementation((cb: () => void) => {
 
 // Require the module after useFakeTimers is called
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const updateGapsInEventLog = require('./update_gaps_in_event_log').updateGapsInEventLog;
+const updateGapsInEventLog = (await import('./update_gaps_in_event_log')).updateGapsInEventLog;
 
 describe('updateGapsInEventLog', () => {
   const mockLogger = loggerMock.create();

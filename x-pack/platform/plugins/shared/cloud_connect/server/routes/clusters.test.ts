@@ -33,7 +33,7 @@ describe('Clusters Routes', () => {
   let mockRequest: any;
   let mockResponse: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     mockLogger = loggingSystemMock.createLogger();
@@ -90,7 +90,7 @@ describe('Clusters Routes', () => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createStorageService } = require('../lib/create_storage_service');
+    const { createStorageService } = await import('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
 
@@ -668,7 +668,7 @@ describe('Clusters Routes', () => {
 
     it('should enable EIS and configure inference on happy path', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { enableInferenceCCM } = require('../services/inference_ccm');
+      const { enableInferenceCCM } = await import('../services/inference_ccm');
 
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',
@@ -816,7 +816,7 @@ describe('Clusters Routes', () => {
 
     it('should rollback when inference configuration fails', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { enableInferenceCCM } = require('../services/inference_ccm');
+      const { enableInferenceCCM } = await import('../services/inference_ccm');
 
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',
@@ -884,7 +884,7 @@ describe('Clusters Routes', () => {
 
     it('should return dual error when both inference and rollback fail', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { enableInferenceCCM } = require('../services/inference_ccm');
+      const { enableInferenceCCM } = await import('../services/inference_ccm');
 
       mockStorageService.getApiKey.mockResolvedValue({
         apiKey: 'test-api-key-123',

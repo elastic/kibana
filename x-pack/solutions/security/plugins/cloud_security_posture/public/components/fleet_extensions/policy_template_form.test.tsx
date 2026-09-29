@@ -142,7 +142,7 @@ describe('<CspPolicyTemplateForm />', () => {
     edit?: boolean;
     newPolicy: NewPackagePolicy;
     packageInfo?: PackageInfo;
-    onChange?: Mock<void, [NewPackagePolicy]>;
+    onChange?: Mock<(...args: [NewPackagePolicy]) => void>;
     isAgentlessEnabled?: boolean;
     integrationToEnable?: string;
     defaultSetupTechnology?: SetupTechnology;

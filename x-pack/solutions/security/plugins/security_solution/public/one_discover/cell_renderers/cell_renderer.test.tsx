@@ -21,7 +21,9 @@ import type { SecurityAppStore } from '../../common/store/types';
 
 vi.mock('../../timelines/components/timeline/cell_rendering/default_cell_renderer');
 
-const DefaultCellRendererMock = DefaultCellRenderer as unknown as Mock<React.ReactElement>;
+const DefaultCellRendererMock = DefaultCellRenderer as unknown as Mock<
+  (...args: unknown[]) => React.ReactElement
+>;
 
 /**
  * Mocking DefaultCellRenderer here because it will be renderered

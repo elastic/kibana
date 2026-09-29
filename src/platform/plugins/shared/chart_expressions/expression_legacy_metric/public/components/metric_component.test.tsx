@@ -19,14 +19,14 @@ import { LabelPosition } from '../../common/constants';
 
 vi.mock('../services', () => {
   const mocked = {
-    getFormatService: () => {
+    getFormatService: async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getFormatService } = require('../__mocks__/services');
+      const { getFormatService } = await import('../__mocks__/services');
       return getFormatService();
     },
-    getPaletteService: () => {
+    getPaletteService: async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getPaletteService } = require('../__mocks__/services');
+      const { getPaletteService } = await import('../__mocks__/services');
       return getPaletteService();
     },
   };

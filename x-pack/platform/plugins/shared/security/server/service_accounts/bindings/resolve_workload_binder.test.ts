@@ -14,7 +14,7 @@ import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './resolv
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 
 describe('resolveWorkloadBinder', () => {
-  let resolveUserProfileId: Mock<Promise<string | undefined>, []>;
+  let resolveUserProfileId: Mock<(...args: []) => Promise<string | undefined>>;
 
   beforeEach(() => {
     resolveUserProfileId = vi.fn().mockResolvedValue('resolved-profile-uid');

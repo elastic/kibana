@@ -60,7 +60,7 @@ beforeEach(() => {
 
 describe('internalBulkResolve', () => {
   let client: ReturnType<typeof elasticsearchClientMock.createElasticsearchClient>;
-  let incrementCounterInternal: Mock<any, any>;
+  let incrementCounterInternal: Mock<(...args: any) => any>;
   let serializer: SavedObjectsSerializer;
   let apiContext: ApiExecutionContextMock;
 

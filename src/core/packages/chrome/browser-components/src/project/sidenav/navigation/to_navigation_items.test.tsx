@@ -19,7 +19,9 @@ import type {
 
 // use require to bypass unnecessary TypeScript checks for JSON imports
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const navigationTree = require('./mocks/mock_security_tree.json') as NavigationTreeDefinitionUI;
+const navigationTree = (await import(
+  './mocks/mock_security_tree.json'
+)) as NavigationTreeDefinitionUI;
 
 const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
 

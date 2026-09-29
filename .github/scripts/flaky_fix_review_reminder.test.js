@@ -17,7 +17,7 @@ const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
 
-const reminder = require('./flaky_fix_review_reminder');
+const reminder = await import('./flaky_fix_review_reminder');
 
 const NOW = new Date('2026-08-18T12:00:00Z').getTime();
 const iso = (d) => new Date(d).toISOString();

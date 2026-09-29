@@ -32,7 +32,7 @@ describe('logHealthMetrics', () => {
     // Reset the last state by running through this as OK
     // (calculateHealthStatus as jest.Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
     resetLastLogLevel();
-    (calculateHealthStatus as Mock<HealthStatus>).mockReset();
+    (calculateHealthStatus as Mock<(...args: unknown[]) => HealthStatus>).mockReset();
   });
 
   it('should log a warning message to enable verbose logging when the status goes from OK to Warning/Error', async () => {
@@ -48,30 +48,38 @@ describe('logHealthMetrics', () => {
     const { calculateHealthStatus } = await vi.importMock('./calculate_health_status');
 
     // We must change from OK to Warning
-    (calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>).mockImplementation(
-      () => ({
-        status: HealthStatus.OK,
-      })
-    );
+    (
+      calculateHealthStatus as Mock<
+        (...args: unknown[]) => { status: HealthStatus; reason?: string }
+      >
+    ).mockImplementation(() => ({
+      status: HealthStatus.OK,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>).mockImplementation(
-      () => ({
-        status: HealthStatus.Warning,
-      })
-    );
+    (
+      calculateHealthStatus as Mock<
+        (...args: unknown[]) => { status: HealthStatus; reason?: string }
+      >
+    ).mockImplementation(() => ({
+      status: HealthStatus.Warning,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
     // We must change from OK to Error
-    (calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>).mockImplementation(
-      () => ({
-        status: HealthStatus.OK,
-      })
-    );
+    (
+      calculateHealthStatus as Mock<
+        (...args: unknown[]) => { status: HealthStatus; reason?: string }
+      >
+    ).mockImplementation(() => ({
+      status: HealthStatus.OK,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>).mockImplementation(
-      () => ({
-        status: HealthStatus.Error,
-      })
-    );
+    (
+      calculateHealthStatus as Mock<
+        (...args: unknown[]) => { status: HealthStatus; reason?: string }
+      >
+    ).mockImplementation(() => ({
+      status: HealthStatus.Error,
+    }));
     logHealthMetrics(health, logger, config, true, docLinks);
 
     const debugCalls = (logger as Mocked<Logger>).debug.mock.calls;
@@ -98,9 +106,13 @@ describe('logHealthMetrics', () => {
     const { calculateHealthStatus } = await vi.importMock('./calculate_health_status');
 
     // We must change from Warning to OK
-    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.Warning);
+    (calculateHealthStatus as Mock<(...args: unknown[]) => HealthStatus>).mockImplementation(
+      () => HealthStatus.Warning
+    );
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    (calculateHealthStatus as Mock<(...args: unknown[]) => HealthStatus>).mockImplementation(
+      () => HealthStatus.OK
+    );
     logHealthMetrics(health, logger, config, true, docLinks);
     expect((logger as Mocked<Logger>).warn).not.toHaveBeenCalled();
   });
@@ -119,9 +131,13 @@ describe('logHealthMetrics', () => {
     const { calculateHealthStatus } = await vi.importMock('./calculate_health_status');
 
     // We must change from Error to OK
-    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.Error);
+    (calculateHealthStatus as Mock<(...args: unknown[]) => HealthStatus>).mockImplementation(
+      () => HealthStatus.Error
+    );
     logHealthMetrics(health, logger, config, true, docLinks);
-    (calculateHealthStatus as Mock<HealthStatus>).mockImplementation(() => HealthStatus.OK);
+    (calculateHealthStatus as Mock<(...args: unknown[]) => HealthStatus>).mockImplementation(
+      () => HealthStatus.OK
+    );
     logHealthMetrics(health, logger, config, true, docLinks);
     expect((logger as Mocked<Logger>).warn).not.toHaveBeenCalled();
   });
@@ -203,11 +219,13 @@ describe('logHealthMetrics', () => {
     });
     const health = getMockMonitoredHealth();
     const { calculateHealthStatus } = await vi.importMock('./calculate_health_status');
-    (calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>).mockImplementation(
-      () => ({
-        status: HealthStatus.Warning,
-      })
-    );
+    (
+      calculateHealthStatus as Mock<
+        (...args: unknown[]) => { status: HealthStatus; reason?: string }
+      >
+    ).mockImplementation(() => ({
+      status: HealthStatus.Warning,
+    }));
 
     logHealthMetrics(health, logger, config, true, docLinks);
 
@@ -231,11 +249,13 @@ describe('logHealthMetrics', () => {
     });
     const health = getMockMonitoredHealth();
     const { calculateHealthStatus } = await vi.importMock('./calculate_health_status');
-    (calculateHealthStatus as Mock<{ status: HealthStatus; reason?: string }>).mockImplementation(
-      () => ({
-        status: HealthStatus.Error,
-      })
-    );
+    (
+      calculateHealthStatus as Mock<
+        (...args: unknown[]) => { status: HealthStatus; reason?: string }
+      >
+    ).mockImplementation(() => ({
+      status: HealthStatus.Error,
+    }));
 
     logHealthMetrics(health, logger, config, true, docLinks);
 

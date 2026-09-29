@@ -21,7 +21,7 @@ const {
   parseTriageGroups,
   runTriageModelStructured,
   runTriageModel,
-} = require('./failure_context_helpers');
+} = await import('./failure_context_helpers');
 
 const SUITE = 'significant-events';
 

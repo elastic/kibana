@@ -67,11 +67,11 @@ describe('CopyToDashboardModal', () => {
   const closeModalMock = vi.fn();
   const navigateToWithEmbeddablePackagesMock = vi.fn();
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../services/kibana_services').embeddableService = {
+    (await import('../services/kibana_services')).embeddableService = {
       getStateTransfer: () => ({
         navigateToWithEmbeddablePackages: navigateToWithEmbeddablePackagesMock,
       }),

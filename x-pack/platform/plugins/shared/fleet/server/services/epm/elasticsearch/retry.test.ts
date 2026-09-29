@@ -17,8 +17,7 @@ import { errors as EsErrors } from '@elastic/elasticsearch';
 import { retryTransientEsErrors } from './retry';
 
 const setTimeoutMock = setTimeout as Mock<
-  ReturnType<typeof setTimeout>,
-  Parameters<typeof setTimeout>
+  (...args: Parameters<typeof setTimeout>) => ReturnType<typeof setTimeout>
 >;
 
 describe('retryTransientErrors', () => {

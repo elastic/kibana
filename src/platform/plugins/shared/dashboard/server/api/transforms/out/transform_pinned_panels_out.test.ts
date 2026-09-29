@@ -35,9 +35,9 @@ import {
 
 const mockGetTransforms = vi.fn();
 
-beforeAll(() => {
+beforeAll(async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  require('../../../kibana_services').embeddableService = {
+  (await import('../../../kibana_services')).embeddableService = {
     getTransforms: mockGetTransforms,
   };
 

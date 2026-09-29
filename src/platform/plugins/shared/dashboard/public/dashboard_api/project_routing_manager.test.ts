@@ -15,9 +15,9 @@ import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 import { initializeProjectRoutingManager } from './project_routing_manager';
 import { cpsService } from '../services/kibana_services';
 
-vi.mock('../services/kibana_services', () => {
+vi.mock('../services/kibana_services', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { cpsServiceMock } = require('@kbn/cps/public/__mocks__');
+  const { cpsServiceMock } = await import('@kbn/cps/public/__mocks__');
   return {
     cpsService: cpsServiceMock,
   };
@@ -41,10 +41,10 @@ describe('projectRouting', () => {
     };
   };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     // Reset the project routing subject before each test
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { resetCpsMock } = require('@kbn/cps/public/__mocks__');
+    const { resetCpsMock } = await import('@kbn/cps/public/__mocks__');
     resetCpsMock();
   });
 

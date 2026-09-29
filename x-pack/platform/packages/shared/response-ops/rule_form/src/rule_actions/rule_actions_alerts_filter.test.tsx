@@ -65,7 +65,7 @@ describe('ruleActionsAlertsFilter', () => {
     });
   });
 
-  (AlertsSearchBar as Mock<any, any>).mockImplementation(
+  (AlertsSearchBar as Mock<(...args: any) => any>).mockImplementation(
     ({ onFiltersUpdated, onQueryChange, onQuerySubmit }: AlertsSearchBarProps) => (
       <div>
         AlertsSearchBar
@@ -208,7 +208,7 @@ describe('ruleActionsAlertsFilter', () => {
       },
     ];
 
-    (AlertsSearchBar as Mock<any, any>).mockImplementation(
+    (AlertsSearchBar as Mock<(...args: any) => any>).mockImplementation(
       ({ onFiltersUpdated, onQueryChange, onQuerySubmit }: AlertsSearchBarProps) => (
         <div>
           AlertsSearchBar
@@ -279,7 +279,7 @@ describe('ruleActionsAlertsFilter', () => {
       },
     };
 
-    (AlertsSearchBar as Mock<any, any>).mockImplementation(
+    (AlertsSearchBar as Mock<(...args: any) => any>).mockImplementation(
       ({ onFiltersUpdated }: AlertsSearchBarProps) => (
         <div>
           AlertsSearchBar

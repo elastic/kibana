@@ -137,9 +137,11 @@ const renderPrivilegeRolesForm = ({
 };
 
 describe('PrivilegesRolesForm', () => {
-  let getRolesSpy: MockInstance<ReturnType<typeof createRolesAPIClientMock>['getRoles']>;
+  let getRolesSpy: MockInstance<
+    (...args: any[]) => ReturnType<typeof createRolesAPIClientMock>['getRoles']
+  >;
   let getAllKibanaPrivilegeSpy: MockInstance<
-    ReturnType<typeof createPrivilegeAPIClientMock>['getAll']
+    (...args: any[]) => ReturnType<typeof createPrivilegeAPIClientMock>['getAll']
   >;
 
   beforeAll(() => {

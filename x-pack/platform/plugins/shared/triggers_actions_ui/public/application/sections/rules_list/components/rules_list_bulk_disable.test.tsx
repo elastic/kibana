@@ -213,7 +213,9 @@ const renderWithProviders = (ui: any) => {
 
 describe('Rules list Bulk Disable', () => {
   beforeAll(async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,

@@ -7,22 +7,27 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { vi } from 'vitest';
+
 import fs from 'node:fs';
 import path from 'node:path';
 import os from 'node:os';
 import { scoutTestTrack } from './test_tracks.ts';
 
-jest.mock('./paths.ts', () => ({
-  SCOUT_TEST_TRACKS_ROOT: '',
-}));
+vi.mock('./paths.ts', () => {
+  const mocked = {
+    SCOUT_TEST_TRACKS_ROOT: '',
+  };
+  return { ...mocked, default: mocked };
+});
 
 describe('scoutTestTrack.definitions', () => {
   let tmpDir: string;
   let pathsMock: { SCOUT_TEST_TRACKS_ROOT: string };
 
-  beforeEach(() => {
+  beforeEach(async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), 'scout-tracks-test-'));
-    pathsMock = require('./paths.ts');
+    pathsMock = await import('./paths.ts');
     pathsMock.SCOUT_TEST_TRACKS_ROOT = tmpDir;
   });
 

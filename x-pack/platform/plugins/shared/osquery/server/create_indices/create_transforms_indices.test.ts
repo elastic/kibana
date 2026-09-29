@@ -34,11 +34,11 @@ interface IndexTemplateResponse {
 
 interface MockEsClient {
   indices: {
-    exists: Mock<Promise<boolean>>;
-    putIndexTemplate: Mock<Promise<{ acknowledged: boolean }>>;
-    create: Mock<Promise<{ acknowledged: boolean }>>;
-    getIndexTemplate: Mock<Promise<IndexTemplateResponse>>;
-    putMapping: Mock<Promise<{ acknowledged: boolean }>>;
+    exists: Mock<(...args: any[]) => Promise<boolean>>;
+    putIndexTemplate: Mock<(...args: any[]) => Promise<{ acknowledged: boolean }>>;
+    create: Mock<(...args: any[]) => Promise<{ acknowledged: boolean }>>;
+    getIndexTemplate: Mock<(...args: any[]) => Promise<IndexTemplateResponse>>;
+    putMapping: Mock<(...args: any[]) => Promise<{ acknowledged: boolean }>>;
   };
 }
 

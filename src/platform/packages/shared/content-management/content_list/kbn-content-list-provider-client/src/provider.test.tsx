@@ -60,7 +60,7 @@ describe('ContentListClientProvider', () => {
 
   const createMockFindItems = (
     items: UserContentCommonSchema[] = []
-  ): Mock<ReturnType<TableListViewFindItemsFn>> => {
+  ): Mock<(...args: any[]) => ReturnType<TableListViewFindItemsFn>> => {
     return vi.fn().mockResolvedValue({ hits: items, total: items.length });
   };
 
@@ -565,7 +565,7 @@ describe('ContentListClientProvider', () => {
 
     const captureFlyoutOnSave = (
       open: NonNullable<ReturnType<typeof captureOpen>['open']>,
-      openContentEditor: Mock<() => void, [OpenContentEditorParams]>
+      openContentEditor: Mock<(...args: [OpenContentEditorParams]) => () => void>
     ) => {
       act(() => {
         open({ id: '1', title: 'Item 1' });

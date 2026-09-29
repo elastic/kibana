@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { eq } = require('../../../src/functions/comparison/eq');
+const { eq } = await import('../../../src/functions/comparison/eq');
 
 describe('Eq', () => {
   it('numbers', () => {

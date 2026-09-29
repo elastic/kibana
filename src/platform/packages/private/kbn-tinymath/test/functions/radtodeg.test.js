@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { radtodeg } = require('../../src/functions/radtodeg');
+const { radtodeg } = await import('../../src/functions/radtodeg');
 
 describe('Radians to Degrees', () => {
   it('numbers', () => {

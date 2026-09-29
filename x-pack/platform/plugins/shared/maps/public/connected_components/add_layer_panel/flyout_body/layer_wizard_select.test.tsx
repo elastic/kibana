@@ -22,9 +22,9 @@ const defaultProps = {
 };
 
 describe('LayerWizardSelect', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../../classes/layers').getLayerWizards = async () => {
+    (await import('../../../classes/layers')).getLayerWizards = async () => {
       return [
         {
           categories: [LAYER_WIZARD_CATEGORY.ELASTICSEARCH],

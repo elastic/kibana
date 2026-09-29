@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { ifelse } = require('../../../src/functions/comparison/ifelse');
+const { ifelse } = await import('../../../src/functions/comparison/ifelse');
 
 describe('Ifelse', () => {
   it('should basically work', () => {

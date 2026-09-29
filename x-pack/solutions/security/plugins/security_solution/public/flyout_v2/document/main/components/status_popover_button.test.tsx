@@ -137,7 +137,9 @@ describe('StatusPopoverButton', () => {
     });
   });
   test('it renders the correct status', () => {
-    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+      writePriveleges
+    );
 
     const { getByText } = render(
       <TestProviders>
@@ -149,7 +151,9 @@ describe('StatusPopoverButton', () => {
   });
 
   test('decorates status items with coloured dot icons', async () => {
-    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+      writePriveleges
+    );
     const { getByText, getByTestId } = render(
       <TestProviders>
         <StatusPopoverButton {...props} />
@@ -168,7 +172,9 @@ describe('StatusPopoverButton', () => {
   });
 
   test('it shows the correct options when clicked', async () => {
-    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+      writePriveleges
+    );
     const { getByText, container } = render(
       <TestProviders>
         <StatusPopoverButton {...props} />
@@ -184,7 +190,9 @@ describe('StatusPopoverButton', () => {
   });
 
   test('does not open the popover when disabled, even with write privileges', () => {
-    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+    (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+      writePriveleges
+    );
     const { getByText, queryByRole } = render(
       <TestProviders>
         <StatusPopoverButton {...props} disabled={true} />
@@ -197,7 +205,9 @@ describe('StatusPopoverButton', () => {
   });
 
   test('Status should be text when user does not have write priveleges', () => {
-    (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(readPriveleges);
+    (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+      readPriveleges
+    );
     mockUseAlertsActions.mockReturnValue({ actionItems: [], panels: [] });
     const { getByText, container } = render(
       <TestProviders>
@@ -216,7 +226,9 @@ describe('StatusPopoverButton', () => {
 
   describe('action telemetry', () => {
     it('reports FlyoutHeaderItemClicked when the status badge is clicked to open the popover', async () => {
-      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+        writePriveleges
+      );
       const { getByText } = render(
         <TestProviders>
           <StatusPopoverButton {...props} />
@@ -232,7 +244,9 @@ describe('StatusPopoverButton', () => {
     });
 
     it('reports FlyoutActionClicked when marking as acknowledged', async () => {
-      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+        writePriveleges
+      );
       const { getByText } = render(
         <TestProviders>
           <StatusPopoverButton {...props} />
@@ -253,7 +267,9 @@ describe('StatusPopoverButton', () => {
     });
 
     it('reports FlyoutActionClicked when marking as closed, without breaking panel navigation', async () => {
-      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+        writePriveleges
+      );
       const { getByText } = render(
         <TestProviders>
           <StatusPopoverButton {...props} />
@@ -278,7 +294,9 @@ describe('StatusPopoverButton', () => {
     });
 
     it('reports FlyoutActionClicked when marking as open', async () => {
-      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+        writePriveleges
+      );
       mockUseAlertsActions.mockReturnValue({
         actionItems: [
           {
@@ -308,7 +326,9 @@ describe('StatusPopoverButton', () => {
     });
 
     it('does not report telemetry for an unmapped action item', async () => {
-      (useAlertsPrivileges as Mock<AlertsPriveleges>).mockReturnValue(writePriveleges);
+      (useAlertsPrivileges as Mock<(...args: unknown[]) => AlertsPriveleges>).mockReturnValue(
+        writePriveleges
+      );
       mockUseAlertsActions.mockReturnValue({
         actionItems: [
           {

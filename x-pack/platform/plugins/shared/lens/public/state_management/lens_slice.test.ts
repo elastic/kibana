@@ -468,7 +468,7 @@ describe('lensSlice', () => {
         expect(
           (
             (datasourceMap.formBased as unknown as Datasource).syncColumns as Mock<
-              Datasource['syncColumns']
+              (...args: unknown[]) => Datasource['syncColumns']
             >
           ).mock.calls[0][0]
         ).toMatchInlineSnapshot(`
@@ -499,7 +499,11 @@ describe('lensSlice', () => {
 
         expect(activeVisualization.onDrop).toHaveBeenCalledTimes(1);
         expect({
-          ...(activeVisualization.onDrop as Mock<Visualization['onDrop']>).mock.calls[0][0],
+          ...(
+            activeVisualization.onDrop as Mock<
+              (...args: Parameters<NonNullable<Visualization['onDrop']>>) => Visualization['onDrop']
+            >
+          ).mock.calls[0][0],
           frame: undefined,
         }).toMatchInlineSnapshot(`
           Object {

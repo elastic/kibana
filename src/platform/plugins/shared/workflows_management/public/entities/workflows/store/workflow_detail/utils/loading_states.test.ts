@@ -43,7 +43,7 @@ type MatcherEntry = [
 ];
 
 interface MockBuilder {
-  addMatcher: Mock<MockBuilder, [MatcherEntry[0], MatcherEntry[1]]>;
+  addMatcher: Mock<(...args: [MatcherEntry[0], MatcherEntry[1]]) => MockBuilder>;
 }
 
 const createMockBuilder = () => {

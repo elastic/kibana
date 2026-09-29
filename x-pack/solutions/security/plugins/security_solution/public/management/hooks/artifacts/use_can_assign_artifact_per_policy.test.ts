@@ -22,7 +22,7 @@ import { GLOBAL_ARTIFACT_TAG } from '../../../../common/endpoint/service/artifac
 
 vi.mock('../../../common/hooks/use_license');
 
-const useLicenseMock = useLicense as Mock<Mocked<LicenseService>>;
+const useLicenseMock = useLicense as Mock<(...args: unknown[]) => Mocked<LicenseService>>;
 
 describe('useCanAssignArtifactPerPolicy()', () => {
   let item: ArtifactFormComponentProps['item'];

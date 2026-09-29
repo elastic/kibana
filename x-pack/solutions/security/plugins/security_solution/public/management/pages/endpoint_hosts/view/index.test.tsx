@@ -113,7 +113,7 @@ vi.mock(
   }
 );
 const useBulkGetAgentPoliciesMock = useBulkGetAgentPolicies as unknown as Mock<
-  DeepPartial<ReturnType<typeof useBulkGetAgentPolicies>>
+  (...args: unknown[]) => DeepPartial<ReturnType<typeof useBulkGetAgentPolicies>>
 >;
 
 const mockUseUiSetting$ = useUiSetting$ as Mock;

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { size } = require('../../src/functions/size');
+const { size } = await import('../../src/functions/size');
 
 describe('Size (also Count)', () => {
   it('array', () => {

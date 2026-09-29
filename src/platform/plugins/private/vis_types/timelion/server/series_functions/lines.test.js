@@ -14,8 +14,8 @@ import invoke from './test_helpers/invoke_series_fn';
 
 describe('lines.js', () => {
   let seriesList;
-  beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async () => {
+    seriesList = (await import('./fixtures/series_list'))();
   });
 
   it('should simply set show, steps, stack and lineWidth', () => {

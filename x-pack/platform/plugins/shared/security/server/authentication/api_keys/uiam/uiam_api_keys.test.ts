@@ -32,7 +32,7 @@ describe('UiamAPIKeys', () => {
   >;
   let mockLicense: Mocked<SecurityLicense>;
   let mockUiam: Mocked<UiamServicePublic>;
-  let mockGetCurrentUser: Mock<AuthenticatedUser | null, [KibanaRequest]>;
+  let mockGetCurrentUser: Mock<(...args: [KibanaRequest]) => AuthenticatedUser | null>;
   let logger: Logger;
 
   /** Mimics what Elasticsearch reports for a request authenticated with a UIAM API key. */

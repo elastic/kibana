@@ -22,7 +22,7 @@ import { RuntimeFieldEditor } from './runtime_field_editor';
 const docLinks = docLinksServiceMock.createStartContract();
 
 describe('Runtime field editor', () => {
-  let onChange: Mock<Props['onChange']> = vi.fn();
+  let onChange: Mock<(...args: any[]) => Props['onChange']> = vi.fn();
 
   const lastOnChangeCall = (): FormState =>
     onChange.mock.calls[onChange.mock.calls.length - 1][0] as FormState;

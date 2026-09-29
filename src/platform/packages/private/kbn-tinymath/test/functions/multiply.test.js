@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { multiply } = require('../../src/functions/multiply');
+const { multiply } = await import('../../src/functions/multiply');
 
 describe('Multiply', () => {
   it('number, number', () => {

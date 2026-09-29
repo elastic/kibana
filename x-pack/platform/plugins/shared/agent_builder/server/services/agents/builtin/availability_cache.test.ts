@@ -19,7 +19,7 @@ import { AgentAvailabilityCache } from './availability_cache';
 
 describe('AgentAvailabilityCache', () => {
   let cache: AgentAvailabilityCache;
-  let mockHandler: Mock<Promise<AgentAvailabilityResult>>;
+  let mockHandler: Mock<(...args: any[]) => Promise<AgentAvailabilityResult>>;
   let context: AgentAvailabilityContext;
 
   beforeEach(() => {

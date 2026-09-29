@@ -8,7 +8,7 @@
  */
 
 const dedent = require('dedent');
-const { parseEsLog } = require('./parse_es_log');
+const { parseEsLog } = await import('./parse_es_log');
 
 test('parses single line', () => {
   const data = dedent(`

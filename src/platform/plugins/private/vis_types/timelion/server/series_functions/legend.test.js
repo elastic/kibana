@@ -14,8 +14,8 @@ import invoke from './test_helpers/invoke_series_fn';
 
 describe('legend.js', () => {
   let seriesList;
-  beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async () => {
+    seriesList = (await import('./fixtures/series_list'))();
   });
 
   it('should create the _global object if it does not exist', () => {

@@ -61,8 +61,8 @@ describe('AgentBuilderSpanProcessor', () => {
     (mockBatch.onEnd as Mock).mockClear();
     (mockBatch.forceFlush as Mock).mockClear();
     (mockBatch.shutdown as Mock).mockClear();
-    (mockBatch.forceFlush as Mock<Promise<void>, []>).mockResolvedValue(undefined);
-    (mockBatch.shutdown as Mock<Promise<void>, []>).mockResolvedValue(undefined);
+    (mockBatch.forceFlush as Mock<(...args: []) => Promise<void>>).mockResolvedValue(undefined);
+    (mockBatch.shutdown as Mock<(...args: []) => Promise<void>>).mockResolvedValue(undefined);
   });
 
   afterEach(() => {

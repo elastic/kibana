@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const {
-  getMethodDescription,
-  getPainlessClassToAutocomplete,
-  createAutocompleteDefinitions,
-} = require('./create_autocomplete_definitions');
+const { getMethodDescription, getPainlessClassToAutocomplete, createAutocompleteDefinitions } =
+  await import('./create_autocomplete_definitions');
 
 // Snippet of sample data returned from https://github.com/elastic/elasticsearch/tree/master/modules/lang-painless/src/main/generated/whitelist-json
 const testContext = [

@@ -29,7 +29,7 @@ describe('useMonitorsSortedByStatus', () => {
     isServiceManaged: true,
   };
 
-  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
+  let useGetUrlParamsSpy: MockInstance<(...args: any[]) => SyntheticsUrlParams>;
 
   beforeEach(() => {
     useGetUrlParamsSpy = vi.spyOn(URL, 'useGetUrlParams');

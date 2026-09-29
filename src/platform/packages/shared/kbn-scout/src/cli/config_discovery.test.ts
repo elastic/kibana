@@ -80,7 +80,7 @@ vi.mock('../tests_discovery/search_configs', () => {
 vi.mock('@kbn/scout-reporting/src/registry', async () => {
   // Access the module-level store
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const testModule = require('./config_discovery.test');
+  const testModule = await import('./config_discovery.test');
   return {
     ...(await vi.importActual('@kbn/scout-reporting/src/registry')),
     testableModules: {

@@ -245,12 +245,12 @@ describe('Dashboard App', () => {
   describe('showNoDataPage', () => {
     const mockIsDashboardAppInNoDataState = vi.fn();
 
-    beforeAll(() => {
+    beforeAll(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./no_data/dashboard_app_no_data').isDashboardAppInNoDataState =
+      (await import('./no_data/dashboard_app_no_data')).isDashboardAppInNoDataState =
         mockIsDashboardAppInNoDataState;
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./no_data/dashboard_app_no_data').DashboardAppNoDataPage = () => (
+      (await import('./no_data/dashboard_app_no_data')).DashboardAppNoDataPage = () => (
         <div>Mock no data page</div>
       );
 

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./security_imports_restriction');
+const rule = await import('./security_imports_restriction');
 
 const LODASH_OPTIONS = [
   {

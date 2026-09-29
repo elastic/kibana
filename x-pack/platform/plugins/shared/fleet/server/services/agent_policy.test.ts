@@ -165,7 +165,9 @@ const mockedOutputService = outputService as Mocked<typeof outputService>;
 const mockedDownloadSourceService = downloadSourceService as Mocked<typeof downloadSourceService>;
 const mockedPackagePolicyService = packagePolicyService as Mocked<typeof packagePolicyService>;
 
-const mockedGetFullAgentPolicy = getFullAgentPolicy as Mock<ReturnType<typeof getFullAgentPolicy>>;
+const mockedGetFullAgentPolicy = getFullAgentPolicy as Mock<
+  (...args: any[]) => ReturnType<typeof getFullAgentPolicy>
+>;
 const mockedCreateAgentPolicyWithPackages = createAgentPolicyWithPackages as MockedFunction<
   typeof createAgentPolicyWithPackages
 >;
@@ -1542,7 +1544,7 @@ describe('Agent policy', () => {
 
   describe('removeOutputFromAll', () => {
     let mockedAgentPolicyServiceUpdate: MockInstance<
-      ReturnType<(typeof agentPolicyService)['update']>
+      (...args: any[]) => ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = vi
@@ -1630,7 +1632,7 @@ describe('Agent policy', () => {
 
   describe('removeDefaultSourceFromAll', () => {
     let mockedAgentPolicyServiceUpdate: MockInstance<
-      ReturnType<(typeof agentPolicyService)['update']>
+      (...args: any[]) => ReturnType<(typeof agentPolicyService)['update']>
     >;
     beforeEach(() => {
       mockedAgentPolicyServiceUpdate = vi

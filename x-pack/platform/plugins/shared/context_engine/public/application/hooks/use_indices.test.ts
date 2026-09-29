@@ -25,7 +25,7 @@ const buildMatchedItem = (name: string, kind: IndexKind = 'index'): MatchedItem 
 
 const renderUseIndices = (
   options: Parameters<typeof useIndices>[0],
-  getIndices: Mock<Promise<MatchedItem[]>>
+  getIndices: Mock<(...args: any[]) => Promise<MatchedItem[]>>
 ) => {
   const core = coreMock.createStart();
   const data = dataPluginMock.createStartContract();

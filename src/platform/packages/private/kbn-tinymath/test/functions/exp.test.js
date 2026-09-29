@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { exp } = require('../../src/functions/exp');
+const { exp } = await import('../../src/functions/exp');
 
 describe('Exp', () => {
   it('numbers', () => {

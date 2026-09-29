@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { first } = require('../../src/functions/first');
+const { first } = await import('../../src/functions/first');
 
 describe('First', () => {
   it('numbers', () => {

@@ -178,7 +178,7 @@ describe('TelemetrySender', () => {
   });
   describe('sendIfDue', () => {
     let originalFetch: (typeof window)['fetch'];
-    let mockFetch: Mock<(typeof window)['fetch']>;
+    let mockFetch: Mock<(...args: unknown[]) => (typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;
@@ -241,7 +241,7 @@ describe('TelemetrySender', () => {
 
   describe('sendUsageData', () => {
     let originalFetch: (typeof window)['fetch'];
-    let mockFetch: Mock<(typeof window)['fetch']>;
+    let mockFetch: Mock<(...args: unknown[]) => (typeof window)['fetch']>;
     let consoleWarnMock: MockInstance;
 
     beforeAll(() => {

@@ -41,7 +41,7 @@ afterAll(async () => {
 type EventLoggerArgs = [message: string, meta: ScreenshottingAction];
 describe('Event Logger', () => {
   let eventLogger: EventLogger;
-  let logSpy: MockInstance<void, EventLoggerArgs>;
+  let logSpy: MockInstance<(...args: EventLoggerArgs) => void>;
 
   beforeEach(() => {
     otelExporter?.reset();
@@ -55,7 +55,7 @@ describe('Event Logger', () => {
     const logger = loggingSystemMock.createLogger();
     eventLogger = new EventLogger(logger);
 
-    logSpy = vi.spyOn(logger, 'debug') as MockInstance<void, EventLoggerArgs>;
+    logSpy = vi.spyOn(logger, 'debug') as MockInstance<(...args: EventLoggerArgs) => void>;
   });
 
   it('creates logs for the events and includes durations and event payload data', () => {

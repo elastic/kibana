@@ -75,8 +75,8 @@ describe('getDescriptorWithUpdatedStyleProps', () => {
 
   const previousFields = [new MockField({ fieldName: previousFieldName })];
 
-  beforeEach(() => {
-    require('../../../kibana_services').getUiSettings = () => ({
+  beforeEach(async () => {
+    (await import('../../../kibana_services')).getUiSettings = () => ({
       get: vi.fn(),
     });
   });

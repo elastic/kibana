@@ -32,7 +32,7 @@ vi.mock('../hooks', () => {
 });
 
 const { useRuleFormState, useRuleFormDispatch } = await vi.importMock<{
-  useRuleFormState: Mock<{ formData: Partial<RuleFormState['formData']> }>;
+  useRuleFormState: Mock<(...args: any[]) => { formData: Partial<RuleFormState['formData']> }>;
   useRuleFormDispatch: Mock;
 }>('../hooks');
 

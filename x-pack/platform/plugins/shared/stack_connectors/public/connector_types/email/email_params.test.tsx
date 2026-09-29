@@ -61,7 +61,7 @@ describe('EmailParamsFields renders', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     mockKibana();
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
   });
 
   test('all params fields is rendered', async () => {

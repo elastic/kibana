@@ -42,8 +42,8 @@ interface EsqlResponse {
 
 const makeEsClient = (): {
   esClient: ElasticsearchClient;
-  search: Mock<Promise<SearchResponse>>;
-  esql: Mock<Promise<EsqlResponse>>;
+  search: Mock<(...args: unknown[]) => Promise<SearchResponse>>;
+  esql: Mock<(...args: unknown[]) => Promise<EsqlResponse>>;
 } => {
   const search = vi.fn<Promise<SearchResponse>, unknown[]>();
   const esql = vi.fn<Promise<EsqlResponse>, unknown[]>();

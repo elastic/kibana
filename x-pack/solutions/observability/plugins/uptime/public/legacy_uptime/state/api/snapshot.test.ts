@@ -14,7 +14,7 @@ import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 
 describe('snapshot API', () => {
-  let fetchMock: MockInstance<Partial<unknown>>;
+  let fetchMock: MockInstance<(...args: any[]) => Partial<unknown>>;
   let mockResponse: Partial<unknown>;
 
   beforeEach(() => {

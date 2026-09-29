@@ -19,7 +19,9 @@ import { TagsCache } from './services';
 import { tagsCacheMock } from './services/tags/tags_cache.mock';
 
 vi.mock('./services/tags/tags_cache');
-const MockedTagsCache = TagsCache as unknown as Mock<PublicMethodsOf<TagsCache>>;
+const MockedTagsCache = TagsCache as unknown as Mock<
+  (...args: any[]) => PublicMethodsOf<TagsCache>
+>;
 
 describe('SavedObjectTaggingPlugin', () => {
   let plugin: SavedObjectTaggingPlugin;

@@ -113,9 +113,9 @@ describe('transformPanelsIn', () => {
       lessThan10: z.number().max(10),
     });
 
-    beforeAll(() => {
+    beforeAll(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../kibana_services').embeddableService = {
+      (await import('../../../kibana_services')).embeddableService = {
         getTransforms: () => ({ schema: TestEmbeddableSchema }),
       };
     });

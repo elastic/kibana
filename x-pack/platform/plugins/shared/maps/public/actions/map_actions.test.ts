@@ -45,18 +45,18 @@ describe('map_actions', () => {
 
   describe('mapExtentChanged', () => {
     describe('mapState.buffer is undefined', () => {
-      beforeEach(() => {
-        require('../selectors/map_selectors').getDataFilters = () => {
+      beforeEach(async () => {
+        (await import('../selectors/map_selectors')).getDataFilters = () => {
           return {
             zoom: 5,
           };
         };
 
-        require('../selectors/map_selectors').getLayerList = () => {
+        (await import('../selectors/map_selectors')).getLayerList = () => {
           return [];
         };
 
-        require('../reducers/non_serializable_instances').getInspectorAdapters = () => {
+        (await import('../reducers/non_serializable_instances')).getInspectorAdapters = () => {
           return {
             vectorTiles: vectorTileAdapterMock,
           };
@@ -110,8 +110,8 @@ describe('map_actions', () => {
 
     describe('mapState.buffer is defined', () => {
       const initialZoom = 10;
-      beforeEach(() => {
-        require('../selectors/map_selectors').getDataFilters = () => {
+      beforeEach(async () => {
+        (await import('../selectors/map_selectors')).getDataFilters = async () => {
           return {
             zoom: initialZoom,
             buffer: {
@@ -122,7 +122,7 @@ describe('map_actions', () => {
             },
           };
 
-          require('../reducers/non_serializable_instances').getInspectorAdapters = () => {
+          (await import('../reducers/non_serializable_instances')).getInspectorAdapters = () => {
             return {
               vectorTiles: vectorTileAdapterMock,
             };
@@ -327,30 +327,30 @@ describe('map_actions', () => {
     ];
     const searchSessionId = '1234';
 
-    beforeEach(() => {
+    beforeEach(async () => {
       // Mocks the "previous" state
-      require('../selectors/map_selectors').getQuery = () => {
+      (await import('../selectors/map_selectors')).getQuery = () => {
         return query;
       };
-      require('../selectors/map_selectors').getTimeFilters = () => {
+      (await import('../selectors/map_selectors')).getTimeFilters = () => {
         return timeFilters;
       };
-      require('../selectors/map_selectors').getTimeslice = () => {
+      (await import('../selectors/map_selectors')).getTimeslice = () => {
         return undefined;
       };
-      require('../selectors/map_selectors').getFilters = () => {
+      (await import('../selectors/map_selectors')).getFilters = () => {
         return filters;
       };
-      require('../selectors/map_selectors').getSearchSessionId = () => {
+      (await import('../selectors/map_selectors')).getSearchSessionId = () => {
         return searchSessionId;
       };
-      require('../selectors/map_selectors').getSearchSessionMapBuffer = () => {
+      (await import('../selectors/map_selectors')).getSearchSessionMapBuffer = () => {
         return undefined;
       };
-      require('../selectors/map_selectors').getProjectRouting = () => {
+      (await import('../selectors/map_selectors')).getProjectRouting = () => {
         return undefined;
       };
-      require('../selectors/map_selectors').getMapSettings = () => {
+      (await import('../selectors/map_selectors')).getMapSettings = () => {
         return {
           autoFitToDataBounds: false,
         };

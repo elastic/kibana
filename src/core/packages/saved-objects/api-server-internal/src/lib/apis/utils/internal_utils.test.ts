@@ -412,7 +412,7 @@ describe('#normalizeNamespace', () => {
 });
 
 describe('#getCurrentTime', () => {
-  let dateNowSpy: MockInstance<number, []>;
+  let dateNowSpy: MockInstance<(...args: []) => number>;
 
   beforeAll(() => (dateNowSpy = vi.spyOn(Date, 'now').mockImplementation(() => 1631307600000)));
   afterAll(() => dateNowSpy.mockRestore());

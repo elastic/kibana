@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('../oxlint_plugin').rules.no_npx_playwright;
+const rule = (await import('../oxlint_plugin')).rules.no_npx_playwright;
 const dedent = require('dedent');
 
 const ERROR_MSG =

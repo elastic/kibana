@@ -48,7 +48,9 @@ const ComponentWithLocale = (props: RulesListTableStatusCellProps) => {
 
 describe('RulesListTableStatusCell', () => {
   beforeEach(() => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
   });
 
   afterEach(() => {

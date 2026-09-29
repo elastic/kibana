@@ -34,7 +34,7 @@ const attributes = (
 describe('ServiceAccountCredentialStore', () => {
   let client: ReturnType<typeof savedObjectsClientMock.create>;
   let encryptedClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
-  let isEncryptionError: Mock<boolean, [Error]>;
+  let isEncryptionError: Mock<(...args: [Error]) => boolean>;
   let logger: ReturnType<typeof loggingSystemMock.createLogger>;
   let store: ServiceAccountCredentialStore;
 

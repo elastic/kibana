@@ -42,7 +42,9 @@ import { getAgentsByKuery, getAgentById } from './crud';
 import { getAgentStatusById, getAgentStatusForAgentPolicy } from './status';
 import { getLatestAvailableAgentVersion } from './versions';
 
-const mockGetAuthzFromRequest = getAuthzFromRequest as Mock<Promise<FleetAuthz>>;
+const mockGetAuthzFromRequest = getAuthzFromRequest as Mock<
+  (...args: any[]) => Promise<FleetAuthz>
+>;
 const mockGetAgentsByKuery = getAgentsByKuery as Mock;
 const mockGetAgentById = getAgentById as Mock;
 const mockGetAgentStatusById = getAgentStatusById as Mock;

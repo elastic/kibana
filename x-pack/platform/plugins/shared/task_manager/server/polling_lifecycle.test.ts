@@ -173,7 +173,7 @@ describe('TaskPollingLifecycle', () => {
 
   beforeEach(() => {
     mockTaskClaiming = taskClaimingMock.create({});
-    (TaskClaiming as Mock<TaskClaimingClass>).mockClear();
+    (TaskClaiming as Mock<(...args: unknown[]) => TaskClaimingClass>).mockClear();
     (TaskManagerRunner as Mock).mockClear();
     resetInFlightTasksMock.mockReset().mockResolvedValue(undefined);
     clock = sinon.useFakeTimers();
@@ -283,8 +283,11 @@ describe('TaskPollingLifecycle', () => {
         startingCapacity: 40,
       });
 
-      const taskClaimingGetCapacity = (TaskClaiming as Mock<TaskClaimingClass>).mock.calls[0][0]
-        .getAvailableCapacity;
+      const taskClaimingGetCapacity = (
+        TaskClaiming as Mock<
+          (...args: ConstructorParameters<typeof TaskClaiming>) => TaskClaimingClass
+        >
+      ).mock.calls[0][0].getAvailableCapacity;
 
       expect(taskClaimingGetCapacity()).toEqual(80);
       expect(taskClaimingGetCapacity('report')).toEqual(10);

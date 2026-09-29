@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { lte } = require('../../../src/functions/comparison/lte');
+const { lte } = await import('../../../src/functions/comparison/lte');
 
 describe('Lte', () => {
   it('missing args', () => {

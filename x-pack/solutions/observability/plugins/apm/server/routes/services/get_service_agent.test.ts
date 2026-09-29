@@ -18,7 +18,7 @@ import {
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import { getServiceAgent } from './get_service_agent';
 
-type SearchMock = Mock<Promise<unknown>>;
+type SearchMock = Mock<(...args: any[]) => Promise<unknown>>;
 
 const start = 1_700_000_000_000;
 const end = 1_700_000_900_000;

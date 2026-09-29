@@ -175,7 +175,7 @@ describe('Run Scheduled Report Task', () => {
   const notifications = notificationsMock.createStart();
   let emailNotificationService: EmailNotificationService;
   let logger: MockedLogger;
-  let notifyUsage: Mock<any>;
+  let notifyUsage: Mock<(...args: any[]) => any>;
 
   const runTaskFn = vi.fn().mockResolvedValue({ content_type: 'application/pdf' });
   beforeEach(async () => {

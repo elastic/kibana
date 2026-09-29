@@ -102,7 +102,7 @@ describe('McpConnector', () => {
 
   const defaultSecrets = {};
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     // Clear the listTools cache before each test
@@ -125,7 +125,7 @@ describe('McpConnector', () => {
 
     // Mock the McpClient constructor
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { McpClient } = require('@kbn/mcp-client');
+    const { McpClient } = await import('@kbn/mcp-client');
     McpClient.mockImplementation(() => mockMcpClient);
 
     connector = new McpConnector({
@@ -150,7 +150,7 @@ describe('McpConnector', () => {
       expect(typeof connector.callTool).toBe('function');
     });
 
-    it('should build a custom fetch from configurationUtilities and pass it to McpClient', () => {
+    it('should build a custom fetch from configurationUtilities and pass it to McpClient', async () => {
       const mockBuildCustomFetch = buildCustomFetch as Mock;
       expect(mockBuildCustomFetch).toHaveBeenCalledWith(
         expect.anything(),
@@ -161,7 +161,7 @@ describe('McpConnector', () => {
       const returnedFetch = mockBuildCustomFetch.mock.results[0].value;
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { McpClient } = require('@kbn/mcp-client');
+      const { McpClient } = await import('@kbn/mcp-client');
       expect(McpClient).toHaveBeenCalledWith(
         logger,
         expect.objectContaining({
@@ -485,7 +485,7 @@ describe('McpConnector', () => {
   describe('connection management', () => {
     it('should use retryWithRecovery for connection failures', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { retryWithRecovery } = require('./retry_utils');
+      const { retryWithRecovery } = await import('./retry_utils');
       const mockConnectResult = {
         connected: true,
         capabilities: {},
@@ -514,7 +514,7 @@ describe('McpConnector', () => {
 
       // Mock retryWithRecovery to throw the error
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { retryWithRecovery } = require('./retry_utils');
+      const { retryWithRecovery } = await import('./retry_utils');
       retryWithRecovery.mockImplementationOnce(async (fn: () => Promise<unknown>) => {
         throw connectionError;
       });
@@ -526,7 +526,7 @@ describe('McpConnector', () => {
 
     it('should disconnect on recovery before retrying', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { retryWithRecovery } = require('./retry_utils');
+      const { retryWithRecovery } = await import('./retry_utils');
       const mockConnectResult = {
         connected: true,
         capabilities: {},
@@ -765,7 +765,7 @@ describe('McpConnector', () => {
 
       // Create a second connector with different id
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { McpClient } = require('@kbn/mcp-client');
+      const { McpClient } = await import('@kbn/mcp-client');
       const mockMcpClient2 = {
         connect: vi.fn().mockResolvedValue({ connected: true, capabilities: {} }),
         disconnect: vi.fn().mockResolvedValue(undefined),
@@ -809,7 +809,7 @@ describe('McpConnector', () => {
 
       // Create a second connector instance with the SAME id
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { McpClient } = require('@kbn/mcp-client');
+      const { McpClient } = await import('@kbn/mcp-client');
       const mockMcpClient2 = {
         connect: vi.fn(),
         disconnect: vi.fn().mockResolvedValue(undefined),

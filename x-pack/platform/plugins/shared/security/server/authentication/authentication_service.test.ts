@@ -261,7 +261,7 @@ describe('AuthenticationService', () => {
 
     describe('authentication handler', () => {
       let authHandler: AuthenticationHandler;
-      let authenticate: MockInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let authenticate: MockInstance<(...args: [KibanaRequest]) => Promise<AuthenticationResult>>;
       let mockAuthToolkit: Mocked<AuthToolkit>;
       beforeEach(async () => {
         mockAuthToolkit = httpServiceMock.createAuthToolkit();
@@ -478,7 +478,7 @@ describe('AuthenticationService', () => {
 
     describe('unauthorized error handler', () => {
       let unauthorizedErrorHandler: UnauthorizedErrorHandler;
-      let reauthenticate: MockInstance<Promise<AuthenticationResult>, [KibanaRequest]>;
+      let reauthenticate: MockInstance<(...args: [KibanaRequest]) => Promise<AuthenticationResult>>;
       let mockUnauthorizedErrorToolkit: Mocked<UnauthorizedErrorHandlerToolkit>;
       beforeEach(async () => {
         mockUnauthorizedErrorToolkit = { notHandled: vi.fn(), retry: vi.fn() };

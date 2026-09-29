@@ -135,8 +135,7 @@ describe('FleetAuthzRouter', () => {
   };
 
   const mockCheckPrivileges: Mock<
-    ReturnType<CheckPrivilegesDynamically>,
-    Parameters<CheckPrivilegesDynamically>
+    (...args: Parameters<CheckPrivilegesDynamically>) => ReturnType<CheckPrivilegesDynamically>
   > = vi.fn().mockResolvedValue({ hasAllRequested: true });
 
   it('does not allow security plugin to be disabled', async () => {

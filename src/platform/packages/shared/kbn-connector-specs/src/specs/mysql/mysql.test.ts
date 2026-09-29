@@ -53,8 +53,8 @@ describe('MysqlConnector', () => {
   let MysqlConnector: ConnectorSpec;
   let configSchema: NonNullable<ConnectorSpec['schema']>;
 
-  beforeEach(() => {
-    ({ MysqlConnector } = require('./mysql'));
+  beforeEach(async () => {
+    ({ MysqlConnector } = await import('./mysql'));
     if (!MysqlConnector.schema) {
       throw new Error('MySQL spec is missing a config schema');
     }

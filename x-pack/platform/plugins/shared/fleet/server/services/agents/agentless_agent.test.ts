@@ -53,7 +53,7 @@ mockedAppContextService.getSecuritySetup.mockImplementation(() => ({
 }));
 
 const mockedListEnrollmentApiKeys = listEnrollmentApiKeys as Mock<
-  ReturnType<typeof listEnrollmentApiKeys>
+  (...args: any[]) => ReturnType<typeof listEnrollmentApiKeys>
 >;
 const mockedFleetServerHostService = fleetServerHostService as Mocked<
   typeof fleetServerHostService

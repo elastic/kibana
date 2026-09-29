@@ -47,7 +47,7 @@ describe('initSpacesOnPostAuthRequestInterceptor', () => {
   let getAll: Mock;
   let getSpaceId: Mock;
   let initialSolutionSetup: InitialSolutionSetupService;
-  let isRequired: MockInstance<InitialSolutionSetupService['isRequired']>;
+  let isRequired: MockInstance<(...args: any[]) => InitialSolutionSetupService['isRequired']>;
   let log: ReturnType<typeof loggingSystemMock.createLogger>;
   let response: ReturnType<typeof httpServerMock.createLifecycleResponseFactory>;
   let toolkit: ReturnType<typeof httpServiceMock.createOnPostAuthToolkit>;

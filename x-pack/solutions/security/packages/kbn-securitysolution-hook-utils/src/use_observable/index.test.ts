@@ -21,7 +21,7 @@ interface TestArgs {
 type TestReturn = Subject<unknown>;
 
 describe('useObservable', () => {
-  let fn: Mock<TestReturn, TestArgs[]>;
+  let fn: Mock<(...args: TestArgs[]) => TestReturn>;
   let subject: TestReturn;
   let args: TestArgs;
 

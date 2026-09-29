@@ -63,7 +63,7 @@ vi.mock('../../../../content_framework/lazy_content_framework_section', () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const mockUseFetchSpanLinks = require('./use_fetch_span_links').useFetchSpanLinks;
+const mockUseFetchSpanLinks = (await import('./use_fetch_span_links')).useFetchSpanLinks;
 
 describe('SpanLinks', () => {
   const defaultProps = { docId: 'doc1', traceId: 'trace1' };

@@ -7,7 +7,7 @@
 
 const Fs = require('fs');
 const Path = require('path');
-const { slugifyId } = require('./slugify_id');
+const { slugifyId } = await import('./slugify_id');
 
 /**
  * Byte-for-byte copy of `normalizeBuildkiteKey` in

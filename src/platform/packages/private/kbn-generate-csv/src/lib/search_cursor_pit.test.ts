@@ -64,7 +64,9 @@ describe('CSV Export Search Cursor', () => {
   let logger: Logger;
   let cursor: TestSearchCursorPit;
 
-  let openPointInTimeSpy: MockInstance<Promise<estypes.OpenPointInTimeResponse>>;
+  let openPointInTimeSpy: MockInstance<
+    (...args: any[]) => Promise<estypes.OpenPointInTimeResponse>
+  >;
 
   beforeEach(() => {
     settings = {

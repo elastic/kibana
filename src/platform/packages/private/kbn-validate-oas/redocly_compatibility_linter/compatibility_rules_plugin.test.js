@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const compatibilityRulesPlugin = require('./compatibility_rules_plugin');
+const compatibilityRulesPlugin = await import('./compatibility_rules_plugin');
 
 describe('compatibility rules plugin predicates', () => {
   it('identifies path parameter objects', () => {

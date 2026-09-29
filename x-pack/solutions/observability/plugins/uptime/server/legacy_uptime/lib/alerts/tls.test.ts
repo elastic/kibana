@@ -117,9 +117,9 @@ const mockOptions = (state = {}, recoveredAlerts: typeof mockRecoveredAlerts = [
 };
 
 describe('tls alert', () => {
-  let toISOStringSpy: MockInstance<string, []>;
+  let toISOStringSpy: MockInstance<(...args: []) => string>;
   let savedObjectsAdapterSpy: MockInstance<
-    ReturnType<UMSavedObjectsAdapter['getUptimeDynamicSettings']>
+    (...args: any[]) => ReturnType<UMSavedObjectsAdapter['getUptimeDynamicSettings']>
   >;
   const mockDate = 'date';
   beforeAll(() => {
@@ -134,7 +134,7 @@ describe('tls alert', () => {
 
     it('triggers when aging or expiring alerts are found', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockGetter: Mock<CertResult> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => CertResult> = vi.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
@@ -189,7 +189,7 @@ describe('tls alert', () => {
 
     it('does not trigger when cert is not considered aging or expiring', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockGetter: Mock<CertResult> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => CertResult> = vi.fn();
 
       mockGetter.mockReturnValue({
         certs: [
@@ -258,7 +258,7 @@ describe('tls alert', () => {
         defaultConnectors: [],
       };
       savedObjectsAdapterSpy.mockImplementation(() => certSettings);
-      const mockGetter: Mock<CertResult> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => CertResult> = vi.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
@@ -276,7 +276,7 @@ describe('tls alert', () => {
 
     it('sets alert recovery context for recovered alerts', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: Mock<CertResult> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => CertResult> = vi.fn();
 
       mockGetter.mockReturnValue(mockCertResult);
       const { server, libs, plugins } = bootstrapDependencies({ getCerts: mockGetter });
@@ -298,7 +298,7 @@ describe('tls alert', () => {
   });
 
   describe('getCertSummary', () => {
-    let diffSpy: MockInstance<any, unknown[]>;
+    let diffSpy: MockInstance<(...args: unknown[]) => any>;
 
     beforeEach(() => {
       diffSpy = vi.spyOn(moment.prototype, 'diff');

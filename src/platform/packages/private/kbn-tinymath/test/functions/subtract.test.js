@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { subtract } = require('../../src/functions/subtract');
+const { subtract } = await import('../../src/functions/subtract');
 
 describe('Subtract', () => {
   it('number, number', () => {

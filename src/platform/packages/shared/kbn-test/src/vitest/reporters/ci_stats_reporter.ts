@@ -52,7 +52,22 @@ export class KbnCiStatsReporter implements Reporter {
 
     for (const testModule of testModules) {
       const { cases, moduleErrors } = getModuleResults(testModule);
-      failed ||= moduleErrors.length > 0;
+      const file = relative(REPO_ROOT, testModule.moduleId);
+      if (moduleErrors.length) {
+        // A file that failed to load has no test cases; report it as one failing run.
+        failed = true;
+        testRuns.push({
+          startTime: new Date(this.startTime).toJSON(),
+          durationMs: testModule.diagnostic().duration,
+          seq: testRuns.length + 1,
+          file,
+          name: 'Test suite failed to run',
+          result: 'fail',
+          suites: [],
+          type: 'test',
+          error: moduleErrors.join('\n\n'),
+        });
+      }
       for (const { suites, title, status, durationMs, startTime, failureMessages } of cases) {
         const result = status === 'failed' ? 'fail' : status === 'passed' ? 'pass' : 'skip';
         failed ||= result === 'fail';
@@ -61,8 +76,9 @@ export class KbnCiStatsReporter implements Reporter {
           startTime: new Date(startTime).toJSON(),
           durationMs,
           seq: testRuns.length + 1,
-          file: relative(REPO_ROOT, testModule.moduleId),
-          name: title,
+          file,
+          // CI Stats rejects empty names, which Vitest allows (e.g. `it('')`, `it.each` without titles)
+          name: title || suites.at(-1) || file,
           result,
           suites,
           type: 'test',

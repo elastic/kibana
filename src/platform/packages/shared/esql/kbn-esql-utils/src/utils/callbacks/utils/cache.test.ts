@@ -13,7 +13,7 @@ import type { Mock } from 'vitest';
 import { cacheParametrizedAsyncFunction } from './cache';
 
 describe('cacheParametrizedAsyncFunction', () => {
-  let mockNow: Mock<number, []>; // Mock function for Date.now
+  let mockNow: Mock<(...args: []) => number>; // Mock function for Date.now
 
   beforeEach(() => {
     mockNow = vi.fn();

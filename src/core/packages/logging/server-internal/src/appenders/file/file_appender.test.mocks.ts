@@ -9,9 +9,9 @@
 
 import { vi } from 'vitest';
 
-vi.mock('../../layouts/layouts', () => {
+vi.mock('../../layouts/layouts', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { schema } = require('@kbn/config-schema');
+  const { schema } = await import('@kbn/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({

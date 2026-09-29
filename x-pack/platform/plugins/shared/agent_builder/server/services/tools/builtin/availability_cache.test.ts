@@ -19,7 +19,7 @@ import { ToolAvailabilityCache } from './availability_cache';
 
 describe('ToolAvailabilityCache', () => {
   let cache: ToolAvailabilityCache;
-  let mockHandler: Mock<Promise<ToolAvailabilityResult>>;
+  let mockHandler: Mock<(...args: any[]) => Promise<ToolAvailabilityResult>>;
   let context: ToolAvailabilityContext;
 
   beforeEach(() => {

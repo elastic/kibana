@@ -35,7 +35,7 @@ vi.mock('@kbn/elastic-assistant', () => {
 });
 
 const useFindPromptsMock = useFindPrompts as unknown as Mock<
-  Pick<ReturnType<typeof useFindPrompts>, 'data'>
+  (...args: unknown[]) => Pick<ReturnType<typeof useFindPrompts>, 'data'>
 >;
 const NewChatMock = NewChat as MockedFunction<typeof NewChat>;
 

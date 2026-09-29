@@ -14,8 +14,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { retryWithRecovery } from './retry_utils';
 
 const setTimeoutMock = setTimeout as Mock<
-  ReturnType<typeof setTimeout>,
-  Parameters<typeof setTimeout>
+  (...args: Parameters<typeof setTimeout>) => ReturnType<typeof setTimeout>
 >;
 
 describe('retryWithRecovery', () => {

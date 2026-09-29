@@ -21,7 +21,9 @@ vi.mock('./api');
 vi.mock('../../../../common/hooks/use_app_toasts');
 vi.mock('../../../../common/components/user_privileges');
 
-const useUserPrivilegesMock = useUserPrivileges as Mock<ReturnType<typeof useUserPrivileges>>;
+const useUserPrivilegesMock = useUserPrivileges as Mock<
+  (...args: unknown[]) => ReturnType<typeof useUserPrivileges>
+>;
 
 const privilege: Privilege = {
   username: 'soc_manager',

@@ -11,9 +11,9 @@ import { vi } from 'vitest';
 import type { Mock } from 'vitest';
 
 export const mockCreateLayout = vi.fn();
-vi.mock('../layouts/layouts', () => {
+vi.mock('../layouts/layouts', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { schema } = require('@kbn/config-schema');
+  const { schema } = await import('@kbn/config-schema');
   return {
     Layouts: {
       configSchema: schema.object({ type: schema.literal('mock') }),
@@ -37,7 +37,7 @@ vi.mock('@opentelemetry/exporter-logs-otlp-http', () => {
 });
 vi.mock('@elastic/opentelemetry-node/sdk', () => {
   interface MockResource {
-    merge: Mock<MockResource>;
+    merge: Mock<(...args: any[]) => MockResource>;
   }
   const makeMergeableResource = (): MockResource => ({ merge: vi.fn(makeMergeableResource) });
   return {

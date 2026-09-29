@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { round } = require('../../src/functions/round');
+const { round } = await import('../../src/functions/round');
 
 describe('Round', () => {
   it('numbers', () => {

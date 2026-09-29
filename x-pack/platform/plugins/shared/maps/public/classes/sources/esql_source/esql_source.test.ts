@@ -10,9 +10,9 @@ import { vi } from 'vitest';
 import { ESQLSource } from './esql_source';
 import { VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 
-vi.mock('../../../kibana_services', () => {
+vi.mock('../../../kibana_services', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { dataPluginMock } = require('@kbn/data-plugin/public/mocks');
+  const { dataPluginMock } = await import('@kbn/data-plugin/public/mocks');
   return {
     getData: () => dataPluginMock.createStartContract(),
   };

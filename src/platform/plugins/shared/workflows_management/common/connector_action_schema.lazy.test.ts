@@ -45,14 +45,14 @@ describe('schema.ts lazy-loading boundary', () => {
     }
   });
 
-  it('does not load connector_action_schema or its transitive deps when schema.ts is imported', () => {
-    require('./schema');
+  it('does not load connector_action_schema or its transitive deps when schema.ts is imported', async () => {
+    await import('./schema');
     expect(getLoadedHeavyModules()).toEqual([]);
   });
 
-  it('loads connector_action_schema after a consumer function triggers the boundary', () => {
+  it('loads connector_action_schema after a consumer function triggers the boundary', async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { getAllConnectors } = require('./schema') as typeof import('./schema');
+    const { getAllConnectors } = (await import('./schema')) as typeof import('./schema');
     expect(getLoadedHeavyModules()).toEqual([]);
 
     getAllConnectors();

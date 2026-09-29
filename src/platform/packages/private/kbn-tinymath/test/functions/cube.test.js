@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { cube } = require('../../src/functions/cube');
+const { cube } = await import('../../src/functions/cube');
 
 describe('Cube', () => {
   it('numbers', () => {

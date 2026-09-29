@@ -111,7 +111,7 @@ vi.mock('@kbn/ts-projects', () => {
 
 // Import the module AFTER all mocks are in place — this triggers the
 // top-level `run()` call which we intercept via the mock above.
-require('./run_type_check_cli');
+await import('./run_type_check_cli');
 
 const { run } = (await vi.importMock('@kbn/dev-cli-runner')) as {
   run: MockedFunction<(fn: Function, opts: unknown) => void>;

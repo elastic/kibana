@@ -19,7 +19,7 @@ vi.mock('../cancel_workflow_if_requested', () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { cancelWorkflowIfRequested } = require('../cancel_workflow_if_requested');
+const { cancelWorkflowIfRequested } = await import('../cancel_workflow_if_requested');
 
 describe('processNodeStackMonitoring', () => {
   beforeEach(() => {

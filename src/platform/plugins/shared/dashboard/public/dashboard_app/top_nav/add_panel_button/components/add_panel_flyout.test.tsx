@@ -78,9 +78,9 @@ describe('AddPanelFlyout', () => {
   });
 
   describe('tabs', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../use_menu_item_groups').useMenuItemGroups = () => ({});
+      (await import('../use_menu_item_groups')).useMenuItemGroups = () => ({});
     });
 
     test('renders "New" and "From library" tabs', async () => {
@@ -141,9 +141,9 @@ describe('AddPanelFlyout', () => {
   });
 
   describe('header', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../use_menu_item_groups').useMenuItemGroups = () => ({});
+      (await import('../use_menu_item_groups')).useMenuItemGroups = () => ({});
     });
 
     test('displays "Add to dashboard" heading', async () => {
@@ -157,9 +157,9 @@ describe('AddPanelFlyout', () => {
   });
 
   describe('displays errors', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../use_menu_item_groups').useMenuItemGroups = () => ({
+      (await import('../use_menu_item_groups')).useMenuItemGroups = () => ({
         loading: false,
         error: new Error('simulated useMenuItemGroups error'),
       });
@@ -198,10 +198,10 @@ describe('AddPanelFlyout', () => {
         'data-test-subj': 'dashboardEditorMenu-group1Group',
       },
     ];
-    beforeEach(() => {
+    beforeEach(async () => {
       onClickMock.mockClear();
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../use_menu_item_groups').useMenuItemGroups = () => ({
+      (await import('../use_menu_item_groups')).useMenuItemGroups = () => ({
         groups,
         loading: false,
       });

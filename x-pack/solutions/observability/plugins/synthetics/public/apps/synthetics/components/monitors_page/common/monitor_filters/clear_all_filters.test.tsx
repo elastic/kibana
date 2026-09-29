@@ -25,8 +25,8 @@ const mockUrlParams = (overrides: Partial<SyntheticsUrlParams> = {}): Synthetics
 });
 
 describe('ClearAllFilters', () => {
-  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
+  let useUrlParamsSpy: MockInstance<(...args: any[]) => [URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<(...args: any[]) => SyntheticsUrlParams>;
   let updateUrlParamsMock: Mock;
 
   beforeEach(() => {

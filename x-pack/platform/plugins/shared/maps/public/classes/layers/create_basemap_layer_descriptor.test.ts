@@ -39,9 +39,9 @@ import {
 import { createBasemapLayerDescriptor } from './create_basemap_layer_descriptor';
 
 describe('kibana.yml configured with map.tilemap.url', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../util').getKibanaTileMap = () => {
+    (await import('../../util')).getKibanaTileMap = () => {
       return {
         url: 'myTileUrl',
       };
@@ -68,13 +68,13 @@ describe('kibana.yml configured with map.tilemap.url', () => {
 });
 
 describe('EMS is enabled', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../util').getKibanaTileMap = () => {
+    (await import('../../util')).getKibanaTileMap = () => {
       return null;
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../kibana_services').getEmsTileLayerId = () => ({
+    (await import('../../kibana_services')).getEmsTileLayerId = () => ({
       bright: DEFAULT_EMS_ROADMAP_ID,
       desaturated: DEFAULT_EMS_ROADMAP_DESATURATED_ID,
       dark: DEFAULT_EMS_DARKMAP_ID,
@@ -105,13 +105,13 @@ describe('EMS is enabled', () => {
 });
 
 describe('EMS is not enabled', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../util').getKibanaTileMap = () => {
+    (await import('../../util')).getKibanaTileMap = () => {
       return null;
     };
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../kibana_services').getEMSSettings = () => {
+    (await import('../../kibana_services')).getEMSSettings = () => {
       return {
         isEMSEnabled: () => false,
         isEMSUrlSet() {

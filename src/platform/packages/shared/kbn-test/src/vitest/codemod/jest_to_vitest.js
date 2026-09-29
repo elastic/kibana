@@ -165,6 +165,34 @@ const addDefaultToMockFactories = (sourceFile) => {
   }
 };
 
+/**
+ * `require('./module')` / `require('@kbn/pkg')` of Kibana sources: Node's require cannot load
+ * TypeScript and bypasses vi.mock(), so load them through Vitest with `await import()`.
+ * Returns the namespace like require() of an ES module did under Jest.
+ */
+const requireSourcesAsImports = (sourceFile, report) => {
+  const calls = sourceFile
+    .getDescendantsOfKind(SyntaxKind.CallExpression)
+    .filter((call) => {
+      const [specifier] = call.getArguments();
+      return (
+        call.getExpression().getText() === 'require' &&
+        specifier !== undefined &&
+        Node.isStringLiteral(specifier) &&
+        !isBarePackageSpecifier(specifier.getLiteralValue())
+      );
+    })
+    .reverse();
+  for (const call of calls) {
+    if (call.wasForgotten()) {
+      continue;
+    }
+    const specifier = call.getArguments()[0].getText();
+    makeEnclosingFunctionAsync(call, report);
+    call.replaceWithText(`(await import(${specifier}))`);
+  }
+};
+
 const transformFile = (sourceFile) => {
   const report = [];
   const vitestTypes = new Set();
@@ -250,6 +278,7 @@ const transformFile = (sourceFile) => {
   }
 
   addDefaultToMockFactories(sourceFile);
+  requireSourcesAsImports(sourceFile, report);
   awaitAsyncAssertions(sourceFile, report);
 
   const testCallbacks = sourceFile

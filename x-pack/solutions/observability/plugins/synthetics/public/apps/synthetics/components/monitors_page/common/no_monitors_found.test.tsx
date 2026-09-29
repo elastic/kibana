@@ -16,8 +16,8 @@ import { SearchField } from './search_field';
 import { NoMonitorsFound } from './no_monitors_found';
 
 describe('NoMonitorsFound', () => {
-  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: MockInstance<SyntheticsUrlParams>;
+  let useUrlParamsSpy: MockInstance<(...args: any[]) => [URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<(...args: any[]) => SyntheticsUrlParams>;
   let updateUrlParamsMock: Mock;
 
   beforeEach(() => {

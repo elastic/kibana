@@ -33,7 +33,7 @@ vi.mock('@kbn/streams-schema', async () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { Streams, isIlmLifecycle } = require('@kbn/streams-schema');
+const { Streams, isIlmLifecycle } = await import('@kbn/streams-schema');
 const mockGetEffectiveLifecycle = getEffectiveLifecycle as MockedFunction<
   typeof getEffectiveLifecycle
 >;

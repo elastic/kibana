@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { pi } = require('../../src/functions/pi');
+const { pi } = await import('../../src/functions/pi');
 
 describe('PI', () => {
   it('constant', () => {

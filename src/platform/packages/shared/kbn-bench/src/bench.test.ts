@@ -52,7 +52,7 @@ describe('bench E2E', () => {
     getDir: () => string;
     ensureCheckout: () => Promise<void>;
     ensureBootstrap: () => Promise<void>;
-    ensureBuild: Mock<Promise<void>, []>;
+    ensureBuild: Mock<(...args: []) => Promise<void>>;
     exec: Mock;
   };
 

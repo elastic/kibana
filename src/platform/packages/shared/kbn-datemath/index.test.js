@@ -19,7 +19,7 @@
 
 import { vi } from 'vitest';
 
-const dateMath = require('.');
+const dateMath = await import('.');
 const moment = require('moment');
 
 /**

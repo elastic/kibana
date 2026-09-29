@@ -81,7 +81,7 @@ const oAuthConnector: ServiceNowActionConnector = {
 
 describe('ServiceNow API', () => {
   const http = httpServiceMock.createStartContract();
-  let fetchMock: MockInstance<Promise<unknown>>;
+  let fetchMock: MockInstance<(...args: any[]) => Promise<unknown>>;
 
   beforeAll(() => {
     fetchMock = vi.spyOn(window, 'fetch');

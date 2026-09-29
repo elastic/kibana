@@ -287,8 +287,8 @@ describe('templates_v2 api bulk actions', () => {
   // NOTE: single-template delete is implemented by calling bulkDeleteTemplates with a single id.
 
   describe('bulkExportTemplates', () => {
-    let dateNowSpy: MockInstance<number, []> | undefined;
-    let anchorClickSpy: MockInstance<void, []> | undefined;
+    let dateNowSpy: MockInstance<(...args: []) => number> | undefined;
+    let anchorClickSpy: MockInstance<(...args: []) => void> | undefined;
 
     beforeEach(() => {
       // stable filename

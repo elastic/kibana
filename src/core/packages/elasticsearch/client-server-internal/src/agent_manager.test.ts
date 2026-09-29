@@ -20,8 +20,8 @@ import { AgentManager } from './agent_manager';
 vi.mock('http');
 vi.mock('https');
 
-const HttpAgentMock = HttpAgent as unknown as Mock<HttpAgent>;
-const HttpsAgentMock = HttpsAgent as unknown as Mock<HttpsAgent>;
+const HttpAgentMock = HttpAgent as unknown as Mock<(...args: any[]) => HttpAgent>;
+const HttpsAgentMock = HttpsAgent as unknown as Mock<(...args: any[]) => HttpsAgent>;
 
 describe('AgentManager', () => {
   let logger: MockedLogger;

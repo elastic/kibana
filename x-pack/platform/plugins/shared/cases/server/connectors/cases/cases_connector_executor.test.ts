@@ -60,8 +60,10 @@ vi.mock('./cases_oracle_service');
 vi.mock('./cases_service');
 vi.mock('@kbn/datemath');
 
-const CasesOracleServiceMock = CasesOracleService as Mock<CasesOracleService>;
-const CasesServiceMock = CasesService as Mock<CasesService>;
+const CasesOracleServiceMock = CasesOracleService as Mock<
+  (...args: unknown[]) => CasesOracleService
+>;
+const CasesServiceMock = CasesService as Mock<(...args: unknown[]) => CasesService>;
 const dateMathMock = dateMath as Mocked<typeof dateMath>;
 
 describe('CasesConnectorExecutor', () => {

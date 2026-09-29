@@ -85,9 +85,9 @@ describe('Gold+ licensing', () => {
   ];
 
   describe('basic license', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./licensed_features').getIsGoldPlus = () => false;
+      (await import('./licensed_features')).getIsGoldPlus = () => false;
     });
 
     describe('getAggregatableGeoFieldTypes', () => {
@@ -108,9 +108,9 @@ describe('Gold+ licensing', () => {
   });
 
   describe('gold license', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('./licensed_features').getIsGoldPlus = () => true;
+      (await import('./licensed_features')).getIsGoldPlus = () => true;
     });
     describe('getAggregatableGeoFieldTypes', () => {
       test('Should add geo_shape field', () => {

@@ -13,8 +13,8 @@ describe('chain_runner', () => {
   let tlConfig;
   let runner;
 
-  beforeAll(() => {
-    tlConfig = require('../series_functions/fixtures/tl_config')();
+  beforeAll(async () => {
+    tlConfig = (await import('../series_functions/fixtures/tl_config'))();
   });
 
   function processExpression(expression) {

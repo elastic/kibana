@@ -15,8 +15,8 @@ import invoke from './test_helpers/invoke_series_fn';
 
 describe('trim.js', () => {
   let seriesList;
-  beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async () => {
+    seriesList = (await import('./fixtures/series_list'))();
   });
 
   it('Sets the first and last values to null by default', () => {

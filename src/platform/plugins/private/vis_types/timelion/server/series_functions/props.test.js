@@ -14,8 +14,8 @@ import fn from './props';
 describe('props.js', () => {
   let seriesList;
 
-  beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async () => {
+    seriesList = (await import('./fixtures/series_list'))();
   });
 
   it('sets safe nested properties on each series', async () => {

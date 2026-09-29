@@ -283,7 +283,7 @@ describe('TelemetryService', () => {
 
   describe('reportOptInStatus', () => {
     let originalFetch: (typeof window)['fetch'];
-    let mockFetch: Mock<(typeof window)['fetch']>;
+    let mockFetch: Mock<(...args: unknown[]) => (typeof window)['fetch']>;
 
     beforeAll(() => {
       originalFetch = window.fetch;

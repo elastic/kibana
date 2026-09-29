@@ -62,7 +62,9 @@ const queryClient = new QueryClient({
 
 describe('Connector rules list', () => {
   beforeAll(() => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     useKibanaMock().services.application.getUrlForApp = getUrlForAppMock;
     useKibanaMock().services.notifications.toasts = {
       addSuccessMock,

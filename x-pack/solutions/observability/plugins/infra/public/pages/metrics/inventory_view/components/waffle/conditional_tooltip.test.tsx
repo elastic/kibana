@@ -37,9 +37,9 @@ vi.mock('../../../../../hooks/use_is_pod_schema_selector_enabled', () => {
 import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 import { useIsPodSchemaSelectorEnabled } from '../../../../../hooks/use_is_pod_schema_selector_enabled';
 
-const mockedUseSnapshot = useSnapshot as Mock<ReturnType<typeof useSnapshot>>;
+const mockedUseSnapshot = useSnapshot as Mock<(...args: any[]) => ReturnType<typeof useSnapshot>>;
 const mockedUseWaffleOptionsContext = useWaffleOptionsContext as Mock<
-  ReturnType<typeof useWaffleOptionsContext>
+  (...args: any[]) => ReturnType<typeof useWaffleOptionsContext>
 >;
 const mockedUseIsPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled as MockedFunction<
   typeof useIsPodSchemaSelectorEnabled

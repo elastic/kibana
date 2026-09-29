@@ -41,7 +41,7 @@ const attributes = (
 describe('WorkloadBindingStore', () => {
   let client: ReturnType<typeof savedObjectsClientMock.create>;
   let encryptedClient: ReturnType<typeof encryptedSavedObjectsMock.createClient>;
-  let isEncryptionError: Mock<boolean, [Error]>;
+  let isEncryptionError: Mock<(...args: [Error]) => boolean>;
   let logger: MockedLogger;
   let store: WorkloadBindingStore;
 

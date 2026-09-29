@@ -23,9 +23,10 @@ vi.mock('../../plugin', () => {
 
 const DISCOVER_URL = 'http://discover/url';
 
-describe('useGetGenerateDiscoverLink', () => {
+describe('useGetGenerateDiscoverLink', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const mockGetUnifiedDocViewerServices = require('../../plugin').getUnifiedDocViewerServices;
+  const mockGetUnifiedDocViewerServices = (await import('../../plugin'))
+    .getUnifiedDocViewerServices;
   const mockDiscoverLocator = {
     getRedirectUrl: vi.fn(() => DISCOVER_URL),
   };

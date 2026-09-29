@@ -31,9 +31,9 @@ function getEsClientMock() {
     },
   } as unknown as ElasticsearchClient & {
     cat: {
-      indices: Mock<Promise<FetchAvailableCatIndicesResponseRequired>>;
+      indices: Mock<(...args: unknown[]) => Promise<FetchAvailableCatIndicesResponseRequired>>;
     };
-    search: Mock<Promise<{ aggregations: IndexSearchAggregationResponse }>>;
+    search: Mock<(...args: unknown[]) => Promise<{ aggregations: IndexSearchAggregationResponse }>>;
   };
 }
 

@@ -66,7 +66,9 @@ const loadGlobalExecutionLogAggregationsMock =
 describe('actions_connectors_event_log_list_table', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     loadGlobalExecutionLogAggregationsMock.mockResolvedValue(mockResponse);
   });
 

@@ -179,8 +179,8 @@ describe('run_check', () => {
   let stdoutSpy: MockInstance;
   let previousExitCode: typeof process.exitCode;
 
-  beforeAll(() => {
-    require('./run_check');
+  beforeAll(async () => {
+    await import('./run_check');
     handler = mockRun.mock.calls[0][0];
   });
 

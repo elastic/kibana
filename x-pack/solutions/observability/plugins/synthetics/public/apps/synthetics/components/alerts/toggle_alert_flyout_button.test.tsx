@@ -24,7 +24,7 @@ vi.mock('./hooks/use_synthetics_rules', () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const useSyntheticsRulesModule = require('./hooks/use_synthetics_rules');
+const useSyntheticsRulesModule = await import('./hooks/use_synthetics_rules');
 const mockUseSyntheticsRules = useSyntheticsRulesModule.useSyntheticsRules as MockedFunction<
   typeof useSyntheticsRulesModule.useSyntheticsRules
 >;

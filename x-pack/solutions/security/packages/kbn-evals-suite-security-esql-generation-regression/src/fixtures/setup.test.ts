@@ -19,9 +19,9 @@ interface ResolveResponse {
 
 interface FakeEsClient {
   indices: {
-    resolveIndex: Mock<Promise<ResolveResponse>, [unknown]>;
-    delete: Mock<Promise<unknown>, [unknown]>;
-    deleteDataStream: Mock<Promise<unknown>, [unknown]>;
+    resolveIndex: Mock<(...args: [unknown]) => Promise<ResolveResponse>>;
+    delete: Mock<(...args: [unknown]) => Promise<unknown>>;
+    deleteDataStream: Mock<(...args: [unknown]) => Promise<unknown>>;
   };
 }
 

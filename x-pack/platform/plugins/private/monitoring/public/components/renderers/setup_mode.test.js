@@ -22,7 +22,7 @@ const onHttpErrorMock = vi.fn();
 describe('SetupModeRenderer', () => {
   beforeEach(() => vi.resetModules());
 
-  it('should render with setup mode disabled', () => {
+  it('should render with setup mode disabled', async () => {
     vi.doMock('../../lib/setup_mode', () => {
       const mocked = {
         getSetupModeState: () => ({
@@ -36,7 +36,7 @@ describe('SetupModeRenderer', () => {
       };
       return { ...mocked, default: mocked };
     });
-    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
+    const SetupModeRenderer = (await import('./setup_mode')).WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
     const component = shallow(
@@ -57,7 +57,7 @@ describe('SetupModeRenderer', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render with setup mode enabled', () => {
+  it('should render with setup mode enabled', async () => {
     vi.doMock('../../lib/setup_mode', () => {
       const mocked = {
         getSetupModeState: () => ({
@@ -75,7 +75,7 @@ describe('SetupModeRenderer', () => {
       };
       return { ...mocked, default: mocked };
     });
-    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
+    const SetupModeRenderer = (await import('./setup_mode')).WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
     const component = shallow(
@@ -96,7 +96,7 @@ describe('SetupModeRenderer', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should render the flyout open', () => {
+  it('should render the flyout open', async () => {
     vi.doMock('../../lib/setup_mode', () => {
       const mocked = {
         getSetupModeState: () => ({
@@ -116,7 +116,7 @@ describe('SetupModeRenderer', () => {
       };
       return { ...mocked, default: mocked };
     });
-    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
+    const SetupModeRenderer = (await import('./setup_mode')).WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
     const component = shallow(
@@ -139,7 +139,7 @@ describe('SetupModeRenderer', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('should handle a new node/instance scenario', () => {
+  it('should handle a new node/instance scenario', async () => {
     vi.doMock('../../lib/setup_mode', () => {
       const mocked = {
         getSetupModeState: () => ({
@@ -159,7 +159,7 @@ describe('SetupModeRenderer', () => {
       };
       return { ...mocked, default: mocked };
     });
-    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
+    const SetupModeRenderer = (await import('./setup_mode')).WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
     const component = shallow(
@@ -182,7 +182,7 @@ describe('SetupModeRenderer', () => {
     expect(component.find('Flyout').prop('product')).toEqual({ isNetNewUser: true });
   });
 
-  it('should use a new product found in the api response', () => {
+  it('should use a new product found in the api response', async () => {
     const newProduct = { id: 1 };
 
     vi.useFakeTimers({ legacyFakeTimers: true });
@@ -217,7 +217,7 @@ describe('SetupModeRenderer', () => {
       };
       return { ...mocked, default: mocked };
     });
-    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
+    const SetupModeRenderer = (await import('./setup_mode')).WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
     const component = shallow(
@@ -244,7 +244,7 @@ describe('SetupModeRenderer', () => {
     expect(component.find('Flyout').prop('product')).toBe(newProduct);
   });
 
-  it('should set the top menu items', () => {
+  it('should set the top menu items', async () => {
     const newProduct = { id: 1 };
 
     vi.doMock('../../lib/setup_mode', () => {
@@ -278,7 +278,7 @@ describe('SetupModeRenderer', () => {
       };
       return { ...mocked, default: mocked };
     });
-    const SetupModeRenderer = require('./setup_mode').WrappedSetupModeRenderer;
+    const SetupModeRenderer = (await import('./setup_mode')).WrappedSetupModeRenderer;
 
     const ChildComponent = () => <h1>Hi</h1>;
     const component = shallow(

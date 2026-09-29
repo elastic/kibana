@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { range } = require('../../src/functions/range');
+const { range } = await import('../../src/functions/range');
 
 describe('Range', () => {
   it('numbers', () => {

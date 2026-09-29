@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { abs } = require('../../src/functions/abs');
+const { abs } = await import('../../src/functions/abs');
 
 describe('Abs', () => {
   it('numbers', () => {

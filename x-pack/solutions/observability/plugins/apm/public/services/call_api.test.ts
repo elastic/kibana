@@ -14,7 +14,7 @@ import type { CoreStart, HttpSetup } from '@kbn/core/public';
 
 type CoreMock = CoreStart & {
   http: {
-    get: MockInstance<HttpSetup['get']>;
+    get: MockInstance<(...args: any[]) => HttpSetup['get']>;
   };
 };
 

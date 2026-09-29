@@ -32,7 +32,7 @@ describe('Authentication Routes', () => {
   let mockRequest: any;
   let mockResponse: any;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     mockLogger = loggingSystemMock.createLogger();
@@ -74,7 +74,7 @@ describe('Authentication Routes', () => {
     };
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { createStorageService } = require('../lib/create_storage_service');
+    const { createStorageService } = await import('../lib/create_storage_service');
     createStorageService.mockResolvedValue(mockStorageService);
   });
 
@@ -167,7 +167,7 @@ describe('Authentication Routes', () => {
     let routeHandler: Function;
     let mockCloudConnectInstance: Mocked<CloudConnectClient>;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       mockCloudConnectInstance = {
         validateApiKeyScope: vi.fn(),
         getClusterDetails: vi.fn(),
@@ -186,7 +186,7 @@ describe('Authentication Routes', () => {
       const hasEncryptedSOEnabled = true;
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { createStorageService } = require('../lib/create_storage_service');
+      const { createStorageService } = await import('../lib/create_storage_service');
       createStorageService.mockResolvedValue(mockStorageService);
 
       registerAuthenticateRoute({
@@ -291,7 +291,7 @@ describe('Authentication Routes', () => {
 
     it('should authenticate with admin key and generate cluster-scoped key', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getCurrentClusterData } = require('../lib/cluster_info');
+      const { getCurrentClusterData } = await import('../lib/cluster_info');
 
       mockCloudConnectInstance.validateApiKeyScope.mockResolvedValue({
         isClusterScoped: false,

@@ -137,7 +137,7 @@ describe('Check Prod Native Modules', () => {
       (existsSync as Mock).mockReturnValue(true);
       vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .spyOn(require('./check_prod_native_modules'), 'isNativeModule')
+        .spyOn(await import('./check_prod_native_modules'), 'isNativeModule')
         .mockResolvedValueOnce(true);
 
       await checkDependencies(
@@ -170,7 +170,7 @@ describe('Check Prod Native Modules', () => {
       (existsSync as Mock).mockReturnValue(true);
       vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .spyOn(require('./check_prod_native_modules'), 'isNativeModule')
+        .spyOn(await import('./check_prod_native_modules'), 'isNativeModule')
         .mockResolvedValueOnce(true);
 
       await checkDependencies(
@@ -194,7 +194,7 @@ describe('Check Prod Native Modules', () => {
       (fs.readdir as Mock).mockResolvedValue([]);
       vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
+        .spyOn(await import('./check_prod_native_modules'), 'checkDependencies')
         .mockResolvedValue(undefined);
 
       const result = await checkProdNativeModules(mockLog);
@@ -217,7 +217,7 @@ describe('Check Prod Native Modules', () => {
       // Mock loadPackageJson to return a mock package JSON object
       vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .spyOn(require('./helpers'), 'loadPackageJson')
+        .spyOn(await import('./helpers'), 'loadPackageJson')
         .mockImplementation((packageJsonPath: any) => {
           return {
             name: '@elastic/native-module',
@@ -232,7 +232,7 @@ describe('Check Prod Native Modules', () => {
         .mockResolvedValueOnce([{ name: 'binding.gyp', isDirectory: () => false }]);
       vi
         // eslint-disable-next-line @typescript-eslint/no-var-requires
-        .spyOn(require('./check_prod_native_modules'), 'checkDependencies')
+        .spyOn(await import('./check_prod_native_modules'), 'checkDependencies')
         .mockImplementationOnce((_, __, prodNativeModulesFound: any) => {
           prodNativeModulesFound.push({
             name: '@elastic/native-module',

@@ -33,9 +33,9 @@ vi.mock('../../utils', () => {
 });
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { processNodeStackMonitoring } = require('./process_node_stack_monitoring');
+const { processNodeStackMonitoring } = await import('./process_node_stack_monitoring');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { abortableTimeout, TimeoutAbortedError } = require('../../utils');
+const { abortableTimeout, TimeoutAbortedError } = await import('../../utils');
 
 describe('runStackMonitor', () => {
   beforeEach(() => {

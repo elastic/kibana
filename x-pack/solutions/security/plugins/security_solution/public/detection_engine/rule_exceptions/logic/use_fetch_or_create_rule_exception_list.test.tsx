@@ -33,11 +33,17 @@ vi.mock('../../rule_management/api/api');
 vi.mock('@kbn/securitysolution-list-api');
 
 describe('useFetchOrCreateRuleExceptionList', () => {
-  let fetchRuleById: MockInstance<ReturnType<typeof rulesApi.fetchRuleById>>;
-  let patchRule: MockInstance<ReturnType<typeof rulesApi.patchRule>>;
-  let addExceptionList: MockInstance<ReturnType<typeof listsApi.addExceptionList>>;
-  let addEndpointExceptionList: MockInstance<ReturnType<typeof listsApi.addEndpointExceptionList>>;
-  let fetchExceptionListById: MockInstance<Promise<ExceptionListSchema>>;
+  let fetchRuleById: MockInstance<
+    (...args: unknown[]) => ReturnType<typeof rulesApi.fetchRuleById>
+  >;
+  let patchRule: MockInstance<(...args: unknown[]) => ReturnType<typeof rulesApi.patchRule>>;
+  let addExceptionList: MockInstance<
+    (...args: unknown[]) => ReturnType<typeof listsApi.addExceptionList>
+  >;
+  let addEndpointExceptionList: MockInstance<
+    (...args: unknown[]) => ReturnType<typeof listsApi.addEndpointExceptionList>
+  >;
+  let fetchExceptionListById: MockInstance<(...args: unknown[]) => Promise<ExceptionListSchema>>;
   let render: (
     listType?: UseFetchOrCreateRuleExceptionListProps['exceptionListType']
   ) => RenderHookResult<

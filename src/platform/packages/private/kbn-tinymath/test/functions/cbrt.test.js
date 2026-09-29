@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { cbrt } = require('../../src/functions/cbrt');
+const { cbrt } = await import('../../src/functions/cbrt');
 
 describe('Cbrt', () => {
   it('numbers', () => {

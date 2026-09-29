@@ -27,7 +27,7 @@ describe('useAsync', () => {
    */
   const timeout = 20_000;
 
-  let fn: Mock<TestReturn, TestArgs[]>;
+  let fn: Mock<(...args: TestArgs[]) => TestReturn>;
   let args: TestArgs;
 
   beforeEach(() => {

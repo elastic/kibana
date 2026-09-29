@@ -15,8 +15,8 @@ import invoke from './test_helpers/invoke_series_fn';
 
 describe('subtract.js', () => {
   let seriesList;
-  beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async () => {
+    seriesList = (await import('./fixtures/series_list'))();
   });
 
   it('it throws an error if first argument is not seriesList', async () => {

@@ -18,9 +18,9 @@ import { AnomalyResultsViewSelector } from '.';
 
 vi.mock('../../contexts/kibana', () => {
   return {
-    useMlLocator: () =>
+    useMlLocator: async () =>
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('@kbn/share-plugin/public/mocks').sharePluginMock.createLocator(),
+      (await import('@kbn/share-plugin/public/mocks')).sharePluginMock.createLocator(),
     useNavigateToPath: () => vi.fn(),
   };
 });

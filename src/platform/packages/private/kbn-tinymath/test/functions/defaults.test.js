@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { defaults } = require('../../src/functions/defaults');
+const { defaults } = await import('../../src/functions/defaults');
 
 describe('Defaults', () => {
   it('number, number', () => {

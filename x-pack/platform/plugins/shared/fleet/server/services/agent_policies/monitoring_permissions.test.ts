@@ -17,8 +17,12 @@ import { getMonitoringPermissions } from './monitoring_permissions';
 
 vi.mock('../epm/packages');
 
-const mockedGetInstallation = getInstallation as Mock<ReturnType<typeof getInstallation>>;
-const mockedGetPackageInfo = getPackageInfo as Mock<ReturnType<typeof getPackageInfo>>;
+const mockedGetInstallation = getInstallation as Mock<
+  (...args: any[]) => ReturnType<typeof getInstallation>
+>;
+const mockedGetPackageInfo = getPackageInfo as Mock<
+  (...args: any[]) => ReturnType<typeof getPackageInfo>
+>;
 
 describe('getMonitoringPermissions', () => {
   describe('Without elastic agent package installed', () => {

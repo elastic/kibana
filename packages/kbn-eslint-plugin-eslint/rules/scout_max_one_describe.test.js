@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_max_one_describe');
+const rule = await import('./scout_max_one_describe');
 const dedent = require('dedent');
 
 const ERROR_MSG =

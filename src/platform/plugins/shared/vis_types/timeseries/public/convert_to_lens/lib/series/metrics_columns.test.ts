@@ -188,7 +188,7 @@ describe('getMetricsColumns', () => {
     } else {
       getMetricsColumns(...input);
       expect(expected).toHaveBeenCalledTimes(1);
-      (expected as Mock<any, any>).mockClear();
+      (expected as Mock<(...args: any) => any>).mockClear();
     }
   });
 });

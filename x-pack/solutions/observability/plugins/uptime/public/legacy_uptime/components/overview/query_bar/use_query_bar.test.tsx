@@ -22,8 +22,8 @@ const SAMPLE_ES_FILTERS = `{"bool":{"should":[{"match_phrase":{"monitor.id":"Nod
 describe('useQueryBar', () => {
   let DEFAULT_URL_PARAMS: UptimeUrlParams;
   let wrapper: any;
-  let useUrlParamsSpy: MockInstance<[URL.GetUrlParams, URL.UpdateUrlParams]>;
-  let useGetUrlParamsSpy: MockInstance<UptimeUrlParams>;
+  let useUrlParamsSpy: MockInstance<(...args: any[]) => [URL.GetUrlParams, URL.UpdateUrlParams]>;
+  let useGetUrlParamsSpy: MockInstance<(...args: any[]) => UptimeUrlParams>;
   let updateUrlParamsMock: Mock;
   let useUpdateKueryStringSpy: MockInstance;
 

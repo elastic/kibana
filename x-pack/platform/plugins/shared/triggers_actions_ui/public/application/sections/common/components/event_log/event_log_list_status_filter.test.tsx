@@ -24,7 +24,7 @@ vi.mock('../../../../../common/get_experimental_features', () => {
 });
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+  (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => false);
 });
 
 const onChangeMock = vi.fn();

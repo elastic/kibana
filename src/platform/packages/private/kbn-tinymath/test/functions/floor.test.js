@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { floor } = require('../../src/functions/floor');
+const { floor } = await import('../../src/functions/floor');
 
 describe('Floor', () => {
   it('numbers', () => {

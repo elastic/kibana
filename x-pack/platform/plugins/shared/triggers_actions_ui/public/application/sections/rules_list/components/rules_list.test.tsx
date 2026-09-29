@@ -458,7 +458,9 @@ describe('rules_list ', () => {
   let actionTypeRegistry: Mocked<ActionTypeRegistryContract<unknown, unknown>>;
 
   beforeEach(() => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     loadRulesWithKueryFilter.mockResolvedValue({
       page: 1,
       perPage: 10000,
@@ -531,7 +533,7 @@ describe('rules_list ', () => {
   });
 
   it('can filter by rule states', async () => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
     const onStatusFilterChangeMock = vi.fn();
     renderWithProviders(
       <RulesList statusFilter={['disabled']} onStatusFilterChange={onStatusFilterChangeMock} />
@@ -971,7 +973,9 @@ describe('rules_list ', () => {
     });
 
     it('renders the status filter if the experiment is on', async () => {
-      (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+      (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+        () => true
+      );
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -986,7 +990,9 @@ describe('rules_list ', () => {
     });
 
     it('renders the tag filter if the experiment is on', async () => {
-      (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+      (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+        () => true
+      );
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
@@ -1017,7 +1023,9 @@ describe('rules_list ', () => {
     // This might be repeated later
     describe('rules_list component empty with show only capability', () => {
       beforeEach(() => {
-        (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+        (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+          () => false
+        );
         loadActionTypes.mockResolvedValue([
           {
             id: 'test',
@@ -1051,7 +1059,9 @@ describe('internally managed rule', () => {
   let actionTypeRegistry: Mocked<ActionTypeRegistryContract<unknown, unknown>>;
 
   beforeEach(() => {
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     const internallyManagedRule = {
       ...mockedRulesData[0],
       ruleTypeId: 'internally_managed_rule_type',

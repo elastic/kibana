@@ -53,8 +53,8 @@ describe('LineClamp', () => {
   describe('overflow', () => {
     const clientHeight = 400;
     const scrollHeight = clientHeight + 100; // scrollHeight is > clientHeight
-    let spyClientHeight: MockInstance<number, []>;
-    let spyScrollHeight: MockInstance<number, []>;
+    let spyClientHeight: MockInstance<(...args: []) => number>;
+    let spyScrollHeight: MockInstance<(...args: []) => number>;
 
     beforeAll(() => {
       spyClientHeight = vi.spyOn(window.HTMLElement.prototype, 'clientHeight', 'get');

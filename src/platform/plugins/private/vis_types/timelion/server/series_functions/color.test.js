@@ -15,8 +15,8 @@ import invoke from './test_helpers/invoke_series_fn';
 
 describe('color.js', () => {
   let seriesList;
-  beforeEach(() => {
-    seriesList = require('./fixtures/series_list')();
+  beforeEach(async () => {
+    seriesList = (await import('./fixtures/series_list'))();
   });
 
   it('sets the color, on all series', () => {

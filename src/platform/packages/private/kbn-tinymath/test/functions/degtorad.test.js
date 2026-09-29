@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { degtorad } = require('../../src/functions/degtorad');
+const { degtorad } = await import('../../src/functions/degtorad');
 
 describe('Degrees to Radians', () => {
   it('numbers', () => {

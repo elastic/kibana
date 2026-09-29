@@ -13,8 +13,8 @@ vi.mock('child_process', () => {
 });
 
 const { execFileSync } = require('child_process');
-const { collectFailureContext } = require('./collect_failure_context');
-const { MAX_LOG_EXCERPT_CHARS, failureLogMetadataKey } = require('./failure_context_helpers');
+const { collectFailureContext } = await import('./collect_failure_context');
+const { MAX_LOG_EXCERPT_CHARS, failureLogMetadataKey } = await import('./failure_context_helpers');
 
 const SUITE = 'significant-events';
 const MODEL = 'gpt-5';

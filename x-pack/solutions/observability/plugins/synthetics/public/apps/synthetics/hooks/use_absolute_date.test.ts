@@ -15,7 +15,7 @@ import moment from 'moment';
 import { useAbsoluteDate } from './use_absolute_date';
 
 describe('useAbsoluteDate', () => {
-  let datemathSpy: MockInstance<Moment | undefined>;
+  let datemathSpy: MockInstance<(...args: any[]) => Moment | undefined>;
 
   beforeEach(() => {
     datemathSpy = vi.spyOn(datemath, 'parse');

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./require_license_header');
+const rule = await import('./require_license_header');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

@@ -30,7 +30,7 @@ describe('TrainedModelsService', () => {
   let mockTrainedModelsApiService: Mocked<TrainedModelsApiService>;
   let trainedModelsService: TrainedModelsService;
   let scheduledDeploymentsSubject: BehaviorSubject<ScheduledDeployment[]>;
-  let mockSetScheduledDeployments: Mock<any, any>;
+  let mockSetScheduledDeployments: Mock<(...args: any) => any>;
   let mockTelemetryService: Mocked<ITelemetryClient>;
   let mockDeploymentParamsMapper: Mocked<DeploymentParamsMapper>;
 

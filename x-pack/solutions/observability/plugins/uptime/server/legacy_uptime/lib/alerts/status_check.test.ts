@@ -222,7 +222,7 @@ const mockOptions = (
 };
 
 describe('status check alert', () => {
-  let toISOStringSpy: MockInstance<string, []>;
+  let toISOStringSpy: MockInstance<(...args: []) => string>;
   const mockDate = new Date('2021-05-13T12:33:37.000Z');
   beforeEach(() => {
     toISOStringSpy = vi.spyOn(Date.prototype, 'toISOString');
@@ -272,7 +272,7 @@ describe('status check alert', () => {
 
     it('triggers when monitors are down and provides expected state', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
@@ -388,7 +388,7 @@ describe('status check alert', () => {
 
     it('supports auto generated monitor status alerts', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });
@@ -476,7 +476,7 @@ describe('status check alert', () => {
 
     it('supports 7.7 alert format', async () => {
       toISOStringSpy.mockImplementation(() => '7.7 date');
-      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
@@ -574,7 +574,7 @@ describe('status check alert', () => {
     it('supports 7.8 alert format', async () => {
       expect.assertions(8);
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValueOnce(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
@@ -867,7 +867,7 @@ describe('status check alert', () => {
     it('supports availability checks', async () => {
       // expect.assertions(13);
       toISOStringSpy.mockImplementation(() => 'availability test');
-      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => GetMonitorStatusResult[]> = vi.fn();
       mockGetter.mockReturnValue([]);
       const mockAvailabilityMonitors = [
         {
@@ -922,7 +922,7 @@ describe('status check alert', () => {
           }),
         },
       ];
-      const mockAvailability: Mock<GetMonitorAvailabilityResult[]> = vi.fn();
+      const mockAvailability: Mock<(...args: any[]) => GetMonitorAvailabilityResult[]> = vi.fn();
       mockAvailability.mockReturnValue(mockAvailabilityMonitors);
       const { server, libs, plugins } = bootstrapDependencies({
         getMonitorAvailability: mockAvailability,
@@ -1172,7 +1172,7 @@ describe('status check alert', () => {
 
     it('sets alert recovery context for recovered alerts', async () => {
       toISOStringSpy.mockImplementation(() => 'foo date string');
-      const mockGetter: Mock<GetMonitorStatusResult[]> = vi.fn();
+      const mockGetter: Mock<(...args: any[]) => GetMonitorStatusResult[]> = vi.fn();
 
       mockGetter.mockReturnValue(mockMonitors);
       const { server, libs, plugins } = bootstrapDependencies({ getMonitorStatus: mockGetter });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { sin } = require('../../src/functions/sin');
+const { sin } = await import('../../src/functions/sin');
 
 describe('Sine', () => {
   it('numbers', () => {

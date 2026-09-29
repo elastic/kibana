@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { ceil } = require('../../src/functions/ceil');
+const { ceil } = await import('../../src/functions/ceil');
 
 describe('Ceil', () => {
   it('numbers', () => {

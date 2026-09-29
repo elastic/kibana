@@ -36,10 +36,10 @@ import { getCompletionItemProvider } from '../lib/autocomplete/get_completion_it
 // Uses createMockMonacoEditor (which includes getVisibleRanges, onDid* listeners,
 // revealLineInCenter, etc.) instead of a hand-rolled inline mock, so the minimap's
 // viewport-tracking code path is exercised without needing the real Monaco environment.
-vi.mock('../../../shared/ui/yaml_editor', () => {
+vi.mock('../../../shared/ui/yaml_editor', async () => {
   // require() is mandatory here: jest.mock factories run before ES-import transforms.
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { createMockMonacoEditor } = require('../../../shared/test_utils/mock_monaco');
+  const { createMockMonacoEditor } = await import('../../../shared/test_utils/mock_monaco');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { createElement } = require('react');
   return {

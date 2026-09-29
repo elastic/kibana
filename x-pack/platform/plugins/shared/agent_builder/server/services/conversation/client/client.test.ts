@@ -52,7 +52,7 @@ vi.mock('../templates/registry', () => {
   return { ...mocked, default: mocked };
 });
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const getTemplateMock: Mock = require('../templates/registry').getTemplate;
+const getTemplateMock: Mock = (await import('../templates/registry')).getTemplate;
 
 const testSpace = 'default';
 

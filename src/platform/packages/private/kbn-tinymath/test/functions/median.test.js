@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { median } = require('../../src/functions/median');
+const { median } = await import('../../src/functions/median');
 
 describe('Median', () => {
   it('numbers', () => {

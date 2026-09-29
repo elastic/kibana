@@ -28,9 +28,9 @@ const navigateToUrl = vi.fn().mockImplementation(async (url) => {
 });
 
 describe('useUnsavedChangesPrompt', () => {
-  let addSpy: MockInstance<Window['addEventListener']>;
-  let removeSpy: MockInstance<Window['removeEventListener']>;
-  let blockSpy: MockInstance<CoreScopedHistory['block']>;
+  let addSpy: MockInstance<(...args: any[]) => Window['addEventListener']>;
+  let removeSpy: MockInstance<(...args: any[]) => Window['removeEventListener']>;
+  let blockSpy: MockInstance<(...args: any[]) => CoreScopedHistory['block']>;
 
   beforeEach(() => {
     addSpy = vi.spyOn(window, 'addEventListener');

@@ -17,7 +17,7 @@ describe('getResolverClusterClient', () => {
   const request = httpServerMock.createKibanaRequest();
   const originClient = elasticsearchServiceMock.createScopedClusterClient();
   let clusterClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>;
-  let getClusterClient: Mock<Promise<IClusterClient>>;
+  let getClusterClient: Mock<(...args: unknown[]) => Promise<IClusterClient>>;
   let context: SecuritySolutionRequestHandlerContext;
 
   beforeEach(() => {

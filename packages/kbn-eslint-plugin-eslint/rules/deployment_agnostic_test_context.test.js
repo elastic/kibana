@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./deployment_agnostic_test_context');
+const rule = await import('./deployment_agnostic_test_context');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

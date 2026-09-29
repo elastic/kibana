@@ -82,7 +82,7 @@ const licenseErrorRule = {
 } as RuleTableItem;
 
 beforeEach(() => {
-  (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+  (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => false);
 });
 
 describe('getRuleHealthColor', () => {
@@ -90,7 +90,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(mockRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.success);
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(mockRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.success);
@@ -100,7 +100,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(warningRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.warning);
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(warningRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.warning);
@@ -110,7 +110,7 @@ describe('getRuleHealthColor', () => {
     let color = getRuleHealthColor(failedRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.danger);
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
 
     color = getRuleHealthColor(failedRule, mockTheme);
     expect(color).toEqual(mockTheme.colors.danger);
@@ -127,7 +127,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Succeeded');
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: mockRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -146,7 +146,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Warning');
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: warningRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -165,7 +165,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('Failed');
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: failedRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,
@@ -184,7 +184,7 @@ describe('getRuleStatusMessage', () => {
     });
     expect(statusMessage).toEqual('License Error');
 
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => true);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(() => true);
     statusMessage = getRuleStatusMessage({
       rule: licenseErrorRule,
       licenseErrorText: ALERT_STATUS_LICENSE_ERROR,

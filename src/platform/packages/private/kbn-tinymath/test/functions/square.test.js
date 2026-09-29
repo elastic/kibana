@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { square } = require('../../src/functions/square');
+const { square } = await import('../../src/functions/square');
 
 describe('Square', () => {
   it('numbers', () => {

@@ -13,7 +13,7 @@ import { ENVIRONMENT_ALL_VALUE } from '../../../common/environment_filter_values
 import { SERVICE_ENVIRONMENT } from '../../../common/es_fields/apm';
 import { getServiceMixedIngestion } from './get_service_mixed_ingestion';
 
-type SearchMock = Mock<Promise<unknown>>;
+type SearchMock = Mock<(...args: any[]) => Promise<unknown>>;
 
 const start = 1_700_000_000_000;
 const end = 1_700_000_900_000;

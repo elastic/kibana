@@ -53,7 +53,7 @@ describe('uploadAllEventsFromPath', () => {
   const spies = {
     existsSync: vi.spyOn(fs, 'existsSync'),
     statSync: vi.spyOn(fs, 'statSync'),
-    readdirSync: vi.spyOn(fs, 'readdirSync') as any as Mock<string[], [string, any]>,
+    readdirSync: vi.spyOn(fs, 'readdirSync') as any as Mock<(...args: [string, any]) => string[]>,
   };
 
   beforeEach(() => {
@@ -276,7 +276,7 @@ describe('uploadAllEventsFromPath', () => {
       info: vi.fn(),
       warning: vi.fn(),
       error: vi.fn(),
-    } as Partial<Mock<ToolingLog>> as ToolingLog;
+    } as Partial<Mock<(...args: any[]) => ToolingLog>> as ToolingLog;
 
     const dataStream = new RealScoutReportDataStream(es, localLog);
 

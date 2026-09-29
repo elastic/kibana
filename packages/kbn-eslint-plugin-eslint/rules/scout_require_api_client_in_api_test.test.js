@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_require_api_client_in_api_test');
+const rule = await import('./scout_require_api_client_in_api_test');
 const dedent = require('dedent');
 
 const DEFAULT_ERROR_MSG =

@@ -58,7 +58,7 @@ describe('Runtime field editor flyout', () => {
       type: 'date',
       script: { source: 'test=123' },
     };
-    const onSave: Mock<Props['onSave']> = vi.fn();
+    const onSave: Mock<(...args: any[]) => Props['onSave']> = vi.fn();
 
     renderComponent({ onSave, defaultValue: field });
 
@@ -79,7 +79,7 @@ describe('Runtime field editor flyout', () => {
 
   describe('validation', () => {
     test('should validate the fields and prevent saving invalid form', async () => {
-      const onSave: Mock<Props['onSave']> = vi.fn();
+      const onSave: Mock<(...args: any[]) => Props['onSave']> = vi.fn();
 
       renderComponent({ onSave });
 
@@ -98,7 +98,7 @@ describe('Runtime field editor flyout', () => {
     });
 
     test('should forward values from the form', async () => {
-      const onSave: Mock<Props['onSave']> = vi.fn();
+      const onSave: Mock<(...args: any[]) => Props['onSave']> = vi.fn();
 
       renderComponent({ onSave });
 

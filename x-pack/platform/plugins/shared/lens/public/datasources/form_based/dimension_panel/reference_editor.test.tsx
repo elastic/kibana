@@ -57,7 +57,7 @@ const getFieldSelectComboBox = (wrapper: ReactWrapper) =>
 
 describe('reference editor', () => {
   let wrapper: ReactWrapper | ShallowWrapper;
-  let paramEditorUpdater: Mock<ReferenceEditorProps['paramEditorUpdater']>;
+  let paramEditorUpdater: Mock<(...args: unknown[]) => ReferenceEditorProps['paramEditorUpdater']>;
 
   const layer = {
     indexPatternId: '1',

@@ -127,8 +127,8 @@ describe('FeatureFlagsService Browser', () => {
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
 
       let setProvider: FeatureFlagsSetup['setProvider'];
-      let apmSpy: MockInstance<Transaction | undefined>;
-      let setProviderSpy: MockInstance<Promise<void>>;
+      let apmSpy: MockInstance<(...args: any[]) => Transaction | undefined>;
+      let setProviderSpy: MockInstance<(...args: any[]) => Promise<void>>;
 
       beforeEach(() => {
         const setup = featureFlagsService.setup(createSetupDeps());

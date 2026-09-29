@@ -44,7 +44,7 @@ describe('UiamServiceAccounts', () => {
   let mockCheckPrivileges: Mocked<CheckPrivileges>;
   let mockCheckPrivilegesWithRequest: Mocked<CheckPrivilegesWithRequest>;
   let logger: Logger;
-  let getCurrentUser: Mock<AuthenticatedUser | null, [KibanaRequest]>;
+  let getCurrentUser: Mock<(...args: [KibanaRequest]) => AuthenticatedUser | null>;
 
   const clusterPrivilegesResponse = (authorized: boolean): CheckPrivilegesResponse => ({
     hasAllRequested: authorized,

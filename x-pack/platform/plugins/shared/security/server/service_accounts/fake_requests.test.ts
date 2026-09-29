@@ -25,7 +25,7 @@ const REQUEST_LIFETIME_MS = 10 * 60 * 1000;
 
 describe('ServiceAccountFakeRequests', () => {
   let logger: Logger;
-  let mintToken: Mock<Promise<string>, [string]>;
+  let mintToken: Mock<(...args: [string]) => Promise<string>>;
   let fakeRequests: ServiceAccountFakeRequests;
 
   beforeEach(() => {

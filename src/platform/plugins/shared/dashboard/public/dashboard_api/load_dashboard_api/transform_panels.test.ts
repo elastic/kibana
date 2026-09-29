@@ -15,9 +15,9 @@ import type { DashboardPanel, DashboardSection } from '@kbn/as-code-dashboard-sc
 
 describe('transformPanels', () => {
   const mockTransformOut = vi.fn();
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../services/kibana_services').embeddableService = {
+    (await import('../../services/kibana_services')).embeddableService = {
       getLegacyURLTransform: async () => mockTransformOut,
     };
   });

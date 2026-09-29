@@ -22,7 +22,7 @@ import type {
 import type { KibanaContext } from '..';
 
 interface MockTypedSearchService {
-  esql: Mock<Promise<IEsqlSearchResult>, [IEsqlSearchParams, IEsqlSearchOptions?]>;
+  esql: Mock<(...args: [IEsqlSearchParams, IEsqlSearchOptions?]) => Promise<IEsqlSearchResult>>;
 }
 
 const mockUiSettings = (): UiSettingsCommon =>

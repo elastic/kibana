@@ -34,18 +34,19 @@ const mockFetchLogDocumentById = vi.fn<
 const mockAdd = vi.fn();
 
 const mockGetById: Mock<
-  | {
-      fetchLogDocumentById: Mock<
-        Promise<
-          | {
-              _index: string;
-              fields: Record<PropertyKey, any> | undefined;
-            }
-          | undefined
-        >
-      >;
-    }
-  | undefined
+  (...args: any[]) =>
+    | {
+        fetchLogDocumentById: Mock<
+          (...args: any[]) => Promise<
+            | {
+                _index: string;
+                fields: Record<PropertyKey, any> | undefined;
+              }
+            | undefined
+          >
+        >;
+      }
+    | undefined
 > = vi.fn(() => ({
   fetchLogDocumentById: mockFetchLogDocumentById,
 }));

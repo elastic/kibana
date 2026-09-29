@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { lt } = require('../../../src/functions/comparison/lt');
+const { lt } = await import('../../../src/functions/comparison/lt');
 
 describe('Lt', () => {
   it('missing args', () => {

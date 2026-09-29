@@ -23,7 +23,7 @@ describe('useResolver', () => {
   });
 
   it('redirects to the home page if ML is disabled', async () => {
-    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<(...args: any[]) => Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: false,
     });
     renderHook(() => useRouteResolver('full', ['canCreateJob']));
@@ -31,7 +31,7 @@ describe('useResolver', () => {
   });
 
   it('redirects to the home page if license is not sufficient', async () => {
-    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<(...args: any[]) => Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: false,
     });
@@ -40,7 +40,7 @@ describe('useResolver', () => {
   });
 
   it('redirects to the data viz page if license is not full', async () => {
-    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<(...args: any[]) => Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: true,
       isFullLicense: false,
@@ -52,7 +52,7 @@ describe('useResolver', () => {
   });
 
   it('does not redirect if license requirements are met', async () => {
-    (useMlLicenseInfo as Mock<Partial<MlLicenseInfo>>).mockReturnValueOnce({
+    (useMlLicenseInfo as Mock<(...args: any[]) => Partial<MlLicenseInfo>>).mockReturnValueOnce({
       isMlEnabled: true,
       isMinimumLicense: true,
       isFullLicense: false,
@@ -64,7 +64,7 @@ describe('useResolver', () => {
 
   // FIXME
   it.skip('redirects to the access denied page if some required capabilities are missing', async () => {
-    (usePermissionCheck as Mock<boolean[]>).mockReturnValueOnce([false]);
+    (usePermissionCheck as Mock<(...args: any[]) => boolean[]>).mockReturnValueOnce([false]);
 
     renderHook(() => useRouteResolver('full', ['canGetCalendars']));
     await waitFor(() => new Promise((resolve) => resolve(null)));

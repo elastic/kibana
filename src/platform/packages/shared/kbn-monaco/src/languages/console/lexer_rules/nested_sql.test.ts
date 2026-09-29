@@ -104,7 +104,7 @@ describe('Console nested SQL lexer rules', () => {
       expect(stringState.length).toBeGreaterThanOrEqual(2);
     });
 
-    it('handles missing string and strings arrays gracefully', () => {
+    it('handles missing string and strings arrays gracefully', async () => {
       vi.resetModules();
       vi.doMock('../../sql/lexer_rules', async () => {
         const actual = await vi.importActual('../../sql/lexer_rules');
@@ -122,7 +122,7 @@ describe('Console nested SQL lexer rules', () => {
       });
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const isolatedNestedSql = require('./nested_sql');
+      const isolatedNestedSql = await import('./nested_sql');
       const rules = isolatedNestedSql.buildSqlRules();
 
       expect(rules.sql_root).toBeDefined();

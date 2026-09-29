@@ -11,7 +11,7 @@ import type { MockInstance } from 'vitest';
 import { updateState } from './common';
 
 describe('updateState', () => {
-  let spy: MockInstance<string, []>;
+  let spy: MockInstance<(...args: []) => string>;
   beforeEach(() => {
     spy = vi.spyOn(Date.prototype, 'toISOString');
   });

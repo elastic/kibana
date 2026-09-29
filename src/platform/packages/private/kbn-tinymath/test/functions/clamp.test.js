@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { clamp } = require('../../src/functions/clamp');
+const { clamp } = await import('../../src/functions/clamp');
 
 describe('Clamp', () => {
   it('numbers', () => {

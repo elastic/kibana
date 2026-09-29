@@ -14,8 +14,8 @@ import { join } from 'path';
 describe('I18n loader', () => {
   let i18nLoader: typeof import('./loader');
 
-  beforeEach(() => {
-    i18nLoader = require('./loader');
+  beforeEach(async () => {
+    i18nLoader = await import('./loader');
   });
 
   afterEach(() => {

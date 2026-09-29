@@ -37,7 +37,7 @@ vi.mock('@elastic/charts', () => {
 });
 
 const chartsMock: {
-  __mockMeter: Mock<null, [MeterProps]>;
+  __mockMeter: Mock<(...args: [MeterProps]) => null>;
 } = await vi.importMock('@elastic/charts');
 const meterMock = chartsMock.__mockMeter;
 

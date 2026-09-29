@@ -15,8 +15,7 @@ import { useNavigateByRouterEventHandler } from './use_navigate_by_router_event_
 import { act, fireEvent, cleanup } from '@testing-library/react';
 
 type ClickHandlerMock<Return = void> = Mock<
-  Return,
-  [React.MouseEvent<HTMLAnchorElement, MouseEvent>]
+  (...args: [React.MouseEvent<HTMLAnchorElement, MouseEvent>]) => Return
 >;
 
 describe('useNavigateByRouterEventHandler hook', () => {

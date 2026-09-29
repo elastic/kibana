@@ -163,8 +163,9 @@ describe('use composite image', () => {
     let selectorSpy: MockInstance;
     let composeSpy: MockInstance;
     let documentCreateElementSpy: MockInstance<
-      ReturnType<typeof document.createElement>,
-      Parameters<typeof document.createElement>
+      (
+        ...args: Parameters<typeof document.createElement>
+      ) => ReturnType<typeof document.createElement>
     >;
 
     // store reference to original document.createElement

@@ -52,7 +52,9 @@ const loadGlobalExecutionKPIAggregationsMock =
 describe('actions_connectors_event_log_list_kpi', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    (getIsExperimentalFeatureEnabled as Mock<any, any>).mockImplementation(() => false);
+    (getIsExperimentalFeatureEnabled as Mock<(...args: any) => any>).mockImplementation(
+      () => false
+    );
     loadGlobalExecutionKPIAggregationsMock.mockResolvedValue(mockKpiResponse);
   });
 

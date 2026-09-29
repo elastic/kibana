@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-const { TRIAGE_OPENROUTER_MODEL, buildOpenrouterConnectorFromVault } = require('./ai_connectors');
+const { TRIAGE_OPENROUTER_MODEL, buildOpenrouterConnectorFromVault } = await import(
+  './ai_connectors'
+);
 
 describe('buildOpenrouterConnectorFromVault', () => {
   const originalEnv = { ...process.env };

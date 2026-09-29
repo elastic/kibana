@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { sum } = require('../../src/functions/sum');
+const { sum } = await import('../../src/functions/sum');
 
 describe('Sum', () => {
   it('numbers', () => {

@@ -37,14 +37,14 @@ vi.mock('@opentelemetry/api', () => {
 });
 
 interface MockSpan {
-  setAttributes: Mock<void, [Record<string, AttributeValue>]>;
-  isRecording: Mock<boolean>;
+  setAttributes: Mock<(...args: [Record<string, AttributeValue>]) => void>;
+  isRecording: Mock<(...args: any[]) => boolean>;
 }
 
 interface MockApm {
-  addLabels: Mock<void, [Labels, boolean?]>;
+  addLabels: Mock<(...args: [Labels, boolean?]) => void>;
   currentTransaction?: {
-    addLabels: Mock<void, [Labels, boolean?]>;
+    addLabels: Mock<(...args: [Labels, boolean?]) => void>;
   };
 }
 
@@ -56,7 +56,7 @@ const createMockSpan = (): MockSpan => ({
   isRecording: vi.fn().mockReturnValue(true),
 });
 
-const getTransactionAddLabelsMock = (): Mock<void, [Labels, boolean?]> => {
+const getTransactionAddLabelsMock = (): Mock<(...args: [Labels, boolean?]) => void> => {
   if (!mockedApm.currentTransaction) {
     throw new Error('expected currentTransaction mock to be defined');
   }

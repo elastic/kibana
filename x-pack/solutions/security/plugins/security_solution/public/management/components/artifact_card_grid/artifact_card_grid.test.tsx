@@ -30,7 +30,7 @@ describe.each([
     props?: Partial<ArtifactCardGridProps>
   ) => ReturnType<AppContextTestRender['render']>;
   let items: ArtifactCardGridProps['items'];
-  let pageChangeHandler: Mock<ArtifactCardGridProps['onPageChange']>;
+  let pageChangeHandler: Mock<(...args: unknown[]) => ArtifactCardGridProps['onPageChange']>;
   let expandCollapseHandler: MockedFunction<ArtifactCardGridProps['onExpandCollapse']>;
   let cardComponentPropsProvider: MockedFunction<
     Required<ArtifactCardGridProps>['cardComponentProps']

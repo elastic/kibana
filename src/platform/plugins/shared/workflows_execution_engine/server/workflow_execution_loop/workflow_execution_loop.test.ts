@@ -72,9 +72,9 @@ describe('workflowExecutionLoop', () => {
     await workflowExecutionLoop(params as any);
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { executionFlowLoop } = require('./execution_flow_loop');
+    const { executionFlowLoop } = await import('./execution_flow_loop');
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { persistenceLoop, flushState } = require('./persistence_loop');
+    const { persistenceLoop, flushState } = await import('./persistence_loop');
 
     expect(executionFlowLoop).toHaveBeenCalledWith(params);
     expect(persistenceLoop).toHaveBeenCalled();
@@ -92,7 +92,7 @@ describe('workflowExecutionLoop', () => {
     const testError = new Error('execution failed');
 
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { executionFlowLoop } = require('./execution_flow_loop');
+    const { executionFlowLoop } = await import('./execution_flow_loop');
     (executionFlowLoop as Mock).mockRejectedValueOnce(testError);
 
     await workflowExecutionLoop(params as any);
@@ -122,7 +122,7 @@ describe('workflowExecutionLoop', () => {
     const params = createParams();
     const abortController = new AbortController();
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    const { flushState } = require('./persistence_loop');
+    const { flushState } = await import('./persistence_loop');
     const loopPromise = workflowExecutionLoop({ ...params, signal: abortController.signal } as any);
     abortController.abort(new WorkflowTaskManagerAbortError());
     await loopPromise;

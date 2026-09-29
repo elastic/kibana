@@ -14,7 +14,7 @@ import type { PluginName } from '@kbn/core-base-common';
 import type { PluginDefinition } from './plugin_reader';
 import { createRuntimePluginContractResolverMock } from './test_helpers';
 
-export const mockPluginInitializerProvider: Mock<PluginDefinition, [PluginName]> = vi
+export const mockPluginInitializerProvider: Mock<(...args: [PluginName]) => PluginDefinition> = vi
   .fn()
   .mockImplementation(() => () => {
     throw new Error('No provider specified');

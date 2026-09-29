@@ -12,7 +12,7 @@ const Path = require('path');
 const { RuleTester } = require('eslint');
 const dedent = require('dedent');
 
-const rule = require('./no_export_all');
+const rule = await import('./no_export_all');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

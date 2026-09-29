@@ -46,8 +46,8 @@ const { SingleActor, GroupedActor, GroupedTarget } = composeStories(stories);
 
 // Mock the useFetchGraphData hook, which is used by the GraphInvestigation component
 // Callbacks replaced with storybook actions, therefore we mock storybook's action function as well for testing
-vi.mock('../../hooks/use_fetch_graph_data', () => {
-  return require('../mock/use_fetch_graph_data.mock');
+vi.mock('../../hooks/use_fetch_graph_data', async () => {
+  return await import('../mock/use_fetch_graph_data.mock');
 });
 
 const actionMocks: Record<string, Mock> = {};

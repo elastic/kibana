@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { min } = require('../../src/functions/min');
+const { min } = await import('../../src/functions/min');
 
 describe('Min', () => {
   it('numbers', () => {

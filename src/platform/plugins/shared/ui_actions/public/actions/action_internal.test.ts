@@ -25,9 +25,9 @@ describe('ActionInternal', () => {
 
   describe('displays toasts when execute function throws', () => {
     const addWarningMock = vi.fn();
-    beforeAll(() => {
+    beforeAll(async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../services').getNotifications = () => ({
+      (await import('../services')).getNotifications = () => ({
         toasts: {
           addWarning: addWarningMock,
         },

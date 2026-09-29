@@ -83,7 +83,7 @@ vi.mock('../hooks/use_date_picker_context', () => {
   return { ...mocked, default: mocked };
 });
 
-const mockContextFactory = (addWarning: Mock<void, []>) => {
+const mockContextFactory = (addWarning: Mock<(...args: []) => void>) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
   const mockedUiSettingsKeys = {} as typeof UI_SETTINGS;

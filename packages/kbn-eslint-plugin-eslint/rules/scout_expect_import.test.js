@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_expect_import');
+const rule = await import('./scout_expect_import');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { mode } = require('../../src/functions/mode');
+const { mode } = await import('../../src/functions/mode');
 
 describe('Mode', () => {
   it('numbers', () => {

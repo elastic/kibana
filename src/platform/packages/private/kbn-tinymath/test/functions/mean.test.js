@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { mean } = require('../../src/functions/mean');
+const { mean } = await import('../../src/functions/mean');
 
 describe('Mean', () => {
   it('numbers', () => {

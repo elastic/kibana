@@ -81,7 +81,7 @@ describe('data table progress bar regressions', () => {
   let frame: FramePublicAPI;
   let state: DatatableVisualizationState;
   let props: TableDimensionEditorProps;
-  let setState: Mock<void, [DatatableVisualizationState]>;
+  let setState: Mock<(...args: [DatatableVisualizationState]) => void>;
 
   const setFooRows = (rows: Array<{ foo: number }>) => {
     const activeData = frame.activeData;

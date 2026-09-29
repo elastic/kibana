@@ -29,7 +29,7 @@ const renderComponent = (props: Partial<Props> = {}) =>
   );
 
 describe('Runtime field form', () => {
-  let onChange: Mock<Props['onChange']> = vi.fn();
+  let onChange: Mock<(...args: any[]) => Props['onChange']> = vi.fn();
 
   const lastOnChangeCall = (): FormState =>
     onChange.mock.calls[onChange.mock.calls.length - 1][0] as FormState;

@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('./no_sync_import_from_plugin');
+const rule = await import('./no_sync_import_from_plugin');
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

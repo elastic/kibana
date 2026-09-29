@@ -13,11 +13,11 @@ import { Vis } from './vis';
 import type { VisTypeDefinition } from './vis_types';
 import { BaseVisType } from './vis_types';
 
-vi.mock('./services', () => {
+vi.mock('./services', async () => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { SearchSource } = require('@kbn/data-plugin/common/search/search_source');
+  const { SearchSource } = await import('@kbn/data-plugin/common/search/search_source');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const stubIndexPattern = require('@kbn/data-plugin/common/stubs');
+  const stubIndexPattern = await import('@kbn/data-plugin/common/stubs');
 
   return {
     getAggs: () => ({

@@ -21,9 +21,9 @@ vi.mock('uuid', () => {
 });
 
 describe('transformPinnedPanelsIn', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../../kibana_services').embeddableService = {
+    (await import('../../../kibana_services')).embeddableService = {
       getTransforms: vi.fn(),
     };
   });
@@ -73,9 +73,9 @@ describe('transformPinnedPanelsIn', () => {
 });
 
 describe('validation', () => {
-  beforeAll(() => {
+  beforeAll(async () => {
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-    require('../../../kibana_services').embeddableService = {
+    (await import('../../../kibana_services')).embeddableService = {
       getTransforms: () => ({
         transformIn: () => {
           throw new Error('Transform in error.');

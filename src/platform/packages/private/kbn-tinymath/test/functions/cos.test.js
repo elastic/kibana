@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { cos } = require('../../src/functions/cos');
+const { cos } = await import('../../src/functions/cos');
 
 describe('Cosine', () => {
   it('numbers', () => {

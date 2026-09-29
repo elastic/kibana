@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { tan } = require('../../src/functions/tan');
+const { tan } = await import('../../src/functions/tan');
 
 describe('Tangent', () => {
   it('numbers', () => {

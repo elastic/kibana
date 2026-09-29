@@ -31,7 +31,7 @@ const TRAIL_URL = 'https://raw.githubusercontent.com/stamparm/trails/main/malwar
 const MAX_NESTED_PER_DOC = 5000;
 
 const makeContext = (
-  fetchImpl: Mock<Promise<Response>, [string | URL | Request, RequestInit?]>
+  fetchImpl: Mock<(...args: [string | URL | Request, RequestInit?]) => Promise<Response>>
 ): AdapterRunContext => ({
   logger: loggingSystemMock.createLogger(),
   abortSignal: new AbortController().signal,

@@ -22,7 +22,7 @@ const monitorId = '12345';
 const configId = '56789';
 
 describe('updateState', () => {
-  let spy: MockInstance<string, []>;
+  let spy: MockInstance<(...args: []) => string>;
   vi.useFakeTimers().setSystemTime(new Date('2023-02-26T00:00:00.000Z'));
   beforeEach(() => {
     spy = vi.spyOn(Date.prototype, 'toISOString');

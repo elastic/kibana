@@ -16,8 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 
 type LinkToAppOnClickMock<Return = void> = Mock<
-  Return,
-  [React.MouseEvent<HTMLAnchorElement, MouseEvent>]
+  (...args: [React.MouseEvent<HTMLAnchorElement, MouseEvent>]) => Return
 >;
 
 describe('LinkToApp component', () => {

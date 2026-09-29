@@ -82,11 +82,11 @@ describe('Rotate API Key Routes', () => {
   describe('POST /internal/cloud_connect/cluster/rotate_api_key', () => {
     let routeHandler: Function;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const mockGetStartServices = vi.fn();
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getApiKeyData } = require('../lib/create_storage_service');
+      const { getApiKeyData } = await import('../lib/create_storage_service');
       getApiKeyData.mockResolvedValue({
         apiKeyData: {
           apiKey: 'test-api-key-123',
@@ -147,11 +147,11 @@ describe('Rotate API Key Routes', () => {
   describe('POST /internal/cloud_connect/cluster/{service_key}/rotate_api_key', () => {
     let routeHandler: Function;
 
-    beforeEach(() => {
+    beforeEach(async () => {
       const mockGetStartServices = vi.fn();
 
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { getApiKeyData } = require('../lib/create_storage_service');
+      const { getApiKeyData } = await import('../lib/create_storage_service');
       getApiKeyData.mockResolvedValue({
         apiKeyData: {
           apiKey: 'test-api-key-123',
@@ -184,7 +184,7 @@ describe('Rotate API Key Routes', () => {
 
     it('should rotate EIS service API key and update inference CCM', async () => {
       // eslint-disable-next-line @typescript-eslint/no-var-requires
-      const { enableInferenceCCM } = require('../services/inference_ccm');
+      const { enableInferenceCCM } = await import('../services/inference_ccm');
 
       mockCloudConnectInstance.rotateServiceApiKey.mockResolvedValue({
         key: 'new-eis-api-key-789',

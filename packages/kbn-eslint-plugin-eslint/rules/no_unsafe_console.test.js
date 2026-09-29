@@ -8,7 +8,7 @@
  */
 
 const { RuleTester } = require('eslint');
-const rule = require('..').rules.no_unsafe_console;
+const rule = (await import('..')).rules.no_unsafe_console;
 const dedent = require('dedent');
 
 const ruleTester = new RuleTester({

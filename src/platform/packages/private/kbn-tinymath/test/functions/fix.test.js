@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const { fix } = require('../../src/functions/fix');
+const { fix } = await import('../../src/functions/fix');
 
 describe('Fix', () => {
   it('numbers', () => {

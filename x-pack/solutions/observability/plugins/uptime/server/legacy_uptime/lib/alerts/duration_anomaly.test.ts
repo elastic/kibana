@@ -135,7 +135,7 @@ const mockOptions = (
 };
 
 describe('duration anomaly alert', () => {
-  let toISOStringSpy: MockInstance<string, []>;
+  let toISOStringSpy: MockInstance<(...args: []) => string>;
   const mockDate = 'date';
   beforeAll(() => {
     Date.now = vi.fn().mockReturnValue(new Date('2021-05-13T12:33:37.000Z'));
@@ -157,11 +157,13 @@ describe('duration anomaly alert', () => {
   describe('alert executor', () => {
     it('triggers when aging or expiring alerts are found', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockResultServiceProviderGetter: Mock<{
-        getAnomaliesTableData: Mock<MockAnomalyResult>;
-      }> = vi.fn();
-      const mockGetAnomliesTableDataGetter: Mock<MockAnomalyResult> = vi.fn();
-      const mockGetLatestMonitorGetter: Mock<Partial<Ping>> = vi.fn();
+      const mockResultServiceProviderGetter: Mock<
+        (...args: any[]) => {
+          getAnomaliesTableData: Mock<(...args: any[]) => MockAnomalyResult>;
+        }
+      > = vi.fn();
+      const mockGetAnomliesTableDataGetter: Mock<(...args: any[]) => MockAnomalyResult> = vi.fn();
+      const mockGetLatestMonitorGetter: Mock<(...args: any[]) => Partial<Ping>> = vi.fn();
 
       mockGetLatestMonitorGetter.mockReturnValue(mockPing);
       mockGetAnomliesTableDataGetter.mockReturnValue(mockAnomaliesResult);
@@ -303,11 +305,13 @@ Response times as high as ${slowestResponse} ms have been detected from location
 
     it('sets alert recovery context for recovered alerts', async () => {
       toISOStringSpy.mockImplementation(() => mockDate);
-      const mockResultServiceProviderGetter: Mock<{
-        getAnomaliesTableData: Mock<MockAnomalyResult>;
-      }> = vi.fn();
-      const mockGetAnomliesTableDataGetter: Mock<MockAnomalyResult> = vi.fn();
-      const mockGetLatestMonitorGetter: Mock<Partial<Ping>> = vi.fn();
+      const mockResultServiceProviderGetter: Mock<
+        (...args: any[]) => {
+          getAnomaliesTableData: Mock<(...args: any[]) => MockAnomalyResult>;
+        }
+      > = vi.fn();
+      const mockGetAnomliesTableDataGetter: Mock<(...args: any[]) => MockAnomalyResult> = vi.fn();
+      const mockGetLatestMonitorGetter: Mock<(...args: any[]) => Partial<Ping>> = vi.fn();
 
       mockGetLatestMonitorGetter.mockReturnValue(mockPing);
       mockGetAnomliesTableDataGetter.mockReturnValue(mockAnomaliesResult);

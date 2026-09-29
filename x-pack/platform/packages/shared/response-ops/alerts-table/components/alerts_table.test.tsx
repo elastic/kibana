@@ -241,7 +241,7 @@ describe('AlertsTable', () => {
   let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
   let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
-  let refreshSpy: MockInstance<void, []>;
+  let refreshSpy: MockInstance<(...args: []) => void>;
 
   const realAlertsDataGridMockImplementation = async (props: AlertsDataGridProps) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = await vi.importActual('./alerts_data_grid');

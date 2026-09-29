@@ -27,7 +27,7 @@ vi.mock('@elastic/eui-test-helpers', () => {
 });
 
 const { RuleTester } = require('eslint');
-const rule = require('./scout_no_raw_eui_selectors');
+const rule = await import('./scout_no_raw_eui_selectors');
 
 const ruleTester = new RuleTester({
   parser: require.resolve('@typescript-eslint/parser'),
