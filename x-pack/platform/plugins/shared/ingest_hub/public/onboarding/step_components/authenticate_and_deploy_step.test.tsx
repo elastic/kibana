@@ -192,6 +192,7 @@ describe('AuthenticateAndDeployStep', () => {
       deploymentMethod: 'managed_integration',
       setDeploymentMethod: jest.fn(),
       authenticateAndDeployStep: { authMethod: 'identity_federation', connectorId: null },
+      agentBasedDeployment: { selectedAgentPolicyIds: [] },
       detectAndReviewStep: {
         serviceStatuses: {},
         policyIdsByInstance: {},

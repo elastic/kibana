@@ -229,3 +229,55 @@ describe('ServiceFieldsForm — ECF single-DS multi-input trigger vars', () => {
     expect(logGroupVar).toMatchObject({ multi: true, required: true });
   });
 });
+
+describe('ServiceFieldsForm — data_stream.dataset onChange extraction', () => {
+  const DATASET_SERVICE: AwsServiceMatrixEntry = {
+    id: 'test_otel',
+    name: 'Test OTel',
+    packageName: 'aws',
+    dataStreams: ['otel_logs'],
+    inputs: ['aws-s3'],
+    showInUI: true,
+    deploymentMethods: [{ method: 'managed_integration', preferred: true }],
+    varDefsByDataStream: {
+      otel_logs: {
+        title: 'OTel Logs',
+        type: 'logs',
+        inputs: ['aws-s3'],
+        defaultEnabledInputs: ['aws-s3'],
+        requiredConfig: ['data_stream.dataset'],
+        varDefsByInput: {
+          'aws-s3': {
+            'data_stream.dataset': {
+              name: 'data_stream.dataset',
+              type: 'text',
+              title: 'Dataset',
+              show_user: true,
+            },
+          },
+        },
+      },
+    },
+  } as unknown as AwsServiceMatrixEntry;
+
+  beforeEach(() => {
+    (LazyPackagePolicyInputVarField as unknown as jest.Mock).mockClear();
+  });
+
+  it('extracts .dataset string from DatasetComponent object instead of stringifying it', () => {
+    const { onFieldChange } = renderForm(DATASET_SERVICE);
+    const varFieldCall = (LazyPackagePolicyInputVarField as unknown as jest.Mock).mock.calls.find(
+      ([props]: [{ varDef?: { name?: string }; onChange?: (v: unknown) => void }]) =>
+        props.varDef?.name === 'data_stream.dataset'
+    );
+    expect(varFieldCall).toBeDefined();
+    const { onChange } = varFieldCall![0] as { onChange: (val: unknown) => void };
+    onChange({ dataset: 'my-custom-dataset', package: 'aws' });
+    expect(onFieldChange).toHaveBeenCalledWith(
+      'otel_logs',
+      'aws-s3',
+      'data_stream.dataset',
+      'my-custom-dataset'
+    );
+  });
+});

@@ -135,9 +135,8 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
     );
 
-    // Step 2: Simulate user changing bucket_arn in Step 2 (overwrite session serviceVars).
-    // Hydration wrote serviceVars: {} — now we put a non-empty value so the session differs
-    // from what the SO recorded.
+    // Step 2: Change bucket_arn via the Step 2 form so the session serviceVars differ from the SO.
+    // First seed instances so the Step 2 list shows the ELB service with its edit button.
     await page.evaluate(
       ({ key }) => {
         sessionStorage.setItem(
@@ -147,26 +146,33 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
             instances: [
               { instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false },
             ],
-            serviceVars: {
-              elb: {
-                enabledDataStreams: ['elb_logs'],
-                varsByDataStream: {
-                  elb_logs: {
-                    enabledInputs: ['aws-s3'],
-                    varsByInput: { 'aws-s3': { bucket_arn: 'arn:aws:s3:::new-drift-bucket' } },
-                  },
-                },
-              },
-            },
+            serviceVars: {},
           })
         );
       },
       { key: SERVICE_SETTINGS_SESSION_KEY }
     );
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'service-settings',
+    });
+    await expect(page.testSubj.locator('onboardingStep-service-settings')).toBeVisible();
 
-    // Step 3: Reload — hydration skipped (hydratedDeploymentId guard), drift effect fires.
-    // awsServicesMap must load (from mocked package) before drift can complete.
-    await page.reload();
+    // Open the ELB flyout and fill bucket_arn. Fleet renders a multi-value text field for
+    // bucket_arn (VarField forces multi: true via ECF_TRIGGER_VARS), so interact with the
+    // input within the first row of the list.
+    await page.testSubj.click('serviceSettingsStep-editButton-elb');
+    await expect(page.testSubj.locator('serviceSettingsFlyout')).toBeVisible();
+    const bucketArnInput = page.testSubj
+      .locator('serviceSettingsFlyout-aws-s3-field-bucket_arn')
+      .locator('input, textarea')
+      .first();
+    await bucketArnInput.fill('arn:aws:s3:::new-drift-bucket');
+    await bucketArnInput.press('Enter');
+    await page.testSubj.click('serviceSettingsFlyout-saveButton');
+
+    // Navigate to Step 3 via the Continue button — drift effect fires on mount.
+    await page.testSubj.click('serviceSettingsStep-continueButton');
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
 
     // Drift callout must appear. The drift effect: session elb has bucket_arn, SO has no
@@ -628,8 +634,11 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
   });
 
   test('auth drift: connector change detected and callout shown', async ({ browserAuth, page }) => {
-    // SO has connectorId: 'old-connector'. Session will be hydrated with that, then overwritten
-    // to 'new-connector' to simulate the user swapping identity in Step 3.
+    // SO has identity_federation auth and no prior policyIdsByInstance so the MI section starts
+    // in "fresh" state with the radio group accessible (not collapsed to "done" state).
+    // Clicking "Access Keys" changes authMethod from 'identity_federation' to 'static_keys',
+    // which is a drift-effect dep — the effect re-fires, fetches SO again, and detects the
+    // mismatch (session static_keys vs SO identity_federation) without any session injection.
     const DEP_ID = 'dep-auth-drift-001';
     await page.route(
       (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
@@ -638,35 +647,48 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
           status: 200,
           contentType: 'application/json',
           body: JSON.stringify({
-            item: makeSoItem(DEP_ID, { connectorId: 'old-connector' }),
+            item: makeSoItem(DEP_ID, {
+              connectorId: null,
+              authMethod: 'identity_federation',
+              policyIdsByInstance: {},
+            }),
           }),
         })
     );
 
     await browserAuth.loginAsAdmin();
+    // Register the SO GET promise before navigating so we catch the initial hydration fetch.
+    const initialSoGetPromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
     await page.gotoApp('onboarding/aws', {
       params: { deploymentId: DEP_ID },
       hash: 'authenticate-and-deploy',
     });
     await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+    // Wait for the initial drift check to settle before interacting — avoids a race where the
+    // radio click fires while the first SO GET is still in flight.
+    await initialSoGetPromise;
 
-    // Overwrite session to use a different connector than the SO recorded.
-    await page.evaluate(
-      ({ key }) => {
-        sessionStorage.setItem(
-          key,
-          JSON.stringify({ connectorId: 'new-connector', authMethod: 'identity_federation' })
-        );
-      },
-      { key: AUTHENTICATE_AND_DEPLOY_SESSION_KEY }
+    // Click "Access Keys" radio via the live UI. This changes authMethod in React state, which
+    // is a drift-effect dep, causing the effect to re-run and compare the new session value
+    // ('static_keys') against the SO's stored value ('identity_federation').
+    const postClickSoGetPromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
     );
+    await page.testSubj
+      .locator('managedIntegrationsSection-preferredMethodRadio')
+      .locator('[id="access_keys"]')
+      .click();
+    await postClickSoGetPromise;
 
-    // Reload — hydration skipped, drift effect fires. authMethod/connectorId are effect deps
-    // so changing connectorId triggers the check.
-    await page.reload();
-    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-
-    // Auth drift detected: session connectorId 'new-connector' differs from SO 'old-connector'.
+    // Auth drift detected: session authMethod 'static_keys' differs from SO 'identity_federation'.
     await expect(page.testSubj.locator('authenticateAndDeployStep-driftCallout')).toBeVisible();
   });
 
@@ -904,5 +926,81 @@ test.describe('Onboarding drift detection and redeploy', { tag: tags.stateful.cl
       },
       { key: DETECT_AND_REVIEW_SESSION_KEY }
     );
+  });
+
+  test('drift check error: SO GET failure shows error callout, Retry re-fetches and recovers', async ({
+    browserAuth,
+    page,
+  }) => {
+    // Validates that when the SO GET fails (e.g. transient 500), the drift check error callout
+    // is shown and Next stays disabled. Clicking Retry re-fetches the SO; on success the
+    // callout disappears and Next enables (isAlreadyDeployed=true from seeded statuses).
+    const DEP_ID = 'dep-drift-so-error-001';
+
+    // Initially return 500 so the drift effect's SO fetch fails.
+    let soShouldFail = true;
+    await page.route(
+      (url) => new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(url.pathname),
+      (route) => {
+        if (soShouldFail) {
+          route.fulfill({ status: 500, body: 'Internal Server Error' });
+        } else {
+          route.fulfill({
+            status: 200,
+            contentType: 'application/json',
+            body: JSON.stringify({ item: makeSoItem(DEP_ID) }),
+          });
+        }
+      }
+    );
+
+    await browserAuth.loginAsAdmin();
+    await page.gotoApp('onboarding/aws', {
+      params: { deploymentId: DEP_ID },
+      hash: 'authenticate-and-deploy',
+    });
+    await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
+
+    // Seed detectAndReview so isAlreadyDeployed=true once drift settles after retry.
+    await page.evaluate(
+      ({ key, depId }) => {
+        sessionStorage.setItem(
+          key,
+          JSON.stringify({
+            policyIdsByInstance: { elb: 'mock-mi-policy-id' },
+            serviceStatuses: { elb: 'receiving' },
+            onboardingDeploymentId: depId,
+            failedInstances: [],
+            deployErrors: {},
+          })
+        );
+      },
+      { key: DETECT_AND_REVIEW_SESSION_KEY, depId: DEP_ID }
+    );
+
+    // Wait for the initial SO GET to fail and the error callout to appear.
+    await expect(
+      page.testSubj.locator('authenticateAndDeployStep-driftCheckErrorCallout')
+    ).toBeVisible();
+    // Next must be disabled while drift check failed (driftSettled=false).
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeDisabled();
+
+    // Allow subsequent SO GETs to succeed.
+    soShouldFail = false;
+    const retryResponsePromise = page.waitForResponse(
+      (resp) =>
+        new RegExp(`/api/fleet/cloud_onboarding_deployments/${DEP_ID}$`).test(
+          new URL(resp.url()).pathname
+        ) && resp.status() === 200
+    );
+    await page.testSubj.click('authenticateAndDeployStep-driftCheckRetryButton');
+    await retryResponsePromise;
+
+    // Error callout gone — drift check resolved with no drift.
+    await expect(
+      page.testSubj.locator('authenticateAndDeployStep-driftCheckErrorCallout')
+    ).toBeHidden();
+    // Next enables: driftSettled=true, isAlreadyDeployed=true (from seeded statuses), isDirty=false.
+    await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
   });
 });

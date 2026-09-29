@@ -130,9 +130,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
       // For fresh deploys, skip groups where every instance already has a package policy —
       // this handles incremental service additions (deploy A, add B, Next should only deploy B).
       const targetsToDeploy = isRetry
-        ? targets.filter((g) =>
-            g.instanceIds.some((id) => instanceIds.includes(id) && !alreadyDeployedIds.has(id))
-          )
+        ? targets.filter((g) => g.instanceIds.some((id) => instanceIds.includes(id)))
         : targets.filter((g) => g.instanceIds.some((id) => !alreadyDeployedIds.has(id)));
 
       // Services deselected from Step 1 never call removeDeployInstance, so pendingCleanupPolicyIds
