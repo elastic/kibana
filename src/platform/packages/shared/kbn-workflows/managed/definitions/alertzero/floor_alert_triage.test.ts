@@ -657,7 +657,7 @@ describe('floor_alert_triage — ai.conversation.metadata.patch failure handling
 // ---------------------------------------------------------------------------
 // Proposal gate outcomes
 //
-// `system-create-proposal` completes normally on every outcome, including an unanswered
+// `system-create-alertzero-proposal` completes normally on every outcome, including an unanswered
 // deadline, so a timeout never reaches `create_fp_proposal`'s on-failure fallback. Each
 // outcome therefore needs its own branch, and an expiry must not be read as a dismissal.
 // ---------------------------------------------------------------------------

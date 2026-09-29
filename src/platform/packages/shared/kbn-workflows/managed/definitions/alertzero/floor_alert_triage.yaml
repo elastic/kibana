@@ -13,7 +13,7 @@ tags:
   - watch-floor
 
 settings:
-  # Must exceed the proposal gate's ceiling. `system-create-proposal` parks this run for up
+  # Must exceed the proposal gate's ceiling. `system-create-alertzero-proposal` parks this run for up
   # to 72 h at Manual autonomy, and a failed or unauthorized attempt re-parks within the same
   # deadline, so the Worker Investigation lifecycle contract puts the ceiling at 168 h. The 6 h
   # default would kill the run mid-gate.
@@ -42,7 +42,7 @@ consts:
 # Preflight steps MUST stay above create_investigation: a disabled Alert Analysis path must
 # not open an Investigation.
 #
-# Tags and notes MUST be written before the gate (`workflow.execute system-create-proposal`).
+# Tags and notes MUST be written before the gate (`workflow.execute system-create-alertzero-proposal`).
 # The gate parks this Worker for up to 72 h at Manual autonomy; anything sequenced after it
 # is invisible to the analyst until a decision arrives.
 #
@@ -488,7 +488,7 @@ steps:
                   ⚠️ The closure proposal could not be completed: {{ error.message }}.
                   {{ variables.fp_candidate_count }} alert(s) remain open and tagged az:false_positive.
         with:
-          workflow-id: system-create-proposal
+          workflow-id: system-create-alertzero-proposal
           inputs:
             conversationId: "{{ steps.create_investigation.output.conversation_id }}"
             comment: >-
