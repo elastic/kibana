@@ -2428,22 +2428,18 @@ class AgentPolicyService {
     }
   }
 
-  /**
-   * Returns the set of space IDs for agent policies that reference the given output ID.
-   * Used for pre-deletion authz checks.
-   */
-  public async getSpacesForPoliciesUsingOutput(outputId: string): Promise<{
-    spaceIds: Set<string>;
-    truncated: boolean;
-  }> {
+  private async getSpacesForPoliciesMatching(
+    searchFields: string[],
+    searchValue: string
+  ): Promise<{ spaceIds: Set<string>; truncated: boolean }> {
     const savedObjectType = await getAgentPolicySavedObjectType();
     const result = await appContextService
       .getInternalUserSOClientWithoutSpaceExtension()
       .find<AgentPolicySOAttributes>({
         type: savedObjectType,
         fields: ['space_ids'],
-        searchFields: ['data_output_id', 'monitoring_output_id'],
-        search: escapeSearchQueryPhrase(outputId),
+        searchFields,
+        search: escapeSearchQueryPhrase(searchValue),
         perPage: SO_SEARCH_LIMIT,
         namespaces: ['*'],
       });
@@ -2456,60 +2452,19 @@ class AgentPolicyService {
     return { spaceIds, truncated: result.saved_objects.length < result.total };
   }
 
-  /**
-   * Returns the set of space IDs for agent policies that reference the given Fleet Server host ID.
-   * Used for pre-deletion authz checks.
-   */
-  public async getSpacesForPoliciesUsingFleetServerHost(fleetServerHostId: string): Promise<{
-    spaceIds: Set<string>;
-    truncated: boolean;
-  }> {
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const result = await appContextService
-      .getInternalUserSOClientWithoutSpaceExtension()
-      .find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['space_ids'],
-        searchFields: ['fleet_server_host_id'],
-        search: escapeSearchQueryPhrase(fleetServerHostId),
-        perPage: SO_SEARCH_LIMIT,
-        namespaces: ['*'],
-      });
-    const spaceIds = new Set<string>();
-    for (const so of result.saved_objects) {
-      for (const ns of so.namespaces ?? []) {
-        spaceIds.add(ns);
-      }
-    }
-    return { spaceIds, truncated: result.saved_objects.length < result.total };
+  public getSpacesForPoliciesUsingOutput(outputId: string) {
+    return this.getSpacesForPoliciesMatching(['data_output_id', 'monitoring_output_id'], outputId);
   }
 
-  /**
-   * Returns the set of space IDs for agent policies that reference the given download source ID.
-   * Used for pre-deletion authz checks.
-   */
-  public async getSpacesForPoliciesUsingDownloadSource(downloadSourceId: string): Promise<{
-    spaceIds: Set<string>;
-    truncated: boolean;
-  }> {
-    const savedObjectType = await getAgentPolicySavedObjectType();
-    const result = await appContextService
-      .getInternalUserSOClientWithoutSpaceExtension()
-      .find<AgentPolicySOAttributes>({
-        type: savedObjectType,
-        fields: ['space_ids'],
-        searchFields: ['download_source_id', 'download_source_ids'],
-        search: escapeSearchQueryPhrase(downloadSourceId),
-        perPage: SO_SEARCH_LIMIT,
-        namespaces: ['*'],
-      });
-    const spaceIds = new Set<string>();
-    for (const so of result.saved_objects) {
-      for (const ns of so.namespaces ?? []) {
-        spaceIds.add(ns);
-      }
-    }
-    return { spaceIds, truncated: result.saved_objects.length < result.total };
+  public getSpacesForPoliciesUsingFleetServerHost(fleetServerHostId: string) {
+    return this.getSpacesForPoliciesMatching(['fleet_server_host_id'], fleetServerHostId);
+  }
+
+  public getSpacesForPoliciesUsingDownloadSource(downloadSourceId: string) {
+    return this.getSpacesForPoliciesMatching(
+      ['download_source_id', 'download_source_ids'],
+      downloadSourceId
+    );
   }
 
   public async agentPoliciesExistForDownloadSourceId(downloadSourceId: string): Promise<boolean> {
