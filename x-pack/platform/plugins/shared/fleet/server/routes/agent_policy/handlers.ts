@@ -75,12 +75,7 @@ import type {
   CreatePackagePolicyRequest,
   FullAgentPolicy,
 } from '../../../common/types';
-import {
-  AgentPolicyNotFoundError,
-  FleetUnauthorizedError,
-  FleetError,
-  defaultFleetErrorHandler,
-} from '../../errors';
+import { AgentPolicyNotFoundError, FleetUnauthorizedError, FleetError } from '../../errors';
 import { createAgentPolicyWithPackages } from '../../services/agent_policy_create';
 import { updateAgentPolicySpaces } from '../../services/spaces/agent_policy';
 import { packagePolicyToSimplifiedPackagePolicy } from '../../../common/services/simplified_package_policy_helper';
@@ -785,35 +780,41 @@ export const getFullAgentPolicy: FleetRequestHandler<
   const canReadSettings = fleetContext.authz.fleet.readSettings;
 
   if (request.query.revision) {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     try {
-      const coreContext = await context.core;
-      const esClient = coreContext.elasticsearch.client.asInternalUser;
       await assertPolicyInSpace(soClient, agentPolicyId);
-      const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
-        esClient,
-        agentPolicyId,
-        request.query.revision
-      );
-      if (!fleetServerPolicy) {
+    } catch (err) {
+      if (err instanceof AgentPolicyNotFoundError) {
         return response.customError({
           statusCode: 404,
           body: { message: 'Agent policy not found' },
         });
       }
-      const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
-      let redactedItem = item;
-      if (!canReadSettings) {
-        const { items: proxies } = await listFleetProxies(soClient);
-        const proxyUrlsWithCertKey = new Set(
-          proxies.filter((p) => p.certificate_key).map((p) => p.url)
-        );
-        redactedItem = redactProxySecretsFromPolicy(item, proxyUrlsWithCertKey);
-      }
-      const body: GetFullAgentPolicyResponse = { item: redactedItem };
-      return response.ok({ body });
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
+      throw err;
     }
+    const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
+      esClient,
+      agentPolicyId,
+      request.query.revision
+    );
+    if (!fleetServerPolicy) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
+    const item = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    let redactedItem = item;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      redactedItem = redactProxySecretsFromPolicy(item, proxyUrlsWithCertKey);
+    }
+    const body: GetFullAgentPolicyResponse = { item: redactedItem };
+    return response.ok({ body });
   }
 
   if (request.query.kubernetes === true) {
@@ -879,39 +880,45 @@ export const downloadFullAgentPolicy: FleetRequestHandler<
   const canReadSettings = fleetContext.authz.fleet.readSettings;
 
   if (request.query.revision) {
+    const coreContext = await context.core;
+    const esClient = coreContext.elasticsearch.client.asInternalUser;
     try {
-      const coreContext = await context.core;
-      const esClient = coreContext.elasticsearch.client.asInternalUser;
       await assertPolicyInSpace(soClient, agentPolicyId);
-      const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
-        esClient,
-        agentPolicyId,
-        request.query.revision
-      );
-      if (!fleetServerPolicy) {
+    } catch (err) {
+      if (err instanceof AgentPolicyNotFoundError) {
         return response.customError({
           statusCode: 404,
           body: { message: 'Agent policy not found' },
         });
       }
-      const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
-      let policyToSerialize = storedPolicy;
-      if (!canReadSettings) {
-        const { items: proxies } = await listFleetProxies(soClient);
-        const proxyUrlsWithCertKey = new Set(
-          proxies.filter((p) => p.certificate_key).map((p) => p.url)
-        );
-        policyToSerialize = redactProxySecretsFromPolicy(storedPolicy, proxyUrlsWithCertKey);
-      }
-      const body = fullAgentPolicyToYaml(policyToSerialize, yaml);
-      const headers: ResponseHeaders = {
-        'content-type': 'text/x-yaml',
-        'content-disposition': `attachment; filename="elastic-agent.yml"`,
-      };
-      return response.ok({ body, headers });
-    } catch (error) {
-      return defaultFleetErrorHandler({ error, response });
+      throw err;
     }
+    const fleetServerPolicy = await agentPolicyService.getFleetServerPolicy(
+      esClient,
+      agentPolicyId,
+      request.query.revision
+    );
+    if (!fleetServerPolicy) {
+      return response.customError({
+        statusCode: 404,
+        body: { message: 'Agent policy not found' },
+      });
+    }
+    const storedPolicy = fleetServerPolicy.data as unknown as FullAgentPolicy;
+    let policyToSerialize = storedPolicy;
+    if (!canReadSettings) {
+      const { items: proxies } = await listFleetProxies(soClient);
+      const proxyUrlsWithCertKey = new Set(
+        proxies.filter((p) => p.certificate_key).map((p) => p.url)
+      );
+      policyToSerialize = redactProxySecretsFromPolicy(storedPolicy, proxyUrlsWithCertKey);
+    }
+    const body = fullAgentPolicyToYaml(policyToSerialize, yaml);
+    const headers: ResponseHeaders = {
+      'content-type': 'text/x-yaml',
+      'content-disposition': `attachment; filename="elastic-agent.yml"`,
+    };
+    return response.ok({ body, headers });
   }
 
   if (request.query.kubernetes === true) {

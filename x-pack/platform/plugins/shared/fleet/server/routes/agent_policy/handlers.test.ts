@@ -27,6 +27,7 @@ import {
 jest.mock('../../services/agent_policy', () => {
   return {
     agentPolicyService: {
+      get: jest.fn(),
       getByIds: jest.fn(),
       listAllOutputsForPolicies: jest.fn(),
       getFullAgentPolicy: jest.fn(),
