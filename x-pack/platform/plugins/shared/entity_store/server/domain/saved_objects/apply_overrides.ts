@@ -9,8 +9,9 @@
  * Applies an incoming override layer on top of a stored one. `undefined` leaves a key alone,
  * `null` deletes it so the key falls through to the layer below.
  *
- * Saved object updates merge attributes shallowly, so a nested override object has to be rebuilt
- * here rather than patched field by field.
+ * For writers that pass `mergeAttributes: false` the stored object is replaced wholesale, so the
+ * next state has to be built here. Writers that keep the default merge can pass their block
+ * straight through instead: `mergeForUpdate` recurses into nested objects and writes `null` as-is.
  */
 export const applyOverrides = <Stored extends object>(
   stored: Stored | undefined,

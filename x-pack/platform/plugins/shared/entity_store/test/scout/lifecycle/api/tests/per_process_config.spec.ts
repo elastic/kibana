@@ -115,13 +115,12 @@ apiTest.describe(
         nonPriorityOverride: { samplingRate: 0.5, frequency: '5m' },
       });
 
-      expect(
-        (
-          await setEngineConfig(apiClient, {
-            nonPriorityOverride: { samplingRate: null },
-          })
-        ).statusCode
-      ).toBe(200);
+      const cleared = await setEngineConfig(apiClient, {
+        nonPriorityOverride: { samplingRate: null },
+      });
+      expect(cleared.statusCode).toBe(200);
+      expect(cleared.body.nonPriorityLogExtractionConfig.samplingRate).toBeNull();
+      expect(cleared.body.nonPriorityLogExtractionConfig.frequency).toBe('5m');
 
       const engine = await userEngine(apiClient);
       expect(engine.nonPriority?.samplingRate).toBeNull();
@@ -186,5 +185,6 @@ apiTest.describe(
         expect(response.statusCode).toBe(400);
       }
     );
+
   }
 );
