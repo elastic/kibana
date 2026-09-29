@@ -64,23 +64,28 @@ jest.mock('@kbn/workflows-ui', () => ({
   }),
 }));
 
+const mockUseKiList = jest.fn();
+
 jest.mock('../hooks/use_ki_list', () => ({
-  useKiList: () => ({
-    kis: [],
-    total: 25,
-    summary: {
-      total: 25,
-      countsByType: [
-        { type: 'index_metadata', count: 10 },
-        { type: 'document', count: 8 },
-        { type: 'detection', count: 7 },
-      ],
-    },
-    isLoading: false,
-    error: undefined,
-    refetch: jest.fn(),
-  }),
+  useKiList: (...args: unknown[]) => mockUseKiList(...args),
 }));
+
+const defaultKiListMock = {
+  kis: [],
+  total: 25,
+  summary: {
+    total: 25,
+    countsByType: [
+      { type: 'index_metadata', count: 10 },
+      { type: 'document', count: 8 },
+      { type: 'detection', count: 7 },
+    ],
+  },
+  isLoading: false,
+  isFetching: false,
+  error: undefined,
+  refetch: jest.fn(),
+};
 
 jest.mock('../hooks/use_signal_groups', () => ({
   useSignalGroups: () => ({ groups: [], isLoading: false, error: undefined, refetch: jest.fn() }),
@@ -190,10 +195,12 @@ describe('AiIndexDetailPage', () => {
     mockMgetWorkflows.mockResolvedValue([]);
     mockCreateWorkflow.mockResolvedValue({ id: 'wf-created' });
     mockUseFeedbackLoopEnabled.mockReturnValue(true);
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
   });
 
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseKiList.mockImplementation(() => defaultKiListMock);
   });
 
   it('shows a dismissible success callout when navigated from AI index creation', async () => {
@@ -306,7 +313,7 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextAiIndexDetailPageTitle')).toHaveTextContent('my-ai-index');
     expect(screen.getByTestId('contextAiIndexSourceRow')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
-    expect(screen.getByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
+    expect(await screen.findByTestId('contextAiIndexDetailTabs')).toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
@@ -815,8 +822,28 @@ describe('AiIndexDetailPage', () => {
 
     expect(screen.queryByTestId('contextKiListPanel')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('contextAiIndexDetailTab-knowledge_indicators'));
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-knowledge_indicators'));
 
     expect(screen.getByTestId('contextKiListPanel')).toBeInTheDocument();
+  });
+
+  it('hides the Knowledge Indicators tab when there are no KIs', async () => {
+    mockUseKiList.mockImplementation(() => ({
+      ...defaultKiListMock,
+      total: 0,
+      summary: { total: 0, countsByType: [] },
+    }));
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.queryByTestId('contextAiIndexDetailTabs')).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('contextAiIndexDetailTab-knowledge_indicators')
+    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexSourceRow')).toBeInTheDocument();
   });
 });
