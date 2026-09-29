@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { extname } from 'path';
-
 import type { ExistingFailedTestIssue } from './existing_failed_test_issues';
 import {
   NOT_AVAILABLE,
@@ -164,14 +162,16 @@ function getJUnitLocation(failure: TestFailure): string {
   return failure.location ?? getLocationFromClassname(failure.classname);
 }
 
+const TEST_FILE_EXTENSION = /\.[cm]?[jt]sx?$/;
+
 /**
  * The failing test file, stored in the issue metadata so tools like the skip-test bot don't
- * have to guess it. Jest classnames only carry the test directory, so a location without a
- * file extension isn't a file.
+ * have to guess it. Jest classnames only carry the test directory, and some Cypress classnames
+ * are a bare test name, so only a location with a script extension counts as a file.
  */
 function getJUnitTestFile(failure: TestFailure): string | undefined {
   const location = getJUnitLocation(failure);
-  return extname(location) ? location : undefined;
+  return TEST_FILE_EXTENSION.test(location) ? location : undefined;
 }
 
 function createJUnitTitle(failure: TestFailure, prependTitle: string): string {

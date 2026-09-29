@@ -161,18 +161,20 @@ describe('createFailureIssue()', () => {
     expect(body).toContain('"test.file":"x-pack/platform/example/tests/example.test.ts"');
   });
 
-  it('omits test.file when the location is only a directory', async () => {
+  it.each([
+    ['only a Jest test directory', 'Jest Tests.x-pack/platform/example/tests'],
+    ['part of a Cypress test name', 'upgrades from v8.19.0 cleanly'],
+  ])('omits test.file when the location is %s', async (_, classname) => {
     const api = new GithubApi();
 
     await createFailureIssue(
       'https://build-url',
       {
-        classname: 'Jest Tests.x-pack/platform/example/tests',
+        classname,
         failure: 'this is the failure text',
         name: 'test name',
         time: '1.000',
         likelyIrrelevant: false,
-        testType: 'jest',
       },
       api,
       'main',
@@ -180,7 +182,6 @@ describe('createFailureIssue()', () => {
     );
 
     const [, body] = api.createIssue.mock.calls[0];
-    expect(body).toContain('| Location | x-pack/platform/example/tests |');
     expect(body).not.toContain('test.file');
   });
 
