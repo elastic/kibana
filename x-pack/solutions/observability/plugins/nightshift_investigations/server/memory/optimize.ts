@@ -214,7 +214,6 @@ export const formatRecalled = (
     recalledMemories.map((memory, index) => ({
       prefix:
         `${index === 0 ? '' : '\n'}- id=${memory.id}\n` +
-        `  title: ${memory.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
         `  context: ${(memory.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
         `  content: `,
       content: memory.content,
@@ -340,13 +339,17 @@ Investigation transcript:\n${transcript}`,
             items: {
               type: 'object',
               properties: {
-                slug: { type: 'string' },
-                title: { type: 'string' },
+                title: {
+                  type: 'string',
+                  description:
+                    'Short, specific name for the fact. It becomes the memory file name ' +
+                    '(lower-cased, hyphenated), e.g. "Checkout Redis evictions".',
+                },
                 content: { type: 'string' },
                 tags: { type: 'array', items: { type: 'string' } },
                 categories: { type: 'array', items: { type: 'string' } },
               },
-              required: ['slug', 'title', 'content'],
+              required: ['title', 'content'],
             },
           },
         },
@@ -363,15 +366,15 @@ Investigation transcript:\n${transcript}`,
         .map((entry) => {
           const candidate =
             typeof entry === 'object' && entry !== null ? (entry as Record<string, unknown>) : {};
-          const rawSlug = String(candidate.slug ?? '');
+          const title = String(candidate.title ?? '').trim();
           // Validate before canonicalization: replacing `api_key=` punctuation with hyphens would
           // otherwise hide the secret pattern while retaining it in the durable ID/path.
-          if (looksLikeSecret(rawSlug)) {
+          if (looksLikeSecret(title)) {
             return undefined;
           }
           return {
-            slug: canonicalizeSlug(rawSlug),
-            title: String(candidate.title ?? '').trim(),
+            slug: canonicalizeSlug(title),
+            title,
             content: String(candidate.content ?? '').trim(),
             tags: Array.isArray(candidate.tags) ? candidate.tags.map(String) : [],
             categories: Array.isArray(candidate.categories) ? candidate.categories.map(String) : [],
@@ -432,7 +435,6 @@ export const formatMemoryMergeSources = ({
       ...sources.map((page, index) => ({
         prefix:
           `${index === 0 ? '' : '\n'}- id=${page.id}\n` +
-          `  title: ${page.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
           `  context: ${(page.context ?? '').slice(0, MAX_RECALLED_CONTEXT_CHARS)}\n` +
           `  content: `,
         content: page.content,
@@ -441,9 +443,7 @@ export const formatMemoryMergeSources = ({
         ? [
             {
               prefix:
-                `\n\nNew extract to fold in:\n- slug=${extract.slug.slice(0, 128)}\n` +
-                `  title: ${extract.title.slice(0, MAX_RECALLED_TITLE_CHARS)}\n` +
-                `  content: `,
+                `\n\nNew extract to fold in:\n- id=${toMemoryKiId(extract.slug)}\n` + `  content: `,
               content: extract.content,
             },
           ]
@@ -968,14 +968,17 @@ const mergeMemoryGroup = async ({
     }
 
     const content = capMergedContent(synthesis.content);
-    if (synthesis.title.length === 0 || content.trim().length === 0) {
+    // A page's title and slug are set once, together; merging into an existing canonical page
+    // keeps both, and only a newly minted canonical page takes the synthesized title.
+    const title = versionedCanonical?.page.title ?? synthesis.title;
+    if (title.length === 0 || content.trim().length === 0) {
       logger.warn('Memory merge aborted — synthesis returned an empty title or content');
       return { merged: false, archivedSourceCount: 0, writeFailureCount: 0 };
     }
     if (
       looksLikeSecret(
         [
-          synthesis.title,
+          title,
           content,
           synthesis.context,
           ...(extract ? [extract.tags.join('\n'), extract.categories.join('\n')] : []),
@@ -996,7 +999,7 @@ const mergeMemoryGroup = async ({
     let slug = versionedCanonical?.page.slug;
     if (!slug) {
       const avoid = new Set(currentSources.map((page) => page.id));
-      const base = canonicalizeSlug(synthesis.title) || 'merged';
+      const base = canonicalizeSlug(title) || 'merged';
       for (let slugAttempt = 0; slugAttempt < 6; slugAttempt++) {
         const suffix =
           slugAttempt === 0 ? '' : slugAttempt === 1 ? '-merged' : `-merged-${slugAttempt}`;
@@ -1028,7 +1031,7 @@ const mergeMemoryGroup = async ({
     }
     const write = {
       slug,
-      title: synthesis.title,
+      title,
       content,
       context: synthesis.context,
       tags: unionStrings(

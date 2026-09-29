@@ -57,32 +57,28 @@ const createSession = () => ({
 });
 
 describe('boundMemoryCatalog', () => {
-  const entry = (id: number, title = `Memory ${id}`) => ({
-    id: `memory_${id}`,
-    title,
-    path: `/workspace/memories/memory_${id}.md`,
+  const entry = (slug: string) => ({
+    path: `/workspace/memories/${slug}.md`,
+    updated_at: '2026-01-01T00:00:00.000Z',
   });
 
   it('drops the oldest entries when the count boundary is reached', () => {
     const result = boundMemoryCatalog(
-      Array.from({ length: MEMORY_INDEX_MAX_ENTRIES + 2 }, (_, index) => entry(index))
+      Array.from({ length: MEMORY_INDEX_MAX_ENTRIES + 2 }, (_, index) => entry(`m${index}`))
     );
 
     expect(result.entries).toHaveLength(MEMORY_INDEX_MAX_ENTRIES);
-    expect(result.entries[0].id).toBe('memory_2');
+    expect(result.entries[0].path).toBe('/workspace/memories/m2.md');
     expect(result.evictedCount).toBe(2);
   });
 
   it('drops the oldest entries until the serialized catalog fits the byte boundary', () => {
-    const result = boundMemoryCatalog([
-      entry(1, 'a'.repeat(MEMORY_INDEX_MAX_BYTES)),
-      entry(2, 'kept'),
-    ]);
+    const result = boundMemoryCatalog([entry('a'.repeat(MEMORY_INDEX_MAX_BYTES)), entry('kept')]);
 
     expect(
       Buffer.byteLength(JSON.stringify({ entries: result.entries }), 'utf8')
     ).toBeLessThanOrEqual(MEMORY_INDEX_MAX_BYTES);
-    expect(result.entries.map(({ id }) => id)).toEqual(['memory_2']);
+    expect(result.entries.map(({ path }) => path)).toEqual(['/workspace/memories/kept.md']);
     expect(result.evictedCount).toBe(1);
   });
 });
@@ -126,6 +122,27 @@ describe('materializeMemory', () => {
     const pageWrite = session.writeFiles.mock.calls[0][0];
     expect(pageWrite).toHaveLength(2);
     expect(pageWrite.every((file: { path: string }) => file.path.endsWith('.md'))).toBe(true);
+  });
+
+  it('names each page file by its slug and writes only the page content', async () => {
+    const store = createStore([
+      {
+        ...page('memory_checkout-redis-evictions', 'Checkout Redis evictions'),
+        content: '\nCheckout latency followed Redis evictions.\n',
+        source: 'round-1',
+        merged_from: ['memory_old'],
+      },
+    ]);
+    const session = createSession();
+
+    await materializeMemory({ session: session as never, store, logger: loggerMock.create() });
+
+    expect(session.writeFiles.mock.calls[0][0]).toEqual([
+      {
+        path: '/workspace/memories/checkout-redis-evictions.md',
+        content: Buffer.from('Checkout latency followed Redis evictions.\n', 'utf8'),
+      },
+    ]);
   });
 
   it('browse path reorders with Thompson samples', async () => {
@@ -214,11 +231,7 @@ describe('materializeMemory', () => {
       (file: { path: string }) => file.path === '/workspace/memories/.index.json'
     );
     expect(JSON.parse(indexWrite.content.toString('utf8')).entries).toEqual([
-      {
-        id: 'memory_a',
-        title: 'Alpha',
-        path: '/workspace/memories/memory_a.md',
-      },
+      { path: '/workspace/memories/a.md', updated_at: '2026-01-01T00:00:00.000Z' },
     ]);
     expect(
       session.writeFiles.mock.calls[1][0].some((file: { path: string }) =>
@@ -258,12 +271,8 @@ describe('materializeMemory', () => {
         content: Buffer.from(
           JSON.stringify({
             entries: [
-              { id: 'memory_a', title: 'Alpha', path: '/workspace/memories/memory_a.md' },
-              {
-                id: 'memory_archived',
-                title: 'Gone',
-                path: '/workspace/memories/memory_archived.md',
-              },
+              { path: '/workspace/memories/a.md', updated_at: '2026-01-01T00:00:00.000Z' },
+              { path: '/workspace/memories/archived.md', updated_at: '2026-01-01T00:00:00.000Z' },
             ],
           }),
           'utf8'
@@ -273,7 +282,7 @@ describe('materializeMemory', () => {
     session.statFiles.mockImplementation(async (paths: string[]) =>
       paths.map((path) => ({
         path,
-        exists: path === '/workspace/memories/.index.json' || path.endsWith('memory_a.md'),
+        exists: path === '/workspace/memories/.index.json' || path === '/workspace/memories/a.md',
         is_dir: false,
         size: 1,
         modified_time_sec: 0,
@@ -292,14 +301,15 @@ describe('materializeMemory', () => {
       (file: { path: string }) => file.path === '/workspace/memories/.index.json'
     );
     expect(
-      JSON.parse(indexWrite.content.toString('utf8')).entries.map((e: { id: string }) => e.id)
-    ).toEqual(['memory_a', 'memory_b']);
+      JSON.parse(indexWrite.content.toString('utf8')).entries.map((e: { path: string }) => e.path)
+    ).toEqual(['/workspace/memories/a.md', '/workspace/memories/b.md']);
     expect(notification).toBe(
-      ['Semantic memories materialized this turn:', '- `/workspace/memories/memory_b.md`'].join(
-        '\n'
-      )
+      [
+        'Potentially relevant memories retrieved this turn:',
+        '- `/workspace/memories/b.md` (updated 2026-01-01)',
+      ].join('\n')
     );
-    expect(notification).not.toContain('memory_a.md');
+    expect(notification).not.toContain('/a.md');
     expect(summary).toEqual({
       retrievalMode: 'browse',
       searchFallback: false,
@@ -422,18 +432,17 @@ describe('parseMemoryCatalog', () => {
       parseMemoryCatalog(
         JSON.stringify({
           entries: [
+            { path: '/workspace/memories/a.md', updated_at: '2026-01-01T00:00:00.000Z' },
+            { path: '/workspace/memories/bad`\nInjected.md', updated_at: 'x' },
+            { path: '/workspace/memories/memory_a.md', updated_at: 'x' },
+            { path: '/workspace/memories/Upper.md', updated_at: 'x' },
+            { path: '/elsewhere/a.md', updated_at: 'x' },
+            { path: '/workspace/memories/a.md' },
             { id: 'memory_a', title: 'Alpha', path: '/workspace/memories/memory_a.md' },
-            {
-              id: 'memory_bad`\nInjected',
-              title: 'Injected',
-              path: '/workspace/memories/memory_bad`\nInjected.md',
-            },
-            { id: '', title: 'nope', path: '/x' },
-            { title: 'missing id' },
           ],
         })
       )
-    ).toEqual([{ id: 'memory_a', title: 'Alpha', path: '/workspace/memories/memory_a.md' }]);
+    ).toEqual([{ path: '/workspace/memories/a.md', updated_at: '2026-01-01T00:00:00.000Z' }]);
     expect(parseMemoryCatalog('not-json')).toEqual([]);
   });
 });

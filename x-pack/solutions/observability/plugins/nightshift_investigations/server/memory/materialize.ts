@@ -11,7 +11,12 @@ import { formatHydrateNotification } from '../lib/hydrate_notification';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { formatPageRefs, previewText } from './log_format';
 import type { MemoryPageStore } from './page_store';
-import { isCanonicalMemoryId, toMemoryDisplayTelemetry } from './page_store';
+import {
+  isCanonicalMemoryId,
+  slugFromMemoryId,
+  toMemoryDisplayTelemetry,
+  toMemoryKiId,
+} from './page_store';
 import { rankForMode, type RankedArm, type SampleBeta } from './ranking';
 import { type MemoryPage } from '../../common/memory';
 
@@ -32,9 +37,8 @@ export const boundMemoryCatalog = (
 };
 
 export interface MemoryCatalogEntry {
-  id: string;
-  title: string;
   path: string;
+  updated_at: string;
 }
 
 export interface MaterializeMemoryResult {
@@ -58,17 +62,28 @@ const README_CONTENT = `# Semantic Memories
 Past investigation observations and learnings. Historical — independently verify
 all claims against current data before relying on them.
 
-The conversation catalog is \`.index.json\` (\`entries\` of \`id\`, \`title\`, \`path\`).
-Read it with \`${SANDBOX_VIEW_FILE_TOOL_ID}\` or \`jq\`. This turn's new pages also
-arrive in \`<system_update>\`. Open the page files with \`${SANDBOX_VIEW_FILE_TOOL_ID}\`.
-This README is not a catalog. Do not edit these pages yourself — a parallel optimizer
-evaluates useful pages after the run.
+Each file name names the memory. The conversation catalog is \`.index.json\`
+(\`entries\` of \`path\`, \`updated_at\`). Read it with \`${SANDBOX_VIEW_FILE_TOOL_ID}\` or
+\`jq\`. This turn's new pages also arrive in \`<system_update>\`. Open the page files with
+\`${SANDBOX_VIEW_FILE_TOOL_ID}\`. This README is not a catalog. Do not edit these pages
+yourself — a parallel optimizer evaluates useful pages after the run.
 `;
 
-const pagePath = (page: MemoryPage): string => `${MEMORY_WORKSPACE_ROOT}/${page.id}.md`;
+const pagePath = (page: MemoryPage): string =>
+  `${MEMORY_WORKSPACE_ROOT}/${slugFromMemoryId(page.id)}.md`;
+
+/** Inverse of {@link pagePath}; undefined for paths no canonical memory id maps to. */
+const memoryIdFromPath = (path: string): string | undefined => {
+  const prefix = `${MEMORY_WORKSPACE_ROOT}/`;
+  if (!path.startsWith(prefix) || !path.endsWith('.md')) {
+    return undefined;
+  }
+  const id = toMemoryKiId(path.slice(prefix.length, -'.md'.length));
+  return isCanonicalMemoryId(id) && path === `${prefix}${slugFromMemoryId(id)}.md` ? id : undefined;
+};
 
 const isCanonicalCatalogEntry = (entry: MemoryCatalogEntry): boolean =>
-  isCanonicalMemoryId(entry.id) && entry.path === `${MEMORY_WORKSPACE_ROOT}/${entry.id}.md`;
+  memoryIdFromPath(entry.path) !== undefined;
 
 export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
   try {
@@ -84,14 +99,11 @@ export const parseMemoryCatalog = (raw: string): MemoryCatalogEntry[] => {
       if (typeof entry !== 'object' || entry === null) {
         return [];
       }
-      const row = entry as { id?: unknown; title?: unknown; path?: unknown };
-      if (typeof row.id !== 'string' || row.id.length === 0) {
+      const row = entry as { path?: unknown; updated_at?: unknown };
+      if (typeof row.path !== 'string' || typeof row.updated_at !== 'string') {
         return [];
       }
-      if (typeof row.title !== 'string' || typeof row.path !== 'string') {
-        return [];
-      }
-      const catalogEntry = { id: row.id, title: row.title, path: row.path };
+      const catalogEntry = { path: row.path, updated_at: row.updated_at };
       return isCanonicalCatalogEntry(catalogEntry) ? [catalogEntry] : [];
     });
   } catch {
@@ -149,31 +161,11 @@ const existingFilePaths = async (
   return new Set(stats.filter((stat) => stat.exists && !stat.is_dir).map((stat) => stat.path));
 };
 
-const renderPage = (page: MemoryPage, nowSec: number): string => {
-  const display = toMemoryDisplayTelemetry(page, nowSec);
-  const usefulnessPct = Math.round(display.conversionRate * 100);
+// Ranking, counters, status, and provenance belong to the memory system; the agent only reads
+// the fact itself, named by its file.
+const renderPage = (page: MemoryPage): string => `${page.content.trim()}\n`;
 
-  const header = [
-    `---`,
-    `title: ${page.title}`,
-    `id: ${page.id}`,
-    `status: ${page.status}`,
-    `usefulness: ${usefulnessPct}%`,
-    `impressions: ${Math.round(display.impressions)}x`,
-    `confidence: ${display.confidence.toFixed(2)}`,
-    `updated_at: ${page.updated_at}`,
-    ...(page.description !== undefined ? [`description: ${page.description}`] : []),
-    ...(page.source !== undefined ? [`source: ${JSON.stringify(page.source)}`] : []),
-    ...(page.merged_from !== undefined && page.merged_from.length > 0
-      ? [`merged_from: ${JSON.stringify(page.merged_from.join(', '))}`]
-      : []),
-    `---`,
-    '',
-    `# ${page.title}`,
-    '',
-  ];
-  return `${header.join('\n')}${page.content.trim()}\n`;
-};
+const toUpdatedDate = (iso: string): string => iso.slice(0, 10);
 
 const assertMkdirResults = (results: boolean[], expectedCount: number): void => {
   if (results.length !== expectedCount || results.some((success) => !success)) {
@@ -291,21 +283,24 @@ export const materializeMemory = async ({
   const keepPaths = pages.map(pagePath);
   const alreadyOnDisk = podReset ? new Set<string>() : await existingFilePaths(session, keepPaths);
 
-  const priorById = new Map(priorCatalog.map((entry) => [entry.id, entry]));
   const carried: MemoryCatalogEntry[] = [];
+  const carriedPaths = new Set<string>();
+  const keepPathSet = new Set(keepPaths);
   for (const entry of priorCatalog) {
-    if (recalledIds.includes(entry.id)) {
+    const id = memoryIdFromPath(entry.path);
+    if (!id || keepPathSet.has(entry.path) || carriedPaths.has(entry.path)) {
       continue;
     }
-    const existing = await store.get(entry.id);
+    const existing = await store.get(id);
     if (!existing || existing.status === 'archived') {
       continue;
     }
-    carried.push(priorById.get(entry.id) ?? entry);
+    carriedPaths.add(entry.path);
+    carried.push(entry);
   }
   const allEntries: MemoryCatalogEntry[] = [
     ...carried,
-    ...pages.map((page) => ({ id: page.id, title: page.title, path: pagePath(page) })),
+    ...pages.map((page) => ({ path: pagePath(page), updated_at: page.updated_at })),
   ];
   const { entries, evictedCount: catalogEvictedCount } = boundMemoryCatalog(allEntries);
   if (catalogEvictedCount > 0) {
@@ -317,8 +312,11 @@ export const materializeMemory = async ({
 
   const newPages = pages.filter((page) => !alreadyOnDisk.has(pagePath(page)));
   const notification = formatHydrateNotification(
-    'Semantic memories materialized this turn:',
-    newPages.map((page) => ({ path: pagePath(page), title: page.title }))
+    'Potentially relevant memories retrieved this turn:',
+    newPages.map((page) => ({
+      path: pagePath(page),
+      detail: `updated ${toUpdatedDate(page.updated_at)}`,
+    }))
   );
 
   const mkdirResults = await session.mkdirs([MEMORY_WORKSPACE_ROOT]);
@@ -327,7 +325,7 @@ export const materializeMemory = async ({
   const pageWriteResults = await session.writeFiles(
     pages.map((page) => ({
       path: pagePath(page),
-      content: Buffer.from(renderPage(page, nowSec), 'utf8'),
+      content: Buffer.from(renderPage(page), 'utf8'),
     }))
   );
   assertWriteResults(pageWriteResults, pages.length, 'memory page files');

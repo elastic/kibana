@@ -8,12 +8,15 @@
 /** Markdown fragment for one hydrate node. Empty when this turn wrote no new files. */
 export const formatHydrateNotification = (
   heading: string,
-  items: ReadonlyArray<{ path: string }>
+  items: ReadonlyArray<{ path: string; detail?: string }>
 ): string => {
   if (items.length === 0) {
     return '';
   }
-  return [heading, ...items.map((item) => `- \`${item.path}\``)].join('\n');
+  return [
+    heading,
+    ...items.map((item) => `- \`${item.path}\`${item.detail ? ` (${item.detail})` : ''}`),
+  ].join('\n');
 };
 
 /**

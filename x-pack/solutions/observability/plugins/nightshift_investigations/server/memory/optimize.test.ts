@@ -221,14 +221,13 @@ describe('createLlmProposeMemoryExtractions', () => {
     );
   });
 
-  it('rejects a secret-bearing raw slug before canonicalization can hide it', async () => {
+  it('rejects a secret-bearing raw title before canonicalization can hide it', async () => {
     const output = jest.fn().mockResolvedValue({
       output: {
         merge_targets: [],
         extractions: [
           {
-            slug: 'api_key=sk-live-not-a-real-key',
-            title: 'Harmless title',
+            title: 'api_key=sk-live-not-a-real-key',
             content: 'Harmless content',
             tags: [],
             categories: [],
@@ -244,6 +243,41 @@ describe('createLlmProposeMemoryExtractions', () => {
       mergeTargets: [],
       extractions: [],
     });
+  });
+
+  it('asks for one title and derives the slug from it', async () => {
+    const output = jest.fn().mockResolvedValue({
+      output: {
+        merge_targets: [],
+        extractions: [
+          {
+            slug: 'ignored-model-slug',
+            title: '  Checkout Redis evictions ',
+            content: 'Checkout latency followed Redis evictions.',
+          },
+        ],
+      },
+    });
+    const propose = createLlmProposeMemoryExtractions({
+      inferenceClient: { output } as never,
+    });
+
+    await expect(propose({ transcript: 'task', recalledMemories: [] })).resolves.toEqual({
+      mergeTargets: [],
+      extractions: [
+        {
+          slug: 'checkout-redis-evictions',
+          title: 'Checkout Redis evictions',
+          content: 'Checkout latency followed Redis evictions.',
+          tags: [],
+          categories: [],
+        },
+      ],
+    });
+    const { schema } = output.mock.calls[0][0];
+    const item = schema.properties.extractions.items;
+    expect(Object.keys(item.properties)).not.toContain('slug');
+    expect(item.required).toEqual(['title', 'content']);
   });
 });
 
@@ -976,7 +1010,7 @@ describe('applyMemoryEdits', () => {
     );
   });
 
-  it('merges an old exact slug in place with OCC and preserves its id', async () => {
+  it('merges an old exact slug in place with OCC and preserves its id and title', async () => {
     const existing = page('memory_checkout-redis', 'Checkout Redis', 'Old fact.');
     const store = createStore({
       get: jest
@@ -1014,7 +1048,7 @@ describe('applyMemoryEdits', () => {
       'memory_checkout-redis',
       expect.objectContaining({
         slug: 'checkout-redis',
-        title: 'Checkout Redis canonical',
+        title: 'Checkout Redis',
         merged_from: ['memory_checkout-redis'],
       }),
       expect.objectContaining({ seqNo: 7, primaryTerm: 2 })
