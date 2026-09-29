@@ -591,8 +591,12 @@ steps:
         ${{ (steps.diagnose_rule.output.structured_output.change_type == 'query'
             or (steps.diagnose_rule.output.structured_output.change_type == 'exception'
               and steps.build_exception_filter.error == null
-              and steps.build_exception_filter.output.filters != null))
-          and steps.fetch_rule.output.type == 'query'
+              and steps.build_exception_filter.output.filters != null)
+            or steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+            or steps.diagnose_rule.output.structured_output.change_type == 'schedule')
+          and (steps.fetch_rule.output.type == 'query'
+            or (steps.fetch_rule.output.type == 'threshold'
+              and steps.diagnose_rule.output.structured_output.change_type == 'threshold'))
           and steps.fetch_rule.output.saved_id == null
           and steps.fetch_rule.output.data_view_id == null
           and steps.fetch_rule.output.timestamp_override == null
@@ -611,7 +615,7 @@ steps:
       inputs:
         space_id: "{{ workflow.spaceId }}"
         preview_body:
-          type: query
+          type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
           query: "{{ steps.fetch_rule.output.query }}"
@@ -632,10 +636,11 @@ steps:
           interval: "{{ steps.fetch_rule.output.interval }}"
           from: "{{ steps.fetch_rule.output.from }}"
           to: "{{ steps.fetch_rule.output.to }}"
+          threshold: "${{ steps.fetch_rule.output.threshold }}"
           invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
           timeframeEnd: "{{ inputs.last_fp_at }}"
         proposed_body:
-          type: query
+          type: "{{ steps.fetch_rule.output.type }}"
           name: "{{ steps.fetch_rule.output.name }}"
           description: "{{ steps.fetch_rule.output.description }}"
           # Only the query arm changes the query itself; the exception arm backtests via
@@ -662,9 +667,17 @@ steps:
           author: "${{ steps.fetch_rule.output.author | default: consts.no_items }}"
           false_positives: "${{ steps.fetch_rule.output.false_positives | default: consts.no_items }}"
           references: "${{ steps.fetch_rule.output.references | default: consts.no_items }}"
-          interval: "{{ steps.fetch_rule.output.interval }}"
-          from: "{{ steps.fetch_rule.output.from }}"
+          # Schedule arm: use proposed interval/from; all other arms keep the rule's own.
+          interval: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}{{ steps.diagnose_rule.output.structured_output.proposed_interval }}{% else %}{{ steps.fetch_rule.output.interval }}{% endif %}
+          from: >-
+            {% if steps.diagnose_rule.output.structured_output.change_type == 'schedule' %}{{ steps.diagnose_rule.output.structured_output.proposed_from }}{% else %}{{ steps.fetch_rule.output.from }}{% endif %}
           to: "{{ steps.fetch_rule.output.to }}"
+          # Threshold arm: use proposed threshold settings; other arms omit this field.
+          threshold: >-
+            ${{ steps.diagnose_rule.output.structured_output.change_type == 'threshold'
+              ? steps.diagnose_rule.output.structured_output.proposed_threshold
+              : steps.fetch_rule.output.threshold }}
           invocationCount: "${{ inputs.preview_invocation_count | default: consts.preview_invocation_count }}"
           timeframeEnd: "{{ inputs.last_fp_at }}"
     on-failure:
@@ -819,7 +832,9 @@ steps:
         {% endcase %}
 
         {% if steps.diagnose_rule.output.structured_output.change_type == "query"
-          or steps.diagnose_rule.output.structured_output.change_type == "exception" %}
+          or steps.diagnose_rule.output.structured_output.change_type == "exception"
+          or steps.diagnose_rule.output.structured_output.change_type == "threshold"
+          or steps.diagnose_rule.output.structured_output.change_type == "schedule" %}
         {% if steps.can_preview_query_change.output.supported %}
         **Backtest**
 
