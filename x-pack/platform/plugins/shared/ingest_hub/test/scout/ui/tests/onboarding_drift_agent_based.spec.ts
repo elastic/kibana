@@ -313,10 +313,10 @@ test.describe(
       browserAuth,
       page,
     }) => {
-      // Verifies that a real ?deploymentId resume (no authMethod in session, no instances seeded)
-      // does not falsely show a drift callout when the session matches the SO exactly.
-      // The drift check uses agentCredentialMethod (not authMethod) for agent-based mode;
-      // this test catches regressions where the absent authMethod triggers false drift (r4132650249).
+      // Verifies that a real ?deploymentId resume (no authMethod in session) does not falsely
+      // show a drift callout when the session matches the SO. The drift check uses
+      // agentCredentialMethod (not authMethod) for agent-based mode; this test catches
+      // regressions where the absent authMethod triggers false drift.
       const DEP_ID = 'dep-ab-clean-001';
       const AGENT_POLICY_ID = 'clean-agent-policy-id';
       const PKG_POLICY_ID = 'clean-pkg-policy-id';
@@ -391,7 +391,7 @@ test.describe(
             JSON.stringify({
               globalRegion: 'us-east-1',
               serviceVars: {},
-              // instances intentionally absent — hydration does not reconstruct them.
+              instances: [{ instanceId: 'elb', serviceId: 'elb', name: 'AWS ELB', isDuplicate: false }],
             })
           );
           sessionStorage.setItem(
@@ -440,7 +440,12 @@ test.describe(
         page.testSubj.locator('authenticateAndDeployStep-driftCallout')
       ).not.toBeVisible();
       await expect(page.testSubj.locator('authenticateAndDeployStep-nextButton')).toBeEnabled();
-      // No package policy PUT must have fired — the clean state requires no redeploy.
+      // Click Next — already-deployed with no drift navigates without any Fleet PUT.
+      await page.testSubj.locator('authenticateAndDeployStep-nextButton').click();
+      await expect(
+        page.testSubj.locator('onboardingStep-authenticate-and-deploy')
+      ).not.toBeVisible();
+      // No package policy PUT must have fired — clean state requires no redeploy.
       expect(pkgPuts).toHaveLength(0);
     });
 

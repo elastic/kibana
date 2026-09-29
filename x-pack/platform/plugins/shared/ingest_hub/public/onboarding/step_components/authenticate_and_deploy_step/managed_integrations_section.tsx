@@ -402,6 +402,7 @@ export function ManagedIntegrationsSection({
                   size="s"
                   color="danger"
                   onClick={onDeploy}
+                  isDisabled={!isDeployReady}
                   data-test-subj="managedIntegrationsSection-retryButton"
                 >
                   <FormattedMessage

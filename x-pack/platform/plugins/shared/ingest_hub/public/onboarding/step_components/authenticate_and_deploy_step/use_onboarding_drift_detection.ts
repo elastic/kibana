@@ -85,7 +85,9 @@ export function useOnboardingDriftDetection({
         if (thisId !== driftCheckIdRef.current) return; // stale response — discard
         if (!item) {
           // SO does not exist or was cleared — nothing to compare against; treat as clean.
+          // Also clear persisted drift flags so stale session state doesn't re-trigger callout.
           setDriftSettled(true);
+          updateDetectAndReviewStep({ isDirty: false });
           return;
         }
         // policyIdsByInstance is captured from the closure: it is hydrated at mount from the SO

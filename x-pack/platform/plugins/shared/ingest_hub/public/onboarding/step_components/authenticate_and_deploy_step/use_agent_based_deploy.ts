@@ -334,20 +334,19 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
 
         if (targetsToDeploy.length === 0) {
           setIsDeploying(false);
-          updateDetectAndReviewStep({
-            isDeploying: false,
-            // Cleanup partially failed but policy updates succeeded — clear isDirty.
-            ...(dirtyUpdateApplied ? { isDirty: false } : {}),
-          });
           // Refresh SO services only when all cleanup succeeded (explicit + live-stale).
           const allLiveStaleSucceeded = Object.keys(liveStalePolicyIds).every((id) =>
             cleanedLiveStale.includes(id)
           );
-          if (
-            onboardingDeploymentId &&
-            Object.keys(remainingPending).length === 0 &&
-            allLiveStaleSucceeded
-          ) {
+          const cleanupComplete =
+            Object.keys(remainingPending).length === 0 && allLiveStaleSucceeded;
+          // Only clear isDirty when the SO is also written: if cleanup is partial the SO stays
+          // stale, so isDirty must remain true to prevent drift check from treating it as clean.
+          updateDetectAndReviewStep({
+            isDeploying: false,
+            ...(dirtyUpdateApplied && cleanupComplete ? { isDirty: false } : {}),
+          });
+          if (onboardingDeploymentId && cleanupComplete) {
             // Build the post-cleanup policy map: exclude instance IDs removed by cleanup so the
             // persisted packagePolicyIds and policyIdsByInstance don't reference deleted policies.
             const postCleanupPolicyIdsByInstance = Object.fromEntries(
