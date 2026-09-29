@@ -362,7 +362,7 @@ export class WorkflowEditorPage {
     return this.serviceAccountPopup.getByRole('option', { name, exact: true });
   }
 
-  async openServiceAccountPicker(
+  async focusServiceAccountSetting(
     yaml: string,
     format: 'block' | 'inline' = 'block'
   ): Promise<void> {
@@ -375,7 +375,33 @@ export class WorkflowEditorPage {
       await this.page.keyboard.press('End');
     }
     await this.page.keyboard.press('Control+Space');
+  }
+
+  async openServiceAccountPicker(
+    yaml: string,
+    format: 'block' | 'inline' = 'block'
+  ): Promise<void> {
+    await this.focusServiceAccountSetting(yaml, format);
     await this.serviceAccountPopup.getByRole('listbox', { name: 'Service accounts' }).waitFor();
+  }
+
+  async focusServiceAccountControls(): Promise<void> {
+    await this.page.keyboard.press('Shift+Tab');
+  }
+
+  async retryServiceAccounts(): Promise<void> {
+    await this.serviceAccountPopup.getByRole('button', { name: 'Try again' }).click();
+  }
+
+  async clickServiceAccountPlaceholder(): Promise<void> {
+    const activateEditor = this.yamlEditor.getByRole('button', {
+      name: 'Code Editor, activate edit mode',
+    });
+    if (await activateEditor.isVisible()) {
+      await activateEditor.focus();
+      await this.page.keyboard.press('Enter');
+    }
+    await this.yamlEditor.getByText('Select service account', { exact: true }).click();
   }
 
   async openExistingServiceAccountPicker(id: string): Promise<void> {

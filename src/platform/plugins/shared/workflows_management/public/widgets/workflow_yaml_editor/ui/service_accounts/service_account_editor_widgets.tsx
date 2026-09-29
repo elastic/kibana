@@ -22,6 +22,7 @@ import { createPortal } from 'react-dom';
 import { monaco } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import { ServiceAccountDetails, ServiceAccountRoles } from './service_account_details';
+import { ServiceAccountPickerPanel } from './service_account_picker_panel';
 import type { WorkflowServiceAccount } from '../../../../entities/service_accounts';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { getRunAsValue } from '../../lib/service_accounts/service_account_editor';
@@ -34,6 +35,9 @@ type Popup =
       position: monaco.IPosition;
       suggestions: ServiceAccountSuggestion[];
       selected: number;
+      accountId: string;
+      status: 'loading' | 'ready' | 'forbidden' | 'unavailable';
+      filtered: boolean;
     }
   | { kind: 'details'; position: monaco.IPosition; account: WorkflowServiceAccount };
 
@@ -55,6 +59,8 @@ export const ServiceAccountEditorWidgets = ({
   const chooseRef = useRef<(suggestion: ServiceAccountSuggestion) => void>(() => {});
   const closeTimer = useRef<ReturnType<typeof setTimeout>>();
   const closeRef = useRef<() => void>(() => {});
+  const retryRef = useRef<() => void>(() => {});
+  const dismissRef = useRef<() => void>(() => {});
   const widget = useMemo<monaco.editor.IContentWidget | null>(
     () =>
       node
@@ -157,12 +163,19 @@ export const ServiceAccountEditorWidgets = ({
       restoreHover();
     };
     closeRef.current = close;
-    const complete = async () => {
+    dismissRef.current = () => {
+      dismissed = true;
+      close();
+      editor.focus();
+    };
+    const complete = async (refresh = false) => {
       const model = editor.getModel();
       const position = editor.getPosition();
       const value = model && position && getRunAsValue(model, position);
       const eligible =
-        !!value && !editor.getOption(monaco.editor.EditorOption.readOnly) && editor.hasTextFocus();
+        !!value &&
+        !editor.getOption(monaco.editor.EditorOption.readOnly) &&
+        (editor.hasTextFocus() || node.contains(document.activeElement));
       valueFocused.set(Boolean(value));
       if (!eligible || !model || !position || !value) {
         dismissed = false;
@@ -180,12 +193,32 @@ export const ServiceAccountEditorWidgets = ({
       const version = model.getVersionId();
       const current = ++completionGeneration;
       const query = filterByTypedValue ? value.id.toLocaleLowerCase() : '';
-      const result = await accounts.completionProvider.provideCompletionItems(model, position, {
-        get isCancellationRequested() {
-          return current !== completionGeneration;
-        },
-        onCancellationRequested: () => ({ dispose() {} }),
+      pickerVisible.set(false);
+      const popupPosition = {
+        lineNumber: value.range.startLineNumber,
+        column: value.range.startColumn,
+      };
+      popupVisible.set(true);
+      setPopup({
+        kind: 'suggestions',
+        position: popupPosition,
+        suggestions: [],
+        selected: 0,
+        accountId: value.id,
+        status: 'loading',
+        filtered: Boolean(query),
       });
+      const result = await accounts.completionProvider.provideCompletionItems(
+        model,
+        position,
+        {
+          get isCancellationRequested() {
+            return current !== completionGeneration;
+          },
+          onCancellationRequested: () => ({ dispose() {} }),
+        },
+        refresh
+      );
       if (
         current !== completionGeneration ||
         model.isDisposed() ||
@@ -197,20 +230,31 @@ export const ServiceAccountEditorWidgets = ({
           ({ account }) =>
             !account || `${account.name} ${account.id}`.toLocaleLowerCase().includes(query)
         ) ?? [];
-      if (!suggestions.length) {
+      if (!result) {
         close();
         return;
       }
       hoverGeneration++;
       clearTimeout(hoverTimer);
-      pickerVisible.set(true);
+      pickerVisible.set(suggestions.length > 0);
       popupVisible.set(true);
       setPopup({
         kind: 'suggestions',
         position: { lineNumber: value.range.startLineNumber, column: value.range.startColumn },
         suggestions,
-        selected: 0,
+        selected: Math.max(
+          0,
+          suggestions.findIndex(({ account }) => account?.id === value.id)
+        ),
+        accountId: value.id,
+        status: result.error ?? 'ready',
+        filtered: Boolean(query),
       });
+    };
+    retryRef.current = () => {
+      editor.focus();
+      clearTimeout(completionTimer);
+      void complete(true);
     };
     const queueCompletion = () => {
       clearTimeout(completionTimer);
@@ -241,7 +285,7 @@ export const ServiceAccountEditorWidgets = ({
     };
     const move = (delta: number) => {
       setPopup((previous) =>
-        previous?.kind === 'suggestions'
+        previous?.kind === 'suggestions' && previous.suggestions.length > 0
           ? {
               ...previous,
               selected:
@@ -265,6 +309,18 @@ export const ServiceAccountEditorWidgets = ({
         run,
       });
     const disposables = [
+      editor.onDidChangeConfiguration((event) => {
+        if (event.hasChanged(monaco.editor.EditorOption.readOnly)) queueCompletion();
+      }),
+      editor.onMouseDown((event) => {
+        const model = editor.getModel();
+        const position = event.target.position;
+        if (model && position && getRunAsValue(model, position)) {
+          dismissed = false;
+          filterByTypedValue = false;
+          queueCompletion();
+        }
+      }),
       editor.onDidChangeCursorPosition(({ reason }) => {
         if (reason === monaco.editor.CursorChangeReason.Explicit) filterByTypedValue = false;
         queueCompletion();
@@ -280,7 +336,9 @@ export const ServiceAccountEditorWidgets = ({
         queueCompletion();
       }),
       editor.onDidBlurEditorText(() => {
-        closeTimer.current = setTimeout(close, 150);
+        closeTimer.current = setTimeout(() => {
+          if (!node.contains(document.activeElement)) close();
+        }, 150);
       }),
       editor.onDidChangeModel(() => {
         dismissed = false;
@@ -289,11 +347,17 @@ export const ServiceAccountEditorWidgets = ({
         restoreSuggestions();
       }),
       editor.onDidScrollChange(close),
+      action(
+        'focusControls',
+        [monaco.KeyMod.Shift + monaco.KeyCode.Tab],
+        () => node.querySelector<HTMLElement>('a[href], button')?.focus(),
+        'workflowServiceAccountPopupVisible'
+      ),
       action('next', [monaco.KeyCode.DownArrow], () => move(1)),
       action('previous', [monaco.KeyCode.UpArrow], () => move(-1)),
       action('accept', [monaco.KeyCode.Enter, monaco.KeyCode.Tab], () => {
         const current = popupRef.current;
-        if (current?.kind === 'suggestions')
+        if (current?.kind === 'suggestions' && current.suggestions[current.selected])
           chooseRef.current(current.suggestions[current.selected]);
       }),
       action(
@@ -408,9 +472,24 @@ export const ServiceAccountEditorWidgets = ({
       paddingSize={popup.kind === 'details' ? 'm' : 'none'}
       hasShadow
       data-test-subj="serviceAccountEditorPopup"
+      onFocusCapture={() => clearTimeout(closeTimer.current)}
+      onBlurCapture={() => {
+        closeTimer.current = setTimeout(() => {
+          if (!node.contains(document.activeElement) && !editor?.hasTextFocus()) closeRef.current();
+        }, 150);
+      }}
+      onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (event.key === 'Escape') {
+          event.preventDefault();
+          event.stopPropagation();
+          dismissRef.current();
+        }
+      }}
       onMouseEnter={() => clearTimeout(closeTimer.current)}
       onMouseLeave={() => {
-        closeTimer.current = setTimeout(() => closeRef.current(), 250);
+        closeTimer.current = setTimeout(() => {
+          if (!node.contains(document.activeElement)) closeRef.current();
+        }, 250);
       }}
       css={css({
         width: popup.kind === 'details' ? 340 : 440,
@@ -430,7 +509,12 @@ export const ServiceAccountEditorWidgets = ({
           }}
         />
       ) : (
-        <>
+        <ServiceAccountPickerPanel
+          status={popup.status}
+          hasSuggestions={popup.suggestions.length > 0}
+          filtered={popup.filtered}
+          onRetry={() => retryRef.current()}
+        >
           <div
             role="listbox"
             aria-label={i18n.translate('workflows.editor.serviceAccountPickerAriaLabel', {
@@ -442,19 +526,21 @@ export const ServiceAccountEditorWidgets = ({
                 key={suggestion.account?.id ?? 'loadMore'}
                 role="option"
                 aria-selected={index === popup.selected}
+                aria-current={suggestion.account?.id === popup.accountId ? 'true' : undefined}
                 color="text"
                 size="s"
                 flush="both"
                 data-test-subj="serviceAccountSuggestion"
                 onMouseDown={(event: React.MouseEvent<HTMLButtonElement>) => event.preventDefault()}
                 onClick={() => chooseRef.current(suggestion)}
-                contentProps={{ css: css({ width: '100%' }) }}
+                contentProps={{ css: css({ width: '100%', minWidth: 0 }) }}
                 textProps={false}
                 css={css({
                   width: '100%',
                   padding: euiTheme.size.s,
                   height: 'auto',
                   textAlign: 'left',
+                  whiteSpace: 'normal',
                   fontWeight: euiTheme.font.weight.regular,
                   backgroundColor:
                     index === popup.selected ? euiTheme.colors.backgroundBasePrimary : undefined,
@@ -468,10 +554,13 @@ export const ServiceAccountEditorWidgets = ({
                 >
                   {suggestion.account && (
                     <EuiFlexItem grow={false}>
-                      <EuiIcon type="user" aria-hidden={true} />
+                      <EuiIcon
+                        type={suggestion.account.id === popup.accountId ? 'check' : 'user'}
+                        aria-hidden={true}
+                      />
                     </EuiFlexItem>
                   )}
-                  <EuiFlexItem css={css({ overflowWrap: 'anywhere' })}>
+                  <EuiFlexItem css={css({ minWidth: 0, overflowWrap: 'anywhere' })}>
                     {getSuggestionLabel(suggestion)}
                   </EuiFlexItem>
                   {suggestion.account && (
@@ -489,7 +578,7 @@ export const ServiceAccountEditorWidgets = ({
               {selectedSuggestion?.account?.roles.join(', ')}
             </div>
           </EuiScreenReaderOnly>
-        </>
+        </ServiceAccountPickerPanel>
       )}
     </EuiPanel>,
     node

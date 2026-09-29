@@ -81,19 +81,23 @@ export const createServiceAccountEditor = (directory: ServiceAccountDirectory) =
     provideCompletionItems: async (
       model: monaco.editor.ITextModel,
       position: monaco.Position,
-      token: monaco.CancellationToken
-    ): Promise<{ suggestions: ServiceAccountSuggestion[] } | null> => {
+      token: monaco.CancellationToken,
+      refresh = false
+    ): Promise<{
+      suggestions: ServiceAccountSuggestion[];
+      error?: 'forbidden' | 'unavailable';
+    } | null> => {
       const value = getRunAsValue(model, position);
       if (!value || !directory.isEnabled()) return null;
       const suggestions: ServiceAccountSuggestion[] = [];
       const seen = new Set<string>();
       for (const cursor of cursors) {
-        const page = await directory.list(cursor);
+        const page = await (refresh ? directory.list(cursor, true) : directory.list(cursor));
         if (token.isCancellationRequested) return { suggestions: [] };
-        if (!page) {
+        if (!page || 'error' in page) {
           cursors.splice(1);
           nextPage = undefined;
-          return { suggestions: [] };
+          return { suggestions: [], error: page?.error ?? 'unavailable' };
         }
         nextPage = page.nextPage;
         for (const account of page.serviceAccounts) {
