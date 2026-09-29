@@ -223,4 +223,129 @@ describe('ESSearchSource', () => {
       expect(esSearchSource.supportsJoins()).toBe(true);
     });
   });
+
+  describe('getGeoJsonWithMeta', () => {
+    const GEO_FIELD_NAME = 'location';
+
+    const makeHit = (id: string) => ({
+      _id: id,
+      _index: 'test-index',
+      fields: {
+        [GEO_FIELD_NAME]: [{ type: 'Point', coordinates: [-70, 40] }],
+      },
+    });
+
+    const makeHits = (count: number) =>
+      Array.from({ length: count }, (_, i) => makeHit(`hit-${i}`));
+
+    const mockIndexPattern = {
+      flattenHit(hit: Record<string, any>) {
+        return {
+          _id: hit._id,
+          _index: hit._index,
+          [GEO_FIELD_NAME]: hit.fields?.[GEO_FIELD_NAME]?.[0],
+        };
+      },
+      metaFields: ['_id', '_index', '_type', '_score'],
+      fields: {
+        getByName(name: string) {
+          return { name, type: 'geo_point', readFromDocValues: false };
+        },
+      },
+    };
+
+    const topHitsRequestMeta: VectorSourceRequestMeta = {
+      isReadOnly: false,
+      filters: [],
+      zoom: 0,
+      fieldNames: [GEO_FIELD_NAME],
+      timeFilters: { from: 'now', to: '15m', mode: 'relative' },
+      sourceMeta: null,
+      applyGlobalQuery: true,
+      applyGlobalTime: true,
+      applyForceRefresh: true,
+      isForceRefresh: false,
+      isFeatureEditorOpenForLayer: false,
+      executionContext: { name: APP_ID },
+    };
+
+    describe('top hits', () => {
+      it('should return features for each top hit across all entities', async () => {
+        const esSearchSource = new ESSearchSource({
+          indexPatternId: 'ipId',
+          geoField: GEO_FIELD_NAME,
+          scalingType: SCALING_TYPES.TOP_HITS,
+          topHitsSplitField: 'machine.os.raw',
+          topHitsSize: 5,
+        });
+        // @ts-expect-error
+        jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
+          hits: makeHits(10),
+          meta: {
+            areResultsTrimmed: false,
+            areEntitiesTrimmed: false,
+            entityCount: 2,
+            totalEntities: 2,
+            warnings: [],
+          },
+        });
+        jest
+          .spyOn(esSearchSource, 'getIndexPattern')
+          .mockResolvedValue(mockIndexPattern as any);
+        // @ts-expect-error
+        jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
+          name: GEO_FIELD_NAME,
+          type: ES_GEO_FIELD_TYPE.GEO_POINT,
+        });
+
+        const { data } = await esSearchSource.getGeoJsonWithMeta(
+          'test',
+          topHitsRequestMeta,
+          jest.fn(),
+          jest.fn(),
+          {} as any
+        );
+        expect(data.features).toHaveLength(10);
+      });
+
+      it('should pass through meta from top hits response', async () => {
+        const esSearchSource = new ESSearchSource({
+          indexPatternId: 'ipId',
+          geoField: GEO_FIELD_NAME,
+          scalingType: SCALING_TYPES.TOP_HITS,
+          topHitsSplitField: 'machine.os.raw',
+          topHitsSize: 1,
+        });
+        const topHitsMeta = {
+          areResultsTrimmed: true,
+          areEntitiesTrimmed: true,
+          entityCount: 10000,
+          totalEntities: 20000,
+          warnings: [],
+        };
+        // @ts-expect-error
+        jest.spyOn(esSearchSource, '_getTopHits').mockResolvedValue({
+          hits: makeHits(5),
+          meta: topHitsMeta,
+        });
+        jest
+          .spyOn(esSearchSource, 'getIndexPattern')
+          .mockResolvedValue(mockIndexPattern as any);
+        // @ts-expect-error
+        jest.spyOn(esSearchSource, '_getGeoField').mockResolvedValue({
+          name: GEO_FIELD_NAME,
+          type: ES_GEO_FIELD_TYPE.GEO_POINT,
+        });
+
+        const { meta } = await esSearchSource.getGeoJsonWithMeta(
+          'test',
+          topHitsRequestMeta,
+          jest.fn(),
+          jest.fn(),
+          {} as any
+        );
+        expect(meta).toEqual(topHitsMeta);
+      });
+    });
+  });
 });
