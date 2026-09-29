@@ -60,7 +60,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   const queryClient = useQueryClient();
   const { agentBuilder, http } = useKibana().services;
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
-  const lifecycleQuery = useFetchEventLifecycle(event.event_uuid);
+  const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
   const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
 
@@ -239,7 +239,7 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
 
         <DetectionsList
           event={event}
-          eventUuid={event.event_uuid}
+          eventId={event.event_id}
           lifecycleQuery={lifecycleQuery}
           occurrencesByRuleUuid={occurrencesQuery.data}
           isLoadingOccurrences={occurrencesQuery.isLoading}

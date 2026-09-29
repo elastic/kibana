@@ -25,6 +25,7 @@ import type { JsonModelSchemaType } from '@kbn/workflows/spec/schema/common/json
 import { type ApprovalLabels, ResumeExecutionButton } from './resume_execution_button';
 import { ResumeUnavailableCallout } from './resume_unavailable_callout';
 import { StepExecutionDataView } from './step_execution_data_view';
+import { ServiceAccountName } from '../../../entities/service_accounts';
 import { formatDuration } from '../../../shared/lib/format_duration';
 import { getStatusLabel } from '../../../shared/translations/status_translations';
 import { FormattedRelativeEnhanced } from '../../../shared/ui/formatted_relative_enhanced/formatted_relative_enhanced';
@@ -99,6 +100,8 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
     return (
       <EuiPanel
         hasShadow={false}
+        hasBorder={false}
+        borderRadius="none"
         paddingSize="m"
         css={{ height: '100%', paddingTop: euiTheme.size.m /* overrides EuiPanel's paddingTop */ }}
         data-test-subj="workflowExecutionOverview"
@@ -123,7 +126,7 @@ export const WorkflowExecutionOverview = React.memo<WorkflowExecutionOverviewPro
                     title: i18n.translate('workflows.execution.runAsLabel', {
                       defaultMessage: 'Run as',
                     }),
-                    description: executionData.effectiveIdentity.id,
+                    description: <ServiceAccountName id={executionData.effectiveIdentity.id} />,
                   },
                 ]}
               />
