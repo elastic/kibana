@@ -14,6 +14,7 @@ const mockConnector: Connector = {
   api_key_secret_id: '',
   configuration: {},
   custom_scheduling: {},
+  deleted: false,
   features: {
     incremental_sync: {
       enabled: true,
